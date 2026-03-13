@@ -1,0 +1,31 @@
+# Project Context
+
+<!-- CUSTOMIZE: Replace this section with your project's overview -->
+
+## Project Overview
+<!-- Describe what your project does in 2-3 sentences -->
+
+## Tech Stack
+<!-- List your core technologies -->
+- Python 3.11+
+- pytest (testing)
+- ruff (linting)
+
+## Key Constraints
+<!-- CUSTOMIZE: Add your project-specific constraints -->
+- All API keys and cookies from .env, never hardcoded
+- Every function must have type hints and docstring
+
+## File Structure
+<!-- CUSTOMIZE: Describe your project's directory layout -->
+- `src/` - Source code
+- `tests/` - Test files
+- `config/` - Configuration files
+- `data/` - Runtime data (not in git)
+- `scripts/git-hooks/` - Git hook sources (installed via `scripts/setup-hooks.sh`)
+
+## Invariants (must always hold, violation = bug)
+<!-- CUSTOMIZE: List your project's invariants. These are checked by /review -->
+1. .env file never tracked by git
+2. No hardcoded secrets in code
+3. <!-- Add your domain-specific invariants here -->

@@ -1,0 +1,55 @@
+#!/bin/sh
+# Git pre-commit hook: ruff version guard, lint, and emoji scan.
+# Install via: bash scripts/setup-hooks.sh
+#
+# Checks:
+#   1. Installed ruff version matches requirements.txt pin
+#   2. ruff check passes on staged .py files
+#   3. No emoji in staged text files
+
+set -e
+
+# --- Helpers ---------------------------------------------------------------
+
+die() {
+    echo "[FAIL] $1" >&2
+    exit 1
+}
+
+# Repo root (works from any subdirectory)
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+# --- 1. Ruff version guard -------------------------------------------------
+
+REQUIRED_VERSION=$(sed -n 's/^ruff==\([^ ]*\)/\1/p' "$REPO_ROOT/requirements.txt")
+if [ -z "$REQUIRED_VERSION" ]; then
+    echo "[WARN] No ruff==X.Y.Z pin found in requirements.txt, skipping version check." >&2
+else
+    INSTALLED_VERSION=$(ruff --version 2>/dev/null | awk '{print $2}')
+    if [ -z "$INSTALLED_VERSION" ]; then
+        die "ruff is not installed. Run: pip install -r requirements.txt"
+    fi
+    if [ "$INSTALLED_VERSION" != "$REQUIRED_VERSION" ]; then
+        die "ruff version mismatch: installed $INSTALLED_VERSION, required $REQUIRED_VERSION. Run: pip install -r requirements.txt"
+    fi
+fi
+
+# --- 2. Ruff lint on staged .py files --------------------------------------
+
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM -- '*.py')
+if [ -n "$STAGED_PY" ]; then
+    echo "[pre-commit] Running ruff check on staged Python files..."
+    # shellcheck disable=SC2086
+    ruff check $STAGED_PY || die "ruff check failed. Fix lint errors before committing."
+fi
+
+# --- 3. Emoji scan on staged text files ------------------------------------
+
+STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM)
+if [ -n "$STAGED_ALL" ]; then
+    echo "[pre-commit] Scanning staged files for emoji..."
+    echo "$STAGED_ALL" | python "$REPO_ROOT/scripts/check_emoji_files.py" \
+        || die "Emoji found in staged files. Remove emoji before committing."
+fi
+
+echo "[OK] Pre-commit checks passed."

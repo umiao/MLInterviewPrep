@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "WebSearch",
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:code.claude.com)",
+      "WebFetch(domain:www.google.com)",
+      "WebFetch(domain:smartscope.blog)",
+      "WebFetch(domain:careers.smartrecruiters.com)",
+      "WebFetch(domain:jobs.uber.com)",
+      "WebFetch(domain:boards-api.greenhouse.io)",
+      "WebFetch(domain:api.ashbyhq.com)",
+      "WebFetch(domain:api.lever.co)",
+      "WebFetch(domain:www.uber.com)",
+      "WebFetch(domain:jobs-microsoft.icims.com)",
+      "WebFetch(domain:salesforce.wd12.myworkdayjobs.com)",
+      "WebFetch(domain:developer.icims.com)",
+      "WebFetch(domain:developer-community.icims.com)",
+      "WebFetch(domain:developers.smartrecruiters.com)",
+      "WebFetch(domain:fantastic.jobs)",
+      "WebFetch(domain:careers.snap.com)",
+      "WebFetch(domain:careers.microsoft.com)",
+      "WebFetch(domain:jobs.careers.microsoft.com)",
+      "WebFetch(domain:www.amazon.jobs)",
+      "WebFetch(domain:developer.phenom.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:www.jobscan.co)",
+      "WebFetch(domain:www.teamblind.com)",
+      "WebFetch(domain:jobs.apple.com)",
+      "WebFetch(domain:careers.linkedin.com)",
+      "WebFetch(domain:gcsservices.careers.microsoft.com)"
+    ]
+  }
+}
