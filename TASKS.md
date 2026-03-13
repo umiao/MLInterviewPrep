@@ -89,12 +89,6 @@
 - **Depends on**: None
 - **Description**: Node 20 build + nginx serve. Compose: backend + frontend services, shared network. Depends: T-P1-61, T-P1-49.
 
-#### T-P1-65: Integration test -- scraper pipeline
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. Depends: T-P1-63, T-P0-42.
-
 #### T-P1-66: Integration test -- framework + study planning
 - **Priority**: P1
 - **Complexity**: M
@@ -135,6 +129,7 @@
 
 > 39 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
 - [x] **2026-03-13** -- T-P1-47: POST /api/import. JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped
 - [x] **2026-03-12** -- T-P1-63: Shared test fixtures (conftest.py). db_session (in-memory per test), test_client (FastAPI TestClient with DB override), mock_llm (canned JSON), seed_problem

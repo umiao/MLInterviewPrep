@@ -174,3 +174,10 @@
 - **Sanity check result**: 444/444 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-64 --status completed`
+
+## 2026-03-13 -- [T-P1-65] Integration test -- scraper pipeline
+- **What I did**: Wrote 24 integration tests across 8 test classes covering the full scraper pipeline: seed URL CRUD + dedup + filters, paste text extraction with LLM mock, duplicate paste caching, question listing with company/type/search/reviewed filters, pagination, question update, LLM question analysis with storage verification, and scraper job status. Also fixed a pre-existing bug where InterviewQuestionResponse.tags failed validation because the DB stores tags as JSON strings.
+- **Deliverables**: tests/test_integration_scraper_pipeline.py (24 tests), src/backend/schemas/scraper.py (tags JSON validator fix)
+- **Sanity check result**: 468/468 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-65 --status completed`
