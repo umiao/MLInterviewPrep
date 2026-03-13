@@ -5,13 +5,17 @@ import csv
 import io
 import json
 import logging
+import time
 from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta
 from typing import Any
 
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 from sqlalchemy import func
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.backend.config import get_settings
 from src.backend.database import init_db
@@ -22,6 +26,33 @@ from src.backend.routers.qa import router as qa_router
 from src.backend.routers.scraper import router as scraper_router
 
 logger = logging.getLogger(__name__)
+
+
+class ResponseTimeMiddleware(BaseHTTPMiddleware):
+    """Log response time for every request."""
+
+    async def dispatch(self, request: Request, call_next):
+        """Measure and log request duration.
+
+        Args:
+            request: Incoming HTTP request.
+            call_next: Next middleware/handler in chain.
+
+        Returns:
+            Response with X-Response-Time header added.
+        """
+        start = time.perf_counter()
+        response = await call_next(request)
+        duration_ms = (time.perf_counter() - start) * 1000
+        response.headers["X-Response-Time"] = f"{duration_ms:.1f}ms"
+        logger.info(
+            "%s %s -> %d (%.1fms)",
+            request.method,
+            request.url.path,
+            response.status_code,
+            duration_ms,
+        )
+        return response
 
 
 @asynccontextmanager
@@ -57,6 +88,35 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(ResponseTimeMiddleware)
+
+
+@app.exception_handler(ValidationError)
+async def pydantic_validation_error_handler(
+    request: Request, exc: ValidationError
+) -> JSONResponse:
+    """Return structured 422 response for Pydantic validation errors.
+
+    Args:
+        request: Incoming HTTP request.
+        exc: Pydantic ValidationError.
+
+    Returns:
+        JSON response with error details.
+    """
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": [
+                {
+                    "loc": list(err.get("loc", [])),
+                    "msg": err.get("msg", ""),
+                    "type": err.get("type", ""),
+                }
+                for err in exc.errors()
+            ]
+        },
+    )
 
 
 @app.get("/api/health")

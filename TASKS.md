@@ -13,23 +13,11 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-34: LLM-enhanced study recommendations
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Add ?use_llm=true to suggest endpoint. Send urgency list to LLM for natural language plan. Return {structured, plan_text}. Depends: T-P1-33.
-
 #### T-P2-60: AI Study Plan display
 - **Priority**: P2
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: Card on Framework page showing GET /api/framework/suggest results. Regenerate button. LLM toggle for natural language plan. Depends: T-P1-55, T-P1-33.
-
-#### T-P2-67: Performance + final polish
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Response time logging middleware, SQLite WAL mode, 422 error handler, README setup instructions, ruff/mypy clean pass. Depends: T-P1-64, T-P1-65, T-P1-66.
 
 ### P3 -- Stretch Goals
 
@@ -39,7 +27,9 @@
 
 > 55 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-13** -- T-P2-67: Performance + final polish. Response time logging middleware, SQLite WAL mode, 422 error handler, README setup instructions, ruff/mypy clean pass. D
 - [x] **2026-03-13** -- T-P2-48: DB views + indexes. Create views v_problem_stats, v_weekly_progress. Add indexes on: problems.pattern, problems.difficulty, problems.next_re
+- [x] **2026-03-13** -- T-P2-34: LLM-enhanced study recommendations. Add ?use_llm=true to suggest endpoint. Send urgency list to LLM for natural language plan. Return {structured, plan_text
 - [x] **2026-03-13** -- T-P1-66: Integration test -- framework + study planning. Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ord
 - [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re

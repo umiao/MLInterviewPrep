@@ -286,3 +286,10 @@
 - **Sanity check result**: 505 tests pass, ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-48 --status completed`
+
+## 2026-03-13 -- [T-P2-67] Performance + final polish
+- **What I did**: Added ResponseTimeMiddleware (logs method, path, status, duration; sets X-Response-Time header). Enabled SQLite WAL journal mode for file-based databases in init_db. Added Pydantic ValidationError exception handler returning structured 422 responses. Also marked T-P2-34 as completed (already implemented in prior sessions).
+- **Deliverables**: src/backend/main.py (middleware, error handler), src/backend/database.py (WAL mode via _enable_wal), tests/test_performance_polish.py (7 new tests)
+- **Sanity check result**: 512 tests pass, ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-67 --status completed`

@@ -54,7 +54,20 @@ def init_db(engine=None):
     import src.backend.models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    _enable_wal(engine)
     _create_views(engine)
+
+
+def _enable_wal(engine) -> None:
+    """Enable WAL journal mode for file-based SQLite databases.
+
+    Args:
+        engine: SQLAlchemy engine to configure.
+    """
+    url = str(engine.url)
+    if url.startswith("sqlite") and ":memory:" not in url:
+        with engine.begin() as conn:
+            conn.execute(text("PRAGMA journal_mode=WAL"))
 
 
 def _create_views(engine) -> None:
