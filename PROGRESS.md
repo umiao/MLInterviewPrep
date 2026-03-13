@@ -195,3 +195,10 @@
 - **Sanity check result**: 498/498 tests pass, ruff clean on Python source. Docker not available in CI env for build test but Dockerfile structure verified manually.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-61 --status completed`
+
+## 2026-03-13 -- [T-P1-49] React + Vite + Tailwind scaffolding
+- **What I did**: Scaffolded the frontend app in src/frontend/ using Vite 8 + React 19 + TypeScript template. Installed Tailwind CSS v4 (PostCSS integration), React Router v6. Created base Layout with sidebar navigation (Dashboard, LeetCode, Framework, Questions, Companies) and placeholder pages. Configured Vite proxy for /api to localhost:8000.
+- **Deliverables**: src/frontend/ (package.json, vite.config.ts, postcss.config.js, src/index.css, src/main.tsx, src/App.tsx, src/components/Sidebar.tsx, src/components/Layout.tsx, src/pages/{Dashboard,Problems,Framework,Questions,Companies}.tsx)
+- **Sanity check result**: Frontend builds clean (tsc + vite build), ESLint clean, backend 498/498 tests pass, ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-49 --status completed`
