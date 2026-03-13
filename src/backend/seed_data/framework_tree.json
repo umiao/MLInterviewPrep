@@ -1,0 +1,1712 @@
+[
+  {
+    "path": "pillar1",
+    "depth": 0,
+    "title": "Coding & Algorithms",
+    "parent_path": null,
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar1.data_structures",
+    "depth": 1,
+    "title": "Data Structures",
+    "parent_path": "pillar1",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar1.data_structures.array_string",
+    "depth": 2,
+    "title": "Array / String",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar1.data_structures.hashmap_hashset",
+    "depth": 2,
+    "title": "HashMap / HashSet",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar1.data_structures.stack_queue",
+    "depth": 2,
+    "title": "Stack / Queue",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar1.data_structures.linked_list",
+    "depth": 2,
+    "title": "Linked List",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar1.data_structures.tree_bst",
+    "depth": 2,
+    "title": "Tree / BST",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar1.data_structures.heap_priority_queue",
+    "depth": 2,
+    "title": "Heap / Priority Queue",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar1.data_structures.trie",
+    "depth": 2,
+    "title": "Trie",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar1.data_structures.union_find",
+    "depth": 2,
+    "title": "Union-Find",
+    "parent_path": "pillar1.data_structures",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar1.algorithm_paradigms",
+    "depth": 1,
+    "title": "Algorithm Paradigms",
+    "parent_path": "pillar1",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.binary_search",
+    "depth": 2,
+    "title": "Binary Search",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.bfs_dfs",
+    "depth": 2,
+    "title": "BFS / DFS",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.dynamic_programming",
+    "depth": 2,
+    "title": "Dynamic Programming",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": 12
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.greedy",
+    "depth": 2,
+    "title": "Greedy",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.backtracking",
+    "depth": 2,
+    "title": "Backtracking",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.graph_algorithms",
+    "depth": 2,
+    "title": "Graph Algorithms",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar1.algorithm_paradigms.divide_and_conquer",
+    "depth": 2,
+    "title": "Divide & Conquer",
+    "parent_path": "pillar1.algorithm_paradigms",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar1.mle_coding",
+    "depth": 1,
+    "title": "MLE-Specific Coding",
+    "parent_path": "pillar1",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar1.mle_coding.matrix_tensor_ops",
+    "depth": 2,
+    "title": "Matrix / Tensor Operations",
+    "parent_path": "pillar1.mle_coding",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar1.mle_coding.implement_ml_algorithms",
+    "depth": 2,
+    "title": "Implement ML Algorithms from Scratch",
+    "parent_path": "pillar1.mle_coding",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar1.mle_coding.data_processing_pipeline",
+    "depth": 2,
+    "title": "Data Processing Pipeline",
+    "parent_path": "pillar1.mle_coding",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar1.mle_coding.sampling_algorithms",
+    "depth": 2,
+    "title": "Sampling Algorithms",
+    "parent_path": "pillar1.mle_coding",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar1.mle_coding.neural_network_components",
+    "depth": 2,
+    "title": "Implement Neural Network Components",
+    "parent_path": "pillar1.mle_coding",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar2",
+    "depth": 0,
+    "title": "ML Fundamentals & Theory",
+    "parent_path": null,
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.supervised_learning",
+    "depth": 1,
+    "title": "Supervised Learning",
+    "parent_path": "pillar2",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.supervised_learning.linear_models",
+    "depth": 2,
+    "title": "Linear Models",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar2.supervised_learning.tree_models",
+    "depth": 2,
+    "title": "Tree Models",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar2.supervised_learning.svm",
+    "depth": 2,
+    "title": "SVM",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.supervised_learning.bias_variance_tradeoff",
+    "depth": 2,
+    "title": "Bias-Variance Tradeoff",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.supervised_learning.loss_functions",
+    "depth": 2,
+    "title": "Loss Functions",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar2.supervised_learning.regularization",
+    "depth": 2,
+    "title": "Regularization",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.supervised_learning.evaluation_metrics",
+    "depth": 2,
+    "title": "Evaluation Metrics",
+    "parent_path": "pillar2.supervised_learning",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar2.unsupervised_learning",
+    "depth": 1,
+    "title": "Unsupervised Learning",
+    "parent_path": "pillar2",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.unsupervised_learning.clustering",
+    "depth": 2,
+    "title": "Clustering",
+    "parent_path": "pillar2.unsupervised_learning",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar2.unsupervised_learning.dimensionality_reduction",
+    "depth": 2,
+    "title": "Dimensionality Reduction",
+    "parent_path": "pillar2.unsupervised_learning",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar2.unsupervised_learning.anomaly_detection",
+    "depth": 2,
+    "title": "Anomaly Detection",
+    "parent_path": "pillar2.unsupervised_learning",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.optimization",
+    "depth": 1,
+    "title": "Optimization",
+    "parent_path": "pillar2",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.optimization.gradient_descent",
+    "depth": 2,
+    "title": "Gradient Descent Family",
+    "parent_path": "pillar2.optimization",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar2.optimization.learning_rate",
+    "depth": 2,
+    "title": "Learning Rate Scheduling",
+    "parent_path": "pillar2.optimization",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.optimization.convergence",
+    "depth": 2,
+    "title": "Convergence & Loss Landscape",
+    "parent_path": "pillar2.optimization",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.optimization.training_tricks",
+    "depth": 2,
+    "title": "Training Tricks",
+    "parent_path": "pillar2.optimization",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.feature_engineering",
+    "depth": 1,
+    "title": "Feature Engineering",
+    "parent_path": "pillar2",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.feature_engineering.numerical",
+    "depth": 2,
+    "title": "Numerical Features",
+    "parent_path": "pillar2.feature_engineering",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.feature_engineering.categorical",
+    "depth": 2,
+    "title": "Categorical Features",
+    "parent_path": "pillar2.feature_engineering",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.feature_engineering.text",
+    "depth": 2,
+    "title": "Text Features",
+    "parent_path": "pillar2.feature_engineering",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.feature_engineering.temporal",
+    "depth": 2,
+    "title": "Temporal Features",
+    "parent_path": "pillar2.feature_engineering",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.feature_engineering.missing_values",
+    "depth": 2,
+    "title": "Missing Value Handling",
+    "parent_path": "pillar2.feature_engineering",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.feature_engineering.feature_selection",
+    "depth": 2,
+    "title": "Feature Selection",
+    "parent_path": "pillar2.feature_engineering",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.sampling_class_imbalance",
+    "depth": 1,
+    "title": "Sampling & Class Imbalance",
+    "parent_path": "pillar2",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.sampling_class_imbalance.oversampling",
+    "depth": 2,
+    "title": "Oversampling",
+    "parent_path": "pillar2.sampling_class_imbalance",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.sampling_class_imbalance.loss_reweighting",
+    "depth": 2,
+    "title": "Loss Reweighting",
+    "parent_path": "pillar2.sampling_class_imbalance",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar2.model_selection_validation",
+    "depth": 1,
+    "title": "Model Selection & Validation",
+    "parent_path": "pillar2",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar2.model_selection_validation.cross_validation",
+    "depth": 2,
+    "title": "Cross-Validation",
+    "parent_path": "pillar2.model_selection_validation",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.model_selection_validation.hyperparameter_tuning",
+    "depth": 2,
+    "title": "Hyperparameter Tuning",
+    "parent_path": "pillar2.model_selection_validation",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar2.model_selection_validation.calibration",
+    "depth": 2,
+    "title": "Calibration",
+    "parent_path": "pillar2.model_selection_validation",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar3",
+    "depth": 0,
+    "title": "ML System Design",
+    "parent_path": null,
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar3.design_framework",
+    "depth": 1,
+    "title": "System Design Framework",
+    "parent_path": "pillar3",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar3.design_problems",
+    "depth": 1,
+    "title": "Classic Design Problems",
+    "parent_path": "pillar3",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar3.design_problems.search_retrieval",
+    "depth": 2,
+    "title": "Search & Retrieval Systems",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar3.design_problems.recommendation",
+    "depth": 2,
+    "title": "Recommendation Systems",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar3.design_problems.ads",
+    "depth": 2,
+    "title": "Ads & Click Prediction",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar3.design_problems.marketplace",
+    "depth": 2,
+    "title": "Marketplace & Logistics",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar3.design_problems.nlp_llm",
+    "depth": 2,
+    "title": "NLP & LLM Systems",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 8
+  },
+  {
+    "path": "pillar3.design_problems.cv",
+    "depth": 2,
+    "title": "Computer Vision Systems",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar3.design_problems.fraud_trust",
+    "depth": 2,
+    "title": "Fraud & Trust Safety",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar3.design_problems.infra",
+    "depth": 2,
+    "title": "ML Infrastructure Design",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar3.design_problems.genai",
+    "depth": 2,
+    "title": "Generative AI Systems",
+    "parent_path": "pillar3.design_problems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 6
+  },
+  {
+    "path": "pillar3.building_blocks",
+    "depth": 1,
+    "title": "Building Blocks",
+    "parent_path": "pillar3",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar3.building_blocks.two_tower_model",
+    "depth": 2,
+    "title": "Two-Tower Model",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar3.building_blocks.multi_stage_ranking",
+    "depth": 2,
+    "title": "Multi-Stage Ranking",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar3.building_blocks.ann",
+    "depth": 2,
+    "title": "Approximate Nearest Neighbor",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar3.building_blocks.feature_store",
+    "depth": 2,
+    "title": "Feature Store",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar3.building_blocks.embedding",
+    "depth": 2,
+    "title": "Embedding Techniques",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar3.building_blocks.realtime_features",
+    "depth": 2,
+    "title": "Real-time Feature Computation",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar3.building_blocks.ab_testing",
+    "depth": 2,
+    "title": "A/B Testing",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar3.building_blocks.exploration_exploitation",
+    "depth": 2,
+    "title": "Exploration / Exploitation",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar3.building_blocks.knowledge_distillation",
+    "depth": 2,
+    "title": "Knowledge Distillation",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar3.building_blocks.multi_task_learning",
+    "depth": 2,
+    "title": "Multi-Task Learning",
+    "parent_path": "pillar3.building_blocks",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar4",
+    "depth": 0,
+    "title": "Applied ML & Domain-Specific",
+    "parent_path": null,
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.recommender_systems",
+    "depth": 1,
+    "title": "Recommender Systems",
+    "parent_path": "pillar4",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.recommender_systems.collaborative_filtering",
+    "depth": 2,
+    "title": "Collaborative Filtering",
+    "parent_path": "pillar4.recommender_systems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.recommender_systems.content_based",
+    "depth": 2,
+    "title": "Content-Based Methods",
+    "parent_path": "pillar4.recommender_systems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.recommender_systems.deep_recommendation",
+    "depth": 2,
+    "title": "Deep Recommendation Models",
+    "parent_path": "pillar4.recommender_systems",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar4.search_ir",
+    "depth": 1,
+    "title": "Search & Information Retrieval",
+    "parent_path": "pillar4",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.search_ir.classic_ir",
+    "depth": 2,
+    "title": "Classic IR (BM25, TF-IDF)",
+    "parent_path": "pillar4.search_ir",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.search_ir.neural_retrieval",
+    "depth": 2,
+    "title": "Neural Retrieval",
+    "parent_path": "pillar4.search_ir",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.search_ir.query_understanding",
+    "depth": 2,
+    "title": "Query Understanding",
+    "parent_path": "pillar4.search_ir",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.search_ir.learning_to_rank",
+    "depth": 2,
+    "title": "Learning to Rank",
+    "parent_path": "pillar4.search_ir",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.nlp_llm_applications",
+    "depth": 1,
+    "title": "NLP & LLM Applications",
+    "parent_path": "pillar4",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.nlp_llm_applications.text_classification",
+    "depth": 2,
+    "title": "Text Classification",
+    "parent_path": "pillar4.nlp_llm_applications",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.nlp_llm_applications.question_answering",
+    "depth": 2,
+    "title": "Question Answering",
+    "parent_path": "pillar4.nlp_llm_applications",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.nlp_llm_applications.llm_application_patterns",
+    "depth": 2,
+    "title": "LLM Application Patterns",
+    "parent_path": "pillar4.nlp_llm_applications",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.ads_monetization",
+    "depth": 1,
+    "title": "Ads & Monetization",
+    "parent_path": "pillar4",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.ads_monetization.ctr_prediction",
+    "depth": 2,
+    "title": "CTR Prediction",
+    "parent_path": "pillar4.ads_monetization",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.marketplace_logistics",
+    "depth": 1,
+    "title": "Marketplace & Logistics",
+    "parent_path": "pillar4",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.marketplace_logistics.dynamic_pricing",
+    "depth": 2,
+    "title": "Dynamic Pricing",
+    "parent_path": "pillar4.marketplace_logistics",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.marketplace_logistics.eta_prediction",
+    "depth": 2,
+    "title": "ETA Prediction",
+    "parent_path": "pillar4.marketplace_logistics",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.marketplace_logistics.causal_inference",
+    "depth": 2,
+    "title": "Causal Inference",
+    "parent_path": "pillar4.marketplace_logistics",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar4.computer_vision",
+    "depth": 1,
+    "title": "Computer Vision",
+    "parent_path": "pillar4",
+    "priority": "P3",
+    "importance": 0.4,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.computer_vision.classification",
+    "depth": 2,
+    "title": "Image Classification",
+    "parent_path": "pillar4.computer_vision",
+    "priority": "P3",
+    "importance": 0.4,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.computer_vision.detection",
+    "depth": 2,
+    "title": "Object Detection",
+    "parent_path": "pillar4.computer_vision",
+    "priority": "P3",
+    "importance": 0.4,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.trust_safety",
+    "depth": 1,
+    "title": "Trust & Safety / Fraud Detection",
+    "parent_path": "pillar4",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar4.trust_safety.anomaly_detection",
+    "depth": 2,
+    "title": "Anomaly Detection for Fraud",
+    "parent_path": "pillar4.trust_safety",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar4.trust_safety.explainability",
+    "depth": 2,
+    "title": "Explainability (SHAP, LIME)",
+    "parent_path": "pillar4.trust_safety",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar5",
+    "depth": 0,
+    "title": "ML Infrastructure & MLOps",
+    "parent_path": null,
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar5.training_infra",
+    "depth": 1,
+    "title": "Training Infrastructure",
+    "parent_path": "pillar5",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar5.training_infra.distributed_training",
+    "depth": 2,
+    "title": "Distributed Training",
+    "parent_path": "pillar5.training_infra",
+    "priority": "P2",
+    "importance": 0.8,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar5.training_infra.mixed_precision",
+    "depth": 2,
+    "title": "Mixed Precision Training",
+    "parent_path": "pillar5.training_infra",
+    "priority": "P2",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar5.training_infra.training_frameworks",
+    "depth": 2,
+    "title": "Training Frameworks",
+    "parent_path": "pillar5.training_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar5.training_infra.experiment_tracking",
+    "depth": 2,
+    "title": "Experiment Tracking",
+    "parent_path": "pillar5.training_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar5.serving_infra",
+    "depth": 1,
+    "title": "Serving Infrastructure",
+    "parent_path": "pillar5",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar5.serving_infra.model_serving",
+    "depth": 2,
+    "title": "Model Serving Systems",
+    "parent_path": "pillar5.serving_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar5.serving_infra.optimization",
+    "depth": 2,
+    "title": "Serving Optimization (Quantization, Pruning)",
+    "parent_path": "pillar5.serving_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar5.serving_infra.llm_serving",
+    "depth": 2,
+    "title": "LLM Serving",
+    "parent_path": "pillar5.serving_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 5
+  },
+  {
+    "path": "pillar5.serving_infra.latency_optimization",
+    "depth": 2,
+    "title": "Latency Optimization",
+    "parent_path": "pillar5.serving_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar5.data_infra",
+    "depth": 1,
+    "title": "Data Infrastructure",
+    "parent_path": "pillar5",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar5.data_infra.data_processing",
+    "depth": 2,
+    "title": "Data Processing (Spark, Flink)",
+    "parent_path": "pillar5.data_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar5.data_infra.feature_store",
+    "depth": 2,
+    "title": "Feature Store Systems",
+    "parent_path": "pillar5.data_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar5.data_infra.data_quality",
+    "depth": 2,
+    "title": "Data Quality & Validation",
+    "parent_path": "pillar5.data_infra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar5.ml_pipeline_ops",
+    "depth": 1,
+    "title": "ML Pipeline & Ops",
+    "parent_path": "pillar5",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar5.ml_pipeline_ops.orchestration",
+    "depth": 2,
+    "title": "Orchestration (Airflow, Kubeflow)",
+    "parent_path": "pillar5.ml_pipeline_ops",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar5.ml_pipeline_ops.cicd_for_ml",
+    "depth": 2,
+    "title": "CI/CD for ML",
+    "parent_path": "pillar5.ml_pipeline_ops",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar5.ml_pipeline_ops.monitoring",
+    "depth": 2,
+    "title": "Model Monitoring & Drift Detection",
+    "parent_path": "pillar5.ml_pipeline_ops",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar5.ml_pipeline_ops.containerization",
+    "depth": 2,
+    "title": "Containerization (Docker, K8s)",
+    "parent_path": "pillar5.ml_pipeline_ops",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6",
+    "depth": 0,
+    "title": "Deep Learning & LLM Specialization",
+    "parent_path": null,
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.transformer",
+    "depth": 1,
+    "title": "Transformer Deep Understanding",
+    "parent_path": "pillar6",
+    "priority": "P1",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.transformer.self_attention",
+    "depth": 2,
+    "title": "Self-Attention Mechanism",
+    "parent_path": "pillar6.transformer",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar6.transformer.multi_head_attention",
+    "depth": 2,
+    "title": "Multi-Head Attention",
+    "parent_path": "pillar6.transformer",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.transformer.position_encoding",
+    "depth": 2,
+    "title": "Position Encoding (Sinusoidal, RoPE, ALiBi)",
+    "parent_path": "pillar6.transformer",
+    "priority": "P1",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.transformer.layer_normalization",
+    "depth": 2,
+    "title": "Layer Normalization",
+    "parent_path": "pillar6.transformer",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar6.transformer.feed_forward",
+    "depth": 2,
+    "title": "Feed-Forward Networks (SwiGLU)",
+    "parent_path": "pillar6.transformer",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar6.transformer.attention_variants",
+    "depth": 2,
+    "title": "Attention Variants (MQA, GQA, Flash Attention)",
+    "parent_path": "pillar6.transformer",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.transformer.architecture_variants",
+    "depth": 2,
+    "title": "Architecture Variants (Encoder/Decoder)",
+    "parent_path": "pillar6.transformer",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.pretrained_lm",
+    "depth": 1,
+    "title": "Pre-trained Language Models",
+    "parent_path": "pillar6",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.pretrained_lm.bert_family",
+    "depth": 2,
+    "title": "BERT Family",
+    "parent_path": "pillar6.pretrained_lm",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.pretrained_lm.gpt_family",
+    "depth": 2,
+    "title": "GPT Family",
+    "parent_path": "pillar6.pretrained_lm",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.pretrained_lm.llama_mistral",
+    "depth": 2,
+    "title": "LLaMA / Mistral Open-Source LLMs",
+    "parent_path": "pillar6.pretrained_lm",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.llm_training_alignment",
+    "depth": 1,
+    "title": "LLM Training & Alignment",
+    "parent_path": "pillar6",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.llm_training_alignment.pretraining",
+    "depth": 2,
+    "title": "Pre-training",
+    "parent_path": "pillar6.llm_training_alignment",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar6.llm_training_alignment.sft",
+    "depth": 2,
+    "title": "Supervised Fine-Tuning (SFT)",
+    "parent_path": "pillar6.llm_training_alignment",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.llm_training_alignment.rlhf",
+    "depth": 2,
+    "title": "RLHF",
+    "parent_path": "pillar6.llm_training_alignment",
+    "priority": "P2",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar6.llm_training_alignment.peft",
+    "depth": 2,
+    "title": "Parameter-Efficient Fine-Tuning (LoRA, QLoRA)",
+    "parent_path": "pillar6.llm_training_alignment",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.llm_training_alignment.evaluation",
+    "depth": 2,
+    "title": "LLM Evaluation & Benchmarks",
+    "parent_path": "pillar6.llm_training_alignment",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar6.llm_inference",
+    "depth": 1,
+    "title": "LLM Inference Optimization",
+    "parent_path": "pillar6",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.llm_inference.kv_cache",
+    "depth": 2,
+    "title": "KV Cache & PagedAttention",
+    "parent_path": "pillar6.llm_inference",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.llm_inference.quantization",
+    "depth": 2,
+    "title": "Quantization (GPTQ, AWQ, FP8)",
+    "parent_path": "pillar6.llm_inference",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.llm_inference.continuous_batching",
+    "depth": 2,
+    "title": "Continuous Batching",
+    "parent_path": "pillar6.llm_inference",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar6.llm_inference.serving_systems",
+    "depth": 2,
+    "title": "Serving Systems (vLLM, TensorRT-LLM)",
+    "parent_path": "pillar6.llm_inference",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.rag_deep",
+    "depth": 1,
+    "title": "RAG Deep Dive",
+    "parent_path": "pillar6",
+    "priority": "P2",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.rag_deep.chunking",
+    "depth": 2,
+    "title": "Chunking Strategies",
+    "parent_path": "pillar6.rag_deep",
+    "priority": "P2",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar6.rag_deep.embedding_models",
+    "depth": 2,
+    "title": "Embedding Models",
+    "parent_path": "pillar6.rag_deep",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar6.rag_deep.vector_database",
+    "depth": 2,
+    "title": "Vector Databases",
+    "parent_path": "pillar6.rag_deep",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.rag_deep.advanced_rag",
+    "depth": 2,
+    "title": "Advanced RAG Patterns",
+    "parent_path": "pillar6.rag_deep",
+    "priority": "P2",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar6.multimodal",
+    "depth": 1,
+    "title": "Multimodal Models",
+    "parent_path": "pillar6",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar6.multimodal.vision_language",
+    "depth": 2,
+    "title": "Vision-Language Models (CLIP, LLaVA)",
+    "parent_path": "pillar6.multimodal",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7",
+    "depth": 0,
+    "title": "Math & Statistics Foundations",
+    "parent_path": null,
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar7.probability_statistics",
+    "depth": 1,
+    "title": "Probability & Statistics",
+    "parent_path": "pillar7",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar7.probability_statistics.probability_basics",
+    "depth": 2,
+    "title": "Probability Basics (Bayes, Conditional)",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar7.probability_statistics.common_distributions",
+    "depth": 2,
+    "title": "Common Distributions",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.probability_statistics.expectation_variance",
+    "depth": 2,
+    "title": "Expectation & Variance",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.probability_statistics.mle_map",
+    "depth": 2,
+    "title": "MLE & MAP Estimation",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar7.probability_statistics.clt",
+    "depth": 2,
+    "title": "Central Limit Theorem",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar7.probability_statistics.hypothesis_testing",
+    "depth": 2,
+    "title": "Hypothesis Testing",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar7.probability_statistics.bayesian_inference",
+    "depth": 2,
+    "title": "Bayesian Inference",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.probability_statistics.information_theory",
+    "depth": 2,
+    "title": "Information Theory",
+    "parent_path": "pillar7.probability_statistics",
+    "priority": "P1",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.linear_algebra",
+    "depth": 1,
+    "title": "Linear Algebra",
+    "parent_path": "pillar7",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar7.linear_algebra.matrix_operations",
+    "depth": 2,
+    "title": "Matrix Operations",
+    "parent_path": "pillar7.linear_algebra",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.linear_algebra.eigendecomposition",
+    "depth": 2,
+    "title": "Eigendecomposition",
+    "parent_path": "pillar7.linear_algebra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.linear_algebra.svd",
+    "depth": 2,
+    "title": "Singular Value Decomposition",
+    "parent_path": "pillar7.linear_algebra",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.calculus_optimization",
+    "depth": 1,
+    "title": "Calculus & Optimization",
+    "parent_path": "pillar7",
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar7.calculus_optimization.multivariable_calculus",
+    "depth": 2,
+    "title": "Multivariable Calculus",
+    "parent_path": "pillar7.calculus_optimization",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.calculus_optimization.chain_rule",
+    "depth": 2,
+    "title": "Chain Rule & Backpropagation",
+    "parent_path": "pillar7.calculus_optimization",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar7.calculus_optimization.convex_optimization",
+    "depth": 2,
+    "title": "Convex Optimization",
+    "parent_path": "pillar7.calculus_optimization",
+    "priority": "P2",
+    "importance": 0.6,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar8",
+    "depth": 0,
+    "title": "Behavioral & Leadership",
+    "parent_path": null,
+    "priority": "P0",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar8.common_questions",
+    "depth": 1,
+    "title": "Common Question Categories",
+    "parent_path": "pillar8",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar8.common_questions.technical_leadership",
+    "depth": 2,
+    "title": "Technical Leadership",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 2
+  },
+  {
+    "path": "pillar8.common_questions.influence_without_authority",
+    "depth": 2,
+    "title": "Influence Without Authority",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.conflict_resolution",
+    "depth": 2,
+    "title": "Conflict Resolution",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.ambiguity",
+    "depth": 2,
+    "title": "Handling Ambiguity",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.failure_learning",
+    "depth": 2,
+    "title": "Failure & Learning",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.impact",
+    "depth": 2,
+    "title": "Impact Stories",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.mentorship",
+    "depth": 2,
+    "title": "Mentorship",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.cross_functional",
+    "depth": 2,
+    "title": "Cross-functional Collaboration",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.common_questions.prioritization",
+    "depth": 2,
+    "title": "Prioritization",
+    "parent_path": "pillar8.common_questions",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.star_framework",
+    "depth": 1,
+    "title": "STAR Framework & Quantification",
+    "parent_path": "pillar8",
+    "priority": "P0",
+    "importance": 1.0,
+    "estimated_hours": 4
+  },
+  {
+    "path": "pillar8.company_specific",
+    "depth": 1,
+    "title": "Company-Specific Behavioral",
+    "parent_path": "pillar8",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": null
+  },
+  {
+    "path": "pillar8.company_specific.google",
+    "depth": 2,
+    "title": "Google (Googleyness)",
+    "parent_path": "pillar8.company_specific",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 1
+  },
+  {
+    "path": "pillar8.company_specific.amazon_lp",
+    "depth": 2,
+    "title": "Amazon Leadership Principles",
+    "parent_path": "pillar8.company_specific",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 3
+  },
+  {
+    "path": "pillar8.company_specific.airbnb_values",
+    "depth": 2,
+    "title": "Airbnb Core Values",
+    "parent_path": "pillar8.company_specific",
+    "priority": "P1",
+    "importance": 0.8,
+    "estimated_hours": 1
+  }
+]

@@ -1,0 +1,59 @@
+# Completed Tasks Archive
+
+> 55 completed tasks archived as of latest archival.
+
+- [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
+- [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
+- [x] **2026-03-12** -- T-P0-11: PUT/DELETE /api/problems/{id}. PUT: partial update via model_dump(exclude_unset=True). DELETE: cascade, return 204. Both 404 if not found. AC: partial 
+- [x] **2026-03-12** -- T-P0-12: POST/GET /api/problems/{id}/attempts. POST: create attempt, update problem (last_attempted_at, comfort_level, is_completed sticky). GET: list newest first. AC
+- [x] **2026-03-12** -- T-P0-13: Spaced repetition service (SM-2 variant). src/backend/services/spaced_repetition.py. compute_next_review + update_review_schedule. Pure functions. comfort<=2->1d,
+- [x] **2026-03-12** -- T-P0-14: Wire SM-2 into attempt creation. Modify POST attempts: call update_review_schedule BEFORE updating last_attempted_at. Set next_review_at. Depends: T-P0-1
+- [x] **2026-03-12** -- T-P0-15: GET /api/problems/review-queue. Return problems where next_review_at <= now, ordered ASC (most overdue first). Null excluded. Depends: T-P0-14.
+- [x] **2026-03-12** -- T-P0-16: LLM service (Anthropic API wrapper). src/backend/services/llm_service.py. LLMService.chat(). Sync client. Never raises - returns {error:...}. JSON parse fail
+- [x] **2026-03-12** -- T-P0-17: POST /api/problems/{id}/review (LLM quick review). Accept {approach_text}. REVIEW_SYSTEM_PROMPT from design doc. Call LLM response_format=json. Store in latest attempt llm
+- [x] **2026-03-12** -- T-P0-18: POST /api/qa/chat (multi-turn QA). src/backend/routers/qa.py. session_id=null creates new, session_id=N continues. Messages as JSON with ISO timestamps. Re
+- [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
+- [x] **2026-03-12** -- T-P0-20: GET /api/problems/stats. Return total, completed, avg_comfort, by_difficulty, by_pattern, weak_patterns (avg<3), total_attempts, avg_duration_sec
+- [x] **2026-03-12** -- T-P0-21: Blind75 seed JSON. src/backend/seed_data/blind75.json. 75 entries with leetcode_id, title, url, difficulty, tags, pattern, source=blind75. 
+- [x] **2026-03-12** -- T-P0-22: NeetCode150 seed JSON. src/backend/seed_data/neetcode150.json. 150 entries. Overlap with B75 -> source=blind75+neetcode150. NeetCode-only -> so
+- [x] **2026-03-12** -- T-P0-23: Framework tree seed JSON. src/backend/seed_data/framework_tree.json. Flat array from mle_interview_framework.md. 8 pillars, 150-200 nodes. path do
+- [x] **2026-03-12** -- T-P0-24: Seed data loader + POST /api/import/seed. src/backend/services/seed_loader.py. load_seed_problems (skip if leetcode_id exists), load_seed_framework (skip if path 
+- [x] **2026-03-12** -- T-P0-25: Pydantic schemas for framework + company. src/backend/schemas/framework.py + company.py. FrameworkNodeUpdate, StudyLogCreate (duration ge=1), FrameworkNodeRespons
+- [x] **2026-03-12** -- T-P0-26: GET /api/framework/tree. Build nested tree from flat DB rows in O(n). max_depth param (0=pillars only, None=full). Return list[FrameworkNodeRespo
+- [x] **2026-03-12** -- T-P0-27: PUT /api/framework/nodes/{id}. Partial update. Status transitions: ->in_progress sets started_at if null; ->mastered sets completed_at+progress=100; ma
+- [x] **2026-03-12** -- T-P0-28: POST /api/framework/nodes/{id}/log (study log). Create StudyLog. Update node last_studied_at. Auto-progress: min(95, total_hours/estimated_hours*100). Cap at 95 (master
+- [x] **2026-03-12** -- T-P0-29: GET /api/framework/stats. total_nodes, by_status, overall_progress_pct (weighted by importance), study_hours_this_week, study_hours_by_pillar, wea
+- [x] **2026-03-12** -- T-P0-3: Database engine + session setup. src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=
+- [x] **2026-03-12** -- T-P0-30: Companies CRUD. GET/POST/PUT /api/companies. List with status/group_tag filter. Duplicate name -> 409. Partial update. Depends: T-P0-25.
+- [x] **2026-03-12** -- T-P0-35: Pydantic schemas for scraper module. src/backend/schemas/scraper.py. SeedURLCreate (url, source_site Literal), PasteRequest (text min_length=10), ScraperRunR
+- [x] **2026-03-12** -- T-P0-36: Seed URL management (GET/POST). src/backend/routers/scraper.py. GET /api/scraper/seeds with source_site/is_active filters. POST: validate URL, duplicate
+- [x] **2026-03-12** -- T-P0-37: Site configs module. src/backend/scraper/site_configs.py. SiteConfig dataclass (base_url, selectors, rate_limit_seconds). SITE_CONFIGS for bl
+- [x] **2026-03-12** -- T-P0-38: HTML content extractor (BeautifulSoup). src/backend/scraper/extractors.py. extract_posts(html, source_site) -> [{title, body_text, url}]. compute_content_hash(t
+- [x] **2026-03-12** -- T-P0-39: LLM question extractor. src/backend/services/question_extractor.py. EXTRACT_PROMPT from design doc. extract_questions(llm, text, source_context)
+- [x] **2026-03-12** -- T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession). src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/prio
+- [x] **2026-03-12** -- T-P0-40: POST /api/scraper/paste. Hash text, check for duplicate ScrapedPage. If new: create page, extract questions via LLM, store InterviewQuestions. Re
+- [x] **2026-03-12** -- T-P0-41: Playwright crawler. src/backend/scraper/crawler.py. PlaywrightCrawler.fetch_page(url, site_config). Random delay before fetch. UA rotation (
+- [x] **2026-03-12** -- T-P0-42: POST /api/scraper/run (orchestrator). BackgroundTasks: for each seed URL, fetch->extract posts->dedup by hash->LLM extract->store. Return 202 + job_id. Track 
+- [x] **2026-03-12** -- T-P0-43: GET /api/scraper/status. Return current + recent job statuses. Prune completed jobs older than 1 hour. Depends: T-P0-42.
+- [x] **2026-03-12** -- T-P0-44: Interview questions endpoints. GET /api/questions: filters company/role/question_type/is_reviewed/year + text search LIKE. PUT /api/questions/{id}: upd
+- [x] **2026-03-12** -- T-P0-5: Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion). src/backend/models/scraper.py. SeedURL: url UNIQUE, source_site CheckConstraint. ScrapedPage: UniqueConstraint(url,conte
+- [x] **2026-03-12** -- T-P0-6: Module 3 SQLAlchemy models (FrameworkNode, StudyLog, Company, CompanyTopicWeight). src/backend/models/framework.py + company.py. FrameworkNode: self-referential parent/children, path UNIQUE, status/progr
+- [x] **2026-03-12** -- T-P0-7: FastAPI app skeleton + health endpoint. src/backend/main.py. Lifespan context manager calls init_db(). CORS middleware. GET /api/health -> {status:ok}. All rout
+- [x] **2026-03-12** -- T-P0-8: Pydantic schemas for Problem CRUD. src/backend/schemas/problem.py. ProblemCreate (title min_length=1, Literal difficulty/category), ProblemUpdate (all Opti
+- [x] **2026-03-12** -- T-P0-9: GET /api/problems (list with filters). src/backend/routers/problems.py. Filters: difficulty, pattern, source, company (JSON contains), is_completed, category. 
+- [x] **2026-03-12** -- T-P1-19: QA session summary + list. POST /api/qa/{id}/summarize: LLM summarizes, store in summary field. GET /api/qa/sessions: list without messages, filter
+- [x] **2026-03-12** -- T-P1-31: Company topic weights. POST /api/companies/{id}/weights: batch upsert [{framework_node_id, weight}]. GET /api/companies/{id}: include topic_wei
+- [x] **2026-03-12** -- T-P1-32: GET /api/companies/{id}/focus. Return framework nodes weighted by company topic weights, sorted by weight DESC, filtered to progress_pct < 80. Depends:
+- [x] **2026-03-12** -- T-P1-33: Study planner service. src/backend/services/study_planner.py. compute_urgency(importance, progress, last_studied, days_until). suggest_study_pl
+- [x] **2026-03-12** -- T-P1-45: GET /api/dashboard. Aggregate all modules: problems (total/completed/due_for_review), framework (overall_progress, pillars), recent_activity
+- [x] **2026-03-12** -- T-P1-46: GET /api/export. Export all data as single JSON: problems (with attempts), framework_nodes (with study_logs), companies (with weights), i
+- [x] **2026-03-13** -- T-P1-47: POST /api/import. JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped
+- [x] **2026-03-13** -- T-P1-49: React + Vite + Tailwind scaffolding. Init src/frontend/ with Vite React template. Tailwind, React Router v6. Proxy /api to localhost:8000 in vite.config.js. 
+- [x] **2026-03-13** -- T-P1-50: API utility layer + hooks. utils/api.js: fetch wrapper with base URL, error handling, JSON parse. hooks/useApi.js: {data, loading, error, refetch}.
+- [x] **2026-03-13** -- T-P1-51: Dashboard page. Consumes GET /api/dashboard. Progress rings (Blind75/NeetCode), review queue badge, framework bar chart, weekly hours, c
+- [x] **2026-03-13** -- T-P1-52: Problem list page with filters. Filter sidebar (difficulty checkboxes, pattern dropdown, source toggle, company multi-select). Table/card view with comf
+- [x] **2026-03-13** -- T-P1-53: Problem practice view + timer. Modal/page: problem details, timer, markdown textarea, result dropdown, complexity inputs, comfort slider 1-5. Submit PO
+- [x] **2026-03-13** -- T-P1-54: Quick Review chat panel. Expandable panel: problem context, chat bubbles, input field. Color-coded verdicts. Toggle review mode (single-shot) vs 
+- [x] **2026-03-13** -- T-P1-55: Framework tree visualization. Two views: (1) collapsible tree with progress bars; (2) treemap. Color: red=not_started, yellow=in_progress, blue=review
+- [x] **2026-03-13** -- T-P1-56: Study log form + node detail. Node detail sidebar: title, description, status, progress, confidence, study history. Log form: date picker, duration, a
+- [x] **2026-03-12** -- T-P1-63: Shared test fixtures (conftest.py). db_session (in-memory per test), test_client (FastAPI TestClient with DB override), mock_llm (canned JSON), seed_problem

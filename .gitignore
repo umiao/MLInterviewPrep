@@ -42,5 +42,10 @@ htmlcov/
 .claude/autonomous.lock
 .claude/tasks.db
 
+# Word / temp files
+*.docx
+~$*
+*.tmp
+
 # Misc
 *.log
