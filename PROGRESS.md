@@ -167,3 +167,10 @@
 - **Sanity check result**: 427/427 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-47 --status completed`
+
+## 2026-03-13 -- [T-P1-64] Integration test -- problem lifecycle
+- **What I did**: Wrote 17 integration tests across 7 test classes covering the full problem lifecycle: create problem, attempt with low comfort, verify review queue scheduling, LLM review storage, attempt with high comfort, verify mastery. Also covers edge cases (duplicate leetcode_id, null IDs, minimal creation), spaced repetition scheduling math, completion flag stickiness, stats aggregation, weak pattern detection, and delete cascade.
+- **Deliverables**: tests/test_integration_problem_lifecycle.py (17 tests)
+- **Sanity check result**: 444/444 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-64 --status completed`
