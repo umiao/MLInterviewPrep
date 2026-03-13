@@ -272,3 +272,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-59 --status completed`
+
+## 2026-03-13 -- [T-P1-62] Frontend Dockerfile + docker-compose.yml
+- **What I did**: Created a multi-stage frontend Dockerfile (Node 20 build + nginx serve) with nginx.conf that proxies /api/ to the backend service and serves the SPA with fallback routing. Created docker-compose.yml with backend and frontend services on a shared network, named volume for SQLite data, and a healthcheck on the backend before frontend starts.
+- **Deliverables**: src/frontend/Dockerfile, src/frontend/nginx.conf, src/frontend/.dockerignore, docker-compose.yml
+- **Sanity check result**: Vite build succeeds, YAML valid, ruff clean, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-62 --status completed`

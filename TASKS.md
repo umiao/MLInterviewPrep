@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-62: Frontend Dockerfile + docker-compose.yml
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Node 20 build + nginx serve. Compose: backend + frontend services, shared network. Depends: T-P1-61, T-P1-49.
-
 ### P2 -- Nice to Have
 
 #### T-P2-34: LLM-enhanced study recommendations
@@ -54,6 +48,7 @@
 - [x] **2026-03-13** -- T-P1-66: Integration test -- framework + study planning. Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ord
 - [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
+- [x] **2026-03-13** -- T-P1-62: Frontend Dockerfile + docker-compose.yml. Node 20 build + nginx serve. Compose: backend + frontend services, shared network. Depends: T-P1-61, T-P1-49.
 - [x] **2026-03-13** -- T-P1-61: Backend Dockerfile. Python 3.11-slim, pip install requirements, EXPOSE 8000, CMD uvicorn. Volume mount for data/. Depends: T-P0-7.
 - [x] **2026-03-13** -- T-P1-59: Paste experience form. Modal on Questions page: large textarea, optional company/role fields. Shows extracted questions for review before confi
 - [x] **2026-03-13** -- T-P1-58: Interview questions browse page. Filterable table: company, role, type, reviewed, text search. Expandable rows. Analyze button (calls LLM). Mark reviewed
