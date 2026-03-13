@@ -251,3 +251,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-56 --status completed`
+
+## 2026-03-13 -- [T-P1-57] Company management kanban page
+- **What I did**: Implemented the Companies page as a kanban board with 5 status columns (Applied, Phone Screen, Onsite, Offer, Rejected). Company cards show name, group tag badge, applied date, and notes snippet. Add Company modal with name, group tag, status, date, and notes fields. Click any card to open a Focus Topics side panel showing company details, status changer, and prioritized framework topics from GET /api/companies/{id}/focus. Created Company TypeScript types.
+- **Deliverables**: src/frontend/src/types/company.ts (new), src/frontend/src/pages/Companies.tsx (rewritten)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-57 --status completed`
