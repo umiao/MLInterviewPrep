@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-51: Dashboard page
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Consumes GET /api/dashboard. Progress rings (Blind75/NeetCode), review queue badge, framework bar chart, weekly hours, company deadline cards. Depends: T-P1-50, T-P1-45.
-
 #### T-P1-52: Problem list page with filters
 - **Priority**: P1
 - **Complexity**: M
@@ -109,6 +103,7 @@
 - [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
 - [x] **2026-03-13** -- T-P1-61: Backend Dockerfile. Python 3.11-slim, pip install requirements, EXPOSE 8000, CMD uvicorn. Volume mount for data/. Depends: T-P0-7.
+- [x] **2026-03-13** -- T-P1-51: Dashboard page. Consumes GET /api/dashboard. Progress rings (Blind75/NeetCode), review queue badge, framework bar chart, weekly hours, c
 - [x] **2026-03-13** -- T-P1-50: API utility layer + hooks. utils/api.js: fetch wrapper with base URL, error handling, JSON parse. hooks/useApi.js: {data, loading, error, refetch}.
 - [x] **2026-03-13** -- T-P1-49: React + Vite + Tailwind scaffolding. Init src/frontend/ with Vite React template. Tailwind, React Router v6. Proxy /api to localhost:8000 in vite.config.js. 
 - [x] **2026-03-13** -- T-P1-47: POST /api/import. JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped

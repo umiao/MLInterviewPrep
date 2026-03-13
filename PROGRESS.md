@@ -209,3 +209,10 @@
 - **Sanity check result**: ESLint clean, TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-50 --status completed`
+
+## 2026-03-13 -- [T-P1-51] Dashboard page
+- **What I did**: Built the Dashboard page consuming GET /api/dashboard. Created TypeScript types for the dashboard response. Implemented progress rings (completed/remaining problems), review queue badge (amber when >0, green when 0), framework pillar bar chart with overall progress percentage, weekly activity stat cards (attempts, study hours, questions added, total questions), and company deadline cards with color-coded status badges.
+- **Deliverables**: src/frontend/src/types/dashboard.ts, src/frontend/src/pages/Dashboard.tsx
+- **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-51 --status completed`
