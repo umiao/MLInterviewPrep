@@ -118,3 +118,10 @@
 - **Sanity check result**: 300/300 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-12 --status completed`
+
+## 2026-03-12 -- [T-P0-13] Spaced repetition service (SM-2 variant)
+- **What I did**: Verified existing spaced_repetition.py implementation (compute_next_review + update_review_schedule) matches design doc spec. Expanded test coverage from 7 to 56 tests covering: all comfort levels (1-5) with various intervals, clamping behavior (zero/negative intervals), parametric combinations, first attempt (None last_attempted_at), subsequent attempts with various gaps, multi-review progression chains, comfort regression resets, gradual comfort growth, return type validation, monotonicity property (higher comfort -> longer interval), determinism.
+- **Deliverables**: Modified tests/test_spaced_repetition.py (56 tests)
+- **Sanity check result**: 349/349 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-13 --status completed`
