@@ -76,3 +76,10 @@
 - **Sanity check result**: 28/28 model tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-6 --status completed`
+
+## 2026-03-12 -- [T-P0-7] FastAPI app skeleton + health endpoint
+- **What I did**: Verified existing main.py (FastAPI app with lifespan calling init_db, CORS middleware with configurable origins, GET /api/health returning {status:ok}, all routers under /api prefix). Wrote 9 tests covering health endpoint (200 status, JSON body, content-type), CORS middleware (allowed origin, credentials, methods), and app config (title, /api prefix on all routes, 404 for unknown routes).
+- **Deliverables**: Created tests/test_main.py (9 tests)
+- **Sanity check result**: 9/9 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-7 --status completed`

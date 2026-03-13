@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-7: FastAPI app skeleton + health endpoint
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: src/backend/main.py. Lifespan context manager calls init_db(). CORS middleware. GET /api/health -> {status:ok}. All routers under /api prefix. AC: uvicorn starts, health returns 200, CORS headers present. Test: tests/test_main.py.
-
 #### T-P0-8: Pydantic schemas for Problem CRUD
 - **Priority**: P0
 - **Complexity**: M
@@ -385,6 +379,7 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-7: FastAPI app skeleton + health endpoint. src/backend/main.py. Lifespan context manager calls init_db(). CORS middleware. GET /api/health -> {status:ok}. All rout
 - [x] **2026-03-12** -- T-P0-6: Module 3 SQLAlchemy models (FrameworkNode, StudyLog, Company, CompanyTopicWeight). src/backend/models/framework.py + company.py. FrameworkNode: self-referential parent/children, path UNIQUE, status/progr
 - [x] **2026-03-12** -- T-P0-5: Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion). src/backend/models/scraper.py. SeedURL: url UNIQUE, source_site CheckConstraint. ScrapedPage: UniqueConstraint(url,conte
 - [x] **2026-03-12** -- T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession). src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/prio
