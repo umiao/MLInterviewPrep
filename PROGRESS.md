@@ -69,3 +69,10 @@
 - **Sanity check result**: 19/19 model tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-5 --status completed`
+
+## 2026-03-12 -- [T-P0-6] Module 3 SQLAlchemy models (FrameworkNode, StudyLog, Company, CompanyTopicWeight)
+- **What I did**: Verified existing models in src/backend/models/framework.py (FrameworkNode with self-referential parent/children, path UNIQUE, status/progress_pct/confidence_level CheckConstraints, relevant_companies JSON property) and src/backend/models/company.py (Company with name UNIQUE, status CheckConstraint, interview_stages JSON; CompanyTopicWeight with composite PK, weight CheckConstraint). Expanded tests from 5 to 28: added defaults, all valid statuses, invalid status, progress_pct range, confidence range, relevant_companies property, cascade delete children/study_logs/weights, study_log defaults/notes, company defaults/statuses/interview_stages, weight default/relationships.
+- **Deliverables**: Modified tests/test_models_framework.py (5 -> 28 tests)
+- **Sanity check result**: 28/28 model tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-6 --status completed`
