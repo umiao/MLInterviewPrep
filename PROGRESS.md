@@ -41,3 +41,10 @@
 - **Sanity check result**: pip install succeeds, all imports work, ruff clean, 17/17 tests pass
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-1 --status completed`
+
+## 2026-03-12 -- [T-P0-2] Config module with pydantic-settings
+- **What I did**: Verified existing config.py (Settings class with DATABASE_URL, ANTHROPIC_API_KEY, LLM_MODEL, CORS_ORIGINS, DEBUG, env_file_encoding=utf-8). Added CORS_ORIGINS to .env.example. Expanded tests from 2 to 5: added defaults validation, get_settings() test, CORS_ORIGINS from env test.
+- **Deliverables**: Modified .env.example, tests/test_config.py
+- **Sanity check result**: 5/5 config tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-2 --status completed`

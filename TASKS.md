@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-2: Config module with pydantic-settings
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_ORIGINS, DEBUG. env_file_encoding=utf-8. AC: Settings() with valid .env works; missing API key raises ValidationError. Test: tests/test_config.py.
-
 #### T-P0-3: Database engine + session setup
 - **Priority**: P0
 - **Complexity**: S
@@ -415,4 +409,5 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
