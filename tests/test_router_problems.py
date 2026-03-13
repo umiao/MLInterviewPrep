@@ -375,8 +375,8 @@ def test_pagination_last_page_partial(test_client):
 # POST /api/problems -- create
 # ===========================================================================
 
-def test_create_problem(test_client):
-    """POST /api/problems creates and returns problem."""
+def test_create_problem_returns_201_with_id(test_client):
+    """POST /api/problems returns 201 and response includes an integer id."""
     resp = test_client.post("/api/problems", json={
         "title": "Two Sum",
         "difficulty": "easy",
@@ -386,13 +386,83 @@ def test_create_problem(test_client):
     })
     assert resp.status_code == 201
     data = resp.json()
-    assert data["id"] is not None
+    assert isinstance(data["id"], int)
     assert data["title"] == "Two Sum"
-    assert data["tags"] == ["array", "hash-table"]
 
 
-def test_create_problem_duplicate_leetcode_id(test_client):
-    """Duplicate leetcode_id returns 409."""
+def test_create_problem_all_fields(test_client):
+    """Create with every field populated returns them all correctly."""
+    payload = {
+        "title": "Median of Two Sorted Arrays",
+        "leetcode_id": 4,
+        "url": "https://leetcode.com/problems/median-of-two-sorted-arrays/",
+        "difficulty": "hard",
+        "tags": ["binary-search", "divide-and-conquer"],
+        "pattern": "binary_search",
+        "category": "algorithm",
+        "source": "blind75",
+        "company_tags": ["google", "amazon"],
+        "priority": 1,
+    }
+    resp = test_client.post("/api/problems", json=payload)
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["leetcode_id"] == 4
+    assert data["url"] == payload["url"]
+    assert data["difficulty"] == "hard"
+    assert data["tags"] == ["binary-search", "divide-and-conquer"]
+    assert data["pattern"] == "binary_search"
+    assert data["category"] == "algorithm"
+    assert data["source"] == "blind75"
+    assert data["company_tags"] == ["google", "amazon"]
+    assert data["priority"] == 1
+    assert data["is_completed"] is False
+    assert data["comfort_level"] == 0
+    assert data["created_at"] is not None
+    assert data["last_attempted_at"] is None
+    assert data["next_review_at"] is None
+
+
+def test_create_problem_minimal_fields(test_client):
+    """Create with only title succeeds and fills defaults."""
+    resp = test_client.post("/api/problems", json={"title": "Minimal"})
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["title"] == "Minimal"
+    assert data["leetcode_id"] is None
+    assert data["difficulty"] is None
+    assert data["tags"] == []
+    assert data["company_tags"] == []
+    assert data["category"] == "algorithm"
+    assert data["priority"] == 2
+    assert data["is_completed"] is False
+    assert data["comfort_level"] == 0
+
+
+def test_create_problem_tags_stored_as_json(test_client):
+    """Tags list is converted to JSON storage and returned as list."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Tags Test",
+        "tags": ["dp", "greedy", "math"],
+        "company_tags": ["meta", "apple"],
+    })
+    data = resp.json()
+    assert data["tags"] == ["dp", "greedy", "math"]
+    assert data["company_tags"] == ["meta", "apple"]
+
+
+def test_create_problem_empty_tags(test_client):
+    """Empty tags arrays are stored and returned as empty lists."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Empty Tags", "tags": [], "company_tags": [],
+    })
+    data = resp.json()
+    assert data["tags"] == []
+    assert data["company_tags"] == []
+
+
+def test_create_problem_duplicate_leetcode_id_409(test_client):
+    """Duplicate leetcode_id returns 409 with detail message."""
     test_client.post("/api/problems", json={
         "title": "Two Sum", "leetcode_id": 1,
     })
@@ -400,14 +470,135 @@ def test_create_problem_duplicate_leetcode_id(test_client):
         "title": "Two Sum v2", "leetcode_id": 1,
     })
     assert resp.status_code == 409
+    assert "leetcode_id" in resp.json()["detail"]
 
 
-def test_create_problems_null_leetcode_id(test_client):
-    """Two problems with null leetcode_id both succeed."""
+def test_create_problem_duplicate_leetcode_id_different_titles(test_client):
+    """Duplicate leetcode_id is rejected even with different titles."""
+    test_client.post("/api/problems", json={
+        "title": "Original", "leetcode_id": 42,
+    })
+    resp = test_client.post("/api/problems", json={
+        "title": "Completely Different", "leetcode_id": 42,
+    })
+    assert resp.status_code == 409
+
+
+def test_create_problems_null_leetcode_id_no_conflict(test_client):
+    """Multiple problems with null leetcode_id all succeed (no uniqueness check)."""
     r1 = test_client.post("/api/problems", json={"title": "A"})
     r2 = test_client.post("/api/problems", json={"title": "B"})
+    r3 = test_client.post("/api/problems", json={"title": "C"})
     assert r1.status_code == 201
     assert r2.status_code == 201
+    assert r3.status_code == 201
+    # All have distinct ids
+    ids = {r1.json()["id"], r2.json()["id"], r3.json()["id"]}
+    assert len(ids) == 3
+
+
+def test_create_problem_different_leetcode_ids_ok(test_client):
+    """Different leetcode_ids never conflict."""
+    r1 = test_client.post("/api/problems", json={"title": "A", "leetcode_id": 1})
+    r2 = test_client.post("/api/problems", json={"title": "B", "leetcode_id": 2})
+    assert r1.status_code == 201
+    assert r2.status_code == 201
+
+
+def test_create_problem_each_category(test_client):
+    """All three categories are accepted."""
+    for cat in ("algorithm", "ml_coding", "system_design"):
+        resp = test_client.post("/api/problems", json={
+            "title": f"Cat {cat}", "category": cat,
+        })
+        assert resp.status_code == 201
+        assert resp.json()["category"] == cat
+
+
+def test_create_problem_each_difficulty(test_client):
+    """All three difficulty levels are accepted."""
+    for diff in ("easy", "medium", "hard"):
+        resp = test_client.post("/api/problems", json={
+            "title": f"Diff {diff}", "difficulty": diff,
+        })
+        assert resp.status_code == 201
+        assert resp.json()["difficulty"] == diff
+
+
+def test_create_problem_priority_bounds(test_client):
+    """Priority 1, 2, 3 are all valid."""
+    for pri in (1, 2, 3):
+        resp = test_client.post("/api/problems", json={
+            "title": f"Pri {pri}", "priority": pri,
+        })
+        assert resp.status_code == 201
+        assert resp.json()["priority"] == pri
+
+
+def test_create_problem_invalid_priority_rejected(test_client):
+    """Priority outside 1-3 is rejected with 422."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Bad Priority", "priority": 0,
+    })
+    assert resp.status_code == 422
+
+    resp = test_client.post("/api/problems", json={
+        "title": "Bad Priority", "priority": 4,
+    })
+    assert resp.status_code == 422
+
+
+def test_create_problem_empty_title_rejected(test_client):
+    """Empty title string is rejected with 422."""
+    resp = test_client.post("/api/problems", json={"title": ""})
+    assert resp.status_code == 422
+
+
+def test_create_problem_missing_title_rejected(test_client):
+    """Missing title field is rejected with 422."""
+    resp = test_client.post("/api/problems", json={"difficulty": "easy"})
+    assert resp.status_code == 422
+
+
+def test_create_problem_invalid_difficulty_rejected(test_client):
+    """Invalid difficulty value is rejected with 422."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Bad Diff", "difficulty": "impossible",
+    })
+    assert resp.status_code == 422
+
+
+def test_create_problem_invalid_category_rejected(test_client):
+    """Invalid category value is rejected with 422."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Bad Cat", "category": "cooking",
+    })
+    assert resp.status_code == 422
+
+
+def test_create_problem_persisted_in_list(test_client):
+    """Created problem appears in GET /api/problems list."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Persisted", "leetcode_id": 999,
+    })
+    pid = resp.json()["id"]
+
+    list_resp = test_client.get("/api/problems")
+    ids = [p["id"] for p in list_resp.json()]
+    assert pid in ids
+
+
+def test_create_problem_unicode_tags(test_client):
+    """Unicode characters in tags are preserved."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Unicode Test",
+        "tags": ["dynamic-programming"],
+        "company_tags": ["ByteDance"],
+    })
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["tags"] == ["dynamic-programming"]
+    assert data["company_tags"] == ["ByteDance"]
 
 
 # ===========================================================================

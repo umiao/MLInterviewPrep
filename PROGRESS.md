@@ -97,3 +97,10 @@
 - **Sanity check result**: 222/222 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-9 --status completed`
+
+## 2026-03-12 -- [T-P0-10] POST /api/problems (create) comprehensive tests
+- **What I did**: Expanded POST /api/problems test coverage from 3 to 20 tests. Covers: all-fields create, minimal-fields defaults, tags/company_tags JSON conversion, empty tags, duplicate leetcode_id 409, null leetcode_id no-conflict (3 problems), different leetcode_ids OK, each category/difficulty/priority value, invalid priority/title/difficulty/category 422, persistence in list, and unicode tags.
+- **Deliverables**: Modified tests/test_router_problems.py (59 tests total)
+- **Sanity check result**: 238/238 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-10 --status completed`
