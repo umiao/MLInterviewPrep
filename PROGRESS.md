@@ -62,3 +62,10 @@
 - **Sanity check result**: 16/16 model tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-4 --status completed`
+
+## 2026-03-12 -- [T-P0-5] Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion)
+- **What I did**: Verified existing models in src/backend/models/scraper.py (SeedURL with url UNIQUE, source_site CheckConstraint; ScrapedPage with UniqueConstraint(url,content_hash); InterviewQuestion with question_type CheckConstraint, mapped_framework_node_id FK, tags JSON property). Expanded tests from 5 to 19: added defaults, invalid source_site, all valid source_sites, relationship to scraped_pages, page creation defaults, same url/different hash OK, different url/same hash OK, cascade delete questions, question defaults, all valid types, tags_list property/setter, empty tags, linked to scraped page, nullable type.
+- **Deliverables**: Modified tests/test_models_scraper.py (5 -> 19 tests)
+- **Sanity check result**: 19/19 model tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-5 --status completed`

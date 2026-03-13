@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-5: Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: src/backend/models/scraper.py. SeedURL: url UNIQUE, source_site CheckConstraint. ScrapedPage: UniqueConstraint(url,content_hash). InterviewQuestion: question_type CheckConstraint, mapped_framework_node_id FK. AC: duplicate url/hash raise IntegrityError. Test: tests/test_models_scraper.py.
-
 #### T-P0-6: Module 3 SQLAlchemy models (FrameworkNode, StudyLog, Company, CompanyTopicWeight)
 - **Priority**: P0
 - **Complexity**: M
@@ -397,6 +391,7 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-5: Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion). src/backend/models/scraper.py. SeedURL: url UNIQUE, source_site CheckConstraint. ScrapedPage: UniqueConstraint(url,conte
 - [x] **2026-03-12** -- T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession). src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/prio
 - [x] **2026-03-12** -- T-P0-3: Database engine + session setup. src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=
 - [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
