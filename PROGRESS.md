@@ -83,3 +83,10 @@
 - **Sanity check result**: 9/9 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-7 --status completed`
+
+## 2026-03-12 -- [T-P0-8] Pydantic schemas for Problem CRUD
+- **What I did**: Enhanced existing schemas with JSON-to-list validator on ProblemResponse (tags/company_tags stored as JSON text in SQLAlchemy but exposed as lists). Expanded test suite from 8 to 30 tests covering all schemas (ProblemCreate, ProblemUpdate, ProblemResponse, AttemptCreate, AttemptResponse) with boundary values, invalid inputs, from_attributes, and exclude_unset behavior.
+- **Deliverables**: Modified src/backend/schemas/problem.py (added field_validator), rewrote tests/test_schemas_problem.py (30 tests)
+- **Sanity check result**: 30/30 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-8 --status completed`

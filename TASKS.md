@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-8: Pydantic schemas for Problem CRUD
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: src/backend/schemas/problem.py. ProblemCreate (title min_length=1, Literal difficulty/category), ProblemUpdate (all Optional, exclude_unset), ProblemResponse (from_attributes), AttemptCreate (result Literal, comfort_after 1-5 required), AttemptResponse. AC: validation rejects empty title, invalid difficulty, comfort=6. Test: tests/test_schemas_problem.py.
-
 #### T-P0-9: GET /api/problems (list with filters)
 - **Priority**: P0
 - **Complexity**: M
@@ -379,6 +373,7 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-8: Pydantic schemas for Problem CRUD. src/backend/schemas/problem.py. ProblemCreate (title min_length=1, Literal difficulty/category), ProblemUpdate (all Opti
 - [x] **2026-03-12** -- T-P0-7: FastAPI app skeleton + health endpoint. src/backend/main.py. Lifespan context manager calls init_db(). CORS middleware. GET /api/health -> {status:ok}. All rout
 - [x] **2026-03-12** -- T-P0-6: Module 3 SQLAlchemy models (FrameworkNode, StudyLog, Company, CompanyTopicWeight). src/backend/models/framework.py + company.py. FrameworkNode: self-referential parent/children, path UNIQUE, status/progr
 - [x] **2026-03-12** -- T-P0-5: Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion). src/backend/models/scraper.py. SeedURL: url UNIQUE, source_site CheckConstraint. ScrapedPage: UniqueConstraint(url,conte
