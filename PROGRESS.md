@@ -202,3 +202,10 @@
 - **Sanity check result**: Frontend builds clean (tsc + vite build), ESLint clean, backend 498/498 tests pass, ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-49 --status completed`
+
+## 2026-03-13 -- [T-P1-50] API utility layer + hooks
+- **What I did**: Created the frontend API utility layer and React hooks. `utils/api.ts`: typed fetch wrapper with base URL (/api), JSON serialization, error handling via ApiRequestError class, query param builder, and methods for GET/POST/PUT/DELETE. `hooks/useApi.ts`: useApi hook (auto-fetch on mount with {data, loading, error, refetch}) and useMutation hook for POST/PUT/DELETE operations. `hooks/useTimer.ts`: stopwatch hook with start/pause/reset/elapsed for problem practice sessions.
+- **Deliverables**: src/frontend/src/utils/api.ts, src/frontend/src/hooks/useApi.ts, src/frontend/src/hooks/useTimer.ts
+- **Sanity check result**: ESLint clean, TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-50 --status completed`
