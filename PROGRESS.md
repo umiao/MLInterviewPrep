@@ -223,3 +223,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-52 --status completed`
+
+## 2026-03-13 -- [T-P1-53] Problem practice view + timer
+- **What I did**: Built PracticeModal component with countdown timer (start/pause/reset), approach notes textarea, result dropdown (solved/hint/failed/timeout), time/space complexity inputs, comfort slider 1-5, and submit button that POSTs to /api/problems/{id}/attempts. Added Attempt/AttemptCreate types. Wired modal into Problems page via "Practice" button on each row; modal closes and refreshes list on successful submit.
+- **Deliverables**: src/frontend/src/components/PracticeModal.tsx, src/frontend/src/types/problem.ts (added Attempt types), src/frontend/src/pages/Problems.tsx (added Practice button + modal)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-53 --status completed`

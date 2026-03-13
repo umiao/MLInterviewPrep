@@ -9,6 +9,7 @@ import type {
   SortField,
   SortOrder,
 } from "../types/problem";
+import PracticeModal from "../components/PracticeModal";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -87,6 +88,9 @@ export default function Problems() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ---- practice modal state ----
+  const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
 
   // ---- distinct patterns for dropdown ----
   const [allPatterns, setAllPatterns] = useState<string[]>([]);
@@ -393,6 +397,7 @@ export default function Problems() {
                   <th className="px-3 py-2 w-28">Pattern</th>
                   <th className="px-3 py-2 w-24">Comfort</th>
                   <th className="px-3 py-2 w-28">Review</th>
+                  <th className="px-3 py-2 w-20"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -464,6 +469,14 @@ export default function Problems() {
                     <td className="px-3 py-2">
                       <ReviewBadge nextReview={p.next_review_at} />
                     </td>
+                    <td className="px-3 py-2">
+                      <button
+                        onClick={() => setPracticeProblem(p)}
+                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Practice
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -496,6 +509,18 @@ export default function Problems() {
           </div>
         )}
       </div>
+
+      {/* Practice Modal */}
+      {practiceProblem && (
+        <PracticeModal
+          problem={practiceProblem}
+          onClose={() => setPracticeProblem(null)}
+          onSubmitted={() => {
+            setPracticeProblem(null);
+            fetchProblems();
+          }}
+        />
+      )}
     </div>
   );
 }

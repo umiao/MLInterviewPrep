@@ -26,6 +26,30 @@ export type SortField =
   | "created_at";
 export type SortOrder = "asc" | "desc";
 
+export type AttemptResult = "solved" | "hint" | "failed" | "timeout";
+
+export interface AttemptCreate {
+  duration_seconds: number | null;
+  result: AttemptResult;
+  approach_notes: string | null;
+  complexity_time: string | null;
+  complexity_space: string | null;
+  comfort_after: number;
+}
+
+export interface Attempt {
+  id: number;
+  problem_id: number;
+  started_at: string | null;
+  duration_seconds: number | null;
+  result: string | null;
+  approach_notes: string | null;
+  complexity_time: string | null;
+  complexity_space: string | null;
+  llm_review: string | null;
+  comfort_after: number | null;
+}
+
 export interface ProblemFilters {
   difficulty?: Difficulty;
   pattern?: string;
