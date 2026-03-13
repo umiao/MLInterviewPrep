@@ -89,12 +89,6 @@
 - **Depends on**: None
 - **Description**: Node 20 build + nginx serve. Compose: backend + frontend services, shared network. Depends: T-P1-61, T-P1-49.
 
-#### T-P1-66: Integration test -- framework + study planning
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ordering. Depends: T-P1-63, T-P1-33.
-
 ### P2 -- Nice to Have
 
 #### T-P2-34: LLM-enhanced study recommendations
@@ -129,6 +123,7 @@
 
 > 39 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-13** -- T-P1-66: Integration test -- framework + study planning. Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ord
 - [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
 - [x] **2026-03-13** -- T-P1-47: POST /api/import. JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped

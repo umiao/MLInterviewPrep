@@ -181,3 +181,10 @@
 - **Sanity check result**: 468/468 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-65 --status completed`
+
+## 2026-03-13 -- [T-P1-66] Integration test -- framework + study planning
+- **What I did**: Wrote 30 integration tests across 8 test classes covering the full framework + study planning pipeline: seed framework tree + max_depth filter, study log auto-progress calculation + accumulation + 95% cap, node status updates with side effects (mastered sets 100%), framework stats aggregation, company CRUD + topic weight upsert, company focus endpoint with progress filtering, study suggestions with urgency ordering + mastered exclusion + company weight boost + study-reduces-urgency + deadline factor, LLM plan text generation, and a full end-to-end journey test.
+- **Deliverables**: tests/test_integration_framework_study.py (30 tests)
+- **Sanity check result**: 498/498 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-66 --status completed`
