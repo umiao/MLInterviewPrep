@@ -216,3 +216,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-51 --status completed`
+
+## 2026-03-13 -- [T-P1-52] Problem list page with filters
+- **What I did**: Built the Problem list page with filter sidebar (difficulty radio, category dropdown, pattern dropdown populated from API, source text input, company text input, completed status dropdown), sortable table with comfort stars, pattern badges, review-due indicators, difficulty badges, company tags, and pagination. Extended api.ts with getWithTotal() to read X-Total-Count header. Created TypeScript types for Problem and ProblemFilters.
+- **Deliverables**: src/frontend/src/types/problem.ts, src/frontend/src/pages/Problems.tsx, src/frontend/src/utils/api.ts (added getWithTotal)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-52 --status completed`

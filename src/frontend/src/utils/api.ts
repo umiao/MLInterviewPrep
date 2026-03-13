@@ -78,6 +78,11 @@ function buildInit(options?: RequestOptions): RequestInit {
   return init;
 }
 
+export interface PaginatedResult<T> {
+  data: T;
+  totalCount: number;
+}
+
 export const api = {
   async get<T = unknown>(
     path: string,
@@ -86,6 +91,22 @@ export const api = {
     const url = buildUrl(path, options?.params);
     const init = buildInit({ ...options, method: "GET" });
     return handleResponse<T>(await fetch(url, init));
+  },
+
+  /** GET that also reads X-Total-Count header for paginated endpoints. */
+  async getWithTotal<T = unknown>(
+    path: string,
+    options?: RequestOptions,
+  ): Promise<PaginatedResult<T>> {
+    const url = buildUrl(path, options?.params);
+    const init = buildInit({ ...options, method: "GET" });
+    const response = await fetch(url, init);
+    const data = await handleResponse<T>(response);
+    const totalCount = parseInt(
+      response.headers.get("X-Total-Count") ?? "0",
+      10,
+    );
+    return { data, totalCount };
   },
 
   async post<T = unknown>(
