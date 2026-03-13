@@ -153,3 +153,10 @@
 - **Sanity check result**: 397/397 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-45 --status completed`
+
+## 2026-03-12 -- [T-P1-46] Enhance GET /api/export with full data
+- **What I did**: Enhanced the existing GET /api/export endpoint to include all model fields and nested relationships: problems with full attempts (approach_notes, complexity, timestamps), framework_nodes with study_logs, companies with topic_weights and interview_stages, interview_questions with all fields (level, round, year, tags, difficulty_estimate). Added datetime serialization helpers. Wrote 11 comprehensive tests across 6 test classes.
+- **Deliverables**: src/backend/main.py (enhanced export_data endpoint), tests/test_export.py (11 tests)
+- **Sanity check result**: 408/408 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-46 --status completed`

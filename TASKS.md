@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-46: GET /api/export
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Export all data as single JSON: problems (with attempts), framework_nodes (with study_logs), companies (with weights), interview_questions. encoding=utf-8. Depends: T-P0-9, T-P0-26, T-P0-30.
-
 #### T-P1-47: POST /api/import
 - **Priority**: P1
 - **Complexity**: M
@@ -154,6 +148,7 @@
 > 39 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-12** -- T-P1-63: Shared test fixtures (conftest.py). db_session (in-memory per test), test_client (FastAPI TestClient with DB override), mock_llm (canned JSON), seed_problem
+- [x] **2026-03-12** -- T-P1-46: GET /api/export. Export all data as single JSON: problems (with attempts), framework_nodes (with study_logs), companies (with weights), i
 - [x] **2026-03-12** -- T-P1-45: GET /api/dashboard. Aggregate all modules: problems (total/completed/due_for_review), framework (overall_progress, pillars), recent_activity
 - [x] **2026-03-12** -- T-P1-33: Study planner service. src/backend/services/study_planner.py. compute_urgency(importance, progress, last_studied, days_until). suggest_study_pl
 - [x] **2026-03-12** -- T-P1-32: GET /api/companies/{id}/focus. Return framework nodes weighted by company topic weights, sorted by weight DESC, filtered to progress_pct < 80. Depends:
