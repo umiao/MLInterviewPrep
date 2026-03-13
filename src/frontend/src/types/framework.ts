@@ -1,0 +1,26 @@
+export type NodeStatus = "not_started" | "in_progress" | "review" | "mastered";
+
+export interface FrameworkNode {
+  id: number;
+  path: string;
+  depth: number;
+  title: string;
+  parent_id: number | null;
+  status: NodeStatus;
+  progress_pct: number;
+  confidence_level: number;
+  importance: number;
+  priority: string;
+  estimated_hours: number | null;
+  children: FrameworkNode[];
+}
+
+export interface FrameworkStats {
+  total_nodes: number;
+  by_status: Record<NodeStatus, number>;
+  overall_progress_pct: number;
+  study_hours_this_week: number;
+  study_hours_by_pillar: { title: string; hours: number }[];
+  weakest_nodes: { id: number; title: string; importance: number; confidence_level: number }[];
+  total_study_logs: number;
+}

@@ -237,3 +237,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-54 --status completed`
+
+## 2026-03-13 -- [T-P1-55] Framework tree visualization
+- **What I did**: Built the Framework page with two visualization modes: (1) Collapsible tree view with expand/collapse all, progress bars per node, confidence dots, status badges color-coded (red=not_started, yellow=in_progress, blue=review, green=mastered), indented by depth; (2) Treemap view with squarified layout, cells sized by importance, colored by status, adjustable detail depth (1-3). Added stats sidebar with overall progress stacked bar, status counts, weekly study hours, weakest nodes, hours by pillar. Node selection shows detail panel with status, progress, confidence, importance, priority, estimated hours, path. Created FrameworkNode/FrameworkStats TypeScript types.
+- **Deliverables**: src/frontend/src/types/framework.ts, src/frontend/src/components/FrameworkTreeView.tsx, src/frontend/src/components/FrameworkTreemap.tsx, src/frontend/src/pages/Framework.tsx
+- **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-55 --status completed`
