@@ -959,58 +959,472 @@ def test_delete_does_not_affect_other_problems(test_client):
 # POST/GET /api/problems/{id}/attempts
 # ===========================================================================
 
-def test_create_attempt(test_client):
-    """Creating an attempt updates problem state."""
-    resp = test_client.post("/api/problems", json={"title": "Test"})
-    pid = resp.json()["id"]
+# --- POST /api/problems/{id}/attempts: basic creation ---
 
+
+def test_create_attempt_returns_201(test_client):
+    """POST attempt returns 201 status."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
     resp = test_client.post(f"/api/problems/{pid}/attempts", json={
         "result": "solved", "comfort_after": 4,
     })
     assert resp.status_code == 201
 
-    # Verify problem updated
-    resp = test_client.get("/api/problems")
-    problem = [p for p in resp.json() if p["id"] == pid][0]
+
+def test_create_attempt_response_has_id(test_client):
+    """Attempt response includes auto-generated id."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    data = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    }).json()
+    assert "id" in data
+    assert isinstance(data["id"], int)
+
+
+def test_create_attempt_response_has_problem_id(test_client):
+    """Attempt response includes the correct problem_id."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    data = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    }).json()
+    assert data["problem_id"] == pid
+
+
+def test_create_attempt_response_has_started_at(test_client):
+    """Attempt response includes a started_at timestamp."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    data = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    }).json()
+    assert data["started_at"] is not None
+
+
+def test_create_attempt_minimal_fields(test_client):
+    """Only result and comfort_after are required."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    data = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "failed", "comfort_after": 1,
+    }).json()
+    assert data["duration_seconds"] is None
+    assert data["approach_notes"] is None
+    assert data["complexity_time"] is None
+    assert data["complexity_space"] is None
+
+
+def test_create_attempt_all_optional_fields(test_client):
+    """All optional fields are stored and returned."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    payload = {
+        "result": "solved",
+        "comfort_after": 5,
+        "duration_seconds": 1200,
+        "approach_notes": "Used two pointers",
+        "complexity_time": "O(n)",
+        "complexity_space": "O(1)",
+    }
+    data = test_client.post(f"/api/problems/{pid}/attempts", json=payload).json()
+    assert data["duration_seconds"] == 1200
+    assert data["approach_notes"] == "Used two pointers"
+    assert data["complexity_time"] == "O(n)"
+    assert data["complexity_space"] == "O(1)"
+
+
+# --- POST /api/problems/{id}/attempts: each result type ---
+
+
+def test_create_attempt_result_solved(test_client):
+    """result='solved' is accepted."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 5,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["result"] == "solved"
+
+
+def test_create_attempt_result_hint(test_client):
+    """result='hint' is accepted."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "hint", "comfort_after": 3,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["result"] == "hint"
+
+
+def test_create_attempt_result_failed(test_client):
+    """result='failed' is accepted."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "failed", "comfort_after": 1,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["result"] == "failed"
+
+
+def test_create_attempt_result_timeout(test_client):
+    """result='timeout' is accepted."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "timeout", "comfort_after": 1,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["result"] == "timeout"
+
+
+# --- POST /api/problems/{id}/attempts: problem state updates ---
+
+
+def test_attempt_updates_last_attempted_at(test_client):
+    """Creating an attempt sets problem.last_attempted_at."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    # Before attempt
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["last_attempted_at"] is None
+
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "failed", "comfort_after": 2,
+    })
+
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["last_attempted_at"] is not None
+
+
+def test_attempt_updates_comfort_level(test_client):
+    """Creating an attempt updates problem.comfort_level."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 4,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
     assert problem["comfort_level"] == 4
-    assert problem["is_completed"] is True
+
+
+def test_attempt_sets_next_review_at(test_client):
+    """Creating an attempt sets problem.next_review_at."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
     assert problem["next_review_at"] is not None
 
 
-def test_attempt_is_completed_sticky(test_client):
-    """is_completed stays True even on low comfort."""
-    resp = test_client.post("/api/problems", json={"title": "Sticky"})
-    pid = resp.json()["id"]
+def test_comfort_3_sets_is_completed(test_client):
+    """comfort_after=3 (threshold) sets is_completed=True."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["is_completed"] is True
 
+
+def test_comfort_5_sets_is_completed(test_client):
+    """comfort_after=5 sets is_completed=True."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 5,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["is_completed"] is True
+
+
+def test_comfort_2_does_not_set_is_completed(test_client):
+    """comfort_after=2 does NOT set is_completed."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "failed", "comfort_after": 2,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["is_completed"] is False
+
+
+def test_comfort_1_does_not_set_is_completed(test_client):
+    """comfort_after=1 does NOT set is_completed."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "timeout", "comfort_after": 1,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["is_completed"] is False
+
+
+def test_is_completed_sticky_after_low_comfort(test_client):
+    """is_completed stays True even after a subsequent low comfort attempt."""
+    pid = test_client.post("/api/problems", json={"title": "Sticky"}).json()["id"]
     test_client.post(f"/api/problems/{pid}/attempts", json={
         "result": "solved", "comfort_after": 4,
     })
     test_client.post(f"/api/problems/{pid}/attempts", json={
         "result": "hint", "comfort_after": 2,
     })
-
-    resp = test_client.get("/api/problems")
-    problem = [p for p in resp.json() if p["id"] == pid][0]
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
     assert problem["is_completed"] is True
     assert problem["comfort_level"] == 2
 
 
-def test_list_attempts_order(test_client):
-    """GET attempts returns newest first."""
-    resp = test_client.post("/api/problems", json={"title": "Order"})
-    pid = resp.json()["id"]
+def test_is_completed_sticky_comfort_1(test_client):
+    """is_completed stays True even with comfort_after=1."""
+    pid = test_client.post("/api/problems", json={"title": "Sticky2"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 5,
+    })
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "failed", "comfort_after": 1,
+    })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["is_completed"] is True
+    assert problem["comfort_level"] == 1
 
+
+def test_multiple_attempts_updates_comfort_each_time(test_client):
+    """Each attempt overwrites problem.comfort_level with latest value."""
+    pid = test_client.post("/api/problems", json={"title": "Multi"}).json()["id"]
+    for comfort in [1, 3, 2, 5]:
+        test_client.post(f"/api/problems/{pid}/attempts", json={
+            "result": "solved", "comfort_after": comfort,
+        })
+    problem = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    assert problem["comfort_level"] == 5  # last attempt wins
+
+
+def test_multiple_attempts_updates_next_review_at(test_client):
+    """Each attempt updates next_review_at."""
+    pid = test_client.post("/api/problems", json={"title": "Review"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 2,
+    })
+    problem1 = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    review1 = problem1["next_review_at"]
+
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 5,
+    })
+    problem2 = [p for p in test_client.get("/api/problems").json() if p["id"] == pid][0]
+    review2 = problem2["next_review_at"]
+
+    assert review1 is not None
+    assert review2 is not None
+    # comfort=5 should push review further out than comfort=2
+    assert review2 > review1
+
+
+# --- POST /api/problems/{id}/attempts: validation errors ---
+
+
+def test_create_attempt_missing_result_422(test_client):
+    """Missing result field returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "comfort_after": 3,
+    })
+    assert resp.status_code == 422
+
+
+def test_create_attempt_missing_comfort_after_422(test_client):
+    """Missing comfort_after field returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved",
+    })
+    assert resp.status_code == 422
+
+
+def test_create_attempt_invalid_result_422(test_client):
+    """Invalid result value returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "gave_up", "comfort_after": 1,
+    })
+    assert resp.status_code == 422
+
+
+def test_create_attempt_comfort_after_0_422(test_client):
+    """comfort_after=0 (below min 1) returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 0,
+    })
+    assert resp.status_code == 422
+
+
+def test_create_attempt_comfort_after_6_422(test_client):
+    """comfort_after=6 (above max 5) returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 6,
+    })
+    assert resp.status_code == 422
+
+
+def test_create_attempt_negative_duration_422(test_client):
+    """Negative duration_seconds returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3, "duration_seconds": -1,
+    })
+    assert resp.status_code == 422
+
+
+def test_create_attempt_empty_body_422(test_client):
+    """Empty body returns 422."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={})
+    assert resp.status_code == 422
+
+
+def test_create_attempt_nonexistent_problem_404(test_client):
+    """POST attempt on non-existent problem returns 404."""
+    resp = test_client.post("/api/problems/99999/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    })
+    assert resp.status_code == 404
+
+
+# --- POST /api/problems/{id}/attempts: edge cases ---
+
+
+def test_attempt_duration_zero_allowed(test_client):
+    """duration_seconds=0 is valid."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3, "duration_seconds": 0,
+    })
+    assert resp.status_code == 201
+    assert resp.json()["duration_seconds"] == 0
+
+
+def test_attempt_does_not_affect_other_problems(test_client):
+    """Attempting one problem does not change another."""
+    pid1 = test_client.post("/api/problems", json={"title": "P1"}).json()["id"]
+    pid2 = test_client.post("/api/problems", json={"title": "P2"}).json()["id"]
+
+    test_client.post(f"/api/problems/{pid1}/attempts", json={
+        "result": "solved", "comfort_after": 5,
+    })
+
+    p2 = [p for p in test_client.get("/api/problems").json() if p["id"] == pid2][0]
+    assert p2["comfort_level"] == 0
+    assert p2["is_completed"] is False
+    assert p2["last_attempted_at"] is None
+
+
+def test_attempt_llm_review_initially_null(test_client):
+    """New attempt has llm_review=null."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    data = test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    }).json()
+    assert data["llm_review"] is None
+
+
+# --- GET /api/problems/{id}/attempts ---
+
+
+def test_list_attempts_empty(test_client):
+    """GET attempts on problem with no attempts returns []."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    resp = test_client.get(f"/api/problems/{pid}/attempts")
+    assert resp.status_code == 200
+    assert resp.json() == []
+
+
+def test_list_attempts_returns_200(test_client):
+    """GET attempts returns 200."""
+    pid = test_client.post("/api/problems", json={"title": "A"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    })
+    resp = test_client.get(f"/api/problems/{pid}/attempts")
+    assert resp.status_code == 200
+
+
+def test_list_attempts_newest_first(test_client):
+    """GET attempts returns newest first."""
+    pid = test_client.post("/api/problems", json={"title": "Order"}).json()["id"]
     test_client.post(f"/api/problems/{pid}/attempts", json={
         "result": "failed", "comfort_after": 1,
     })
     test_client.post(f"/api/problems/{pid}/attempts", json={
         "result": "solved", "comfort_after": 5,
     })
-
-    resp = test_client.get(f"/api/problems/{pid}/attempts")
-    attempts = resp.json()
+    attempts = test_client.get(f"/api/problems/{pid}/attempts").json()
     assert len(attempts) == 2
     assert attempts[0]["comfort_after"] == 5  # newest first
+    assert attempts[1]["comfort_after"] == 1
+
+
+def test_list_attempts_count_matches(test_client):
+    """GET attempts returns the correct number of attempts."""
+    pid = test_client.post("/api/problems", json={"title": "Count"}).json()["id"]
+    for i in range(5):
+        test_client.post(f"/api/problems/{pid}/attempts", json={
+            "result": "failed", "comfort_after": i + 1,
+        })
+    attempts = test_client.get(f"/api/problems/{pid}/attempts").json()
+    assert len(attempts) == 5
+
+
+def test_list_attempts_isolated_per_problem(test_client):
+    """Attempts for one problem do not appear under another."""
+    pid1 = test_client.post("/api/problems", json={"title": "P1"}).json()["id"]
+    pid2 = test_client.post("/api/problems", json={"title": "P2"}).json()["id"]
+
+    test_client.post(f"/api/problems/{pid1}/attempts", json={
+        "result": "solved", "comfort_after": 5,
+    })
+    test_client.post(f"/api/problems/{pid1}/attempts", json={
+        "result": "hint", "comfort_after": 3,
+    })
+    test_client.post(f"/api/problems/{pid2}/attempts", json={
+        "result": "failed", "comfort_after": 1,
+    })
+
+    a1 = test_client.get(f"/api/problems/{pid1}/attempts").json()
+    a2 = test_client.get(f"/api/problems/{pid2}/attempts").json()
+    assert len(a1) == 2
+    assert len(a2) == 1
+    assert all(a["problem_id"] == pid1 for a in a1)
+    assert all(a["problem_id"] == pid2 for a in a2)
+
+
+def test_list_attempts_nonexistent_problem_404(test_client):
+    """GET attempts on non-existent problem returns 404."""
+    resp = test_client.get("/api/problems/99999/attempts")
+    assert resp.status_code == 404
+
+
+def test_list_attempts_response_fields(test_client):
+    """GET attempts response includes all expected fields."""
+    pid = test_client.post("/api/problems", json={"title": "Fields"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 4,
+        "duration_seconds": 600, "approach_notes": "DP",
+        "complexity_time": "O(n)", "complexity_space": "O(n)",
+    })
+    attempt = test_client.get(f"/api/problems/{pid}/attempts").json()[0]
+    assert attempt["id"] is not None
+    assert attempt["problem_id"] == pid
+    assert attempt["started_at"] is not None
+    assert attempt["duration_seconds"] == 600
+    assert attempt["result"] == "solved"
+    assert attempt["approach_notes"] == "DP"
+    assert attempt["complexity_time"] == "O(n)"
+    assert attempt["complexity_space"] == "O(n)"
+    assert attempt["comfort_after"] == 4
+
+
+def test_list_attempts_after_delete_cascade(test_client):
+    """Deleting problem cascades to its attempts; no orphans."""
+    pid = test_client.post("/api/problems", json={"title": "Cascade"}).json()["id"]
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    })
+    test_client.delete(f"/api/problems/{pid}")
+    # Problem gone -> 404 on attempts
+    resp = test_client.get(f"/api/problems/{pid}/attempts")
+    assert resp.status_code == 404
 
 
 # ===========================================================================

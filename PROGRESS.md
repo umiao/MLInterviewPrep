@@ -111,3 +111,10 @@
 - **Sanity check result**: 263/263 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-11 --status completed`
+
+## 2026-03-12 -- [T-P0-12] POST/GET /api/problems/{id}/attempts comprehensive tests
+- **What I did**: Expanded POST/GET attempts test coverage from 3 tests to 40 tests. POST tests cover: 201 status, response fields (id, problem_id, started_at), minimal fields, all optional fields, each result type (solved/hint/failed/timeout), problem state updates (last_attempted_at, comfort_level, next_review_at), is_completed threshold (comfort>=3), is_completed sticky (stays True on low comfort), multiple attempts updating comfort each time, next_review_at progression. Validation: missing result/comfort_after 422, invalid result 422, comfort_after out of range (0,6) 422, negative duration 422, empty body 422, nonexistent problem 404. Edge cases: duration=0 allowed, no cross-problem contamination, llm_review initially null. GET tests: empty list, 200 status, newest first ordering, count matches, isolated per problem, 404 nonexistent, response fields, cascade on delete.
+- **Deliverables**: Modified tests/test_router_problems.py (121 tests total)
+- **Sanity check result**: 300/300 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-12 --status completed`
