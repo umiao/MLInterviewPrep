@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-3: Database engine + session setup
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=False for SQLite. Create data/ dir if needed. AC: init_db with in-memory works; get_db yields usable session. Test: tests/test_database.py.
-
 #### T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession)
 - **Priority**: P0
 - **Complexity**: M
@@ -409,5 +403,6 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-3: Database engine + session setup. src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=
 - [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p

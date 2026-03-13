@@ -48,3 +48,10 @@
 - **Sanity check result**: 5/5 config tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-2 --status completed`
+
+## 2026-03-12 -- [T-P0-3] Database engine + session setup
+- **What I did**: Verified existing database.py (Base, get_engine with URL override, SessionLocal, get_db generator, init_db with data dir creation, check_same_thread=False for SQLite). Expanded tests from 2 to 8: added get_engine override, check_same_thread, default URL, data dir creation, generator lifecycle, SessionLocal binding tests.
+- **Deliverables**: Modified tests/test_database.py (2 -> 8 tests)
+- **Sanity check result**: 8/8 database tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-3 --status completed`
