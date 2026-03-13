@@ -146,3 +146,10 @@
 - **Sanity check result**: 384/384 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-63 --status completed`
+
+## 2026-03-12 -- [T-P1-45] Add comprehensive dashboard endpoint tests
+- **What I did**: Wrote 13 tests for GET /api/dashboard covering empty DB (zeros), problem counts, framework weighted progress, pillars, recent activity (attempts/study hours/questions in 7d window), company deadlines, scraper totals, and a full integrated scenario. Endpoint implementation was already in place from prior sessions.
+- **Deliverables**: tests/test_dashboard.py (13 tests across 7 test classes)
+- **Sanity check result**: 397/397 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-45 --status completed`
