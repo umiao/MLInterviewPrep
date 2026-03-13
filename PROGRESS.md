@@ -258,3 +258,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-57 --status completed`
+
+## 2026-03-13 -- [T-P1-58] Interview questions browse page
+- **What I did**: Built the Interview Questions browse page with a filterable table supporting company, role, type, reviewed status, and text search filters. Rows are expandable to show full question details, metadata, tags, and action buttons. Mark Reviewed toggle updates the backend via PUT /questions/{id}. Analyze button calls POST /questions/{id}/analyze for LLM analysis and displays structured results (solution approach, key concepts, difficulty, related patterns, suggested study). Created InterviewQuestion and QuestionAnalysis TypeScript types. Pagination with Previous/Next controls.
+- **Deliverables**: src/frontend/src/types/question.ts (new), src/frontend/src/pages/Questions.tsx (rewritten)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-58 --status completed`
