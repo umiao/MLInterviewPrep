@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-9: GET /api/problems (list with filters)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: src/backend/routers/problems.py. Filters: difficulty, pattern, source, company (JSON contains), is_completed, category. Sort by comfort_level/last_attempted_at/next_review_at/created_at. Pagination limit/offset. X-Total-Count header. AC: filters AND together, pagination works. Depends: T-P0-7, T-P0-8.
-
 #### T-P0-10: POST /api/problems (create)
 - **Priority**: P0
 - **Complexity**: S
@@ -373,6 +367,7 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-9: GET /api/problems (list with filters). src/backend/routers/problems.py. Filters: difficulty, pattern, source, company (JSON contains), is_completed, category. 
 - [x] **2026-03-12** -- T-P0-8: Pydantic schemas for Problem CRUD. src/backend/schemas/problem.py. ProblemCreate (title min_length=1, Literal difficulty/category), ProblemUpdate (all Opti
 - [x] **2026-03-12** -- T-P0-7: FastAPI app skeleton + health endpoint. src/backend/main.py. Lifespan context manager calls init_db(). CORS middleware. GET /api/health -> {status:ok}. All rout
 - [x] **2026-03-12** -- T-P0-6: Module 3 SQLAlchemy models (FrameworkNode, StudyLog, Company, CompanyTopicWeight). src/backend/models/framework.py + company.py. FrameworkNode: self-referential parent/children, path UNIQUE, status/progr

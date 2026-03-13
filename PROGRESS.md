@@ -90,3 +90,10 @@
 - **Sanity check result**: 30/30 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-8 --status completed`
+
+## 2026-03-12 -- [T-P0-9] GET /api/problems list with filters
+- **What I did**: Wrote 30 new tests for the GET /api/problems endpoint covering all filter types (difficulty, pattern, source, company JSON contains, is_completed, category), AND-together behavior of multiple filters, X-Total-Count header with pagination, sorting by comfort_level/created_at asc/desc, and pagination edge cases (offset beyond total, last partial page). Also fixed conftest.py by adding StaticPool to the in-memory SQLite engine so test_client fixture works reliably.
+- **Deliverables**: Rewrote tests/test_router_problems.py (43 tests total), modified tests/conftest.py (StaticPool fix)
+- **Sanity check result**: 222/222 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-9 --status completed`
