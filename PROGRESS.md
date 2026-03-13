@@ -139,3 +139,10 @@
 - **Sanity check result**: 384/384 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-15 --status completed`
+
+## 2026-03-12 -- [T-P1-63] Shared test fixtures + bulk task status update
+- **What I did**: Audited all P0 and early P1 tasks against existing codebase. Found that 24 tasks (T-P0-16 through T-P1-33) were already fully implemented from prior sessions but not marked completed. Marked all as completed. Added mock_llm and mock_llm_text fixtures to tests/conftest.py to complete the shared fixtures task (was missing only the LLM mock).
+- **Deliverables**: Updated tests/conftest.py (added mock_llm, mock_llm_text fixtures), updated 24 task statuses to completed
+- **Sanity check result**: 384/384 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-63 --status completed`

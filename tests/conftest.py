@@ -1,6 +1,6 @@
 """Shared pytest fixtures for the test suite."""
 import os
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from sqlalchemy import create_engine
@@ -91,6 +91,34 @@ def seed_problems(db_session):
     for p in problems:
         db_session.refresh(p)
     return problems
+
+
+@pytest.fixture()
+def mock_llm():
+    """Create a mock LLMService that returns canned JSON responses.
+
+    The mock's chat method returns a dict by default.
+    Override mock_llm.chat.return_value for custom responses.
+    """
+    canned = {
+        "verdict": "optimal",
+        "feedback": "Good approach.",
+        "hint": None,
+        "optimal_complexity": {"time": "O(n)", "space": "O(1)"},
+        "pattern": "two_pointers",
+        "follow_up": "What about edge cases?",
+    }
+    mock = MagicMock()
+    mock.chat.return_value = canned
+    return mock
+
+
+@pytest.fixture()
+def mock_llm_text():
+    """Create a mock LLMService that returns plain text responses."""
+    mock = MagicMock()
+    mock.chat.return_value = "This is a test LLM response."
+    return mock
 
 
 @pytest.fixture()
