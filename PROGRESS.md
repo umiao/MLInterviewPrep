@@ -265,3 +265,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-58 --status completed`
+
+## 2026-03-13 -- [T-P1-59] Paste experience form
+- **What I did**: Added a PasteExperienceModal to the Questions page. The modal has a large textarea for pasting interview experience text, optional company and role fields, and an "Extract Questions" button that calls POST /scraper/paste. After extraction, it shows a review list of extracted questions with type badges, company, and role. Duplicate detection warns the user. A "Done" button confirms and refreshes the question list. The modal is triggered by a "+ Paste Experience" button in the page header.
+- **Deliverables**: src/frontend/src/pages/Questions.tsx (modified -- added PasteExperienceModal component, paste types, modal integration)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-59 --status completed`
