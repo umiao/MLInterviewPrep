@@ -279,3 +279,10 @@
 - **Sanity check result**: Vite build succeeds, YAML valid, ruff clean, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-62 --status completed`
+
+## 2026-03-13 -- [T-P2-48] Add DB views and indexes
+- **What I did**: Added indexes on problems.pattern, problems.difficulty, problems.next_review_at, study_logs.date, and interview_questions.company. Created two SQL views: v_problem_stats (per-problem attempt aggregates) and v_weekly_progress (weekly study log summaries). Updated conftest.py to create views in test DB.
+- **Deliverables**: src/backend/database.py (views), src/backend/models/problem.py (indexes), src/backend/models/framework.py (index), src/backend/models/scraper.py (index), tests/conftest.py (view creation), tests/test_db_views_indexes.py (7 new tests)
+- **Sanity check result**: 505 tests pass, ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-48 --status completed`

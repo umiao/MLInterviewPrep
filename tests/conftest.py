@@ -11,7 +11,7 @@ from sqlalchemy.pool import StaticPool
 os.environ.setdefault("ANTHROPIC_API_KEY", "test-key-not-real")
 os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
-from src.backend.database import Base, get_db  # noqa: E402
+from src.backend.database import Base, _create_views, get_db  # noqa: E402
 from src.backend.models import FrameworkNode, Problem  # noqa: E402
 
 
@@ -24,6 +24,7 @@ def db_engine():
         poolclass=StaticPool,
     )
     Base.metadata.create_all(bind=engine)
+    _create_views(engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
 

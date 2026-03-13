@@ -19,12 +19,6 @@
 - **Depends on**: None
 - **Description**: Add ?use_llm=true to suggest endpoint. Send urgency list to LLM for natural language plan. Return {structured, plan_text}. Depends: T-P1-33.
 
-#### T-P2-48: DB views + indexes
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Create views v_problem_stats, v_weekly_progress. Add indexes on: problems.pattern, problems.difficulty, problems.next_review_at, framework_nodes.path, study_logs.date, interview_questions.company. Depends: T-P0-3.
-
 #### T-P2-60: AI Study Plan display
 - **Priority**: P2
 - **Complexity**: S
@@ -45,6 +39,7 @@
 
 > 55 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-13** -- T-P2-48: DB views + indexes. Create views v_problem_stats, v_weekly_progress. Add indexes on: problems.pattern, problems.difficulty, problems.next_re
 - [x] **2026-03-13** -- T-P1-66: Integration test -- framework + study planning. Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ord
 - [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
