@@ -24,6 +24,22 @@ export interface StudyLog {
   notes: string | null;
 }
 
+export interface StudyTopic {
+  node_id: number;
+  title: string;
+  path: string;
+  urgency: number;
+  progress_pct: number;
+  importance: number;
+  confidence: number;
+  allocated_minutes: number;
+}
+
+export interface StudyPlanResult {
+  structured: StudyTopic[];
+  plan_text: string | null;
+}
+
 export interface FrameworkStats {
   total_nodes: number;
   by_status: Record<NodeStatus, number>;

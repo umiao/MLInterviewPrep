@@ -293,3 +293,10 @@
 - **Sanity check result**: 512 tests pass, ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-67 --status completed`
+
+## 2026-03-13 -- [T-P2-60] AI Study Plan display card
+- **What I did**: Created StudyPlanCard component for the Framework page. The card calls GET /api/framework/suggest and displays ranked study topics with urgency bars, allocated time, and progress percentages. Includes a collapsible settings panel (hours, days, company selector, LLM toggle), Generate/Regenerate buttons, and a blue panel for LLM-generated natural language plan text. Added StudyTopic and StudyPlanResult TypeScript types.
+- **Deliverables**: src/frontend/src/components/StudyPlanCard.tsx (new), src/frontend/src/types/framework.ts (added types), src/frontend/src/pages/Framework.tsx (integrated card)
+- **Sanity check result**: TypeScript clean, 512 backend tests pass, ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-60 --status completed`

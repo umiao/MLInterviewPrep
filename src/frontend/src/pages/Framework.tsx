@@ -3,6 +3,7 @@ import { useApi } from "../hooks/useApi";
 import FrameworkTreeView from "../components/FrameworkTreeView";
 import FrameworkTreemap from "../components/FrameworkTreemap";
 import NodeDetailPanel from "../components/NodeDetailPanel";
+import StudyPlanCard from "../components/StudyPlanCard";
 import type { FrameworkNode, FrameworkStats, NodeStatus } from "../types/framework";
 
 type ViewMode = "tree" | "treemap";
@@ -209,6 +210,7 @@ export default function Framework() {
           {selectedNode && (
             <NodeDetailPanel node={selectedNode} onNodeUpdated={handleNodeUpdated} />
           )}
+          <StudyPlanCard />
           {stats && <StatsPanel stats={stats} />}
         </div>
       </div>
