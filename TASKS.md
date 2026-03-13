@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/priority CheckConstraints, tags/company_tags JSON properties. Attempt: result CheckConstraint, llm_review Text. QASession: messages JSON. AC: create_all works, JSON round-trip, invalid result raises IntegrityError. Test: tests/test_models_problem.py.
-
 #### T-P0-5: Module 2 SQLAlchemy models (SeedURL, ScrapedPage, InterviewQuestion)
 - **Priority**: P0
 - **Complexity**: M
@@ -403,6 +397,7 @@
 
 ## Completed Tasks
 
+- [x] **2026-03-12** -- T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession). src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/prio
 - [x] **2026-03-12** -- T-P0-3: Database engine + session setup. src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=
 - [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p

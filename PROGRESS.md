@@ -55,3 +55,10 @@
 - **Sanity check result**: 8/8 database tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-3 --status completed`
+
+## 2026-03-12 -- [T-P0-4] Module 1 SQLAlchemy models (Problem, Attempt, QASession)
+- **What I did**: Verified existing models in src/backend/models/problem.py (Problem with nullable leetcode_id, difficulty/category/priority CheckConstraints, tags/company_tags JSON properties; Attempt with result CheckConstraint, llm_review Text; QASession with messages JSON). Expanded tests from 5 to 16: added nullable leetcode_id, defaults, tags_list setter, empty tags, invalid difficulty, all valid results, llm_review text, QA linked/unlinked to problem, messages_list setter, cascade delete.
+- **Deliverables**: Modified tests/test_models_problem.py (5 -> 16 tests)
+- **Sanity check result**: 16/16 model tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-4 --status completed`
