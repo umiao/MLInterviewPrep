@@ -132,3 +132,10 @@
 - **Sanity check result**: 367/367 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-14 --status completed`
+
+## 2026-03-12 -- [T-P0-15] GET /api/problems/review-queue tests
+- **What I did**: Verified the review-queue endpoint was already implemented (returns problems where next_review_at <= now, ordered ASC, null excluded). Created 17 comprehensive tests covering: empty DB, due/future/null filtering, ASC ordering (most overdue first), default limit (20), custom limit, limit validation (min/max), response field shape, edge cases (exactly-now, mix of states, completed-but-due), limit+ordering interaction, and integration with SM-2 attempt creation (low/high comfort).
+- **Deliverables**: Created tests/test_review_queue.py (17 tests)
+- **Sanity check result**: 384/384 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-15 --status completed`
