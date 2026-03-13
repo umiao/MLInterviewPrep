@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-11: PUT/DELETE /api/problems/{id}
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: PUT: partial update via model_dump(exclude_unset=True). DELETE: cascade, return 204. Both 404 if not found. AC: partial update preserves unchanged fields. Depends: T-P0-10.
-
 #### T-P0-12: POST/GET /api/problems/{id}/attempts
 - **Priority**: P0
 - **Complexity**: M
@@ -369,5 +363,6 @@
 - [x] **2026-03-12** -- T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession). src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/prio
 - [x] **2026-03-12** -- T-P0-3: Database engine + session setup. src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=
 - [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
+- [x] **2026-03-12** -- T-P0-11: PUT/DELETE /api/problems/{id}. PUT: partial update via model_dump(exclude_unset=True). DELETE: cascade, return 204. Both 404 if not found. AC: partial 
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p

@@ -602,13 +602,15 @@ def test_create_problem_unicode_tags(test_client):
 
 
 # ===========================================================================
-# PUT/DELETE /api/problems
+# PUT /api/problems/{id} -- partial update
 # ===========================================================================
 
-def test_update_problem_partial(test_client):
-    """PUT with partial data only updates specified fields."""
+def test_update_problem_partial_preserves_unchanged(test_client):
+    """PUT with partial data only updates specified fields, preserves rest."""
     resp = test_client.post("/api/problems", json={
         "title": "Original", "difficulty": "easy", "pattern": "dp",
+        "category": "algorithm", "priority": 1, "tags": ["array"],
+        "company_tags": ["google"], "source": "blind75", "leetcode_id": 100,
     })
     pid = resp.json()["id"]
 
@@ -616,26 +618,341 @@ def test_update_problem_partial(test_client):
     assert resp.status_code == 200
     data = resp.json()
     assert data["difficulty"] == "hard"
-    assert data["title"] == "Original"  # unchanged
-    assert data["pattern"] == "dp"  # unchanged
+    assert data["title"] == "Original"
+    assert data["pattern"] == "dp"
+    assert data["category"] == "algorithm"
+    assert data["priority"] == 1
+    assert data["tags"] == ["array"]
+    assert data["company_tags"] == ["google"]
+    assert data["source"] == "blind75"
+    assert data["leetcode_id"] == 100
 
 
-def test_delete_problem(test_client):
-    """DELETE returns 204, subsequent GET returns 404."""
+def test_update_problem_title(test_client):
+    """Update only title."""
+    resp = test_client.post("/api/problems", json={"title": "Old Title"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"title": "New Title"})
+    assert resp.status_code == 200
+    assert resp.json()["title"] == "New Title"
+
+
+def test_update_problem_difficulty_each_value(test_client):
+    """Update difficulty to each valid value."""
+    resp = test_client.post("/api/problems", json={"title": "DiffTest"})
+    pid = resp.json()["id"]
+
+    for diff in ("easy", "medium", "hard"):
+        resp = test_client.put(f"/api/problems/{pid}", json={"difficulty": diff})
+        assert resp.status_code == 200
+        assert resp.json()["difficulty"] == diff
+
+
+def test_update_problem_category_each_value(test_client):
+    """Update category to each valid value."""
+    resp = test_client.post("/api/problems", json={"title": "CatTest"})
+    pid = resp.json()["id"]
+
+    for cat in ("algorithm", "ml_coding", "system_design"):
+        resp = test_client.put(f"/api/problems/{pid}", json={"category": cat})
+        assert resp.status_code == 200
+        assert resp.json()["category"] == cat
+
+
+def test_update_problem_priority_each_value(test_client):
+    """Update priority to each valid value 1-3."""
+    resp = test_client.post("/api/problems", json={"title": "PriTest"})
+    pid = resp.json()["id"]
+
+    for pri in (1, 2, 3):
+        resp = test_client.put(f"/api/problems/{pid}", json={"priority": pri})
+        assert resp.status_code == 200
+        assert resp.json()["priority"] == pri
+
+
+def test_update_problem_tags(test_client):
+    """Update tags replaces entire list."""
+    resp = test_client.post("/api/problems", json={
+        "title": "TagUpdate", "tags": ["old1", "old2"],
+    })
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"tags": ["new1", "new2", "new3"]})
+    assert resp.status_code == 200
+    assert resp.json()["tags"] == ["new1", "new2", "new3"]
+
+
+def test_update_problem_tags_to_empty(test_client):
+    """Update tags to empty list."""
+    resp = test_client.post("/api/problems", json={
+        "title": "TagEmpty", "tags": ["a", "b"],
+    })
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"tags": []})
+    assert resp.status_code == 200
+    assert resp.json()["tags"] == []
+
+
+def test_update_problem_company_tags(test_client):
+    """Update company_tags replaces entire list."""
+    resp = test_client.post("/api/problems", json={
+        "title": "CompUpdate", "company_tags": ["google"],
+    })
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={
+        "company_tags": ["meta", "amazon"],
+    })
+    assert resp.status_code == 200
+    assert resp.json()["company_tags"] == ["meta", "amazon"]
+
+
+def test_update_problem_multiple_fields(test_client):
+    """Update multiple fields at once."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Multi", "difficulty": "easy", "priority": 3,
+    })
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={
+        "title": "Updated Multi",
+        "difficulty": "hard",
+        "priority": 1,
+        "pattern": "graph",
+        "source": "neetcode150",
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["title"] == "Updated Multi"
+    assert data["difficulty"] == "hard"
+    assert data["priority"] == 1
+    assert data["pattern"] == "graph"
+    assert data["source"] == "neetcode150"
+
+
+def test_update_problem_comfort_level(test_client):
+    """Update comfort_level directly via PUT."""
+    resp = test_client.post("/api/problems", json={"title": "Comfort"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"comfort_level": 4})
+    assert resp.status_code == 200
+    assert resp.json()["comfort_level"] == 4
+
+
+def test_update_problem_is_completed(test_client):
+    """Update is_completed directly via PUT."""
+    resp = test_client.post("/api/problems", json={"title": "Complete"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"is_completed": True})
+    assert resp.status_code == 200
+    assert resp.json()["is_completed"] is True
+
+
+def test_update_problem_url(test_client):
+    """Update URL field."""
+    resp = test_client.post("/api/problems", json={"title": "UrlTest"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={
+        "url": "https://leetcode.com/problems/two-sum/",
+    })
+    assert resp.status_code == 200
+    assert resp.json()["url"] == "https://leetcode.com/problems/two-sum/"
+
+
+def test_update_problem_leetcode_id(test_client):
+    """Update leetcode_id field."""
+    resp = test_client.post("/api/problems", json={"title": "LcIdTest"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"leetcode_id": 42})
+    assert resp.status_code == 200
+    assert resp.json()["leetcode_id"] == 42
+
+
+def test_update_problem_empty_body_noop(test_client):
+    """PUT with empty body is a no-op, returns current state."""
+    resp = test_client.post("/api/problems", json={
+        "title": "NoOp", "difficulty": "easy",
+    })
+    pid = resp.json()["id"]
+    original = resp.json()
+
+    resp = test_client.put(f"/api/problems/{pid}", json={})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["title"] == original["title"]
+    assert data["difficulty"] == original["difficulty"]
+
+
+def test_update_problem_invalid_difficulty_422(test_client):
+    """PUT with invalid difficulty returns 422."""
+    resp = test_client.post("/api/problems", json={"title": "BadDiff"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"difficulty": "impossible"})
+    assert resp.status_code == 422
+
+
+def test_update_problem_invalid_category_422(test_client):
+    """PUT with invalid category returns 422."""
+    resp = test_client.post("/api/problems", json={"title": "BadCat"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"category": "cooking"})
+    assert resp.status_code == 422
+
+
+def test_update_problem_invalid_priority_422(test_client):
+    """PUT with priority outside 1-3 returns 422."""
+    resp = test_client.post("/api/problems", json={"title": "BadPri"})
+    pid = resp.json()["id"]
+
+    assert test_client.put(f"/api/problems/{pid}", json={"priority": 0}).status_code == 422
+    assert test_client.put(f"/api/problems/{pid}", json={"priority": 4}).status_code == 422
+
+
+def test_update_problem_invalid_comfort_level_422(test_client):
+    """PUT with comfort_level outside 0-5 returns 422."""
+    resp = test_client.post("/api/problems", json={"title": "BadComf"})
+    pid = resp.json()["id"]
+
+    assert test_client.put(f"/api/problems/{pid}", json={"comfort_level": -1}).status_code == 422
+    assert test_client.put(f"/api/problems/{pid}", json={"comfort_level": 6}).status_code == 422
+
+
+def test_update_problem_empty_title_422(test_client):
+    """PUT with empty title string returns 422."""
+    resp = test_client.post("/api/problems", json={"title": "EmptyTitle"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"title": ""})
+    assert resp.status_code == 422
+
+
+def test_update_problem_404(test_client):
+    """PUT on non-existent id returns 404."""
+    resp = test_client.put("/api/problems/99999", json={"title": "X"})
+    assert resp.status_code == 404
+    assert "not found" in resp.json()["detail"].lower()
+
+
+def test_update_problem_persisted(test_client):
+    """Updated fields persist across subsequent GET requests."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Persist", "difficulty": "easy",
+    })
+    pid = resp.json()["id"]
+
+    test_client.put(f"/api/problems/{pid}", json={
+        "difficulty": "hard", "pattern": "graph",
+    })
+
+    # Verify via list endpoint
+    list_resp = test_client.get("/api/problems")
+    problem = [p for p in list_resp.json() if p["id"] == pid][0]
+    assert problem["difficulty"] == "hard"
+    assert problem["pattern"] == "graph"
+
+
+# ===========================================================================
+# DELETE /api/problems/{id}
+# ===========================================================================
+
+def test_delete_problem_returns_204(test_client):
+    """DELETE returns 204 with no body."""
     resp = test_client.post("/api/problems", json={"title": "ToDelete"})
     pid = resp.json()["id"]
 
     resp = test_client.delete(f"/api/problems/{pid}")
     assert resp.status_code == 204
 
+
+def test_delete_problem_removed_from_list(test_client):
+    """Deleted problem no longer appears in GET /api/problems."""
+    resp = test_client.post("/api/problems", json={"title": "RemoveMe"})
+    pid = resp.json()["id"]
+
+    test_client.delete(f"/api/problems/{pid}")
+
     resp = test_client.get("/api/problems")
     assert all(p["id"] != pid for p in resp.json())
 
 
-def test_update_delete_404(test_client):
-    """PUT/DELETE on non-existent id returns 404."""
-    assert test_client.put("/api/problems/99999", json={"title": "X"}).status_code == 404
-    assert test_client.delete("/api/problems/99999").status_code == 404
+def test_delete_problem_cascades_attempts(test_client):
+    """DELETE cascades to remove associated attempts."""
+    resp = test_client.post("/api/problems", json={"title": "CascadeTest"})
+    pid = resp.json()["id"]
+
+    # Create attempts
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "solved", "comfort_after": 3,
+    })
+    test_client.post(f"/api/problems/{pid}/attempts", json={
+        "result": "hint", "comfort_after": 2,
+    })
+
+    # Verify attempts exist
+    resp = test_client.get(f"/api/problems/{pid}/attempts")
+    assert len(resp.json()) == 2
+
+    # Delete problem
+    resp = test_client.delete(f"/api/problems/{pid}")
+    assert resp.status_code == 204
+
+    # Attempts endpoint returns 404 (problem gone)
+    resp = test_client.get(f"/api/problems/{pid}/attempts")
+    assert resp.status_code == 404
+
+
+def test_delete_problem_404(test_client):
+    """DELETE on non-existent id returns 404."""
+    resp = test_client.delete("/api/problems/99999")
+    assert resp.status_code == 404
+    assert "not found" in resp.json()["detail"].lower()
+
+
+def test_delete_problem_twice_404(test_client):
+    """Deleting the same problem twice returns 404 on the second call."""
+    resp = test_client.post("/api/problems", json={"title": "DeleteTwice"})
+    pid = resp.json()["id"]
+
+    assert test_client.delete(f"/api/problems/{pid}").status_code == 204
+    assert test_client.delete(f"/api/problems/{pid}").status_code == 404
+
+
+def test_delete_problem_total_count_decreases(test_client):
+    """Deleting a problem decreases X-Total-Count."""
+    test_client.post("/api/problems", json={"title": "A"})
+    resp = test_client.post("/api/problems", json={"title": "B"})
+    pid_b = resp.json()["id"]
+
+    resp = test_client.get("/api/problems")
+    assert resp.headers["X-Total-Count"] == "2"
+
+    test_client.delete(f"/api/problems/{pid_b}")
+
+    resp = test_client.get("/api/problems")
+    assert resp.headers["X-Total-Count"] == "1"
+
+
+def test_delete_does_not_affect_other_problems(test_client):
+    """Deleting one problem does not affect others."""
+    r1 = test_client.post("/api/problems", json={"title": "Keep"})
+    r2 = test_client.post("/api/problems", json={"title": "Remove"})
+    pid_keep = r1.json()["id"]
+    pid_remove = r2.json()["id"]
+
+    test_client.delete(f"/api/problems/{pid_remove}")
+
+    resp = test_client.get("/api/problems")
+    ids = [p["id"] for p in resp.json()]
+    assert pid_keep in ids
+    assert pid_remove not in ids
 
 
 # ===========================================================================

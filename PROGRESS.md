@@ -104,3 +104,10 @@
 - **Sanity check result**: 238/238 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-10 --status completed`
+
+## 2026-03-12 -- [T-P0-11] PUT/DELETE /api/problems/{id} comprehensive tests
+- **What I did**: Expanded PUT/DELETE test coverage from 3 tests to 29 tests. PUT tests cover: partial update preserving unchanged fields, update each field individually (title, difficulty, category, priority, tags, company_tags, comfort_level, is_completed, url, leetcode_id), update tags to empty, update multiple fields at once, empty body no-op, invalid values 422 (difficulty, category, priority, comfort_level, empty title), 404 on non-existent id, persistence verification. DELETE tests cover: 204 return, removed from list, cascade deletes attempts, 404 on non-existent, double-delete 404, total count decreases, does not affect other problems.
+- **Deliverables**: Modified tests/test_router_problems.py (84 tests total)
+- **Sanity check result**: 263/263 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-11 --status completed`
