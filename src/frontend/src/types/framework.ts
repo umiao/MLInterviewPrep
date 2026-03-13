@@ -15,6 +15,15 @@ export interface FrameworkNode {
   children: FrameworkNode[];
 }
 
+export interface StudyLog {
+  id: number;
+  framework_node_id: number;
+  date: string;
+  duration_minutes: number;
+  activity_type: string | null;
+  notes: string | null;
+}
+
 export interface FrameworkStats {
   total_nodes: number;
   by_status: Record<NodeStatus, number>;

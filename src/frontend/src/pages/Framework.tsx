@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useApi } from "../hooks/useApi";
 import FrameworkTreeView from "../components/FrameworkTreeView";
 import FrameworkTreemap from "../components/FrameworkTreemap";
+import NodeDetailPanel from "../components/NodeDetailPanel";
 import type { FrameworkNode, FrameworkStats, NodeStatus } from "../types/framework";
 
 type ViewMode = "tree" | "treemap";
@@ -115,59 +116,17 @@ function StatsPanel({ stats }: { stats: FrameworkStats }) {
   );
 }
 
-/** Selected node detail panel. */
-function NodeDetail({ node }: { node: FrameworkNode }) {
-  const status = node.status as NodeStatus;
-  return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4">
-      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-        Selected Node
-      </h3>
-      <p className="text-lg font-semibold text-gray-800 mb-2">{node.title}</p>
-      <div className="space-y-2 text-sm">
-        <div className="flex justify-between">
-          <span className="text-gray-500">Status</span>
-          <span className="font-medium">{STATUS_LABELS[status] ?? status}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Progress</span>
-          <span className="font-medium">{Math.round(node.progress_pct)}%</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Confidence</span>
-          <span className="font-medium">{node.confidence_level}/5</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Importance</span>
-          <span className="font-medium">{node.importance}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-gray-500">Priority</span>
-          <span className="font-medium">{node.priority}</span>
-        </div>
-        {node.estimated_hours != null && (
-          <div className="flex justify-between">
-            <span className="text-gray-500">Est. Hours</span>
-            <span className="font-medium">{node.estimated_hours}h</span>
-          </div>
-        )}
-        <div className="flex justify-between">
-          <span className="text-gray-500">Path</span>
-          <span className="font-mono text-xs text-gray-400 truncate max-w-[160px]" title={node.path}>
-            {node.path}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Framework() {
-  const { data: tree, loading: treeLoading, error: treeError } = useApi<FrameworkNode[]>("/framework/tree");
-  const { data: stats, loading: statsLoading } = useApi<FrameworkStats>("/framework/stats");
+  const { data: tree, loading: treeLoading, error: treeError, refetch: refetchTree } = useApi<FrameworkNode[]>("/framework/tree");
+  const { data: stats, loading: statsLoading, refetch: refetchStats } = useApi<FrameworkStats>("/framework/stats");
 
   const [viewMode, setViewMode] = useState<ViewMode>("tree");
   const [selectedNode, setSelectedNode] = useState<FrameworkNode | null>(null);
+
+  const handleNodeUpdated = useCallback(() => {
+    refetchTree();
+    refetchStats();
+  }, [refetchTree, refetchStats]);
 
   if (treeLoading || statsLoading) {
     return (
@@ -245,9 +204,11 @@ export default function Framework() {
           )}
         </div>
 
-        {/* Right: stats + selected node detail */}
-        <div className="w-64 shrink-0 space-y-4">
-          {selectedNode && <NodeDetail node={selectedNode} />}
+        {/* Right: node detail + stats */}
+        <div className="w-72 shrink-0 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+          {selectedNode && (
+            <NodeDetailPanel node={selectedNode} onNodeUpdated={handleNodeUpdated} />
+          )}
           {stats && <StatsPanel stats={stats} />}
         </div>
       </div>

@@ -244,3 +244,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-55 --status completed`
+
+## 2026-03-13 -- [T-P1-56] Study log form + node detail panel
+- **What I did**: Added GET /api/framework/nodes/{id}/logs endpoint returning study history (newest first, limit param). Created NodeDetailPanel component replacing the static NodeDetail sidebar: editable status dropdown and confidence slider with save button, study log form (date picker, duration, activity type, notes), study history timeline. Updated Framework page to use the new panel with refetch on updates. Added StudyLog TypeScript type. Widened sidebar to w-72 with scrollable overflow.
+- **Deliverables**: src/backend/routers/framework.py (new endpoint), src/frontend/src/types/framework.ts (StudyLog type), src/frontend/src/components/NodeDetailPanel.tsx (new), src/frontend/src/pages/Framework.tsx (updated)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, ruff clean, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-56 --status completed`
