@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-47: POST /api/import
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped, errors}. Depends: T-P1-46.
-
 #### T-P1-49: React + Vite + Tailwind scaffolding
 - **Priority**: P1
 - **Complexity**: M
@@ -147,6 +141,7 @@
 
 > 39 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-13** -- T-P1-47: POST /api/import. JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped
 - [x] **2026-03-12** -- T-P1-63: Shared test fixtures (conftest.py). db_session (in-memory per test), test_client (FastAPI TestClient with DB override), mock_llm (canned JSON), seed_problem
 - [x] **2026-03-12** -- T-P1-46: GET /api/export. Export all data as single JSON: problems (with attempts), framework_nodes (with study_logs), companies (with weights), i
 - [x] **2026-03-12** -- T-P1-45: GET /api/dashboard. Aggregate all modules: problems (total/completed/due_for_review), framework (overall_progress, pillars), recent_activity

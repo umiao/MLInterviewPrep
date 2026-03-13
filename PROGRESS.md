@@ -160,3 +160,10 @@
 - **Sanity check result**: 408/408 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-46 --status completed`
+
+## 2026-03-13 -- [T-P1-47] Add POST /api/import JSON and CSV endpoints
+- **What I did**: Implemented POST /api/import for JSON data import with merge semantics (skip existing by leetcode_id/title for problems, path for framework nodes, name for companies; questions always insert). Implemented POST /api/import/csv for CSV problem import with semicolon-separated tags. Both return {inserted, skipped, errors} per section. Wrote 19 comprehensive tests across 8 test classes including round-trip export/import idempotency test.
+- **Deliverables**: src/backend/main.py (import endpoints + helper functions), tests/test_import.py (19 tests)
+- **Sanity check result**: 427/427 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-47 --status completed`

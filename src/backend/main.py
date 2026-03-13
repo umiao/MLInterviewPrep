@@ -1,11 +1,15 @@
 """FastAPI application entry point."""
 from __future__ import annotations
 
+import csv
+import io
+import json
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from typing import Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func
 
@@ -308,5 +312,366 @@ def import_seed():
     db = SessionLocal()
     try:
         return load_all_seeds(db)
+    finally:
+        db.close()
+
+
+def _parse_dt(val: str | None) -> datetime | None:
+    """Parse ISO 8601 datetime string to datetime object."""
+    if not val:
+        return None
+    return datetime.fromisoformat(val)
+
+
+def _parse_date(val: str | None) -> date | None:
+    """Parse ISO 8601 date string to date object."""
+    if not val:
+        return None
+    return date.fromisoformat(val)
+
+
+def _import_problems(db, problems_data: list[dict[str, Any]]) -> dict[str, int]:
+    """Import problems, skipping duplicates by leetcode_id (if set) or title.
+
+    Returns counts of inserted, skipped, and errors.
+    """
+    from src.backend.models.problem import Attempt, Problem
+
+    inserted = 0
+    skipped = 0
+    errors = 0
+
+    for item in problems_data:
+        try:
+            # Check for existing: by leetcode_id if present, else by title
+            existing = None
+            if item.get("leetcode_id"):
+                existing = db.query(Problem).filter(
+                    Problem.leetcode_id == item["leetcode_id"]
+                ).first()
+            if not existing and item.get("title"):
+                existing = db.query(Problem).filter(
+                    Problem.title == item["title"]
+                ).first()
+
+            if existing:
+                skipped += 1
+                continue
+
+            p = Problem(
+                leetcode_id=item.get("leetcode_id"),
+                title=item["title"],
+                url=item.get("url"),
+                difficulty=item.get("difficulty"),
+                tags=json.dumps(item["tags"], ensure_ascii=False)
+                if isinstance(item.get("tags"), list)
+                else item.get("tags"),
+                pattern=item.get("pattern"),
+                category=item.get("category", "algorithm"),
+                source=item.get("source"),
+                company_tags=json.dumps(item["company_tags"], ensure_ascii=False)
+                if isinstance(item.get("company_tags"), list)
+                else item.get("company_tags"),
+                priority=item.get("priority", 2),
+                is_completed=item.get("is_completed", False),
+                comfort_level=item.get("comfort_level", 0),
+            )
+            db.add(p)
+            db.flush()
+
+            # Import nested attempts
+            for att_data in item.get("attempts", []):
+                att = Attempt(
+                    problem_id=p.id,
+                    started_at=_parse_dt(att_data.get("started_at")),
+                    duration_seconds=att_data.get("duration_seconds"),
+                    result=att_data.get("result"),
+                    approach_notes=att_data.get("approach_notes"),
+                    complexity_time=att_data.get("complexity_time"),
+                    complexity_space=att_data.get("complexity_space"),
+                    comfort_after=att_data.get("comfort_after"),
+                )
+                db.add(att)
+
+            inserted += 1
+        except Exception:
+            errors += 1
+            logger.exception("Error importing problem: %s", item.get("title", "?"))
+
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}
+
+
+def _import_framework_nodes(
+    db, nodes_data: list[dict[str, Any]]
+) -> dict[str, int]:
+    """Import framework nodes, skipping duplicates by path.
+
+    Returns counts of inserted, skipped, and errors.
+    """
+    from src.backend.models.framework import FrameworkNode, StudyLog
+
+    inserted = 0
+    skipped = 0
+    errors = 0
+
+    # Sort by depth so parents are created before children
+    sorted_nodes = sorted(nodes_data, key=lambda n: n.get("depth", 0))
+
+    # Map old path -> new id for parent resolution
+    path_to_id: dict[str, int] = {}
+
+    for item in sorted_nodes:
+        try:
+            path = item.get("path", "")
+            existing = db.query(FrameworkNode).filter(
+                FrameworkNode.path == path
+            ).first()
+            if existing:
+                path_to_id[path] = existing.id
+                skipped += 1
+                continue
+
+            # Resolve parent_id from path
+            parent_id = None
+            if "." in path:
+                parent_path = path.rsplit(".", 1)[0]
+                parent_id = path_to_id.get(parent_path)
+                if parent_id is None:
+                    parent_node = db.query(FrameworkNode).filter(
+                        FrameworkNode.path == parent_path
+                    ).first()
+                    if parent_node:
+                        parent_id = parent_node.id
+
+            node = FrameworkNode(
+                parent_id=parent_id,
+                path=path,
+                depth=item.get("depth", 0),
+                title=item["title"],
+                description=item.get("description"),
+                importance=item.get("importance", 1.0),
+                priority=item.get("priority", "P1"),
+                estimated_hours=item.get("estimated_hours"),
+                status=item.get("status", "not_started"),
+                progress_pct=item.get("progress_pct", 0.0),
+                confidence_level=item.get("confidence_level", 0),
+                relevant_companies=json.dumps(
+                    item["relevant_companies"], ensure_ascii=False
+                )
+                if isinstance(item.get("relevant_companies"), list)
+                else item.get("relevant_companies"),
+            )
+            db.add(node)
+            db.flush()
+            path_to_id[path] = node.id
+
+            # Import nested study logs
+            for sl_data in item.get("study_logs", []):
+                sl = StudyLog(
+                    framework_node_id=node.id,
+                    date=_parse_date(sl_data.get("date"))
+                    or date.today(),
+                    duration_minutes=sl_data["duration_minutes"],
+                    activity_type=sl_data.get("activity_type"),
+                    notes=sl_data.get("notes"),
+                )
+                db.add(sl)
+
+            inserted += 1
+        except Exception:
+            errors += 1
+            logger.exception(
+                "Error importing framework node: %s", item.get("path", "?")
+            )
+
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}
+
+
+def _import_companies(db, companies_data: list[dict[str, Any]]) -> dict[str, int]:
+    """Import companies, skipping duplicates by name.
+
+    Returns counts of inserted, skipped, and errors.
+    """
+    from src.backend.models.company import Company, CompanyTopicWeight
+
+    inserted = 0
+    skipped = 0
+    errors = 0
+
+    for item in companies_data:
+        try:
+            name = item.get("name", "")
+            existing = db.query(Company).filter(Company.name == name).first()
+            if existing:
+                skipped += 1
+                continue
+
+            c = Company(
+                name=name,
+                group_tag=item.get("group_tag"),
+                interview_stages=json.dumps(
+                    item["interview_stages"], ensure_ascii=False
+                )
+                if isinstance(item.get("interview_stages"), list)
+                else item.get("interview_stages"),
+                status=item.get("status", "applied"),
+                applied_at=_parse_date(item.get("applied_at")),
+                notes=item.get("notes"),
+            )
+            db.add(c)
+            db.flush()
+
+            # Import nested topic weights
+            for tw_data in item.get("topic_weights", []):
+                tw = CompanyTopicWeight(
+                    company_id=c.id,
+                    framework_node_id=tw_data["framework_node_id"],
+                    weight=tw_data.get("weight", 1.0),
+                )
+                db.add(tw)
+
+            inserted += 1
+        except Exception:
+            errors += 1
+            logger.exception("Error importing company: %s", item.get("name", "?"))
+
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}
+
+
+def _import_questions(
+    db, questions_data: list[dict[str, Any]]
+) -> dict[str, int]:
+    """Import interview questions (no dedup -- always insert).
+
+    Returns counts of inserted and errors.
+    """
+    from src.backend.models.scraper import InterviewQuestion
+
+    inserted = 0
+    errors = 0
+
+    for item in questions_data:
+        try:
+            q = InterviewQuestion(
+                company=item.get("company"),
+                role=item.get("role"),
+                level=item.get("level"),
+                interview_round=item.get("interview_round"),
+                year=item.get("year"),
+                question_text=item["question_text"],
+                question_type=item.get("question_type"),
+                tags=json.dumps(item["tags"], ensure_ascii=False)
+                if isinstance(item.get("tags"), list)
+                else item.get("tags"),
+                mapped_framework_node_id=item.get("mapped_framework_node_id"),
+                is_reviewed=item.get("is_reviewed", False),
+                notes=item.get("notes"),
+                difficulty_estimate=item.get("difficulty_estimate"),
+            )
+            db.add(q)
+            inserted += 1
+        except Exception:
+            errors += 1
+            logger.exception(
+                "Error importing question: %s",
+                item.get("question_text", "?")[:50],
+            )
+
+    return {"inserted": inserted, "skipped": 0, "errors": errors}
+
+
+@app.post("/api/import")
+def import_data(payload: dict[str, Any]):
+    """Import JSON data with merge semantics.
+
+    Accepts the same format as GET /api/export.
+    Skips existing records by unique key (leetcode_id/title, path, name).
+    Returns per-section counts of {inserted, skipped, errors}.
+    """
+    from src.backend.database import SessionLocal
+
+    db = SessionLocal()
+    try:
+        result: dict[str, dict[str, int]] = {}
+
+        if "problems" in payload:
+            result["problems"] = _import_problems(db, payload["problems"])
+        if "framework_nodes" in payload:
+            result["framework_nodes"] = _import_framework_nodes(
+                db, payload["framework_nodes"]
+            )
+        if "companies" in payload:
+            result["companies"] = _import_companies(db, payload["companies"])
+        if "interview_questions" in payload:
+            result["interview_questions"] = _import_questions(
+                db, payload["interview_questions"]
+            )
+
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+
+@app.post("/api/import/csv")
+async def import_csv(file: UploadFile = File(...)):
+    """Import problems from a CSV file.
+
+    Expected columns: leetcode_id, title, url, difficulty, pattern, category,
+    source, priority, tags (semicolon-separated), company_tags (semicolon-separated).
+    Skips existing by leetcode_id or title (same merge logic as JSON import).
+    Returns {inserted, skipped, errors}.
+    """
+    from src.backend.database import SessionLocal
+
+    content = await file.read()
+    text = content.decode("utf-8")
+    reader = csv.DictReader(io.StringIO(text))
+
+    problems_data: list[dict[str, Any]] = []
+    parse_errors = 0
+
+    for row in reader:
+        try:
+            item: dict[str, Any] = {"title": row["title"]}
+            if row.get("leetcode_id"):
+                item["leetcode_id"] = int(row["leetcode_id"])
+            item["url"] = row.get("url") or None
+            item["difficulty"] = row.get("difficulty") or None
+            item["pattern"] = row.get("pattern") or None
+            item["category"] = row.get("category", "algorithm") or "algorithm"
+            item["source"] = row.get("source") or None
+            if row.get("priority"):
+                item["priority"] = int(row["priority"])
+            # Tags: semicolon-separated -> list
+            tags_raw = row.get("tags", "")
+            item["tags"] = (
+                [t.strip() for t in tags_raw.split(";") if t.strip()]
+                if tags_raw
+                else []
+            )
+            company_raw = row.get("company_tags", "")
+            item["company_tags"] = (
+                [t.strip() for t in company_raw.split(";") if t.strip()]
+                if company_raw
+                else []
+            )
+            problems_data.append(item)
+        except Exception:
+            parse_errors += 1
+            logger.exception("Error parsing CSV row: %s", row)
+
+    db = SessionLocal()
+    try:
+        result = _import_problems(db, problems_data)
+        result["errors"] += parse_errors
+        db.commit()
+        return result
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
