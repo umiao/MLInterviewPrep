@@ -10,6 +10,7 @@ import type {
   SortOrder,
 } from "../types/problem";
 import PracticeModal from "../components/PracticeModal";
+import ReviewPanel from "../components/ReviewPanel";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -91,6 +92,9 @@ export default function Problems() {
 
   // ---- practice modal state ----
   const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
+
+  // ---- review panel state ----
+  const [reviewProblem, setReviewProblem] = useState<Problem | null>(null);
 
   // ---- distinct patterns for dropdown ----
   const [allPatterns, setAllPatterns] = useState<string[]>([]);
@@ -470,12 +474,20 @@ export default function Problems() {
                       <ReviewBadge nextReview={p.next_review_at} />
                     </td>
                     <td className="px-3 py-2">
-                      <button
-                        onClick={() => setPracticeProblem(p)}
-                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        Practice
-                      </button>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => setPracticeProblem(p)}
+                          className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                          Practice
+                        </button>
+                        <button
+                          onClick={() => setReviewProblem(p)}
+                          className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+                        >
+                          Review
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -519,6 +531,14 @@ export default function Problems() {
             setPracticeProblem(null);
             fetchProblems();
           }}
+        />
+      )}
+
+      {/* Review Panel */}
+      {reviewProblem && (
+        <ReviewPanel
+          problem={reviewProblem}
+          onClose={() => setReviewProblem(null)}
         />
       )}
     </div>

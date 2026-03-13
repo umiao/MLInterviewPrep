@@ -230,3 +230,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-53 --status completed`
+
+## 2026-03-13 -- [T-P1-54] Quick Review chat panel
+- **What I did**: Built ReviewPanel slide-out component with two modes: (1) Review mode -- single-shot approach text submission to POST /api/problems/{id}/review with color-coded verdict badges (green=optimal, yellow=suboptimal, red=incorrect, blue=needs_clarification), feedback display, complexity, pattern, hint, and follow-up question; (2) QA mode -- multi-turn chat with POST /api/qa/chat, chat bubbles UI, session management (new/past sessions list), Enter-to-send. Added ReviewResult, QAChatMessage, QAChatResponse, QASessionSummary types. Wired into Problems page via purple "Review" button on each row.
+- **Deliverables**: src/frontend/src/components/ReviewPanel.tsx, src/frontend/src/types/problem.ts (added review/QA types), src/frontend/src/pages/Problems.tsx (added Review button + panel)
+- **Sanity check result**: TypeScript clean, Vite build succeeds, backend 498/498 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-54 --status completed`

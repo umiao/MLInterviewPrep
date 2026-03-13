@@ -62,3 +62,42 @@ export interface ProblemFilters {
   limit: number;
   offset: number;
 }
+
+// --- Review types ---
+
+export type ReviewVerdict =
+  | "optimal"
+  | "suboptimal"
+  | "incorrect"
+  | "needs_clarification";
+
+export interface ReviewResult {
+  verdict: ReviewVerdict;
+  feedback: string;
+  hint: string | null;
+  optimal_complexity: { time: string; space: string };
+  pattern: string;
+  follow_up: string;
+}
+
+// --- QA types ---
+
+export interface QAChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: string;
+}
+
+export interface QAChatResponse {
+  session_id: number;
+  reply: string;
+  messages: QAChatMessage[];
+}
+
+export interface QASessionSummary {
+  id: number;
+  problem_id: number | null;
+  topic: string | null;
+  created_at: string | null;
+  summary: string | null;
+}
