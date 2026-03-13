@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-14: Wire SM-2 into attempt creation
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Modify POST attempts: call update_review_schedule BEFORE updating last_attempted_at. Set next_review_at. Depends: T-P0-12, T-P0-13.
-
 #### T-P0-15: GET /api/problems/review-queue
 - **Priority**: P0
 - **Complexity**: S
@@ -351,6 +345,7 @@
 - [x] **2026-03-12** -- T-P0-4: Module 1 SQLAlchemy models (Problem, Attempt, QASession). src/backend/models/problem.py. Match SQL schema from design doc. Problem: leetcode_id nullable, difficulty/category/prio
 - [x] **2026-03-12** -- T-P0-3: Database engine + session setup. src/backend/database.py. Base, get_engine(url override), SessionLocal, get_db() generator, init_db(). check_same_thread=
 - [x] **2026-03-12** -- T-P0-2: Config module with pydantic-settings. src/backend/config.py + .env.example. Settings class with DATABASE_URL, ANTHROPIC_API_KEY (required), LLM_MODEL, CORS_OR
+- [x] **2026-03-12** -- T-P0-14: Wire SM-2 into attempt creation. Modify POST attempts: call update_review_schedule BEFORE updating last_attempted_at. Set next_review_at. Depends: T-P0-1
 - [x] **2026-03-12** -- T-P0-13: Spaced repetition service (SM-2 variant). src/backend/services/spaced_repetition.py. compute_next_review + update_review_schedule. Pure functions. comfort<=2->1d,
 - [x] **2026-03-12** -- T-P0-12: POST/GET /api/problems/{id}/attempts. POST: create attempt, update problem (last_attempted_at, comfort_level, is_completed sticky). GET: list newest first. AC
 - [x] **2026-03-12** -- T-P0-11: PUT/DELETE /api/problems/{id}. PUT: partial update via model_dump(exclude_unset=True). DELETE: cascade, return 204. Both 404 if not found. AC: partial 

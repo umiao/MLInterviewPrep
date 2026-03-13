@@ -125,3 +125,10 @@
 - **Sanity check result**: 349/349 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-13 --status completed`
+
+## 2026-03-12 -- [T-P0-14] Wire SM-2 into attempt creation
+- **What I did**: Verified SM-2 wiring already implemented in POST /api/problems/{id}/attempts (update_review_schedule called BEFORE last_attempted_at update, next_review_at set). Created 18 dedicated integration tests verifying: exact interval calculations for all comfort levels (1-5) on first attempt, next_review_at initially None then set, ordering correctness (SM-2 sees old last_attempted_at via mock spy), monotonicity (higher comfort -> further review), interval growth with repeated high comfort, low comfort reset, is_completed interaction, argument verification via patch spy.
+- **Deliverables**: Created tests/test_sm2_wiring.py (18 tests)
+- **Sanity check result**: 367/367 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-14 --status completed`
