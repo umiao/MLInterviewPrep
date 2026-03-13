@@ -77,12 +77,6 @@
 - **Depends on**: None
 - **Description**: Modal on Questions page: large textarea, optional company/role fields. Shows extracted questions for review before confirm. Depends: T-P1-58, T-P0-40.
 
-#### T-P1-61: Backend Dockerfile
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Python 3.11-slim, pip install requirements, EXPOSE 8000, CMD uvicorn. Volume mount for data/. Depends: T-P0-7.
-
 #### T-P1-62: Frontend Dockerfile + docker-compose.yml
 - **Priority**: P1
 - **Complexity**: M
@@ -126,6 +120,7 @@
 - [x] **2026-03-13** -- T-P1-66: Integration test -- framework + study planning. Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ord
 - [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
 - [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
+- [x] **2026-03-13** -- T-P1-61: Backend Dockerfile. Python 3.11-slim, pip install requirements, EXPOSE 8000, CMD uvicorn. Volume mount for data/. Depends: T-P0-7.
 - [x] **2026-03-13** -- T-P1-47: POST /api/import. JSON import with merge (skip existing by leetcode_id/path/name). CSV import for problems only. Return {inserted, skipped
 - [x] **2026-03-12** -- T-P1-63: Shared test fixtures (conftest.py). db_session (in-memory per test), test_client (FastAPI TestClient with DB override), mock_llm (canned JSON), seed_problem
 - [x] **2026-03-12** -- T-P1-46: GET /api/export. Export all data as single JSON: problems (with attempts), framework_nodes (with study_logs), companies (with weights), i

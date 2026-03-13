@@ -188,3 +188,10 @@
 - **Sanity check result**: 498/498 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-66 --status completed`
+
+## 2026-03-13 -- [T-P1-61] Backend Dockerfile
+- **What I did**: Created Dockerfile for the backend service using Python 3.11-slim base image. Installs requirements, copies src/, exposes port 8000, runs uvicorn. Added .dockerignore to exclude non-essential files (tests, .git, .env, data/, etc.). Data directory is created inside the container for SQLite volume mount.
+- **Deliverables**: Dockerfile, .dockerignore
+- **Sanity check result**: 498/498 tests pass, ruff clean on Python source. Docker not available in CI env for build test but Dockerfile structure verified manually.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-61 --status completed`
