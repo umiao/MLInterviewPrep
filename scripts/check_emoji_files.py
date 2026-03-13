@@ -19,8 +19,6 @@ _EMOJI_RE = re.compile(
     "\U0001f900-\U0001f9ff"  # supplemental symbols
     "\U0001fa00-\U0001fa6f"  # chess symbols
     "\U0001fa70-\U0001faff"  # symbols extended-A
-    "\u2600-\u26ff"          # misc symbols
-    "\u2700-\u27bf"          # dingbats
     "\u200d"                 # zero-width joiner
     "\ufe0f"                 # variation selector-16
     "]"

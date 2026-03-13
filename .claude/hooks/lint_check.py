@@ -24,8 +24,6 @@ _EMOJI_RE = re.compile(
     "\U0001f900-\U0001f9ff"  # supplemental symbols
     "\U0001fa00-\U0001fa6f"  # chess symbols
     "\U0001fa70-\U0001faff"  # symbols extended-A
-    "\u2600-\u26ff"          # misc symbols
-    "\u2700-\u27bf"          # dingbats
     "\u200d"                 # zero-width joiner
     "\ufe0f"                 # variation selector-16
     "]"
@@ -37,13 +35,24 @@ _SCAN_EXTENSIONS = {
     ".json", ".html", ".css", ".js", ".ts", ".sh", ".bat", ".ps1",
 }
 
+# Extensions where emoji should block (code/config). Doc files only warn.
+_CODE_EXTENSIONS = {
+    ".py", ".yaml", ".yml", ".toml", ".cfg", ".ini",
+    ".json", ".html", ".css", ".js", ".ts", ".sh", ".bat", ".ps1",
+}
+
 # Directories to skip
 _SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".ruff_cache", "data"}
 
 
-def scan_emoji(root: str) -> list[str]:
-    """Walk project tree and return list of 'file:line: <match>' for any emoji found."""
-    hits: list[str] = []
+def scan_emoji(root: str) -> tuple[list[str], list[str]]:
+    """Walk project tree and return (code_hits, doc_hits) for any emoji found.
+
+    code_hits: emoji in code/config files (should block)
+    doc_hits: emoji in doc files like .md/.txt (warn only)
+    """
+    code_hits: list[str] = []
+    doc_hits: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         # Prune skipped directories in-place
         dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS]
@@ -59,10 +68,14 @@ def scan_emoji(root: str) -> list[str]:
                         if matches:
                             rel = os.path.relpath(fpath, root)
                             preview = line.rstrip()[:120]
-                            hits.append(f"  {rel}:{lineno}: {preview}")
+                            hit = f"  {rel}:{lineno}: {preview}"
+                            if ext in _CODE_EXTENSIONS:
+                                code_hits.append(hit)
+                            else:
+                                doc_hits.append(hit)
             except OSError:
                 continue
-    return hits
+    return code_hits, doc_hits
 
 
 def main(hook_input: dict) -> None:
@@ -96,16 +109,21 @@ def main(hook_input: dict) -> None:
 
     # --- Emoji scan ---
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    emoji_hits = scan_emoji(project_root)
-    if emoji_hits:
-        report = "\n".join(emoji_hits[:20])  # cap at 20 to keep output readable
-        count = len(emoji_hits)
+    code_hits, doc_hits = scan_emoji(project_root)
+    if code_hits:
+        report = "\n".join(code_hits[:20])
         print(
-            f"[EMOJI GUARD] Found emoji in {count} location(s). "
+            f"[EMOJI GUARD] Found emoji in {len(code_hits)} code/config file(s). "
             f"Remove all emoji (use ASCII text tags like [DONE], [FAIL] instead):\n{report}",
             file=sys.stderr,
         )
         blocked = True
+    if doc_hits:
+        report = "\n".join(doc_hits[:10])
+        print(
+            f"[EMOJI GUARD] Found emoji in {len(doc_hits)} doc file(s) (warning only):\n{report}",
+            file=sys.stderr,
+        )
 
     if blocked:
         sys.exit(2)

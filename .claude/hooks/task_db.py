@@ -15,10 +15,12 @@ Usage:
 """
 
 import argparse
+import contextlib
 import hashlib
 import json
 import os
 import stat
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -74,6 +76,15 @@ def _write_projection(root: Path, store: TaskStore) -> None:
 
     # Restore read-only
     _set_readonly(tasks_file)
+
+    # Auto-stage TASKS.md so it's included in the next commit
+    with contextlib.suppress(subprocess.TimeoutExpired, FileNotFoundError, OSError):
+        subprocess.run(
+            ["git", "add", str(tasks_file)],
+            capture_output=True,
+            encoding="utf-8",
+            timeout=10,
+        )
 
 
 def _set_readonly(path: Path) -> None:

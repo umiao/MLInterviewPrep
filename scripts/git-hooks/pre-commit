@@ -43,7 +43,18 @@ if [ -n "$STAGED_PY" ]; then
     ruff check $STAGED_PY || die "ruff check failed. Fix lint errors before committing."
 fi
 
-# --- 3. Emoji scan on staged text files ------------------------------------
+# --- 3. TASKS.md consistency check -----------------------------------------
+
+DB_PATH="$REPO_ROOT/.claude/tasks.db"
+if [ -f "$DB_PATH" ]; then
+    echo "[pre-commit] Regenerating TASKS.md from tasks.db..."
+    python "$REPO_ROOT/.claude/hooks/task_db.py" project > /dev/null 2>&1 \
+        || echo "[WARN] task_db.py project failed, continuing" >&2
+    # Stage TASKS.md if it changed (task_db.py auto-stages, but ensure it)
+    git add "$REPO_ROOT/TASKS.md" 2>/dev/null || true
+fi
+
+# --- 4. Emoji scan on staged text files ------------------------------------
 
 STAGED_ALL=$(git diff --cached --name-only --diff-filter=ACM)
 if [ -n "$STAGED_ALL" ]; then

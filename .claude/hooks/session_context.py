@@ -180,6 +180,16 @@ def _summarize_task_oneline(task_block: str) -> str:
     return " ".join(parts)
 
 
+def _get_completed_task_ids(content: str) -> set[str]:
+    """Extract task IDs from the Completed Tasks section of TASKS.md."""
+    completed_match = re.search(
+        r"## Completed Tasks\s*\n(.*?)(?=\n## |\Z)", content, re.DOTALL
+    )
+    if completed_match:
+        return set(re.findall(r"(T-P\d+-\d+)", completed_match.group(1)))
+    return set()
+
+
 def _get_active_tasks(root: Path, current_task_id: str | None) -> str:
     """Extract tasks with two-tier detail. DB-first, TASKS.md fallback."""
     # Try DB first
@@ -195,12 +205,7 @@ def _get_active_tasks(root: Path, current_task_id: str | None) -> str:
     content = tasks_file.read_text(encoding="utf-8")
 
     # Extract completed task IDs for dedup (defense against orphaned specs)
-    completed_ids: set[str] = set()
-    completed_match = re.search(
-        r"## Completed Tasks\s*\n(.*?)(?=\n## |\Z)", content, re.DOTALL
-    )
-    if completed_match:
-        completed_ids = set(re.findall(r"(T-P\d+-\d+)", completed_match.group(1)))
+    completed_ids = _get_completed_task_ids(content)
 
     sections: list[str] = []
 
@@ -467,7 +472,22 @@ def main(hook_input: dict) -> None:
     human_input = _get_human_input_status(root)
     lessons = _get_recent_lessons(root, current_task_id)
 
+    # Warn if DB is missing but TASKS.md has content (fresh clone scenario)
+    db_path = root / ".claude" / "tasks.db"
+    tasks_file = root / "TASKS.md"
+    db_missing_warning = ""
+    if not db_path.exists() and tasks_file.exists():
+        tasks_content = tasks_file.read_text(encoding="utf-8")
+        if "#### T-P" in tasks_content:
+            db_missing_warning = (
+                "[WARN] .claude/tasks.db not found but TASKS.md has tasks. "
+                "Run: python .claude/hooks/task_db.py import"
+            )
+
     sections = ["=== SESSION CONTEXT ==="]
+    if db_missing_warning:
+        sections.append("")
+        sections.append(db_missing_warning)
     if autonomous_status:
         sections.append("")
         sections.append(autonomous_status)

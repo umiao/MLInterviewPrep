@@ -39,6 +39,7 @@ htmlcov/
 .claude/checkpoint.json
 .claude/last_*_pass
 .claude/autonomous.lock
+.claude/tasks.db
 
 # Misc
 *.log
