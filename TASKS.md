@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-1: Update dependencies in requirements.txt and pyproject.toml
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (pinned). Update pyproject.toml: name=mle-interview-prep, add optional-deps dev+scraper. AC: pip install succeeds, ruff passes, imports work.
-
 #### T-P0-2: Config module with pydantic-settings
 - **Priority**: P0
 - **Complexity**: S
@@ -420,3 +414,5 @@
 ## Blocked
 
 ## Completed Tasks
+
+- [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p

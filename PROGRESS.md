@@ -34,3 +34,10 @@
 - **Sanity check result**: ruff clean, stop hook exits 0 (doc emoji warned not blocked), 80/80 tests pass (20 pre-existing router failures excluded), 7 emoji regex regression tests pass.
 - **Status**: [DONE]
 - **Request**: No change
+
+## 2026-03-12 -- [T-P0-1] Pin all dependencies to exact versions
+- **What I did**: Pinned all dependencies in requirements.txt to exact versions (fastapi==0.109.0, uvicorn==0.41.0, sqlalchemy==2.0.25, anthropic==0.84.0, pydantic-settings==2.13.1, httpx==0.27.2, beautifulsoup4==4.12.2, playwright==1.58.0, ruff==0.15.4, pytest==7.4.4). Updated pyproject.toml optional-deps (dev: pytest, httpx, ruff; scraper: playwright, beautifulsoup4) with exact pins.
+- **Deliverables**: Modified requirements.txt, pyproject.toml
+- **Sanity check result**: pip install succeeds, all imports work, ruff clean, 17/17 tests pass
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-1 --status completed`

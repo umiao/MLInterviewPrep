@@ -1,9 +1,12 @@
-# <!-- CUSTOMIZE: Update project name, description, and Python version -->
 [project]
-name = "my-project"
+name = "mle-interview-prep"
 version = "0.1.0"
-description = "Project description"
+description = "MLE Interview Prep Platform"
 requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = ["pytest==7.4.4", "httpx==0.27.2", "ruff==0.15.4"]
+scraper = ["playwright==1.58.0", "beautifulsoup4==4.12.2"]
 
 [tool.ruff]
 target-version = "py311"
@@ -20,7 +23,10 @@ select = [
     "B",    # flake8-bugbear
     "SIM",  # flake8-simplify
 ]
-ignore = ["E501"]  # line length handled by line-length setting
+ignore = [
+    "E501",   # line length handled by line-length setting
+    "B008",   # Depends() in function defaults is standard FastAPI pattern
+]
 
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
