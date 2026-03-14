@@ -47,27 +47,27 @@
 
 | 类别 | 知识点 | 频率 | 例题 |
 |------|--------|------|------|
-| Array / String | Two pointers, sliding window, prefix sum | ★★★★★ | Merge intervals, Longest substring without repeating |
-| HashMap / HashSet | Frequency count, grouping, two-sum pattern | ★★★★★ | Group anagrams, Subarray sum equals K |
-| Stack / Queue | Monotonic stack, BFS queue, min-stack | ★★★★ | Daily temperatures, Valid parentheses |
-| Linked List | Reverse, merge, cycle detection, LRU cache | ★★★★ | LRU Cache (高频!), Merge K sorted lists |
-| Tree / BST | Traversal, LCA, serialize/deserialize | ★★★★★ | Validate BST, Binary tree max path sum |
-| Heap / Priority Queue | Top-K, merge sorted, median stream | ★★★★ | Find median from data stream, K closest points |
-| Trie | Prefix search, autocomplete | ★★★ | Design autocomplete, Word search II |
-| Union-Find | Connected components, redundant edges | ★★★ | Number of islands variant, Accounts merge |
-| Segment Tree / BIT | Range query, interval update | ★★ | Range sum query mutable |
+| Array / String | Two pointers, sliding window, prefix sum | ***** | Merge intervals, Longest substring without repeating |
+| HashMap / HashSet | Frequency count, grouping, two-sum pattern | ***** | Group anagrams, Subarray sum equals K |
+| Stack / Queue | Monotonic stack, BFS queue, min-stack | **** | Daily temperatures, Valid parentheses |
+| Linked List | Reverse, merge, cycle detection, LRU cache | **** | LRU Cache (高频!), Merge K sorted lists |
+| Tree / BST | Traversal, LCA, serialize/deserialize | ***** | Validate BST, Binary tree max path sum |
+| Heap / Priority Queue | Top-K, merge sorted, median stream | **** | Find median from data stream, K closest points |
+| Trie | Prefix search, autocomplete | *** | Design autocomplete, Word search II |
+| Union-Find | Connected components, redundant edges | *** | Number of islands variant, Accounts merge |
+| Segment Tree / BIT | Range query, interval update | ** | Range sum query mutable |
 
 ### 2.2 算法范式
 
 | 范式 | 关键 Pattern | MLE 相关度 | 例题 |
 |------|-------------|-----------|------|
-| Binary Search | Search space reduction, rotated arrays, 浮点二分 | ★★★★★ | Search in rotated array, Kth smallest in matrix |
-| BFS/DFS | Graph traversal, topological sort, grid search | ★★★★★ | Course schedule, Word ladder |
-| Dynamic Programming | Knapsack, LCS, interval DP, bitmask DP | ★★★★ | Edit distance, Coin change, Regular expression matching |
-| Greedy | Interval scheduling, Huffman, activity selection | ★★★ | Jump game, Task scheduler |
-| Backtracking | Permutations, combinations, constraint satisfaction | ★★★ | N-Queens, Sudoku solver |
-| Graph Algorithms | Dijkstra, Bellman-Ford, Floyd-Warshall, MST | ★★★ | Network delay time, Cheapest flights |
-| Divide & Conquer | Merge sort variants, quick select | ★★★ | Count of smaller numbers after self |
+| Binary Search | Search space reduction, rotated arrays, 浮点二分 | ***** | Search in rotated array, Kth smallest in matrix |
+| BFS/DFS | Graph traversal, topological sort, grid search | ***** | Course schedule, Word ladder |
+| Dynamic Programming | Knapsack, LCS, interval DP, bitmask DP | **** | Edit distance, Coin change, Regular expression matching |
+| Greedy | Interval scheduling, Huffman, activity selection | *** | Jump game, Task scheduler |
+| Backtracking | Permutations, combinations, constraint satisfaction | *** | N-Queens, Sudoku solver |
+| Graph Algorithms | Dijkstra, Bellman-Ford, Floyd-Warshall, MST | *** | Network delay time, Cheapest flights |
+| Divide & Conquer | Merge sort variants, quick select | *** | Count of smaller numbers after self |
 
 ### 2.3 MLE 特化 Coding 题型
 
@@ -479,33 +479,33 @@ Step 9: Monitoring & Iteration (3-5 min)
 
 | 知识点 | MLE 面试相关度 | 详细内容 |
 |--------|--------------|---------|
-| **Probability Basics** | ★★★★★ | Bayes' theorem, conditional probability, independence, chain rule |
-| **Common Distributions** | ★★★★★ | Bernoulli, Binomial, Poisson, Gaussian, Exponential, Beta, Dirichlet |
-| **Expectation & Variance** | ★★★★★ | Law of total expectation/variance, covariance, correlation |
-| **MLE & MAP** | ★★★★★ | 推导 MLE for Gaussian/Bernoulli, prior 的 role, conjugate priors |
-| **Central Limit Theorem** | ★★★★ | 应用于 A/B testing, confidence intervals |
-| **Hypothesis Testing** | ★★★★ | p-value, Type I/II errors, power, multiple testing (Bonferroni, FDR) |
-| **Bayesian Inference** | ★★★ | Posterior computation, MCMC (Metropolis-Hastings, Gibbs), variational inference basics |
-| **Information Theory** | ★★★ | Entropy, cross-entropy, KL divergence, mutual information |
+| **Probability Basics** | ***** | Bayes' theorem, conditional probability, independence, chain rule |
+| **Common Distributions** | ***** | Bernoulli, Binomial, Poisson, Gaussian, Exponential, Beta, Dirichlet |
+| **Expectation & Variance** | ***** | Law of total expectation/variance, covariance, correlation |
+| **MLE & MAP** | ***** | 推导 MLE for Gaussian/Bernoulli, prior 的 role, conjugate priors |
+| **Central Limit Theorem** | **** | 应用于 A/B testing, confidence intervals |
+| **Hypothesis Testing** | **** | p-value, Type I/II errors, power, multiple testing (Bonferroni, FDR) |
+| **Bayesian Inference** | *** | Posterior computation, MCMC (Metropolis-Hastings, Gibbs), variational inference basics |
+| **Information Theory** | *** | Entropy, cross-entropy, KL divergence, mutual information |
 
 ### 8.2 Linear Algebra
 
 | 知识点 | MLE 面试相关度 | 详细内容 |
 |--------|--------------|---------|
-| **Matrix Operations** | ★★★★★ | Multiplication, transpose, inverse, rank, trace |
-| **Eigendecomposition** | ★★★★ | Eigenvalues/eigenvectors, PCA derivation, spectral theorem |
-| **SVD** | ★★★★ | Full vs truncated, 应用于 matrix factorization / dimensionality reduction |
-| **Matrix Calculus** | ★★★ | Gradient of matrix expressions, chain rule for tensors |
-| **Positive (Semi-)Definite** | ★★★ | Kernel functions, covariance matrices |
+| **Matrix Operations** | ***** | Multiplication, transpose, inverse, rank, trace |
+| **Eigendecomposition** | **** | Eigenvalues/eigenvectors, PCA derivation, spectral theorem |
+| **SVD** | **** | Full vs truncated, 应用于 matrix factorization / dimensionality reduction |
+| **Matrix Calculus** | *** | Gradient of matrix expressions, chain rule for tensors |
+| **Positive (Semi-)Definite** | *** | Kernel functions, covariance matrices |
 
 ### 8.3 Calculus & Optimization
 
 | 知识点 | MLE 面试相关度 | 详细内容 |
 |--------|--------------|---------|
-| **Multivariable Calculus** | ★★★★ | Gradients, Jacobian, Hessian |
-| **Chain Rule** | ★★★★★ | Backpropagation derivation |
-| **Convex Optimization** | ★★★ | Convex sets/functions, KKT conditions, duality |
-| **Lagrange Multipliers** | ★★★ | Constrained optimization, SVM dual derivation |
+| **Multivariable Calculus** | **** | Gradients, Jacobian, Hessian |
+| **Chain Rule** | ***** | Backpropagation derivation |
+| **Convex Optimization** | *** | Convex sets/functions, KKT conditions, duality |
+| **Lagrange Multipliers** | *** | Constrained optimization, SVM dual derivation |
 
 ---
 
@@ -564,31 +564,31 @@ Result: 量化成果 (数字！revenue, latency, accuracy, adoption rate)
 
 | 公司 | Coding | ML Theory | ML Sys Design | Infra/MLOps | Behavioral | LLM/DL | Domain |
 |------|--------|-----------|--------------|-------------|------------|--------|--------|
-| Google (Search/Ads) | ★★★★★ | ★★★★ | ★★★★★ | ★★★ | ★★★★ | ★★★ | Search/Ads |
-| Nvidia | ★★★★ | ★★★★ | ★★★ | ★★★★★ | ★★★ | ★★★★★ | GPU/CUDA |
-| Airbnb | ★★★★ | ★★★ | ★★★★★ | ★★★ | ★★★★★ | ★★ | Marketplace |
-| Uber (ML) | ★★★★ | ★★★★ | ★★★★★ | ★★★★ | ★★★★ | ★★★ | Marketplace |
-| LinkedIn | ★★★★ | ★★★★ | ★★★★★ | ★★★ | ★★★★ | ★★★ | RecSys/Search |
-| Netflix | ★★★★ | ★★★★★ | ★★★★ | ★★★★ | ★★★★ | ★★★ | RecSys |
-| Databricks | ★★★★ | ★★★★ | ★★★★ | ★★★★★ | ★★★ | ★★★★ | Infra |
-| DoorDash | ★★★★ | ★★★ | ★★★★★ | ★★★ | ★★★★ | ★★ | Marketplace |
-| Scale AI | ★★★★ | ★★★★ | ★★★★ | ★★★★ | ★★★ | ★★★★ | Data/Infra |
-| Perplexity | ★★★ | ★★★★ | ★★★★★ | ★★★★ | ★★★ | ★★★★★ | Search/RAG |
-| Glean | ★★★ | ★★★★ | ★★★★★ | ★★★ | ★★★ | ★★★★★ | Search/RAG |
-| Apple (ML) | ★★★★ | ★★★★★ | ★★★★ | ★★★★ | ★★★★ | ★★★★ | On-device ML |
-| Together AI | ★★★ | ★★★★★ | ★★★ | ★★★★★ | ★★★ | ★★★★★ | LLM Infra |
-| Cohere | ★★★ | ★★★★★ | ★★★★ | ★★★★ | ★★★ | ★★★★★ | NLP/LLM |
-| Character.ai | ★★★ | ★★★★★ | ★★★★ | ★★★★ | ★★★ | ★★★★★ | LLM/Dialog |
-| Harvey AI | ★★★ | ★★★★ | ★★★★★ | ★★★ | ★★★ | ★★★★★ | LLM/Legal |
-| Sierra AI | ★★★ | ★★★★ | ★★★★★ | ★★★ | ★★★★ | ★★★★★ | LLM/Agent |
-| Mistral | ★★★ | ★★★★★ | ★★★ | ★★★★★ | ★★ | ★★★★★ | LLM Core |
-| Adobe (MLE) | ★★★★ | ★★★★ | ★★★★ | ★★★ | ★★★★ | ★★★★ | GenAI/CV |
-| Roblox | ★★★★ | ★★★ | ★★★★ | ★★★ | ★★★★ | ★★★ | CV/3D |
-| Slack/Salesforce | ★★★★ | ★★★ | ★★★★ | ★★★ | ★★★★ | ★★★★ | NLP/Einstein |
-| Amazon (Search) | ★★★★★ | ★★★★ | ★★★★★ | ★★★★ | ★★★★★ | ★★★ | Search/LP |
-| Microsoft (Bing) | ★★★★ | ★★★★ | ★★★★★ | ★★★★ | ★★★★ | ★★★★ | Search/LLM |
-| Instacart | ★★★★ | ★★★ | ★★★★★ | ★★★ | ★★★★ | ★★ | Marketplace |
-| Robinhood | ★★★★ | ★★★ | ★★★★ | ★★★ | ★★★★ | ★★ | Fraud/Finance |
+| Google (Search/Ads) | ***** | **** | ***** | *** | **** | *** | Search/Ads |
+| Nvidia | **** | **** | *** | ***** | *** | ***** | GPU/CUDA |
+| Airbnb | **** | *** | ***** | *** | ***** | ** | Marketplace |
+| Uber (ML) | **** | **** | ***** | **** | **** | *** | Marketplace |
+| LinkedIn | **** | **** | ***** | *** | **** | *** | RecSys/Search |
+| Netflix | **** | ***** | **** | **** | **** | *** | RecSys |
+| Databricks | **** | **** | **** | ***** | *** | **** | Infra |
+| DoorDash | **** | *** | ***** | *** | **** | ** | Marketplace |
+| Scale AI | **** | **** | **** | **** | *** | **** | Data/Infra |
+| Perplexity | *** | **** | ***** | **** | *** | ***** | Search/RAG |
+| Glean | *** | **** | ***** | *** | *** | ***** | Search/RAG |
+| Apple (ML) | **** | ***** | **** | **** | **** | **** | On-device ML |
+| Together AI | *** | ***** | *** | ***** | *** | ***** | LLM Infra |
+| Cohere | *** | ***** | **** | **** | *** | ***** | NLP/LLM |
+| Character.ai | *** | ***** | **** | **** | *** | ***** | LLM/Dialog |
+| Harvey AI | *** | **** | ***** | *** | *** | ***** | LLM/Legal |
+| Sierra AI | *** | **** | ***** | *** | **** | ***** | LLM/Agent |
+| Mistral | *** | ***** | *** | ***** | ** | ***** | LLM Core |
+| Adobe (MLE) | **** | **** | **** | *** | **** | **** | GenAI/CV |
+| Roblox | **** | *** | **** | *** | **** | *** | CV/3D |
+| Slack/Salesforce | **** | *** | **** | *** | **** | **** | NLP/Einstein |
+| Amazon (Search) | ***** | **** | ***** | **** | ***** | *** | Search/LP |
+| Microsoft (Bing) | **** | **** | ***** | **** | **** | **** | Search/LLM |
+| Instacart | **** | *** | ***** | *** | **** | ** | Marketplace |
+| Robinhood | **** | *** | **** | *** | **** | ** | Fraud/Finance |
 
 ### 10.2 公司分组策略
 
@@ -667,20 +667,20 @@ P3 (选择性准备):
 
 | 资源 | 覆盖模块 | 推荐度 |
 |------|---------|--------|
-| **Designing Machine Learning Systems** (Chip Huyen) | ML Sys Design | ★★★★★ |
-| **Machine Learning System Design Interview** (Ali Aminian) | ML Sys Design | ★★★★★ |
-| **NeetCode 150** / Blind 75 | Coding | ★★★★★ |
-| **LeetCode** 公司标签题 | Coding | ★★★★★ |
-| **Stanford CS229** notes | ML Theory | ★★★★ |
-| **Stanford CS224N** | NLP/LLM | ★★★★ |
-| **Andrej Karpathy: Let's build GPT** | Transformer | ★★★★★ |
-| **Jay Alammar's Blog** (Illustrated Transformer 等) | DL Visualization | ★★★★ |
-| **Eugene Yan's Blog** (RecSys, ML Systems) | RecSys / ML Sys | ★★★★ |
-| **Made With ML** (Goku Mohandas) | Applied ML | ★★★★ |
-| **Papers With Code** | SOTA tracking | ★★★★ |
-| **Hugging Face Blog / Docs** | LLM 实践 | ★★★★ |
-| **Pramp / Interviewing.io** | Mock Interviews | ★★★★★ |
-| **Glassdoor / Blind** | 面经收集 | ★★★★ |
+| **Designing Machine Learning Systems** (Chip Huyen) | ML Sys Design | ***** |
+| **Machine Learning System Design Interview** (Ali Aminian) | ML Sys Design | ***** |
+| **NeetCode 150** / Blind 75 | Coding | ***** |
+| **LeetCode** 公司标签题 | Coding | ***** |
+| **Stanford CS229** notes | ML Theory | **** |
+| **Stanford CS224N** | NLP/LLM | **** |
+| **Andrej Karpathy: Let's build GPT** | Transformer | ***** |
+| **Jay Alammar's Blog** (Illustrated Transformer 等) | DL Visualization | **** |
+| **Eugene Yan's Blog** (RecSys, ML Systems) | RecSys / ML Sys | **** |
+| **Made With ML** (Goku Mohandas) | Applied ML | **** |
+| **Papers With Code** | SOTA tracking | **** |
+| **Hugging Face Blog / Docs** | LLM 实践 | **** |
+| **Pramp / Interviewing.io** | Mock Interviews | ***** |
+| **Glassdoor / Blind** | 面经收集 | **** |
 
 ---
 
@@ -775,7 +775,7 @@ P3 (选择性准备):
 
 > **使用说明**: 本框架设计为可迭代的活文档。建议:
 > 1. 根据自己的 timeline 和 target companies 调整优先级
-> 2. 每完成一个知识点打 ✅
+> 2. 每完成一个知识点打 [OK]
 > 3. 记录每次 mock interview 的反馈, 更新薄弱项
 > 4. 补充公司面经和实际面试题到对应 section
 > 5. 定期 review 和 update 自己的 STAR stories

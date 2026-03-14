@@ -300,3 +300,10 @@
 - **Sanity check result**: TypeScript clean, 512 backend tests pass, ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-60 --status completed`
+
+## 2026-03-13 -- Remove all emoji from documentation files
+- **What I did**: Replaced 81 emoji characters across 2 documentation files (mle_prep_system_design.md and mle_interview_framework.md) with ASCII text equivalents per project CLAUDE.md rules. Replacements: stars to *, checkboxes to [x], feedback indicators to [OK]/[WARN]/[FAIL].
+- **Deliverables**: mle_prep_system_design.md (9 replacements), mle_interview_framework.md (72 replacements)
+- **Sanity check result**: `python scripts/check_emoji.py` reports 0 violations.
+- **Status**: [DONE]
+- **Request**: No task ID (ad-hoc cleanup)

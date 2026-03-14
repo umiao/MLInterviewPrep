@@ -239,9 +239,9 @@ GROUP BY fn.id;
 1. 选择一道题 (或输入新题)
 2. 用 1-3 句话描述自己的思路/approach
 3. LLM 立即评价:
-   - ✅ 思路正确 → 追问: "时间复杂度? 能否优化?"
-   - ⚠️ 思路可行但非最优 → 提示: "考虑过 X pattern 吗?"
-   - ❌ 思路有误 → 引导: "这个 edge case 会怎样?"
+   - [OK] 思路正确 → 追问: "时间复杂度? 能否优化?"
+   - [WARN] 思路可行但非最优 → 提示: "考虑过 X pattern 吗?"
+   - [FAIL] 思路有误 → 引导: "这个 edge case 会怎样?"
 4. 可以继续追问，形成短对话
 5. 最终 LLM 给出总结: {verdict, optimal_approach, key_insight}
 ```
@@ -300,22 +300,22 @@ def compute_next_review(comfort_level: int, previous_interval_days: int) -> int:
 │  LeetCode Tracker                     [+ Add Problem]│
 ├─────────────┬───────────────────────────────────────┤
 │ Filters     │  Problem List / Kanban View            │
-│ ☑ Blind75   │  ┌─────────────────────────────────┐  │
-│ ☑ NeetCode  │  │ #3 Longest Substring    Medium  │  │
+│ [x] Blind75  │  ┌─────────────────────────────────┐  │
+│ [x] NeetCode │  │ #3 Longest Substring    Medium  │  │
 │ Pattern:    │  │ Pattern: Sliding Window          │  │
-│ [Dropdown]  │  │ Comfort: ⭐⭐⭐☆☆  Last: 3d ago │  │
+│ [Dropdown]  │  │ Comfort: ***..  Last: 3d ago │  │
 │ Difficulty: │  │ [Practice] [Quick Review] [Skip] │  │
 │ [E][M][H]   │  └─────────────────────────────────┘  │
 │ Company:    │  ┌─────────────────────────────────┐  │
 │ [Multi-sel] │  │ #146 LRU Cache           Medium  │  │
 │             │  │ Pattern: Design / HashMap+DLL    │  │
-│ ─────────── │  │ Comfort: ⭐⭐☆☆☆  REVIEW DUE!  │  │
+│ ─────────── │  │ Comfort: **...  REVIEW DUE!  │  │
 │ Stats:      │  │ [Practice] [Quick Review] [Skip] │  │
 │ Done: 45/75 │  └─────────────────────────────────┘  │
-│ Avg: ⭐3.2  │                                       │
+│ Avg: *3.2   │                                       │
 │ Weak: DP,   │  ──── Quick Review Panel ────────── │
 │ Graph       │  │ You: "Use hashmap + DLL, O(1)"  │  │
-│             │  │ AI: ✅ Correct! What about       │  │
+│             │  │ AI: [OK] Correct! What about     │  │
 │             │  │     thread safety for concurrent  │  │
 │             │  │     access?                       │  │
 │             │  │ [Your reply...]          [Send]  │  │
