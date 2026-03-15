@@ -1,213 +1,125 @@
-# Claude Code Project Template
+# MLInterviewPrep
 
-A production-ready Claude Code project template with self-enforcing quality gates,
-autonomous multi-session workflows, and persistent state management.
+Full-stack ML/SDE interview preparation platform with spaced repetition,
+knowledge framework tracking, and AI-powered study planning.
 
----
+## Features
 
-## Design Philosophy
+- **Problem Tracking** -- CRUD for coding problems with difficulty, tags, patterns, and company associations
+- **Spaced Repetition (SM-2)** -- Automatic review scheduling with a timed practice modal
+- **Knowledge Framework** -- Hierarchical topic tree with progress tracking and D3 treemap visualization
+- **AI Study Planner** -- LLM-generated study plans ranked by urgency with time allocation
+- **Interview Question Bank** -- Scrape/paste interview questions, filter by company/role/type, LLM analysis
+- **Company Tracker** -- Track application status, interview stages, and topic weights per company
+- **Q&A Chat** -- Multi-turn LLM conversations for problem discussion and session summaries
+- **Import/Export** -- Full JSON and CSV import/export with merge semantics
 
-The template is built on five pillars that separate concerns and ensure consistency
-across sessions:
+## Tech Stack
 
-| Pillar | File / Directory | Role |
-|--------|-----------------|------|
-| **Rules** | `CLAUDE.md` | Stable constraints and coding standards |
-| **Tasks** | `TASKS.md` | Prioritized work backlog (single source of truth) |
-| **Journal** | `PROGRESS.md` | Append-only session log |
-| **Knowledge** | `LESSONS.md` | Curated post-mortems and patterns |
-| **Guardrails** | `.claude/hooks/` | Automated enforcement at every lifecycle boundary |
-
-**Core insight:** instructions are suggestions, hooks are enforcement.
-Files are persistent, memory is ephemeral.
-
----
-
-## Session Lifecycle
-
-Every Claude Code session follows this flow. Hooks act as automated gates --
-they catch violations before they persist.
-
-```
-SessionStart hook
-    |
-    v
-[Context loaded: tasks, progress, lessons]
-    |
-    v
-Claude works (read / edit / run)
-    |  PreToolUse hooks guard each operation
-    |  PostToolUse hooks validate after changes
-    v
-Claude tries to stop
-    |
-    +--[PASS: prompt + lint + test]--> Session ends
-    |
-    +--[FAIL]--> Claude sees error --> fixes --> retries
-```
-
-**PreToolUse hooks** fire before Bash commands, file writes, and edits:
-- `block_dangerous.py` -- prevents destructive shell commands
-- `secret_guard.py` -- rejects hardcoded secrets in code
-
-**PostToolUse hooks** fire after changes land:
-- `file_watch_warn.py` -- warns when critical files are modified
-- `yaml_validate.py` -- validates YAML syntax
-- `lint_check.py` -- runs ruff on changed Python files
-- `test_check.py` -- runs pytest after code changes
-
-**Stop hooks** enforce the exit protocol (progress logged, tasks updated, tests pass).
-
----
-
-## Agent and Task System
-
-Three layers work together: skills orchestrate, agents execute, hooks enforce.
-
-```
-User / Orchestrator
-    |
-    | invokes skill or gives instruction
-    v
-+---------------------+       +---------------------+
-|   Skills            |       |   Hooks             |
-|  /review            |       |  PreToolUse         |
-|  /improve           |       |  PostToolUse        |
-|  /sanity-check      |       |  Stop               |
-|  /e2e-test          |       |  SessionStart       |
-|  /collect-input     |       +----------+----------+
-+----------+----------+                  |
-           |                             | enforce
-           | spawn                       v
-+----------v----------+     +-----------+-----------+
-|   Agents            |     |  State Files          |
-|  reviewer           |     |  TASKS.md             |
-|  test-runner        |     |  PROGRESS.md          |
-|  refactor-advisor   |     |  LESSONS.md           |
-|  input-reviewer     |     |  session_state.json   |
-+---------------------+     |  checkpoint.json      |
-                             +-----------------------+
-```
-
-**Skills** are user-facing commands that orchestrate multi-step workflows.
-**Agents** run in isolated Task contexts with focused tool access.
-**State files** persist across sessions so no context is lost.
-
----
-
-## Autonomous Multi-Session Mode
-
-The autonomous runner loops sessions until all tasks are done or failures
-accumulate. Each session is self-contained and commits its own work.
-
-```
-autonomous_run.sh (loop)
-    |
-    v
-Session N starts --> SessionStart loads state
-    |
-    v
-Pick highest-priority unblocked task
-    |
-    v
-Work, complete, git commit, update state
-    |
-    v
-Session ends --> check session_state.json
-    |
-    +--[all_done]-----------------------> Stop
-    +--[more tasks]---------------------> Session N+1
-    +--[consecutive failures >= 2]------> Stop
-```
-
-See `docs/workflow/autonomous.md` for the full ruleset.
-
----
-
-## Human-AI Cooperation: Structured Handoff
-
-**Design principle:** Tasks needing human input are explicitly tagged, validated
-before unblocking, and surfaced proactively -- never silently skipped.
-
-The system uses a four-step lifecycle for any task that cannot proceed without
-human-provided artifacts (fixture files, configuration preferences, credentials setup):
-
-```
-TAG                GUIDE              VALIDATE           UNBLOCK
-TASKS.md adds      /collect-input     input-reviewer     /collect-input
-[NEEDS-INPUT]  --> guides human   --> agent checks    --> unblock <id>
-               --> through spec   --> files meet spec --> removes tag
-```
-
-**In autonomous mode**, the orchestrator skips NEEDS-INPUT tasks and records
-them in `session_state.json` under `skipped_tasks`. The SessionStart hook
-surfaces them in an `[INPUT]` line so neither Claude nor the user loses track.
-
-**Across multiple projects**, each project's `session_state.json` records its
-own NEEDS-INPUT skips. Aggregate them to triage human effort across projects:
-
-```bash
-# Show all NEEDS-INPUT skips across projects
-for f in ~/projects/*/.claude/session_state.json; do
-  python3 -c "import json,sys; d=json.load(open(sys.argv[1],encoding='utf-8')); \
-    [print(f'{sys.argv[1]}: {s[\"task\"]} -- {s[\"reason\"]}') \
-     for s in d.get('skipped_tasks',[]) if 'NEEDS-INPUT' in s.get('reason','')]" "$f"
-done
-```
-
-For full details on the NEEDS-INPUT protocol, /collect-input skill, and validation
-infrastructure, see [Section 4 of the workflow guide](claude-code-workflow-guide.md#4-human-ai-cooperation-structured-handoff).
-
----
-
-## File Map
-
-| Path | Purpose |
-|------|---------|
-| `CLAUDE.md` | Project rules, constraints, session workflow |
-| `TASKS.md` | Task backlog with priorities and dependencies |
-| `PROGRESS.md` | Append-only session log |
-| `LESSONS.md` | Post-mortems and effective patterns |
-| `claude-code-workflow-guide.md` | Comprehensive workflow design guide |
-| `.claude/settings.json` | Hook wiring and lifecycle configuration |
-| `.claude/settings.local.json` | Permission allowlist for autonomous mode |
-| `.claude/hooks/` | Python hook scripts (9 hooks + template) |
-| `.claude/agents/` | Agent definitions (reviewer, test-runner, refactor-advisor, input-reviewer) |
-| `.claude/skills/` | Skill definitions (review, improve, sanity-check, e2e-test, collect-input) |
-| `scripts/` | Utility scripts including autonomous runner |
-| `src/` | Source code |
-| `tests/` | Test files |
-| `docs/` | Extended documentation and workflow specs |
-| `pyproject.toml` | Python project configuration (ruff, mypy, pytest) |
-
----
+| Layer | Technology |
+|-------|-----------|
+| Backend | FastAPI, SQLAlchemy, SQLite (WAL mode) |
+| Frontend | React 19, TypeScript, Tailwind CSS, Vite |
+| LLM | Anthropic Claude API (optional) |
+| Testing | pytest (512+ tests) |
+| Linting | ruff |
+| Deployment | Docker / Docker Compose |
 
 ## Quick Start
 
-See `scripts/QUICKSTART.md` for the full setup guide. The essentials:
+See [`scripts/QUICKSTART.md`](scripts/QUICKSTART.md) for full setup details.
+
+### Local
 
 ```bash
-# 1. Clone and install
-git clone <this-repo> my-project && cd my-project
+# Backend
+python -m venv .venv
+source .venv/bin/activate        # PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+uvicorn src.backend.main:app --reload
 
-# 2. Install git hooks
-bash scripts/setup-hooks.sh
-
-# 3. Customize for your project
-#    Edit CLAUDE.md -- set your project overview, tech stack, and invariants
-#    Edit TASKS.md  -- replace example tasks with your backlog
-
-# 4. Run interactively
-claude
-
-# 5. Run autonomously (loops until tasks are done)
-bash scripts/autonomous_run.sh
+# Frontend (separate terminal)
+cd src/frontend
+npm install
+npm run dev
 ```
 
----
+Create a `.env` file in the project root with `ANTHROPIC_API_KEY=sk-ant-...`
+to enable LLM features. All other features work without it.
 
-## Full Guide
+### Docker
 
-For deep details on the design philosophy, hook architecture, agent system,
-and workflow patterns, see [`claude-code-workflow-guide.md`](claude-code-workflow-guide.md).
+```bash
+docker-compose up --build
+```
+
+Backend on `http://localhost:8000`, frontend on `http://localhost:3000`.
+
+## Project Structure
+
+```
+MLInterviewPrep/
+  src/
+    backend/
+      main.py              # FastAPI app, lifespan, import/export endpoints
+      config.py             # Pydantic settings (env vars)
+      database.py           # SQLAlchemy engine, session, DB views
+      models/               # SQLAlchemy models (Problem, FrameworkNode, Company, etc.)
+      routers/              # API route modules
+      services/             # Business logic (SM-2, seed loader, LLM client)
+    frontend/
+      src/
+        pages/              # Dashboard, Problems, Framework, Questions, Companies
+        components/         # Layout, Sidebar, ReviewPanel, PracticeModal, Treemap, etc.
+        hooks/              # useApi, useTimer
+        types/              # TypeScript interfaces
+  tests/                    # pytest test suite
+  data/                     # SQLite database (created at runtime)
+  config/                   # Seed data (YAML)
+  Dockerfile                # Backend container
+  docker-compose.yml        # Full-stack orchestration
+```
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/health` | Health check |
+| GET | `/api/dashboard` | Aggregated stats across all modules |
+| GET | `/api/problems` | List problems (filterable) |
+| POST | `/api/problems` | Create a problem |
+| PUT | `/api/problems/{id}` | Update a problem |
+| DELETE | `/api/problems/{id}` | Delete a problem |
+| GET | `/api/problems/review-queue` | SM-2 due problems |
+| POST | `/api/problems/{id}/attempts` | Record an attempt |
+| POST | `/api/problems/{id}/review` | LLM review of approach |
+| GET | `/api/framework/tree` | Knowledge tree |
+| PUT | `/api/framework/nodes/{id}` | Update a node |
+| POST | `/api/framework/nodes/{id}/log` | Log a study session |
+| GET | `/api/framework/suggest` | AI study plan |
+| GET | `/api/companies` | List companies |
+| POST | `/api/companies` | Create a company |
+| PUT | `/api/companies/{id}` | Update a company |
+| GET | `/api/questions` | List interview questions |
+| PUT | `/api/questions/{id}` | Update a question |
+| POST | `/api/questions/{id}/analyze` | LLM question analysis |
+| POST | `/api/qa/chat` | Multi-turn Q&A |
+| GET | `/api/export` | Export all data (JSON) |
+| POST | `/api/import` | Import data (JSON) |
+| POST | `/api/import/csv` | Import problems (CSV) |
+| POST | `/api/import/seed` | Reload seed data |
+
+## Testing
+
+```bash
+pytest                  # Run all tests
+pytest -x               # Stop on first failure
+pytest tests/test_foo.py  # Run specific test file
+```
+
+## Development Infrastructure
+
+This project uses a Claude Code workflow with automated hooks, task management,
+and autonomous session support. See
+[`claude-code-workflow-guide.md`](claude-code-workflow-guide.md) for details
+on the hook architecture, session lifecycle, and autonomous mode.

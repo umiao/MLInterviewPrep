@@ -3,135 +3,122 @@
 ## Prerequisites
 
 - Python 3.11+
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) installed
-- Git repository initialized
+- Node.js 18+
+- (Optional) Docker and Docker Compose
+- (Optional) Anthropic API key -- required only for LLM features (Q&A chat,
+  problem review, study plan generation, question analysis)
 
-## Setup
+## Option A: Local Development
 
-### 1. Clone this template
+### 1. Backend
 
-```bash
-# Option A: Use as GitHub template (click "Use this template" on GitHub)
-# Option B: Clone directly
-git clone <template-url> my-project
-cd my-project
-```
-
-### 2. Install dependencies
+**bash:**
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 3. Install git hooks
+**PowerShell:**
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### 2. Create `.env`
+
+Create a `.env` file in the project root:
+
+```
+ANTHROPIC_API_KEY=sk-ant-...       # optional, needed for LLM features
+DATABASE_URL=sqlite:///data/mle_prep.db  # default, can be omitted
+LLM_MODEL=claude-sonnet-4-20250514      # default, can be omitted
+```
+
+If you skip the API key, all CRUD features work normally; only LLM-powered
+endpoints (Q&A chat, review, study plan, question analysis) will fail.
+
+### 3. Start the backend
+
+```bash
+uvicorn src.backend.main:app --reload
+```
+
+The API server starts on `http://localhost:8000`. On first launch, the database
+is created at `data/mle_prep.db` and seed data (problems, framework nodes) is
+loaded automatically if the problems table is empty.
+
+### 4. Frontend
+
+```bash
+cd src/frontend
+npm install
+npm run dev
+```
+
+The frontend starts on `http://localhost:5173` and proxies `/api` requests to
+the backend at `localhost:8000`.
+
+## Option B: Docker
+
+```bash
+docker-compose up --build
+```
+
+- Backend: `http://localhost:8000`
+- Frontend: `http://localhost:3000`
+
+A `.env` file is still required in the project root (Docker reads it via
+`env_file`). Data is persisted in a Docker volume (`app-data`).
+
+## Seed Data
+
+Seed data loads automatically on first startup when the problems table is
+empty. To reload seeds manually at any time:
+
+```bash
+curl -X POST http://localhost:8000/api/import/seed
+```
+
+## Running Tests
+
+```bash
+pytest
+```
+
+The test suite (512+ tests) covers all backend endpoints, models, and services.
+No running server or API key is required for tests.
+
+## Git Hooks (Optional -- for contributors)
 
 ```bash
 bash scripts/setup-hooks.sh
 ```
 
-This installs a pre-commit hook that enforces ruff version parity with
-`requirements.txt`, runs lint on staged Python files, and scans for emoji.
-
-### 4. Customize CLAUDE.md
-
-Open `CLAUDE.md` and update all `<!-- CUSTOMIZE -->` sections:
-- Project overview and tech stack
-- File structure description
-- Project-specific invariants
-- Prohibited actions
-
-### 5. Set up your task backlog
-
-Edit `TASKS.md` to replace the example tasks with your actual tasks.
-Follow the existing format for priorities, complexity, and acceptance criteria.
-
-### 6. Customize hooks (optional)
-
-- **`file_watch_warn.py`**: Update `WATCHED_PATHS` with your critical file paths
-- **`lint_check.py`**: Update `LINT_COMMAND` and `LINT_PATHS` if not using ruff
-- **`test_check.py`**: Update `TEST_COMMAND` and `TEST_PATHS` if not using pytest
-- **`input-reviewer.md`**: Add task-specific validation checks
-
-### 7. Verify hooks work
-
-```bash
-# Start a Claude Code session -- the SessionStart hook should fire
-claude
-
-# Inside the session, try /sanity-check to verify all hooks work
-```
-
-## Usage
-
-### Interactive mode (default)
-
-```bash
-claude
-```
-
-The SessionStart hook will display your task status, recent progress, and relevant
-lessons. Work on tasks, and the Stop hooks will enforce quality gates when you finish.
-
-### Autonomous mode
-
-```bash
-bash scripts/autonomous_run.sh 10  # Run up to 10 sessions
-```
-
-Each session picks up one task, completes it, commits, and stops. The orchestrator
-launches fresh sessions until all tasks are done or the limit is reached.
-
-### Common slash commands
-
-| Command | Purpose |
-|---------|---------|
-| `/sanity-check` | Run exit gate checks without stopping |
-| `/review` | Code review against CLAUDE.md invariants |
-| `/e2e-test` | Run full test suite with analysis |
-| `/improve` | Scan for quality improvements |
-| `/collect-input status` | Check human input task status |
-
-## File Structure
-
-```
-your-project/
-  CLAUDE.md              # Project rules (customize this first)
-  TASKS.md               # Task backlog (add your tasks here)
-  PROGRESS.md            # Session log (auto-populated)
-  LESSONS.md             # Knowledge base (auto-populated)
-  .claude/
-    settings.json        # Hook wiring (works out of the box)
-    settings.local.json  # Permission allowlist for autonomous mode
-    hooks/               # Quality enforcement scripts
-    agents/              # Sub-agent definitions
-    skills/              # Slash command definitions
-  docs/
-    workflow/            # Autonomous mode + exit protocol docs
-    human_input/         # Human input collection specs
-  scripts/
-    autonomous_run.sh    # Autonomous orchestrator
-```
-
-## Permissions
-
-The `settings.local.json` file pre-approves common safe operations (python, git,
-ruff, pytest, etc.) to reduce permission prompts during autonomous mode. Review
-and adjust the allowlist for your needs.
+Installs a pre-commit hook that checks ruff version parity, runs lint on staged
+Python files, and scans for emoji.
 
 ## Troubleshooting
 
-### Hooks not firing
-- Verify `.claude/settings.json` exists and has the correct hook paths
-- Check that Python scripts have correct shebang / are executable
-- Run a hook manually: `echo '{}' | python .claude/hooks/lint_check.py`
-
-### Stop hook blocks unexpectedly
-- The prompt-based stop hook evaluates 5 rules (work completeness, sanity check,
-  PROGRESS.md, TASKS.md, LESSONS.md). Check which rule is blocking.
-- Run `/sanity-check` to see the current state before trying to stop.
-
 ### Encoding errors on Windows
-- All hooks use UTF-8 via `hook_utils.py`. If you add custom hooks, always use
-  `encoding="utf-8"` in file operations and subprocess calls.
+
+All file I/O in this project uses explicit `encoding="utf-8"`. If you see
+`UnicodeDecodeError` or cp1252 errors, check that any new code you added
+specifies the encoding parameter.
+
+### Missing API key
+
+Without `ANTHROPIC_API_KEY` in `.env`, LLM-powered endpoints return errors.
+All other features (problem CRUD, framework management, import/export) work
+without it.
+
+### Port conflicts
+
+| Service | Default Port | Override |
+|---------|-------------|----------|
+| Backend | 8000 | `uvicorn ... --port <N>` |
+| Frontend (dev) | 5173 | `npm run dev -- --port <N>` |
+| Frontend (Docker) | 3000 | Change `ports` in `docker-compose.yml` |

@@ -3,19 +3,9 @@
 > Tasks requiring human-provided files before autonomous execution can continue.
 > Use `/collect-input` to check status, get guidance, validate, and unblock tasks.
 
-<!-- CUSTOMIZE: Replace the example tasks below with your project's actual
-     NEEDS-INPUT tasks. Each task should have its own section with status,
-     description, target location, and validation command. -->
-
 ---
 
-## T-XX-1: Example Input Task
-
-- **Status**: [ ] Not started
-- **What's needed**: Description of what files or configuration the human needs to provide
-- **Target location**: `path/to/target/files/`
-- **Template**: `path/to/template/file` (if applicable)
-- **Validate**: `/collect-input validate T-XX-1`
+No tasks currently require human input.
 
 ---
 

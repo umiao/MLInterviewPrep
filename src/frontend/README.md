@@ -1,73 +1,76 @@
-# React + TypeScript + Vite
+# MLInterviewPrep Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React single-page application for the ML/SDE Interview Preparation Platform.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Layer | Technology |
+|-------|-----------|
+| Framework | React 19 + TypeScript |
+| Build | Vite |
+| Styling | Tailwind CSS |
+| HTTP | Fetch via custom `useApi` hook |
+| Visualization | D3.js (treemap) |
 
-## React Compiler
+## Pages
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/` | Aggregated stats: problem progress, framework coverage, recent activity, company deadlines |
+| Problems | `/problems` | Problem list with filters (difficulty, pattern, company), SM-2 review queue, practice modal with timer |
+| Framework | `/framework` | Knowledge tree with treemap visualization, node detail panel, AI study plan generator |
+| Questions | `/questions` | Interview question bank with company/role/type filters, LLM analysis |
+| Companies | `/companies` | Company tracker with application status, interview stages, topic weight configuration |
 
-## Expanding the ESLint configuration
+## Components
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Component | Purpose |
+|-----------|---------|
+| Layout | Top-level page wrapper with sidebar |
+| Sidebar | Navigation menu across pages |
+| ReviewPanel | SM-2 spaced-repetition review queue for due problems |
+| PracticeModal | Timed problem-solving modal with approach notes and complexity inputs |
+| FrameworkTreeView | Hierarchical tree view of knowledge framework nodes |
+| FrameworkTreemap | D3 treemap visualization of framework nodes by importance |
+| NodeDetailPanel | Detail/edit panel for a selected framework node with study log |
+| StudyPlanCard | AI-generated study plan with urgency ranking and time allocation |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Hooks
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+| Hook | Purpose |
+|------|---------|
+| `useApi` | Generic fetch wrapper with loading/error state management |
+| `useTimer` | Stopwatch hook for timing problem attempts |
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Type Definitions
+
+Type files in `src/types/` mirror backend models: `problem.ts`, `framework.ts`,
+`company.ts`, `question.ts`, `dashboard.ts`.
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server (proxies /api to localhost:8000)
+npm run dev
+
+# Production build
+npm run build
+
+# Lint
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The Vite dev server runs on port 5173 and proxies `/api` requests to
+`http://localhost:8000` (see `vite.config.ts`).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Docker
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Build frontend image (serves via nginx on port 80)
+docker build -t mlinterviewprep-frontend .
 ```
+
+Or use `docker-compose up` from the project root to run both backend and frontend.
