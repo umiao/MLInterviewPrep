@@ -307,3 +307,17 @@
 - **Sanity check result**: `python scripts/check_emoji.py` reports 0 violations.
 - **Status**: [DONE]
 - **Request**: No task ID (ad-hoc cleanup)
+
+## 2026-03-15 -- [T-P2-68] Add combined backend+frontend startup script
+- **What I did**: Created scripts/dev.py that launches both uvicorn and npm dev as subprocesses with [backend]/[frontend] prefixed output. Handles Ctrl+C gracefully, uses taskkill /T /F on Windows, terminates the other process if one exits. Updated QUICKSTART.md with "Option A (combined)" section and README.md Quick Start with the new command.
+- **Deliverables**: scripts/dev.py (new), scripts/QUICKSTART.md (edited), README.md (edited)
+- **Sanity check result**: ruff clean, no emoji violations, smoke test confirmed both processes start with prefixed output and clean shutdown.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-68 --status completed`
+
+## 2026-03-15 -- [T-P0-69] Fix CI: add python-multipart dependency
+- **What I did**: Added python-multipart==0.0.20 to requirements.txt. FastAPI requires this for Form/File endpoints; it was missing from explicit deps causing 295 RuntimeErrors in CI.
+- **Deliverables**: requirements.txt (edited)
+- **Sanity check result**: 512 tests pass, pip install -r requirements.txt succeeds.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-69 --status completed`

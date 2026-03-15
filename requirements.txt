@@ -5,6 +5,7 @@ pyyaml==6.0
 
 # Application dependencies
 fastapi==0.109.0
+python-multipart==0.0.20
 uvicorn[standard]==0.41.0
 sqlalchemy==2.0.25
 anthropic==0.84.0
