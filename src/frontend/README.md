@@ -53,7 +53,7 @@ Type files in `src/types/` mirror backend models: `problem.ts`, `framework.ts`,
 # Install dependencies
 npm install
 
-# Start dev server (proxies /api to localhost:8000)
+# Start dev server (proxies /api to localhost:8100)
 npm run dev
 
 # Production build
@@ -64,7 +64,7 @@ npm run lint
 ```
 
 The Vite dev server runs on port 5173 and proxies `/api` requests to
-`http://localhost:8000` (see `vite.config.ts`).
+`http://localhost:8100` (see `vite.config.ts`).
 
 ## Docker
 

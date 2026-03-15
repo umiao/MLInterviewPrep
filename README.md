@@ -42,6 +42,9 @@ uvicorn src.backend.main:app --reload
 cd src/frontend
 npm install
 npm run dev
+
+# Or run both in one terminal:
+python scripts/dev.py
 ```
 
 Create a `.env` file in the project root with `ANTHROPIC_API_KEY=sk-ant-...`
@@ -53,7 +56,7 @@ to enable LLM features. All other features work without it.
 docker-compose up --build
 ```
 
-Backend on `http://localhost:8000`, frontend on `http://localhost:3000`.
+Backend on `http://localhost:8100`, frontend on `http://localhost:3000`.
 
 ## Project Structure
 

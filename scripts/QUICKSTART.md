@@ -47,7 +47,7 @@ endpoints (Q&A chat, review, study plan, question analysis) will fail.
 uvicorn src.backend.main:app --reload
 ```
 
-The API server starts on `http://localhost:8000`. On first launch, the database
+The API server starts on `http://localhost:8100`. On first launch, the database
 is created at `data/mle_prep.db` and seed data (problems, framework nodes) is
 loaded automatically if the problems table is empty.
 
@@ -60,7 +60,19 @@ npm run dev
 ```
 
 The frontend starts on `http://localhost:5173` and proxies `/api` requests to
-the backend at `localhost:8000`.
+the backend at `localhost:8100`.
+
+### Option A (combined): Single-Command Local Dev
+
+After completing steps 1-2 above (venv + `.env`), run both servers with one
+command:
+
+```bash
+python scripts/dev.py
+```
+
+This starts the backend on `http://localhost:8100` and frontend on
+`http://localhost:5173` in a single terminal. Press Ctrl+C to stop both.
 
 ## Option B: Docker
 
@@ -68,7 +80,7 @@ the backend at `localhost:8000`.
 docker-compose up --build
 ```
 
-- Backend: `http://localhost:8000`
+- Backend: `http://localhost:8100`
 - Frontend: `http://localhost:3000`
 
 A `.env` file is still required in the project root (Docker reads it via
@@ -80,7 +92,7 @@ Seed data loads automatically on first startup when the problems table is
 empty. To reload seeds manually at any time:
 
 ```bash
-curl -X POST http://localhost:8000/api/import/seed
+curl -X POST http://localhost:8100/api/import/seed
 ```
 
 ## Running Tests
@@ -119,6 +131,6 @@ without it.
 
 | Service | Default Port | Override |
 |---------|-------------|----------|
-| Backend | 8000 | `uvicorn ... --port <N>` |
+| Backend | 8100 | `uvicorn ... --port <N>` |
 | Frontend (dev) | 5173 | `npm run dev -- --port <N>` |
 | Frontend (Docker) | 3000 | Change `ports` in `docker-compose.yml` |

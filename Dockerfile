@@ -13,7 +13,7 @@ COPY src/ src/
 # Create data directory for SQLite volume mount
 RUN mkdir -p /app/data
 
-EXPOSE 8000
+EXPOSE 8100
 
 # Run with uvicorn
-CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.backend.main:app", "--host", "0.0.0.0", "--port", "8100"]
