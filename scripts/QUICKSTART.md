@@ -44,7 +44,7 @@ endpoints (Q&A chat, review, study plan, question analysis) will fail.
 ### 3. Start the backend
 
 ```bash
-uvicorn src.backend.main:app --reload
+uvicorn src.backend.main:app --reload --port 8100
 ```
 
 The API server starts on `http://localhost:8100`. On first launch, the database

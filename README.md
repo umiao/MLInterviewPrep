@@ -36,7 +36,7 @@ See [`scripts/QUICKSTART.md`](scripts/QUICKSTART.md) for full setup details.
 python -m venv .venv
 source .venv/bin/activate        # PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-uvicorn src.backend.main:app --reload
+uvicorn src.backend.main:app --reload --port 8100
 
 # Frontend (separate terminal)
 cd src/frontend

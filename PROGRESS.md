@@ -321,3 +321,10 @@
 - **Sanity check result**: 512 tests pass, pip install -r requirements.txt succeeds.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-69 --status completed`
+
+## 2026-03-15 -- [T-P2-68] Change default backend port to 8100
+- **What I did**: Changed default backend port from 8000 to 8100 across the entire project to avoid conflict with HelixOS. Updated scripts/dev.py (--port 8100), vite.config.ts proxy target, Dockerfile, docker-compose.yml, and all documentation (QUICKSTART.md, README.md, frontend README.md) including manual uvicorn commands.
+- **Deliverables**: scripts/dev.py, src/frontend/vite.config.ts, Dockerfile, docker-compose.yml, scripts/QUICKSTART.md, README.md, src/frontend/README.md
+- **Sanity check result**: 512 tests pass, port 8100 confirmed bindable.
+- **Status**: [DONE]
+- **Request**: No task change (included in T-P2-68 commit)
