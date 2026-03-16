@@ -11,26 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-95
-- **Description**: ## Acceptance Criteria
-1. New utils/markdown.ts: countUnchecked(md) and countChecked(md) using regex ^[-*]\s*\[ \] and ^[-*]\s*\[[xX]\]; toggleCheckbox(md, lineIndex) toggles [ ] <-> [x]
-2. New PrepNotesTab component (companyId, initialNotes, onNotesChanged props):
-   a. Edit/Preview toggle
-   b. Preview mode: ReactMarkdown with custom li renderer -- clicking checkbox toggles state via toggleCheckbox(), triggers debounced save
-   c. Edit mode: textarea with raw markdown
-   d. Auto-save: 500ms debounce, useMutation PUT /companies/{id} with { prep_notes }
-   e. Status: "Saving..." / "Saved" / "Save failed" (red text + retry button)
-   f. Import button: file input (.md), POST /companies/{id}/prep-notes/import with FormData + mode radio (append default / replace)
-   g. Invalidates ["companies"] on save
-3. Company type updated: prep_notes: string | null added to Company and CompanyCreate
-4. CompanyDetailPanel: "Prep" tab added with red dot badge showing unchecked count
-5. CompanyCard: red dot indicator if prep_notes has unchecked items
-6. Journey AC: User opens company -> clicks Prep tab -> imports .md -> sees rendered checklist -> clicks checkbox in preview -> toggles, red dot count decreases -> closes and reopens -> state persisted
-7. Failure AC: Network error during save -> "Save failed" shown in red -> user clicks retry -> saves successfully
-
 #### T-P1-98: Dashboard timeline prep notes modal + red dots on EventCard
 - **Priority**: P1
 - **Complexity**: M
@@ -57,6 +37,7 @@
 
 > 87 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
 - [x] **2026-03-15** -- T-P2-94: [B7] Frontend: Analytics deep-dive (radar chart, scatter plot, trend lines). AC:\n- Pattern comfort radar chart (Recharts RadarChart) on Problems page or Dashboard\n- Framework confidence vs import

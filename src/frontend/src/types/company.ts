@@ -13,6 +13,7 @@ export interface Company {
   status: CompanyStatus;
   applied_at: string | null;
   notes: string | null;
+  prep_notes: string | null;
 }
 
 export interface CompanyWithWeights extends Company {
@@ -39,4 +40,5 @@ export interface CompanyCreate {
   status?: CompanyStatus;
   applied_at?: string | null;
   notes?: string | null;
+  prep_notes?: string | null;
 }

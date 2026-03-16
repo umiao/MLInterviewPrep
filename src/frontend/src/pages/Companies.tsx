@@ -11,6 +11,8 @@ import { useToast } from "../contexts/ToastContext";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import EditCompanyPanel from "../components/companies/EditCompanyPanel";
 import TopicWeightEditor from "../components/companies/TopicWeightEditor";
+import PrepNotesTab from "../components/companies/PrepNotesTab";
+import { countUnchecked } from "../utils/markdown";
 import type {
   Company,
   CompanyCreate,
@@ -208,7 +210,7 @@ function AddCompanyModal({
 
 /* ---------- Company Detail Panel ---------- */
 
-type PanelTab = "focus" | "weights" | "edit";
+type PanelTab = "focus" | "weights" | "prep" | "edit";
 
 function CompanyDetailPanel({
   company,
@@ -277,9 +279,12 @@ function CompanyDetailPanel({
     statusMutation.mutate(status);
   }
 
-  const TABS: { key: PanelTab; label: string }[] = [
+  const uncheckedCount = countUnchecked(company.prep_notes);
+
+  const TABS: { key: PanelTab; label: string; badge?: number }[] = [
     { key: "focus", label: "Focus" },
     { key: "weights", label: "Weights" },
+    { key: "prep", label: "Prep", badge: uncheckedCount },
     { key: "edit", label: "Edit" },
   ];
 
@@ -311,6 +316,11 @@ function CompanyDetailPanel({
             }`}
           >
             {t.label}
+            {t.badge != null && t.badge > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full">
+                {t.badge > 9 ? "9+" : t.badge}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -423,6 +433,17 @@ function CompanyDetailPanel({
           <TopicWeightEditor companyId={company.id} />
         )}
 
+        {/* ---- Prep tab ---- */}
+        {tab === "prep" && (
+          <PrepNotesTab
+            companyId={company.id}
+            initialNotes={company.prep_notes}
+            onNotesChanged={(newNotes) => {
+              onCompanyChanged({ ...company, prep_notes: newNotes });
+            }}
+          />
+        )}
+
         {/* ---- Edit tab ---- */}
         {tab === "edit" && (
           <div className="space-y-5">
@@ -472,13 +493,19 @@ function CompanyCard({
   company: Company;
   onClick: () => void;
 }) {
+  const unchecked = countUnchecked(company.prep_notes);
   return (
     <button
       onClick={onClick}
       className="w-full text-left bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow space-y-1.5 cursor-grab active:cursor-grabbing"
     >
       <div className="flex items-start justify-between gap-2">
-        <span className="font-medium text-sm truncate">{company.name}</span>
+        <span className="font-medium text-sm truncate flex items-center gap-1.5">
+          {company.name}
+          {unchecked > 0 && (
+            <span className="inline-block w-2 h-2 bg-red-500 rounded-full shrink-0" title={`${unchecked} unchecked prep item${unchecked !== 1 ? "s" : ""}`} />
+          )}
+        </span>
         {company.group_tag && (
           <span className="text-xs px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 shrink-0">
             {company.group_tag}

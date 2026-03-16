@@ -238,3 +238,10 @@
 - **Sanity check result**: 614/614 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-96 --status completed`
+
+## 2026-03-16 -- [T-P1-97] PrepNotesTab with checkbox click-toggle + Companies page integration
+- **What I did**: Created markdown utility functions (countUnchecked, countChecked, toggleCheckbox) in utils/markdown.ts. Built PrepNotesTab component with edit/preview toggle, clickable checkbox rendering via ReactMarkdown custom li renderer, debounced auto-save (500ms) with saving/saved/error status and retry button, and .md file import with append/replace mode. Added prep_notes field to Company and CompanyCreate TypeScript types. Integrated PrepNotesTab as "Prep" tab in CompanyDetailPanel with red dot badge showing unchecked count. Added red dot indicator on CompanyCard for companies with unchecked prep items.
+- **Deliverables**: src/frontend/src/utils/markdown.ts (new), src/frontend/src/components/companies/PrepNotesTab.tsx (new), src/frontend/src/types/company.ts (modified), src/frontend/src/pages/Companies.tsx (modified)
+- **Sanity check result**: 614/614 tests pass, ruff clean, TypeScript compiles clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-97 --status completed`
