@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
-import { useApi, useMutation } from "../hooks/useApi";
 import type { FrameworkNode, NodeStatus, StudyLog } from "../types/framework";
 
 const STATUS_OPTIONS: { value: NodeStatus; label: string; color: string }[] = [
@@ -27,10 +27,11 @@ interface Props {
 
 /** Full node detail panel with editable status/confidence, study log form, and history. */
 export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
+  const queryClient = useQueryClient();
+
   // -- Editable fields --
   const [editStatus, setEditStatus] = useState<NodeStatus>(node.status);
   const [editConfidence, setEditConfidence] = useState(node.confidence_level);
-  const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
 
   // Sync local state when node changes
@@ -40,67 +41,74 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
     setSaveMsg("");
   }, [node.id, node.status, node.confidence_level]);
 
-  const handleSaveNode = useCallback(async () => {
-    if (editStatus === node.status && editConfidence === node.confidence_level) return;
-    setSaving(true);
-    setSaveMsg("");
-    try {
-      await api.put(`/framework/nodes/${node.id}`, {
+  const saveNodeMutation = useMutation({
+    mutationFn: () =>
+      api.put(`/framework/nodes/${node.id}`, {
         status: editStatus,
         confidence_level: editConfidence,
-      });
+      }),
+    onSuccess: () => {
       setSaveMsg("Saved");
       onNodeUpdated();
-    } catch {
+    },
+    onError: () => {
       setSaveMsg("Error saving");
-    } finally {
-      setSaving(false);
-    }
-  }, [node.id, node.status, node.confidence_level, editStatus, editConfidence, onNodeUpdated]);
+    },
+  });
+
+  const handleSaveNode = useCallback(() => {
+    if (editStatus === node.status && editConfidence === node.confidence_level) return;
+    setSaveMsg("");
+    saveNodeMutation.mutate();
+  }, [node.status, node.confidence_level, editStatus, editConfidence, saveNodeMutation]);
+
+  const saving = saveNodeMutation.isPending;
 
   // -- Study log form --
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [logDuration, setLogDuration] = useState(30);
   const [logActivity, setLogActivity] = useState("");
   const [logNotes, setLogNotes] = useState("");
-  const { execute: submitLog, loading: logSubmitting } = useMutation<StudyLog>(
-    "POST",
-    `/framework/nodes/${node.id}/log`,
-  );
   const [logMsg, setLogMsg] = useState("");
+
+  const submitLogMutation = useMutation({
+    mutationFn: (body: Record<string, unknown>) =>
+      api.post<StudyLog>(`/framework/nodes/${node.id}/log`, body),
+    onSuccess: () => {
+      setLogMsg("Logged");
+      setLogDuration(30);
+      setLogNotes("");
+      onNodeUpdated();
+      queryClient.invalidateQueries({ queryKey: ["framework", "nodes", node.id, "logs"] });
+    },
+    onError: () => {
+      setLogMsg("Error logging");
+    },
+  });
+
+  const logSubmitting = submitLogMutation.isPending;
 
   // Reset log form when node changes
   useEffect(() => {
     setLogMsg("");
   }, [node.id]);
 
-  const handleSubmitLog = useCallback(async (e: React.FormEvent) => {
+  const handleSubmitLog = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     setLogMsg("");
-    try {
-      await submitLog({
-        date: logDate,
-        duration_minutes: logDuration,
-        activity_type: logActivity || null,
-        notes: logNotes || null,
-      });
-      setLogMsg("Logged");
-      setLogDuration(30);
-      setLogNotes("");
-      onNodeUpdated();
-      // Refetch logs
-      setLogsKey((k) => k + 1);
-    } catch {
-      setLogMsg("Error logging");
-    }
-  }, [logDate, logDuration, logActivity, logNotes, submitLog, onNodeUpdated]);
+    submitLogMutation.mutate({
+      date: logDate,
+      duration_minutes: logDuration,
+      activity_type: logActivity || null,
+      notes: logNotes || null,
+    });
+  }, [logDate, logDuration, logActivity, logNotes, submitLogMutation]);
 
   // -- Study history --
-  const [logsKey, setLogsKey] = useState(0);
-  const { data: logs, loading: logsLoading } = useApi<StudyLog[]>(
-    `/framework/nodes/${node.id}/logs`,
-    { params: { limit: 10, _r: logsKey } },
-  );
+  const { data: logs, isLoading: logsLoading } = useQuery({
+    queryKey: ["framework", "nodes", node.id, "logs"],
+    queryFn: () => api.get<StudyLog[]>(`/framework/nodes/${node.id}/logs`, { params: { limit: 10 } }),
+  });
 
   const hasChanges = editStatus !== node.status || editConfidence !== node.confidence_level;
 

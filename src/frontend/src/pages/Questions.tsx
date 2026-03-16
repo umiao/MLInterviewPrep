@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
 import type { InterviewQuestion, QuestionAnalysis, QuestionType } from "../types/question";
 
@@ -470,46 +471,33 @@ const EMPTY_FILTERS: Filters = {
 /* ---------- Main Page ---------- */
 
 export default function Questions() {
-  const [questions, setQuestions] = useState<InterviewQuestion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   const [pasteOpen, setPasteOpen] = useState(false);
   const PAGE_SIZE = 50;
 
-  const fetchQuestions = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params: Record<string, string | number | boolean | undefined> = {
-        limit: PAGE_SIZE,
-        offset: page * PAGE_SIZE,
-      };
-      if (filters.company) params.company = filters.company;
-      if (filters.role) params.role = filters.role;
-      if (filters.question_type) params.question_type = filters.question_type;
-      if (filters.is_reviewed === "true") params.is_reviewed = true;
-      if (filters.is_reviewed === "false") params.is_reviewed = false;
-      if (filters.search) params.search = filters.search;
-
-      const data = await api.get<InterviewQuestion[]>("/questions", {
-        params,
-      });
-      setQuestions(data);
-    } catch (err) {
-      const msg =
-        err instanceof ApiRequestError ? err.message : String(err);
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+  const queryParams = useMemo(() => {
+    const params: Record<string, string | number | boolean | undefined> = {
+      limit: PAGE_SIZE,
+      offset: page * PAGE_SIZE,
+    };
+    if (filters.company) params.company = filters.company;
+    if (filters.role) params.role = filters.role;
+    if (filters.question_type) params.question_type = filters.question_type;
+    if (filters.is_reviewed === "true") params.is_reviewed = true;
+    if (filters.is_reviewed === "false") params.is_reviewed = false;
+    if (filters.search) params.search = filters.search;
+    return params;
   }, [filters, page]);
 
-  useEffect(() => {
-    fetchQuestions();
-  }, [fetchQuestions]);
+  const { data: questions = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["questions", queryParams],
+    queryFn: () => api.get<InterviewQuestion[]>("/questions", { params: queryParams }),
+  });
+
+  const error = queryError ? queryError.message : null;
 
   function handleFilterChange(key: keyof Filters, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -523,23 +511,20 @@ export default function Questions() {
     setExpandedId(null);
   }
 
-  async function handleToggleReviewed(id: number, reviewed: boolean) {
-    try {
-      await api.put(`/questions/${id}`, { is_reviewed: reviewed });
-      setQuestions((prev) =>
-        prev.map((q) => (q.id === id ? { ...q, is_reviewed: reviewed } : q)),
-      );
-    } catch {
-      // silent fail -- user sees stale state until refresh
-    }
+  const toggleReviewedMutation = useMutation({
+    mutationFn: ({ id, reviewed }: { id: number; reviewed: boolean }) =>
+      api.put(`/questions/${id}`, { is_reviewed: reviewed }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+    },
+  });
+
+  function handleToggleReviewed(id: number, reviewed: boolean) {
+    toggleReviewedMutation.mutate({ id, reviewed });
   }
 
-  function handleAnalyzeDone(id: number) {
-    // Refresh to get updated notes
-    fetchQuestions().catch(() => {
-      // If refresh fails, at least the analysis panel shows the result
-    });
-    void id;
+  function handleAnalyzeDone(_id: number) {
+    queryClient.invalidateQueries({ queryKey: ["questions"] });
   }
 
   const hasFilters = Object.values(filters).some((v) => v !== "");
@@ -552,7 +537,7 @@ export default function Questions() {
         onClose={() => setPasteOpen(false)}
         onSuccess={() => {
           setPage(0);
-          fetchQuestions();
+          queryClient.invalidateQueries({ queryKey: ["questions"] });
         }}
       />
 

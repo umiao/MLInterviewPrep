@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useApi } from "../hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import type { StudyPlanResult, StudyTopic } from "../types/framework";
 import type { Company } from "../types/company";
@@ -60,7 +60,10 @@ export default function StudyPlanCard() {
   const [error, setError] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
-  const { data: companies } = useApi<Company[]>("/companies");
+  const { data: companies } = useQuery({
+    queryKey: ["companies"],
+    queryFn: () => api.get<Company[]>("/companies"),
+  });
 
   const fetchPlan = useCallback(async (p: StudyPlanParams) => {
     setLoading(true);

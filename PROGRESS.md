@@ -356,3 +356,10 @@
 - **Sanity check result**: 521/521 backend tests pass, frontend build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-73 --status completed`
+
+## 2026-03-15 -- [T-P0-74] Migrate all pages from useApi to React Query useQuery/useMutation
+- **What I did**: Migrated all 6 remaining files from custom useApi/useMutation hooks and manual api.get/put/post calls to React Query's useQuery/useMutation with queryClient.invalidateQueries for cache invalidation. Files: Framework.tsx (2 useApi -> 2 useQuery), Problems.tsx (manual fetchProblems + patterns fetch -> 2 useQuery), Questions.tsx (manual fetch + toggle reviewed -> useQuery + useMutation), Companies.tsx (manual fetch + status update -> useQuery + useMutation), NodeDetailPanel.tsx (useApi + useMutation + api.put -> useQuery + 2 useMutation), StudyPlanCard.tsx (useApi -> useQuery). useApi.ts now has zero consumers.
+- **Deliverables**: src/frontend/src/pages/Framework.tsx, Problems.tsx, Questions.tsx, Companies.tsx, src/frontend/src/components/NodeDetailPanel.tsx, StudyPlanCard.tsx
+- **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-74 --status completed`

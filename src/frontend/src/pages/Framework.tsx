@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { useApi } from "../hooks/useApi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "../utils/api";
 import FrameworkTreeView from "../components/FrameworkTreeView";
 import FrameworkTreemap from "../components/FrameworkTreemap";
 import NodeDetailPanel from "../components/NodeDetailPanel";
@@ -118,16 +119,22 @@ function StatsPanel({ stats }: { stats: FrameworkStats }) {
 }
 
 export default function Framework() {
-  const { data: tree, loading: treeLoading, error: treeError, refetch: refetchTree } = useApi<FrameworkNode[]>("/framework/tree");
-  const { data: stats, loading: statsLoading, refetch: refetchStats } = useApi<FrameworkStats>("/framework/stats");
+  const queryClient = useQueryClient();
+  const { data: tree, isLoading: treeLoading, error: treeError } = useQuery({
+    queryKey: ["framework", "tree"],
+    queryFn: () => api.get<FrameworkNode[]>("/framework/tree"),
+  });
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ["framework", "stats"],
+    queryFn: () => api.get<FrameworkStats>("/framework/stats"),
+  });
 
   const [viewMode, setViewMode] = useState<ViewMode>("tree");
   const [selectedNode, setSelectedNode] = useState<FrameworkNode | null>(null);
 
   const handleNodeUpdated = useCallback(() => {
-    refetchTree();
-    refetchStats();
-  }, [refetchTree, refetchStats]);
+    queryClient.invalidateQueries({ queryKey: ["framework"] });
+  }, [queryClient]);
 
   if (treeLoading || statsLoading) {
     return (

@@ -9,17 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-74: [B1] Migrate all pages from useApi to React Query useQuery/useMutation
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-73
-- **Description**: AC:
-- Problems, Framework, Questions, Companies pages all use useQuery for reads
-- All existing useMutation calls migrated
-- Cache invalidation configured: mutations invalidate related query keys
-- No regressions in existing functionality
-- useApi.ts can be removed or deprecated
-
 #### T-P0-75: [B1] Build Toast notification system (ToastContext + ToastProvider)
 - **Priority**: P0
 - **Complexity**: S
@@ -290,6 +279,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-74: [B1] Migrate all pages from useApi to React Query useQuery/useMutation. AC:
 - [x] **2026-03-15** -- T-P0-73: [B1] Install React Query + setup QueryClientProvider in App.tsx. AC:
 - [x] **2026-03-15** -- T-P0-71: Convert LLM callers to async + update tests. All endpoints calling llm.chat() become async def + await. extract_questions() becomes async. Update all test files for 
 - [x] **2026-03-15** -- T-P0-70: SDK migration: async LLMService + sdk_adapter. Create src/backend/services/sdk_adapter.py (SDK_AVAILABLE flag, async run_query). Rewrite LLMService with async chat(), 

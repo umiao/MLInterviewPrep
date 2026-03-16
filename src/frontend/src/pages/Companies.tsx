@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
 import type {
   Company,
@@ -206,33 +207,31 @@ function FocusTopicsPanel({
   onClose: () => void;
   onStatusChange: (newStatus: CompanyStatus) => void;
 }) {
-  const [topics, setTopics] = useState<FocusTopic[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: topics = [], isLoading: loading } = useQuery({
+    queryKey: ["companies", company.id, "focus"],
+    queryFn: () => api.get<FocusTopic[]>(`/companies/${company.id}/focus`),
+  });
   const [status, setStatus] = useState<CompanyStatus>(company.status);
-  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    api
-      .get<FocusTopic[]>(`/companies/${company.id}/focus`)
-      .then(setTopics)
-      .catch(() => setTopics([]))
-      .finally(() => setLoading(false));
-  }, [company.id]);
-
-  async function handleStatusSave() {
-    if (status === company.status) return;
-    setSaving(true);
-    try {
-      await api.put(`/companies/${company.id}`, { status });
-      onStatusChange(status);
-    } catch {
-      /* revert on failure */
+  const statusMutation = useMutation({
+    mutationFn: (newStatus: CompanyStatus) =>
+      api.put(`/companies/${company.id}`, { status: newStatus }),
+    onSuccess: (_data, newStatus) => {
+      onStatusChange(newStatus);
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+    },
+    onError: () => {
       setStatus(company.status);
-    } finally {
-      setSaving(false);
-    }
+    },
+  });
+
+  function handleStatusSave() {
+    if (status === company.status) return;
+    statusMutation.mutate(status);
   }
+
+  const saving = statusMutation.isPending;
 
   return (
     <div className="fixed inset-y-0 right-0 w-80 bg-white border-l border-gray-200 shadow-lg z-40 flex flex-col">
@@ -422,30 +421,14 @@ function KanbanColumn({
 /* ---------- Main Page ---------- */
 
 export default function Companies() {
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { data: companies = [], isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["companies"],
+    queryFn: () => api.get<Company[]>("/companies"),
+  });
+  const error = queryError ? queryError.message : null;
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-
-  const fetchCompanies = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await api.get<Company[]>("/companies");
-      setCompanies(data);
-    } catch (err) {
-      const msg =
-        err instanceof ApiRequestError ? err.message : String(err);
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
 
   // Group companies by status
   const byStatus: Record<CompanyStatus, Company[]> = {
@@ -465,9 +448,7 @@ export default function Companies() {
   }
 
   function handleStatusChange(companyId: number, newStatus: CompanyStatus) {
-    setCompanies((prev) =>
-      prev.map((c) => (c.id === companyId ? { ...c, status: newStatus } : c)),
-    );
+    queryClient.invalidateQueries({ queryKey: ["companies"] });
     if (selectedCompany?.id === companyId) {
       setSelectedCompany((prev) =>
         prev ? { ...prev, status: newStatus } : null,
@@ -527,7 +508,7 @@ export default function Companies() {
           onClose={() => setShowAddModal(false)}
           onCreated={() => {
             setShowAddModal(false);
-            fetchCompanies();
+            queryClient.invalidateQueries({ queryKey: ["companies"] });
           }}
         />
       )}

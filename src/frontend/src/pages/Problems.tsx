@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { api, ApiRequestError } from "../utils/api";
-import type { PaginatedResult } from "../utils/api";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "../utils/api";
 import type {
   Category,
   Difficulty,
@@ -71,6 +71,8 @@ function PatternBadge({ pattern }: { pattern: string | null }) {
 }
 
 export default function Problems() {
+  const queryClient = useQueryClient();
+
   // ---- filter state ----
   const [difficulty, setDifficulty] = useState<Difficulty | undefined>();
   const [pattern, setPattern] = useState("");
@@ -84,20 +86,11 @@ export default function Problems() {
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
   const [page, setPage] = useState(0);
 
-  // ---- data state ----
-  const [problems, setProblems] = useState<Problem[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   // ---- practice modal state ----
   const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
 
   // ---- review panel state ----
   const [reviewProblem, setReviewProblem] = useState<Problem | null>(null);
-
-  // ---- distinct patterns for dropdown ----
-  const [allPatterns, setAllPatterns] = useState<string[]>([]);
 
   const filters: ProblemFilters = useMemo(
     () => ({
@@ -128,59 +121,45 @@ export default function Problems() {
     ],
   );
 
-  const fetchProblems = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const params: Record<string, string | number | boolean | undefined> = {
-        sort_by: filters.sort_by,
-        sort_order: filters.sort_order,
-        limit: filters.limit,
-        offset: filters.offset,
-        difficulty: filters.difficulty,
-        pattern: filters.pattern,
-        source: filters.source,
-        company: filters.company,
-        is_completed: filters.is_completed,
-        category: filters.category,
-      };
-      const result: PaginatedResult<Problem[]> =
-        await api.getWithTotal<Problem[]>("/problems", { params });
-      setProblems(result.data);
-      setTotalCount(result.totalCount);
-    } catch (err) {
-      const msg =
-        err instanceof ApiRequestError ? err.message : String(err);
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [filters]);
+  const params: Record<string, string | number | boolean | undefined> = useMemo(() => ({
+    sort_by: filters.sort_by,
+    sort_order: filters.sort_order,
+    limit: filters.limit,
+    offset: filters.offset,
+    difficulty: filters.difficulty,
+    pattern: filters.pattern,
+    source: filters.source,
+    company: filters.company,
+    is_completed: filters.is_completed,
+    category: filters.category,
+  }), [filters]);
 
-  useEffect(() => {
-    fetchProblems();
-  }, [fetchProblems]);
+  const { data: problemsResult, isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["problems", params],
+    queryFn: () => api.getWithTotal<Problem[]>("/problems", { params }),
+  });
+
+  const problems = problemsResult?.data ?? [];
+  const totalCount = problemsResult?.totalCount ?? 0;
+  const error = queryError ? queryError.message : null;
 
   // Load all problems once to extract unique patterns for the dropdown
-  useEffect(() => {
-    api
-      .get<Problem[]>("/problems", {
-        params: { limit: 200, offset: 0 },
-      })
-      .then((data) => {
-        const patterns = [
-          ...new Set(
-            data
-              .map((p) => p.pattern)
-              .filter((p): p is string => p !== null),
-          ),
-        ].sort();
-        setAllPatterns(patterns);
-      })
-      .catch(() => {
-        /* non-critical */
-      });
-  }, []);
+  const { data: allProblemsData } = useQuery({
+    queryKey: ["problems", "allPatterns"],
+    queryFn: () => api.get<Problem[]>("/problems", { params: { limit: 200, offset: 0 } }),
+    staleTime: 60_000,
+  });
+
+  const allPatterns = useMemo(() => {
+    if (!allProblemsData) return [];
+    return [
+      ...new Set(
+        allProblemsData
+          .map((p) => p.pattern)
+          .filter((p): p is string => p !== null),
+      ),
+    ].sort();
+  }, [allProblemsData]);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
@@ -529,7 +508,7 @@ export default function Problems() {
           onClose={() => setPracticeProblem(null)}
           onSubmitted={() => {
             setPracticeProblem(null);
-            fetchProblems();
+            queryClient.invalidateQueries({ queryKey: ["problems"] });
           }}
         />
       )}
