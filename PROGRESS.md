@@ -120,3 +120,10 @@
 - **Sanity check result**: 525/525 backend tests pass, frontend TypeScript clean, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-80 --status completed`
+
+## 2026-03-15 -- [T-P0-81] Add framework_node_id FK to Problem model + topic-linked endpoints
+- **What I did**: Added nullable `framework_node_id` FK (SET NULL on delete) to Problem model. Updated ProblemCreate/ProblemUpdate/ProblemResponse schemas and problem router (create, update, response helper). Added two new endpoints: GET /framework/nodes/{id}/problems and GET /framework/nodes/{id}/questions. Updated export/import in main.py. Added `framework_node_id` to frontend Problem TypeScript type. Added conftest fixtures for problems/questions linked to framework nodes. Wrote 9 new tests covering CRUD with topic link, endpoint filtering, 404s, and cascade SET NULL behavior. Created migration script.
+- **Deliverables**: src/backend/models/problem.py, src/backend/schemas/problem.py, src/backend/routers/framework.py, src/backend/routers/problems.py, src/backend/main.py, src/frontend/src/types/problem.ts, tests/conftest.py, tests/test_router_framework.py, scripts/migrate_add_problem_framework_node.py (new)
+- **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-81 --status completed`

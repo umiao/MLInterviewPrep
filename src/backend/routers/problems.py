@@ -40,6 +40,7 @@ def _problem_to_response(p: Problem) -> dict:
         "created_at": p.created_at,
         "last_attempted_at": p.last_attempted_at,
         "next_review_at": p.next_review_at,
+        "framework_node_id": p.framework_node_id,
     }
 
 
@@ -199,6 +200,7 @@ def create_problem(
         source=problem.source,
         company_tags=json.dumps(problem.company_tags, ensure_ascii=False),
         priority=problem.priority,
+        framework_node_id=problem.framework_node_id,
         created_at=datetime.utcnow(),
     )
     db.add(db_problem)

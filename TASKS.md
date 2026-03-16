@@ -9,21 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-74
-- **Description**: AC:
-- Problem model gets nullable framework_node_id FK to framework_nodes
-- DB MIGRATION REQUIRED: ALTER TABLE problems ADD COLUMN framework_node_id INTEGER REFERENCES framework_nodes(id). For dev: recreate DB from scratch is acceptable (seed data restores everything). Write migration script for existing data safety.
-- Update conftest.py test fixtures to include new column
-- ProblemCreate/ProblemUpdate schemas accept optional framework_node_id
-- GET /api/framework/nodes/{id}/problems returns problems linked to a topic
-- GET /api/framework/nodes/{id}/questions returns interview questions linked to a topic (uses existing mapped_framework_node_id)
-- Tests: create problem with topic link, query by topic, verify cascade behavior (SET NULL on node delete)
-
-Key files: src/backend/models/problem.py, src/backend/routers/framework.py, src/backend/schemas/problem.py, tests/conftest.py
-
 #### T-P0-82: [B3] Frontend: FrameworkNodePicker component
 - **Priority**: P0
 - **Complexity**: S
@@ -208,6 +193,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints. AC:
 - [x] **2026-03-15** -- T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave. AC:
 - [x] **2026-03-15** -- T-P0-79: [B2] Backend: expose description in framework tree API + extend node update schema. AC:
 - [x] **2026-03-15** -- T-P0-78: [B1] CJK font support + install recharts + react-markdown. AC:

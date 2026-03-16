@@ -55,9 +55,13 @@ class Problem(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     last_attempted_at = Column(DateTime, nullable=True)
     next_review_at = Column(DateTime, nullable=True, index=True)
+    framework_node_id = Column(
+        Integer, ForeignKey("framework_nodes.id", ondelete="SET NULL"), nullable=True, index=True
+    )
 
     attempts = relationship("Attempt", back_populates="problem", cascade="all, delete-orphan")
     qa_sessions = relationship("QASession", back_populates="problem", cascade="all, delete-orphan")
+    framework_node = relationship("FrameworkNode", backref="problems")
 
     @property
     def tags_list(self) -> list[str]:

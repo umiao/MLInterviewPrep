@@ -7,12 +7,16 @@ from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
 from src.backend.models.framework import FrameworkNode, StudyLog
+from src.backend.models.problem import Problem
+from src.backend.models.scraper import InterviewQuestion
 from src.backend.schemas.framework import (
     FrameworkNodeResponse,
     FrameworkNodeUpdate,
     StudyLogCreate,
     StudyLogResponse,
 )
+from src.backend.schemas.problem import ProblemResponse
+from src.backend.schemas.scraper import InterviewQuestionResponse
 
 router = APIRouter()
 
@@ -110,6 +114,48 @@ def update_framework_node(
         "estimated_hours": node.estimated_hours,
         "children": [],
     }
+
+
+@router.get(
+    "/framework/nodes/{node_id}/problems",
+    response_model=list[ProblemResponse],
+)
+def get_node_problems(
+    node_id: int,
+    db: Session = Depends(get_db),
+) -> list[Problem]:
+    """Return problems linked to a framework node."""
+    node = db.query(FrameworkNode).filter(FrameworkNode.id == node_id).first()
+    if not node:
+        raise HTTPException(status_code=404, detail="Framework node not found")
+
+    return (
+        db.query(Problem)
+        .filter(Problem.framework_node_id == node_id)
+        .order_by(Problem.id)
+        .all()
+    )
+
+
+@router.get(
+    "/framework/nodes/{node_id}/questions",
+    response_model=list[InterviewQuestionResponse],
+)
+def get_node_questions(
+    node_id: int,
+    db: Session = Depends(get_db),
+) -> list[InterviewQuestion]:
+    """Return interview questions linked to a framework node."""
+    node = db.query(FrameworkNode).filter(FrameworkNode.id == node_id).first()
+    if not node:
+        raise HTTPException(status_code=404, detail="Framework node not found")
+
+    return (
+        db.query(InterviewQuestion)
+        .filter(InterviewQuestion.mapped_framework_node_id == node_id)
+        .order_by(InterviewQuestion.id)
+        .all()
+    )
 
 
 @router.post(

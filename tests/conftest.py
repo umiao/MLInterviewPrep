@@ -13,6 +13,7 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///:memory:")
 
 from src.backend.database import Base, _create_views, get_db  # noqa: E402
 from src.backend.models import FrameworkNode, Problem  # noqa: E402
+from src.backend.models.scraper import InterviewQuestion  # noqa: E402
 
 
 @pytest.fixture()
@@ -120,6 +121,55 @@ def mock_llm_text():
     mock = MagicMock()
     mock.chat = AsyncMock(return_value="This is a test LLM response.")
     return mock
+
+
+@pytest.fixture()
+def seed_problems_with_topic(db_session, seed_framework):
+    """Insert problems linked to framework nodes."""
+    root, child = seed_framework
+    problems = []
+    for title, node_id in [
+        ("DP Problem 1", child.id),
+        ("DP Problem 2", child.id),
+        ("Unlinked Problem", None),
+    ]:
+        p = Problem(
+            title=title,
+            difficulty="medium",
+            pattern="dp",
+            tags='["test"]',
+            company_tags='["google"]',
+            framework_node_id=node_id,
+        )
+        db_session.add(p)
+        problems.append(p)
+    db_session.commit()
+    for p in problems:
+        db_session.refresh(p)
+    return problems
+
+
+@pytest.fixture()
+def seed_questions_with_topic(db_session, seed_framework):
+    """Insert interview questions linked to framework nodes."""
+    root, child = seed_framework
+    questions = []
+    for text, node_id in [
+        ("Explain DP approach", child.id),
+        ("DP coding question", child.id),
+        ("Unlinked question", None),
+    ]:
+        q = InterviewQuestion(
+            question_text=text,
+            company="TestCo",
+            mapped_framework_node_id=node_id,
+        )
+        db_session.add(q)
+        questions.append(q)
+    db_session.commit()
+    for q in questions:
+        db_session.refresh(q)
+    return questions
 
 
 @pytest.fixture()

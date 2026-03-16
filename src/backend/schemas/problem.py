@@ -19,6 +19,7 @@ class ProblemCreate(BaseModel):
     source: str | None = None
     company_tags: list[str] = []
     priority: int = Field(default=2, ge=1, le=3)
+    framework_node_id: int | None = None
 
 
 class ProblemUpdate(BaseModel):
@@ -36,6 +37,7 @@ class ProblemUpdate(BaseModel):
     priority: int | None = Field(default=None, ge=1, le=3)
     is_completed: bool | None = None
     comfort_level: int | None = Field(default=None, ge=0, le=5)
+    framework_node_id: int | None = None
 
 
 class ProblemResponse(BaseModel):
@@ -57,6 +59,7 @@ class ProblemResponse(BaseModel):
     created_at: datetime | None = None
     last_attempted_at: datetime | None = None
     next_review_at: datetime | None = None
+    framework_node_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

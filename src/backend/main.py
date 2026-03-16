@@ -281,6 +281,7 @@ def export_data():
                     "created_at": _dt(p.created_at),
                     "last_attempted_at": _dt(p.last_attempted_at),
                     "next_review_at": _dt(p.next_review_at),
+                    "framework_node_id": p.framework_node_id,
                     "attempts": [
                         {
                             "id": a.id,
@@ -445,6 +446,7 @@ def _import_problems(db, problems_data: list[dict[str, Any]]) -> dict[str, int]:
                 priority=item.get("priority", 2),
                 is_completed=item.get("is_completed", False),
                 comfort_level=item.get("comfort_level", 0),
+                framework_node_id=item.get("framework_node_id"),
             )
             db.add(p)
             db.flush()

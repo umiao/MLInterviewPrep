@@ -15,6 +15,7 @@ export interface Problem {
   created_at: string;
   last_attempted_at: string | null;
   next_review_at: string | null;
+  framework_node_id: number | null;
 }
 
 export type Difficulty = "easy" | "medium" | "hard";
