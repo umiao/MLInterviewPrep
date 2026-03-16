@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 71 completed tasks archived as of latest archival.
+> 87 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -77,3 +77,50 @@
 - [x] **2026-03-13** -- T-P2-48: DB views + indexes. Create views v_problem_stats, v_weekly_progress. Add indexes on: problems.pattern, problems.difficulty, problems.next_re
 - [x] **2026-03-13** -- T-P2-60: AI Study Plan display. Card on Framework page showing GET /api/framework/suggest results. Regenerate button. LLM toggle for natural language pl
 - [x] **2026-03-13** -- T-P2-67: Performance + final polish. Response time logging middleware, SQLite WAL mode, 422 error handler, README setup instructions, ruff/mypy clean pass. D
+- [x] **2026-03-15** -- T-P0-74: [B1] Migrate all pages from useApi to React Query useQuery/useMutation. AC:
+- Problems, Framework, Questions, Companies pages all use useQuery for reads
+- All existing useMutation calls migrat
+- [x] **2026-03-15** -- T-P0-75: [B1] Build Toast notification system (ToastContext + ToastProvider). AC:
+- ToastContext.tsx with success/error/info methods
+- ToastProvider wrapping App
+- Fixed-position toast stack (bottom
+- [x] **2026-03-15** -- T-P0-76: [B1] Build shared UI components (Modal, ConfirmDialog, Badge, EmptyState, LoadingSpinner, SearchInput, Pagination). AC (REDUCED SCOPE -- build only what Batch 1 needs):
+- Toast.tsx: toast notification component (used by mutation error r
+- [x] **2026-03-15** -- T-P0-77: [B1] Add useFilterParams hook + useDebounce hook. AC:
+- useFilterParams: stores filter/sort state in URL searchParams via useSearchParams
+- Applied to Problems page filte
+- [x] **2026-03-15** -- T-P0-78: [B1] CJK font support + install recharts + react-markdown. AC:
+- Noto Sans SC, Microsoft YaHei added to font stack in index.css
+- break-words class on text containers for CJK
+- re
+- [x] **2026-03-15** -- T-P0-79: [B2] Backend: expose description in framework tree API + extend node update schema. AC:
+- PUT /api/framework/nodes/{id} accepts title and description fields
+- GET /api/framework/tree includes description 
+- [x] **2026-03-15** -- T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave. AC:
+- Tabs component added to NodeDetailPanel (Details | Notes | Study Log)
+- Notes tab: textarea for markdown editing +
+- [x] **2026-03-15** -- T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints. AC:
+- Problem model gets nullable framework_node_id FK to framework_nodes
+- DB MIGRATION REQUIRED: ALTER TABLE problems 
+- [x] **2026-03-15** -- T-P0-82: [B3] Frontend: FrameworkNodePicker component. AC:
+- Dropdown/autocomplete component for selecting a framework topic
+- Fetches flat list from /api/framework/tree?max_d
+- [x] **2026-03-15** -- T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search. AC:
+- + Add Problem button -> AddProblemModal (title, leetcode_id, url, difficulty, tags, pattern, category, source, com
+- [x] **2026-03-15** -- T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel. AC:
+- NodeDetailPanel gets Problems and Questions sub-sections (or sub-tabs)
+- Problems: fetches GET /api/framework/node
+- [x] **2026-03-15** -- T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints. AC:
+- GET /api/dashboard/today: due_reviews count, suggested_focus_topic (weakest), streak_days
+- GET /api/dashboard/act
+- [x] **2026-03-15** -- T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress. AC:
+- Row 1: Today Focus cards (3-col): Due Reviews (clickable -> /problems?review=due), Weakest Topic (clickable -> /fr
+- [x] **2026-03-15** -- T-P1-87: [B5] Backend: DELETE companies/{id}, POST/DELETE questions, extend PUT questions/{id}. AC:
+- DELETE /api/companies/{id}: deletes company + cascades topic weights. Returns count of deleted weights.
+- POST /ap
+- [x] **2026-03-15** -- T-P1-88: [B5] Frontend: Companies edit/delete + topic weight editor. AC:
+- Edit company in FocusTopicsPanel: name, group_tag, notes, applied_at all editable + Save
+- Delete company button -
+- [x] **2026-03-15** -- T-P1-89: [B5] Frontend: Questions add/edit/delete + bulk mark reviewed + framework mapping. AC:
+- + Add Question button -> AddQuestionModal (question_text, company, role, type, level, year, tags)
+- Inline edit me

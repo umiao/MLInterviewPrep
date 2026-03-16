@@ -211,3 +211,10 @@
 - **Sanity check result**: 568/568 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-93 --status completed`
+
+## 2026-03-15 -- [T-P2-94] Analytics deep-dive page (radar, scatter, trend, readiness)
+- **What I did**: Created Analytics page with four visualization sections: (1) Pattern Comfort radar chart showing avg comfort per problem pattern (top 8), (2) Confidence vs Importance scatter plot for framework nodes, (3) 30-day activity trend line chart (attempts + study minutes), (4) Company prep readiness scores with weighted progress bars and gap analysis. Added ProblemStats type, four new chart components, Analytics page, route, and sidebar nav link.
+- **Deliverables**: src/frontend/src/pages/Analytics.tsx (new), src/frontend/src/components/charts/PatternRadarChart.tsx (new), src/frontend/src/components/charts/ConfidenceScatterChart.tsx (new), src/frontend/src/components/charts/ComfortTrendChart.tsx (new), src/frontend/src/components/charts/CompanyReadinessCard.tsx (new), src/frontend/src/types/problem.ts (modified), src/frontend/src/App.tsx (modified), src/frontend/src/components/Sidebar.tsx (modified)
+- **Sanity check result**: 568/568 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-94 --status completed`

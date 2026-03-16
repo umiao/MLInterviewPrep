@@ -64,6 +64,26 @@ export interface ProblemFilters {
   offset: number;
 }
 
+// --- Stats types ---
+
+export interface PatternStat {
+  pattern: string;
+  count: number;
+  completed: number;
+  avg_comfort: number;
+}
+
+export interface ProblemStats {
+  total: number;
+  completed: number;
+  avg_comfort: number;
+  by_difficulty: Record<string, number>;
+  by_pattern: PatternStat[];
+  weak_patterns: string[];
+  total_attempts: number;
+  avg_duration_seconds: number;
+}
+
 // --- Review types ---
 
 export type ReviewVerdict =
