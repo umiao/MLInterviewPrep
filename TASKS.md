@@ -9,19 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-81, T-P0-80
-- **Description**: AC:
-- NodeDetailPanel gets Problems and Questions sub-sections (or sub-tabs)
-- Problems: fetches GET /api/framework/nodes/{id}/problems, shows compact list
-- Questions: fetches GET /api/framework/nodes/{id}/questions, shows compact list
-- Each item clickable (navigates to Problems/Questions page with filter)
-- Empty state when no linked items
-
-Key files: src/frontend/src/components/NodeDetailPanel.tsx
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints
@@ -164,6 +151,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel. AC:
 - [x] **2026-03-15** -- T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search. AC:
 - [x] **2026-03-15** -- T-P0-82: [B3] Frontend: FrameworkNodePicker component. AC:
 - [x] **2026-03-15** -- T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints. AC:

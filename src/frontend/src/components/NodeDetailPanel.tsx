@@ -6,6 +6,8 @@ import { useToast } from "../contexts/ToastContext";
 import { useDebounce } from "../hooks/useDebounce";
 import Tabs from "./ui/Tabs";
 import type { FrameworkNode, NodeStatus, StudyLog } from "../types/framework";
+import type { Problem } from "../types/problem";
+import type { InterviewQuestion } from "../types/question";
 
 const STATUS_OPTIONS: { value: NodeStatus; label: string }[] = [
   { value: "not_started", label: "Not Started" },
@@ -27,6 +29,8 @@ const ACTIVITY_TYPES = [
 const TABS = [
   { key: "details", label: "Details" },
   { key: "notes", label: "Notes" },
+  { key: "problems", label: "Problems" },
+  { key: "questions", label: "Questions" },
   { key: "log", label: "Study Log" },
 ];
 
@@ -274,6 +278,8 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
                   notesSaveStatus={notesSaveStatus}
                 />
               )}
+              {activeTab === "problems" && <LinkedProblemsTab nodeId={node.id} />}
+              {activeTab === "questions" && <LinkedQuestionsTab nodeId={node.id} />}
               {activeTab === "log" && (
                 <StudyLogTab
                   logDate={logDate}
@@ -615,6 +621,104 @@ function StudyLogTab({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ---- Linked Problems Tab ----
+
+const DIFFICULTY_COLORS: Record<string, string> = {
+  easy: "text-green-600",
+  medium: "text-yellow-600",
+  hard: "text-red-600",
+};
+
+function LinkedProblemsTab({ nodeId }: { nodeId: number }) {
+  const { data: problems, isLoading } = useQuery({
+    queryKey: ["framework", "nodes", nodeId, "problems"],
+    queryFn: () => api.get<Problem[]>(`/framework/nodes/${nodeId}/problems`),
+  });
+
+  if (isLoading) {
+    return <p className="text-xs text-gray-400">Loading...</p>;
+  }
+
+  if (!problems || problems.length === 0) {
+    return (
+      <p className="text-sm text-gray-400 py-6 text-center">
+        No problems linked to this topic.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-gray-500 mb-2">{problems.length} linked problem{problems.length !== 1 ? "s" : ""}</p>
+      {problems.map((p) => (
+        <a
+          key={p.id}
+          href={`/problems?search=${encodeURIComponent(p.title)}`}
+          className="block border border-gray-200 rounded px-3 py-2 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-800 truncate">{p.title}</span>
+            {p.difficulty && (
+              <span className={`text-xs font-medium ml-2 ${DIFFICULTY_COLORS[p.difficulty] ?? "text-gray-500"}`}>
+                {p.difficulty}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            {p.pattern && <span className="text-xs text-blue-600">{p.pattern}</span>}
+            {p.company_tags.length > 0 && (
+              <span className="text-xs text-gray-400">{p.company_tags.slice(0, 3).join(", ")}</span>
+            )}
+            {p.is_completed && <span className="text-xs text-green-600">[done]</span>}
+          </div>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+// ---- Linked Questions Tab ----
+
+function LinkedQuestionsTab({ nodeId }: { nodeId: number }) {
+  const { data: questions, isLoading } = useQuery({
+    queryKey: ["framework", "nodes", nodeId, "questions"],
+    queryFn: () => api.get<InterviewQuestion[]>(`/framework/nodes/${nodeId}/questions`),
+  });
+
+  if (isLoading) {
+    return <p className="text-xs text-gray-400">Loading...</p>;
+  }
+
+  if (!questions || questions.length === 0) {
+    return (
+      <p className="text-sm text-gray-400 py-6 text-center">
+        No questions linked to this topic.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-xs text-gray-500 mb-2">{questions.length} linked question{questions.length !== 1 ? "s" : ""}</p>
+      {questions.map((q) => (
+        <a
+          key={q.id}
+          href={`/questions?search=${encodeURIComponent(q.question_text.slice(0, 50))}`}
+          className="block border border-gray-200 rounded px-3 py-2 hover:bg-gray-50 transition-colors"
+        >
+          <p className="text-sm text-gray-800 line-clamp-2">{q.question_text}</p>
+          <div className="flex items-center gap-2 mt-0.5">
+            {q.company && <span className="text-xs text-blue-600">{q.company}</span>}
+            {q.question_type && <span className="text-xs text-gray-500">{q.question_type}</span>}
+            {q.level && <span className="text-xs text-gray-400">{q.level}</span>}
+            {q.is_reviewed && <span className="text-xs text-green-600">[reviewed]</span>}
+          </div>
+        </a>
+      ))}
     </div>
   );
 }

@@ -141,3 +141,10 @@
 - **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-83 --status completed`
+
+## 2026-03-15 -- [T-P0-84] Linked problems + questions in NodeDetailPanel
+- **What I did**: Added "Problems" and "Questions" tabs to NodeDetailPanel. Each tab fetches from existing backend endpoints (GET /api/framework/nodes/{id}/problems and /questions), displays compact clickable lists with difficulty/pattern/company metadata, and shows empty state when no items are linked. Items link to the Problems/Questions pages with a search filter pre-filled.
+- **Deliverables**: src/frontend/src/components/NodeDetailPanel.tsx (updated)
+- **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-84 --status completed`
