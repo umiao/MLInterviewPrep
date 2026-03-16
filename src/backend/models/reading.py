@@ -64,3 +64,22 @@ class AudioCache(Base):
     engine = Column(String, nullable=False)  # edge_tts, openai, browser
     voice = Column(String, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
+
+
+class TTSSummary(Base):
+    """Cached LLM-generated TTS-optimized summary for a content item."""
+
+    __tablename__ = "tts_summaries"
+    __table_args__ = (
+        UniqueConstraint(
+            "content_type", "content_id",
+            name="uq_tts_summary_content",
+        ),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content_type = Column(String, nullable=False)
+    content_id = Column(Integer, nullable=False)
+    content_hash = Column(String, nullable=False)  # SHA-256 of source text for invalidation
+    summary_text = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())

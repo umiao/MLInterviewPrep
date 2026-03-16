@@ -203,6 +203,21 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             ")",
         ],
     ),
+    (
+        5,
+        "Create tts_summaries table for LLM-generated TTS summaries",
+        [
+            "CREATE TABLE IF NOT EXISTS tts_summaries ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  content_type VARCHAR NOT NULL,"
+            "  content_id INTEGER NOT NULL,"
+            "  content_hash VARCHAR NOT NULL,"
+            "  summary_text TEXT NOT NULL,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(content_type, content_id)"
+            ")",
+        ],
+    ),
 ]
 
 

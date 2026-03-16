@@ -89,6 +89,24 @@ class ContentResponse(BaseModel):
     content_id: int
     raw_text: str
     preprocessed_text: str
+    summary_text: str | None = Field(None, description="LLM-generated TTS summary if available")
     chunks: list[str]
     content_hash: str
     total_chars: int
+
+
+class SummaryRequest(BaseModel):
+    """Request to generate or retrieve a TTS summary for a content item."""
+
+    content_type: ContentType
+    content_id: int
+
+
+class SummaryResponse(BaseModel):
+    """Response with TTS-optimized summary text."""
+
+    content_type: str
+    content_id: int
+    summary_text: str
+    from_cache: bool = Field(description="True if returned from cache without LLM call")
+    total_chars: int = Field(description="Length of summary text in characters")

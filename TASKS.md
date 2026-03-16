@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-110: LLM-generated TTS summaries for long content
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Use LLM service to create spoken-word-optimized summaries. Cache in tts_summaries table. Prompt: Rewrite for TTS narration, conversational, expand abbreviations, no visual references. Fallback to preprocessed raw text when LLM unavailable. AC: Summary cached (not regenerated), used instead of raw when available, mocked LLM test
-
 #### T-P2-111: Listening session analytics on Dashboard and StudyRadio
 - **Priority**: P2
 - **Complexity**: S
@@ -39,6 +33,7 @@
 
 > 103 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-16** -- T-P2-110: LLM-generated TTS summaries for long content. Use LLM service to create spoken-word-optimized summaries. Cache in tts_summaries table. Prompt: Rewrite for TTS narrati
 - [x] **2026-03-16** -- T-P2-109: Interview-aware content ordering in reading queue. Enhance get_reading_queue(): query interview_events for upcoming interviews, boost urgency for soonest interview company
 - [x] **2026-03-16** -- T-P1-98: Dashboard timeline prep notes modal + red dots on EventCard. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria

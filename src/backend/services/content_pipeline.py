@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -17,9 +18,11 @@ from sqlalchemy.orm import Session
 from src.backend.models.company import Company, CompanyTopicWeight
 from src.backend.models.framework import FrameworkNode
 from src.backend.models.problem import Problem
-from src.backend.models.reading import ReadingProgress
+from src.backend.models.reading import ReadingProgress, TTSSummary
 from src.backend.models.timeline import InterviewEvent
 from src.backend.services.study_planner import compute_urgency
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Content types
@@ -506,3 +509,144 @@ def get_reading_queue(
     items.sort(key=lambda x: x.urgency, reverse=True)
 
     return items[:limit]
+
+
+# ---------------------------------------------------------------------------
+# TTS summary generation via LLM
+# ---------------------------------------------------------------------------
+TTS_SUMMARY_SYSTEM_PROMPT = (
+    "You are a text-to-speech content optimizer. "
+    "Rewrite the following content for TTS narration. "
+    "Make it conversational and easy to follow when listened to. "
+    "Expand all abbreviations (e.g. -> for example, ML -> machine learning). "
+    "Do not include any visual references (tables, diagrams, code blocks, URLs). "
+    "Keep the key information but make it concise and spoken-word friendly. "
+    "Output ONLY the rewritten text, no preamble or explanation."
+)
+
+
+async def generate_tts_summary(
+    db: Session,
+    content_type: str,
+    content_id: int,
+) -> str | None:
+    """Generate an LLM-optimized TTS summary for a content item.
+
+    If a cached summary exists with a matching content_hash, returns it
+    without calling the LLM. If the content has changed (hash mismatch),
+    regenerates the summary.
+
+    Falls back to preprocessed raw text when the LLM is unavailable.
+
+    Args:
+        db: Database session.
+        content_type: One of the VALID_CONTENT_TYPES.
+        content_id: Primary key of the content item.
+
+    Returns:
+        The TTS-optimized summary text, or None if content not found.
+    """
+    raw_text = get_content_text(db, content_type, content_id)
+    if raw_text is None:
+        return None
+
+    content_hash = compute_content_hash(raw_text)
+
+    # Check cache
+    cached = (
+        db.query(TTSSummary)
+        .filter(
+            TTSSummary.content_type == content_type,
+            TTSSummary.content_id == content_id,
+        )
+        .first()
+    )
+
+    if cached and cached.content_hash == content_hash:
+        return cached.summary_text
+
+    # Hash mismatch -> delete stale cache
+    if cached:
+        db.delete(cached)
+        db.commit()
+
+    # Generate via LLM
+    try:
+        from src.backend.services.llm_service import LLMService
+
+        llm = LLMService()
+        result = await llm.chat(
+            system_prompt=TTS_SUMMARY_SYSTEM_PROMPT,
+            messages=[{"role": "user", "content": raw_text}],
+            response_format="text",
+            max_tokens=2048,
+        )
+
+        # LLM error returns a dict with "error" key
+        if isinstance(result, dict) and "error" in result:
+            logger.warning(
+                "LLM summary generation failed for %s/%s: %s",
+                content_type, content_id, result["error"],
+            )
+            return preprocess_for_tts(raw_text)
+
+        summary_text = str(result).strip()
+        if not summary_text:
+            return preprocess_for_tts(raw_text)
+
+    except Exception:
+        logger.exception(
+            "LLM unavailable for summary generation (%s/%s), falling back to preprocessed text",
+            content_type, content_id,
+        )
+        return preprocess_for_tts(raw_text)
+
+    # Cache the summary
+    new_entry = TTSSummary(
+        content_type=content_type,
+        content_id=content_id,
+        content_hash=content_hash,
+        summary_text=summary_text,
+    )
+    db.add(new_entry)
+    db.commit()
+
+    return summary_text
+
+
+def get_cached_summary(
+    db: Session,
+    content_type: str,
+    content_id: int,
+) -> str | None:
+    """Return a cached TTS summary if it exists and is still valid.
+
+    Does NOT call the LLM. Returns None if no valid cache exists.
+
+    Args:
+        db: Database session.
+        content_type: One of the VALID_CONTENT_TYPES.
+        content_id: Primary key of the content item.
+
+    Returns:
+        Cached summary text, or None if not available or stale.
+    """
+    raw_text = get_content_text(db, content_type, content_id)
+    if raw_text is None:
+        return None
+
+    content_hash = compute_content_hash(raw_text)
+
+    cached = (
+        db.query(TTSSummary)
+        .filter(
+            TTSSummary.content_type == content_type,
+            TTSSummary.content_id == content_id,
+        )
+        .first()
+    )
+
+    if cached and cached.content_hash == content_hash:
+        return cached.summary_text
+
+    return None

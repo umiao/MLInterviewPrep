@@ -287,3 +287,10 @@
 - **Sanity check result**: 742/742 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-109 --status completed`
+
+## 2026-03-16 -- [T-P2-110] LLM-generated TTS summaries for long content
+- **What I did**: Added TTSSummary model and migration v5 for caching LLM-generated summaries. Created generate_tts_summary() async function in content_pipeline.py that calls LLMService with a TTS-optimization prompt, caches results in tts_summaries table with content_hash invalidation, and falls back to preprocessed raw text when LLM unavailable. Added get_cached_summary() for read-only cache lookups. New POST /reading/summary endpoint generates or retrieves cached summaries. Synthesize endpoint now prefers cached summaries over raw text. Content endpoint includes summary_text field when available.
+- **Deliverables**: src/backend/models/reading.py (TTSSummary model), src/backend/database.py (migration v5), src/backend/services/content_pipeline.py (generate_tts_summary, get_cached_summary), src/backend/routers/reading.py (summary endpoint + integration), src/backend/schemas/reading.py (SummaryRequest/Response), tests/test_tts_summary.py (13 new tests)
+- **Sanity check result**: 755/755 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-110 --status completed`

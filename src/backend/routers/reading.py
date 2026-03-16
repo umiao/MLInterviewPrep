@@ -17,6 +17,8 @@ from src.backend.schemas.reading import (
     ProgressUpdateRequest,
     QueueItemResponse,
     QueueResponse,
+    SummaryRequest,
+    SummaryResponse,
     SynthesizeAsyncResponse,
     SynthesizeRequest,
     SynthesizeResponse,
@@ -25,6 +27,8 @@ from src.backend.services.content_pipeline import (
     VALID_CONTENT_TYPES,
     chunk_text,
     compute_content_hash,
+    generate_tts_summary,
+    get_cached_summary,
     get_content_text,
     get_reading_queue,
     preprocess_for_tts,
@@ -290,7 +294,10 @@ async def get_content(
     _validate_content_type(content_type)
     raw_text = _get_raw_text_or_404(db, content_type, content_id)
     preprocessed = preprocess_for_tts(raw_text)
-    chunks = chunk_text(preprocessed)
+    summary = get_cached_summary(db, content_type, content_id)
+    # Use summary for chunks if available, otherwise preprocessed text
+    text_for_chunks = summary if summary else preprocessed
+    chunks = chunk_text(text_for_chunks)
     content_hash = compute_content_hash(raw_text)
 
     return ContentResponse(
@@ -298,9 +305,61 @@ async def get_content(
         content_id=content_id,
         raw_text=raw_text,
         preprocessed_text=preprocessed,
+        summary_text=summary,
         chunks=chunks,
         content_hash=content_hash,
-        total_chars=len(preprocessed),
+        total_chars=len(text_for_chunks),
+    )
+
+
+# -----------------------------------------------------------------------
+# POST /reading/summary -- generate or retrieve TTS summary
+# -----------------------------------------------------------------------
+@router.post("/reading/summary", response_model=SummaryResponse)
+async def get_or_generate_summary(
+    request: SummaryRequest,
+    db: Session = Depends(get_db),
+) -> SummaryResponse:
+    """Generate or retrieve a cached LLM-optimized TTS summary.
+
+    If a valid cached summary exists, returns it immediately.
+    Otherwise, calls the LLM to generate one, caches it, and returns it.
+    Falls back to preprocessed raw text when the LLM is unavailable.
+
+    Args:
+        request: Summary request with content type and ID.
+        db: Database session.
+
+    Returns:
+        TTS-optimized summary text with cache status.
+    """
+    _validate_content_type(request.content_type)
+
+    # Check cache first
+    cached = get_cached_summary(db, request.content_type, request.content_id)
+    if cached is not None:
+        return SummaryResponse(
+            content_type=request.content_type,
+            content_id=request.content_id,
+            summary_text=cached,
+            from_cache=True,
+            total_chars=len(cached),
+        )
+
+    # Generate via LLM (or fallback)
+    summary = await generate_tts_summary(db, request.content_type, request.content_id)
+    if summary is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"{request.content_type} with id {request.content_id} not found",
+        )
+
+    return SummaryResponse(
+        content_type=request.content_type,
+        content_id=request.content_id,
+        summary_text=summary,
+        from_cache=False,
+        total_chars=len(summary),
     )
 
 
@@ -329,7 +388,10 @@ async def synthesize(
     """
     _validate_content_type(request.content_type)
     raw_text = _get_raw_text_or_404(db, request.content_type, request.content_id)
-    processed_text = preprocess_for_tts(raw_text)
+
+    # Prefer cached LLM summary over raw preprocessed text
+    cached_summary = get_cached_summary(db, request.content_type, request.content_id)
+    processed_text = cached_summary or preprocess_for_tts(raw_text)
 
     if not processed_text.strip():
         raise HTTPException(status_code=400, detail="No speakable text after preprocessing")
