@@ -12,6 +12,7 @@ import ConfirmDialog from "../components/ui/ConfirmDialog";
 import EditCompanyPanel from "../components/companies/EditCompanyPanel";
 import TopicWeightEditor from "../components/companies/TopicWeightEditor";
 import PrepNotesTab from "../components/companies/PrepNotesTab";
+import ListenButton from "../components/ui/ListenButton";
 import { countUnchecked } from "../utils/markdown";
 import type {
   Company,
@@ -292,12 +293,21 @@ function CompanyDetailPanel({
     <div className="fixed inset-y-0 right-0 w-80 bg-white border-l border-gray-200 shadow-lg z-40 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-        <h2 className="text-lg font-semibold truncate" title={company.name}>
-          {company.name}
-        </h2>
+        <div className="flex items-center gap-2 min-w-0">
+          <h2 className="text-lg font-semibold truncate" title={company.name}>
+            {company.name}
+          </h2>
+          {company.prep_notes && company.prep_notes.trim().length > 0 && (
+            <ListenButton
+              contentType="prep_notes"
+              contentId={company.id}
+              title={`${company.name} Prep Notes`}
+            />
+          )}
+        </div>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+          className="text-gray-400 hover:text-gray-600 text-xl leading-none shrink-0"
         >
           x
         </button>

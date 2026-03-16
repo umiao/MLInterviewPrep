@@ -273,3 +273,10 @@
 - **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-107 --status completed`
+
+## 2026-03-16 -- [T-P1-108] Listen buttons across app (Companies, Questions, Dashboard, Framework)
+- **What I did**: Added ListenButton to three more pages: (1) Questions page - ListenButton in EditableQuestionRow expanded actions bar, plays interview_question content type. (2) Companies page - ListenButton in CompanyDetailPanel header next to company name, plays prep_notes (only shown when company has prep notes). (3) Dashboard - Start Radio quick action card with contextual label (Start Radio vs Go to Radio when already playing), navigates to /radio. Framework page already had ListenButton via NodeDetailPanel.
+- **Deliverables**: src/frontend/src/components/questions/EditableQuestionRow.tsx (updated), src/frontend/src/pages/Companies.tsx (updated), src/frontend/src/pages/Dashboard.tsx (updated)
+- **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-108 --status completed`

@@ -6,6 +6,7 @@ import Skeleton from "../components/ui/Skeleton";
 import WeeklyActivityChart from "../components/charts/WeeklyActivityChart";
 import InterviewTimeline from "../components/timeline/InterviewTimeline";
 import EventFormModal from "../components/timeline/EventFormModal";
+import { useAudioPlayerContext } from "../contexts/AudioPlayerContext";
 import { countUnchecked, countChecked } from "../utils/markdown";
 import type {
   ActivityDay,
@@ -343,6 +344,7 @@ function PrepQuickAccess({ companies }: { companies: Company[] }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { status: playerStatus, startRadio } = useAudioPlayerContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<InterviewEvent | null>(null);
 
@@ -397,6 +399,35 @@ export default function Dashboard() {
 
       {/* Prep Notes quick access */}
       {companiesQuery.data && <PrepQuickAccess companies={companiesQuery.data} />}
+
+      {/* Start Radio quick action */}
+      <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+              Study Radio
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {playerStatus !== "idle"
+                ? "Audio is playing. Go to Radio to manage your queue."
+                : "Listen to your study material while on the go."}
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              if (playerStatus !== "idle") {
+                navigate("/radio");
+              } else {
+                startRadio();
+                navigate("/radio");
+              }
+            }}
+            className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
+          >
+            {playerStatus !== "idle" ? "Go to Radio" : "Start Radio"}
+          </button>
+        </div>
+      </div>
 
       {hasError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">

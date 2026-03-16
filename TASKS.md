@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-108: Listen buttons across app (Companies, Questions, Dashboard, Framework)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-104
-- **Description**: Add Listen buttons to existing pages using AudioPlayerContext.play(): Companies page (Listen to prep notes per company), Questions page (Listen on question rows), Dashboard (Start Radio quick action card), Framework tree (speaker icon per node). AC: Buttons on all content-bearing pages, click starts playback + shows player bar, consistent icon/behavior
-
 ### P2 -- Nice to Have
 
 #### T-P2-109: Interview-aware content ordering in reading queue
@@ -55,6 +49,7 @@
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-108: Listen buttons across app (Companies, Questions, Dashboard, Framework). Add Listen buttons to existing pages using AudioPlayerContext.play(): Companies page (Listen to prep notes per company),
 - [x] **2026-03-16** -- T-P1-107: Study Radio page: queue management, now playing, history. New StudyRadio.tsx page at /radio. Sections: (1) Quick Start with company filter + engine select + Start Radio button (2
 - [x] **2026-03-16** -- T-P1-106: Persistent Audio Player Bar (Spotify-style bottom bar). New AudioPlayerBar.tsx: fixed-bottom bar with [Title+badge] [<<] [Play/Pause] [>>] [Progress bar] [Time] [Speed 0.75-2x]
 - [x] **2026-03-16** -- T-P1-105: Browser Web Speech API fallback + prefetch next item. Enhance useAudioPlayer: (1) Browser fallback: if synthesize returns {mode: browser}, use SpeechSynthesis API seamlessly 

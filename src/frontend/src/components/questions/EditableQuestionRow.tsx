@@ -4,6 +4,7 @@ import { api, ApiRequestError } from "../../utils/api";
 import { useToast } from "../../contexts/ToastContext";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import FrameworkNodePicker from "../framework/FrameworkNodePicker";
+import ListenButton from "../ui/ListenButton";
 import type { InterviewQuestion, QuestionAnalysis, QuestionType } from "../../types/question";
 import LoadingSpinner from "../ui/LoadingSpinner";
 
@@ -415,6 +416,11 @@ export default function EditableQuestionRow({
 
           {/* Actions */}
           <div className="flex items-center gap-3">
+            <ListenButton
+              contentType="interview_question"
+              contentId={question.id}
+              title={question.question_text.slice(0, 80)}
+            />
             <button
               onClick={() =>
                 onToggleReviewed(question.id, !question.is_reviewed)
