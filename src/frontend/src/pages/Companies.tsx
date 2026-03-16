@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  DragDropContext,
+  Droppable,
+  Draggable,
+  type DropResult,
+} from "@hello-pangea/dnd";
 import { api, ApiRequestError } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
@@ -469,7 +475,7 @@ function CompanyCard({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow space-y-1.5"
+      className="w-full text-left bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow space-y-1.5 cursor-grab active:cursor-grabbing"
     >
       <div className="flex items-start justify-between gap-2">
         <span className="font-medium text-sm truncate">{company.name}</span>
@@ -514,20 +520,50 @@ function KanbanColumn({
           {companies.length}
         </span>
       </div>
-      <div
-        className="flex-1 p-2 space-y-2 overflow-y-auto"
-        data-status={status}
-        style={{ minHeight: "12rem" }}
-      >
-        {companies.map((c) => (
-          <CompanyCard key={c.id} company={c} onClick={() => onCardClick(c)} />
-        ))}
-        {companies.length === 0 && (
-          <div className="text-xs text-gray-400 text-center py-6">
-            No companies
+      <Droppable droppableId={status}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={`flex-1 p-2 space-y-2 overflow-y-auto transition-colors ${
+              snapshot.isDraggingOver ? "bg-blue-50/60" : ""
+            }`}
+            style={{ minHeight: "12rem" }}
+          >
+            {companies.map((c, index) => (
+              <Draggable
+                key={c.id}
+                draggableId={String(c.id)}
+                index={index}
+              >
+                {(dragProvided, dragSnapshot) => (
+                  <div
+                    ref={dragProvided.innerRef}
+                    {...dragProvided.draggableProps}
+                    {...dragProvided.dragHandleProps}
+                    className={
+                      dragSnapshot.isDragging
+                        ? "opacity-90 shadow-lg rounded-lg rotate-2"
+                        : ""
+                    }
+                  >
+                    <CompanyCard
+                      company={c}
+                      onClick={() => onCardClick(c)}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+            {companies.length === 0 && !snapshot.isDraggingOver && (
+              <div className="text-xs text-gray-400 text-center py-6">
+                No companies
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </Droppable>
     </div>
   );
 }
@@ -536,6 +572,7 @@ function KanbanColumn({
 
 export default function Companies() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { data: companies = [], isLoading: loading, error: queryError } = useQuery({
     queryKey: ["companies"],
     queryFn: () => api.get<Company[]>("/companies"),
@@ -543,6 +580,25 @@ export default function Companies() {
   const error = queryError ? queryError.message : null;
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+
+  // Drag-and-drop status change mutation
+  const dragMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: CompanyStatus }) =>
+      api.put<Company>(`/companies/${id}`, { status }),
+    onSuccess: (_data, { id, status }) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      // Update selected company if it was the one dragged
+      if (selectedCompany?.id === id) {
+        setSelectedCompany({ ...selectedCompany, status });
+      }
+      const statusLabel = STATUSES.find((s) => s.value === status)?.label ?? status;
+      toast.success(`Moved to ${statusLabel}`);
+    },
+    onError: (err: Error) => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast.error(err.message || "Failed to update status");
+    },
+  });
 
   // Group companies by status
   const byStatus: Record<CompanyStatus, Company[]> = {
@@ -564,6 +620,25 @@ export default function Companies() {
   function handleCompanyChanged(updated: Company) {
     queryClient.invalidateQueries({ queryKey: ["companies"] });
     setSelectedCompany(updated);
+  }
+
+  function handleDragEnd(result: DropResult) {
+    const { draggableId, destination, source } = result;
+    // Dropped outside a column or same column
+    if (!destination || destination.droppableId === source.droppableId) return;
+
+    const companyId = Number(draggableId);
+    const newStatus = destination.droppableId as CompanyStatus;
+
+    // Optimistic update: move card in local cache immediately
+    queryClient.setQueryData<Company[]>(["companies"], (old) => {
+      if (!old) return old;
+      return old.map((c) =>
+        c.id === companyId ? { ...c, status: newStatus } : c
+      );
+    });
+
+    dragMutation.mutate({ id: companyId, status: newStatus });
   }
 
   return (
@@ -598,18 +673,20 @@ export default function Companies() {
 
       {/* Kanban Board */}
       {!loading && (
-        <div className="flex gap-4 overflow-x-auto pb-4 flex-1 min-h-0">
-          {STATUSES.map((s) => (
-            <KanbanColumn
-              key={s.value}
-              status={s.value}
-              label={s.label}
-              colorClass={s.color}
-              companies={byStatus[s.value]}
-              onCardClick={setSelectedCompany}
-            />
-          ))}
-        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="flex gap-4 overflow-x-auto pb-4 flex-1 min-h-0">
+            {STATUSES.map((s) => (
+              <KanbanColumn
+                key={s.value}
+                status={s.value}
+                label={s.label}
+                colorClass={s.color}
+                companies={byStatus[s.value]}
+                onCardClick={setSelectedCompany}
+              />
+            ))}
+          </div>
+        </DragDropContext>
       )}
 
       {/* Add Company Modal */}

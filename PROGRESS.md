@@ -183,3 +183,10 @@
 - **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-89 --status completed`
+
+## 2026-03-15 -- [T-P2-90] Frontend: Kanban drag-and-drop for Companies page
+- **What I did**: Installed @hello-pangea/dnd. Wrapped Kanban board in DragDropContext, columns as Droppable, cards as Draggable. On drop: optimistic cache update + PUT /companies/{id} with new status. Visual feedback: blue-tinted column on drag-over, shadow + slight rotation on dragged card, grab cursor. Toast on success/failure. React Query cache invalidation after API response.
+- **Deliverables**: src/frontend/src/pages/Companies.tsx (modified), src/frontend/package.json (added @hello-pangea/dnd)
+- **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-90 --status completed`

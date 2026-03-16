@@ -13,20 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-90: [B6] Frontend: Kanban drag-and-drop for Companies page
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P1-88
-- **Description**: AC:
-- Install @hello-pangea/dnd
-- Wrap Kanban columns as Droppable, cards as Draggable
-- On drop: call PUT /companies/{id} with new status
-- Visual feedback during drag (shadow, placeholder)
-- React Query cache invalidation after status change
-- Toast on success/failure
-
-Key files: src/frontend/src/pages/Companies.tsx
-
 #### T-P2-91: [B6] Frontend: Framework tree search + breadcrumb path
 - **Priority**: P2
 - **Complexity**: M
@@ -80,6 +66,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 > 71 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-15** -- T-P2-90: [B6] Frontend: Kanban drag-and-drop for Companies page. AC:
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
 - [x] **2026-03-15** -- T-P1-89: [B5] Frontend: Questions add/edit/delete + bulk mark reviewed + framework mapping. AC:
