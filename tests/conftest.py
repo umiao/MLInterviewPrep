@@ -1,6 +1,6 @@
 """Shared pytest fixtures for the test suite."""
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from sqlalchemy import create_engine
@@ -98,7 +98,7 @@ def seed_problems(db_session):
 def mock_llm():
     """Create a mock LLMService that returns canned JSON responses.
 
-    The mock's chat method returns a dict by default.
+    The mock's chat method is an AsyncMock for async compatibility.
     Override mock_llm.chat.return_value for custom responses.
     """
     canned = {
@@ -110,7 +110,7 @@ def mock_llm():
         "follow_up": "What about edge cases?",
     }
     mock = MagicMock()
-    mock.chat.return_value = canned
+    mock.chat = AsyncMock(return_value=canned)
     return mock
 
 
@@ -118,7 +118,7 @@ def mock_llm():
 def mock_llm_text():
     """Create a mock LLMService that returns plain text responses."""
     mock = MagicMock()
-    mock.chat.return_value = "This is a test LLM response."
+    mock.chat = AsyncMock(return_value="This is a test LLM response.")
     return mock
 
 

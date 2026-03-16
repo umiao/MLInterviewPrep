@@ -29,7 +29,7 @@ Example:
 """
 
 
-def extract_questions(
+async def extract_questions(
     llm_service: LLMService,
     text: str,
     source_context: dict | None = None,
@@ -53,7 +53,7 @@ def extract_questions(
         )
     user_message += text
 
-    result = llm_service.chat(
+    result = await llm_service.chat(
         system_prompt=EXTRACT_PROMPT,
         messages=[{"role": "user", "content": user_message}],
         response_format="json",

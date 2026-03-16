@@ -267,7 +267,7 @@ def get_framework_stats(db: Session = Depends(get_db)) -> dict:
 
 
 @router.get("/framework/suggest")
-def suggest_study(
+async def suggest_study(
     company_ids: str | None = Query(default=None),
     hours: float = Query(default=3.0, ge=0.5),
     days: int = Query(default=14, ge=1),
@@ -293,7 +293,7 @@ def suggest_study(
             for t in topics[:15]
         )
         llm = LLMService()
-        plan_text = llm.chat(
+        plan_text = await llm.chat(
             system_prompt="You are a study planning assistant for MLE interview prep.",
             messages=[{
                 "role": "user",

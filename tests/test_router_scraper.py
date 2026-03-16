@@ -1,5 +1,5 @@
 """Tests for scraper API routes."""
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 
 def test_seed_url_create_list(test_client):
@@ -54,10 +54,10 @@ def test_paste_experience(test_client):
 
     with patch("src.backend.routers.scraper.LLMService") as mock_cls:
         mock_llm = MagicMock()
-        mock_llm.chat.return_value = mock_questions
+        mock_llm.chat = AsyncMock(return_value=mock_questions)
         mock_cls.return_value = mock_llm
 
-        with patch("src.backend.routers.scraper.extract_questions", return_value=mock_questions):
+        with patch("src.backend.routers.scraper.extract_questions", new_callable=AsyncMock, return_value=mock_questions):
             resp = test_client.post("/api/scraper/paste", json={
                 "text": "I interviewed at Google for MLE. They asked me to design a rec system.",
                 "company": "Google",

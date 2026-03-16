@@ -306,7 +306,7 @@ def list_attempts(
 
 
 @router.post("/problems/{problem_id}/review")
-def review_problem(
+async def review_problem(
     problem_id: int,
     body: dict,
     db: Session = Depends(get_db),
@@ -352,7 +352,7 @@ def review_problem(
     )
 
     llm = LLMService()
-    result = llm.chat(
+    result = await llm.chat(
         system_prompt=system_prompt,
         messages=[{"role": "user", "content": user_msg}],
         response_format="json",

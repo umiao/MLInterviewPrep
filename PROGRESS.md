@@ -328,3 +328,17 @@
 - **Sanity check result**: 512 tests pass, port 8100 confirmed bindable.
 - **Status**: [DONE]
 - **Request**: No task change (included in T-P2-68 commit)
+
+## 2026-03-15 -- [T-P0-70] SDK migration: async LLMService + sdk_adapter
+- **What I did**: Created sdk_adapter.py with SDK_AVAILABLE flag and async run_query. Rewrote LLMService.chat() as async with dual backend dispatch (auto/sdk/anthropic). Made ANTHROPIC_API_KEY optional (default ''), added LLM_BACKEND='auto' config setting. Updated test_llm_service.py for async interface (12 tests covering both backends, JSON parsing, errors, auto-selection, max_tokens warning). Fixed test_config.py for optional API key.
+- **Deliverables**: src/backend/services/sdk_adapter.py (new), src/backend/services/llm_service.py, src/backend/config.py, tests/test_llm_service.py, tests/test_config.py
+- **Sanity check result**: 520/520 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-70 --status completed`
+
+## 2026-03-15 -- [T-P0-71] Convert LLM callers to async + update tests
+- **What I did**: Converted all LLM-calling endpoints and functions to async: qa.py (qa_chat, summarize_session), problems.py (review_problem), framework.py (suggest_study), scraper.py (paste_experience, analyze_question). Made extract_questions() async. Updated _run_scraper_job to use asyncio.run() for async extract_questions call. Updated all test fixtures (mock_llm, mock_llm_text) to use AsyncMock for chat method. Updated test_question_extractor.py to async tests. Updated test_router_scraper.py mock. Added pytest-asyncio to requirements.txt and asyncio_mode=auto to pyproject.toml.
+- **Deliverables**: src/backend/routers/qa.py, src/backend/routers/problems.py, src/backend/routers/framework.py, src/backend/routers/scraper.py, src/backend/services/question_extractor.py, tests/conftest.py, tests/test_question_extractor.py, tests/test_router_scraper.py, requirements.txt, pyproject.toml
+- **Sanity check result**: 520/520 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-71 --status completed`

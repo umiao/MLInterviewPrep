@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("/qa/chat")
-def qa_chat(body: dict, db: Session = Depends(get_db)) -> dict:
+async def qa_chat(body: dict, db: Session = Depends(get_db)) -> dict:
     """Multi-turn Q&A conversation.
 
     Body: {session_id, problem_id, topic, message}
@@ -57,7 +57,7 @@ def qa_chat(body: dict, db: Session = Depends(get_db)) -> dict:
     )
 
     llm = LLMService()
-    reply = llm.chat(
+    reply = await llm.chat(
         system_prompt=system_prompt,
         messages=llm_messages,
     )
@@ -84,7 +84,7 @@ def qa_chat(body: dict, db: Session = Depends(get_db)) -> dict:
 
 
 @router.post("/qa/{session_id}/summarize")
-def summarize_session(
+async def summarize_session(
     session_id: int, db: Session = Depends(get_db)
 ) -> dict:
     """Summarize a QA session using LLM."""
@@ -98,7 +98,7 @@ def summarize_session(
     )
 
     llm = LLMService()
-    summary = llm.chat(
+    summary = await llm.chat(
         system_prompt=(
             "Summarize this interview prep Q&A session in 2-3 bullet points. "
             "Focus on key insights and areas for improvement."

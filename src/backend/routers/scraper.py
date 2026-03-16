@@ -82,7 +82,7 @@ def create_seed_url(
 # -- Paste endpoint --
 
 @router.post("/scraper/paste")
-def paste_experience(
+async def paste_experience(
     paste: PasteRequest, db: Session = Depends(get_db)
 ) -> dict:
     """Extract interview questions from pasted text."""
@@ -130,7 +130,7 @@ def paste_experience(
         context["role"] = paste.role
 
     llm = LLMService()
-    extracted = extract_questions(llm, paste.text, context or None)
+    extracted = await extract_questions(llm, paste.text, context or None)
 
     questions = []
     for q_data in extracted:
@@ -223,10 +223,10 @@ def _run_scraper_job(job_id: str, seed_url_ids: list[int] | None) -> None:
                         db.add(page)
                         db.flush()
 
-                        extracted = extract_questions(
+                        extracted = asyncio.run(extract_questions(
                             llm, post.get("body_text", ""),
                             {"company": seed.company} if seed.company else None,
-                        )
+                        ))
                         for q_data in extracted:
                             db.add(InterviewQuestion(
                                 scraped_page_id=page.id,
@@ -348,7 +348,7 @@ def update_question(
 
 
 @router.post("/questions/{question_id}/analyze")
-def analyze_question(
+async def analyze_question(
     question_id: int, db: Session = Depends(get_db)
 ) -> dict:
     """Use LLM to analyze an interview question."""
@@ -357,7 +357,7 @@ def analyze_question(
         raise HTTPException(status_code=404, detail="Question not found")
 
     llm = LLMService()
-    result = llm.chat(
+    result = await llm.chat(
         system_prompt=(
             "You are an MLE interview prep expert. Analyze this interview question "
             "and provide structured guidance. Return JSON with: solution_approach, "
