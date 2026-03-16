@@ -9,19 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-82: [B3] Frontend: FrameworkNodePicker component
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-74, T-P0-81
-- **Description**: AC:
-- Dropdown/autocomplete component for selecting a framework topic
-- Fetches flat list from /api/framework/tree?max_depth=2
-- Shows path as label (e.g. Coding > Dynamic Programming)
-- Supports clear/deselect
-- Reusable in Problem forms and Question expanded rows
-
-Key files: new src/frontend/src/components/framework/FrameworkNodePicker.tsx
-
 #### T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search
 - **Priority**: P0
 - **Complexity**: M
@@ -193,6 +180,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-82: [B3] Frontend: FrameworkNodePicker component. AC:
 - [x] **2026-03-15** -- T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints. AC:
 - [x] **2026-03-15** -- T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave. AC:
 - [x] **2026-03-15** -- T-P0-79: [B2] Backend: expose description in framework tree API + extend node update schema. AC:

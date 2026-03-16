@@ -127,3 +127,10 @@
 - **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-81 --status completed`
+
+## 2026-03-15 -- [T-P0-82] FrameworkNodePicker component
+- **What I did**: Created reusable FrameworkNodePicker dropdown/autocomplete component for selecting framework topics. Fetches tree from /api/framework/tree?max_depth=2, flattens to a searchable list with path labels (e.g. "Coding > Dynamic Programming"). Supports debounced text search, clear/deselect, depth-indented dropdown, outside-click dismiss, and disabled state. Uses React Query with 5-min stale time for caching.
+- **Deliverables**: src/frontend/src/components/framework/FrameworkNodePicker.tsx (new)
+- **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-82 --status completed`
