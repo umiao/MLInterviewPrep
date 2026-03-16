@@ -204,3 +204,10 @@
 - **Sanity check result**: 568/568 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-92 --status completed`
+
+## 2026-03-15 -- [T-P2-93] QA session summarize button in ReviewPanel
+- **What I did**: Added Summarize Session button to the QA mode in ReviewPanel. Button appears when a session has messages, calls POST /api/qa/{id}/summarize, displays the summary in a styled panel below chat messages. Includes loading state on button during request and toast notifications on success/failure. Summary clears when switching sessions.
+- **Deliverables**: src/frontend/src/components/ReviewPanel.tsx (modified)
+- **Sanity check result**: 568/568 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-93 --status completed`

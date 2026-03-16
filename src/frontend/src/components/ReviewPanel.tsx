@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, ApiRequestError } from "../utils/api";
+import { useToast } from "../contexts/ToastContext";
 import type {
   Problem,
   QAChatMessage,
@@ -74,6 +75,9 @@ export default function ReviewPanel({ problem, onClose }: Props) {
   const [qaError, setQaError] = useState<string | null>(null);
   const [pastSessions, setPastSessions] = useState<QASessionSummary[]>([]);
   const [showSessions, setShowSessions] = useState(false);
+  const [summarizing, setSummarizing] = useState(false);
+  const [summaryText, setSummaryText] = useState<string | null>(null);
+  const toast = useToast();
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -163,6 +167,7 @@ export default function ReviewPanel({ problem, onClose }: Props) {
     setQaMessages([]);
     setQaError(null);
     setShowSessions(false);
+    setSummaryText(null);
   }, []);
 
   const loadSession = useCallback(
@@ -174,6 +179,7 @@ export default function ReviewPanel({ problem, onClose }: Props) {
       setQaSessionId(sessionId);
       setQaMessages([]);
       setShowSessions(false);
+      setSummaryText(null);
       // Send a continuation message to load context
       setQaLoading(true);
       try {
@@ -204,6 +210,25 @@ export default function ReviewPanel({ problem, onClose }: Props) {
     },
     [sendQaMessage],
   );
+
+  const summarizeSession = useCallback(async () => {
+    if (!qaSessionId) return;
+    setSummarizing(true);
+    try {
+      const resp = await api.post<{ session_id: number; summary: string }>(
+        `/qa/${qaSessionId}/summarize`,
+        {},
+      );
+      setSummaryText(resp.summary);
+      toast.success("Session summarized");
+    } catch (err) {
+      const msg =
+        err instanceof ApiRequestError ? err.message : String(err);
+      toast.error(`Summarize failed: ${msg}`);
+    } finally {
+      setSummarizing(false);
+    }
+  }, [qaSessionId, toast]);
 
   return (
     <div className="fixed inset-y-0 right-0 z-40 w-full max-w-lg bg-white shadow-2xl border-l border-gray-200 flex flex-col">
@@ -427,6 +452,27 @@ export default function ReviewPanel({ problem, onClose }: Props) {
               )}
               <div ref={chatEndRef} />
             </div>
+
+            {/* Summarize button + summary */}
+            {qaSessionId && qaMessages.length > 0 && (
+              <div className="px-4 py-2 border-t border-gray-100 shrink-0 space-y-2">
+                <button
+                  onClick={summarizeSession}
+                  disabled={summarizing}
+                  className="text-xs px-3 py-1.5 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 disabled:opacity-50"
+                >
+                  {summarizing ? "Summarizing..." : "Summarize Session"}
+                </button>
+                {summaryText && (
+                  <div className="bg-purple-50 border border-purple-200 rounded p-3 text-sm text-gray-700 whitespace-pre-wrap">
+                    <span className="text-xs font-semibold text-purple-600 uppercase block mb-1">
+                      Summary
+                    </span>
+                    {summaryText}
+                  </div>
+                )}
+              </div>
+            )}
 
             {qaError && (
               <div className="mx-4 mb-2 bg-red-50 text-red-700 px-3 py-2 rounded text-sm">
