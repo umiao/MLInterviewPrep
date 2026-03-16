@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
+import { useToast } from "../contexts/ToastContext";
 import type { InterviewQuestion, QuestionAnalysis, QuestionType } from "../types/question";
 
 /* ---------- Paste Response Types ---------- */
@@ -472,6 +473,7 @@ const EMPTY_FILTERS: Filters = {
 
 export default function Questions() {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
@@ -516,6 +518,9 @@ export default function Questions() {
       api.put(`/questions/${id}`, { is_reviewed: reviewed }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["questions"] });
+    },
+    onError: () => {
+      toast.error("Failed to update review status");
     },
   });
 

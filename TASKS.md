@@ -9,18 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-75: [B1] Build Toast notification system (ToastContext + ToastProvider)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-73
-- **Description**: AC:
-- ToastContext.tsx with success/error/info methods
-- ToastProvider wrapping App
-- Fixed-position toast stack (bottom-right)
-- Auto-dismiss after 4s, manual dismiss on click
-- useToast() hook exported
-- All existing mutation calls show toast on error
-
 #### T-P0-76: [B1] Build shared UI components (Modal, ConfirmDialog, Badge, EmptyState, LoadingSpinner, SearchInput, Pagination)
 - **Priority**: P0
 - **Complexity**: M
@@ -279,6 +267,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-75: [B1] Build Toast notification system (ToastContext + ToastProvider). AC:
 - [x] **2026-03-15** -- T-P0-74: [B1] Migrate all pages from useApi to React Query useQuery/useMutation. AC:
 - [x] **2026-03-15** -- T-P0-73: [B1] Install React Query + setup QueryClientProvider in App.tsx. AC:
 - [x] **2026-03-15** -- T-P0-71: Convert LLM callers to async + update tests. All endpoints calling llm.chat() become async def + await. extract_questions() becomes async. Update all test files for 

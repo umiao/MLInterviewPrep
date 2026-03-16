@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import { useToast } from "../contexts/ToastContext";
 import type { FrameworkNode, NodeStatus, StudyLog } from "../types/framework";
 
 const STATUS_OPTIONS: { value: NodeStatus; label: string; color: string }[] = [
@@ -28,6 +29,7 @@ interface Props {
 /** Full node detail panel with editable status/confidence, study log form, and history. */
 export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   // -- Editable fields --
   const [editStatus, setEditStatus] = useState<NodeStatus>(node.status);
@@ -50,9 +52,11 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
     onSuccess: () => {
       setSaveMsg("Saved");
       onNodeUpdated();
+      toast.success("Node updated");
     },
     onError: () => {
       setSaveMsg("Error saving");
+      toast.error("Failed to save node");
     },
   });
 
@@ -80,9 +84,11 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
       setLogNotes("");
       onNodeUpdated();
       queryClient.invalidateQueries({ queryKey: ["framework", "nodes", node.id, "logs"] });
+      toast.success("Study session logged");
     },
     onError: () => {
       setLogMsg("Error logging");
+      toast.error("Failed to log study session");
     },
   });
 

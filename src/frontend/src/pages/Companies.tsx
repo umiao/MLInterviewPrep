@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
+import { useToast } from "../contexts/ToastContext";
 import type {
   Company,
   CompanyCreate,
@@ -208,6 +209,7 @@ function FocusTopicsPanel({
   onStatusChange: (newStatus: CompanyStatus) => void;
 }) {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const { data: topics = [], isLoading: loading } = useQuery({
     queryKey: ["companies", company.id, "focus"],
     queryFn: () => api.get<FocusTopic[]>(`/companies/${company.id}/focus`),
@@ -220,9 +222,11 @@ function FocusTopicsPanel({
     onSuccess: (_data, newStatus) => {
       onStatusChange(newStatus);
       queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast.success("Status updated");
     },
     onError: () => {
       setStatus(company.status);
+      toast.error("Failed to update status");
     },
   });
 

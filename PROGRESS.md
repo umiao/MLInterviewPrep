@@ -363,3 +363,10 @@
 - **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-74 --status completed`
+
+## 2026-03-15 -- [T-P0-75] Build Toast notification system (ToastContext + ToastProvider)
+- **What I did**: Created ToastContext with success/error/info methods, ToastProvider with fixed bottom-right toast stack, auto-dismiss after 4s, click to dismiss. Wrapped App with ToastProvider. Added toast notifications to all existing useMutation onError/onSuccess callbacks in NodeDetailPanel (2 mutations), Companies FocusTopicsPanel (1 mutation), and Questions (1 mutation).
+- **Deliverables**: src/frontend/src/contexts/ToastContext.tsx (new), src/frontend/src/App.tsx, src/frontend/src/components/NodeDetailPanel.tsx, src/frontend/src/pages/Companies.tsx, src/frontend/src/pages/Questions.tsx
+- **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-75 --status completed`
