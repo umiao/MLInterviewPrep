@@ -301,3 +301,10 @@
 - **Sanity check result**: 767/767 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-111 --status completed`
+
+## 2026-03-16 -- Fix: Content area only fills half the screen width
+- **What I did**: Added `w-full` to Layout component's root div. The `#root` div uses `display: flex` (row), and its Layout child had no width constraint, so it shrank to content intrinsic width instead of filling the viewport. Adding `width: 100%` ensures Layout fills `#root`, giving `<main className="flex-1">` the full remaining width after the sidebar.
+- **Deliverables**: src/frontend/src/components/Layout.tsx (1-line className change)
+- **Sanity check result**: Vite build succeeds, dev server starts, CSS chain verified (#root flex -> Layout w-full -> main flex-1)
+- **Status**: [DONE]
+- **Request**: No task_db change (ad-hoc fix, not a tracked task)
