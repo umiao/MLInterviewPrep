@@ -11,19 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-88: [B5] Frontend: Companies edit/delete + topic weight editor
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-87, T-P0-76
-- **Description**: AC:
-- Edit company in FocusTopicsPanel: name, group_tag, notes, applied_at all editable + Save
-- Delete company button -> ConfirmDialog showing cascade count (N topic weights will be removed)
-- TopicWeightEditor: list current weights with sliders (0-5), add/remove topics
-- Toast on all mutation success/failure
-- React Query cache invalidation after mutations
-
-Key files: src/frontend/src/pages/Companies.tsx, new components/companies/EditCompanyPanel.tsx, TopicWeightEditor.tsx
-
 #### T-P1-89: [B5] Frontend: Questions add/edit/delete + bulk mark reviewed + framework mapping
 - **Priority**: P1
 - **Complexity**: M
@@ -109,6 +96,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P1-88: [B5] Frontend: Companies edit/delete + topic weight editor. AC:
 - [x] **2026-03-15** -- T-P1-87: [B5] Backend: DELETE companies/{id}, POST/DELETE questions, extend PUT questions/{id}. AC:
 - [x] **2026-03-15** -- T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress. AC:
 - [x] **2026-03-15** -- T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints. AC:

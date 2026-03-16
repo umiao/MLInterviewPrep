@@ -169,3 +169,10 @@
 - **Sanity check result**: 564/564 backend tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-87 --status completed`
+
+## 2026-03-15 -- [T-P1-88] Frontend: Companies edit/delete + topic weight editor
+- **What I did**: Added tabbed CompanyDetailPanel (Focus/Weights/Edit tabs) replacing old FocusTopicsPanel. Focus tab retains existing topic focus view and status changer. Edit tab has inline form for name, group_tag, status, applied_at, notes with Save via PUT. Delete button with ConfirmDialog shows cascade count (N topic weights will be removed). Weights tab has TopicWeightEditor: lists current weights with range sliders (0-5, step 0.5), remove button per weight with ConfirmDialog, and add-topic section using FrameworkNodePicker + weight slider. Added backend DELETE /companies/{id}/weights/{node_id} endpoint for individual weight removal. All mutations use React Query with cache invalidation and toast notifications.
+- **Deliverables**: src/frontend/src/components/companies/EditCompanyPanel.tsx (new), src/frontend/src/components/companies/TopicWeightEditor.tsx (new), src/frontend/src/pages/Companies.tsx (refactored), src/backend/routers/companies.py (new DELETE weight endpoint), tests/test_router_companies.py (2 new tests)
+- **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-88 --status completed`

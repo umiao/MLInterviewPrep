@@ -153,6 +153,26 @@ def upsert_topic_weights(
     return {"inserted": inserted, "updated": updated}
 
 
+@router.delete("/companies/{company_id}/weights/{node_id}")
+def delete_topic_weight(
+    company_id: int, node_id: int, db: Session = Depends(get_db)
+) -> dict:
+    """Delete a single topic weight for a company."""
+    weight = (
+        db.query(CompanyTopicWeight)
+        .filter(
+            CompanyTopicWeight.company_id == company_id,
+            CompanyTopicWeight.framework_node_id == node_id,
+        )
+        .first()
+    )
+    if not weight:
+        raise HTTPException(status_code=404, detail="Topic weight not found")
+    db.delete(weight)
+    db.commit()
+    return {"deleted": True}
+
+
 @router.get("/companies/{company_id}")
 def get_company(company_id: int, db: Session = Depends(get_db)) -> dict:
     """Get company details with topic weights."""

@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import EditCompanyPanel from "../components/companies/EditCompanyPanel";
+import TopicWeightEditor from "../components/companies/TopicWeightEditor";
 import type {
   Company,
   CompanyCreate,
@@ -197,30 +200,49 @@ function AddCompanyModal({
   );
 }
 
-/* ---------- Focus Topics Panel ---------- */
+/* ---------- Company Detail Panel ---------- */
 
-function FocusTopicsPanel({
+type PanelTab = "focus" | "weights" | "edit";
+
+function CompanyDetailPanel({
   company,
   onClose,
-  onStatusChange,
+  onCompanyChanged,
+  onDeleted,
 }: {
   company: Company;
   onClose: () => void;
-  onStatusChange: (newStatus: CompanyStatus) => void;
+  onCompanyChanged: (updated: Company) => void;
+  onDeleted: () => void;
 }) {
   const queryClient = useQueryClient();
   const toast = useToast();
-  const { data: topics = [], isLoading: loading } = useQuery({
+  const [tab, setTab] = useState<PanelTab>("focus");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Focus topics query
+  const { data: topics = [], isLoading: loadingTopics } = useQuery({
     queryKey: ["companies", company.id, "focus"],
     queryFn: () => api.get<FocusTopic[]>(`/companies/${company.id}/focus`),
   });
-  const [status, setStatus] = useState<CompanyStatus>(company.status);
 
+  // Fetch weight count for delete confirmation message
+  const { data: companyDetail } = useQuery({
+    queryKey: ["companies", company.id, "detail"],
+    queryFn: () =>
+      api.get<{ topic_weights: { node_id: number }[] }>(
+        `/companies/${company.id}`,
+      ),
+  });
+  const weightCount = companyDetail?.topic_weights?.length ?? 0;
+
+  // Status mutation
+  const [status, setStatus] = useState<CompanyStatus>(company.status);
   const statusMutation = useMutation({
     mutationFn: (newStatus: CompanyStatus) =>
-      api.put(`/companies/${company.id}`, { status: newStatus }),
-    onSuccess: (_data, newStatus) => {
-      onStatusChange(newStatus);
+      api.put<Company>(`/companies/${company.id}`, { status: newStatus }),
+    onSuccess: (updated, newStatus) => {
+      onCompanyChanged({ ...company, ...updated, status: newStatus });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
       toast.success("Status updated");
     },
@@ -230,12 +252,30 @@ function FocusTopicsPanel({
     },
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: () => api.del(`/companies/${company.id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
+      toast.success("Company deleted");
+      onDeleted();
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete company");
+      setShowDeleteConfirm(false);
+    },
+  });
+
   function handleStatusSave() {
     if (status === company.status) return;
     statusMutation.mutate(status);
   }
 
-  const saving = statusMutation.isPending;
+  const TABS: { key: PanelTab; label: string }[] = [
+    { key: "focus", label: "Focus" },
+    { key: "weights", label: "Weights" },
+    { key: "edit", label: "Edit" },
+  ];
 
   return (
     <div className="fixed inset-y-0 right-0 w-80 bg-white border-l border-gray-200 shadow-lg z-40 flex flex-col">
@@ -252,97 +292,167 @@ function FocusTopicsPanel({
         </button>
       </div>
 
+      {/* Tab bar */}
+      <div className="flex border-b border-gray-200">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`flex-1 text-xs py-2 font-medium border-b-2 transition-colors ${
+              tab === t.key
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5">
-        {/* Company info */}
-        <div className="space-y-2">
-          {company.group_tag && (
-            <div className="text-xs text-gray-500">
-              Group: <span className="font-medium">{company.group_tag}</span>
-            </div>
-          )}
-          {company.applied_at && (
-            <div className="text-xs text-gray-500">
-              Applied: {company.applied_at}
-            </div>
-          )}
-          {company.notes && (
-            <p className="text-sm text-gray-600 break-words">{company.notes}</p>
-          )}
-        </div>
-
-        {/* Status changer */}
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500">Status</label>
-          <div className="flex gap-2">
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as CompanyStatus)}
-              className="flex-1 text-sm border border-gray-300 rounded px-2 py-1"
-            >
-              {STATUSES.map((s) => (
-                <option key={s.value} value={s.value}>
-                  {s.label}
-                </option>
-              ))}
-            </select>
-            {status !== company.status && (
-              <button
-                onClick={handleStatusSave}
-                disabled={saving}
-                className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
-              >
-                {saving ? "..." : "Save"}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Focus topics */}
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-700">
-            Focus Topics
-          </h3>
-          <p className="text-xs text-gray-400">
-            Topics to study for this company (progress &lt; 80%)
-          </p>
-
-          {loading && (
-            <div className="text-sm text-gray-400 py-4 text-center">
-              Loading...
-            </div>
-          )}
-
-          {!loading && topics.length === 0 && (
-            <div className="text-sm text-gray-400 py-4 text-center">
-              No focus topics. Add topic weights to this company or all topics
-              are above 80%.
-            </div>
-          )}
-
-          {!loading &&
-            topics.map((t) => (
-              <div
-                key={t.node_id}
-                className="border border-gray-200 rounded p-2 space-y-1"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium truncate">
-                    {t.title}
-                  </span>
-                  <span className="text-xs text-gray-400 shrink-0 ml-2">
-                    w:{t.weight}
-                  </span>
+        {/* ---- Focus tab ---- */}
+        {tab === "focus" && (
+          <>
+            {/* Company info summary */}
+            <div className="space-y-2">
+              {company.group_tag && (
+                <div className="text-xs text-gray-500">
+                  Group:{" "}
+                  <span className="font-medium">{company.group_tag}</span>
                 </div>
-                <ProgressBar pct={t.progress_pct} />
-                <div className="flex justify-between text-xs text-gray-400">
-                  <span>{t.progress_pct.toFixed(0)}% done</span>
-                  <span>conf: {t.confidence}/5</span>
+              )}
+              {company.applied_at && (
+                <div className="text-xs text-gray-500">
+                  Applied: {company.applied_at}
                 </div>
+              )}
+              {company.notes && (
+                <p className="text-sm text-gray-600 break-words">
+                  {company.notes}
+                </p>
+              )}
+            </div>
+
+            {/* Status changer */}
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-gray-500">
+                Status
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={status}
+                  onChange={(e) =>
+                    setStatus(e.target.value as CompanyStatus)
+                  }
+                  className="flex-1 text-sm border border-gray-300 rounded px-2 py-1"
+                >
+                  {STATUSES.map((s) => (
+                    <option key={s.value} value={s.value}>
+                      {s.label}
+                    </option>
+                  ))}
+                </select>
+                {status !== company.status && (
+                  <button
+                    onClick={handleStatusSave}
+                    disabled={statusMutation.isPending}
+                    className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {statusMutation.isPending ? "..." : "Save"}
+                  </button>
+                )}
               </div>
-            ))}
-        </div>
+            </div>
+
+            {/* Focus topics */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-semibold text-gray-700">
+                Focus Topics
+              </h3>
+              <p className="text-xs text-gray-400">
+                Topics to study for this company (progress &lt; 80%)
+              </p>
+
+              {loadingTopics && (
+                <div className="text-sm text-gray-400 py-4 text-center">
+                  Loading...
+                </div>
+              )}
+
+              {!loadingTopics && topics.length === 0 && (
+                <div className="text-sm text-gray-400 py-4 text-center">
+                  No focus topics. Add topic weights in the Weights tab, or
+                  all topics are above 80%.
+                </div>
+              )}
+
+              {!loadingTopics &&
+                topics.map((t) => (
+                  <div
+                    key={t.node_id}
+                    className="border border-gray-200 rounded p-2 space-y-1"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium truncate">
+                        {t.title}
+                      </span>
+                      <span className="text-xs text-gray-400 shrink-0 ml-2">
+                        w:{t.weight}
+                      </span>
+                    </div>
+                    <ProgressBar pct={t.progress_pct} />
+                    <div className="flex justify-between text-xs text-gray-400">
+                      <span>{t.progress_pct.toFixed(0)}% done</span>
+                      <span>conf: {t.confidence}/5</span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </>
+        )}
+
+        {/* ---- Weights tab ---- */}
+        {tab === "weights" && (
+          <TopicWeightEditor companyId={company.id} />
+        )}
+
+        {/* ---- Edit tab ---- */}
+        {tab === "edit" && (
+          <div className="space-y-5">
+            <EditCompanyPanel
+              company={company}
+              onSaved={(updated) => {
+                onCompanyChanged(updated);
+                setTab("focus");
+              }}
+              onCancel={() => setTab("focus")}
+            />
+
+            {/* Delete section */}
+            <div className="border-t border-gray-200 pt-4">
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full text-xs px-3 py-1.5 border border-red-300 text-red-600 rounded hover:bg-red-50"
+              >
+                Delete Company
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Delete confirmation dialog */}
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => deleteMutation.mutate()}
+        title="Delete Company"
+        message={`Delete "${company.name}"?${weightCount > 0 ? ` ${weightCount} topic weight${weightCount !== 1 ? "s" : ""} will be removed.` : ""}`}
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        loading={deleteMutation.isPending}
+      />
     </div>
   );
 }
@@ -451,13 +561,9 @@ export default function Companies() {
     }
   }
 
-  function handleStatusChange(companyId: number, newStatus: CompanyStatus) {
+  function handleCompanyChanged(updated: Company) {
     queryClient.invalidateQueries({ queryKey: ["companies"] });
-    if (selectedCompany?.id === companyId) {
-      setSelectedCompany((prev) =>
-        prev ? { ...prev, status: newStatus } : null,
-      );
-    }
+    setSelectedCompany(updated);
   }
 
   return (
@@ -517,14 +623,13 @@ export default function Companies() {
         />
       )}
 
-      {/* Focus Topics Panel */}
+      {/* Company Detail Panel */}
       {selectedCompany && (
-        <FocusTopicsPanel
+        <CompanyDetailPanel
           company={selectedCompany}
           onClose={() => setSelectedCompany(null)}
-          onStatusChange={(newStatus) =>
-            handleStatusChange(selectedCompany.id, newStatus)
-          }
+          onCompanyChanged={handleCompanyChanged}
+          onDeleted={() => setSelectedCompany(null)}
         />
       )}
     </div>
