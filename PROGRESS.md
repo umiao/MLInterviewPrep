@@ -294,3 +294,10 @@
 - **Sanity check result**: 733/733 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-103 --status completed`
+
+## 2026-03-16 -- [T-P1-104] Frontend Audio Player + Radio Mode (core playback)
+- **What I did**: Created the core frontend audio player infrastructure. New types/reading.ts with ContentType, QueueItem, SynthesizeResponse, AudioPlayerItem, PlayerStatus types. New hooks/useAudioPlayer.ts managing HTML5 Audio element: play(item) calls POST /synthesize then plays audio_url or falls back to browser SpeechSynthesis, pause/resume/skip/seek controls, auto-advance through queue (radio mode), playback speed 0.75x-2.0x via playbackRate, progress tracking via ontimeupdate with periodic backend saves every 30s. New contexts/AudioPlayerContext.tsx wrapping the hook as a global provider. Wrapped App.tsx in AudioPlayerProvider so state persists across navigation. Refactored ListenButton.tsx to use the shared AudioPlayerContext instead of managing its own audio element.
+- **Deliverables**: src/frontend/src/types/reading.ts (new), src/frontend/src/hooks/useAudioPlayer.ts (new), src/frontend/src/contexts/AudioPlayerContext.tsx (new), src/frontend/src/App.tsx (updated), src/frontend/src/components/ui/ListenButton.tsx (rewritten)
+- **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-104 --status completed`

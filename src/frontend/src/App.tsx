@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ToastProvider } from "./contexts/ToastContext";
+import { AudioPlayerProvider } from "./contexts/AudioPlayerContext";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Problems from "./pages/Problems";
@@ -24,20 +25,22 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="problems" element={<Problems />} />
-              <Route path="framework" element={<Framework />} />
-              <Route path="questions" element={<Questions />} />
-              <Route path="companies" element={<Companies />} />
-              <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />
-              <Route path="analytics" element={<Analytics />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
+        <AudioPlayerProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<Layout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="problems" element={<Problems />} />
+                <Route path="framework" element={<Framework />} />
+                <Route path="questions" element={<Questions />} />
+                <Route path="companies" element={<Companies />} />
+                <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </AudioPlayerProvider>
       </ToastProvider>
     </QueryClientProvider>
   );

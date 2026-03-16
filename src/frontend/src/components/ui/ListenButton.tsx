@@ -1,119 +1,66 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback } from "react";
+import { useAudioPlayerContext } from "../../contexts/AudioPlayerContext";
+import type { ContentType } from "../../types/reading";
 
 interface ListenButtonProps {
-  contentType: "framework_node";
+  contentType: ContentType;
   contentId: number;
+  title?: string;
 }
 
 /**
- * Button that synthesizes and plays TTS audio for a content item.
- * Manages its own audio element for play/pause/stop.
+ * Button that plays TTS audio for a content item via the global AudioPlayerContext.
+ * Replaces the old self-contained audio approach with the shared player.
  */
-export default function ListenButton({ contentType, contentId }: ListenButtonProps) {
-  const [state, setState] = useState<"idle" | "loading" | "playing" | "paused">("idle");
-  const [error, setError] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+export default function ListenButton({ contentType, contentId, title }: ListenButtonProps) {
+  const { status, currentItem, play, pause, resume } = useAudioPlayerContext();
 
-  const stop = useCallback(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-      audioRef.current.src = "";
-      audioRef.current = null;
-    }
-    setState("idle");
-  }, []);
+  const isThisItem =
+    currentItem?.content_type === contentType &&
+    currentItem?.content_id === contentId;
+
+  const effectiveStatus = isThisItem ? status : "idle";
 
   const handleClick = useCallback(async () => {
-    setError(null);
-
-    // If playing -> pause
-    if (state === "playing" && audioRef.current) {
-      audioRef.current.pause();
-      setState("paused");
+    if (effectiveStatus === "playing") {
+      pause();
       return;
     }
-
-    // If paused -> resume
-    if (state === "paused" && audioRef.current) {
-      audioRef.current.play();
-      setState("playing");
+    if (effectiveStatus === "paused") {
+      resume();
       return;
     }
-
-    // If idle -> synthesize and play
-    setState("loading");
-    try {
-      const res = await fetch("/api/reading/synthesize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content_type: contentType, content_id: contentId }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({ detail: "Synthesis failed" }));
-        throw new Error(data.detail || `HTTP ${res.status}`);
-      }
-
-      const data = await res.json();
-      const audio = new Audio(data.audio_url);
-      audioRef.current = audio;
-
-      audio.onended = () => {
-        setState("idle");
-        audioRef.current = null;
-      };
-      audio.onerror = () => {
-        setError("Audio playback error");
-        setState("idle");
-        audioRef.current = null;
-      };
-
-      await audio.play();
-      setState("playing");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to synthesize");
-      setState("idle");
-    }
-  }, [state, contentType, contentId]);
+    // idle or loading another item -> play this item
+    await play({
+      content_type: contentType,
+      content_id: contentId,
+      title: title ?? `${contentType} #${contentId}`,
+    });
+  }, [effectiveStatus, contentType, contentId, title, play, pause, resume]);
 
   const label = {
     idle: "Listen",
     loading: "Loading...",
     playing: "Pause",
     paused: "Resume",
-  }[state];
+  }[effectiveStatus];
 
   const icon = {
-    idle: "\u25B6",       // play triangle
-    loading: "\u25CF",    // circle (loading)
-    playing: "\u275A\u275A", // pause bars
-    paused: "\u25B6",     // play triangle
-  }[state];
+    idle: "\u25B6",
+    loading: "\u25CF",
+    playing: "\u275A\u275A",
+    paused: "\u25B6",
+  }[effectiveStatus];
 
   return (
-    <div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={handleClick}
-          disabled={state === "loading"}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
-          title={state === "idle" ? "Listen to this node's description" : label}
-        >
-          <span className="text-xs">{icon}</span>
-          {label}
-        </button>
-        {state !== "idle" && state !== "loading" && (
-          <button
-            onClick={stop}
-            className="px-2 py-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors"
-            title="Stop"
-          >
-            &#x25A0;
-          </button>
-        )}
-      </div>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
+    <button
+      onClick={handleClick}
+      disabled={effectiveStatus === "loading"}
+      className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 transition-colors"
+      title={effectiveStatus === "idle" ? "Listen to this content" : label}
+    >
+      <span className="text-xs">{icon}</span>
+      {label}
+    </button>
   );
 }
