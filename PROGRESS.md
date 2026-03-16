@@ -280,3 +280,10 @@
 - **Sanity check result**: 682/682 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-101 --status completed`
+
+## 2026-03-16 -- [T-P0-102] Reading REST endpoints: queue, progress, content, async synthesize
+- **What I did**: Expanded routers/reading.py with 7 endpoints: GET /reading/queue (ranked with progress, company filtering), GET /reading/progress (all records), PUT /reading/progress/{type}/{id} (upsert last_chunk_index + char_offset), DELETE /reading/progress (reset all), GET /reading/content/{type}/{id} (preprocessed text + chunks + hash), refactored POST /reading/synthesize (AudioCache-aware with content_hash invalidation, async 202 for content >= 2000 chars), GET /reading/jobs/{id} (poll async jobs). Expanded schemas/reading.py with ContentType literal, QueueItemResponse, QueueResponse, ProgressResponse, ProgressUpdateRequest, ContentResponse, SynthesizeAsyncResponse. All 3 content types supported: framework_node, prep_notes, interview_question.
+- **Deliverables**: src/backend/routers/reading.py (rewritten), src/backend/schemas/reading.py (expanded), tests/test_router_reading.py (rewritten - 35 tests)
+- **Sanity check result**: 710/710 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-102 --status completed`

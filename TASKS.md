@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-102: Reading REST endpoints: queue, progress, content, async synthesize
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-100, T-P0-101
-- **Description**: Expand routers/reading.py + new schemas/reading.py: GET /api/reading/queue (ranked with progress), GET /api/reading/progress, PUT /api/reading/progress/{type}/{id} (update last_chunk_index + char_offset), GET /api/reading/content/{type}/{id} (preprocessed text + chunks), DELETE /api/reading/progress (reset). Refactor POST /api/reading/synthesize to use AudioCache (cache-aware + content_hash invalidation). Async mode for long content (>2000 chars): return 202 + job_id, poll GET /api/reading/jobs/{id}. AC: Queue sorted, progress persists both fields, cache hit/miss correct, long content returns 202, tests for each endpoint
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-103: TTS Engine abstraction: EdgeTTS + OpenAI + Browser engines
@@ -92,6 +86,7 @@
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P0-99: TTS MVP: edge-tts -> MP3 -> <audio> playback for framework nodes. Minimal vertical slice: pick one framework node -> preprocess markdown (v1: strip #, **, *, _, links, skip code blocks) 
+- [x] **2026-03-16** -- T-P0-102: Reading REST endpoints: queue, progress, content, async synthesize. Expand routers/reading.py + new schemas/reading.py: GET /api/reading/queue (ranked with progress), GET /api/reading/prog
 - [x] **2026-03-16** -- T-P0-101: Content Pipeline: queue ranking, preprocessing v2, chunking. Expand services/content_pipeline.py: (1) get_reading_queue(db, company_ids, days_until_interview, limit=20) - reuse comp
 - [x] **2026-03-16** -- T-P0-100: ReadingProgress + AudioCache models + Migration v4. New models in models/reading.py: ReadingProgress (content_type, content_id, last_chunk_index, char_offset, total_chars, 
 - [x] **2026-03-15** -- T-P2-94: [B7] Frontend: Analytics deep-dive (radar chart, scatter plot, trend lines). AC:\n- Pattern comfort radar chart (Recharts RadarChart) on Problems page or Dashboard\n- Framework confidence vs import
