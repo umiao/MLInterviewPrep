@@ -231,3 +231,10 @@
 - **Sanity check result**: 609/609 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-95 --status completed`
+
+## 2026-03-16 -- [T-P1-96] Auto-link company on timeline event creation
+- **What I did**: Modified timeline router create_event() and update_event() to call get_or_create_company() for automatic company linking. create_event now always resolves company_id via get_or_create_company. update_event auto-links when company_name changes. Updated EventFormModal to invalidate ["companies"] queries on create/update/delete success. Fixed existing test_filter_by_company_id test to work with auto-linking. Added 5 new tests covering: auto-create company, no duplicate on reuse, case-insensitive matching, update links new company, update without company_name preserves link.
+- **Deliverables**: src/backend/routers/timeline.py (modified), src/frontend/src/components/timeline/EventFormModal.tsx (modified), tests/test_timeline.py (modified)
+- **Sanity check result**: 614/614 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-96 --status completed`

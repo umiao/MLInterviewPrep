@@ -68,6 +68,7 @@ export default function EventFormModal({ open, onClose, event }: Props) {
       api.post("/timeline/events", body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["timeline", "events"] });
+      qc.invalidateQueries({ queryKey: ["companies"] });
       onClose();
     },
   });
@@ -77,6 +78,7 @@ export default function EventFormModal({ open, onClose, event }: Props) {
       api.put(`/timeline/events/${event?.id}`, body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["timeline", "events"] });
+      qc.invalidateQueries({ queryKey: ["companies"] });
       onClose();
     },
   });
@@ -85,6 +87,7 @@ export default function EventFormModal({ open, onClose, event }: Props) {
     mutationFn: () => api.del(`/timeline/events/${event?.id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["timeline", "events"] });
+      qc.invalidateQueries({ queryKey: ["companies"] });
       onClose();
     },
   });

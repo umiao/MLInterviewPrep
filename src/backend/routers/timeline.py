@@ -9,6 +9,7 @@ from src.backend.schemas.timeline import (
     InterviewEventResponse,
     InterviewEventUpdate,
 )
+from src.backend.services.company_service import get_or_create_company
 
 router = APIRouter()
 
@@ -56,8 +57,9 @@ def create_event(
     Returns:
         Created interview event.
     """
+    company = get_or_create_company(event.company_name, db)
     db_event = InterviewEvent(
-        company_id=event.company_id,
+        company_id=company.id,
         company_name=event.company_name,
         event_type=event.event_type,
         title=event.title,
@@ -98,6 +100,12 @@ def update_event(
         raise HTTPException(status_code=404, detail="Event not found")
 
     update_data = event_update.model_dump(exclude_unset=True)
+
+    # Auto-link company when company_name is provided
+    if "company_name" in update_data:
+        company = get_or_create_company(update_data["company_name"], db)
+        update_data["company_id"] = company.id
+
     for field, value in update_data.items():
         setattr(db_event, field, value)
 

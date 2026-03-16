@@ -11,16 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-96: Auto-link company on timeline event creation via get_or_create_company
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-95
-- **Description**: ## Acceptance Criteria
-1. timeline router create_event() calls get_or_create_company(event.company_name, db) to resolve company_id
-2. timeline router update_event() does the same when company_name changes
-3. EventFormModal onSuccess invalidates both ["timeline","events"] and ["companies"] queries
-4. Tests: create event with new company -> Company auto-created; create event with existing name (different case) -> linked, no duplicate; update event company_name -> new Company if needed
-
 #### T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration
 - **Priority**: P1
 - **Complexity**: L
@@ -67,6 +57,7 @@
 
 > 87 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
 - [x] **2026-03-15** -- T-P2-94: [B7] Frontend: Analytics deep-dive (radar chart, scatter plot, trend lines). AC:\n- Pattern comfort radar chart (Recharts RadarChart) on Problems page or Dashboard\n- Framework confidence vs import
 - [x] **2026-03-15** -- T-P2-93: [B6] Frontend: QA session summarize button in ReviewPanel. AC:

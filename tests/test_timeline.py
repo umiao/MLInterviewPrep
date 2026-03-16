@@ -65,14 +65,18 @@ class TestTimelineCRUD:
 
     def test_filter_by_company_id(self, test_client, event_payload):
         """GET /timeline/events?company_id=N filters correctly."""
-        payload_with_id = {**event_payload, "company_id": 99}
-        test_client.post("/api/timeline/events", json=payload_with_id)
-        test_client.post("/api/timeline/events", json=event_payload)  # no company_id
+        # Create event for LinkedIn (auto-creates company)
+        resp1 = test_client.post("/api/timeline/events", json=event_payload)
+        linkedin_cid = resp1.json()["company_id"]
 
-        resp = test_client.get("/api/timeline/events", params={"company_id": 99})
+        # Create event for a different company
+        other_payload = {**event_payload, "company_name": "Google", "title": "Google Screen"}
+        test_client.post("/api/timeline/events", json=other_payload)
+
+        resp = test_client.get("/api/timeline/events", params={"company_id": linkedin_cid})
         data = resp.json()
         assert len(data) == 1
-        assert data[0]["company_id"] == 99
+        assert data[0]["company_id"] == linkedin_cid
 
     def test_update_event(self, test_client, event_payload):
         """PUT /timeline/events/{id} partial update works."""
@@ -125,6 +129,92 @@ class TestTimelineCRUD:
 
         resp = test_client.get("/api/timeline/events", params={"limit": 1})
         assert len(resp.json()) == 1
+
+
+# ---- Auto-link Company Tests ----
+
+class TestTimelineAutoLinkCompany:
+    """Test auto-linking company on event create/update."""
+
+    def test_create_event_auto_creates_company(self, test_client, event_payload):
+        """Creating an event auto-creates the company and links company_id."""
+        resp = test_client.post("/api/timeline/events", json=event_payload)
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["company_id"] is not None
+
+        # Verify company was created
+        companies = test_client.get("/api/companies").json()
+        names = [c["name"] for c in companies]
+        assert "LinkedIn" in names
+        # company_id matches
+        company = next(c for c in companies if c["name"] == "LinkedIn")
+        assert data["company_id"] == company["id"]
+
+    def test_create_event_existing_company_no_duplicate(self, test_client, event_payload):
+        """Creating events with same company name reuses existing company."""
+        # Create first event -> company auto-created
+        resp1 = test_client.post("/api/timeline/events", json=event_payload)
+        cid1 = resp1.json()["company_id"]
+
+        # Create second event with same company
+        payload2 = {**event_payload, "title": "Tech Screen"}
+        resp2 = test_client.post("/api/timeline/events", json=payload2)
+        cid2 = resp2.json()["company_id"]
+
+        assert cid1 == cid2
+
+        # Only one company exists
+        companies = test_client.get("/api/companies").json()
+        linkedin_companies = [c for c in companies if c["name"] == "LinkedIn"]
+        assert len(linkedin_companies) == 1
+
+    def test_create_event_case_insensitive_match(self, test_client, event_payload):
+        """Company matching is case-insensitive (no duplicate for 'linkedin' vs 'LinkedIn')."""
+        test_client.post("/api/timeline/events", json=event_payload)  # "LinkedIn"
+
+        payload2 = {**event_payload, "company_name": "linkedin", "title": "2nd"}
+        resp2 = test_client.post("/api/timeline/events", json=payload2)
+        cid2 = resp2.json()["company_id"]
+
+        companies = test_client.get("/api/companies").json()
+        # Should only have one company (case-insensitive dedup)
+        assert len(companies) == 1
+        assert companies[0]["id"] == cid2
+
+    def test_update_event_company_name_links_new_company(self, test_client, event_payload):
+        """Updating company_name on event auto-creates and links the new company."""
+        create_resp = test_client.post("/api/timeline/events", json=event_payload)
+        event_id = create_resp.json()["id"]
+        old_cid = create_resp.json()["company_id"]
+
+        # Update company_name to a new one
+        update_resp = test_client.put(
+            f"/api/timeline/events/{event_id}",
+            json={"company_name": "DoorDash"},
+        )
+        assert update_resp.status_code == 200
+        data = update_resp.json()
+        assert data["company_name"] == "DoorDash"
+        assert data["company_id"] is not None
+        assert data["company_id"] != old_cid
+
+        # DoorDash company exists
+        companies = test_client.get("/api/companies").json()
+        names = [c["name"] for c in companies]
+        assert "DoorDash" in names
+
+    def test_update_event_without_company_name_keeps_existing(self, test_client, event_payload):
+        """Updating other fields without company_name preserves existing company_id."""
+        create_resp = test_client.post("/api/timeline/events", json=event_payload)
+        event_id = create_resp.json()["id"]
+        original_cid = create_resp.json()["company_id"]
+
+        update_resp = test_client.put(
+            f"/api/timeline/events/{event_id}",
+            json={"title": "Updated Title"},
+        )
+        assert update_resp.json()["company_id"] == original_cid
 
 
 # ---- Export/Import Tests ----
