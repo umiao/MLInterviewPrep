@@ -12,6 +12,11 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
     DEBUG: bool = True
 
+    # TTS settings
+    TTS_ENGINE: str = "edge-tts"
+    TTS_VOICE: str = "en-US-AriaNeural"
+    TTS_RATE: str = "+0%"  # edge-tts rate string, e.g. "+20%", "-10%"
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

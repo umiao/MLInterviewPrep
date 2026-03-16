@@ -23,6 +23,7 @@ from src.backend.routers.companies import router as companies_router
 from src.backend.routers.framework import router as framework_router
 from src.backend.routers.problems import router as problems_router
 from src.backend.routers.qa import router as qa_router
+from src.backend.routers.reading import router as reading_router
 from src.backend.routers.scraper import router as scraper_router
 from src.backend.routers.timeline import router as timeline_router
 
@@ -142,6 +143,7 @@ app.include_router(framework_router, prefix="/api")
 app.include_router(companies_router, prefix="/api")
 app.include_router(scraper_router, prefix="/api")
 app.include_router(timeline_router, prefix="/api")
+app.include_router(reading_router, prefix="/api")
 
 
 @app.get("/api/dashboard")

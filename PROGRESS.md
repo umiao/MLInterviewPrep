@@ -252,3 +252,17 @@
 - **Sanity check result**: 614/614 tests pass, ruff clean, TypeScript compiles clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-98 --status completed`
+
+## 2026-03-16 -- Full-screen prep notes page + Dashboard prep quick-access
+- **What I did**: Created full-screen PrepNotesPage at /companies/:companyId/prep with sticky header, full-height editor/preview, GFM-inspired .prep-prose CSS styling. Extracted usePrepNotes hook and MarkdownPreview shared component. Replaced Dashboard PrepNotesModal with direct navigation. Added PrepQuickAccess section on Dashboard showing companies with prep notes, checklist progress bars, and unchecked count badges. Refactored PrepNotesTab to use shared hook with "Full Page" link. Moved LinkedIn interview from 03/16 to 03/17 10:30AM.
+- **Deliverables**: src/frontend/src/hooks/usePrepNotes.ts (new), src/frontend/src/components/ui/MarkdownPreview.tsx (new), src/frontend/src/pages/PrepNotesPage.tsx (new), src/frontend/src/index.css (modified), src/frontend/src/App.tsx (modified), src/frontend/src/pages/Dashboard.tsx (modified), src/frontend/src/components/companies/PrepNotesTab.tsx (modified)
+- **Sanity check result**: 614/614 tests pass, ruff clean, TypeScript compiles clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: No task change (ad-hoc)
+
+## 2026-03-16 -- [T-P0-99] TTS MVP: edge-tts synthesize + audio playback for framework nodes
+- **What I did**: Implemented minimal TTS vertical slice. Added edge-tts dependency and TTS settings (voice, rate) to config. Created EdgeTTS engine service with SHA-256 file caching in data/tts_cache/. Created content pipeline with markdown-to-spoken-text preprocessing (strips headings, bold/italic, links, code blocks; expands abbreviations). Added reading router with POST /synthesize (returns audio URL) and GET /audio/{cache_key} (serves MP3 via FileResponse). Created ListenButton UI component with play/pause/stop states. Integrated Listen button into NodeDetailPanel DetailsTab for nodes with descriptions.
+- **Deliverables**: src/backend/services/tts_engine.py (new), src/backend/services/content_pipeline.py (new), src/backend/schemas/reading.py (new), src/backend/routers/reading.py (new), src/frontend/src/components/ui/ListenButton.tsx (new), src/backend/config.py (modified), src/backend/main.py (modified), src/frontend/src/components/NodeDetailPanel.tsx (modified), requirements.txt (modified), tests/test_content_pipeline.py (new), tests/test_tts_engine.py (new), tests/test_router_reading.py (new)
+- **Sanity check result**: 637/637 tests pass, ruff clean, TypeScript compiles clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-99 --status completed`

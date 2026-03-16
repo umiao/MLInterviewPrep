@@ -5,6 +5,7 @@ import { api } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
 import { useDebounce } from "../hooks/useDebounce";
 import Tabs from "./ui/Tabs";
+import ListenButton from "./ui/ListenButton";
 import type { FrameworkNode, NodeStatus, StudyLog } from "../types/framework";
 import type { Problem } from "../types/problem";
 import type { InterviewQuestion } from "../types/question";
@@ -382,6 +383,11 @@ function DetailsTab({
           </span>
         )}
       </div>
+
+      {/* Listen button */}
+      {node.description && (
+        <ListenButton contentType="framework_node" contentId={node.id} />
+      )}
 
       <hr className="border-gray-100" />
 
