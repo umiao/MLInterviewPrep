@@ -13,20 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-92: [B6] Frontend: Settings page (import/export + scraper management)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P0-74
-- **Description**: AC:
-- New /settings route added to App.tsx
-- Settings link in Sidebar
-- Export section: Download JSON button (GET /api/export -> download), Download CSV option
-- Import section: File upload zone for JSON (POST /api/import) and CSV (POST /api/import/csv), show results (inserted/skipped/errors)
-- Seed section: Load Seed Data button (POST /api/import/seed)
-- Scraper section: seed URL list (GET /api/scraper/seeds), add/edit/delete, Run Scraper button + job status
-
-Key files: new src/frontend/src/pages/Settings.tsx, new components/settings/ExportPanel.tsx, ImportPanel.tsx, ScraperManager.tsx, src/frontend/src/components/Sidebar.tsx
-
 #### T-P2-93: [B6] Frontend: QA session summarize button in ReviewPanel
 - **Priority**: P2
 - **Complexity**: S
@@ -54,6 +40,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 > 71 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-15** -- T-P2-92: [B6] Frontend: Settings page (import/export + scraper management). AC:
 - [x] **2026-03-15** -- T-P2-91: [B6] Frontend: Framework tree search + breadcrumb path. AC:
 - [x] **2026-03-15** -- T-P2-90: [B6] Frontend: Kanban drag-and-drop for Companies page. AC:
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON

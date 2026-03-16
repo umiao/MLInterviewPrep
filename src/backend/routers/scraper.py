@@ -81,6 +81,19 @@ def create_seed_url(
     return db_seed
 
 
+@router.delete("/scraper/seeds/{seed_id}")
+def delete_seed_url(
+    seed_id: int, db: Session = Depends(get_db)
+) -> dict:
+    """Delete a seed URL by ID."""
+    seed = db.query(SeedURL).filter(SeedURL.id == seed_id).first()
+    if not seed:
+        raise HTTPException(status_code=404, detail="Seed URL not found")
+    db.delete(seed)
+    db.commit()
+    return {"deleted": True, "id": seed_id}
+
+
 # -- Paste endpoint --
 
 @router.post("/scraper/paste")

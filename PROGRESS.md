@@ -197,3 +197,10 @@
 - **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-91 --status completed`
+
+## 2026-03-15 -- [T-P2-92] Frontend: Settings page (import/export + scraper management)
+- **What I did**: Created Settings page with four panels: ExportPanel (JSON full backup + CSV problems-only download), ImportPanel (JSON and CSV file upload with result summaries), SeedDataPanel (load built-in seed data), ScraperPanel (seed URL list with add/delete, run scraper button, job status with auto-refresh). Added DELETE /api/scraper/seeds/{id} backend endpoint. Added /settings route to App.tsx and Settings link to Sidebar. Added 2 backend tests for seed URL delete.
+- **Deliverables**: src/frontend/src/pages/Settings.tsx (new), src/frontend/src/App.tsx (modified), src/frontend/src/components/Sidebar.tsx (modified), src/backend/routers/scraper.py (modified), tests/test_router_scraper.py (modified)
+- **Sanity check result**: 568/568 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-92 --status completed`

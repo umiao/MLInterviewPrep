@@ -7,6 +7,7 @@ import Problems from "./pages/Problems";
 import Framework from "./pages/Framework";
 import Questions from "./pages/Questions";
 import Companies from "./pages/Companies";
+import Settings from "./pages/Settings";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,6 +30,7 @@ export default function App() {
               <Route path="framework" element={<Framework />} />
               <Route path="questions" element={<Questions />} />
               <Route path="companies" element={<Companies />} />
+              <Route path="settings" element={<Settings />} />
             </Route>
           </Routes>
         </BrowserRouter>
