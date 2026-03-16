@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { api } from "../utils/api";
 import Skeleton from "../components/ui/Skeleton";
 import WeeklyActivityChart from "../components/charts/WeeklyActivityChart";
 import InterviewTimeline from "../components/timeline/InterviewTimeline";
 import EventFormModal from "../components/timeline/EventFormModal";
-import PrepNotesModal from "../components/timeline/PrepNotesModal";
+import { countUnchecked, countChecked } from "../utils/markdown";
 import type {
   ActivityDay,
   DashboardToday,
@@ -15,6 +15,7 @@ import type {
 } from "../types/dashboard";
 import type { FrameworkNode } from "../types/framework";
 import type { InterviewEvent } from "../types/timeline";
+import type { Company } from "../types/company";
 
 /* ------------------------------------------------------------------ */
 /*  Row 1: Today Focus cards                                          */
@@ -266,14 +267,84 @@ function CompanySummaryCard({ counts }: { counts: Record<string, number> }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Prep Notes Quick Access                                           */
+/* ------------------------------------------------------------------ */
+
+function PrepQuickAccess({ companies }: { companies: Company[] }) {
+  // Show companies that have prep notes, sorted by unchecked count desc
+  const withPrep = companies
+    .filter((c) => c.prep_notes && c.prep_notes.trim().length > 0)
+    .map((c) => ({
+      company: c,
+      unchecked: countUnchecked(c.prep_notes),
+      checked: countChecked(c.prep_notes),
+    }))
+    .sort((a, b) => b.unchecked - a.unchecked);
+
+  if (withPrep.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+          Prep Notes
+        </h2>
+        <Link to="/companies" className="text-xs text-blue-600 hover:text-blue-800">
+          All Companies
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {withPrep.map(({ company: c, unchecked, checked }) => {
+          const total = unchecked + checked;
+          const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+          return (
+            <Link
+              key={c.id}
+              to={`/companies/${c.id}/prep`}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg border border-gray-200
+                         hover:border-blue-300 hover:shadow-sm transition-all group"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm text-gray-800 group-hover:text-blue-600 truncate">
+                  {c.name}
+                </p>
+                {total > 0 ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-green-500 rounded-full transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-500 shrink-0">
+                      {checked}/{total}
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-400 mt-1">Notes (no checklist)</p>
+                )}
+              </div>
+              {unchecked > 0 && (
+                <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-100 text-red-700 text-xs font-bold shrink-0">
+                  {unchecked}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Main Dashboard                                                    */
 /* ------------------------------------------------------------------ */
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<InterviewEvent | null>(null);
-  const [prepCompanyId, setPrepCompanyId] = useState<number | null>(null);
-  const [prepCompanyName, setPrepCompanyName] = useState("");
 
   const today = useQuery<DashboardToday>({
     queryKey: ["dashboard", "today"],
@@ -288,6 +359,11 @@ export default function Dashboard() {
   const summary = useQuery<DashboardSummary>({
     queryKey: ["dashboard", "summary"],
     queryFn: () => api.get<DashboardSummary>("/dashboard/summary"),
+  });
+
+  const companiesQuery = useQuery<Company[]>({
+    queryKey: ["companies"],
+    queryFn: () => api.get<Company[]>("/companies"),
   });
 
   /* Pillars come from the framework tree (depth-0 nodes). */
@@ -311,21 +387,16 @@ export default function Dashboard() {
       <InterviewTimeline
         onAddClick={() => { setEditingEvent(null); setModalOpen(true); }}
         onEditClick={(e) => { setEditingEvent(e); setModalOpen(true); }}
-        onCompanyClick={(name, id) => { setPrepCompanyName(name); setPrepCompanyId(id); }}
+        onCompanyClick={(_name, id) => { navigate(`/companies/${id}/prep`); }}
       />
       <EventFormModal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditingEvent(null); }}
         event={editingEvent}
       />
-      {prepCompanyId !== null && (
-        <PrepNotesModal
-          open
-          onClose={() => { setPrepCompanyId(null); setPrepCompanyName(""); }}
-          companyId={prepCompanyId}
-          companyName={prepCompanyName}
-        />
-      )}
+
+      {/* Prep Notes quick access */}
+      {companiesQuery.data && <PrepQuickAccess companies={companiesQuery.data} />}
 
       {hasError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">

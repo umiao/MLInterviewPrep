@@ -9,6 +9,7 @@ import Questions from "./pages/Questions";
 import Companies from "./pages/Companies";
 import Settings from "./pages/Settings";
 import Analytics from "./pages/Analytics";
+import PrepNotesPage from "./pages/PrepNotesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="framework" element={<Framework />} />
               <Route path="questions" element={<Questions />} />
               <Route path="companies" element={<Companies />} />
+              <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />
               <Route path="analytics" element={<Analytics />} />
               <Route path="settings" element={<Settings />} />
             </Route>
