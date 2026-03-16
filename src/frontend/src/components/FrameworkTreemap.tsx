@@ -89,7 +89,7 @@ function squarify(
 function PillarSection({
   pillar,
   leaves,
-  containerWidth,
+  containerWidth: _containerWidth,
   totalImportance,
   onSelect,
   selectedId,

@@ -27,13 +27,6 @@ const STATUSES: { value: CompanyStatus; label: string; color: string }[] = [
   },
 ];
 
-const STATUS_BADGE: Record<CompanyStatus, string> = {
-  applied: "bg-gray-200 text-gray-700",
-  phone_screen: "bg-blue-100 text-blue-700",
-  onsite: "bg-yellow-100 text-yellow-700",
-  offer: "bg-green-100 text-green-700",
-  rejected: "bg-red-100 text-red-700",
-};
 
 function ProgressBar({ pct }: { pct: number }) {
   return (

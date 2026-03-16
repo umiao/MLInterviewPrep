@@ -349,3 +349,10 @@
 - **Sanity check result**: 521/521 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-72 --status completed`
+
+## 2026-03-15 -- [T-P0-73] Install React Query + setup QueryClientProvider in App.tsx
+- **What I did**: Installed @tanstack/react-query, wrapped App with QueryClientProvider (staleTime 30s, retry 1). Migrated Dashboard page from useApi to useQuery as proof of concept. Fixed two pre-existing TS errors (unused containerWidth in FrameworkTreemap, unused STATUS_BADGE in Companies).
+- **Deliverables**: src/frontend/package.json, src/frontend/src/App.tsx, src/frontend/src/pages/Dashboard.tsx, src/frontend/src/components/FrameworkTreemap.tsx, src/frontend/src/pages/Companies.tsx
+- **Sanity check result**: 521/521 backend tests pass, frontend build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-73 --status completed`

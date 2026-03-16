@@ -1,4 +1,5 @@
-import { useApi } from "../hooks/useApi";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../utils/api";
 import type {
   CompanyDeadline,
   DashboardData,
@@ -120,9 +121,12 @@ function DeadlineCard({ company }: { company: CompanyDeadline }) {
 }
 
 export default function Dashboard() {
-  const { data, loading, error } = useApi<DashboardData>("/dashboard");
+  const { data, isLoading, error } = useQuery<DashboardData>({
+    queryKey: ["dashboard"],
+    queryFn: () => api.get<DashboardData>("/dashboard"),
+  });
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-400">
         Loading dashboard...
