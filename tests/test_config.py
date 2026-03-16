@@ -1,7 +1,5 @@
 """Tests for config module."""
 
-import pytest
-from pydantic import ValidationError
 
 
 def test_settings_with_valid_env(monkeypatch):
@@ -20,17 +18,15 @@ def test_settings_with_valid_env(monkeypatch):
     assert s.DEBUG is True
 
 
-def test_settings_missing_api_key_raises(monkeypatch):
-    """Missing ANTHROPIC_API_KEY raises ValidationError."""
+def test_settings_missing_api_key_defaults_empty(monkeypatch):
+    """Missing ANTHROPIC_API_KEY defaults to empty string."""
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    # Also need to ensure no .env file is read
     monkeypatch.setenv("DATABASE_URL", "sqlite:///:memory:")
 
     from src.backend.config import Settings
 
-    with pytest.raises(ValidationError) as exc_info:
-        Settings(_env_file=None)
-    assert "ANTHROPIC_API_KEY" in str(exc_info.value)
+    s = Settings(_env_file=None)
+    assert s.ANTHROPIC_API_KEY == ""
 
 
 def test_settings_defaults(monkeypatch):
@@ -43,6 +39,7 @@ def test_settings_defaults(monkeypatch):
     s = Settings(_env_file=None)
     assert s.DATABASE_URL == "sqlite:///data/mle_prep.db"
     assert s.LLM_MODEL == "claude-sonnet-4-20250514"
+    assert s.LLM_BACKEND == "auto"
     assert s.CORS_ORIGINS == ["http://localhost:5173"]
     assert s.DEBUG is True
 

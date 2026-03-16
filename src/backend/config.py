@@ -6,8 +6,9 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables and .env file."""
 
     DATABASE_URL: str = "sqlite:///data/mle_prep.db"
-    ANTHROPIC_API_KEY: str  # required, no default
+    ANTHROPIC_API_KEY: str = ""  # optional, default empty string
     LLM_MODEL: str = "claude-sonnet-4-20250514"
+    LLM_BACKEND: str = "auto"  # 'auto', 'sdk', or 'anthropic'
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
     DEBUG: bool = True
 
