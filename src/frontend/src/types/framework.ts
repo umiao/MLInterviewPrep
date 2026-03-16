@@ -5,6 +5,7 @@ export interface FrameworkNode {
   path: string;
   depth: number;
   title: string;
+  description: string | null;
   parent_id: number | null;
   status: NodeStatus;
   progress_pct: number;

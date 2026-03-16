@@ -113,3 +113,10 @@
 - **Sanity check result**: 525/525 backend tests pass, frontend TypeScript clean, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-79 --status completed`
+
+## 2026-03-15 -- [T-P0-80] Notes tab in NodeDetailPanel with markdown edit/preview + autosave
+- **What I did**: Restructured NodeDetailPanel into 3 tabs (Details | Notes | Study Log). Built reusable Tabs UI component. Notes tab has markdown textarea with Edit/Preview toggle using react-markdown, auto-saves via 500ms debounce on PUT /framework/nodes/{id} with {description}. Added inline title editing (click to edit, Enter to save, Escape to cancel). Added `description` field to FrameworkNode TypeScript type.
+- **Deliverables**: src/frontend/src/components/NodeDetailPanel.tsx (rewritten), src/frontend/src/components/ui/Tabs.tsx (new), src/frontend/src/types/framework.ts
+- **Sanity check result**: 525/525 backend tests pass, frontend TypeScript clean, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-80 --status completed`

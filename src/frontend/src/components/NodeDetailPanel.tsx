@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import ReactMarkdown from "react-markdown";
 import { api } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
+import { useDebounce } from "../hooks/useDebounce";
+import Tabs from "./ui/Tabs";
 import type { FrameworkNode, NodeStatus, StudyLog } from "../types/framework";
 
-const STATUS_OPTIONS: { value: NodeStatus; label: string; color: string }[] = [
-  { value: "not_started", label: "Not Started", color: "bg-red-100 text-red-700" },
-  { value: "in_progress", label: "In Progress", color: "bg-yellow-100 text-yellow-700" },
-  { value: "review", label: "Review", color: "bg-blue-100 text-blue-700" },
-  { value: "mastered", label: "Mastered", color: "bg-green-100 text-green-700" },
+const STATUS_OPTIONS: { value: NodeStatus; label: string }[] = [
+  { value: "not_started", label: "Not Started" },
+  { value: "in_progress", label: "In Progress" },
+  { value: "review", label: "Review" },
+  { value: "mastered", label: "Mastered" },
 ];
 
 const ACTIVITY_TYPES = [
@@ -21,22 +24,75 @@ const ACTIVITY_TYPES = [
   "Other",
 ];
 
+const TABS = [
+  { key: "details", label: "Details" },
+  { key: "notes", label: "Notes" },
+  { key: "log", label: "Study Log" },
+];
+
 interface Props {
   node: FrameworkNode;
   onNodeUpdated: () => void;
 }
 
-/** Full node detail panel with editable status/confidence, study log form, and history. */
+/** Full node detail panel with tabs: Details, Notes (markdown), Study Log. */
 export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
   const queryClient = useQueryClient();
   const toast = useToast();
 
-  // -- Editable fields --
+  // -- Inline title edit --
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState(node.title);
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setEditingTitle(false);
+    setTitleDraft(node.title);
+  }, [node.id, node.title]);
+
+  useEffect(() => {
+    if (editingTitle) titleInputRef.current?.focus();
+  }, [editingTitle]);
+
+  const saveTitleMutation = useMutation({
+    mutationFn: (newTitle: string) =>
+      api.put(`/framework/nodes/${node.id}`, { title: newTitle }),
+    onSuccess: () => {
+      onNodeUpdated();
+      toast.success("Title updated");
+    },
+    onError: () => toast.error("Failed to update title"),
+  });
+
+  const handleTitleSubmit = useCallback(() => {
+    const trimmed = titleDraft.trim();
+    if (!trimmed || trimmed === node.title) {
+      setTitleDraft(node.title);
+      setEditingTitle(false);
+      return;
+    }
+    saveTitleMutation.mutate(trimmed);
+    setEditingTitle(false);
+  }, [titleDraft, node.title, saveTitleMutation]);
+
+  const handleTitleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleTitleSubmit();
+      } else if (e.key === "Escape") {
+        setTitleDraft(node.title);
+        setEditingTitle(false);
+      }
+    },
+    [handleTitleSubmit, node.title],
+  );
+
+  // -- Editable fields (Details tab) --
   const [editStatus, setEditStatus] = useState<NodeStatus>(node.status);
   const [editConfidence, setEditConfidence] = useState(node.confidence_level);
   const [saveMsg, setSaveMsg] = useState("");
 
-  // Sync local state when node changes
   useEffect(() => {
     setEditStatus(node.status);
     setEditConfidence(node.confidence_level);
@@ -67,8 +123,53 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
   }, [node.status, node.confidence_level, editStatus, editConfidence, saveNodeMutation]);
 
   const saving = saveNodeMutation.isPending;
+  const hasChanges = editStatus !== node.status || editConfidence !== node.confidence_level;
 
-  // -- Study log form --
+  // -- Notes tab (markdown edit/preview + autosave) --
+  const [notesDraft, setNotesDraft] = useState(node.description ?? "");
+  const [notesPreview, setNotesPreview] = useState(false);
+  const [notesSaveStatus, setNotesSaveStatus] = useState<"" | "saving" | "saved" | "error">("");
+
+  // Track the node id we initialized notes for to avoid stale resets
+  const notesNodeIdRef = useRef(node.id);
+
+  useEffect(() => {
+    if (node.id !== notesNodeIdRef.current) {
+      notesNodeIdRef.current = node.id;
+      setNotesDraft(node.description ?? "");
+      setNotesPreview(false);
+      setNotesSaveStatus("");
+    }
+  }, [node.id, node.description]);
+
+  const debouncedNotes = useDebounce(notesDraft, 500);
+
+  const saveNotesMutation = useMutation({
+    mutationFn: (description: string) =>
+      api.put(`/framework/nodes/${node.id}`, { description }),
+    onSuccess: () => {
+      setNotesSaveStatus("saved");
+      onNodeUpdated();
+    },
+    onError: () => {
+      setNotesSaveStatus("error");
+      toast.error("Failed to save notes");
+    },
+  });
+
+  // Track the last saved notes to avoid redundant saves
+  const lastSavedNotesRef = useRef(node.description ?? "");
+
+  useEffect(() => {
+    if (node.id !== notesNodeIdRef.current) return;
+    if (debouncedNotes === lastSavedNotesRef.current) return;
+    lastSavedNotesRef.current = debouncedNotes;
+    setNotesSaveStatus("saving");
+    saveNotesMutation.mutate(debouncedNotes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedNotes, node.id]);
+
+  // -- Study log form (Study Log tab) --
   const [logDate, setLogDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [logDuration, setLogDuration] = useState(30);
   const [logActivity, setLogActivity] = useState("");
@@ -94,190 +195,404 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
 
   const logSubmitting = submitLogMutation.isPending;
 
-  // Reset log form when node changes
   useEffect(() => {
     setLogMsg("");
   }, [node.id]);
 
-  const handleSubmitLog = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    setLogMsg("");
-    submitLogMutation.mutate({
-      date: logDate,
-      duration_minutes: logDuration,
-      activity_type: logActivity || null,
-      notes: logNotes || null,
-    });
-  }, [logDate, logDuration, logActivity, logNotes, submitLogMutation]);
+  const handleSubmitLog = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      setLogMsg("");
+      submitLogMutation.mutate({
+        date: logDate,
+        duration_minutes: logDuration,
+        activity_type: logActivity || null,
+        notes: logNotes || null,
+      });
+    },
+    [logDate, logDuration, logActivity, logNotes, submitLogMutation],
+  );
 
   // -- Study history --
   const { data: logs, isLoading: logsLoading } = useQuery({
     queryKey: ["framework", "nodes", node.id, "logs"],
-    queryFn: () => api.get<StudyLog[]>(`/framework/nodes/${node.id}/logs`, { params: { limit: 10 } }),
+    queryFn: () =>
+      api.get<StudyLog[]>(`/framework/nodes/${node.id}/logs`, { params: { limit: 10 } }),
   });
 
-  const hasChanges = editStatus !== node.status || editConfidence !== node.confidence_level;
-
   return (
-    <div className="space-y-4">
-      {/* Node info */}
+    <div className="space-y-3">
+      {/* Node header with inline title edit */}
       <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-1">
-          Selected Node
-        </h3>
-        <p className="text-lg font-semibold text-gray-800">{node.title}</p>
+        {editingTitle ? (
+          <input
+            ref={titleInputRef}
+            value={titleDraft}
+            onChange={(e) => setTitleDraft(e.target.value)}
+            onBlur={handleTitleSubmit}
+            onKeyDown={handleTitleKeyDown}
+            className="text-lg font-semibold text-gray-800 w-full border border-blue-300 rounded px-1 py-0.5 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        ) : (
+          <h3
+            className="text-lg font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors"
+            onClick={() => setEditingTitle(true)}
+            title="Click to edit title"
+          >
+            {node.title}
+          </h3>
+        )}
         <p className="text-xs text-gray-400 font-mono mt-0.5 truncate" title={node.path}>
           {node.path}
         </p>
+      </div>
 
-        <div className="mt-3 space-y-2 text-sm">
-          {/* Status selector */}
-          <div>
-            <label className="block text-gray-500 text-xs mb-1">Status</label>
-            <select
-              value={editStatus}
-              onChange={(e) => setEditStatus(e.target.value as NodeStatus)}
-              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-              {STATUS_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Confidence slider */}
-          <div>
-            <label className="block text-gray-500 text-xs mb-1">
-              Confidence: {editConfidence}/5
-            </label>
-            <input
-              type="range"
-              min={0}
-              max={5}
-              value={editConfidence}
-              onChange={(e) => setEditConfidence(Number(e.target.value))}
-              className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-            />
-            <div className="flex justify-between text-xs text-gray-400 mt-0.5">
-              <span>0</span><span>5</span>
-            </div>
-          </div>
-
-          {/* Save button */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleSaveNode}
-              disabled={!hasChanges || saving}
-              className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-40 transition-colors"
-            >
-              {saving ? "Saving..." : "Save"}
-            </button>
-            {saveMsg && (
-              <span className={`text-xs ${saveMsg === "Saved" ? "text-green-600" : "text-red-600"}`}>
-                {saveMsg}
-              </span>
-            )}
-          </div>
-
-          <hr className="border-gray-100" />
-
-          {/* Read-only fields */}
-          <div className="flex justify-between">
-            <span className="text-gray-500">Progress</span>
-            <span className="font-medium">{Math.round(node.progress_pct)}%</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Importance</span>
-            <span className="font-medium">{node.importance}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Priority</span>
-            <span className="font-medium">{node.priority}</span>
-          </div>
-          {node.estimated_hours != null && (
-            <div className="flex justify-between">
-              <span className="text-gray-500">Est. Hours</span>
-              <span className="font-medium">{node.estimated_hours}h</span>
-            </div>
+      {/* Tabbed content */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <Tabs tabs={TABS} defaultTab="details">
+          {(activeTab) => (
+            <>
+              {activeTab === "details" && (
+                <DetailsTab
+                  node={node}
+                  editStatus={editStatus}
+                  setEditStatus={setEditStatus}
+                  editConfidence={editConfidence}
+                  setEditConfidence={setEditConfidence}
+                  hasChanges={hasChanges}
+                  saving={saving}
+                  saveMsg={saveMsg}
+                  onSave={handleSaveNode}
+                />
+              )}
+              {activeTab === "notes" && (
+                <NotesTab
+                  notesDraft={notesDraft}
+                  setNotesDraft={setNotesDraft}
+                  notesPreview={notesPreview}
+                  setNotesPreview={setNotesPreview}
+                  notesSaveStatus={notesSaveStatus}
+                />
+              )}
+              {activeTab === "log" && (
+                <StudyLogTab
+                  logDate={logDate}
+                  setLogDate={setLogDate}
+                  logDuration={logDuration}
+                  setLogDuration={setLogDuration}
+                  logActivity={logActivity}
+                  setLogActivity={setLogActivity}
+                  logNotes={logNotes}
+                  setLogNotes={setLogNotes}
+                  logMsg={logMsg}
+                  logSubmitting={logSubmitting}
+                  onSubmit={handleSubmitLog}
+                  logs={logs ?? []}
+                  logsLoading={logsLoading}
+                />
+              )}
+            </>
           )}
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+// ---- Details Tab ----
+
+interface DetailsTabProps {
+  node: FrameworkNode;
+  editStatus: NodeStatus;
+  setEditStatus: (s: NodeStatus) => void;
+  editConfidence: number;
+  setEditConfidence: (n: number) => void;
+  hasChanges: boolean;
+  saving: boolean;
+  saveMsg: string;
+  onSave: () => void;
+}
+
+function DetailsTab({
+  node,
+  editStatus,
+  setEditStatus,
+  editConfidence,
+  setEditConfidence,
+  hasChanges,
+  saving,
+  saveMsg,
+  onSave,
+}: DetailsTabProps) {
+  return (
+    <div className="space-y-2 text-sm">
+      {/* Status selector */}
+      <div>
+        <label className="block text-gray-500 text-xs mb-1">Status</label>
+        <select
+          value={editStatus}
+          onChange={(e) => setEditStatus(e.target.value as NodeStatus)}
+          className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        >
+          {STATUS_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Confidence slider */}
+      <div>
+        <label className="block text-gray-500 text-xs mb-1">
+          Confidence: {editConfidence}/5
+        </label>
+        <input
+          type="range"
+          min={0}
+          max={5}
+          value={editConfidence}
+          onChange={(e) => setEditConfidence(Number(e.target.value))}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+        />
+        <div className="flex justify-between text-xs text-gray-400 mt-0.5">
+          <span>0</span>
+          <span>5</span>
         </div>
       </div>
 
-      {/* Study log form */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Log Study Session
-        </h3>
-        <form onSubmit={handleSubmitLog} className="space-y-2">
-          <div>
-            <label className="block text-gray-500 text-xs mb-0.5">Date</label>
-            <input
-              type="date"
-              value={logDate}
-              onChange={(e) => setLogDate(e.target.value)}
-              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-500 text-xs mb-0.5">Duration (min)</label>
-            <input
-              type="number"
-              min={1}
-              value={logDuration}
-              onChange={(e) => setLogDuration(Number(e.target.value))}
-              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-gray-500 text-xs mb-0.5">Activity Type</label>
-            <select
-              value={logActivity}
-              onChange={(e) => setLogActivity(e.target.value)}
-              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            >
-              <option value="">-- Optional --</option>
-              {ACTIVITY_TYPES.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-gray-500 text-xs mb-0.5">Notes</label>
-            <textarea
-              value={logNotes}
-              onChange={(e) => setLogNotes(e.target.value)}
-              rows={2}
-              className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-              placeholder="Optional notes..."
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="submit"
-              disabled={logSubmitting}
-              className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-40 transition-colors"
-            >
-              {logSubmitting ? "Logging..." : "Log Session"}
-            </button>
-            {logMsg && (
-              <span className={`text-xs ${logMsg === "Logged" ? "text-green-600" : "text-red-600"}`}>
-                {logMsg}
-              </span>
-            )}
-          </div>
-        </form>
+      {/* Save button */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onSave}
+          disabled={!hasChanges || saving}
+          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-40 transition-colors"
+        >
+          {saving ? "Saving..." : "Save"}
+        </button>
+        {saveMsg && (
+          <span className={`text-xs ${saveMsg === "Saved" ? "text-green-600" : "text-red-600"}`}>
+            {saveMsg}
+          </span>
+        )}
       </div>
 
+      <hr className="border-gray-100" />
+
+      {/* Read-only fields */}
+      <div className="flex justify-between">
+        <span className="text-gray-500">Progress</span>
+        <span className="font-medium">{Math.round(node.progress_pct)}%</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-500">Importance</span>
+        <span className="font-medium">{node.importance}</span>
+      </div>
+      <div className="flex justify-between">
+        <span className="text-gray-500">Priority</span>
+        <span className="font-medium">{node.priority}</span>
+      </div>
+      {node.estimated_hours != null && (
+        <div className="flex justify-between">
+          <span className="text-gray-500">Est. Hours</span>
+          <span className="font-medium">{node.estimated_hours}h</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- Notes Tab ----
+
+interface NotesTabProps {
+  notesDraft: string;
+  setNotesDraft: (s: string) => void;
+  notesPreview: boolean;
+  setNotesPreview: (b: boolean) => void;
+  notesSaveStatus: "" | "saving" | "saved" | "error";
+}
+
+function NotesTab({
+  notesDraft,
+  setNotesDraft,
+  notesPreview,
+  setNotesPreview,
+  notesSaveStatus,
+}: NotesTabProps) {
+  return (
+    <div className="space-y-2">
+      {/* Toolbar: Edit/Preview toggle + save status */}
+      <div className="flex items-center justify-between">
+        <div className="flex bg-gray-100 rounded p-0.5">
+          <button
+            onClick={() => setNotesPreview(false)}
+            className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+              !notesPreview ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => setNotesPreview(true)}
+            className={`px-2 py-0.5 text-xs font-medium rounded transition-colors ${
+              notesPreview ? "bg-white text-gray-800 shadow-sm" : "text-gray-500"
+            }`}
+          >
+            Preview
+          </button>
+        </div>
+        <span
+          className={`text-xs ${
+            notesSaveStatus === "saving"
+              ? "text-gray-400"
+              : notesSaveStatus === "saved"
+                ? "text-green-600"
+                : notesSaveStatus === "error"
+                  ? "text-red-600"
+                  : ""
+          }`}
+        >
+          {notesSaveStatus === "saving"
+            ? "Saving..."
+            : notesSaveStatus === "saved"
+              ? "Saved"
+              : notesSaveStatus === "error"
+                ? "Save failed"
+                : ""}
+        </span>
+      </div>
+
+      {/* Editor or preview */}
+      {notesPreview ? (
+        <div className="prose prose-sm max-w-none min-h-[120px] text-sm text-gray-700 break-words">
+          {notesDraft ? (
+            <ReactMarkdown>{notesDraft}</ReactMarkdown>
+          ) : (
+            <p className="text-gray-400 italic">No notes yet.</p>
+          )}
+        </div>
+      ) : (
+        <textarea
+          value={notesDraft}
+          onChange={(e) => setNotesDraft(e.target.value)}
+          rows={8}
+          className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-y font-mono"
+          placeholder="Write markdown notes here..."
+        />
+      )}
+    </div>
+  );
+}
+
+// ---- Study Log Tab ----
+
+interface StudyLogTabProps {
+  logDate: string;
+  setLogDate: (s: string) => void;
+  logDuration: number;
+  setLogDuration: (n: number) => void;
+  logActivity: string;
+  setLogActivity: (s: string) => void;
+  logNotes: string;
+  setLogNotes: (s: string) => void;
+  logMsg: string;
+  logSubmitting: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+  logs: StudyLog[];
+  logsLoading: boolean;
+}
+
+function StudyLogTab({
+  logDate,
+  setLogDate,
+  logDuration,
+  setLogDuration,
+  logActivity,
+  setLogActivity,
+  logNotes,
+  setLogNotes,
+  logMsg,
+  logSubmitting,
+  onSubmit,
+  logs,
+  logsLoading,
+}: StudyLogTabProps) {
+  return (
+    <div className="space-y-4">
+      {/* Log form */}
+      <form onSubmit={onSubmit} className="space-y-2">
+        <div>
+          <label className="block text-gray-500 text-xs mb-0.5">Date</label>
+          <input
+            type="date"
+            value={logDate}
+            onChange={(e) => setLogDate(e.target.value)}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-500 text-xs mb-0.5">Duration (min)</label>
+          <input
+            type="number"
+            min={1}
+            value={logDuration}
+            onChange={(e) => setLogDuration(Number(e.target.value))}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            required
+          />
+        </div>
+        <div>
+          <label className="block text-gray-500 text-xs mb-0.5">Activity Type</label>
+          <select
+            value={logActivity}
+            onChange={(e) => setLogActivity(e.target.value)}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            <option value="">-- Optional --</option>
+            {ACTIVITY_TYPES.map((t) => (
+              <option key={t} value={t}>
+                {t}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-gray-500 text-xs mb-0.5">Notes</label>
+          <textarea
+            value={logNotes}
+            onChange={(e) => setLogNotes(e.target.value)}
+            rows={2}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            placeholder="Optional notes..."
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="submit"
+            disabled={logSubmitting}
+            className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-40 transition-colors"
+          >
+            {logSubmitting ? "Logging..." : "Log Session"}
+          </button>
+          {logMsg && (
+            <span
+              className={`text-xs ${logMsg === "Logged" ? "text-green-600" : "text-red-600"}`}
+            >
+              {logMsg}
+            </span>
+          )}
+        </div>
+      </form>
+
       {/* Study history */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
-          Study History
-        </h3>
+      <div>
+        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+          History
+        </h4>
         {logsLoading ? (
           <p className="text-xs text-gray-400">Loading...</p>
-        ) : !logs || logs.length === 0 ? (
+        ) : logs.length === 0 ? (
           <p className="text-xs text-gray-400">No study sessions yet.</p>
         ) : (
           <div className="space-y-2">
@@ -291,7 +606,9 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
                   <span className="text-xs text-blue-600">{log.activity_type}</span>
                 )}
                 {log.notes && (
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 break-words">{log.notes}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 break-words">
+                    {log.notes}
+                  </p>
                 )}
               </div>
             ))}

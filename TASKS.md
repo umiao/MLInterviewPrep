@@ -9,20 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-79, T-P0-76
-- **Description**: AC:
-- Tabs component added to NodeDetailPanel (Details | Notes | Study Log)
-- Notes tab: textarea for markdown editing + preview toggle via react-markdown
-- Auto-save on 500ms debounce via PUT /framework/nodes/{id} with {description: text}
-- Toast on save success/failure
-- Inline title edit: click title to edit, Enter to save
-- CJK text works correctly in notes
-
-Key files: src/frontend/src/components/NodeDetailPanel.tsx, new Tabs.tsx component
-
 #### T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints
 - **Priority**: P0
 - **Complexity**: M
@@ -222,6 +208,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave. AC:
 - [x] **2026-03-15** -- T-P0-79: [B2] Backend: expose description in framework tree API + extend node update schema. AC:
 - [x] **2026-03-15** -- T-P0-78: [B1] CJK font support + install recharts + react-markdown. AC:
 - [x] **2026-03-15** -- T-P0-77: [B1] Add useFilterParams hook + useDebounce hook. AC:
