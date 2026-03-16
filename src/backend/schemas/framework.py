@@ -10,6 +10,8 @@ from pydantic import BaseModel, ConfigDict, Field
 class FrameworkNodeUpdate(BaseModel):
     """Schema for partial framework node update."""
 
+    title: str | None = None
+    description: str | None = None
     status: Literal["not_started", "in_progress", "review", "mastered"] | None = None
     progress_pct: float | None = Field(default=None, ge=0, le=100)
     confidence_level: int | None = Field(default=None, ge=0, le=5)
@@ -33,6 +35,7 @@ class FrameworkNodeResponse(BaseModel):
     path: str
     depth: int
     title: str
+    description: str | None = None
     parent_id: int | None = None
     status: str = "not_started"
     progress_pct: float = 0.0

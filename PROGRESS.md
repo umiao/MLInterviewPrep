@@ -106,3 +106,10 @@
 - **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-78 --status completed`
+
+## 2026-03-15 -- [T-P0-79] Expose description in framework tree API + extend node update schema
+- **What I did**: Added `title` and `description` optional fields to `FrameworkNodeUpdate` schema. Added `description` field to `FrameworkNodeResponse` schema. Updated `_build_tree()` and PUT response dict in framework router to include `description`. Added 4 new tests: title+description update round-trip, tree includes description, description-only update, null description default.
+- **Deliverables**: src/backend/schemas/framework.py, src/backend/routers/framework.py, tests/test_router_framework.py
+- **Sanity check result**: 525/525 backend tests pass, frontend TypeScript clean, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-79 --status completed`

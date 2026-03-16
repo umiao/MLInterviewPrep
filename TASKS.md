@@ -9,19 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-79: [B2] Backend: expose description in framework tree API + extend node update schema
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-74
-- **Description**: AC:
-- PUT /api/framework/nodes/{id} accepts title and description fields
-- GET /api/framework/tree includes description in response dict
-- FrameworkNodeUpdate schema extended with optional title: str, description: str
-- Tests: verify title/description update round-trip, verify tree response includes description
-- No DB migration needed (column exists)
-
-Key files: src/backend/routers/framework.py, src/backend/schemas/framework.py
-
 #### T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave
 - **Priority**: P0
 - **Complexity**: M
@@ -235,6 +222,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-79: [B2] Backend: expose description in framework tree API + extend node update schema. AC:
 - [x] **2026-03-15** -- T-P0-78: [B1] CJK font support + install recharts + react-markdown. AC:
 - [x] **2026-03-15** -- T-P0-77: [B1] Add useFilterParams hook + useDebounce hook. AC:
 - [x] **2026-03-15** -- T-P0-76: [B1] Build shared UI components (Modal, ConfirmDialog, Badge, EmptyState, LoadingSpinner, SearchInput, Pagination). AC (REDUCED SCOPE -- build only what Batch 1 needs):
