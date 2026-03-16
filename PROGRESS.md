@@ -342,3 +342,10 @@
 - **Sanity check result**: 520/520 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-71 --status completed`
+
+## 2026-03-15 -- [T-P2-72] Add GET / root endpoint returning API info JSON
+- **What I did**: Added a `GET /` endpoint to main.py that returns JSON with API name, docs URL, and health endpoint path. Added test in test_main.py verifying 200 status and expected keys.
+- **Deliverables**: src/backend/main.py, tests/test_main.py
+- **Sanity check result**: 521/521 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-72 --status completed`

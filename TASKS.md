@@ -21,6 +21,7 @@
 
 > 55 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
 - [x] **2026-03-15** -- T-P0-71: Convert LLM callers to async + update tests. All endpoints calling llm.chat() become async def + await. extract_questions() becomes async. Update all test files for 
 - [x] **2026-03-15** -- T-P0-70: SDK migration: async LLMService + sdk_adapter. Create src/backend/services/sdk_adapter.py (SDK_AVAILABLE flag, async run_query). Rewrite LLMService with async chat(), 

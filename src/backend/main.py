@@ -119,6 +119,16 @@ async def pydantic_validation_error_handler(
     )
 
 
+@app.get("/", include_in_schema=False)
+def root() -> dict:
+    """Root endpoint with API info and navigation links."""
+    return {
+        "name": "MLE Interview Prep API",
+        "docs": app.docs_url or "/docs",
+        "health": "/api/health",
+    }
+
+
 @app.get("/api/health")
 def health_check() -> dict:
     """Health check endpoint."""

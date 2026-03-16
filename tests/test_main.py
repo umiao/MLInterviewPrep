@@ -1,6 +1,19 @@
 """Tests for FastAPI app skeleton and health endpoint (T-P0-7)."""
 
 
+class TestRootEndpoint:
+    """Root URL endpoint tests."""
+
+    def test_root_returns_api_info(self, test_client):
+        """Root URL returns JSON with API info."""
+        resp = test_client.get("/")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "name" in data
+        assert "docs" in data
+        assert "health" in data
+
+
 class TestHealthEndpoint:
     """Health check endpoint tests."""
 
