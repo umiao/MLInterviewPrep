@@ -266,3 +266,10 @@
 - **Sanity check result**: 637/637 tests pass, ruff clean, TypeScript compiles clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-99 --status completed`
+
+## 2026-03-16 -- [T-P0-100] ReadingProgress + AudioCache models + Migration v4
+- **What I did**: Created three new SQLAlchemy models in models/reading.py: ReadingProgress (tracks per-content listening progress with content_type+content_id unique constraint), ReadingSession (listening session duration/stats), AudioCache (cached TTS audio with content_type+content_id+engine+voice unique constraint and content_hash for invalidation). Added migration v4 to database.py creating all three tables. Updated models/__init__.py exports. Fixed pre-existing test_timeline idempotent assertion to use len(MIGRATIONS) instead of hardcoded count.
+- **Deliverables**: src/backend/models/reading.py (new), src/backend/database.py (modified), src/backend/models/__init__.py (modified), tests/test_reading_models.py (new), tests/test_migrations.py (modified), tests/test_timeline.py (modified)
+- **Sanity check result**: 653/653 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-100 --status completed`

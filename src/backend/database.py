@@ -167,6 +167,42 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ON interview_events(scheduled_at)",
         ],
     ),
+    (
+        4,
+        "Create reading_progress, reading_sessions, audio_cache tables",
+        [
+            "CREATE TABLE IF NOT EXISTS reading_progress ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  content_type VARCHAR NOT NULL,"
+            "  content_id INTEGER NOT NULL,"
+            "  last_chunk_index INTEGER DEFAULT 0,"
+            "  char_offset INTEGER DEFAULT 0,"
+            "  total_chars INTEGER DEFAULT 0,"
+            "  completed BOOLEAN DEFAULT 0,"
+            "  last_read_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(content_type, content_id)"
+            ")",
+            "CREATE TABLE IF NOT EXISTS reading_sessions ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,"
+            "  ended_at TIMESTAMP,"
+            "  content_items_read INTEGER DEFAULT 0,"
+            "  total_duration_seconds REAL DEFAULT 0.0,"
+            "  tts_engine VARCHAR"
+            ")",
+            "CREATE TABLE IF NOT EXISTS audio_cache ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  content_type VARCHAR NOT NULL,"
+            "  content_id INTEGER NOT NULL,"
+            "  content_hash VARCHAR NOT NULL,"
+            "  file_path TEXT NOT NULL,"
+            "  engine VARCHAR NOT NULL,"
+            "  voice VARCHAR NOT NULL,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(content_type, content_id, engine, voice)"
+            ")",
+        ],
+    ),
 ]
 
 

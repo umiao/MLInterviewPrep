@@ -134,3 +134,62 @@ class TestMigration1FrameworkNodeId:
         insp = inspect(old_schema_db)
         columns = {col["name"] for col in insp.get_columns("problems")}
         assert "framework_node_id" not in columns
+
+
+class TestMigration4ReadingTables:
+    """Test migration 4: create reading_progress, reading_sessions, audio_cache."""
+
+    def test_tables_created(self, old_schema_db):
+        """After migration, all three reading tables exist."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        table_names = set(insp.get_table_names())
+        assert "reading_progress" in table_names
+        assert "reading_sessions" in table_names
+        assert "audio_cache" in table_names
+
+    def test_reading_progress_columns(self, old_schema_db):
+        """reading_progress table has expected columns."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("reading_progress")}
+        expected = {
+            "id", "content_type", "content_id", "last_chunk_index",
+            "char_offset", "total_chars", "completed", "last_read_at",
+        }
+        assert expected <= columns
+
+    def test_audio_cache_columns(self, old_schema_db):
+        """audio_cache table has expected columns."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("audio_cache")}
+        expected = {
+            "id", "content_type", "content_id", "content_hash",
+            "file_path", "engine", "voice", "created_at",
+        }
+        assert expected <= columns
+
+    def test_schema_version_4_recorded(self, old_schema_db):
+        """Migration version 4 is recorded in schema_versions."""
+        _run_migrations(old_schema_db)
+        with old_schema_db.connect() as conn:
+            rows = conn.execute(
+                text("SELECT version FROM schema_versions")
+            ).fetchall()
+        assert 4 in {row[0] for row in rows}
+
+    def test_idempotent(self, old_schema_db):
+        """Running migration 4 twice is safe."""
+        _run_migrations(old_schema_db)
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        assert "reading_progress" in set(insp.get_table_names())
+
+    def test_tables_missing_before_migration(self, old_schema_db):
+        """Sanity check: reading tables do NOT exist before migration."""
+        insp = inspect(old_schema_db)
+        table_names = set(insp.get_table_names())
+        assert "reading_progress" not in table_names
+        assert "reading_sessions" not in table_names
+        assert "audio_cache" not in table_names

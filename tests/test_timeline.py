@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.pool import StaticPool
 
-from src.backend.database import _run_migrations
+from src.backend.database import MIGRATIONS, _run_migrations
 
 # ---- Fixtures ----
 
@@ -361,7 +361,7 @@ class TestMigration2InterviewEvents:
             rows = conn.execute(
                 text("SELECT version FROM schema_versions")
             ).fetchall()
-        assert len(rows) == 3  # v1 + v2 + v3
+        assert len(rows) == len(MIGRATIONS)
 
     def test_table_missing_before(self, pre_v2_db):
         """Sanity: interview_events does not exist before migration."""

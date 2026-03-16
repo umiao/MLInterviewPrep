@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-100: ReadingProgress + AudioCache models + Migration v4
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-99
-- **Description**: New models in models/reading.py: ReadingProgress (content_type, content_id, last_chunk_index, char_offset, total_chars, completed, last_read_at; unique on content_type+content_id), ReadingSession (started_at, ended_at, content_items_read, total_duration_seconds, tts_engine), AudioCache (content_type, content_id, content_hash SHA-256, file_path, engine, voice; unique on content_type+content_id+engine+voice -- NO rate, playback speed is frontend-controlled). Migration v4 in database.py MIGRATIONS. AC: (1) Tables created on init_db() (2) Migration v4 applies on existing DB (3) Migration test passes (4) Cache invalidation test: change content -> hash mismatch -> regenerate
-
 #### T-P0-101: Content Pipeline: queue ranking, preprocessing v2, chunking
 - **Priority**: P0
 - **Complexity**: M
@@ -104,6 +98,7 @@
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P0-99: TTS MVP: edge-tts -> MP3 -> <audio> playback for framework nodes. Minimal vertical slice: pick one framework node -> preprocess markdown (v1: strip #, **, *, _, links, skip code blocks) 
+- [x] **2026-03-16** -- T-P0-100: ReadingProgress + AudioCache models + Migration v4. New models in models/reading.py: ReadingProgress (content_type, content_id, last_chunk_index, char_offset, total_chars, 
 - [x] **2026-03-15** -- T-P2-94: [B7] Frontend: Analytics deep-dive (radar chart, scatter plot, trend lines). AC:\n- Pattern comfort radar chart (Recharts RadarChart) on Problems page or Dashboard\n- Framework confidence vs import
 - [x] **2026-03-15** -- T-P2-93: [B6] Frontend: QA session summarize button in ReviewPanel. AC:
 - [x] **2026-03-15** -- T-P2-92: [B6] Frontend: Settings page (import/export + scraper management). AC:
