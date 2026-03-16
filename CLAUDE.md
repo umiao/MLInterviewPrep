@@ -103,6 +103,11 @@
   and config between the two.  Every delta is a finding.  Do NOT skip to
   output-format analysis or external doc research before completing this diff.
   Analysis of "why" comes AFTER identifying "what's different."
+- **Schema migration rule**: When adding a column to an existing SQLAlchemy model,
+  you MUST also: (1) add a versioned migration in `_run_migrations()` in
+  `database.py`, (2) add a migration-specific test that creates old schema,
+  runs migration, verifies new schema. `create_all()` only creates new tables --
+  it does NOT alter existing ones. In-memory test DBs hide this gap.
 
 ### Task Planning Mode
 When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":
