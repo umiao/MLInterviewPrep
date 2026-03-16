@@ -236,6 +236,203 @@ def get_dashboard():
         db.close()
 
 
+@app.get("/api/dashboard/today")
+def get_dashboard_today():
+    """Today's focus data: due reviews, weakest topic, streak days."""
+    from src.backend.database import SessionLocal
+    from src.backend.models.framework import FrameworkNode, StudyLog
+    from src.backend.models.problem import Attempt, Problem
+
+    db = SessionLocal()
+    try:
+        now = datetime.utcnow()
+
+        # Due reviews count
+        due_reviews = (
+            db.query(func.count(Problem.id))
+            .filter(Problem.next_review_at.isnot(None), Problem.next_review_at <= now)
+            .scalar()
+            or 0
+        )
+
+        # Suggested focus topic: leaf node with lowest progress_pct among
+        # nodes that have importance > 0 and are not mastered
+        weakest_node = (
+            db.query(FrameworkNode)
+            .filter(
+                FrameworkNode.importance > 0,
+                FrameworkNode.status != "mastered",
+            )
+            .order_by(FrameworkNode.progress_pct.asc(), FrameworkNode.importance.desc())
+            .first()
+        )
+        suggested_focus_topic = None
+        if weakest_node:
+            suggested_focus_topic = {
+                "id": weakest_node.id,
+                "title": weakest_node.title,
+                "path": weakest_node.path,
+                "progress_pct": weakest_node.progress_pct,
+            }
+
+        # Streak days: consecutive days (ending today) with any activity
+        # Activity = attempt or study log
+        streak_days = 0
+        check_date = date.today()
+        while True:
+            has_attempt = (
+                db.query(func.count(Attempt.id))
+                .filter(
+                    func.date(Attempt.started_at) == check_date,
+                )
+                .scalar()
+                or 0
+            )
+            has_study = (
+                db.query(func.count(StudyLog.id))
+                .filter(StudyLog.date == check_date)
+                .scalar()
+                or 0
+            )
+            if has_attempt > 0 or has_study > 0:
+                streak_days += 1
+                check_date -= timedelta(days=1)
+            else:
+                break
+
+        return {
+            "due_reviews": due_reviews,
+            "suggested_focus_topic": suggested_focus_topic,
+            "streak_days": streak_days,
+        }
+    finally:
+        db.close()
+
+
+@app.get("/api/dashboard/activity")
+def get_dashboard_activity():
+    """Activity data for the last 30 days.
+
+    Returns a list of {date, attempts, study_minutes, questions_added}
+    for each of the last 30 days.
+    """
+    from src.backend.database import SessionLocal
+    from src.backend.models.framework import StudyLog
+    from src.backend.models.problem import Attempt
+    from src.backend.models.scraper import InterviewQuestion
+
+    db = SessionLocal()
+    try:
+        today = date.today()
+        start_date = today - timedelta(days=29)  # 30 days including today
+
+        # Attempts per day
+        attempt_rows = (
+            db.query(
+                func.date(Attempt.started_at).label("day"),
+                func.count(Attempt.id).label("cnt"),
+            )
+            .filter(func.date(Attempt.started_at) >= start_date)
+            .group_by(func.date(Attempt.started_at))
+            .all()
+        )
+        attempts_by_day = {str(row.day): row.cnt for row in attempt_rows}
+
+        # Study minutes per day
+        study_rows = (
+            db.query(
+                StudyLog.date.label("day"),
+                func.sum(StudyLog.duration_minutes).label("mins"),
+            )
+            .filter(StudyLog.date >= start_date)
+            .group_by(StudyLog.date)
+            .all()
+        )
+        study_by_day = {str(row.day): row.mins or 0 for row in study_rows}
+
+        # Questions added per day
+        question_rows = (
+            db.query(
+                func.date(InterviewQuestion.created_at).label("day"),
+                func.count(InterviewQuestion.id).label("cnt"),
+            )
+            .filter(func.date(InterviewQuestion.created_at) >= start_date)
+            .group_by(func.date(InterviewQuestion.created_at))
+            .all()
+        )
+        questions_by_day = {str(row.day): row.cnt for row in question_rows}
+
+        # Build result for all 30 days
+        result = []
+        for i in range(30):
+            d = start_date + timedelta(days=i)
+            d_str = str(d)
+            result.append({
+                "date": d_str,
+                "attempts": attempts_by_day.get(d_str, 0),
+                "study_minutes": study_by_day.get(d_str, 0),
+                "questions_added": questions_by_day.get(d_str, 0),
+            })
+
+        return result
+    finally:
+        db.close()
+
+
+@app.get("/api/dashboard/summary")
+def get_dashboard_summary():
+    """Summary stats: problems, framework progress, company counts by status."""
+    from src.backend.database import SessionLocal
+    from src.backend.models.company import Company
+    from src.backend.models.framework import FrameworkNode
+    from src.backend.models.problem import Problem
+
+    db = SessionLocal()
+    try:
+        # Problems
+        total_problems = db.query(func.count(Problem.id)).scalar() or 0
+        completed = (
+            db.query(func.count(Problem.id))
+            .filter(Problem.is_completed.is_(True))
+            .scalar()
+            or 0
+        )
+
+        # Framework overall progress
+        weighted_sum = (
+            db.query(func.sum(FrameworkNode.progress_pct * FrameworkNode.importance))
+            .filter(FrameworkNode.importance > 0)
+            .scalar()
+            or 0
+        )
+        total_importance = (
+            db.query(func.sum(FrameworkNode.importance))
+            .filter(FrameworkNode.importance > 0)
+            .scalar()
+            or 1
+        )
+        overall_progress = round(weighted_sum / total_importance, 1)
+
+        # Company counts by status
+        status_rows = (
+            db.query(Company.status, func.count(Company.id))
+            .group_by(Company.status)
+            .all()
+        )
+        company_counts = {row[0]: row[1] for row in status_rows}
+
+        return {
+            "problems": {
+                "total": total_problems,
+                "completed": completed,
+            },
+            "framework_overall_progress_pct": overall_progress,
+            "company_counts_by_status": company_counts,
+        }
+    finally:
+        db.close()
+
+
 def _dt(val: datetime | None) -> str | None:
     """Serialize datetime to ISO 8601 string."""
     return val.isoformat() if val else None

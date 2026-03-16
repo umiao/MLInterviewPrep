@@ -148,3 +148,10 @@
 - **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-84 --status completed`
+
+## 2026-03-15 -- [T-P1-85] Split dashboard API into today/activity/summary endpoints
+- **What I did**: Added three new dashboard sub-endpoints: GET /api/dashboard/today (due_reviews, suggested_focus_topic, streak_days), GET /api/dashboard/activity (30-day daily breakdown of attempts, study_minutes, questions_added), GET /api/dashboard/summary (problem counts, framework progress, company counts by status). Kept original GET /api/dashboard for backward compat.
+- **Deliverables**: src/backend/main.py (updated), tests/test_dashboard_split.py (new, 17 tests)
+- **Sanity check result**: 551/551 backend tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-85 --status completed`

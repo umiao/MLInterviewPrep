@@ -11,20 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-81
-- **Description**: AC:
-- GET /api/dashboard/today: due_reviews count, suggested_focus_topic (weakest), streak_days
-- GET /api/dashboard/activity: [{date, attempts, study_minutes, questions_added}] for last 30 days
-- GET /api/dashboard/summary: problems (total/completed), framework overall_progress_pct, company counts by status
-- Keep GET /api/dashboard for backward compat (aggregates the 3 sub-endpoints)
-- Tests for each new endpoint
-- streak_days: count consecutive days with any activity (attempt or study log)
-
-Key files: src/backend/main.py
-
 #### T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress
 - **Priority**: P1
 - **Complexity**: M
@@ -151,6 +137,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints. AC:
 - [x] **2026-03-15** -- T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel. AC:
 - [x] **2026-03-15** -- T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search. AC:
 - [x] **2026-03-15** -- T-P0-82: [B3] Frontend: FrameworkNodePicker component. AC:
