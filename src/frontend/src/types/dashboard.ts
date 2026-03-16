@@ -1,4 +1,6 @@
-/** Response shape for GET /api/dashboard */
+/** Response shapes for dashboard API endpoints. */
+
+/* --- Legacy combined endpoint: GET /api/dashboard --- */
 
 export interface DashboardProblems {
   total: number;
@@ -37,4 +39,41 @@ export interface DashboardData {
   recent_activity: DashboardActivity;
   company_deadlines: CompanyDeadline[];
   scraper: DashboardScraper;
+}
+
+/* --- Split endpoint: GET /api/dashboard/today --- */
+
+export interface FocusTopic {
+  id: number;
+  title: string;
+  path: string;
+  progress_pct: number;
+}
+
+export interface DashboardToday {
+  due_reviews: number;
+  suggested_focus_topic: FocusTopic | null;
+  streak_days: number;
+}
+
+/* --- Split endpoint: GET /api/dashboard/activity --- */
+
+export interface ActivityDay {
+  date: string;
+  attempts: number;
+  study_minutes: number;
+  questions_added: number;
+}
+
+/** GET /api/dashboard/activity returns ActivityDay[] */
+
+/* --- Split endpoint: GET /api/dashboard/summary --- */
+
+export interface DashboardSummary {
+  problems: {
+    total: number;
+    completed: number;
+  };
+  framework_overall_progress_pct: number;
+  company_counts_by_status: Record<string, number>;
 }

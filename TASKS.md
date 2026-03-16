@@ -11,21 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-85, T-P0-78, T-P0-74
-- **Description**: AC:
-- Row 1: Today Focus cards (3-col): Due Reviews (clickable -> /problems?review=due), Weakest Topic (clickable -> /framework), Streak days
-- Row 2 left: WeeklyActivityChart (Recharts BarChart, stacked attempts + study mins, 7 days)
-- Row 2 right: Framework Pillar Progress Bars (existing PillarBar, click navigates to Framework page)
-- Row 3: Company Status Summary (compact counts per status)
-- No heatmap, no pie chart. Clean and actionable.
-- Uses React Query for all 3 dashboard endpoints
-- Loading skeletons instead of Loading... text
-
-Key files: src/frontend/src/pages/Dashboard.tsx (rewrite), new components/charts/WeeklyActivityChart.tsx
-
 #### T-P1-87: [B5] Backend: DELETE companies/{id}, POST/DELETE questions, extend PUT questions/{id}
 - **Priority**: P1
 - **Complexity**: M
@@ -137,6 +122,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress. AC:
 - [x] **2026-03-15** -- T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints. AC:
 - [x] **2026-03-15** -- T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel. AC:
 - [x] **2026-03-15** -- T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search. AC:

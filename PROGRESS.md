@@ -155,3 +155,10 @@
 - **Sanity check result**: 551/551 backend tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-85 --status completed`
+
+## 2026-03-15 -- [T-P1-86] Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress
+- **What I did**: Rewrote Dashboard.tsx to use all 3 split dashboard endpoints (today/activity/summary) plus framework tree. New layout: Row 1 = Today Focus cards (Due Reviews clickable -> /problems?review=due, Weakest Topic clickable -> /framework, Streak days). Row 2 = WeeklyActivityChart (Recharts stacked BarChart, 7 days) + Framework Pillar Progress bars (clickable -> /framework). Row 3 = Company Pipeline status summary with counts per status. Added loading skeletons for all sections. Created new components: WeeklyActivityChart.tsx, Skeleton.tsx.
+- **Deliverables**: src/frontend/src/pages/Dashboard.tsx (rewritten), src/frontend/src/components/charts/WeeklyActivityChart.tsx (new), src/frontend/src/components/ui/Skeleton.tsx (new), src/frontend/src/types/dashboard.ts (updated with split endpoint types)
+- **Sanity check result**: 551/551 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-86 --status completed`
