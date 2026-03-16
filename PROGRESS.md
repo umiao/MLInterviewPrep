@@ -287,3 +287,10 @@
 - **Sanity check result**: 710/710 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-102 --status completed`
+
+## 2026-03-16 -- [T-P1-103] TTS Engine abstraction: EdgeTTS + OpenAI + Browser engines
+- **What I did**: Refactored services/tts_engine.py into ABC TTSEngine with synthesize_to_file + voice_options. Implemented EdgeTTSEngine (refactored from MVP, lazy edge-tts import, file caching), OpenAITTSEngine (httpx async POST to /v1/audio/speech, OPENAI_API_KEY validation, file caching), BrowserTTSEngine (returns {mode: "browser", text: ...} for client-side SpeechSynthesis). Added factory get_tts_engine(name) with settings default. Added synthesize_with_fallback() that auto-falls back to browser on engine failure. Updated routers/reading.py synthesize endpoint to use engine abstraction with browser mode support. Added OPENAI_API_KEY to Settings. Updated SynthesizeRequest with engine field, SynthesizeResponse with mode/text fields.
+- **Deliverables**: src/backend/services/tts_engine.py (rewritten), src/backend/config.py (OPENAI_API_KEY), src/backend/routers/reading.py (updated), src/backend/schemas/reading.py (updated), tests/test_tts_engine.py (rewritten - 28 tests), tests/test_router_reading.py (updated mocks)
+- **Sanity check result**: 733/733 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-103 --status completed`

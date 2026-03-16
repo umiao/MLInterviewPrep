@@ -32,7 +32,7 @@ from src.backend.services.content_pipeline import (
 from src.backend.services.tts_engine import (
     compute_cache_key,
     get_cached_path,
-    synthesize_text,
+    synthesize_with_fallback,
 )
 
 logger = logging.getLogger(__name__)
@@ -327,11 +327,22 @@ async def synthesize(
         raise HTTPException(status_code=400, detail="No speakable text after preprocessing")
 
     from src.backend.config import get_settings
+    from src.backend.services.tts_engine import get_tts_engine
 
     settings = get_settings()
+    engine_name = request.engine or settings.TTS_ENGINE
+    engine = get_tts_engine(engine_name)
     voice = request.voice or settings.TTS_VOICE
     rate = request.rate or settings.TTS_RATE
     content_hash = compute_content_hash(raw_text)
+
+    # Browser engine: return text immediately, no caching needed
+    if engine.name == "browser":
+        return SynthesizeResponse(
+            mode="browser",
+            text=processed_text,
+            content_length=len(processed_text),
+        )
 
     # Check AudioCache model for existing cache entry
     cache_entry = (
@@ -339,7 +350,7 @@ async def synthesize(
         .filter(
             AudioCache.content_type == request.content_type,
             AudioCache.content_id == request.content_id,
-            AudioCache.engine == "edge_tts",
+            AudioCache.engine == engine.name,
             AudioCache.voice == voice,
         )
         .first()
@@ -368,10 +379,17 @@ async def synthesize(
         async def _run_synthesis() -> None:
             """Background synthesis task."""
             try:
-                mp3_path = await synthesize_text(processed_text, voice=voice, rate=rate)
-                audio_url = f"/api/reading/audio/{mp3_path.stem}"
-                _jobs[job_id]["status"] = "completed"
-                _jobs[job_id]["audio_url"] = audio_url
+                result = await synthesize_with_fallback(
+                    processed_text, voice=voice, rate=rate, engine_name=engine_name,
+                )
+                if result.mode == "browser":
+                    _jobs[job_id]["status"] = "completed"
+                    _jobs[job_id]["mode"] = "browser"
+                    _jobs[job_id]["text"] = result.text
+                else:
+                    audio_url = f"/api/reading/audio/{result.file_path.stem}"
+                    _jobs[job_id]["status"] = "completed"
+                    _jobs[job_id]["audio_url"] = audio_url
             except Exception as exc:
                 logger.error("Async synthesis failed for job %s: %s", job_id, exc)
                 _jobs[job_id]["status"] = "failed"
@@ -391,7 +409,17 @@ async def synthesize(
         )
 
     # Synchronous synthesis (short content or cache hit)
-    mp3_path = await synthesize_text(processed_text, voice=voice, rate=rate)
+    result = await synthesize_with_fallback(
+        processed_text, voice=voice, rate=rate, engine_name=engine_name,
+    )
+
+    # Browser fallback case
+    if result.mode == "browser":
+        return SynthesizeResponse(
+            mode="browser",
+            text=result.text,
+            content_length=len(processed_text),
+        )
 
     # Upsert AudioCache entry
     if cache_entry is None:
@@ -399,15 +427,16 @@ async def synthesize(
             content_type=request.content_type,
             content_id=request.content_id,
             content_hash=content_hash,
-            file_path=str(mp3_path),
-            engine="edge_tts",
+            file_path=str(result.file_path),
+            engine=engine.name,
             voice=voice,
         )
         db.add(cache_entry)
         db.commit()
 
-    audio_url = f"/api/reading/audio/{mp3_path.stem}"
+    audio_url = f"/api/reading/audio/{result.file_path.stem}"
     return SynthesizeResponse(
+        mode="file",
         audio_url=audio_url,
         cache_hit=cache_hit,
         content_length=len(processed_text),

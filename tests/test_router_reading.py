@@ -8,6 +8,7 @@ from unittest.mock import AsyncMock, patch
 from src.backend.models.company import Company
 from src.backend.models.framework import FrameworkNode
 from src.backend.models.reading import AudioCache, ReadingProgress
+from src.backend.services.tts_engine import SynthesisResult
 
 
 def _seed_node(db, title="DP", path="coding/dp", description="Dynamic programming overview."):
@@ -338,14 +339,14 @@ class TestSynthesize:
         })
         assert resp.status_code == 422
 
-    @patch("src.backend.routers.reading.synthesize_text", new_callable=AsyncMock)
+    @patch("src.backend.routers.reading.synthesize_with_fallback", new_callable=AsyncMock)
     def test_synthesize_success(self, mock_synth, test_client, db_session, tmp_path):
         """Successful synthesis returns audio URL."""
         node = _seed_node(db_session)
 
         fake_mp3 = tmp_path / "abc123.mp3"
         fake_mp3.write_bytes(b"\xff\xfb\x90\x00" * 100)
-        mock_synth.return_value = fake_mp3
+        mock_synth.return_value = SynthesisResult(mode="file", file_path=fake_mp3)
 
         resp = test_client.post("/api/reading/synthesize", json={
             "content_type": "framework_node",
@@ -353,20 +354,20 @@ class TestSynthesize:
         })
         assert resp.status_code == 200
         data = resp.json()
-        assert "audio_url" in data
+        assert data["mode"] == "file"
         assert data["audio_url"].startswith("/api/reading/audio/")
         assert data["content_length"] > 0
         assert isinstance(data["cache_hit"], bool)
         mock_synth.assert_called_once()
 
-    @patch("src.backend.routers.reading.synthesize_text", new_callable=AsyncMock)
+    @patch("src.backend.routers.reading.synthesize_with_fallback", new_callable=AsyncMock)
     def test_synthesize_creates_audio_cache_entry(self, mock_synth, test_client, db_session, tmp_path):
         """Synthesis creates an AudioCache DB entry."""
         node = _seed_node(db_session)
 
         fake_mp3 = tmp_path / "cache_entry.mp3"
         fake_mp3.write_bytes(b"\xff\xfb\x90\x00" * 50)
-        mock_synth.return_value = fake_mp3
+        mock_synth.return_value = SynthesisResult(mode="file", file_path=fake_mp3)
 
         resp = test_client.post("/api/reading/synthesize", json={
             "content_type": "framework_node",
@@ -383,7 +384,7 @@ class TestSynthesize:
         assert cache is not None
         assert len(cache.content_hash) == 64
 
-    @patch("src.backend.routers.reading.synthesize_text", new_callable=AsyncMock)
+    @patch("src.backend.routers.reading.synthesize_with_fallback", new_callable=AsyncMock)
     def test_synthesize_cache_invalidation_on_hash_change(
         self, mock_synth, test_client, db_session, tmp_path,
     ):
@@ -404,7 +405,7 @@ class TestSynthesize:
 
         fake_mp3 = tmp_path / "new_cache.mp3"
         fake_mp3.write_bytes(b"\xff\xfb\x90\x00" * 50)
-        mock_synth.return_value = fake_mp3
+        mock_synth.return_value = SynthesisResult(mode="file", file_path=fake_mp3)
 
         resp = test_client.post("/api/reading/synthesize", json={
             "content_type": "framework_node",
@@ -421,7 +422,7 @@ class TestSynthesize:
         assert len(caches) == 1
         assert caches[0].content_hash != "stale_hash_that_will_not_match"
 
-    @patch("src.backend.routers.reading.synthesize_text", new_callable=AsyncMock)
+    @patch("src.backend.routers.reading.synthesize_with_fallback", new_callable=AsyncMock)
     def test_synthesize_long_content_returns_202(
         self, mock_synth, test_client, db_session,
     ):
@@ -439,14 +440,14 @@ class TestSynthesize:
         assert data["status"] == "pending"
         assert data["content_length"] >= 2000
 
-    @patch("src.backend.routers.reading.synthesize_text", new_callable=AsyncMock)
+    @patch("src.backend.routers.reading.synthesize_with_fallback", new_callable=AsyncMock)
     def test_synthesize_prep_notes(self, mock_synth, test_client, db_session, tmp_path):
         """Synthesis works for prep_notes content type."""
         company = _seed_company(db_session)
 
         fake_mp3 = tmp_path / "prep.mp3"
         fake_mp3.write_bytes(b"\xff\xfb\x90\x00" * 50)
-        mock_synth.return_value = fake_mp3
+        mock_synth.return_value = SynthesisResult(mode="file", file_path=fake_mp3)
 
         resp = test_client.post("/api/reading/synthesize", json={
             "content_type": "prep_notes",
@@ -467,7 +468,7 @@ class TestJobPolling:
         resp = test_client.get("/api/reading/jobs/nonexistent-uuid")
         assert resp.status_code == 404
 
-    @patch("src.backend.routers.reading.synthesize_text", new_callable=AsyncMock)
+    @patch("src.backend.routers.reading.synthesize_with_fallback", new_callable=AsyncMock)
     def test_job_created_on_async_synthesize(
         self, mock_synth, test_client, db_session,
     ):

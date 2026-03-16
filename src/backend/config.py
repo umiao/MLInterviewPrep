@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""  # optional, default empty string
     LLM_MODEL: str = "claude-sonnet-4-20250514"
     LLM_BACKEND: str = "auto"  # 'auto', 'sdk', or 'anthropic'
+    OPENAI_API_KEY: str = ""  # optional, for OpenAI TTS engine
     CORS_ORIGINS: list[str] = ["http://localhost:5173"]
     DEBUG: bool = True
 

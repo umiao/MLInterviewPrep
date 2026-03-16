@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-103: TTS Engine abstraction: EdgeTTS + OpenAI + Browser engines
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-99
-- **Description**: Refactor services/tts_engine.py: ABC TTSEngine with synthesize_to_file + voice_options. EdgeTTSEngine (refactor from MVP), OpenAITTSEngine (httpx async, OPENAI_API_KEY), BrowserTTSEngine (returns text JSON, frontend speaks). Factory get_tts_engine(name). Add OPENAI_API_KEY to Settings. Browser engine returns {mode: browser, text: ...} instead of audio URL. AC: EdgeTTS produces MP3, OpenAI mocked + API call verified, Browser returns text, factory correct per config, fallback test: edge-tts network error -> returns browser mode
-
 #### T-P1-104: Frontend Audio Player + Radio Mode (core playback)
 - **Priority**: P1
 - **Complexity**: M
@@ -85,6 +79,7 @@
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-103: TTS Engine abstraction: EdgeTTS + OpenAI + Browser engines. Refactor services/tts_engine.py: ABC TTSEngine with synthesize_to_file + voice_options. EdgeTTSEngine (refactor from MVP
 - [x] **2026-03-16** -- T-P0-99: TTS MVP: edge-tts -> MP3 -> <audio> playback for framework nodes. Minimal vertical slice: pick one framework node -> preprocess markdown (v1: strip #, **, *, _, links, skip code blocks) 
 - [x] **2026-03-16** -- T-P0-102: Reading REST endpoints: queue, progress, content, async synthesize. Expand routers/reading.py + new schemas/reading.py: GET /api/reading/queue (ranked with progress), GET /api/reading/prog
 - [x] **2026-03-16** -- T-P0-101: Content Pipeline: queue ranking, preprocessing v2, chunking. Expand services/content_pipeline.py: (1) get_reading_queue(db, company_ids, days_until_interview, limit=20) - reuse comp

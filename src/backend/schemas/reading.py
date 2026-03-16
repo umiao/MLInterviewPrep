@@ -16,13 +16,16 @@ class SynthesizeRequest(BaseModel):
     content_id: int
     voice: str | None = None
     rate: str | None = None
+    engine: str | None = None
 
 
 class SynthesizeResponse(BaseModel):
     """Response with audio URL after synthesis."""
 
-    audio_url: str
-    cache_hit: bool
+    mode: str = Field(description="'file' for audio URL, 'browser' for client-side TTS")
+    audio_url: str | None = None
+    text: str | None = None
+    cache_hit: bool = False
     content_length: int = Field(description="Length of preprocessed text in characters")
 
 
