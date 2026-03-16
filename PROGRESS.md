@@ -266,3 +266,10 @@
 - **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-106 --status completed`
+
+## 2026-03-16 -- [T-P1-107] Study Radio page: queue management, now playing, history
+- **What I did**: Created StudyRadio.tsx page at /radio with four sections: (1) Quick Start with company filter dropdown, TTS engine selector, Start Radio button, and auto-advance toggle. (2) Now Playing section with transport controls (prev/play-pause/next), title+badge, progress bar with time display, and queue position indicator. (3) Queue section showing ranked pending items with urgency labels (High/Med/Low), content-type badges, progress indicators (Not started/percentage/Done), and per-item Play buttons. Current item highlighted in green. (4) History section showing completed items with Replay buttons. Added route in App.tsx and nav item in Sidebar.tsx.
+- **Deliverables**: src/frontend/src/pages/StudyRadio.tsx (new), src/frontend/src/App.tsx (updated), src/frontend/src/components/Sidebar.tsx (updated)
+- **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-107 --status completed`

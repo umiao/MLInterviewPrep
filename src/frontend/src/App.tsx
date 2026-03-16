@@ -11,6 +11,7 @@ import Companies from "./pages/Companies";
 import Settings from "./pages/Settings";
 import Analytics from "./pages/Analytics";
 import PrepNotesPage from "./pages/PrepNotesPage";
+import StudyRadio from "./pages/StudyRadio";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ export default function App() {
                 <Route path="questions" element={<Questions />} />
                 <Route path="companies" element={<Companies />} />
                 <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />
+                <Route path="radio" element={<StudyRadio />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
