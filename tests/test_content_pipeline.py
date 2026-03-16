@@ -1,10 +1,12 @@
 """Tests for content_pipeline preprocessing, chunking, queue, and content retrieval."""
 import json
+from datetime import UTC, datetime, timedelta
 
 from src.backend.models.company import Company
 from src.backend.models.framework import FrameworkNode
 from src.backend.models.problem import Problem
 from src.backend.models.reading import ReadingProgress
+from src.backend.models.timeline import InterviewEvent
 from src.backend.services.content_pipeline import (
     CONTENT_TYPE_FRAMEWORK_NODE,
     CONTENT_TYPE_INTERVIEW_QUESTION,
@@ -12,6 +14,7 @@ from src.backend.services.content_pipeline import (
     chunk_text,
     compute_content_hash,
     get_content_text,
+    get_interview_context,
     get_reading_queue,
     preprocess_for_tts,
 )
@@ -568,3 +571,247 @@ def test_reading_queue_all_three_types(db_session):
     assert CONTENT_TYPE_FRAMEWORK_NODE in types_in_queue
     assert CONTENT_TYPE_PREP_NOTES in types_in_queue
     assert CONTENT_TYPE_INTERVIEW_QUESTION in types_in_queue
+
+
+# ---------------------------------------------------------------------------
+# get_interview_context tests
+# ---------------------------------------------------------------------------
+def test_interview_context_no_events(db_session):
+    """No upcoming events returns empty context with defaults."""
+    ctx = get_interview_context(db_session)
+    assert ctx.company_ids == []
+    assert ctx.days_until_soonest == 30
+    assert ctx.imminent_company_ids == []
+
+
+def test_interview_context_with_upcoming(db_session):
+    """Upcoming interviews populate company_ids and days_until_soonest."""
+    company = Company(name="LinkedIn")
+    db_session.add(company)
+    db_session.commit()
+    db_session.refresh(company)
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    event = InterviewEvent(
+        company_id=company.id,
+        company_name="LinkedIn",
+        event_type="hr_call",
+        title="HR Phone Screen",
+        scheduled_at=datetime(2026, 3, 17, 18, 30, tzinfo=UTC),
+        status="upcoming",
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    ctx = get_interview_context(db_session, now=now)
+    assert company.id in ctx.company_ids
+    assert ctx.days_until_soonest == 1
+    assert company.id in ctx.imminent_company_ids
+
+
+def test_interview_context_ignores_completed(db_session):
+    """Completed/cancelled events are not included."""
+    company = Company(name="Google")
+    db_session.add(company)
+    db_session.commit()
+    db_session.refresh(company)
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    event = InterviewEvent(
+        company_id=company.id,
+        company_name="Google",
+        event_type="technical",
+        title="Tech Interview",
+        scheduled_at=datetime(2026, 3, 20, 14, 0, tzinfo=UTC),
+        status="completed",
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    ctx = get_interview_context(db_session, now=now)
+    assert ctx.company_ids == []
+
+
+def test_interview_context_imminent_threshold(db_session):
+    """Only interviews < 3 days away are in imminent_company_ids."""
+    near_co = Company(name="NearCo")
+    far_co = Company(name="FarCo")
+    db_session.add_all([near_co, far_co])
+    db_session.commit()
+    db_session.refresh(near_co)
+    db_session.refresh(far_co)
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    near_event = InterviewEvent(
+        company_id=near_co.id,
+        company_name="NearCo",
+        event_type="hr_call",
+        title="HR Call",
+        scheduled_at=now + timedelta(days=1),
+        status="upcoming",
+    )
+    far_event = InterviewEvent(
+        company_id=far_co.id,
+        company_name="FarCo",
+        event_type="technical",
+        title="Tech Screen",
+        scheduled_at=now + timedelta(days=10),
+        status="upcoming",
+    )
+    db_session.add_all([near_event, far_event])
+    db_session.commit()
+
+    ctx = get_interview_context(db_session, now=now)
+    assert near_co.id in ctx.imminent_company_ids
+    assert far_co.id not in ctx.imminent_company_ids
+    # Both should be in company_ids
+    assert near_co.id in ctx.company_ids
+    assert far_co.id in ctx.company_ids
+
+
+# ---------------------------------------------------------------------------
+# Interview-aware queue ordering tests
+# ---------------------------------------------------------------------------
+def test_queue_auto_detects_interview_company(db_session):
+    """Queue auto-populates company_ids from upcoming interview events."""
+    company = Company(name="LinkedIn", prep_notes="Study distributed systems.")
+    db_session.add(company)
+    db_session.commit()
+    db_session.refresh(company)
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    event = InterviewEvent(
+        company_id=company.id,
+        company_name="LinkedIn",
+        event_type="hr_call",
+        title="HR Phone Screen",
+        scheduled_at=datetime(2026, 3, 17, 18, 30, tzinfo=UTC),
+        status="upcoming",
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    # No company_ids passed -- should auto-detect LinkedIn
+    queue = get_reading_queue(db_session, now=now)
+    prep_items = [q for q in queue if q.content_type == CONTENT_TYPE_PREP_NOTES]
+    assert len(prep_items) == 1
+    assert "LinkedIn" in prep_items[0].title
+
+
+def test_queue_imminent_prep_notes_first(db_session):
+    """Prep notes for < 3 day interview appear first in queue."""
+    company = Company(name="LinkedIn", prep_notes="Study distributed systems.")
+    db_session.add(company)
+    db_session.commit()
+    db_session.refresh(company)
+
+    # High-importance framework node to compete with
+    node = FrameworkNode(
+        path="test.important",
+        depth=0,
+        title="Very Important Topic",
+        description="Critical content here.",
+        importance=2.0,
+        progress_pct=0.0,
+    )
+    db_session.add(node)
+    db_session.commit()
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    event = InterviewEvent(
+        company_id=company.id,
+        company_name="LinkedIn",
+        event_type="hr_call",
+        title="HR Phone Screen",
+        scheduled_at=datetime(2026, 3, 17, 18, 30, tzinfo=UTC),
+        status="upcoming",
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    queue = get_reading_queue(db_session, now=now)
+    assert len(queue) >= 2
+    # Prep notes for imminent interview should be first
+    assert queue[0].content_type == CONTENT_TYPE_PREP_NOTES
+    assert "LinkedIn" in queue[0].title
+
+
+def test_queue_no_interviews_falls_back(db_session):
+    """Without upcoming interviews, standard urgency ordering applies."""
+    node = FrameworkNode(
+        path="test.fallback",
+        depth=0,
+        title="Fallback Topic",
+        description="Some content.",
+        importance=1.0,
+        progress_pct=0.0,
+    )
+    company = Company(name="SomeCo", prep_notes="Notes here.")
+    db_session.add_all([node, company])
+    db_session.commit()
+
+    # No interview events -- should still return items
+    queue = get_reading_queue(db_session)
+    assert len(queue) >= 1
+    # Prep notes without interview context get standard urgency (1.0)
+    # Framework nodes with importance=1.0 should have comparable urgency
+
+
+def test_queue_explicit_ids_override_auto_detect(db_session):
+    """Explicitly passed company_ids take precedence over auto-detection."""
+    auto_co = Company(name="AutoCo", prep_notes="Auto notes.")
+    manual_co = Company(name="ManualCo", prep_notes="Manual notes.")
+    db_session.add_all([auto_co, manual_co])
+    db_session.commit()
+    db_session.refresh(auto_co)
+    db_session.refresh(manual_co)
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    event = InterviewEvent(
+        company_id=auto_co.id,
+        company_name="AutoCo",
+        event_type="hr_call",
+        title="Auto Interview",
+        scheduled_at=now + timedelta(days=1),
+        status="upcoming",
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    # Explicitly pass manual_co -- should NOT auto-detect auto_co
+    queue = get_reading_queue(db_session, company_ids=[manual_co.id], now=now)
+    prep_items = [q for q in queue if q.content_type == CONTENT_TYPE_PREP_NOTES]
+    assert len(prep_items) == 1
+    assert "ManualCo" in prep_items[0].title
+
+
+def test_queue_interview_questions_auto_detected(db_session):
+    """Interview questions for auto-detected companies appear in queue."""
+    company = Company(name="DoorDash")
+    db_session.add(company)
+    db_session.commit()
+    db_session.refresh(company)
+
+    problem = Problem(
+        title="Design Rate Limiter",
+        difficulty="hard",
+        company_tags=json.dumps(["DoorDash"]),
+    )
+    db_session.add(problem)
+
+    now = datetime(2026, 3, 16, 12, 0, tzinfo=UTC)
+    event = InterviewEvent(
+        company_id=company.id,
+        company_name="DoorDash",
+        event_type="technical",
+        title="Technical Interview",
+        scheduled_at=now + timedelta(days=10),
+        status="upcoming",
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    queue = get_reading_queue(db_session, now=now)
+    iq_items = [q for q in queue if q.content_type == CONTENT_TYPE_INTERVIEW_QUESTION]
+    assert len(iq_items) == 1
+    assert iq_items[0].title == "Design Rate Limiter"

@@ -98,15 +98,21 @@ def _get_raw_text_or_404(db: Session, content_type: str, content_id: int) -> str
 async def get_queue(
     db: Session = Depends(get_db),
     company_ids: str | None = Query(None, description="Comma-separated company IDs"),
-    days_until_interview: int = Query(30, ge=1),
+    days_until_interview: int | None = Query(None, ge=1),
     limit: int = Query(20, ge=1, le=100),
 ) -> QueueResponse:
     """Return a ranked reading queue with progress information.
 
+    When company_ids and days_until_interview are omitted, the queue
+    auto-detects upcoming interviews and prioritizes accordingly.
+    Prep notes for companies with interviews < 3 days away appear first.
+
     Args:
         db: Database session.
         company_ids: Comma-separated list of company IDs to prioritize.
+            When omitted, auto-detects from upcoming interview events.
         days_until_interview: Days until next interview for urgency calc.
+            When omitted, auto-detects from soonest interview event.
         limit: Maximum items to return.
 
     Returns:
@@ -122,12 +128,14 @@ async def get_queue(
                 detail="company_ids must be comma-separated integers",
             ) from exc
 
-    items = get_reading_queue(
-        db,
-        company_ids=parsed_ids,
-        days_until_interview=days_until_interview,
-        limit=limit,
-    )
+    kwargs: dict = {
+        "company_ids": parsed_ids,
+        "limit": limit,
+    }
+    if days_until_interview is not None:
+        kwargs["days_until_interview"] = days_until_interview
+
+    items = get_reading_queue(db, **kwargs)
 
     response_items = [
         QueueItemResponse(

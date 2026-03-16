@@ -9,7 +9,8 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -17,6 +18,7 @@ from src.backend.models.company import Company, CompanyTopicWeight
 from src.backend.models.framework import FrameworkNode
 from src.backend.models.problem import Problem
 from src.backend.models.reading import ReadingProgress
+from src.backend.models.timeline import InterviewEvent
 from src.backend.services.study_planner import compute_urgency
 
 # ---------------------------------------------------------------------------
@@ -48,6 +50,78 @@ class QueueItem:
     last_chunk_index: int = 0
     char_offset: int = 0
     completed: bool = False
+
+
+@dataclass
+class InterviewContext:
+    """Upcoming interview context derived from interview_events."""
+
+    company_ids: list[int] = field(default_factory=list)
+    days_until_soonest: int = 30
+    imminent_company_ids: list[int] = field(default_factory=list)
+
+
+def get_interview_context(
+    db: Session,
+    now: datetime | None = None,
+) -> InterviewContext:
+    """Query upcoming interviews and derive scheduling context.
+
+    Args:
+        db: Database session.
+        now: Current datetime (default: utcnow). Accepts both naive and
+            timezone-aware datetimes.
+
+    Returns:
+        InterviewContext with company_ids, days until soonest, and
+        imminent (< 3 days) company_ids.
+    """
+    if now is None:
+        now = datetime.now(UTC)
+
+    # Ensure now is timezone-aware for comparison
+    if now.tzinfo is None:
+        now = now.replace(tzinfo=UTC)
+
+    upcoming = (
+        db.query(InterviewEvent)
+        .filter(
+            InterviewEvent.status == "upcoming",
+            InterviewEvent.scheduled_at > now,
+        )
+        .order_by(InterviewEvent.scheduled_at.asc())
+        .all()
+    )
+
+    if not upcoming:
+        return InterviewContext()
+
+    ctx = InterviewContext()
+    seen_ids: set[int] = set()
+
+    for event in upcoming:
+        if event.company_id and event.company_id not in seen_ids:
+            ctx.company_ids.append(event.company_id)
+            seen_ids.add(event.company_id)
+
+    # Days until soonest interview
+    soonest = upcoming[0]
+    sched = soonest.scheduled_at
+    if sched.tzinfo is None:
+        sched = sched.replace(tzinfo=UTC)
+    delta = (sched - now).total_seconds() / 86400.0
+    ctx.days_until_soonest = max(1, int(delta))
+
+    # Imminent: interviews within 3 days
+    for event in upcoming:
+        sched = event.scheduled_at
+        if sched.tzinfo is None:
+            sched = sched.replace(tzinfo=UTC)
+        days_away = (sched - now).total_seconds() / 86400.0
+        if days_away < 3 and event.company_id and event.company_id not in set(ctx.imminent_company_ids):
+            ctx.imminent_company_ids.append(event.company_id)
+
+    return ctx
 
 
 # ---------------------------------------------------------------------------
@@ -271,23 +345,40 @@ def get_reading_queue(
     company_ids: list[int] | None = None,
     days_until_interview: int = 30,
     limit: int = 20,
+    now: datetime | None = None,
 ) -> list[QueueItem]:
     """Build a ranked reading queue from all content types.
 
-    Ranks FrameworkNodes by urgency (reusing compute_urgency from
-    study_planner), then interleaves prep_notes and interview_questions
-    for target companies.
+    Automatically queries upcoming interview events to determine which
+    companies to prioritize and how urgently. When an interview is < 3
+    days away, that company's prep_notes are boosted to the top.
+
+    Falls back to standard urgency-based ordering when no upcoming
+    interviews exist and no company_ids are provided.
 
     Args:
         db: Database session.
         company_ids: Optional list of company IDs to prioritize.
+            When None, auto-detects from upcoming interview events.
         days_until_interview: Days until next interview for urgency calc.
+            When interview context is auto-detected, this is overridden.
         limit: Maximum queue items to return.
+        now: Current datetime for interview context (default: utcnow).
 
     Returns:
         Sorted list of QueueItem objects, highest urgency first.
     """
-    company_ids = company_ids or []
+    # --- Auto-detect interview context ---
+    interview_ctx = get_interview_context(db, now=now)
+    imminent_ids: set[int] = set(interview_ctx.imminent_company_ids)
+
+    if company_ids is None and interview_ctx.company_ids:
+        # Auto-populate from upcoming interviews
+        company_ids = interview_ctx.company_ids
+        days_until_interview = interview_ctx.days_until_soonest
+    elif company_ids is None:
+        company_ids = []
+
     items: list[QueueItem] = []
 
     # --- Framework nodes (not mastered, with content) ---
@@ -351,6 +442,11 @@ def get_reading_queue(
         # Prep notes get a boost for target companies
         urgency = 2.0 if company.id in (company_ids or []) else 1.0
         urgency *= max(1.0, 30 / max(1, days_until_interview))
+
+        # Imminent interview boost: prep_notes for < 3 day interviews
+        # get a massive boost to ensure they appear first
+        if company.id in imminent_ids:
+            urgency *= 100.0
 
         items.append(QueueItem(
             content_type=CONTENT_TYPE_PREP_NOTES,

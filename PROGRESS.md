@@ -280,3 +280,10 @@
 - **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-108 --status completed`
+
+## 2026-03-16 -- [T-P2-109] Interview-aware content ordering in reading queue
+- **What I did**: Enhanced get_reading_queue() to automatically query InterviewEvent for upcoming interviews. Added get_interview_context() helper that derives company_ids, days_until_soonest, and imminent_company_ids (< 3 days). When interview is imminent, prep_notes for that company get a 100x urgency boost to appear first. Router updated to make company_ids and days_until_interview optional (auto-detected when omitted). Falls back to standard urgency ordering when no upcoming interviews exist.
+- **Deliverables**: src/backend/services/content_pipeline.py (updated), src/backend/routers/reading.py (updated), tests/test_content_pipeline.py (updated, 9 new tests)
+- **Sanity check result**: 742/742 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-109 --status completed`
