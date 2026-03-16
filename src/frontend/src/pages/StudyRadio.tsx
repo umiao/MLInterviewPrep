@@ -13,7 +13,7 @@ import { useAudioPlayerContext } from "../contexts/AudioPlayerContext";
 import { useToast } from "../contexts/ToastContext";
 import { api } from "../utils/api";
 import type { Company } from "../types/company";
-import type { AudioPlayerItem, ContentType, QueueItem, QueueResponse } from "../types/reading";
+import type { AudioPlayerItem, ContentType, ListeningStats, QueueItem, QueueResponse } from "../types/reading";
 import Badge from "../components/ui/Badge";
 
 /** Map content_type to badge config. */
@@ -81,6 +81,12 @@ export default function StudyRadio() {
   const companiesQuery = useQuery<Company[]>({
     queryKey: ["companies"],
     queryFn: () => api.get<Company[]>("/companies"),
+  });
+
+  // Fetch listening stats
+  const statsQuery = useQuery<ListeningStats>({
+    queryKey: ["reading-stats"],
+    queryFn: () => api.get<ListeningStats>("/reading/stats"),
   });
 
   // Fetch reading queue
@@ -220,6 +226,30 @@ export default function StudyRadio() {
           </p>
         )}
       </div>
+
+      {/* Listening Stats */}
+      {statsQuery.data && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <p className="text-2xl font-bold text-blue-600">{statsQuery.data.total_sessions}</p>
+            <p className="text-xs text-gray-500 mt-1">Total Sessions</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <p className="text-2xl font-bold text-green-600">
+              {Math.round(statsQuery.data.total_listening_seconds / 60)}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Total Minutes</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <p className="text-2xl font-bold text-purple-600">{statsQuery.data.total_items_listened}</p>
+            <p className="text-xs text-gray-500 mt-1">Items Listened</p>
+          </div>
+          <div className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+            <p className="text-2xl font-bold text-amber-600">{statsQuery.data.streak_days}</p>
+            <p className="text-xs text-gray-500 mt-1">Day Streak</p>
+          </div>
+        </div>
+      )}
 
       {/* Now Playing Section */}
       {currentItem && (

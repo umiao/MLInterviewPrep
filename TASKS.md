@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-111: Listening session analytics on Dashboard and StudyRadio
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Track listening sessions via ReadingSession model. POST /api/reading/sessions (create/close), GET /api/reading/stats (total time, items/day, streak). Show on Dashboard + StudyRadio page. AC: Sessions created/closed correctly, stats accurate, Dashboard shows listening time alongside study time
-
 #### T-P2-112: SSE chunked audio streaming (if latency requires it)
 - **Priority**: P2
 - **Complexity**: M
@@ -33,6 +27,7 @@
 
 > 103 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-16** -- T-P2-111: Listening session analytics on Dashboard and StudyRadio. Track listening sessions via ReadingSession model. POST /api/reading/sessions (create/close), GET /api/reading/stats (to
 - [x] **2026-03-16** -- T-P2-110: LLM-generated TTS summaries for long content. Use LLM service to create spoken-word-optimized summaries. Cache in tts_summaries table. Prompt: Rewrite for TTS narrati
 - [x] **2026-03-16** -- T-P2-109: Interview-aware content ordering in reading queue. Enhance get_reading_queue(): query interview_events for upcoming interviews, boost urgency for soonest interview company
 - [x] **2026-03-16** -- T-P1-98: Dashboard timeline prep notes modal + red dots on EventCard. ## Acceptance Criteria

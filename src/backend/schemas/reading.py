@@ -110,3 +110,41 @@ class SummaryResponse(BaseModel):
     summary_text: str
     from_cache: bool = Field(description="True if returned from cache without LLM call")
     total_chars: int = Field(description="Length of summary text in characters")
+
+
+class SessionCreateRequest(BaseModel):
+    """Request to start a new listening session."""
+
+    tts_engine: str | None = None
+
+
+class SessionCloseRequest(BaseModel):
+    """Request to close an active listening session."""
+
+    session_id: int
+    content_items_read: int = Field(ge=0, default=0)
+    total_duration_seconds: float = Field(ge=0.0, default=0.0)
+
+
+class SessionResponse(BaseModel):
+    """Response for a listening session."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    started_at: str
+    ended_at: str | None = None
+    content_items_read: int
+    total_duration_seconds: float
+    tts_engine: str | None = None
+
+
+class ListeningStatsResponse(BaseModel):
+    """Aggregated listening statistics."""
+
+    total_sessions: int = Field(description="Total number of listening sessions")
+    total_listening_seconds: float = Field(description="Sum of all session durations in seconds")
+    total_items_listened: int = Field(description="Sum of items across all sessions")
+    sessions_today: int = Field(description="Sessions started today")
+    listening_seconds_today: float = Field(description="Listening duration today in seconds")
+    streak_days: int = Field(description="Consecutive days with at least one session")

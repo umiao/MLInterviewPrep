@@ -54,3 +54,12 @@ export interface AudioPlayerItem {
 }
 
 export type PlayerStatus = "idle" | "loading" | "playing" | "paused";
+
+export interface ListeningStats {
+  total_sessions: number;
+  total_listening_seconds: number;
+  total_items_listened: number;
+  sessions_today: number;
+  listening_seconds_today: number;
+  streak_days: number;
+}

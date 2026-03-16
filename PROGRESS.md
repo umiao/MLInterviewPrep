@@ -294,3 +294,10 @@
 - **Sanity check result**: 755/755 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-110 --status completed`
+
+## 2026-03-16 -- [T-P2-111] Listening session analytics on Dashboard and StudyRadio
+- **What I did**: Added POST /reading/sessions (create), PUT /reading/sessions/{id} (close with items/duration), and GET /reading/stats (total sessions, listening time, items listened, today's stats, streak) endpoints. ReadingSession model was already in place from migration v4. Added Pydantic schemas for session create/close requests and listening stats response. Updated StudyRadio page with a 4-stat card grid (sessions, minutes, items, streak). Enhanced Dashboard's Study Radio section with today/total/streak inline stats.
+- **Deliverables**: src/backend/routers/reading.py (3 new endpoints), src/backend/schemas/reading.py (4 new schemas), src/frontend/src/types/reading.ts (ListeningStats type), src/frontend/src/pages/StudyRadio.tsx (stats grid), src/frontend/src/pages/Dashboard.tsx (inline listening stats), tests/test_listening_sessions.py (12 new tests)
+- **Sanity check result**: 767/767 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-111 --status completed`

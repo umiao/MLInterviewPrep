@@ -17,6 +17,7 @@ import type {
 import type { FrameworkNode } from "../types/framework";
 import type { InterviewEvent } from "../types/timeline";
 import type { Company } from "../types/company";
+import type { ListeningStats } from "../types/reading";
 
 /* ------------------------------------------------------------------ */
 /*  Row 1: Today Focus cards                                          */
@@ -368,6 +369,11 @@ export default function Dashboard() {
     queryFn: () => api.get<Company[]>("/companies"),
   });
 
+  const listeningStats = useQuery<ListeningStats>({
+    queryKey: ["reading-stats"],
+    queryFn: () => api.get<ListeningStats>("/reading/stats"),
+  });
+
   /* Pillars come from the framework tree (depth-0 nodes). */
   const tree = useQuery<FrameworkNode[]>({
     queryKey: ["framework", "tree"],
@@ -400,9 +406,9 @@ export default function Dashboard() {
       {/* Prep Notes quick access */}
       {companiesQuery.data && <PrepQuickAccess companies={companiesQuery.data} />}
 
-      {/* Start Radio quick action */}
+      {/* Start Radio quick action + listening stats */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
               Study Radio
@@ -427,6 +433,26 @@ export default function Dashboard() {
             {playerStatus !== "idle" ? "Go to Radio" : "Start Radio"}
           </button>
         </div>
+        {listeningStats.data && (listeningStats.data.total_sessions > 0 || listeningStats.data.sessions_today > 0) && (
+          <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-100">
+            <div className="text-center">
+              <p className="text-lg font-bold text-green-600">
+                {Math.round(listeningStats.data.listening_seconds_today / 60)}m
+              </p>
+              <p className="text-xs text-gray-400">Today</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-blue-600">
+                {Math.round(listeningStats.data.total_listening_seconds / 60)}m
+              </p>
+              <p className="text-xs text-gray-400">Total</p>
+            </div>
+            <div className="text-center">
+              <p className="text-lg font-bold text-amber-600">{listeningStats.data.streak_days}d</p>
+              <p className="text-xs text-gray-400">Streak</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {hasError && (

@@ -4,19 +4,24 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
-from src.backend.models.reading import AudioCache, ReadingProgress
+from src.backend.models.reading import AudioCache, ReadingProgress, ReadingSession
 from src.backend.schemas.reading import (
     ContentResponse,
+    ListeningStatsResponse,
     ProgressResponse,
     ProgressUpdateRequest,
     QueueItemResponse,
     QueueResponse,
+    SessionCloseRequest,
+    SessionCreateRequest,
+    SessionResponse,
     SummaryRequest,
     SummaryResponse,
     SynthesizeAsyncResponse,
@@ -560,3 +565,144 @@ async def get_audio(cache_key: str) -> FileResponse:
         media_type="audio/mpeg",
         filename=f"{cache_key}.mp3",
     )
+
+
+# -----------------------------------------------------------------------
+# POST /reading/sessions -- create or close a listening session
+# -----------------------------------------------------------------------
+@router.post("/reading/sessions", response_model=SessionResponse, status_code=201)
+async def create_session(
+    request: SessionCreateRequest,
+    db: Session = Depends(get_db),
+) -> SessionResponse:
+    """Create a new listening session.
+
+    Args:
+        request: Session creation request with optional TTS engine.
+        db: Database session.
+
+    Returns:
+        The created session record.
+    """
+    session = ReadingSession(
+        tts_engine=request.tts_engine,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+
+    return SessionResponse(
+        id=session.id,
+        started_at=str(session.started_at),
+        ended_at=None,
+        content_items_read=session.content_items_read or 0,
+        total_duration_seconds=session.total_duration_seconds or 0.0,
+        tts_engine=session.tts_engine,
+    )
+
+
+@router.put("/reading/sessions/{session_id}", response_model=SessionResponse)
+async def close_session(
+    session_id: int,
+    request: SessionCloseRequest,
+    db: Session = Depends(get_db),
+) -> SessionResponse:
+    """Close an existing listening session with final stats.
+
+    Args:
+        session_id: ID of the session to close.
+        request: Close request with items read and duration.
+        db: Database session.
+
+    Returns:
+        The updated session record.
+    """
+    session = db.query(ReadingSession).filter(ReadingSession.id == session_id).first()
+    if session is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    session.ended_at = datetime.now(UTC)
+    session.content_items_read = request.content_items_read
+    session.total_duration_seconds = request.total_duration_seconds
+    db.commit()
+    db.refresh(session)
+
+    return SessionResponse(
+        id=session.id,
+        started_at=str(session.started_at),
+        ended_at=str(session.ended_at) if session.ended_at else None,
+        content_items_read=session.content_items_read or 0,
+        total_duration_seconds=session.total_duration_seconds or 0.0,
+        tts_engine=session.tts_engine,
+    )
+
+
+# -----------------------------------------------------------------------
+# GET /reading/stats -- aggregated listening statistics
+# -----------------------------------------------------------------------
+@router.get("/reading/stats", response_model=ListeningStatsResponse)
+async def get_listening_stats(
+    db: Session = Depends(get_db),
+) -> ListeningStatsResponse:
+    """Return aggregated listening statistics.
+
+    Computes total sessions, listening time, items count,
+    today's stats, and a streak of consecutive days with sessions.
+
+    Args:
+        db: Database session.
+
+    Returns:
+        Aggregated listening stats.
+    """
+    from datetime import date, timedelta
+
+    all_sessions = db.query(ReadingSession).all()
+    total_sessions = len(all_sessions)
+    total_seconds = sum(s.total_duration_seconds or 0.0 for s in all_sessions)
+    total_items = sum(s.content_items_read or 0 for s in all_sessions)
+
+    # Today's stats
+    today_start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_sessions = [
+        s for s in all_sessions
+        if s.started_at and _to_aware(s.started_at) >= today_start
+    ]
+    sessions_today = len(today_sessions)
+    listening_seconds_today = sum(s.total_duration_seconds or 0.0 for s in today_sessions)
+
+    # Streak: count consecutive days backward from today with at least one session
+    session_dates: set[date] = set()
+    for s in all_sessions:
+        if s.started_at:
+            session_dates.add(_to_aware(s.started_at).date())
+
+    streak = 0
+    check_date = date.today()
+    while check_date in session_dates:
+        streak += 1
+        check_date -= timedelta(days=1)
+
+    return ListeningStatsResponse(
+        total_sessions=total_sessions,
+        total_listening_seconds=total_seconds,
+        total_items_listened=total_items,
+        sessions_today=sessions_today,
+        listening_seconds_today=listening_seconds_today,
+        streak_days=streak,
+    )
+
+
+def _to_aware(dt: datetime) -> datetime:
+    """Convert a naive datetime to UTC-aware.
+
+    Args:
+        dt: Datetime that may be naive or aware.
+
+    Returns:
+        UTC-aware datetime.
+    """
+
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=UTC)
+    return dt
