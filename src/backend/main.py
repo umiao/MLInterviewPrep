@@ -541,6 +541,7 @@ def export_data():
                     "status": c.status,
                     "applied_at": _date(c.applied_at),
                     "notes": c.notes,
+                    "prep_notes": c.prep_notes,
                     "topic_weights": [
                         {
                             "framework_node_id": tw.framework_node_id,
@@ -806,6 +807,7 @@ def _import_companies(db, companies_data: list[dict[str, Any]]) -> dict[str, int
                 status=item.get("status", "applied"),
                 applied_at=_parse_date(item.get("applied_at")),
                 notes=item.get("notes"),
+                prep_notes=item.get("prep_notes"),
             )
             db.add(c)
             db.flush()

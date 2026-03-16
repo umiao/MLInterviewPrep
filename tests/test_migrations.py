@@ -54,6 +54,17 @@ def _create_old_schema_db(db_path: str) -> None:
             next_review_at TIMESTAMP
         )
     """)
+    conn.execute("""
+        CREATE TABLE companies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR NOT NULL UNIQUE,
+            group_tag VARCHAR,
+            interview_stages TEXT,
+            status VARCHAR DEFAULT 'applied',
+            applied_at DATE,
+            notes TEXT
+        )
+    """)
     conn.commit()
     conn.close()
 

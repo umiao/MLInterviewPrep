@@ -224,3 +224,10 @@
 - **Deliverables**: src/backend/models/timeline.py (new), src/backend/schemas/timeline.py (new), src/backend/routers/timeline.py (new), src/backend/models/__init__.py (modified), src/backend/database.py (modified), src/backend/main.py (modified), src/frontend/index.html (modified), src/frontend/src/index.css (modified), src/frontend/src/types/timeline.ts (new), src/frontend/src/components/timeline/InterviewTimeline.tsx (new), src/frontend/src/components/timeline/EventFormModal.tsx (new), src/frontend/src/pages/Dashboard.tsx (modified), tests/test_timeline.py (new), tests/test_migrations.py (modified)
 - **Sanity check result**: 590/590 tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
+
+## 2026-03-16 -- [T-P1-95] Add prep_notes to Company + migration v3 + get_or_create_company
+- **What I did**: Added prep_notes (Text, nullable) column to Company model with migration v3 (ADD_COLUMN_IF_MISSING directive). Updated CompanyCreate/CompanyUpdate/CompanyResponse schemas, _company_to_response(), and create_company() to include prep_notes. Added POST /companies/{id}/prep-notes/import endpoint supporting append/replace modes with .md file upload. Created get_or_create_company service with case-insensitive matching and IntegrityError race condition handling. Updated export/import to include prep_notes. Fixed pre-existing migration tests (added companies table to old schema fixtures for v3 compatibility).
+- **Deliverables**: src/backend/models/company.py (modified), src/backend/database.py (modified), src/backend/schemas/company.py (modified), src/backend/routers/companies.py (modified), src/backend/main.py (modified), src/backend/services/company_service.py (new), tests/test_company_prep_notes.py (new), tests/test_migrations.py (modified), tests/test_timeline.py (modified)
+- **Sanity check result**: 609/609 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-95 --status completed`

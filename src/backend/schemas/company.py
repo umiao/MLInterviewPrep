@@ -16,6 +16,7 @@ class CompanyCreate(BaseModel):
     ] = "applied"
     applied_at: date | None = None
     notes: str | None = None
+    prep_notes: str | None = None
 
 
 class CompanyUpdate(BaseModel):
@@ -29,6 +30,7 @@ class CompanyUpdate(BaseModel):
     ] | None = None
     applied_at: date | None = None
     notes: str | None = None
+    prep_notes: str | None = None
 
 
 class CompanyResponse(BaseModel):
@@ -41,6 +43,7 @@ class CompanyResponse(BaseModel):
     status: str = "applied"
     applied_at: date | None = None
     notes: str | None = None
+    prep_notes: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

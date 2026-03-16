@@ -35,6 +35,7 @@ class Company(Base):
     )
     applied_at = Column(Date, nullable=True)
     notes = Column(Text, nullable=True)
+    prep_notes = Column(Text, nullable=True)
 
     topic_weights = relationship(
         "CompanyTopicWeight", back_populates="company", cascade="all, delete-orphan"

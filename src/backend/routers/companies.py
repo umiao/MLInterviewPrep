@@ -1,7 +1,8 @@
 """Company management API routes."""
 import json
+from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
@@ -27,6 +28,7 @@ def _company_to_response(c: Company) -> dict:
         "status": c.status,
         "applied_at": c.applied_at,
         "notes": c.notes,
+        "prep_notes": c.prep_notes,
     }
 
 
@@ -64,6 +66,7 @@ def create_company(
         status=company.status,
         applied_at=company.applied_at,
         notes=company.notes,
+        prep_notes=company.prep_notes,
     )
     db.add(db_company)
     db.commit()
@@ -114,6 +117,40 @@ def delete_company(
     db.delete(company)
     db.commit()
     return {"deleted": True, "weights_removed": weight_count}
+
+
+@router.post("/companies/{company_id}/prep-notes/import")
+async def import_prep_notes(
+    company_id: int,
+    file: UploadFile = File(...),
+    mode: Literal["append", "replace"] = Form("append"),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Import prep notes from a .md file.
+
+    Args:
+        company_id: Target company ID.
+        file: Uploaded markdown file.
+        mode: 'append' concatenates with separator, 'replace' overwrites.
+        db: Database session.
+
+    Returns:
+        Updated company response dict.
+    """
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    content = (await file.read()).decode("utf-8")
+
+    if mode == "replace" or not company.prep_notes:
+        company.prep_notes = content
+    else:
+        company.prep_notes = company.prep_notes + "\n\n---\n\n" + content
+
+    db.commit()
+    db.refresh(company)
+    return _company_to_response(company)
 
 
 @router.post("/companies/{company_id}/weights", status_code=200)

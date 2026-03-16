@@ -139,6 +139,14 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
         ],
     ),
     (
+        3,
+        "Add prep_notes column to companies table",
+        [
+            "ADD_COLUMN_IF_MISSING:companies:prep_notes:"
+            "ALTER TABLE companies ADD COLUMN prep_notes TEXT",
+        ],
+    ),
+    (
         2,
         "Create interview_events table",
         [

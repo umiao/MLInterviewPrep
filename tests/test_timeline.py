@@ -7,7 +7,6 @@ from sqlalchemy.pool import StaticPool
 
 from src.backend.database import _run_migrations
 
-
 # ---- Fixtures ----
 
 @pytest.fixture()
@@ -195,6 +194,17 @@ def _create_pre_v2_schema(db_path: str) -> None:
         )
     """)
     conn.execute("""
+        CREATE TABLE companies (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name VARCHAR NOT NULL UNIQUE,
+            group_tag VARCHAR,
+            interview_stages TEXT,
+            status VARCHAR DEFAULT 'applied',
+            applied_at DATE,
+            notes TEXT
+        )
+    """)
+    conn.execute("""
         CREATE TABLE schema_versions (
             version INTEGER PRIMARY KEY,
             description TEXT NOT NULL,
@@ -261,7 +271,7 @@ class TestMigration2InterviewEvents:
             rows = conn.execute(
                 text("SELECT version FROM schema_versions")
             ).fetchall()
-        assert len(rows) == 2  # v1 + v2
+        assert len(rows) == 3  # v1 + v2 + v3
 
     def test_table_missing_before(self, pre_v2_db):
         """Sanity: interview_events does not exist before migration."""
