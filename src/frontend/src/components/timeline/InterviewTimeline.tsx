@@ -3,6 +3,8 @@ import { api } from "../../utils/api";
 import type { InterviewEvent } from "../../types/timeline";
 import { EVENT_TYPE_LABELS } from "../../types/timeline";
 import type { EventType } from "../../types/timeline";
+import type { Company } from "../../types/company";
+import { countUnchecked } from "../../utils/markdown";
 import Skeleton from "../ui/Skeleton";
 
 /** Color of the left border based on urgency. */
@@ -60,13 +62,27 @@ const TYPE_BADGE_COLORS: Record<string, string> = {
 interface Props {
   onAddClick: () => void;
   onEditClick: (event: InterviewEvent) => void;
+  onCompanyClick?: (companyName: string, companyId: number) => void;
 }
 
-export default function InterviewTimeline({ onAddClick, onEditClick }: Props) {
+export default function InterviewTimeline({ onAddClick, onEditClick, onCompanyClick }: Props) {
   const { data, isLoading, error } = useQuery<InterviewEvent[]>({
     queryKey: ["timeline", "events"],
     queryFn: () => api.get<InterviewEvent[]>("/timeline/events"),
   });
+
+  const { data: companies } = useQuery<Company[]>({
+    queryKey: ["companies"],
+    queryFn: () => api.get<Company[]>("/companies"),
+  });
+
+  // Build lookup: company_id -> Company
+  const companyMap = new Map<number, Company>();
+  if (companies) {
+    for (const c of companies) {
+      companyMap.set(c.id, c);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -121,7 +137,14 @@ export default function InterviewTimeline({ onAddClick, onEditClick }: Props) {
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-400 uppercase">Upcoming</p>
               {upcoming.map((e) => (
-                <EventCard key={e.id} event={e} isPast={false} onClick={() => onEditClick(e)} />
+                <EventCard
+                  key={e.id}
+                  event={e}
+                  isPast={false}
+                  company={e.company_id ? companyMap.get(e.company_id) : undefined}
+                  onClick={() => onEditClick(e)}
+                  onCompanyClick={onCompanyClick}
+                />
               ))}
             </div>
           )}
@@ -131,7 +154,14 @@ export default function InterviewTimeline({ onAddClick, onEditClick }: Props) {
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-400 uppercase">Past</p>
               {past.slice(0, 5).map((e) => (
-                <EventCard key={e.id} event={e} isPast onClick={() => onEditClick(e)} />
+                <EventCard
+                  key={e.id}
+                  event={e}
+                  isPast
+                  company={e.company_id ? companyMap.get(e.company_id) : undefined}
+                  onClick={() => onEditClick(e)}
+                  onCompanyClick={onCompanyClick}
+                />
               ))}
             </div>
           )}
@@ -144,14 +174,20 @@ export default function InterviewTimeline({ onAddClick, onEditClick }: Props) {
 function EventCard({
   event,
   isPast,
+  company,
   onClick,
+  onCompanyClick,
 }: {
   event: InterviewEvent;
   isPast: boolean;
+  company?: Company;
   onClick: () => void;
+  onCompanyClick?: (companyName: string, companyId: number) => void;
 }) {
   const badgeColor = TYPE_BADGE_COLORS[event.event_type] ?? TYPE_BADGE_COLORS.other;
   const label = EVENT_TYPE_LABELS[event.event_type as EventType] ?? event.event_type;
+  const uncheckedCount = company ? countUnchecked(company.prep_notes) : 0;
+  const canClickCompany = onCompanyClick && event.company_id;
 
   return (
     <button
@@ -165,7 +201,32 @@ function EventCard({
         <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badgeColor}`}>
           {label}
         </span>
-        <span className="font-semibold text-sm text-gray-800">{event.company_name}</span>
+        {canClickCompany ? (
+          <span className="inline-flex items-center gap-1">
+            <span
+              role="link"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCompanyClick!(event.company_name, event.company_id!);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                  onCompanyClick!(event.company_name, event.company_id!);
+                }
+              }}
+              className="font-semibold text-sm text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+            >
+              {event.company_name}
+            </span>
+            {uncheckedCount > 0 && (
+              <span className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0" title={`${uncheckedCount} unchecked prep items`} />
+            )}
+          </span>
+        ) : (
+          <span className="font-semibold text-sm text-gray-800">{event.company_name}</span>
+        )}
         {!isPast && (
           <span className="ml-auto text-xs text-gray-500">{countdown(event.scheduled_at)}</span>
         )}

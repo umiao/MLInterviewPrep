@@ -6,6 +6,7 @@ import Skeleton from "../components/ui/Skeleton";
 import WeeklyActivityChart from "../components/charts/WeeklyActivityChart";
 import InterviewTimeline from "../components/timeline/InterviewTimeline";
 import EventFormModal from "../components/timeline/EventFormModal";
+import PrepNotesModal from "../components/timeline/PrepNotesModal";
 import type {
   ActivityDay,
   DashboardToday,
@@ -271,6 +272,8 @@ function CompanySummaryCard({ counts }: { counts: Record<string, number> }) {
 export default function Dashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<InterviewEvent | null>(null);
+  const [prepCompanyId, setPrepCompanyId] = useState<number | null>(null);
+  const [prepCompanyName, setPrepCompanyName] = useState("");
 
   const today = useQuery<DashboardToday>({
     queryKey: ["dashboard", "today"],
@@ -308,12 +311,21 @@ export default function Dashboard() {
       <InterviewTimeline
         onAddClick={() => { setEditingEvent(null); setModalOpen(true); }}
         onEditClick={(e) => { setEditingEvent(e); setModalOpen(true); }}
+        onCompanyClick={(name, id) => { setPrepCompanyName(name); setPrepCompanyId(id); }}
       />
       <EventFormModal
         open={modalOpen}
         onClose={() => { setModalOpen(false); setEditingEvent(null); }}
         event={editingEvent}
       />
+      {prepCompanyId !== null && (
+        <PrepNotesModal
+          open
+          onClose={() => { setPrepCompanyId(null); setPrepCompanyName(""); }}
+          companyId={prepCompanyId}
+          companyName={prepCompanyName}
+        />
+      )}
 
       {hasError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">

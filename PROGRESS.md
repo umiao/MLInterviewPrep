@@ -245,3 +245,10 @@
 - **Sanity check result**: 614/614 tests pass, ruff clean, TypeScript compiles clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-97 --status completed`
+
+## 2026-03-16 -- [T-P1-98] Dashboard timeline prep notes modal + red dots on EventCard
+- **What I did**: Created PrepNotesModal component (max-w-2xl Modal wrapping PrepNotesTab with "View in Companies" link). Updated InterviewTimeline to fetch /companies, build Map<id, Company> lookup, pass company data to EventCard. Made company_name in EventCard a blue clickable link (e.stopPropagation) that opens PrepNotesModal via new onCompanyClick prop. Added red dot next to company name when countUnchecked(prep_notes) > 0. Updated Dashboard.tsx with prepCompanyId/Name state, passes onCompanyClick to InterviewTimeline, renders PrepNotesModal. PrepNotesModal invalidates ["companies"] on close to sync red dots.
+- **Deliverables**: src/frontend/src/components/timeline/PrepNotesModal.tsx (new), src/frontend/src/components/timeline/InterviewTimeline.tsx (modified), src/frontend/src/pages/Dashboard.tsx (modified)
+- **Sanity check result**: 614/614 tests pass, ruff clean, TypeScript compiles clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-98 --status completed`

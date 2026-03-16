@@ -11,22 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-98: Dashboard timeline prep notes modal + red dots on EventCard
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-97
-- **Description**: ## Acceptance Criteria
-1. InterviewTimeline: new onCompanyClick(companyName, companyId) prop
-2. EventCard: company_name rendered as blue clickable text with e.stopPropagation() (clicking name opens prep modal, clicking card still opens edit event modal)
-3. InterviewTimeline fetches /companies alongside events, builds Map<id, Company> lookup
-4. Red dot next to company name on EventCard if countUnchecked(prep_notes) > 0
-5. New PrepNotesModal: base Modal (max-w-2xl), fetches company, renders PrepNotesTab, has "View in Companies" navigation link
-6. PrepNotesModal onClose: invalidates ["companies"] to sync red dots on Dashboard
-7. Dashboard.tsx: state for prepCompanyId/Name, passes onCompanyClick to InterviewTimeline, renders PrepNotesModal
-8. EventFormModal: onSuccess also invalidates ["companies"]
-9. Journey AC: User sees red dot on "LinkedIn" in timeline -> clicks company name -> modal opens with prep checklist -> toggles checkbox -> closes modal -> red dot count updates on timeline
-10. Inverse AC: Company with no prep_notes or all checked -> no red dot shown
-
 ### P2 -- Nice to Have
 
 ### P3 -- Stretch Goals
@@ -37,6 +21,7 @@
 
 > 87 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-16** -- T-P1-98: Dashboard timeline prep notes modal + red dots on EventCard. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
