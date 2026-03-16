@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-106: Persistent Audio Player Bar (Spotify-style bottom bar)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-104
-- **Description**: New AudioPlayerBar.tsx: fixed-bottom bar with [Title+badge] [<<] [Play/Pause] [>>] [Progress bar] [Time] [Speed 0.75-2x] [Engine selector] [Queue slide-out] [Close]. Mount in Layout.tsx, visible only when player active. Keyboard: Space=play/pause (with focus guard for inputs), N=next. AC: All controls work, progress bar real-time via ontimeupdate, responsive on small screens, keyboard shortcuts work
-
 #### T-P1-107: Study Radio page: queue management, now playing, history
 - **Priority**: P1
 - **Complexity**: M
@@ -67,6 +61,7 @@
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-106: Persistent Audio Player Bar (Spotify-style bottom bar). New AudioPlayerBar.tsx: fixed-bottom bar with [Title+badge] [<<] [Play/Pause] [>>] [Progress bar] [Time] [Speed 0.75-2x]
 - [x] **2026-03-16** -- T-P1-105: Browser Web Speech API fallback + prefetch next item. Enhance useAudioPlayer: (1) Browser fallback: if synthesize returns {mode: browser}, use SpeechSynthesis API seamlessly 
 - [x] **2026-03-16** -- T-P1-104: Frontend Audio Player + Radio Mode (core playback). New files: types/reading.ts, hooks/useAudioPlayer.ts, contexts/AudioPlayerContext.tsx. Hook manages <audio> element: pla
 - [x] **2026-03-16** -- T-P1-103: TTS Engine abstraction: EdgeTTS + OpenAI + Browser engines. Refactor services/tts_engine.py: ABC TTSEngine with synthesize_to_file + voice_options. EdgeTTSEngine (refactor from MVP
