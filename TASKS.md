@@ -11,20 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-89: [B5] Frontend: Questions add/edit/delete + bulk mark reviewed + framework mapping
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-87, T-P0-82
-- **Description**: AC:
-- + Add Question button -> AddQuestionModal (question_text, company, role, type, level, year, tags)
-- Inline edit metadata in expanded row (all fields editable via PUT)
-- Delete with ConfirmDialog
-- Bulk mark reviewed: checkboxes on rows + floating action bar
-- FrameworkNodePicker in expanded row for mapped_framework_node_id
-- Toast on all mutations
-
-Key files: src/frontend/src/pages/Questions.tsx, new components/questions/AddQuestionModal.tsx, EditableQuestionRow.tsx
-
 ### P2 -- Nice to Have
 
 #### T-P2-90: [B6] Frontend: Kanban drag-and-drop for Companies page
@@ -96,6 +82,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P1-89: [B5] Frontend: Questions add/edit/delete + bulk mark reviewed + framework mapping. AC:
 - [x] **2026-03-15** -- T-P1-88: [B5] Frontend: Companies edit/delete + topic weight editor. AC:
 - [x] **2026-03-15** -- T-P1-87: [B5] Backend: DELETE companies/{id}, POST/DELETE questions, extend PUT questions/{id}. AC:
 - [x] **2026-03-15** -- T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress. AC:

@@ -176,3 +176,10 @@
 - **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-88 --status completed`
+
+## 2026-03-15 -- [T-P1-89] Frontend: Questions add/edit/delete + bulk mark reviewed + framework mapping
+- **What I did**: Added AddQuestionModal with form fields (question_text, company, role, type, level, year, tags, mapped_framework_node_id via FrameworkNodePicker). Replaced inline ExpandedRow with EditableQuestionRow component supporting inline edit mode for all metadata fields (company, role, type, level, year, tags, difficulty, framework topic), delete with ConfirmDialog, and LLM analysis. Added bulk mark reviewed: checkbox column with select-all header, floating action bar at bottom with count + "Mark Reviewed" + "Clear" buttons using Promise.all for parallel PUT calls. Header now has both "+ Add Question" and "Paste Experience" buttons.
+- **Deliverables**: src/frontend/src/components/questions/AddQuestionModal.tsx (new), src/frontend/src/components/questions/EditableQuestionRow.tsx (new), src/frontend/src/pages/Questions.tsx (refactored)
+- **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-89 --status completed`

@@ -3,7 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
-import type { InterviewQuestion, QuestionAnalysis, QuestionType } from "../types/question";
+import AddQuestionModal from "../components/questions/AddQuestionModal";
+import EditableQuestionRow from "../components/questions/EditableQuestionRow";
+import type { InterviewQuestion, QuestionType } from "../types/question";
 
 /* ---------- Paste Response Types ---------- */
 
@@ -261,193 +263,6 @@ function typeLabel(t: string | null): string {
   return found ? found.label : t;
 }
 
-/* ---------- Analysis Panel ---------- */
-
-function AnalysisPanel({
-  analysis,
-  loading,
-}: {
-  analysis: QuestionAnalysis | null;
-  loading: boolean;
-}) {
-  if (loading) {
-    return <LoadingSpinner message="Analyzing with LLM..." size="sm" />;
-  }
-  if (!analysis) return null;
-
-  return (
-    <div className="space-y-3 mt-3 p-3 bg-blue-50 rounded border border-blue-100">
-      <div>
-        <h4 className="text-xs font-semibold text-gray-500 uppercase">
-          Solution Approach
-        </h4>
-        <p className="text-sm text-gray-700 mt-1 break-words">{analysis.solution_approach}</p>
-      </div>
-      {analysis.key_concepts.length > 0 && (
-        <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase">
-            Key Concepts
-          </h4>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {analysis.key_concepts.map((c) => (
-              <span
-                key={c}
-                className="text-xs px-2 py-0.5 rounded bg-white border border-blue-200 text-blue-700"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-      <div className="flex gap-6">
-        <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase">
-            Difficulty
-          </h4>
-          <span className="text-sm font-medium capitalize">
-            {analysis.difficulty}
-          </span>
-        </div>
-        {analysis.related_patterns.length > 0 && (
-          <div>
-            <h4 className="text-xs font-semibold text-gray-500 uppercase">
-              Related Patterns
-            </h4>
-            <span className="text-sm text-gray-700">
-              {analysis.related_patterns.join(", ")}
-            </span>
-          </div>
-        )}
-      </div>
-      {analysis.suggested_study && (
-        <div>
-          <h4 className="text-xs font-semibold text-gray-500 uppercase">
-            Suggested Study
-          </h4>
-          <p className="text-sm text-gray-700 mt-1">
-            {analysis.suggested_study}
-          </p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ---------- Expanded Row ---------- */
-
-function ExpandedRow({
-  question,
-  onToggleReviewed,
-  onAnalyze,
-}: {
-  question: InterviewQuestion;
-  onToggleReviewed: (id: number, reviewed: boolean) => void;
-  onAnalyze: (id: number) => void;
-}) {
-  const [analysis, setAnalysis] = useState<QuestionAnalysis | null>(null);
-  const [analyzing, setAnalyzing] = useState(false);
-  const [analyzeError, setAnalyzeError] = useState<string | null>(null);
-
-  // Try to parse existing notes as analysis
-  useEffect(() => {
-    if (question.notes) {
-      try {
-        const parsed = JSON.parse(question.notes) as QuestionAnalysis;
-        if (parsed.solution_approach) {
-          setAnalysis(parsed);
-        }
-      } catch {
-        // notes is plain text, not analysis JSON
-      }
-    }
-  }, [question.notes]);
-
-  async function handleAnalyze() {
-    setAnalyzing(true);
-    setAnalyzeError(null);
-    try {
-      const result = await api.post<QuestionAnalysis>(
-        `/questions/${question.id}/analyze`,
-      );
-      setAnalysis(result);
-      onAnalyze(question.id);
-    } catch (err) {
-      const msg =
-        err instanceof ApiRequestError ? err.message : String(err);
-      setAnalyzeError(msg);
-    } finally {
-      setAnalyzing(false);
-    }
-  }
-
-  return (
-    <tr>
-      <td colSpan={7} className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <div className="space-y-3">
-          {/* Full question text */}
-          <div>
-            <h4 className="text-xs font-semibold text-gray-500 uppercase mb-1">
-              Question
-            </h4>
-            <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-              {question.question_text}
-            </p>
-          </div>
-
-          {/* Metadata row */}
-          <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-            {question.level && <span>Level: {question.level}</span>}
-            {question.interview_round && (
-              <span>Round: {question.interview_round}</span>
-            )}
-            {question.year && <span>Year: {question.year}</span>}
-            {question.tags.length > 0 && (
-              <span>Tags: {question.tags.join(", ")}</span>
-            )}
-            {question.difficulty_estimate && (
-              <span>Difficulty: {question.difficulty_estimate}</span>
-            )}
-          </div>
-
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() =>
-                onToggleReviewed(question.id, !question.is_reviewed)
-              }
-              className={`text-xs px-3 py-1.5 rounded border ${
-                question.is_reviewed
-                  ? "bg-green-50 border-green-300 text-green-700"
-                  : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {question.is_reviewed ? "[x] Reviewed" : "[ ] Mark Reviewed"}
-            </button>
-            <button
-              onClick={handleAnalyze}
-              disabled={analyzing}
-              className="text-xs px-3 py-1.5 rounded border bg-white border-blue-300 text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-            >
-              {analyzing ? "Analyzing..." : analysis ? "Re-analyze" : "Analyze"}
-            </button>
-          </div>
-
-          {/* Analysis error */}
-          {analyzeError && (
-            <div className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded">
-              {analyzeError}
-            </div>
-          )}
-
-          {/* Analysis results */}
-          <AnalysisPanel analysis={analysis} loading={analyzing} />
-        </div>
-      </td>
-    </tr>
-  );
-}
-
 /* ---------- Filters ---------- */
 
 interface Filters {
@@ -475,6 +290,8 @@ export default function Questions() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   const [pasteOpen, setPasteOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
   const PAGE_SIZE = 50;
 
   const queryParams = useMemo(() => {
@@ -497,6 +314,11 @@ export default function Questions() {
   });
 
   const error = queryError ? queryError.message : null;
+
+  // Clear selection when questions change (page/filter change)
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [queryParams]);
 
   function handleFilterChange(key: keyof Filters, value: string) {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -525,15 +347,53 @@ export default function Questions() {
     toggleReviewedMutation.mutate({ id, reviewed });
   }
 
-  function handleAnalyzeDone(_id: number) {
-    queryClient.invalidateQueries({ queryKey: ["questions"] });
+  // Bulk mark reviewed mutation
+  const bulkReviewMutation = useMutation({
+    mutationFn: async (ids: number[]) => {
+      await Promise.all(
+        ids.map((id) => api.put(`/questions/${id}`, { is_reviewed: true })),
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["questions"] });
+      toast.success(`${selectedIds.size} question(s) marked as reviewed`);
+      setSelectedIds(new Set());
+    },
+    onError: () => {
+      toast.error("Failed to bulk update review status");
+    },
+  });
+
+  function handleBulkMarkReviewed() {
+    bulkReviewMutation.mutate(Array.from(selectedIds));
+  }
+
+  function handleToggleSelect(id: number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function handleSelectAll() {
+    if (selectedIds.size === questions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(questions.map((q) => q.id)));
+    }
   }
 
   const hasFilters = Object.values(filters).some((v) => v !== "");
+  const allSelected = questions.length > 0 && selectedIds.size === questions.length;
 
   return (
     <div className="flex flex-col h-full">
-      {/* Paste Modal */}
+      {/* Modals */}
       <PasteExperienceModal
         open={pasteOpen}
         onClose={() => setPasteOpen(false)}
@@ -541,6 +401,10 @@ export default function Questions() {
           setPage(0);
           queryClient.invalidateQueries({ queryKey: ["questions"] });
         }}
+      />
+      <AddQuestionModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
       />
 
       {/* Header */}
@@ -551,12 +415,20 @@ export default function Questions() {
             {questions.length} question{questions.length !== 1 ? "s" : ""} shown
           </p>
         </div>
-        <button
-          onClick={() => setPasteOpen(true)}
-          className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-        >
-          + Paste Experience
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setAddOpen(true)}
+            className="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+          >
+            + Add Question
+          </button>
+          <button
+            onClick={() => setPasteOpen(true)}
+            className="px-4 py-2 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50"
+          >
+            Paste Experience
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -658,6 +530,15 @@ export default function Questions() {
           <table className="w-full text-sm">
             <thead className="bg-gray-50 sticky top-0">
               <tr className="text-left text-xs font-medium text-gray-500 uppercase">
+                <th className="px-3 py-2 w-10">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={handleSelectAll}
+                    className="rounded border-gray-300"
+                    title="Select all"
+                  />
+                </th>
                 <th className="px-4 py-2 w-8" />
                 <th className="px-4 py-2">Question</th>
                 <th className="px-4 py-2 w-32">Company</th>
@@ -671,7 +552,7 @@ export default function Questions() {
               {questions.length === 0 && (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-4 py-8 text-center text-gray-400"
                   >
                     No questions found. Try adjusting your filters.
@@ -679,9 +560,8 @@ export default function Questions() {
                 </tr>
               )}
               {questions.map((q) => (
-                <>
+                <tbody key={q.id}>
                   <tr
-                    key={q.id}
                     onClick={() =>
                       setExpandedId(expandedId === q.id ? null : q.id)
                     }
@@ -689,6 +569,17 @@ export default function Questions() {
                       expandedId === q.id ? "bg-gray-50" : ""
                     }`}
                   >
+                    <td
+                      className="px-3 py-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(q.id)}
+                        onChange={() => handleToggleSelect(q.id)}
+                        className="rounded border-gray-300"
+                      />
+                    </td>
                     <td className="px-4 py-2 text-gray-400 text-xs">
                       {expandedId === q.id ? "v" : ">"}
                     </td>
@@ -722,14 +613,12 @@ export default function Questions() {
                     </td>
                   </tr>
                   {expandedId === q.id && (
-                    <ExpandedRow
-                      key={`expanded-${q.id}`}
+                    <EditableQuestionRow
                       question={q}
                       onToggleReviewed={handleToggleReviewed}
-                      onAnalyze={handleAnalyzeDone}
                     />
                   )}
-                </>
+                </tbody>
               ))}
             </tbody>
           </table>
@@ -753,6 +642,30 @@ export default function Questions() {
             className="px-3 py-1.5 border border-gray-300 rounded text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
+          </button>
+        </div>
+      )}
+
+      {/* Floating bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-gray-800 text-white rounded-lg shadow-xl px-5 py-3 flex items-center gap-4">
+          <span className="text-sm">
+            {selectedIds.size} question{selectedIds.size !== 1 ? "s" : ""} selected
+          </span>
+          <button
+            onClick={handleBulkMarkReviewed}
+            disabled={bulkReviewMutation.isPending}
+            className="text-sm px-4 py-1.5 bg-green-600 rounded hover:bg-green-700 disabled:opacity-50"
+          >
+            {bulkReviewMutation.isPending
+              ? "Marking..."
+              : "Mark Reviewed"}
+          </button>
+          <button
+            onClick={() => setSelectedIds(new Set())}
+            className="text-sm px-3 py-1.5 border border-gray-500 rounded hover:bg-gray-700"
+          >
+            Clear
           </button>
         </div>
       )}
