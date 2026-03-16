@@ -190,3 +190,10 @@
 - **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-90 --status completed`
+
+## 2026-03-15 -- [T-P2-91] Frontend: Framework tree search + breadcrumb path
+- **What I did**: Created TreeSearchBar component with debounced input (useDebounce hook). Created BreadcrumbPath component that builds ancestor chain from node to root with clickable path segments. Updated FrameworkTreeView to accept searchQuery prop: matching nodes highlighted with yellow bg, non-matching leaves hidden, ancestors auto-expanded. Match count displayed in toolbar. Wired everything into Framework.tsx page.
+- **Deliverables**: src/frontend/src/components/framework/TreeSearchBar.tsx (new), src/frontend/src/components/framework/BreadcrumbPath.tsx (new), src/frontend/src/components/FrameworkTreeView.tsx (modified), src/frontend/src/pages/Framework.tsx (modified)
+- **Sanity check result**: 566/566 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-91 --status completed`

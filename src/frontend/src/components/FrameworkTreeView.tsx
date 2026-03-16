@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import type { FrameworkNode, NodeStatus } from "../types/framework";
 
 const STATUS_COLORS: Record<NodeStatus, { bg: string; text: string; bar: string }> = {
@@ -68,29 +68,136 @@ function Chevron({ expanded }: { expanded: boolean }) {
   );
 }
 
+/** Highlight matching substring in title. */
+function HighlightedTitle({
+  title,
+  query,
+  className,
+}: {
+  title: string;
+  query: string;
+  className: string;
+}) {
+  if (!query) {
+    return <span className={className} title={title}>{title}</span>;
+  }
+  const lowerTitle = title.toLowerCase();
+  const lowerQuery = query.toLowerCase();
+  const idx = lowerTitle.indexOf(lowerQuery);
+  if (idx === -1) {
+    return <span className={className} title={title}>{title}</span>;
+  }
+  const before = title.slice(0, idx);
+  const match = title.slice(idx, idx + query.length);
+  const after = title.slice(idx + query.length);
+  return (
+    <span className={className} title={title}>
+      {before}
+      <mark className="bg-yellow-200 text-inherit rounded-sm px-0.5">{match}</mark>
+      {after}
+    </span>
+  );
+}
+
+/**
+ * Compute which node IDs match, and which IDs are visible (match or ancestor of match).
+ * Returns { matchIds, visibleIds }.
+ */
+function computeSearchSets(
+  nodes: FrameworkNode[],
+  query: string,
+): { matchIds: Set<number>; visibleIds: Set<number> } {
+  const matchIds = new Set<number>();
+  const visibleIds = new Set<number>();
+
+  if (!query) return { matchIds, visibleIds };
+
+  const lowerQuery = query.toLowerCase();
+
+  // Collect all matching node IDs and build parent map
+  const parentMap = new Map<number, number | null>();
+  const walk = (list: FrameworkNode[]) => {
+    for (const n of list) {
+      parentMap.set(n.id, n.parent_id);
+      if (n.title.toLowerCase().includes(lowerQuery)) {
+        matchIds.add(n.id);
+      }
+      walk(n.children);
+    }
+  };
+  walk(nodes);
+
+  // For each match, mark all ancestors as visible
+  for (const id of matchIds) {
+    visibleIds.add(id);
+    let pid = parentMap.get(id) ?? null;
+    while (pid !== null) {
+      visibleIds.add(pid);
+      pid = parentMap.get(pid) ?? null;
+    }
+  }
+
+  // Also mark children of matches as visible (so matching parent shows its subtree)
+  const markChildren = (list: FrameworkNode[]) => {
+    for (const n of list) {
+      if (matchIds.has(n.id)) {
+        const addAll = (children: FrameworkNode[]) => {
+          for (const c of children) {
+            visibleIds.add(c.id);
+            addAll(c.children);
+          }
+        };
+        addAll(n.children);
+      }
+      markChildren(n.children);
+    }
+  };
+  markChildren(nodes);
+
+  return { matchIds, visibleIds };
+}
+
 function TreeNode({
   node,
   expandedIds,
   toggleExpand,
   onSelect,
   selectedId,
+  searchQuery,
+  matchIds,
+  visibleIds,
 }: {
   node: FrameworkNode;
   expandedIds: Set<number>;
   toggleExpand: (id: number) => void;
   onSelect: (node: FrameworkNode) => void;
   selectedId: number | null;
+  searchQuery: string;
+  matchIds: Set<number>;
+  visibleIds: Set<number>;
 }) {
   const hasChildren = node.children.length > 0;
   const isExpanded = expandedIds.has(node.id);
   const isSelected = selectedId === node.id;
+  const isMatch = matchIds.has(node.id);
   const status = node.status as NodeStatus;
+
+  // When searching, filter children to only visible ones
+  const isSearching = searchQuery.length > 0;
+  const visibleChildren = isSearching
+    ? node.children.filter((c) => visibleIds.has(c.id))
+    : node.children;
+  const showChildren = isSearching ? visibleChildren.length > 0 : hasChildren && isExpanded;
 
   return (
     <div>
       <div
         className={`flex items-center gap-2 py-1.5 px-2 rounded-md cursor-pointer hover:bg-gray-50 transition-colors ${
-          isSelected ? "bg-blue-50 ring-1 ring-blue-200" : ""
+          isSelected
+            ? "bg-blue-50 ring-1 ring-blue-200"
+            : isMatch && isSearching
+              ? "bg-yellow-50"
+              : ""
         }`}
         style={{ paddingLeft: `${node.depth * 20 + 8}px` }}
         onClick={() => onSelect(node)}
@@ -103,11 +210,17 @@ function TreeNode({
             if (hasChildren) toggleExpand(node.id);
           }}
         >
-          {hasChildren ? <Chevron expanded={isExpanded} /> : <span className="w-4" />}
+          {hasChildren ? (
+            <Chevron expanded={isSearching ? showChildren : isExpanded} />
+          ) : (
+            <span className="w-4" />
+          )}
         </button>
 
         {/* Title */}
-        <span
+        <HighlightedTitle
+          title={node.title}
+          query={searchQuery}
           className={`text-sm font-medium truncate ${
             node.depth === 0
               ? "text-gray-900 text-base font-semibold"
@@ -115,10 +228,7 @@ function TreeNode({
                 ? "text-gray-800"
                 : "text-gray-700"
           }`}
-          title={node.title}
-        >
-          {node.title}
-        </span>
+        />
 
         {/* Spacer */}
         <span className="flex-1" />
@@ -139,9 +249,9 @@ function TreeNode({
       </div>
 
       {/* Children */}
-      {hasChildren && isExpanded && (
+      {showChildren && (
         <div>
-          {node.children.map((child) => (
+          {visibleChildren.map((child) => (
             <TreeNode
               key={child.id}
               node={child}
@@ -149,6 +259,9 @@ function TreeNode({
               toggleExpand={toggleExpand}
               onSelect={onSelect}
               selectedId={selectedId}
+              searchQuery={searchQuery}
+              matchIds={matchIds}
+              visibleIds={visibleIds}
             />
           ))}
         </div>
@@ -161,10 +274,12 @@ export default function FrameworkTreeView({
   nodes,
   onSelect,
   selectedId,
+  searchQuery = "",
 }: {
   nodes: FrameworkNode[];
   onSelect: (node: FrameworkNode) => void;
   selectedId: number | null;
+  searchQuery?: string;
 }) {
   // Start with pillars (depth 0) expanded
   const [expandedIds, setExpandedIds] = useState<Set<number>>(() => {
@@ -174,6 +289,11 @@ export default function FrameworkTreeView({
     }
     return ids;
   });
+
+  const { matchIds, visibleIds } = useMemo(
+    () => computeSearchSets(nodes, searchQuery),
+    [nodes, searchQuery],
+  );
 
   const toggleExpand = useCallback((id: number) => {
     setExpandedIds((prev) => {
@@ -200,9 +320,16 @@ export default function FrameworkTreeView({
     setExpandedIds(new Set());
   }, []);
 
+  const isSearching = searchQuery.length > 0;
+
+  // When searching, filter top-level nodes to visible ones
+  const visibleNodes = isSearching
+    ? nodes.filter((n) => visibleIds.has(n.id))
+    : nodes;
+
   return (
     <div>
-      <div className="flex gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-3">
         <button
           className="text-xs text-blue-600 hover:text-blue-800 font-medium"
           onClick={expandAll}
@@ -216,18 +343,35 @@ export default function FrameworkTreeView({
         >
           Collapse All
         </button>
+        {isSearching && (
+          <>
+            <span className="text-gray-300">|</span>
+            <span className="text-xs text-gray-500">
+              {matchIds.size} match{matchIds.size !== 1 ? "es" : ""}
+            </span>
+          </>
+        )}
       </div>
       <div className="space-y-0.5">
-        {nodes.map((node) => (
-          <TreeNode
-            key={node.id}
-            node={node}
-            expandedIds={expandedIds}
-            toggleExpand={toggleExpand}
-            onSelect={onSelect}
-            selectedId={selectedId}
-          />
-        ))}
+        {visibleNodes.length === 0 && isSearching ? (
+          <p className="text-sm text-gray-400 py-4 text-center">
+            No nodes match &quot;{searchQuery}&quot;
+          </p>
+        ) : (
+          visibleNodes.map((node) => (
+            <TreeNode
+              key={node.id}
+              node={node}
+              expandedIds={expandedIds}
+              toggleExpand={toggleExpand}
+              onSelect={onSelect}
+              selectedId={selectedId}
+              searchQuery={searchQuery}
+              matchIds={matchIds}
+              visibleIds={visibleIds}
+            />
+          ))
+        )}
       </div>
     </div>
   );

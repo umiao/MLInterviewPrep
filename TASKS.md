@@ -13,18 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-91: [B6] Frontend: Framework tree search + breadcrumb path
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P0-80, T-P0-77
-- **Description**: AC:
-- TreeSearchBar: type to filter, matching nodes highlighted (yellow bg), non-matching ancestors auto-expanded, non-matching leaves hidden
-- BreadcrumbPath: when node selected, show clickable path segments above detail panel
-- Search uses client-side filter (no backend change)
-- Debounced search input (useDebounce)
-
-Key files: src/frontend/src/pages/Framework.tsx, src/frontend/src/components/FrameworkTreeView.tsx, new components/framework/TreeSearchBar.tsx, BreadcrumbPath.tsx
-
 #### T-P2-92: [B6] Frontend: Settings page (import/export + scraper management)
 - **Priority**: P2
 - **Complexity**: M
@@ -66,6 +54,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 > 71 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-15** -- T-P2-91: [B6] Frontend: Framework tree search + breadcrumb path. AC:
 - [x] **2026-03-15** -- T-P2-90: [B6] Frontend: Kanban drag-and-drop for Companies page. AC:
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)

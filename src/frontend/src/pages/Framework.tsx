@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
@@ -6,6 +6,8 @@ import FrameworkTreeView from "../components/FrameworkTreeView";
 import FrameworkTreemap from "../components/FrameworkTreemap";
 import NodeDetailPanel from "../components/NodeDetailPanel";
 import StudyPlanCard from "../components/StudyPlanCard";
+import TreeSearchBar from "../components/framework/TreeSearchBar";
+import BreadcrumbPath from "../components/framework/BreadcrumbPath";
 import type { FrameworkNode, FrameworkStats, NodeStatus } from "../types/framework";
 
 type ViewMode = "tree" | "treemap";
@@ -132,6 +134,20 @@ export default function Framework() {
 
   const [viewMode, setViewMode] = useState<ViewMode>("tree");
   const [selectedNode, setSelectedNode] = useState<FrameworkNode | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Build a flat id->node map for breadcrumb ancestor lookup
+  const nodeMap = useMemo(() => {
+    const map = new Map<number, FrameworkNode>();
+    const walk = (list: FrameworkNode[]) => {
+      for (const n of list) {
+        map.set(n.id, n);
+        walk(n.children);
+      }
+    };
+    if (tree) walk(tree);
+    return map;
+  }, [tree]);
 
   const handleNodeUpdated = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["framework"] });
@@ -190,6 +206,20 @@ export default function Framework() {
         </div>
       </div>
 
+      {/* Search bar (tree view only) */}
+      {viewMode === "tree" && (
+        <TreeSearchBar onSearchChange={setSearchQuery} />
+      )}
+
+      {/* Breadcrumb path for selected node */}
+      {selectedNode && (
+        <BreadcrumbPath
+          node={selectedNode}
+          nodeMap={nodeMap}
+          onNavigate={setSelectedNode}
+        />
+      )}
+
       {/* Main content: sidebar + visualization */}
       <div className="flex gap-4">
         {/* Left: main visualization */}
@@ -199,6 +229,7 @@ export default function Framework() {
               nodes={tree}
               onSelect={setSelectedNode}
               selectedId={selectedNode?.id ?? null}
+              searchQuery={searchQuery}
             />
           ) : (
             <FrameworkTreemap
