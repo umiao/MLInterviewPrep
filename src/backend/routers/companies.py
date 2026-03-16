@@ -94,6 +94,28 @@ def update_company(
     return _company_to_response(db_company)
 
 
+@router.delete("/companies/{company_id}")
+def delete_company(
+    company_id: int, db: Session = Depends(get_db)
+) -> dict:
+    """Delete a company and cascade-delete its topic weights."""
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    weight_count = (
+        db.query(CompanyTopicWeight)
+        .filter(CompanyTopicWeight.company_id == company_id)
+        .count()
+    )
+    db.query(CompanyTopicWeight).filter(
+        CompanyTopicWeight.company_id == company_id
+    ).delete()
+    db.delete(company)
+    db.commit()
+    return {"deleted": True, "weights_removed": weight_count}
+
+
 @router.post("/companies/{company_id}/weights", status_code=200)
 def upsert_topic_weights(
     company_id: int,

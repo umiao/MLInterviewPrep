@@ -45,6 +45,41 @@ class ScraperRunRequest(BaseModel):
     seed_url_ids: list[int] | None = None
 
 
+class InterviewQuestionCreate(BaseModel):
+    """Schema for creating an interview question."""
+
+    question_text: str = Field(min_length=1)
+    company: str | None = None
+    role: str | None = None
+    question_type: Literal[
+        "coding", "ml_theory", "ml_system_design",
+        "behavioral", "ml_coding", "general_system_design",
+    ] | None = None
+    level: str | None = None
+    year: int | None = None
+    tags: list[str] = []
+    difficulty_estimate: str | None = None
+    mapped_framework_node_id: int | None = None
+
+
+class InterviewQuestionUpdate(BaseModel):
+    """Schema for updating an interview question (all optional fields)."""
+
+    company: str | None = None
+    role: str | None = None
+    question_type: Literal[
+        "coding", "ml_theory", "ml_system_design",
+        "behavioral", "ml_coding", "general_system_design",
+    ] | None = None
+    level: str | None = None
+    year: int | None = None
+    tags: list[str] | None = None
+    difficulty_estimate: str | None = None
+    mapped_framework_node_id: int | None = None
+    is_reviewed: bool | None = None
+    notes: str | None = None
+
+
 class InterviewQuestionResponse(BaseModel):
     """Schema for interview question API response."""
 

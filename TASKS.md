@@ -11,19 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-87: [B5] Backend: DELETE companies/{id}, POST/DELETE questions, extend PUT questions/{id}
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-74
-- **Description**: AC:
-- DELETE /api/companies/{id}: deletes company + cascades topic weights. Returns count of deleted weights.
-- POST /api/questions: create single question (question_text, company, role, question_type, level, year, tags, difficulty_estimate, mapped_framework_node_id)
-- DELETE /api/questions/{id}: delete question
-- PUT /api/questions/{id}: accept all editable fields (company, role, question_type, level, year, tags, difficulty_estimate, mapped_framework_node_id, notes)
-- Tests for each new/modified endpoint
-
-Key files: src/backend/routers/companies.py, src/backend/routers/scraper.py, src/backend/schemas/scraper.py
-
 #### T-P1-88: [B5] Frontend: Companies edit/delete + topic weight editor
 - **Priority**: P1
 - **Complexity**: M
@@ -122,6 +109,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P1-87: [B5] Backend: DELETE companies/{id}, POST/DELETE questions, extend PUT questions/{id}. AC:
 - [x] **2026-03-15** -- T-P1-86: [B4] Frontend: Dashboard rewrite with Today Focus + Weekly Chart + Pillar Progress. AC:
 - [x] **2026-03-15** -- T-P1-85: [B4] Backend: Split dashboard API into today/activity/summary endpoints. AC:
 - [x] **2026-03-15** -- T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel. AC:

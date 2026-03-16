@@ -162,3 +162,10 @@
 - **Sanity check result**: 551/551 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-86 --status completed`
+
+## 2026-03-15 -- [T-P1-87] Backend CRUD for companies delete + questions create/delete/update
+- **What I did**: Added DELETE /api/companies/{id} with cascade-delete of topic weights (returns count). Added POST /api/questions for creating single questions with all fields. Added DELETE /api/questions/{id}. Extended PUT /api/questions/{id} to accept all editable fields (company, role, question_type, level, year, tags, difficulty_estimate, mapped_framework_node_id, is_reviewed, notes) using a typed Pydantic schema instead of raw dict. Added InterviewQuestionCreate and InterviewQuestionUpdate schemas. Fixed existing integration test to match new PUT response format.
+- **Deliverables**: src/backend/routers/companies.py (DELETE endpoint), src/backend/routers/scraper.py (POST/DELETE questions, extended PUT), src/backend/schemas/scraper.py (new create/update schemas), tests/test_router_companies.py (new, 4 tests), tests/test_router_questions.py (new, 9 tests), tests/test_integration_scraper_pipeline.py (fixed)
+- **Sanity check result**: 564/564 backend tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-87 --status completed`

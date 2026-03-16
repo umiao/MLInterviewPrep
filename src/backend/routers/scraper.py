@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 from src.backend.database import get_db
 from src.backend.models.scraper import InterviewQuestion, ScrapedPage, SeedURL
 from src.backend.schemas.scraper import (
+    InterviewQuestionCreate,
     InterviewQuestionResponse,
+    InterviewQuestionUpdate,
     PasteRequest,
     ScraperRunRequest,
     SeedURLCreate,
@@ -329,22 +331,63 @@ def list_questions(
     return query.offset(offset).limit(limit).all()
 
 
-@router.put("/questions/{question_id}")
+@router.post("/questions", response_model=InterviewQuestionResponse, status_code=201)
+def create_question(
+    body: InterviewQuestionCreate, db: Session = Depends(get_db)
+) -> InterviewQuestion:
+    """Create a single interview question."""
+    q = InterviewQuestion(
+        question_text=body.question_text,
+        company=body.company,
+        role=body.role,
+        question_type=body.question_type,
+        level=body.level,
+        year=body.year,
+        tags=json.dumps(body.tags, ensure_ascii=False),
+        difficulty_estimate=body.difficulty_estimate,
+        mapped_framework_node_id=body.mapped_framework_node_id,
+    )
+    db.add(q)
+    db.commit()
+    db.refresh(q)
+    return q
+
+
+@router.put("/questions/{question_id}", response_model=InterviewQuestionResponse)
 def update_question(
-    question_id: int, body: dict, db: Session = Depends(get_db)
-) -> dict:
-    """Update an interview question."""
+    question_id: int,
+    body: InterviewQuestionUpdate,
+    db: Session = Depends(get_db),
+) -> InterviewQuestion:
+    """Update an interview question (partial)."""
     q = db.query(InterviewQuestion).filter(InterviewQuestion.id == question_id).first()
     if not q:
         raise HTTPException(status_code=404, detail="Question not found")
 
-    for attr_name in ("is_reviewed", "notes", "difficulty_estimate", "mapped_framework_node_id"):
-        if attr_name in body:
-            setattr(q, attr_name, body[attr_name])
+    update_data = body.model_dump(exclude_unset=True)
+    for attr_name, value in update_data.items():
+        if attr_name == "tags" and value is not None:
+            q.tags = json.dumps(value, ensure_ascii=False)
+        else:
+            setattr(q, attr_name, value)
 
     db.commit()
     db.refresh(q)
-    return {"id": q.id, "updated": True}
+    return q
+
+
+@router.delete("/questions/{question_id}")
+def delete_question(
+    question_id: int, db: Session = Depends(get_db)
+) -> dict:
+    """Delete an interview question."""
+    q = db.query(InterviewQuestion).filter(InterviewQuestion.id == question_id).first()
+    if not q:
+        raise HTTPException(status_code=404, detail="Question not found")
+
+    db.delete(q)
+    db.commit()
+    return {"deleted": True, "id": question_id}
 
 
 @router.post("/questions/{question_id}/analyze")

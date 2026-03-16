@@ -450,7 +450,7 @@ class TestQuestionUpdate:
             json={"is_reviewed": True},
         )
         assert resp.status_code == 200
-        assert resp.json()["updated"] is True
+        assert resp.json()["is_reviewed"] is True
 
         # Verify via filter
         resp = test_client.get(
