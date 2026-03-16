@@ -138,6 +138,27 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ON problems(framework_node_id)",
         ],
     ),
+    (
+        2,
+        "Create interview_events table",
+        [
+            "CREATE TABLE IF NOT EXISTS interview_events ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,"
+            "  company_name VARCHAR NOT NULL,"
+            "  event_type VARCHAR NOT NULL,"
+            "  title VARCHAR NOT NULL,"
+            "  description TEXT,"
+            "  scheduled_at TIMESTAMP NOT NULL,"
+            "  duration_minutes INTEGER,"
+            "  location VARCHAR,"
+            "  status VARCHAR NOT NULL DEFAULT 'upcoming',"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_interview_events_scheduled_at "
+            "ON interview_events(scheduled_at)",
+        ],
+    ),
 ]
 
 

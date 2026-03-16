@@ -106,12 +106,17 @@ class TestMigration1FrameworkNodeId:
     def test_idempotent(self, old_schema_db):
         """Running migrations twice is a no-op the second time."""
         _run_migrations(old_schema_db)
-        _run_migrations(old_schema_db)
         with old_schema_db.connect() as conn:
-            rows = conn.execute(
+            rows_first = conn.execute(
                 text("SELECT version FROM schema_versions")
             ).fetchall()
-        assert len(rows) == 1
+        _run_migrations(old_schema_db)
+        with old_schema_db.connect() as conn:
+            rows_second = conn.execute(
+                text("SELECT version FROM schema_versions")
+            ).fetchall()
+        assert len(rows_first) == len(rows_second)
+        assert 1 in {r[0] for r in rows_second}
 
     def test_column_missing_before_migration(self, old_schema_db):
         """Sanity check: column does NOT exist before migration runs."""

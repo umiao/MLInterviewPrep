@@ -3,6 +3,7 @@ from src.backend.models.company import Company, CompanyTopicWeight
 from src.backend.models.framework import FrameworkNode, StudyLog
 from src.backend.models.problem import Attempt, Problem, QASession
 from src.backend.models.scraper import InterviewQuestion, ScrapedPage, SeedURL
+from src.backend.models.timeline import InterviewEvent
 
 __all__ = [
     "Problem",
@@ -15,4 +16,5 @@ __all__ = [
     "StudyLog",
     "Company",
     "CompanyTopicWeight",
+    "InterviewEvent",
 ]

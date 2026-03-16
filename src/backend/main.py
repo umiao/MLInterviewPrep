@@ -24,6 +24,7 @@ from src.backend.routers.framework import router as framework_router
 from src.backend.routers.problems import router as problems_router
 from src.backend.routers.qa import router as qa_router
 from src.backend.routers.scraper import router as scraper_router
+from src.backend.routers.timeline import router as timeline_router
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +141,7 @@ app.include_router(qa_router, prefix="/api")
 app.include_router(framework_router, prefix="/api")
 app.include_router(companies_router, prefix="/api")
 app.include_router(scraper_router, prefix="/api")
+app.include_router(timeline_router, prefix="/api")
 
 
 @app.get("/api/dashboard")
@@ -451,6 +453,7 @@ def export_data():
     from src.backend.models.framework import FrameworkNode
     from src.backend.models.problem import Problem
     from src.backend.models.scraper import InterviewQuestion
+    from src.backend.models.timeline import InterviewEvent as IEvent
 
     db = SessionLocal()
     try:
@@ -458,6 +461,7 @@ def export_data():
         framework_nodes = db.query(FrameworkNode).all()
         companies = db.query(Company).all()
         questions = db.query(InterviewQuestion).all()
+        events = db.query(IEvent).order_by(IEvent.scheduled_at).all()
 
         return {
             "problems": [
@@ -565,6 +569,22 @@ def export_data():
                     "created_at": _dt(q.created_at),
                 }
                 for q in questions
+            ],
+            "interview_events": [
+                {
+                    "id": e.id,
+                    "company_id": e.company_id,
+                    "company_name": e.company_name,
+                    "event_type": e.event_type,
+                    "title": e.title,
+                    "description": e.description,
+                    "scheduled_at": _dt(e.scheduled_at),
+                    "duration_minutes": e.duration_minutes,
+                    "location": e.location,
+                    "status": e.status,
+                    "created_at": _dt(e.created_at),
+                }
+                for e in events
             ],
         }
     finally:
@@ -849,6 +869,42 @@ def _import_questions(
     return {"inserted": inserted, "skipped": 0, "errors": errors}
 
 
+def _import_events(
+    db, events_data: list[dict[str, Any]]
+) -> dict[str, int]:
+    """Import interview events (always insert, no dedup).
+
+    Returns counts of inserted and errors.
+    """
+    from src.backend.models.timeline import InterviewEvent as IEvent
+
+    inserted = 0
+    errors = 0
+
+    for item in events_data:
+        try:
+            e = IEvent(
+                company_id=item.get("company_id"),
+                company_name=item["company_name"],
+                event_type=item["event_type"],
+                title=item["title"],
+                description=item.get("description"),
+                scheduled_at=_parse_dt(item["scheduled_at"]),
+                duration_minutes=item.get("duration_minutes"),
+                location=item.get("location"),
+                status=item.get("status", "upcoming"),
+            )
+            db.add(e)
+            inserted += 1
+        except Exception:
+            errors += 1
+            logger.exception(
+                "Error importing event: %s", item.get("title", "?")
+            )
+
+    return {"inserted": inserted, "skipped": 0, "errors": errors}
+
+
 @app.post("/api/import")
 def import_data(payload: dict[str, Any]):
     """Import JSON data with merge semantics.
@@ -874,6 +930,10 @@ def import_data(payload: dict[str, Any]):
         if "interview_questions" in payload:
             result["interview_questions"] = _import_questions(
                 db, payload["interview_questions"]
+            )
+        if "interview_events" in payload:
+            result["interview_events"] = _import_events(
+                db, payload["interview_events"]
             )
 
         db.commit()

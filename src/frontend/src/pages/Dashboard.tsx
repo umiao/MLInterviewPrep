@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "../utils/api";
 import Skeleton from "../components/ui/Skeleton";
 import WeeklyActivityChart from "../components/charts/WeeklyActivityChart";
+import InterviewTimeline from "../components/timeline/InterviewTimeline";
+import EventFormModal from "../components/timeline/EventFormModal";
 import type {
   ActivityDay,
   DashboardToday,
@@ -10,6 +13,7 @@ import type {
   PillarProgress,
 } from "../types/dashboard";
 import type { FrameworkNode } from "../types/framework";
+import type { InterviewEvent } from "../types/timeline";
 
 /* ------------------------------------------------------------------ */
 /*  Row 1: Today Focus cards                                          */
@@ -265,6 +269,9 @@ function CompanySummaryCard({ counts }: { counts: Record<string, number> }) {
 /* ------------------------------------------------------------------ */
 
 export default function Dashboard() {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<InterviewEvent | null>(null);
+
   const today = useQuery<DashboardToday>({
     queryKey: ["dashboard", "today"],
     queryFn: () => api.get<DashboardToday>("/dashboard/today"),
@@ -296,6 +303,17 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+
+      {/* Row 0: Interview Timeline */}
+      <InterviewTimeline
+        onAddClick={() => { setEditingEvent(null); setModalOpen(true); }}
+        onEditClick={(e) => { setEditingEvent(e); setModalOpen(true); }}
+      />
+      <EventFormModal
+        open={modalOpen}
+        onClose={() => { setModalOpen(false); setEditingEvent(null); }}
+        event={editingEvent}
+      />
 
       {hasError && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm">

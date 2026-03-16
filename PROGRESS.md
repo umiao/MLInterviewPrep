@@ -218,3 +218,9 @@
 - **Sanity check result**: 568/568 backend tests pass, ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-94 --status completed`
+
+## 2026-03-16 -- Interview Timeline + Widescreen Fix + Title Fix
+- **What I did**: Implemented full interview timeline feature: InterviewEvent model with migration v2, CRUD API endpoints, Pydantic schemas, export/import support. Built InterviewTimeline component (upcoming/past sections, urgency colors, countdown) and EventFormModal (add/edit/delete). Integrated as Row 0 on Dashboard. Fixed page title ("frontend" -> "ML Interview Prep") and widescreen CSS bug (added width:100% to #root). Seeded LinkedIn 3/16 and DoorDash 3/26 events. Fixed pre-existing migration idempotency test broken by adding v2.
+- **Deliverables**: src/backend/models/timeline.py (new), src/backend/schemas/timeline.py (new), src/backend/routers/timeline.py (new), src/backend/models/__init__.py (modified), src/backend/database.py (modified), src/backend/main.py (modified), src/frontend/index.html (modified), src/frontend/src/index.css (modified), src/frontend/src/types/timeline.ts (new), src/frontend/src/components/timeline/InterviewTimeline.tsx (new), src/frontend/src/components/timeline/EventFormModal.tsx (new), src/frontend/src/pages/Dashboard.tsx (modified), tests/test_timeline.py (new), tests/test_migrations.py (modified)
+- **Sanity check result**: 590/590 tests pass, ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
