@@ -2,9 +2,17 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* CJK text support: prevent overflow and enable word breaking */
+.break-words {
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 #root {

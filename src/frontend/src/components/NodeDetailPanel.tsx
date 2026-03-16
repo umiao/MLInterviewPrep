@@ -291,7 +291,7 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
                   <span className="text-xs text-blue-600">{log.activity_type}</span>
                 )}
                 {log.notes && (
-                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{log.notes}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2 break-words">{log.notes}</p>
                 )}
               </div>
             ))}

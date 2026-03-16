@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
 /** Schema entry describing how to serialize/deserialize one filter param. */
@@ -12,7 +12,8 @@ interface ParamDef<T> {
 }
 
 /** A record mapping param names to their schema definitions. */
-type ParamSchema = Record<string, ParamDef<unknown>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ParamSchema = Record<string, ParamDef<any>>;
 
 /** Infer the typed values from a schema. */
 type ParamValues<S extends ParamSchema> = {

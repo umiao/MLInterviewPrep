@@ -45,7 +45,7 @@ function ChatBubble({ msg }: { msg: QAChatMessage }) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}>
       <div
-        className={`max-w-[85%] px-3 py-2 rounded-lg text-sm whitespace-pre-wrap ${
+        className={`max-w-[85%] px-3 py-2 rounded-lg text-sm whitespace-pre-wrap break-words ${
           isUser
             ? "bg-blue-600 text-white rounded-br-sm"
             : "bg-gray-100 text-gray-800 rounded-bl-sm"
@@ -299,7 +299,7 @@ export default function ReviewPanel({ problem, onClose }: Props) {
                   <h4 className="text-xs font-semibold text-gray-500 uppercase mb-1">
                     Feedback
                   </h4>
-                  <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                  <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
                     {reviewResult.feedback}
                   </p>
                 </div>

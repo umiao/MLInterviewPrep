@@ -281,7 +281,7 @@ function AnalysisPanel({
         <h4 className="text-xs font-semibold text-gray-500 uppercase">
           Solution Approach
         </h4>
-        <p className="text-sm text-gray-700 mt-1">{analysis.solution_approach}</p>
+        <p className="text-sm text-gray-700 mt-1 break-words">{analysis.solution_approach}</p>
       </div>
       {analysis.key_concepts.length > 0 && (
         <div>
@@ -390,7 +390,7 @@ function ExpandedRow({
             <h4 className="text-xs font-semibold text-gray-500 uppercase mb-1">
               Question
             </h4>
-            <p className="text-sm text-gray-800 whitespace-pre-wrap">
+            <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
               {question.question_text}
             </p>
           </div>

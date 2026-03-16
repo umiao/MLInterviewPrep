@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 55 completed tasks archived as of latest archival.
+> 71 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -57,3 +57,23 @@
 - [x] **2026-03-13** -- T-P1-55: Framework tree visualization. Two views: (1) collapsible tree with progress bars; (2) treemap. Color: red=not_started, yellow=in_progress, blue=review
 - [x] **2026-03-13** -- T-P1-56: Study log form + node detail. Node detail sidebar: title, description, status, progress, confidence, study history. Log form: date picker, duration, a
 - [x] **2026-03-12** -- T-P1-63: Shared test fixtures (conftest.py). db_session (in-memory per test), test_client (FastAPI TestClient with DB override), mock_llm (canned JSON), seed_problem
+- [x] **2026-03-15** -- T-P0-69: Fix CI: add python-multipart dependency
+- [x] **2026-03-15** -- T-P0-70: SDK migration: async LLMService + sdk_adapter. Create src/backend/services/sdk_adapter.py (SDK_AVAILABLE flag, async run_query). Rewrite LLMService with async chat(), 
+- [x] **2026-03-15** -- T-P0-71: Convert LLM callers to async + update tests. All endpoints calling llm.chat() become async def + await. extract_questions() becomes async. Update all test files for 
+- [x] **2026-03-15** -- T-P0-73: [B1] Install React Query + setup QueryClientProvider in App.tsx. AC:
+- @tanstack/react-query installed
+- QueryClientProvider wraps App
+- Default staleTime 30s configured
+- One page (Das
+- [x] **2026-03-13** -- T-P1-57: Company management (kanban). Kanban columns by status. Company cards with name, group tag, deadline. Add company form. Click -> focus topics panel. D
+- [x] **2026-03-13** -- T-P1-58: Interview questions browse page. Filterable table: company, role, type, reviewed, text search. Expandable rows. Analyze button (calls LLM). Mark reviewed
+- [x] **2026-03-13** -- T-P1-59: Paste experience form. Modal on Questions page: large textarea, optional company/role fields. Shows extracted questions for review before confi
+- [x] **2026-03-13** -- T-P1-61: Backend Dockerfile. Python 3.11-slim, pip install requirements, EXPOSE 8000, CMD uvicorn. Volume mount for data/. Depends: T-P0-7.
+- [x] **2026-03-13** -- T-P1-62: Frontend Dockerfile + docker-compose.yml. Node 20 build + nginx serve. Compose: backend + frontend services, shared network. Depends: T-P1-61, T-P1-49.
+- [x] **2026-03-13** -- T-P1-64: Integration test -- problem lifecycle. Create problem -> attempt (comfort=2) -> verify in review queue -> LLM review -> attempt (comfort=5) -> verify not in re
+- [x] **2026-03-13** -- T-P1-65: Integration test -- scraper pipeline. Create seed URL -> paste text -> verify questions extracted and stored -> analyze question -> verify analysis stored. De
+- [x] **2026-03-13** -- T-P1-66: Integration test -- framework + study planning. Load seed framework -> log study -> verify progress -> create company + weights -> get suggestions -> verify urgency ord
+- [x] **2026-03-13** -- T-P2-34: LLM-enhanced study recommendations. Add ?use_llm=true to suggest endpoint. Send urgency list to LLM for natural language plan. Return {structured, plan_text
+- [x] **2026-03-13** -- T-P2-48: DB views + indexes. Create views v_problem_stats, v_weekly_progress. Add indexes on: problems.pattern, problems.difficulty, problems.next_re
+- [x] **2026-03-13** -- T-P2-60: AI Study Plan display. Card on Framework page showing GET /api/framework/suggest results. Regenerate button. LLM toggle for natural language pl
+- [x] **2026-03-13** -- T-P2-67: Performance + final polish. Response time logging middleware, SQLite WAL mode, 422 error handler, README setup instructions, ruff/mypy clean pass. D

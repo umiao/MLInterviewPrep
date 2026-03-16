@@ -215,7 +215,7 @@ export default function StudyPlanCard() {
               <h4 className="text-xs font-semibold text-blue-700 uppercase mb-1">
                 AI Recommendation
               </h4>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+              <p className="text-sm text-gray-700 whitespace-pre-wrap break-words">
                 {plan.plan_text}
               </p>
             </div>

@@ -267,7 +267,7 @@ function FocusTopicsPanel({
             </div>
           )}
           {company.notes && (
-            <p className="text-sm text-gray-600">{company.notes}</p>
+            <p className="text-sm text-gray-600 break-words">{company.notes}</p>
           )}
         </div>
 
@@ -373,7 +373,7 @@ function CompanyCard({
         <div className="text-xs text-gray-400">{company.applied_at}</div>
       )}
       {company.notes && (
-        <p className="text-xs text-gray-500 line-clamp-2">{company.notes}</p>
+        <p className="text-xs text-gray-500 line-clamp-2 break-words">{company.notes}</p>
       )}
     </button>
   );
