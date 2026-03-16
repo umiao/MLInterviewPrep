@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-105: Browser Web Speech API fallback + prefetch next item
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-104
-- **Description**: Enhance useAudioPlayer: (1) Browser fallback: if synthesize returns {mode: browser}, use SpeechSynthesis API seamlessly (same play/pause/skip interface). (2) Prefetch: while current item plays, POST /synthesize for next queue item so MP3 is cached and ready. AC: edge-tts failure -> browser fallback without user action, engine switch to browser uses SpeechSynthesis, next item starts instantly (prefetch hit), no prefetch if only 1 item remaining
-
 #### T-P1-106: Persistent Audio Player Bar (Spotify-style bottom bar)
 - **Priority**: P1
 - **Complexity**: M
@@ -73,6 +67,7 @@
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-105: Browser Web Speech API fallback + prefetch next item. Enhance useAudioPlayer: (1) Browser fallback: if synthesize returns {mode: browser}, use SpeechSynthesis API seamlessly 
 - [x] **2026-03-16** -- T-P1-104: Frontend Audio Player + Radio Mode (core playback). New files: types/reading.ts, hooks/useAudioPlayer.ts, contexts/AudioPlayerContext.tsx. Hook manages <audio> element: pla
 - [x] **2026-03-16** -- T-P1-103: TTS Engine abstraction: EdgeTTS + OpenAI + Browser engines. Refactor services/tts_engine.py: ABC TTSEngine with synthesize_to_file + voice_options. EdgeTTSEngine (refactor from MVP
 - [x] **2026-03-16** -- T-P0-99: TTS MVP: edge-tts -> MP3 -> <audio> playback for framework nodes. Minimal vertical slice: pick one framework node -> preprocess markdown (v1: strip #, **, *, _, links, skip code blocks) 

@@ -81,6 +81,11 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
   // Refs to track current values in callbacks without stale closures
   const queueRef = useRef<AudioPlayerItem[]>([]);
   const autoAdvanceRef = useRef(false);
+  // Browser SpeechSynthesis tracking
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const isBrowserTTSRef = useRef(false);
+  // Prefetch cache: maps "content_type:content_id" to the synthesize response
+  const prefetchCacheRef = useRef<Map<string, SynthesizeResponse>>(new Map());
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -137,8 +142,13 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     }
   }, []);
 
-  /** Clean up audio element. */
+  /** Clean up audio element and browser TTS. */
   const cleanupAudio = useCallback(() => {
+    if (isBrowserTTSRef.current) {
+      window.speechSynthesis.cancel();
+      utteranceRef.current = null;
+      isBrowserTTSRef.current = false;
+    }
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.removeAttribute("src");
@@ -148,9 +158,42 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     stopProgressTimer();
   }, [stopProgressTimer]);
 
+  /** Build cache key for prefetch map. */
+  const cacheKey = useCallback(
+    (item: AudioPlayerItem) => `${item.content_type}:${item.content_id}`,
+    [],
+  );
+
+  /** Prefetch the next item in queue (if any). */
+  const prefetchNext = useCallback(
+    async (currentIdx: number) => {
+      const q = queueRef.current;
+      const nextIdx = currentIdx + 1;
+      if (nextIdx >= q.length) return; // no next item
+      const nextItem = q[nextIdx];
+      const key = cacheKey(nextItem);
+      if (prefetchCacheRef.current.has(key)) return; // already prefetched
+
+      try {
+        const response = await api.post<SynthesizeResponse>(
+          "/reading/synthesize",
+          {
+            content_type: nextItem.content_type,
+            content_id: nextItem.content_id,
+          },
+        );
+        prefetchCacheRef.current.set(key, response);
+      } catch {
+        // Silent fail for prefetch -- will synthesize on demand
+      }
+    },
+    [cacheKey],
+  );
+
   /** Stop everything. */
   const stop = useCallback(() => {
     cleanupAudio();
+    prefetchCacheRef.current.clear();
     setStatus("idle");
     setCurrentItem(null);
     setCurrentTime(0);
@@ -168,24 +211,33 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       setStatus("loading");
 
       try {
-        const response = await api.post<SynthesizeResponse>(
-          "/reading/synthesize",
-          {
-            content_type: item.content_type,
-            content_id: item.content_id,
-          },
-        );
+        // Check prefetch cache first
+        const key = cacheKey(item);
+        let response = prefetchCacheRef.current.get(key) ?? null;
+        if (response) {
+          prefetchCacheRef.current.delete(key);
+        } else {
+          response = await api.post<SynthesizeResponse>(
+            "/reading/synthesize",
+            {
+              content_type: item.content_type,
+              content_id: item.content_id,
+            },
+          );
+        }
 
         if (response.mode === "browser" && response.text) {
           // Browser TTS fallback -- use SpeechSynthesis API
           if (!("speechSynthesis" in window)) {
             throw new Error("Browser speech synthesis not available");
           }
+          isBrowserTTSRef.current = true;
           const utterance = new SpeechSynthesisUtterance(response.text);
           utterance.rate = speed;
+          utteranceRef.current = utterance;
           utterance.onend = () => {
-            setStatus("idle");
-            setCurrentItem(null);
+            isBrowserTTSRef.current = false;
+            utteranceRef.current = null;
             setCurrentTime(0);
             setDuration(0);
             // Auto-advance if in radio mode
@@ -194,15 +246,22 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
               if (nextIdx < queueRef.current.length) {
                 queueIndexRef.current = nextIdx;
                 play(queueRef.current[nextIdx]);
+                return;
               }
             }
+            setStatus("idle");
+            setCurrentItem(null);
           };
           utterance.onerror = () => {
+            isBrowserTTSRef.current = false;
+            utteranceRef.current = null;
             setError("Browser speech synthesis failed");
             setStatus("idle");
           };
           window.speechSynthesis.speak(utterance);
           setStatus("playing");
+          // Prefetch next item while browser TTS plays
+          prefetchNext(queueIndexRef.current);
           return;
         }
 
@@ -253,18 +312,32 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
         await audio.play();
         setStatus("playing");
         startProgressTimer(item);
+        // Prefetch next item while current plays
+        prefetchNext(queueIndexRef.current);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to synthesize");
         setStatus("idle");
         setCurrentItem(null);
       }
     },
-    [cleanupAudio, speed, saveProgress, stopProgressTimer, startProgressTimer],
+    [
+      cleanupAudio,
+      cacheKey,
+      speed,
+      saveProgress,
+      stopProgressTimer,
+      startProgressTimer,
+      prefetchNext,
+    ],
   );
 
   /** Pause playback. */
   const pause = useCallback(() => {
-    if (audioRef.current && status === "playing") {
+    if (status !== "playing") return;
+    if (isBrowserTTSRef.current) {
+      window.speechSynthesis.pause();
+      setStatus("paused");
+    } else if (audioRef.current) {
       audioRef.current.pause();
       setStatus("paused");
     }
@@ -272,7 +345,11 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
 
   /** Resume playback. */
   const resume = useCallback(() => {
-    if (audioRef.current && status === "paused") {
+    if (status !== "paused") return;
+    if (isBrowserTTSRef.current) {
+      window.speechSynthesis.resume();
+      setStatus("playing");
+    } else if (audioRef.current) {
       audioRef.current.play();
       setStatus("playing");
     }
@@ -333,6 +410,7 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     async (items?: AudioPlayerItem[]) => {
       setAutoAdvance(true);
       setError(null);
+      prefetchCacheRef.current.clear();
 
       let radioQueue: AudioPlayerItem[];
       if (items && items.length > 0) {

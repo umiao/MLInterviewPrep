@@ -301,3 +301,10 @@
 - **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-104 --status completed`
+
+## 2026-03-16 -- [T-P1-105] Browser Web Speech API fallback + prefetch next item
+- **What I did**: Enhanced useAudioPlayer hook with two features: (1) Improved browser SpeechSynthesis fallback with proper pause/resume support via speechSynthesis.pause()/resume(), tracking active utterance and browser TTS mode in refs, cleanup via speechSynthesis.cancel(). (2) Prefetch system: when an item starts playing (both audio and browser TTS), automatically POST /synthesize for the next queue item in background. Prefetched responses stored in a Map ref keyed by "content_type:content_id". On play(), checks prefetch cache first to skip network round-trip. Cache cleared on stop() and startRadio() to prevent stale data.
+- **Deliverables**: src/frontend/src/hooks/useAudioPlayer.ts (enhanced)
+- **Sanity check result**: 733/733 tests pass, ruff clean, TypeScript compiles clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-105 --status completed`
