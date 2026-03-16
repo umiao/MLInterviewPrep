@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, ApiRequestError } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 import type { InterviewQuestion, QuestionAnalysis, QuestionType } from "../types/question";
 
 /* ---------- Paste Response Types ---------- */
@@ -270,11 +271,7 @@ function AnalysisPanel({
   loading: boolean;
 }) {
   if (loading) {
-    return (
-      <div className="text-sm text-gray-500 py-3 text-center">
-        Analyzing with LLM...
-      </div>
-    );
+    return <LoadingSpinner message="Analyzing with LLM..." size="sm" />;
   }
   if (!analysis) return null;
 
@@ -653,9 +650,7 @@ export default function Questions() {
       )}
 
       {/* Loading */}
-      {loading && (
-        <div className="text-gray-500 py-8 text-center">Loading...</div>
-      )}
+      {loading && <LoadingSpinner message="Loading questions..." />}
 
       {/* Table */}
       {!loading && (

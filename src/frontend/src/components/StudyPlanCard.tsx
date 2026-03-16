@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import LoadingSpinner from "./ui/LoadingSpinner";
 import type { StudyPlanResult, StudyTopic } from "../types/framework";
 import type { Company } from "../types/company";
 
@@ -183,11 +184,7 @@ export default function StudyPlanCard() {
       )}
 
       {/* Loading state */}
-      {loading && (
-        <div className="flex items-center justify-center py-6 text-gray-400 text-sm">
-          Generating study plan...
-        </div>
-      )}
+      {loading && <LoadingSpinner message="Generating study plan..." size="sm" />}
 
       {/* Error state */}
       {error && (

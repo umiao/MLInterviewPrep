@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 import type {
   CompanyDeadline,
   DashboardData,
@@ -127,11 +128,7 @@ export default function Dashboard() {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
-        Loading dashboard...
-      </div>
-    );
+    return <LoadingSpinner message="Loading dashboard..." fullHeight />;
   }
 
   if (error) {

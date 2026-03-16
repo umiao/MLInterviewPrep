@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 import type {
   Category,
   Difficulty,
@@ -358,9 +359,7 @@ export default function Problems() {
         )}
 
         {/* Loading */}
-        {loading && (
-          <div className="text-gray-500 py-8 text-center">Loading...</div>
-        )}
+        {loading && <LoadingSpinner message="Loading problems..." />}
 
         {/* Table */}
         {!loading && problems.length === 0 && (

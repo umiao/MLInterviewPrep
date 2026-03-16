@@ -370,3 +370,10 @@
 - **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-75 --status completed`
+
+## 2026-03-15 -- [T-P0-76] Build shared UI components (LoadingSpinner)
+- **What I did**: Created components/ui/ directory and LoadingSpinner component with animated CSS spinner, configurable size (sm/md/lg), optional message, fullHeight mode, and ARIA role="status". Replaced all plain-text loading patterns across Dashboard, Framework, Problems, Questions pages and StudyPlanCard component with the new LoadingSpinner. Toast part was already completed in T-P0-75.
+- **Deliverables**: src/frontend/src/components/ui/LoadingSpinner.tsx (new), src/frontend/src/pages/Dashboard.tsx, Framework.tsx, Problems.tsx, Questions.tsx, src/frontend/src/components/StudyPlanCard.tsx
+- **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-76 --status completed`

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import LoadingSpinner from "../components/ui/LoadingSpinner";
 import FrameworkTreeView from "../components/FrameworkTreeView";
 import FrameworkTreemap from "../components/FrameworkTreemap";
 import NodeDetailPanel from "../components/NodeDetailPanel";
@@ -137,11 +138,7 @@ export default function Framework() {
   }, [queryClient]);
 
   if (treeLoading || statsLoading) {
-    return (
-      <div className="flex items-center justify-center h-64 text-gray-400">
-        Loading framework...
-      </div>
-    );
+    return <LoadingSpinner message="Loading framework..." fullHeight />;
   }
 
   if (treeError) {
