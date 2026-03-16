@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-101: Content Pipeline: queue ranking, preprocessing v2, chunking
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-100
-- **Description**: Expand services/content_pipeline.py: (1) get_reading_queue(db, company_ids, days_until_interview, limit=20) - reuse compute_urgency() from study_planner.py, rank FrameworkNodes, interleave prep_notes + interview_questions for target companies. (2) preprocess_for_tts v2: add bullets->sentences, expand e.g./i.e., add [PAUSE] at headings (defer LaTeX/tables). (3) chunk_text(text, max_chars=500) - split at sentence boundaries. (4) get_content_text for all 3 content types. (5) compute_content_hash for cache invalidation. AC: Queue sorted by urgency with all 3 types, preprocessing tests per rule, chunking never breaks mid-sentence, hash changes on text change
-
 #### T-P0-102: Reading REST endpoints: queue, progress, content, async synthesize
 - **Priority**: P0
 - **Complexity**: S
@@ -98,6 +92,7 @@
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P0-99: TTS MVP: edge-tts -> MP3 -> <audio> playback for framework nodes. Minimal vertical slice: pick one framework node -> preprocess markdown (v1: strip #, **, *, _, links, skip code blocks) 
+- [x] **2026-03-16** -- T-P0-101: Content Pipeline: queue ranking, preprocessing v2, chunking. Expand services/content_pipeline.py: (1) get_reading_queue(db, company_ids, days_until_interview, limit=20) - reuse comp
 - [x] **2026-03-16** -- T-P0-100: ReadingProgress + AudioCache models + Migration v4. New models in models/reading.py: ReadingProgress (content_type, content_id, last_chunk_index, char_offset, total_chars, 
 - [x] **2026-03-15** -- T-P2-94: [B7] Frontend: Analytics deep-dive (radar chart, scatter plot, trend lines). AC:\n- Pattern comfort radar chart (Recharts RadarChart) on Problems page or Dashboard\n- Framework confidence vs import
 - [x] **2026-03-15** -- T-P2-93: [B6] Frontend: QA session summarize button in ReviewPanel. AC:

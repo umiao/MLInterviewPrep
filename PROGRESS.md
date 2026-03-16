@@ -273,3 +273,10 @@
 - **Sanity check result**: 653/653 tests pass, ruff clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-100 --status completed`
+
+## 2026-03-16 -- [T-P0-101] Content Pipeline: queue ranking, preprocessing v2, chunking
+- **What I did**: Expanded services/content_pipeline.py with five new functions: (1) get_reading_queue(db, company_ids, days_until_interview, limit) ranks FrameworkNodes by urgency (reusing compute_urgency from study_planner), interleaves prep_notes and interview_questions for target companies, attaches ReadingProgress, filters completed items. (2) preprocess_for_tts v2 adds [PAUSE] markers at headings, ensures bullet/numbered items end with period, expands w/ and w/o abbreviations. (3) chunk_text splits at sentence boundaries respecting max_chars. (4) get_content_text retrieves raw text for all 3 content types (framework_node description, company prep_notes, problem metadata). (5) compute_content_hash returns SHA-256 for cache invalidation. Added QueueItem dataclass and content type constants.
+- **Deliverables**: src/backend/services/content_pipeline.py (modified), tests/test_content_pipeline.py (modified - 40 tests total)
+- **Sanity check result**: 682/682 tests pass, ruff clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-101 --status completed`
