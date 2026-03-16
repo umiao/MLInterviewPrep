@@ -134,3 +134,10 @@
 - **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-82 --status completed`
+
+## 2026-03-15 -- [T-P0-83] Problem CRUD + text search
+- **What I did**: Built Problem CRUD (Add/Edit/Delete) with text search on the Problems page. Created 7 shared UI components (Modal, ConfirmDialog, SearchInput, FormField, Badge, EmptyState, Pagination) and 3 problem-specific components (ProblemFormFields shared form, AddProblemModal, EditProblemModal). Updated Problems.tsx with SearchInput for client-side filtering across title/pattern/company, "+ Add Problem" button, per-row Edit/Delete actions, and React Query mutations with toast notifications and cache invalidation. Form state preserved on error.
+- **Deliverables**: src/frontend/src/components/ui/Modal.tsx, ConfirmDialog.tsx, SearchInput.tsx, FormField.tsx, Badge.tsx, EmptyState.tsx, Pagination.tsx (all new), src/frontend/src/components/problems/ProblemFormFields.tsx, AddProblemModal.tsx, EditProblemModal.tsx (all new), src/frontend/src/pages/Problems.tsx (updated)
+- **Sanity check result**: 534/534 backend tests pass, frontend TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-83 --status completed`

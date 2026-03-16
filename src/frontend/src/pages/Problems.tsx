@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import { useToast } from "../contexts/ToastContext";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
+import SearchInput from "../components/ui/SearchInput";
+import EmptyState from "../components/ui/EmptyState";
+import Pagination from "../components/ui/Pagination";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
+import Badge from "../components/ui/Badge";
 import { useFilterParams } from "../hooks/useFilterParams";
 import type {
   Category,
@@ -13,6 +19,8 @@ import type {
 } from "../types/problem";
 import PracticeModal from "../components/PracticeModal";
 import ReviewPanel from "../components/ReviewPanel";
+import AddProblemModal from "../components/problems/AddProblemModal";
+import EditProblemModal from "../components/problems/EditProblemModal";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -37,6 +45,7 @@ const filterSchema = {
   pattern: { defaultValue: "" },
   source: { defaultValue: "" },
   company: { defaultValue: "" },
+  search: { defaultValue: "" },
   category: {
     defaultValue: undefined as Category | undefined,
     parse: (raw: string) => raw as Category,
@@ -92,29 +101,22 @@ function ReviewBadge({ nextReview }: { nextReview: string | null }) {
   );
 }
 
-function PatternBadge({ pattern }: { pattern: string | null }) {
-  if (!pattern) return null;
-  return (
-    <span className="text-xs px-1.5 py-0.5 rounded bg-blue-100 text-blue-700">
-      {pattern}
-    </span>
-  );
-}
-
 export default function Problems() {
   const queryClient = useQueryClient();
+  const toast = useToast();
 
   // ---- filter state (persisted in URL) ----
   const [
-    { difficulty, pattern, source, company, category, completed, sortBy, sortOrder, page },
-    { setDifficulty, setPattern, setSource, setCompany, setCategory, setCompleted, setSortBy, setSortOrder, setPage, resetAll },
+    { difficulty, pattern, source, company, search, category, completed, sortBy, sortOrder, page },
+    { setDifficulty, setPattern, setSource, setCompany, setSearch, setCategory, setCompleted, setSortBy, setSortOrder, setPage, resetAll },
   ] = useFilterParams(filterSchema);
 
-  // ---- practice modal state ----
+  // ---- modal state ----
   const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
-
-  // ---- review panel state ----
   const [reviewProblem, setReviewProblem] = useState<Problem | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editProblem, setEditProblem] = useState<Problem | null>(null);
+  const [deleteProblem, setDeleteProblem] = useState<Problem | null>(null);
 
   const filters: ProblemFilters = useMemo(
     () => ({
@@ -163,9 +165,22 @@ export default function Problems() {
     queryFn: () => api.getWithTotal<Problem[]>("/problems", { params }),
   });
 
-  const problems = problemsResult?.data ?? [];
+  const allProblems = problemsResult?.data ?? [];
   const totalCount = problemsResult?.totalCount ?? 0;
   const error = queryError ? queryError.message : null;
+
+  // Client-side text search across title/pattern/company_tags
+  // TODO: Switch to server-side search when dataset exceeds ~500 problems
+  const problems = useMemo(() => {
+    if (!search) return allProblems;
+    const lower = search.toLowerCase();
+    return allProblems.filter(
+      (p) =>
+        p.title.toLowerCase().includes(lower) ||
+        (p.pattern && p.pattern.toLowerCase().includes(lower)) ||
+        p.company_tags.some((c) => c.toLowerCase().includes(lower)),
+    );
+  }, [allProblems, search]);
 
   // Load all problems once to extract unique patterns for the dropdown
   const { data: allProblemsData } = useQuery({
@@ -203,6 +218,24 @@ export default function Problems() {
       setPage(0);
     }
   }, [filterKey, setPage]);
+
+  // ---- delete mutation ----
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => api.del(`/problems/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["problems"] });
+      toast.success("Problem deleted");
+      setDeleteProblem(null);
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to delete problem");
+    },
+  });
+
+  const handleSearchChange = useCallback(
+    (value: string) => setSearch(value),
+    [setSearch],
+  );
 
   return (
     <div className="flex gap-6">
@@ -335,33 +368,49 @@ export default function Problems() {
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">LeetCode Problems</h1>
-          <span className="text-sm text-gray-500">
-            {totalCount} problem{totalCount !== 1 ? "s" : ""}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-gray-500">
+              {totalCount} problem{totalCount !== 1 ? "s" : ""}
+            </span>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              + Add Problem
+            </button>
+          </div>
         </div>
 
-        {/* Sort controls */}
-        <div className="flex items-center gap-3 mb-3 text-sm">
-          <label className="text-gray-500">Sort by</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortField)}
-            className="border border-gray-300 rounded px-2 py-1"
-          >
-            <option value="created_at">Date added</option>
-            <option value="comfort_level">Comfort</option>
-            <option value="last_attempted_at">Last attempted</option>
-            <option value="next_review_at">Next review</option>
-          </select>
-          <button
-            onClick={() =>
-              setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-            }
-            className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-            title={`Currently: ${sortOrder}`}
-          >
-            {sortOrder === "asc" ? "Asc" : "Desc"}
-          </button>
+        {/* Search + Sort controls */}
+        <div className="flex items-center gap-3 mb-3">
+          <SearchInput
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search title, pattern, company..."
+            className="flex-1 max-w-sm"
+          />
+          <div className="flex items-center gap-2 text-sm ml-auto">
+            <label className="text-gray-500">Sort by</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortField)}
+              className="border border-gray-300 rounded px-2 py-1"
+            >
+              <option value="created_at">Date added</option>
+              <option value="comfort_level">Comfort</option>
+              <option value="last_attempted_at">Last attempted</option>
+              <option value="next_review_at">Next review</option>
+            </select>
+            <button
+              onClick={() =>
+                setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+              }
+              className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
+              title={`Currently: ${sortOrder}`}
+            >
+              {sortOrder === "asc" ? "Asc" : "Desc"}
+            </button>
+          </div>
         </div>
 
         {/* Error */}
@@ -374,13 +423,19 @@ export default function Problems() {
         {/* Loading */}
         {loading && <LoadingSpinner message="Loading problems..." />}
 
-        {/* Table */}
+        {/* Empty state */}
         {!loading && problems.length === 0 && (
-          <div className="text-gray-400 py-8 text-center">
-            No problems found.
-          </div>
+          <EmptyState
+            message={search ? "No problems match your search." : "No problems found."}
+            action={
+              !search
+                ? { label: "Add your first problem", onClick: () => setShowAddModal(true) }
+                : undefined
+            }
+          />
         )}
 
+        {/* Table */}
         {!loading && problems.length > 0 && (
           <div className="overflow-x-auto rounded border border-gray-200">
             <table className="w-full text-sm">
@@ -392,7 +447,7 @@ export default function Problems() {
                   <th className="px-3 py-2 w-28">Pattern</th>
                   <th className="px-3 py-2 w-24">Comfort</th>
                   <th className="px-3 py-2 w-28">Review</th>
-                  <th className="px-3 py-2 w-20"></th>
+                  <th className="px-3 py-2 w-40">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -425,7 +480,7 @@ export default function Problems() {
                           </span>
                         )}
                         {p.is_completed && (
-                          <span className="text-xs text-green-600">[done]</span>
+                          <Badge variant="green">done</Badge>
                         )}
                       </div>
                       {p.company_tags.length > 0 && (
@@ -448,15 +503,22 @@ export default function Problems() {
                     </td>
                     <td className="px-3 py-2">
                       {p.difficulty && (
-                        <span
-                          className={`text-xs px-1.5 py-0.5 rounded capitalize ${DIFFICULTY_COLORS[p.difficulty]}`}
+                        <Badge
+                          variant={
+                            p.difficulty === "easy"
+                              ? "green"
+                              : p.difficulty === "medium"
+                                ? "yellow"
+                                : "red"
+                          }
+                          className="capitalize"
                         >
                           {p.difficulty}
-                        </span>
+                        </Badge>
                       )}
                     </td>
                     <td className="px-3 py-2">
-                      <PatternBadge pattern={p.pattern} />
+                      {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
                     </td>
                     <td className="px-3 py-2">
                       <ComfortStars level={p.comfort_level} />
@@ -478,6 +540,18 @@ export default function Problems() {
                         >
                           Review
                         </button>
+                        <button
+                          onClick={() => setEditProblem(p)}
+                          className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeleteProblem(p)}
+                          className="text-xs px-2 py-1 border border-red-200 rounded hover:bg-red-50 text-red-600"
+                        >
+                          Del
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -488,28 +562,32 @@ export default function Problems() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 text-sm">
-            <button
-              disabled={page === 0}
-              onClick={() => setPage(Math.max(0, page - 1))}
-              className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-100"
-            >
-              Previous
-            </button>
-            <span className="text-gray-500">
-              Page {page + 1} of {totalPages}
-            </span>
-            <button
-              disabled={page >= totalPages - 1}
-              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-              className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-100"
-            >
-              Next
-            </button>
-          </div>
-        )}
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </div>
+
+      {/* Add Problem Modal */}
+      <AddProblemModal
+        open={showAddModal}
+        onClose={() => setShowAddModal(false)}
+      />
+
+      {/* Edit Problem Modal */}
+      <EditProblemModal
+        problem={editProblem}
+        onClose={() => setEditProblem(null)}
+      />
+
+      {/* Delete Confirm Dialog */}
+      <ConfirmDialog
+        open={deleteProblem !== null}
+        onClose={() => setDeleteProblem(null)}
+        onConfirm={() => deleteProblem && deleteMutation.mutate(deleteProblem.id)}
+        title="Delete Problem"
+        message={`Are you sure you want to delete "${deleteProblem?.title}"? This will also delete all associated attempts and QA sessions.`}
+        confirmLabel="Delete"
+        confirmVariant="danger"
+        loading={deleteMutation.isPending}
+      />
 
       {/* Practice Modal */}
       {practiceProblem && (

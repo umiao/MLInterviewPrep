@@ -9,22 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-76, T-P0-82
-- **Description**: AC:
-- + Add Problem button -> AddProblemModal (title, leetcode_id, url, difficulty, tags, pattern, category, source, company_tags, priority, framework_node_id via FrameworkNodePicker)
-- Row edit action -> EditProblemModal (pre-filled, PUT /problems/{id})
-- Row delete action -> ConfirmDialog -> DELETE /problems/{id}
-- SearchInput at top filtering across title/pattern/company (client-side)
-- NOTE: Client-side search OK for <500 problems. Add TODO comment for server-side threshold. Current dataset ~225 problems.
-- React Query mutations with cache invalidation + toast
-- Form state preserved on error
-- Shared components built here as first consumers: Modal, ConfirmDialog, SearchInput, FormField, Badge, EmptyState, Pagination (extracted from current Problems page)
-
-Key files: src/frontend/src/pages/Problems.tsx, new components/problems/AddProblemModal.tsx, EditProblemModal.tsx, new components/ui/Modal.tsx, ConfirmDialog.tsx, SearchInput.tsx, FormField.tsx, Badge.tsx, EmptyState.tsx, Pagination.tsx
-
 #### T-P0-84: [B3] Frontend: Topic detail shows linked problems + questions in NodeDetailPanel
 - **Priority**: P0
 - **Complexity**: S
@@ -180,6 +164,7 @@ Key files: src/frontend/src/components/ReviewPanel.tsx
 
 - [x] **2026-03-15** -- T-P2-72: Add GET / root endpoint returning API info JSON
 - [x] **2026-03-15** -- T-P2-68: Add combined backend+frontend startup script (scripts/dev.py)
+- [x] **2026-03-15** -- T-P0-83: [B3] Frontend: Problem CRUD (Add/Edit/Delete) + text search. AC:
 - [x] **2026-03-15** -- T-P0-82: [B3] Frontend: FrameworkNodePicker component. AC:
 - [x] **2026-03-15** -- T-P0-81: [B3] Backend: Add framework_node_id FK to Problem model + topic-linked endpoints. AC:
 - [x] **2026-03-15** -- T-P0-80: [B2] Frontend: Notes tab in NodeDetailPanel with markdown edit/preview + autosave. AC:
