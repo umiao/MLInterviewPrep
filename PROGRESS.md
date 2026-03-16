@@ -377,3 +377,10 @@
 - **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-76 --status completed`
+
+## 2026-03-15 -- [T-P0-77] Add useFilterParams hook + useDebounce hook
+- **What I did**: Created two reusable hooks in src/frontend/src/hooks/. useDebounce: generic debounce hook for delayed value updates. useFilterParams: stores filter/sort/page state in URL searchParams via react-router's useSearchParams, with a schema-driven API supporting typed parsing, serialization, and clean URLs (default values omitted). Applied useFilterParams to the Problems page, replacing 8 useState calls with URL-persisted params. Filters now persist across navigation and browser back/forward.
+- **Deliverables**: src/frontend/src/hooks/useDebounce.ts (new), src/frontend/src/hooks/useFilterParams.ts (new), src/frontend/src/pages/Problems.tsx (refactored)
+- **Sanity check result**: 521/521 backend tests pass, frontend build succeeds, TypeScript clean
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-77 --status completed`

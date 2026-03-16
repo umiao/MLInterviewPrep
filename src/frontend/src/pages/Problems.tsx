@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
+import { useFilterParams } from "../hooks/useFilterParams";
 import type {
   Category,
   Difficulty,
@@ -25,6 +26,35 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   easy: "bg-green-100 text-green-700",
   medium: "bg-yellow-100 text-yellow-700",
   hard: "bg-red-100 text-red-700",
+};
+
+// Stable schema for URL filter params (defined outside component to avoid re-creation)
+const filterSchema = {
+  difficulty: {
+    defaultValue: undefined as Difficulty | undefined,
+    parse: (raw: string) => raw as Difficulty,
+  },
+  pattern: { defaultValue: "" },
+  source: { defaultValue: "" },
+  company: { defaultValue: "" },
+  category: {
+    defaultValue: undefined as Category | undefined,
+    parse: (raw: string) => raw as Category,
+  },
+  completed: { defaultValue: "all" },
+  sortBy: {
+    defaultValue: "created_at" as SortField,
+    parse: (raw: string) => raw as SortField,
+  },
+  sortOrder: {
+    defaultValue: "desc" as SortOrder,
+    parse: (raw: string) => raw as SortOrder,
+  },
+  page: {
+    defaultValue: 0,
+    parse: (raw: string) => parseInt(raw, 10) || 0,
+    serialize: (v: number) => String(v),
+  },
 };
 
 function ComfortStars({ level }: { level: number }) {
@@ -74,18 +104,11 @@ function PatternBadge({ pattern }: { pattern: string | null }) {
 export default function Problems() {
   const queryClient = useQueryClient();
 
-  // ---- filter state ----
-  const [difficulty, setDifficulty] = useState<Difficulty | undefined>();
-  const [pattern, setPattern] = useState("");
-  const [source, setSource] = useState("");
-  const [company, setCompany] = useState("");
-  const [category, setCategory] = useState<Category | undefined>();
-  const [completedFilter, setCompletedFilter] = useState<
-    "all" | "yes" | "no"
-  >("all");
-  const [sortBy, setSortBy] = useState<SortField>("created_at");
-  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [page, setPage] = useState(0);
+  // ---- filter state (persisted in URL) ----
+  const [
+    { difficulty, pattern, source, company, category, completed, sortBy, sortOrder, page },
+    { setDifficulty, setPattern, setSource, setCompany, setCategory, setCompleted, setSortBy, setSortOrder, setPage, resetAll },
+  ] = useFilterParams(filterSchema);
 
   // ---- practice modal state ----
   const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
@@ -100,9 +123,9 @@ export default function Problems() {
       source: source || undefined,
       company: company || undefined,
       is_completed:
-        completedFilter === "all"
+        completed === "all"
           ? undefined
-          : completedFilter === "yes",
+          : completed === "yes",
       category,
       sort_by: sortBy,
       sort_order: sortOrder,
@@ -114,7 +137,7 @@ export default function Problems() {
       pattern,
       source,
       company,
-      completedFilter,
+      completed,
       category,
       sortBy,
       sortOrder,
@@ -164,30 +187,22 @@ export default function Problems() {
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
-  function resetFilters() {
-    setDifficulty(undefined);
-    setPattern("");
-    setSource("");
-    setCompany("");
-    setCategory(undefined);
-    setCompletedFilter("all");
-    setSortBy("created_at");
-    setSortOrder("desc");
-    setPage(0);
-  }
-
   // Reset to page 0 when filters change (not sort/page)
   const filterKey = JSON.stringify({
     difficulty,
     pattern,
     source,
     company,
-    completedFilter,
+    completed,
     category,
   });
+  const prevFilterKey = useRef(filterKey);
   useEffect(() => {
-    setPage(0);
-  }, [filterKey]);
+    if (prevFilterKey.current !== filterKey) {
+      prevFilterKey.current = filterKey;
+      setPage(0);
+    }
+  }, [filterKey, setPage]);
 
   return (
     <div className="flex gap-6">
@@ -198,7 +213,7 @@ export default function Problems() {
             Filters
           </h2>
           <button
-            onClick={resetFilters}
+            onClick={resetAll}
             className="text-xs text-blue-600 hover:underline"
           >
             Reset
@@ -303,11 +318,9 @@ export default function Problems() {
             Status
           </legend>
           <select
-            value={completedFilter}
+            value={completed}
             onChange={(e) =>
-              setCompletedFilter(
-                e.target.value as "all" | "yes" | "no",
-              )
+              setCompleted(e.target.value)
             }
             className="w-full text-sm border border-gray-300 rounded px-2 py-1"
           >
@@ -479,7 +492,7 @@ export default function Problems() {
           <div className="flex items-center justify-between mt-4 text-sm">
             <button
               disabled={page === 0}
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              onClick={() => setPage(Math.max(0, page - 1))}
               className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-100"
             >
               Previous
@@ -489,9 +502,7 @@ export default function Problems() {
             </span>
             <button
               disabled={page >= totalPages - 1}
-              onClick={() =>
-                setPage((p) => Math.min(totalPages - 1, p + 1))
-              }
+              onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
               className="px-3 py-1 border border-gray-300 rounded disabled:opacity-40 hover:bg-gray-100"
             >
               Next
