@@ -165,7 +165,7 @@ export default function PrepNotesPage() {
             placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
           />
         ) : (
-          <div className="prep-prose flex-1">
+          <div className="prep-prose min-h-0 overflow-auto">
             {notes ? (
               <MarkdownPreview
                 markdown={notes}

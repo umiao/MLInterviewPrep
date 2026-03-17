@@ -28,9 +28,11 @@ export function usePrepNotes({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   const lastSavedRef = useRef(initialNotes ?? "");
+  const isSavingRef = useRef(false);
 
-  // Sync from parent when initialNotes changes (e.g., after refetch)
+  // Sync from parent -- skip while a save is in flight
   useEffect(() => {
+    if (isSavingRef.current) return;
     const incoming = initialNotes ?? "";
     if (incoming !== lastSavedRef.current) {
       setNotes(incoming);
@@ -44,14 +46,30 @@ export function usePrepNotes({
   const saveMutation = useMutation({
     mutationFn: (prepNotes: string) =>
       api.put<Company>(`/companies/${companyId}`, { prep_notes: prepNotes }),
+    onMutate: async (prepNotes: string) => {
+      await queryClient.cancelQueries({ queryKey: ["companies", companyId] });
+      const previous = queryClient.getQueryData<Company>(["companies", companyId]);
+      queryClient.setQueryData<Company>(["companies", companyId], (old) =>
+        old ? { ...old, prep_notes: prepNotes } : old,
+      );
+      return { previous };
+    },
     onSuccess: (_data, prepNotes) => {
       lastSavedRef.current = prepNotes;
       setSaveStatus("saved");
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
       onNotesChanged?.(prepNotes);
     },
-    onError: () => {
+    onError: (_err, _prepNotes, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData<Company>(["companies", companyId], context.previous);
+        setNotes(context.previous.prep_notes ?? "");
+        lastSavedRef.current = context.previous.prep_notes ?? "";
+      }
       setSaveStatus("error");
+    },
+    onSettled: () => {
+      isSavingRef.current = false;
+      queryClient.invalidateQueries({ queryKey: ["companies"] });
     },
   });
 
@@ -59,6 +77,7 @@ export function usePrepNotes({
   useEffect(() => {
     if (debouncedNotes !== lastSavedRef.current) {
       setSaveStatus("saving");
+      isSavingRef.current = true;
       saveMutation.mutate(debouncedNotes);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,6 +86,7 @@ export function usePrepNotes({
   /** Retry a failed save. */
   function handleRetry() {
     setSaveStatus("saving");
+    isSavingRef.current = true;
     saveMutation.mutate(notes);
   }
 
@@ -76,8 +96,8 @@ export function usePrepNotes({
       const updated = toggleCheckbox(notes, lineIndex);
       setNotes(updated);
       setSaveStatus("saving");
+      isSavingRef.current = true;
       saveMutation.mutate(updated);
-      lastSavedRef.current = updated;
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [notes, companyId],

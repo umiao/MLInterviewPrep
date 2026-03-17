@@ -133,3 +133,10 @@
 - **Deliverables**: src/frontend/src/index.css (CSS fix), scripts/import_blind75_notes.py (regex + encoding fix), data/blind75_parsed.json (76 parsed notes), database updated with 64 problem notes
 - **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
 - **Status**: [DONE]
+
+## 2026-03-17 -- [T-P1-125] Fix checkbox persistence and scroll white space on PrepNotesPage
+- **What I did**: (1) Fixed checkbox revert bug by adding optimistic updates to saveMutation (onMutate cancels queries + sets cache), an isSavingRef guard to prevent useEffect([initialNotes]) from reverting state during saves, and removed premature lastSavedRef update from handleCheckboxClick. (2) Fixed scroll white space by replacing flex-1 with min-h-0 overflow-auto on the prep-prose div.
+- **Deliverables**: src/frontend/src/hooks/usePrepNotes.ts, src/frontend/src/pages/PrepNotesPage.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit), no frontend test files to run
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-125 --status completed`
