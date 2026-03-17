@@ -231,3 +231,10 @@
 - **Sanity check result**: 811 tests pass, TypeScript compiles, frontend builds, API smoke test confirms `$$O(1)$$` in DB and API responses, currency `$2M` preserved, code block content untouched
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-138 --status completed`
+
+## 2026-03-17 -- [T-P1-139..142] Fix 6 Framework page issues + seed interview events
+- **What I did**: (1) Widened right panel default from 288px to 35% of viewport (min 480px). (2) Made URL the single source of truth for node selection -- added `/framework/:nodeId` route, removed `selectedNode` state, derive from `useParams`. Leaf nodes with description navigate to notes page. (3) Auto-expand ancestors in tree when URL changes selection. (4) Row click on non-leaf nodes now toggles expand + selects (VS Code/Finder pattern). (5) Checkbox toggles now calculate progress_pct from checked/total checkboxes and send to backend. Backend propagates weighted progress to all ancestors atomically. (6) Created `scripts/seed_interview_events.py` for DoorDash (3/26 ML Deep Dive) and Uber (3/27 HR) events.
+- **Deliverables**: src/frontend/src/App.tsx, src/frontend/src/pages/Framework.tsx, src/frontend/src/components/FrameworkTreeView.tsx, src/frontend/src/hooks/useFrameworkNotes.ts, src/backend/routers/framework.py, scripts/seed_interview_events.py (new)
+- **Sanity check result**: 811 tests pass, TypeScript compiles cleanly, ruff clean
+- **Status**: [DONE]
+- **Request**: Tasks T-P1-139 through T-P1-142 marked completed

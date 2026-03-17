@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import type { FrameworkNode, NodeStatus } from "../types/framework";
 
@@ -201,7 +201,10 @@ function TreeNode({
               : ""
         }`}
         style={{ paddingLeft: `${node.depth * 20 + 8}px` }}
-        onClick={() => onSelect(node)}
+        onClick={() => {
+          if (hasChildren) toggleExpand(node.id);
+          onSelect(node);
+        }}
       >
         {/* Expand/collapse toggle */}
         <button
@@ -302,6 +305,42 @@ export default function FrameworkTreeView({
     }
     return ids;
   });
+
+  // Build parent map for ancestor lookup
+  const parentMap = useMemo(() => {
+    const map = new Map<number, number | null>();
+    const walk = (list: FrameworkNode[]) => {
+      for (const n of list) {
+        map.set(n.id, n.parent_id);
+        walk(n.children);
+      }
+    };
+    walk(nodes);
+    return map;
+  }, [nodes]);
+
+  // Auto-expand ancestors when selectedId changes (e.g. URL navigation)
+  useEffect(() => {
+    if (selectedId === null) return;
+    const ancestors: number[] = [];
+    let pid = parentMap.get(selectedId) ?? null;
+    while (pid !== null) {
+      ancestors.push(pid);
+      pid = parentMap.get(pid) ?? null;
+    }
+    if (ancestors.length === 0) return;
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      let changed = false;
+      for (const id of ancestors) {
+        if (!next.has(id)) {
+          next.add(id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [selectedId, parentMap]);
 
   const { matchIds, visibleIds } = useMemo(
     () => computeSearchSets(nodes, searchQuery),

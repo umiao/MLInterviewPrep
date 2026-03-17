@@ -36,6 +36,7 @@ export default function App() {
                 <Route path="problems" element={<Problems />} />
                 <Route path="problems/:problemId" element={<ProblemDetailPage />} />
                 <Route path="framework" element={<Framework />} />
+                <Route path="framework/:nodeId" element={<Framework />} />
                 <Route path="framework/:nodeId/notes" element={<FrameworkNotesPage />} />
                 <Route path="questions" element={<Questions />} />
                 <Route path="companies" element={<Companies />} />

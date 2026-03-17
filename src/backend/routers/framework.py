@@ -95,6 +95,33 @@ def get_framework_node(
     }
 
 
+def _propagate_progress(node_id: int, db: Session) -> None:
+    """Recalculate progress for all ancestors in one transaction."""
+    node = db.query(FrameworkNode).filter(FrameworkNode.id == node_id).first()
+    if not node or node.parent_id is None:
+        return
+    current_parent_id = node.parent_id
+    while current_parent_id is not None:
+        parent = db.query(FrameworkNode).filter(
+            FrameworkNode.id == current_parent_id
+        ).first()
+        if not parent:
+            break
+        children = db.query(FrameworkNode).filter(
+            FrameworkNode.parent_id == current_parent_id
+        ).all()
+        if children:
+            total_importance = sum(c.importance for c in children)
+            if total_importance > 0:
+                weighted = sum(c.progress_pct * c.importance for c in children)
+                parent.progress_pct = round(weighted / total_importance, 1)
+            else:
+                parent.progress_pct = round(
+                    sum(c.progress_pct for c in children) / len(children), 1
+                )
+        current_parent_id = parent.parent_id
+
+
 @router.put("/framework/nodes/{node_id}", response_model=FrameworkNodeResponse)
 def update_framework_node(
     node_id: int,
@@ -123,6 +150,9 @@ def update_framework_node(
     for field, value in update_data.items():
         setattr(node, field, value)
 
+    db.flush()  # flush node changes
+    if "progress_pct" in update_data:
+        _propagate_progress(node_id, db)
     db.commit()
     db.refresh(node)
 

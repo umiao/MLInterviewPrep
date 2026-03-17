@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useDebounce } from "./useDebounce";
+import { countChecked, countUnchecked } from "../utils/markdown";
 import type { FrameworkNode } from "../types/framework";
 
 type ViewMode = "preview" | "edit";
@@ -42,23 +43,32 @@ export function useFrameworkNotes({
   // Debounced auto-save
   const debouncedNotes = useDebounce(notes, 500);
 
+  interface SavePayload {
+    description: string;
+    progress_pct?: number;
+  }
+
   const saveMutation = useMutation({
-    mutationFn: (description: string) =>
-      api.put<FrameworkNode>(`/framework/nodes/${nodeId}`, { description }),
-    onMutate: async (description) => {
+    mutationFn: (payload: SavePayload) =>
+      api.put<FrameworkNode>(`/framework/nodes/${nodeId}`, payload),
+    onMutate: async () => {
       isSavingRef.current = true;
       // Cancel any outbound refetches so they don't overwrite optimistic update
       await queryClient.cancelQueries({
         queryKey: ["framework", "node", nodeId],
       });
     },
-    onSuccess: (_data, description) => {
-      lastSavedRef.current = description;
+    onSuccess: (_data, payload) => {
+      lastSavedRef.current = payload.description;
       // Update the single-node query cache
       queryClient.setQueryData<FrameworkNode>(
         ["framework", "node", nodeId],
-        (old) => (old ? { ...old, description } : old),
+        (old) => (old ? { ...old, description: payload.description } : old),
       );
+      // Invalidate tree so parent progress bars refresh
+      if (payload.progress_pct !== undefined) {
+        queryClient.invalidateQueries({ queryKey: ["framework", "tree"] });
+      }
       setSaveStatus("saved");
       isSavingRef.current = false;
     },
@@ -72,7 +82,7 @@ export function useFrameworkNotes({
   useEffect(() => {
     if (debouncedNotes !== lastSavedRef.current) {
       setSaveStatus("saving");
-      saveMutation.mutate(debouncedNotes);
+      saveMutation.mutate({ description: debouncedNotes });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedNotes, nodeId]);
@@ -89,15 +99,20 @@ export function useFrameworkNotes({
     }
     const updated = lines.join("\n");
     setNotes(updated);
-    // Immediately save checkbox changes
+    // Calculate progress from checkbox state
+    const checked = countChecked(updated);
+    const unchecked = countUnchecked(updated);
+    const total = checked + unchecked;
+    const progress_pct = total > 0 ? Math.round((checked / total) * 100 * 10) / 10 : undefined;
+    // Immediately save checkbox changes with progress
     setSaveStatus("saving");
-    saveMutation.mutate(updated);
+    saveMutation.mutate({ description: updated, progress_pct });
   }
 
   /** Retry a failed save. */
   function handleRetry() {
     setSaveStatus("saving");
-    saveMutation.mutate(notes);
+    saveMutation.mutate({ description: notes });
   }
 
   return {

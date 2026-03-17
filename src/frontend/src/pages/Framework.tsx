@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
@@ -122,6 +123,8 @@ function StatsPanel({ stats }: { stats: FrameworkStats }) {
 }
 
 export default function Framework() {
+  const { nodeId: nodeIdParam } = useParams<{ nodeId?: string }>();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: tree, isLoading: treeLoading, error: treeError } = useQuery({
     queryKey: ["framework", "tree"],
@@ -133,16 +136,16 @@ export default function Framework() {
   });
 
   const [viewMode, setViewMode] = useState<ViewMode>("tree");
-  const [selectedNode, setSelectedNode] = useState<FrameworkNode | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
   // -- Resizable right panel --
   const MIN_PANEL_WIDTH = 240;
-  const DEFAULT_PANEL_WIDTH = 288; // w-72
-  const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
+  const [panelWidth, setPanelWidth] = useState(
+    Math.max(480, Math.floor(window.innerWidth * 0.35))
+  );
   const isDragging = useRef(false);
   const startX = useRef(0);
-  const startWidth = useRef(DEFAULT_PANEL_WIDTH);
+  const startWidth = useRef(panelWidth);
 
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
@@ -188,6 +191,23 @@ export default function Framework() {
     if (tree) walk(tree);
     return map;
   }, [tree]);
+
+  // Derive selected node from URL param
+  const selectedNode = nodeIdParam ? nodeMap.get(Number(nodeIdParam)) ?? null : null;
+
+  /** Navigate to node: leaf with description -> notes page, otherwise -> framework/:id */
+  const handleSelect = useCallback((node: FrameworkNode) => {
+    if (node.children.length === 0 && node.description) {
+      navigate(`/framework/${node.id}/notes`);
+    } else {
+      navigate(`/framework/${node.id}`);
+    }
+  }, [navigate]);
+
+  /** Breadcrumb navigation: always stays on framework page (no notes redirect) */
+  const handleBreadcrumbNavigate = useCallback((node: FrameworkNode) => {
+    navigate(`/framework/${node.id}`);
+  }, [navigate]);
 
   const handleNodeUpdated = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["framework"] });
@@ -256,7 +276,7 @@ export default function Framework() {
         <BreadcrumbPath
           node={selectedNode}
           nodeMap={nodeMap}
-          onNavigate={setSelectedNode}
+          onNavigate={handleBreadcrumbNavigate}
         />
       )}
 
@@ -267,14 +287,14 @@ export default function Framework() {
           {viewMode === "tree" ? (
             <FrameworkTreeView
               nodes={tree}
-              onSelect={setSelectedNode}
+              onSelect={handleSelect}
               selectedId={selectedNode?.id ?? null}
               searchQuery={searchQuery}
             />
           ) : (
             <FrameworkTreemap
               nodes={tree}
-              onSelect={setSelectedNode}
+              onSelect={handleSelect}
               selectedId={selectedNode?.id ?? null}
             />
           )}
