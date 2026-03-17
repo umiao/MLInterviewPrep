@@ -56,3 +56,19 @@
 - **What went wrong / What I learned**: Tailwind CSS v4's `@tailwindcss/typography` (prose) resets `text-decoration` on inline elements including `<del>` and `<s>`, removing the browser default `line-through`. This is not a remark-gfm issue -- the HTML is correct but CSS overrides remove the visual.
 - **Fix / Correct approach**: Add explicit `.prose del, .prose s { text-decoration: line-through; }` in the global CSS to restore the expected rendering. Check for similar prose resets when other HTML elements lose their default styling.
 - **Tags**: #tailwind #prose #css #strikethrough #typography
+
+### [2026-03-17] UI component best practices for scroll-aware mode switching
+- **Context**: Designing sticky toolbar + scroll position preservation for prep notes edit/preview toggle.
+- **What went wrong / What I learned**: Initial design had several anti-patterns that review caught:
+  1. **DOM traversal to find scroll containers** -- walking up parentElement to find `overflow-y: auto|scroll` is fragile and breaks if CSS changes. Scroll containers are always known at design time.
+  2. **Exposing bare state setters** -- exposing `setMode` lets callers bypass scroll capture. Silent bugs when new code calls `setMode` directly.
+  3. **rAF guessing for layout timing** -- using `requestAnimationFrame` (even repeated) to wait for DOM layout is a guess. Async content (images, math plugins) can take arbitrarily long.
+  4. **Duplicated logic across components** -- same handleModeSwitch + useLayoutEffect pattern in two files means change-one-forget-one bugs.
+- **Fix / Correct approach**:
+  1. **Explicit refs** -- pass scroll container refs as props or own them directly. Never discover them at runtime.
+  2. **Encapsulate state transitions** -- wrap `setMode` into `switchMode(newMode, captureScroll?)` as the only public API. Impossible to forget side-effects.
+  3. **ResizeObserver + timeout** -- observe content height stabilization, restore scroll when stable. 500ms timeout as fallback. Deterministic instead of frame-counting.
+  4. **Extract shared hooks** -- `useScrollRestore(scrollContainerRef, mode)` used by both components. Single source of truth.
+  5. **Visual affordances** -- sticky elements need `border-b` separator to distinguish from content. Functional, not decorative.
+  6. **Guard arithmetic** -- `maxScroll <= 0` must short-circuit explicitly. Never leave division-by-zero protection as "mentioned in edge cases".
+- **Tags**: #react #scroll #sticky #hooks #ui-patterns #code-review

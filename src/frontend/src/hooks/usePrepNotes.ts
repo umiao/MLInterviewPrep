@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useDebounce } from "./useDebounce";
-import { toggleCheckbox } from "../utils/markdown";
 import type { Company } from "../types/company";
 
-type ViewMode = "preview" | "edit";
+export type ViewMode = "preview" | "edit";
 type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 interface UsePrepNotesOptions {
@@ -15,7 +14,11 @@ interface UsePrepNotesOptions {
 }
 
 /**
- * Shared hook for prep notes: fetch/save/autosave/checkbox-toggle logic.
+ * Shared hook for prep notes: fetch/save/autosave logic.
+ *
+ * Saves update the query cache directly from the server response instead of
+ * calling invalidateQueries.  This avoids a refetch race where stale GET
+ * data could overwrite local state before the UI re-renders.
  */
 export function usePrepNotes({
   companyId,
@@ -28,11 +31,9 @@ export function usePrepNotes({
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
 
   const lastSavedRef = useRef(initialNotes ?? "");
-  const isSavingRef = useRef(false);
 
-  // Sync from parent -- skip while a save is in flight
+  // Sync from parent (e.g. initial load, import, or external refetch).
   useEffect(() => {
-    if (isSavingRef.current) return;
     const incoming = initialNotes ?? "";
     if (incoming !== lastSavedRef.current) {
       setNotes(incoming);
@@ -46,30 +47,19 @@ export function usePrepNotes({
   const saveMutation = useMutation({
     mutationFn: (prepNotes: string) =>
       api.put<Company>(`/companies/${companyId}`, { prep_notes: prepNotes }),
-    onMutate: async (prepNotes: string) => {
-      await queryClient.cancelQueries({ queryKey: ["companies", companyId] });
-      const previous = queryClient.getQueryData<Company>(["companies", companyId]);
-      queryClient.setQueryData<Company>(["companies", companyId], (old) =>
-        old ? { ...old, prep_notes: prepNotes } : old,
-      );
-      return { previous };
-    },
-    onSuccess: (_data, prepNotes) => {
+    onSuccess: (data, prepNotes) => {
       lastSavedRef.current = prepNotes;
+      // Merge the confirmed server state into the query cache (PUT response
+      // may lack fields like topic_weights that GET returns, so we merge
+      // instead of replacing to avoid clobbering cached data).
+      queryClient.setQueryData<Company>(["companies", companyId], (old) =>
+        old ? { ...old, ...data } : data,
+      );
       setSaveStatus("saved");
       onNotesChanged?.(prepNotes);
     },
-    onError: (_err, _prepNotes, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData<Company>(["companies", companyId], context.previous);
-        setNotes(context.previous.prep_notes ?? "");
-        lastSavedRef.current = context.previous.prep_notes ?? "";
-      }
+    onError: () => {
       setSaveStatus("error");
-    },
-    onSettled: () => {
-      isSavingRef.current = false;
-      queryClient.invalidateQueries({ queryKey: ["companies"] });
     },
   });
 
@@ -77,7 +67,6 @@ export function usePrepNotes({
   useEffect(() => {
     if (debouncedNotes !== lastSavedRef.current) {
       setSaveStatus("saving");
-      isSavingRef.current = true;
       saveMutation.mutate(debouncedNotes);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,31 +75,26 @@ export function usePrepNotes({
   /** Retry a failed save. */
   function handleRetry() {
     setSaveStatus("saving");
-    isSavingRef.current = true;
     saveMutation.mutate(notes);
   }
 
-  /** Toggle checkbox in preview mode (immediate save, bypasses debounce). */
-  const handleCheckboxClick = useCallback(
-    (lineIndex: number) => {
-      const updated = toggleCheckbox(notes, lineIndex);
-      setNotes(updated);
-      setSaveStatus("saving");
-      isSavingRef.current = true;
-      saveMutation.mutate(updated);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [notes, companyId],
-  );
+  /**
+   * Switch between preview/edit modes. Accepts an optional callback that runs
+   * before the mode change (used by useScrollRestore to capture scroll position).
+   */
+  function switchMode(newMode: ViewMode, beforeSwitch?: () => void) {
+    if (newMode === mode) return;
+    beforeSwitch?.();
+    setMode(newMode);
+  }
 
   return {
     notes,
     setNotes,
     mode,
-    setMode,
+    switchMode,
     saveStatus,
     setSaveStatus,
     handleRetry,
-    handleCheckboxClick,
   };
 }

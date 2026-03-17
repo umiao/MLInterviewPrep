@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { usePrepNotes } from "../hooks/usePrepNotes";
+import { useScrollRestore } from "../hooks/useScrollRestore";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import type { Company } from "../types/company";
@@ -19,6 +20,7 @@ export default function PrepNotesPage() {
   const navigate = useNavigate();
   const [importMode, setImportMode] = useState<ImportMode>("append");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   const { data: company, isLoading } = useQuery<Company>({
     queryKey: ["companies", companyId],
@@ -54,7 +56,7 @@ export default function PrepNotesPage() {
     notes,
     setNotes,
     mode,
-    setMode,
+    switchMode,
     saveStatus,
     setSaveStatus,
     handleRetry,
@@ -62,6 +64,8 @@ export default function PrepNotesPage() {
     companyId,
     initialNotes: company?.prep_notes ?? null,
   });
+
+  const { captureScroll } = useScrollRestore(contentRef, mode);
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -137,7 +141,7 @@ export default function PrepNotesPage() {
           {/* Mode toggle */}
           <div className="flex gap-1">
             <button
-              onClick={() => setMode("preview")}
+              onClick={() => switchMode("preview", captureScroll)}
               className={`text-sm px-3 py-1.5 rounded ${
                 mode === "preview"
                   ? "bg-blue-100 text-blue-700 font-medium"
@@ -147,7 +151,7 @@ export default function PrepNotesPage() {
               Preview
             </button>
             <button
-              onClick={() => setMode("edit")}
+              onClick={() => switchMode("edit", captureScroll)}
               className={`text-sm px-3 py-1.5 rounded ${
                 mode === "edit"
                   ? "bg-blue-100 text-blue-700 font-medium"
@@ -182,7 +186,7 @@ export default function PrepNotesPage() {
       </header>
 
       {/* Content area */}
-      <div className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
+      <div ref={contentRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
         {mode === "edit" ? (
           <textarea
             value={notes}

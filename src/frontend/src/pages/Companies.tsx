@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DragDropContext,
@@ -228,6 +228,7 @@ function CompanyDetailPanel({
   const toast = useToast();
   const [tab, setTab] = useState<PanelTab>("focus");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const cardBodyRef = useRef<HTMLDivElement>(null);
 
   // Focus topics query
   const { data: topics = [], isLoading: loadingTopics } = useQuery({
@@ -336,7 +337,7 @@ function CompanyDetailPanel({
       </div>
 
       {/* Body */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5">
+      <div ref={cardBodyRef} className="flex-1 overflow-y-auto p-4 space-y-5">
         {/* ---- Focus tab ---- */}
         {tab === "focus" && (
           <>
@@ -448,6 +449,7 @@ function CompanyDetailPanel({
           <PrepNotesTab
             companyId={company.id}
             initialNotes={company.prep_notes}
+            scrollContainerRef={cardBodyRef}
             onNotesChanged={(newNotes) => {
               onCompanyChanged({ ...company, prep_notes: newNotes });
             }}

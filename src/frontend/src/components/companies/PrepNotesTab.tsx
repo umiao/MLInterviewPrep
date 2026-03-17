@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, type RefObject } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { usePrepNotes } from "../../hooks/usePrepNotes";
+import { useScrollRestore } from "../../hooks/useScrollRestore";
 import MarkdownPreview from "../ui/MarkdownPreview";
 import type { Company } from "../../types/company";
 
@@ -11,16 +12,18 @@ interface PrepNotesTabProps {
   companyId: number;
   initialNotes: string | null;
   onNotesChanged?: (notes: string) => void;
+  scrollContainerRef?: RefObject<HTMLElement | null>;
 }
 
 /**
- * PrepNotesTab: edit/preview markdown prep notes with checkbox click-toggle.
+ * PrepNotesTab: edit/preview markdown prep notes with autosave.
  * Inline panel variant used in the Companies page.
  */
 export default function PrepNotesTab({
   companyId,
   initialNotes,
   onNotesChanged,
+  scrollContainerRef,
 }: PrepNotesTabProps) {
   const queryClient = useQueryClient();
   const [importMode, setImportMode] = useState<ImportMode>("append");
@@ -30,12 +33,15 @@ export default function PrepNotesTab({
     notes,
     setNotes,
     mode,
-    setMode,
+    switchMode,
     saveStatus,
     setSaveStatus,
     handleRetry,
-    handleCheckboxClick,
   } = usePrepNotes({ companyId, initialNotes, onNotesChanged });
+
+  const fallbackRef = useRef<HTMLElement>(null);
+  const effectiveRef = scrollContainerRef ?? fallbackRef;
+  const { captureScroll } = useScrollRestore(effectiveRef, mode);
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -70,11 +76,11 @@ export default function PrepNotesTab({
 
   return (
     <div className="space-y-3">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between">
+      {/* Toolbar -- sticky within the parent scroll container */}
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-2 flex items-center justify-between">
         <div className="flex gap-1">
           <button
-            onClick={() => setMode("preview")}
+            onClick={() => switchMode("preview", captureScroll)}
             className={`text-xs px-2 py-1 rounded ${
               mode === "preview"
                 ? "bg-blue-100 text-blue-700 font-medium"
@@ -84,7 +90,7 @@ export default function PrepNotesTab({
             Preview
           </button>
           <button
-            onClick={() => setMode("edit")}
+            onClick={() => switchMode("edit", captureScroll)}
             className={`text-xs px-2 py-1 rounded ${
               mode === "edit"
                 ? "bg-blue-100 text-blue-700 font-medium"
@@ -140,7 +146,7 @@ export default function PrepNotesTab({
       ) : (
         <div className="text-sm min-h-[8rem] border border-gray-200 rounded p-3 overflow-y-auto">
           {notes ? (
-            <MarkdownPreview markdown={notes} onCheckboxClick={handleCheckboxClick} />
+            <MarkdownPreview markdown={notes} />
           ) : (
             <p className="text-gray-400 italic">
               No prep notes yet. Switch to Edit mode to add some.

@@ -203,3 +203,10 @@
 - **Sanity check result**: All 48 nodes verified in DB with content (4.4K-8.9K chars each), checkboxes, tables. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-133 --status completed`
+
+## 2026-03-17 -- [T-P1-135] Sticky toolbar + scroll position sync for PrepNotes
+- **What I did**: (1) Made PrepNotesTab toolbar sticky with `sticky top-0 z-10 bg-white border-b` so it stays visible during scroll. (2) Created shared `useScrollRestore` hook that captures scroll ratio before mode switch and restores it after new content renders using ResizeObserver + 500ms timeout fallback. (3) Encapsulated `setMode` into `switchMode(newMode, captureScroll?)` in `usePrepNotes` to ensure scroll capture always happens before mode change. (4) Wired scroll restore into both PrepNotesTab (via explicit `scrollContainerRef` prop from parent) and PrepNotesPage (via owned `contentRef`). (5) Added UI component best practices to LESSONS.md.
+- **Deliverables**: src/frontend/src/hooks/useScrollRestore.ts (new), src/frontend/src/hooks/usePrepNotes.ts, src/frontend/src/components/companies/PrepNotesTab.tsx, src/frontend/src/pages/PrepNotesPage.tsx, src/frontend/src/pages/Companies.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-135 --status completed`
