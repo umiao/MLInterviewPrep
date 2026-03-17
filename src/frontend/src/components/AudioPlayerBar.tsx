@@ -4,6 +4,7 @@
  * Only visible when the player is active (not idle).
  */
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAudioPlayerContext } from "../contexts/AudioPlayerContext";
 import { SPEED_OPTIONS } from "../hooks/useAudioPlayer";
 import type { PlaybackSpeed } from "../hooks/useAudioPlayer";
@@ -43,6 +44,7 @@ export default function AudioPlayerBar() {
     stop,
   } = useAudioPlayerContext();
 
+  const navigate = useNavigate();
   const [showQueue, setShowQueue] = useState(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const speedMenuRef = useRef<HTMLDivElement>(null);
@@ -173,8 +175,12 @@ export default function AudioPlayerBar() {
                 {currentItem.title}
               </span>
             </>
+          ) : status === "loading" ? (
+            <span className="text-sm text-gray-400">Preparing audio...</span>
           ) : error ? (
-            <span className="text-sm text-red-400 truncate">{error}</span>
+            <span className="text-sm text-red-400 truncate">
+              {error.startsWith("empty:") ? error.slice("empty:".length) : error}
+            </span>
           ) : null}
         </div>
 
@@ -269,6 +275,15 @@ export default function AudioPlayerBar() {
             </div>
           )}
         </div>
+
+        {/* Radio page link */}
+        <button
+          onClick={() => navigate("/radio")}
+          className="px-2 py-1 text-xs font-medium text-gray-300 hover:text-white border border-gray-600 rounded transition-colors"
+          title="Go to Radio"
+        >
+          Radio
+        </button>
 
         {/* Queue toggle */}
         <button

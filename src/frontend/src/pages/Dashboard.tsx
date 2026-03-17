@@ -345,7 +345,7 @@ function PrepQuickAccess({ companies }: { companies: Company[] }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { status: playerStatus, startRadio } = useAudioPlayerContext();
+  const { status: playerStatus, error: playerError, startRadio } = useAudioPlayerContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<InterviewEvent | null>(null);
 
@@ -414,25 +414,43 @@ export default function Dashboard() {
               Study Radio
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              {playerStatus !== "idle"
-                ? "Audio is playing. Go to Radio to manage your queue."
-                : "Listen to your study material while on the go."}
+              {playerStatus === "loading"
+                ? "Preparing audio..."
+                : playerStatus === "playing" || playerStatus === "paused"
+                  ? "Audio is playing. Use the player bar below."
+                  : "Listen to your study material while on the go."}
             </p>
           </div>
-          <button
-            onClick={() => {
-              if (playerStatus !== "idle") {
-                navigate("/radio");
-              } else {
-                startRadio();
-                navigate("/radio");
-              }
-            }}
-            className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors shrink-0"
-          >
-            {playerStatus !== "idle" ? "Go to Radio" : "Start Radio"}
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {playerStatus !== "idle" && (
+              <Link
+                to="/radio"
+                className="px-4 py-2 text-sm text-green-700 border border-green-300 rounded-lg hover:bg-green-50 transition-colors"
+              >
+                Go to Radio
+              </Link>
+            )}
+            <button
+              onClick={() => startRadio()}
+              disabled={playerStatus === "loading" || playerStatus === "playing" || playerStatus === "paused"}
+              className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {playerStatus === "loading" ? "Preparing..." : "Start Radio"}
+            </button>
+          </div>
         </div>
+        {/* Error / empty-queue feedback */}
+        {playerError && (
+          playerError.startsWith("empty:") ? (
+            <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+              {playerError.slice("empty:".length)}. Add study content to get started.
+            </div>
+          ) : (
+            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+              {playerError}
+            </div>
+          )
+        )}
         {listeningStats.data && (listeningStats.data.total_sessions > 0 || listeningStats.data.sessions_today > 0) && (
           <div className="grid grid-cols-3 gap-4 pt-3 border-t border-gray-100">
             <div className="text-center">

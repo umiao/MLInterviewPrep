@@ -64,6 +64,7 @@ export default function StudyRadio() {
     currentTime,
     duration,
     autoAdvance,
+    error,
     play,
     togglePlayPause,
     skipNext,
@@ -205,7 +206,7 @@ export default function StudyRadio() {
             disabled={status === "loading" || pendingItems.length === 0}
             className="px-5 py-2 bg-green-600 text-white font-medium rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {status === "loading" ? "Loading..." : "Start Radio"}
+            {status === "loading" ? "Preparing..." : "Start Radio"}
           </button>
 
           {/* Auto-advance toggle */}
@@ -226,6 +227,19 @@ export default function StudyRadio() {
           </p>
         )}
       </div>
+
+      {/* Error / empty-queue banner */}
+      {error && (
+        error.startsWith("empty:") ? (
+          <div className="px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+            {error.slice("empty:".length)}. Add study content to get started.
+          </div>
+        ) : (
+          <div className="px-4 py-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )
+      )}
 
       {/* Listening Stats */}
       {statsQuery.data && (
@@ -252,6 +266,17 @@ export default function StudyRadio() {
       )}
 
       {/* Now Playing Section */}
+      {status === "loading" && !currentItem && (
+        <div className="bg-white rounded-lg border border-gray-200 p-5">
+          <h2 className="text-lg font-semibold text-gray-800 mb-3">Now Playing</h2>
+          <div className="flex items-center gap-3 text-gray-400">
+            <svg className="w-6 h-6 animate-spin" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="31.4 31.4" />
+            </svg>
+            <span className="text-sm">Preparing audio...</span>
+          </div>
+        </div>
+      )}
       {currentItem && (
         <div className="bg-white rounded-lg border border-gray-200 p-5">
           <h2 className="text-lg font-semibold text-gray-800 mb-3">Now Playing</h2>

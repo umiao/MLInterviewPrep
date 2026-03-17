@@ -11,10 +11,13 @@ import type {
   PlayerStatus,
   QueueItem,
   QueueResponse,
+  SynthesizeAsyncResponse,
   SynthesizeResponse,
 } from "../types/reading";
 
 const PROGRESS_SAVE_INTERVAL_MS = 30_000;
+const JOB_POLL_INTERVAL_MS = 1_500;
+const JOB_POLL_MAX_ATTEMPTS = 120; // ~3 minutes max
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 1.75, 2] as const;
 export type PlaybackSpeed = (typeof SPEED_OPTIONS)[number];
 export { SPEED_OPTIONS };
@@ -175,14 +178,42 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       if (prefetchCacheRef.current.has(key)) return; // already prefetched
 
       try {
-        const response = await api.post<SynthesizeResponse>(
+        const raw = await api.post<SynthesizeResponse & Partial<SynthesizeAsyncResponse>>(
           "/reading/synthesize",
           {
             content_type: nextItem.content_type,
             content_id: nextItem.content_id,
           },
         );
-        prefetchCacheRef.current.set(key, response);
+
+        if (raw.job_id) {
+          // Async synthesis -- poll until complete for prefetch
+          let attempts = 0;
+          while (attempts < JOB_POLL_MAX_ATTEMPTS) {
+            await new Promise((r) => setTimeout(r, JOB_POLL_INTERVAL_MS));
+            attempts++;
+            const job = await api.get<{
+              job_id: string;
+              status: string;
+              audio_url: string | null;
+              error: string | null;
+              mode?: string;
+              text?: string;
+            }>(`/reading/jobs/${raw.job_id}`);
+            if (job.status === "completed") {
+              if (job.mode === "browser" && job.text) {
+                prefetchCacheRef.current.set(key, { mode: "browser", text: job.text, audio_url: null, cache_hit: false, content_length: 0 });
+              } else if (job.audio_url) {
+                prefetchCacheRef.current.set(key, { mode: "file", audio_url: job.audio_url, text: null, cache_hit: false, content_length: 0 });
+              }
+              break;
+            } else if (job.status === "failed") {
+              break;
+            }
+          }
+        } else {
+          prefetchCacheRef.current.set(key, raw as SynthesizeResponse);
+        }
       } catch {
         // Silent fail for prefetch -- will synthesize on demand
       }
@@ -217,13 +248,51 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
         if (response) {
           prefetchCacheRef.current.delete(key);
         } else {
-          response = await api.post<SynthesizeResponse>(
+          // The backend may return 200 (SynthesizeResponse) or 202 (SynthesizeAsyncResponse).
+          // Both are treated as OK by the fetch wrapper, so we check for job_id to distinguish.
+          const raw = await api.post<SynthesizeResponse & Partial<SynthesizeAsyncResponse>>(
             "/reading/synthesize",
             {
               content_type: item.content_type,
               content_id: item.content_id,
             },
           );
+
+          if (raw.job_id) {
+            // Async synthesis -- poll until complete
+            let attempts = 0;
+            while (attempts < JOB_POLL_MAX_ATTEMPTS) {
+              await new Promise((r) => setTimeout(r, JOB_POLL_INTERVAL_MS));
+              attempts++;
+              const job = await api.get<{
+                job_id: string;
+                status: string;
+                audio_url: string | null;
+                error: string | null;
+                mode?: string;
+                text?: string;
+              }>(`/reading/jobs/${raw.job_id}`);
+
+              if (job.status === "completed") {
+                if (job.mode === "browser" && job.text) {
+                  response = { mode: "browser", text: job.text, audio_url: null, cache_hit: false, content_length: 0 };
+                } else if (job.audio_url) {
+                  response = { mode: "file", audio_url: job.audio_url, text: null, cache_hit: false, content_length: 0 };
+                } else {
+                  throw new Error("Job completed but no audio returned");
+                }
+                break;
+              } else if (job.status === "failed") {
+                throw new Error(job.error || "Audio synthesis failed");
+              }
+              // else still pending -- continue polling
+            }
+            if (!response) {
+              throw new Error("Audio synthesis timed out");
+            }
+          } else {
+            response = raw as SynthesizeResponse;
+          }
         }
 
         if (response.mode === "browser" && response.text) {
@@ -408,6 +477,8 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
   /** Load queue from backend and start radio mode. */
   const startRadio = useCallback(
     async (items?: AudioPlayerItem[]) => {
+      // Guard: prevent concurrent startRadio calls
+      if (status === "loading") return;
       setAutoAdvance(true);
       setError(null);
       prefetchCacheRef.current.clear();
@@ -434,7 +505,7 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       }
 
       if (radioQueue.length === 0) {
-        setError("No items in queue");
+        setError("empty:No pending items in your study queue");
         return;
       }
 
@@ -443,7 +514,7 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
       queueIndexRef.current = 0;
       await play(radioQueue[0]);
     },
-    [play],
+    [play, status],
   );
 
   /** Seek to a fraction (0-1) of the track. */
