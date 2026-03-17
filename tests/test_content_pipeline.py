@@ -33,13 +33,15 @@ def test_strip_headings():
     assert "#" not in result
 
 
-def test_headings_get_pause_marker():
-    """Headings produce [PAUSE] markers in v2."""
+def test_headings_get_natural_pause():
+    """Headings produce natural pauses (empty lines) in v3."""
     text = "# Introduction\nSome text.\n## Details\nMore text."
     result = preprocess_for_tts(text)
-    assert "[PAUSE]" in result
+    assert "[PAUSE]" not in result
     assert "Introduction" in result
     assert "Details" in result
+    # There should be an empty line (natural pause) before heading text
+    assert "\n\n" in result or result.startswith("\n")
 
 
 def test_remove_bold_italic():
@@ -169,7 +171,62 @@ See [Wikipedia](https://en.wikipedia.org/wiki/DP) for more details, e.g. example
     assert "dp[i]" not in result
     assert "for example" in result
     assert "that is" in result
-    assert "[PAUSE]" in result
+    assert "[PAUSE]" not in result
+
+
+def test_strip_table_syntax():
+    """Table rows become readable comma-separated text."""
+    text = "| Name | Score | Grade |\n|------|-------|-------|\n| Alice | 95 | A |\n| Bob | 82 | B |"
+    result = preprocess_for_tts(text)
+    assert "|" not in result
+    assert "---" not in result
+    assert "Alice" in result
+    assert "Bob" in result
+    # Cells joined with commas
+    assert "Alice, 95, A." in result
+    assert "Bob, 82, B." in result
+
+
+def test_strip_checkbox_markers():
+    """Checkboxes converted to 'Completed:' / 'To do:' spoken text."""
+    text = "- [x] Review system design\n- [ ] Practice coding\n- [X] Read papers"
+    result = preprocess_for_tts(text)
+    assert "Completed: Review system design." in result
+    assert "To do: Practice coding." in result
+    assert "Completed: Read papers." in result
+    assert "[x]" not in result
+    assert "[ ]" not in result
+
+
+def test_strip_underscore_placeholders():
+    """Long underscore placeholders removed."""
+    text = "Fill in the blank: __________ is a technique."
+    result = preprocess_for_tts(text)
+    assert "_____" not in result
+    assert "Fill in the blank" in result
+    assert "is a technique." in result
+
+
+def test_strip_horizontal_rules():
+    """Horizontal rules (---, ***, ___) removed."""
+    text = "Section one.\n---\nSection two.\n***\nSection three."
+    result = preprocess_for_tts(text)
+    assert "---" not in result
+    assert "***" not in result
+    assert "Section one." in result
+    assert "Section two." in result
+    assert "Section three." in result
+
+
+def test_cjk_line_skipping():
+    """Chinese-only lines skipped, mixed lines kept."""
+    text = "This is English.\n\u8fd9\u662f\u4e2d\u6587\u6d4b\u8bd5\u884c\u3002\nMixed English and \u4e2d\u6587 content."
+    result = preprocess_for_tts(text)
+    assert "This is English." in result
+    # Pure CJK line should be skipped
+    assert "\u8fd9\u662f\u4e2d\u6587\u6d4b\u8bd5\u884c" not in result
+    # Mixed line should be kept
+    assert "Mixed English" in result
 
 
 # ---------------------------------------------------------------------------

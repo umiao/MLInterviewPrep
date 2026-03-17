@@ -58,8 +58,8 @@ export interface AudioPlayerActions {
   setSpeed: (speed: PlaybackSpeed) => void;
   /** Enable/disable auto-advance (radio mode). */
   setAutoAdvance: (enabled: boolean) => void;
-  /** Load a queue of items and start playing the first one. */
-  startRadio: (items?: AudioPlayerItem[]) => Promise<void>;
+  /** Load a queue of items and start playing the first one. Returns true on success. */
+  startRadio: (items?: AudioPlayerItem[]) => Promise<boolean>;
   /** Stop playback and clear state. */
   stop: () => void;
   /** Seek to a position (0-1 fraction). */
@@ -384,7 +384,13 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
         // Prefetch next item while current plays
         prefetchNext(queueIndexRef.current);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to synthesize");
+        const msg =
+          err instanceof DOMException && err.name === "NotAllowedError"
+            ? "Autoplay blocked -- click play to start"
+            : err instanceof Error
+              ? err.message
+              : "Failed to synthesize";
+        setError(msg);
         setStatus("idle");
         setCurrentItem(null);
       }
@@ -474,11 +480,11 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     setAutoAdvance(enabled);
   }, []);
 
-  /** Load queue from backend and start radio mode. */
+  /** Load queue from backend and start radio mode. Returns true on success. */
   const startRadio = useCallback(
-    async (items?: AudioPlayerItem[]) => {
+    async (items?: AudioPlayerItem[]): Promise<boolean> => {
       // Guard: prevent concurrent startRadio calls
-      if (status === "loading") return;
+      if (status === "loading") return false;
       setAutoAdvance(true);
       setError(null);
       prefetchCacheRef.current.clear();
@@ -500,19 +506,26 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
           setError(
             err instanceof Error ? err.message : "Failed to load queue",
           );
-          return;
+          return false;
         }
       }
 
       if (radioQueue.length === 0) {
         setError("empty:No pending items in your study queue");
-        return;
+        return false;
       }
 
       setQueue(radioQueue);
       queueRef.current = radioQueue;
       queueIndexRef.current = 0;
-      await play(radioQueue[0]);
+      try {
+        await play(radioQueue[0]);
+        return true;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to start radio");
+        setStatus("idle");
+        return false;
+      }
     },
     [play, status],
   );

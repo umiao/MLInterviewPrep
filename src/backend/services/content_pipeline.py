@@ -195,21 +195,59 @@ def compute_content_hash(text: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# preprocess_for_tts (v2)
+# preprocess_for_tts (v3)
 # ---------------------------------------------------------------------------
+def _is_cjk_char(ch: str) -> bool:
+    """Return True if ch is a CJK Unified Ideograph.
+
+    Args:
+        ch: A single character.
+
+    Returns:
+        True if the character is CJK.
+    """
+    cp = ord(ch)
+    return (
+        0x4E00 <= cp <= 0x9FFF
+        or 0x3400 <= cp <= 0x4DBF
+        or 0x20000 <= cp <= 0x2A6DF
+        or 0x2A700 <= cp <= 0x2B73F
+        or 0xF900 <= cp <= 0xFAFF
+    )
+
+
+def _cjk_ratio(line: str) -> float:
+    """Return fraction of non-whitespace characters that are CJK.
+
+    Args:
+        line: Text line to check.
+
+    Returns:
+        Float between 0.0 and 1.0.
+    """
+    chars = [ch for ch in line if not ch.isspace()]
+    if not chars:
+        return 0.0
+    return sum(1 for ch in chars if _is_cjk_char(ch)) / len(chars)
+
+
 def preprocess_for_tts(text: str) -> str:
     """Convert markdown text to plain spoken-word text for TTS.
 
-    Transformations (v2):
-    - Strip markdown headings (#, ##, etc.) but keep the text, add [PAUSE]
+    Transformations (v3):
+    - Strip markdown headings (#, ##, etc.) but keep the text, add natural pause
     - Remove bold/italic markers (**, *, __, _)
     - Remove markdown links, keep link text
     - Skip code blocks (``` ... ```)
     - Remove inline code backticks
     - Convert bullet points to sentences (ensure period ending)
+    - Convert checkboxes (- [x], - [ ]) to spoken text
+    - Strip table syntax into readable text
+    - Remove horizontal rules (---, ***, ___)
+    - Remove underscore placeholders (_____)
+    - Skip CJK-only lines (>80% CJK characters)
     - Expand common abbreviations (e.g., i.e.)
     - Collapse multiple blank lines
-    - Add [PAUSE] markers at heading boundaries
 
     Args:
         text: Raw markdown text.
@@ -236,11 +274,29 @@ def preprocess_for_tts(text: str) -> str:
         if in_code_block:
             continue
 
-        # Strip heading markers and add [PAUSE]
+        # Horizontal rules: lines of only -, *, or _ (3+)
+        if re.match(r"^[-*_]{3,}$", stripped):
+            result_lines.append("")
+            continue
+
+        # Table divider lines: |---|---|
+        if re.match(r"^\|[-:| ]+\|$", stripped):
+            continue
+
+        # Table data rows: | cell | cell |
+        if stripped.startswith("|") and stripped.endswith("|"):
+            cells = [c.strip() for c in stripped.strip("|").split("|")]
+            cells = [c for c in cells if c]
+            if cells:
+                stripped = ", ".join(cells) + "."
+            else:
+                continue
+
+        # Strip heading markers and add natural pause (empty line)
         if stripped.startswith("#"):
             stripped = re.sub(r"^#{1,6}\s*", "", stripped)
             if stripped:
-                result_lines.append("[PAUSE]")
+                result_lines.append("")
                 result_lines.append(stripped)
             continue
 
@@ -254,14 +310,31 @@ def preprocess_for_tts(text: str) -> str:
         # Remove inline code backticks
         stripped = re.sub(r"`([^`]+)`", r"\1", stripped)
 
-        # Convert bullet points to plain sentences
-        bullet_match = re.match(r"^[-*+]\s+(.*)", stripped)
-        if bullet_match:
-            sentence = bullet_match.group(1).strip()
-            # Ensure ends with period
+        # Remove underscore placeholders (5+ underscores)
+        stripped = re.sub(r"_{5,}", "", stripped)
+
+        # Checkboxes: - [x] text -> "Completed: text." / - [ ] text -> "To do: text."
+        checkbox_checked = re.match(r"^[-*+]\s+\[x\]\s+(.*)", stripped, re.IGNORECASE)
+        checkbox_unchecked = re.match(r"^[-*+]\s+\[ \]\s+(.*)", stripped)
+        if checkbox_checked:
+            sentence = checkbox_checked.group(1).strip()
             if sentence and sentence[-1] not in ".!?":
                 sentence += "."
-            stripped = sentence
+            stripped = f"Completed: {sentence}"
+        elif checkbox_unchecked:
+            sentence = checkbox_unchecked.group(1).strip()
+            if sentence and sentence[-1] not in ".!?":
+                sentence += "."
+            stripped = f"To do: {sentence}"
+        else:
+            # Convert bullet points to plain sentences
+            bullet_match = re.match(r"^[-*+]\s+(.*)", stripped)
+            if bullet_match:
+                sentence = bullet_match.group(1).strip()
+                # Ensure ends with period
+                if sentence and sentence[-1] not in ".!?":
+                    sentence += "."
+                stripped = sentence
 
         # Numbered lists
         num_match = re.match(r"^\d+\.\s+(.*)", stripped)
@@ -270,6 +343,11 @@ def preprocess_for_tts(text: str) -> str:
             if sentence and sentence[-1] not in ".!?":
                 sentence += "."
             stripped = sentence
+
+        # Skip CJK-only lines (>80% CJK characters)
+        if stripped and _cjk_ratio(stripped) > 0.8:
+            logger.debug("Skipping CJK-dominant line: %.50s...", stripped)
+            continue
 
         result_lines.append(stripped)
 
@@ -520,6 +598,9 @@ TTS_SUMMARY_SYSTEM_PROMPT = (
     "Make it conversational and easy to follow when listened to. "
     "Expand all abbreviations (e.g. -> for example, ML -> machine learning). "
     "Do not include any visual references (tables, diagrams, code blocks, URLs). "
+    "Remove table formatting, checkbox syntax, and placeholder underscores. "
+    "If content contains Chinese text, translate all key points to English "
+    "and integrate them naturally into the narration. "
     "Keep the key information but make it concise and spoken-word friendly. "
     "Output ONLY the rewritten text, no preamble or explanation."
 )

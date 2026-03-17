@@ -85,12 +85,6 @@ export default function AudioPlayerBar() {
     }
   }, [status, togglePlayPause, skipNext]);
 
-  // Don't render when idle and no error
-  if (status === "idle" && !error) return null;
-
-  const progress = duration > 0 ? currentTime / duration : 0;
-  const badge = currentItem ? CONTENT_BADGE[currentItem.content_type] : null;
-
   const handleProgressClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
       const rect = e.currentTarget.getBoundingClientRect();
@@ -113,6 +107,12 @@ export default function AudioPlayerBar() {
     setShowQueue(false);
     setShowSpeedMenu(false);
   }, [stop]);
+
+  // Don't render when idle and no error
+  if (status === "idle" && !error) return null;
+
+  const progress = duration > 0 ? currentTime / duration : 0;
+  const badge = currentItem ? CONTENT_BADGE[currentItem.content_type] : null;
 
   return (
     <>
