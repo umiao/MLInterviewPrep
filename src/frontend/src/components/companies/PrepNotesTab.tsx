@@ -28,6 +28,11 @@ export default function PrepNotesTab({
   const queryClient = useQueryClient();
   const [importMode, setImportMode] = useState<ImportMode>("append");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const captureScrollRef = useRef<(() => void) | null>(null);
+
+  const fallbackRef = useRef<HTMLElement>(null);
+  const effectiveContainerRef = scrollContainerRef ?? fallbackRef;
 
   const {
     notes,
@@ -37,11 +42,10 @@ export default function PrepNotesTab({
     saveStatus,
     setSaveStatus,
     handleRetry,
-  } = usePrepNotes({ companyId, initialNotes, onNotesChanged });
+  } = usePrepNotes({ companyId, initialNotes, onNotesChanged, captureScrollRef });
 
-  const fallbackRef = useRef<HTMLElement>(null);
-  const effectiveRef = scrollContainerRef ?? fallbackRef;
-  const { captureScroll } = useScrollRestore(effectiveRef, mode);
+  const { captureScroll } = useScrollRestore(effectiveContainerRef, textareaRef, mode);
+  captureScrollRef.current = captureScroll;
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -80,7 +84,7 @@ export default function PrepNotesTab({
       <div className="sticky top-0 z-10 bg-white border-b border-gray-200 pb-2 flex items-center justify-between">
         <div className="flex gap-1">
           <button
-            onClick={() => switchMode("preview", captureScroll)}
+            onClick={() => switchMode("preview")}
             className={`text-xs px-2 py-1 rounded ${
               mode === "preview"
                 ? "bg-blue-100 text-blue-700 font-medium"
@@ -90,7 +94,7 @@ export default function PrepNotesTab({
             Preview
           </button>
           <button
-            onClick={() => switchMode("edit", captureScroll)}
+            onClick={() => switchMode("edit")}
             className={`text-xs px-2 py-1 rounded ${
               mode === "edit"
                 ? "bg-blue-100 text-blue-700 font-medium"
@@ -132,6 +136,7 @@ export default function PrepNotesTab({
       {/* Content area */}
       {mode === "edit" ? (
         <textarea
+          ref={textareaRef}
           value={notes}
           onChange={(e) => {
             setNotes(e.target.value);

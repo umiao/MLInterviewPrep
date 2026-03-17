@@ -21,6 +21,8 @@ export default function PrepNotesPage() {
   const [importMode, setImportMode] = useState<ImportMode>("append");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const captureScrollRef = useRef<(() => void) | null>(null);
 
   const { data: company, isLoading } = useQuery<Company>({
     queryKey: ["companies", companyId],
@@ -63,9 +65,11 @@ export default function PrepNotesPage() {
   } = usePrepNotes({
     companyId,
     initialNotes: company?.prep_notes ?? null,
+    captureScrollRef,
   });
 
-  const { captureScroll } = useScrollRestore(contentRef, mode);
+  const { captureScroll } = useScrollRestore(contentRef, textareaRef, mode);
+  captureScrollRef.current = captureScroll;
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -141,7 +145,7 @@ export default function PrepNotesPage() {
           {/* Mode toggle */}
           <div className="flex gap-1">
             <button
-              onClick={() => switchMode("preview", captureScroll)}
+              onClick={() => switchMode("preview")}
               className={`text-sm px-3 py-1.5 rounded ${
                 mode === "preview"
                   ? "bg-blue-100 text-blue-700 font-medium"
@@ -151,7 +155,7 @@ export default function PrepNotesPage() {
               Preview
             </button>
             <button
-              onClick={() => switchMode("edit", captureScroll)}
+              onClick={() => switchMode("edit")}
               className={`text-sm px-3 py-1.5 rounded ${
                 mode === "edit"
                   ? "bg-blue-100 text-blue-700 font-medium"
@@ -189,6 +193,7 @@ export default function PrepNotesPage() {
       <div ref={contentRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
         {mode === "edit" ? (
           <textarea
+            ref={textareaRef}
             value={notes}
             onChange={(e) => {
               setNotes(e.target.value);

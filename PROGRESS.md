@@ -210,3 +210,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-135 --status completed`
+
+## 2026-03-17 -- [T-P1-136] Fix scroll sync dual-ref targeting
+- **What I did**: Fixed scroll position sync to use the correct scroll target per mode. Preview mode scrolls the outer container div; edit mode scrolls the textarea internally. (1) Rewrote `useScrollRestore` to accept dual refs (`containerRef` + `textareaRef`) and pick the correct element based on mode. Removed ResizeObserver in favor of rAF + 100ms fallback for async markdown. (2) Added `captureScrollRef` option to `usePrepNotes` so `switchMode()` auto-captures scroll before mode change -- callers no longer pass `beforeSwitch` manually. (3) Both `PrepNotesTab` and `PrepNotesPage` now attach `textareaRef` to their textarea elements and wire the capture ref.
+- **Deliverables**: src/frontend/src/hooks/useScrollRestore.ts, src/frontend/src/hooks/usePrepNotes.ts, src/frontend/src/components/companies/PrepNotesTab.tsx, src/frontend/src/pages/PrepNotesPage.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-136 --status completed`

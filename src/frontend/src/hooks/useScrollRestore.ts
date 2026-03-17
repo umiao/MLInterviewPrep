@@ -1,12 +1,17 @@
 import { useRef, useLayoutEffect, type RefObject } from "react";
 
 /**
- * Captures scroll position (as a ratio) before a mode switch and restores it
- * after the new content renders. Uses ResizeObserver to wait for layout to
- * stabilize, with a 500ms timeout fallback.
+ * Preserves scroll position (as a ratio) across mode switches.
+ *
+ * Dual-ref design: preview mode scrolls the outer container, edit mode scrolls
+ * the textarea internally. The hook picks the correct element based on mode.
+ *
+ * Call `captureScroll()` before changing mode to snapshot the current ratio,
+ * then useLayoutEffect + rAF restores it on the new target after React commits.
  */
 export function useScrollRestore(
-  scrollContainerRef: RefObject<HTMLElement | null>,
+  containerRef: RefObject<HTMLElement | null>,
+  textareaRef: RefObject<HTMLTextAreaElement | null>,
   mode: string,
 ): {
   captureScroll: () => void;
@@ -14,8 +19,12 @@ export function useScrollRestore(
   const ratioRef = useRef(0);
   const hasCapturedRef = useRef(false);
 
+  function getScrollTarget(m: string): HTMLElement | null {
+    return m === "edit" ? textareaRef.current : containerRef.current;
+  }
+
   function captureScroll(): void {
-    const el = scrollContainerRef.current;
+    const el = getScrollTarget(mode);
     if (!el) return;
     const maxScroll = el.scrollHeight - el.clientHeight;
     if (maxScroll <= 0) {
@@ -30,54 +39,30 @@ export function useScrollRestore(
     if (!hasCapturedRef.current) return;
     hasCapturedRef.current = false;
 
-    const el = scrollContainerRef.current;
-    if (!el) return;
-
     const ratio = ratioRef.current;
 
     function applyScroll(): void {
+      const el = getScrollTarget(mode);
       if (!el) return;
       const maxScroll = el.scrollHeight - el.clientHeight;
       if (maxScroll <= 0) return;
       el.scrollTop = ratio * maxScroll;
     }
 
-    // Observe first child for size changes to detect when content has laid out.
-    const target = el.firstElementChild ?? el;
-    let lastHeight = target.getBoundingClientRect().height;
-    let stableTimer: ReturnType<typeof setTimeout> | null = null;
-    let fallbackTimer: ReturnType<typeof setTimeout> | null = null;
+    // rAF lets the browser finish layout after React commits.
+    const rafId = requestAnimationFrame(applyScroll);
 
-    const observer = new ResizeObserver(() => {
-      const h = target.getBoundingClientRect().height;
-      if (h !== lastHeight) {
-        lastHeight = h;
-        if (stableTimer) clearTimeout(stableTimer);
-        stableTimer = setTimeout(() => {
-          applyScroll();
-          cleanup();
-        }, 50);
-      }
-    });
-
-    function cleanup(): void {
-      observer.disconnect();
-      if (stableTimer) clearTimeout(stableTimer);
-      if (fallbackTimer) clearTimeout(fallbackTimer);
+    // For preview mode, markdown rendering may be async (images, syntax
+    // highlighting). Apply again after a short delay as a fallback.
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (mode === "preview") {
+      timeoutId = setTimeout(applyScroll, 100);
     }
 
-    observer.observe(target);
-
-    // Apply immediately in case content is already stable (e.g. textarea).
-    requestAnimationFrame(applyScroll);
-
-    // Fallback: if ResizeObserver never fires (content same size), apply after 500ms.
-    fallbackTimer = setTimeout(() => {
-      applyScroll();
-      cleanup();
-    }, 500);
-
-    return cleanup;
+    return () => {
+      cancelAnimationFrame(rafId);
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 

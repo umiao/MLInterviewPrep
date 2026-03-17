@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type MutableRefObject } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useDebounce } from "./useDebounce";
@@ -11,6 +11,12 @@ interface UsePrepNotesOptions {
   companyId: number;
   initialNotes: string | null;
   onNotesChanged?: (notes: string) => void;
+  /**
+   * Optional ref to a capture function (from useScrollRestore). When provided,
+   * switchMode() calls it automatically before changing mode. This guarantees
+   * scroll capture without callers needing to remember to pass it.
+   */
+  captureScrollRef?: MutableRefObject<(() => void) | null>;
 }
 
 /**
@@ -24,6 +30,7 @@ export function usePrepNotes({
   companyId,
   initialNotes,
   onNotesChanged,
+  captureScrollRef,
 }: UsePrepNotesOptions) {
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<ViewMode>("preview");
@@ -79,12 +86,12 @@ export function usePrepNotes({
   }
 
   /**
-   * Switch between preview/edit modes. Accepts an optional callback that runs
-   * before the mode change (used by useScrollRestore to capture scroll position).
+   * Switch between preview/edit modes. Automatically captures scroll position
+   * (via captureScrollRef) before changing mode.
    */
-  function switchMode(newMode: ViewMode, beforeSwitch?: () => void) {
+  function switchMode(newMode: ViewMode) {
     if (newMode === mode) return;
-    beforeSwitch?.();
+    captureScrollRef?.current?.();
     setMode(newMode);
   }
 
