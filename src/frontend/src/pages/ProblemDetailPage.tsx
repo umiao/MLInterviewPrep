@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
@@ -17,6 +18,7 @@ export default function ProblemDetailPage() {
   const problemId = Number(rawId);
   const queryClient = useQueryClient();
   const toast = useToast();
+  const [notesOpen, setNotesOpen] = useState(false);
 
   const { data: problem, isLoading } = useQuery<Problem>({
     queryKey: ["problem", problemId],
@@ -190,11 +192,30 @@ export default function ProblemDetailPage() {
         )}
       </div>
 
-      {/* My Notes */}
+      {/* My Notes (collapsible, default collapsed) */}
       {problem.notes && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-6">
-          <h3 className="text-sm font-semibold text-amber-800 mb-3">My Notes</h3>
-          <MarkdownPreview markdown={problem.notes} />
+        <div className="bg-amber-50 border border-amber-200 rounded-lg mb-6">
+          <button
+            type="button"
+            onClick={() => setNotesOpen((prev) => !prev)}
+            className="w-full flex items-center justify-between px-6 py-3 text-left hover:bg-amber-100/50 rounded-lg transition-colors"
+          >
+            <h3 className="text-sm font-semibold text-amber-800">My Notes</h3>
+            <svg
+              className={`w-4 h-4 text-amber-600 transition-transform ${notesOpen ? "rotate-180" : ""}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </button>
+          {notesOpen && (
+            <div className="px-6 pb-6">
+              <MarkdownPreview markdown={problem.notes} />
+            </div>
+          )}
         </div>
       )}
 

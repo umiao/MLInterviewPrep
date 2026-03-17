@@ -113,3 +113,10 @@
 - **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-121 --status completed`
+
+## 2026-03-16 -- [T-P1-122] Collapsible My Notes section on Problem detail page
+- **What I did**: Made the My Notes section on ProblemDetailPage collapsible with default collapsed state. Added a clickable header with a chevron toggle icon. Section still hidden entirely when no notes exist. State resets on navigation (no persistence).
+- **Deliverables**: src/frontend/src/pages/ProblemDetailPage.tsx
+- **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-122 --status completed`
