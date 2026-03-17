@@ -196,3 +196,10 @@
 - **Sanity check result**: All 18 nodes verified in DB with content (4.5K-6.0K chars each), checkboxes, tables. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-132 --status completed`
+
+## 2026-03-17 -- [T-P2-133] Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs
+- **What I did**: Created three seed scripts for the remaining framework pillars: `seed_pillar1_content.py` (20 Coding & Algorithms leaf topics across Data Structures, Algorithm Paradigms, MLE-Specific Coding), `seed_pillar5_content.py` (15 ML Infrastructure & MLOps leaf topics across Training Infra, Serving Infra, Data Infra, ML Pipeline & Ops), and `seed_pillar8_content.py` (13 Behavioral & Leadership leaf topics across Common Questions, STAR Framework, Company-Specific Behavioral). All 48 topics follow the content template with senior MLE-depth content, KaTeX LaTeX, Python code snippets, interview pattern tables, comparison tables, and self-assessment checkboxes.
+- **Deliverables**: scripts/seed_pillar1_content.py (new), scripts/seed_pillar5_content.py (new), scripts/seed_pillar8_content.py (new), data/mle_prep.db (48 nodes updated)
+- **Sanity check result**: All 48 nodes verified in DB with content (4.4K-8.9K chars each), checkboxes, tables. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-133 --status completed`
