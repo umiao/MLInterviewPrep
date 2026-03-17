@@ -99,3 +99,10 @@
 - **Sanity check result**: No new TS errors from changes, Vite build succeeds, pre-existing test failure unrelated
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-119 --status completed`
+
+## 2026-03-16 -- [T-P1-120] Add Difficulty as a sort option for Problems page
+- **What I did**: Added "Difficulty" to sort dropdown (frontend) and backend sort handler. Backend uses SQLAlchemy `case()` for semantic ordering (easy=1 < medium=2 < hard=3) with nulls always last. Added 3 regression tests covering asc, desc, and null-last behavior.
+- **Deliverables**: src/frontend/src/types/problem.ts, src/frontend/src/pages/Problems.tsx, src/backend/routers/problems.py, tests/test_router_problems.py
+- **Sanity check result**: 130 tests pass, TypeScript compiles cleanly
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-120 --status completed`

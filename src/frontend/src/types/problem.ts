@@ -28,7 +28,8 @@ export type SortField =
   | "comfort_level"
   | "last_attempted_at"
   | "next_review_at"
-  | "created_at";
+  | "created_at"
+  | "difficulty";
 export type SortOrder = "asc" | "desc";
 
 export type AttemptResult = "solved" | "hint" | "failed" | "timeout";

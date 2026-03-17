@@ -559,6 +559,7 @@ export default function Problems() {
           >
             <option value="created_at">Date added</option>
             <option value="comfort_level">Comfort</option>
+            <option value="difficulty">Difficulty</option>
             <option value="last_attempted_at">Last attempted</option>
             <option value="next_review_at">Next review</option>
           </select>

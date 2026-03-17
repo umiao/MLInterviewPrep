@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import Integer, func
+from sqlalchemy import Integer, case, func
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
@@ -147,7 +147,8 @@ def list_problems(
     is_completed: bool | None = None,
     category: str | None = None,
     sort_by: Literal[
-        "comfort_level", "last_attempted_at", "next_review_at", "created_at"
+        "comfort_level", "last_attempted_at", "next_review_at", "created_at",
+        "difficulty",
     ] = "created_at",
     sort_order: Literal["asc", "desc"] = "desc",
     limit: int = Query(default=50, ge=1, le=200),
@@ -175,9 +176,21 @@ def list_problems(
     response.headers["X-Total-Count"] = str(total_count)
 
     # Sort
-    sort_col = getattr(Problem, sort_by)
-    order = sort_col.asc() if sort_order == "asc" else sort_col.desc()
-    query = query.order_by(order)
+    if sort_by == "difficulty":
+        # Semantic ordering: easy=1, medium=2, hard=3; null always last
+        null_last = case((Problem.difficulty.is_(None), 1), else_=0)
+        difficulty_rank = case(
+            (Problem.difficulty == "easy", 1),
+            (Problem.difficulty == "medium", 2),
+            (Problem.difficulty == "hard", 3),
+            else_=0,
+        )
+        rank_order = difficulty_rank.asc() if sort_order == "asc" else difficulty_rank.desc()
+        query = query.order_by(null_last.asc(), rank_order)
+    else:
+        sort_col = getattr(Problem, sort_by)
+        order = sort_col.asc() if sort_order == "asc" else sort_col.desc()
+        query = query.order_by(order)
 
     problems = query.offset(offset).limit(limit).all()
     return [_problem_to_response(p) for p in problems]

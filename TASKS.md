@@ -11,19 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-120: Problems: add Difficulty as a sort option (frontend + backend)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: AC:
-1. Sort dropdown includes Difficulty option
-2. Backend sorts semantically: easy(1) < medium(2) < hard(3); null sorts last
-3. Both asc and desc directions work correctly
-4. Journey: select Difficulty sort -> Asc -> easy first -> toggle Desc -> hard first
-5. Manual smoke: verify table reorders on sort change
-6. Backend regression test with mixed difficulties
-Files: types/problem.ts, Problems.tsx, problems.py (SQLAlchemy case()), test_router_problems.py
-
 #### T-P1-121: Problems: notes indicator icon on All Problems tab
 - **Priority**: P1
 - **Complexity**: S
@@ -90,6 +77,7 @@ Files: Framework.tsx, Tabs.tsx, NodeDetailPanel.tsx
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-120: Problems: add Difficulty as a sort option (frontend + backend). AC:
 - [x] **2026-03-16** -- T-P1-119: Fix strikethrough + math formula rendering in MarkdownPreview. Problem: (1) ~~strikethrough~~ text not rendering with line-through -- Tailwind v4 prose resets <del> styling. (2) Math 
 - [x] **2026-03-16** -- T-P1-116: Local LeetCode Descriptions (Neetcode.io Fetch)
 - [x] **2026-03-16** -- T-P1-115: Decouple Reading from Synthesis (Text View)

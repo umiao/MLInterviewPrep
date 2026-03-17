@@ -326,6 +326,46 @@ def test_sort_by_comfort_level_asc(test_client):
     assert data[0]["comfort_level"] == 0  # default
 
 
+def test_sort_by_difficulty_asc(test_client):
+    """Sort by difficulty asc: easy first, then medium, then hard."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?sort_by=difficulty&sort_order=asc&limit=50")
+    data = resp.json()
+    # Map difficulties to numeric for comparison
+    rank = {"easy": 1, "medium": 2, "hard": 3}
+    ranks = [rank.get(p["difficulty"], 99) for p in data]
+    assert ranks == sorted(ranks), f"Expected ascending difficulty order, got {[p['difficulty'] for p in data]}"
+    assert data[0]["difficulty"] == "easy"
+
+
+def test_sort_by_difficulty_desc(test_client):
+    """Sort by difficulty desc: hard first, then medium, then easy."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?sort_by=difficulty&sort_order=desc&limit=50")
+    data = resp.json()
+    rank = {"easy": 1, "medium": 2, "hard": 3}
+    ranks = [rank.get(p["difficulty"], 99) for p in data]
+    assert ranks == sorted(ranks, reverse=True), f"Expected descending difficulty order, got {[p['difficulty'] for p in data]}"
+    assert data[0]["difficulty"] == "hard"
+
+
+def test_sort_by_difficulty_null_last(test_client):
+    """Problems with null difficulty sort last regardless of direction."""
+    _seed_diverse_problems(test_client)
+    # Create a problem without difficulty
+    test_client.post("/api/problems", json={
+        "title": "No Diff Problem", "category": "algorithm",
+    })
+    # Asc: null should be last
+    resp = test_client.get("/api/problems?sort_by=difficulty&sort_order=asc&limit=50")
+    data = resp.json()
+    assert data[-1]["difficulty"] is None
+    # Desc: null should also be last
+    resp = test_client.get("/api/problems?sort_by=difficulty&sort_order=desc&limit=50")
+    data = resp.json()
+    assert data[-1]["difficulty"] is None
+
+
 # ===========================================================================
 # GET /api/problems -- pagination
 # ===========================================================================
