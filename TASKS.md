@@ -11,6 +11,46 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-120: Problems: add Difficulty as a sort option (frontend + backend)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: AC:
+1. Sort dropdown includes Difficulty option
+2. Backend sorts semantically: easy(1) < medium(2) < hard(3); null sorts last
+3. Both asc and desc directions work correctly
+4. Journey: select Difficulty sort -> Asc -> easy first -> toggle Desc -> hard first
+5. Manual smoke: verify table reorders on sort change
+6. Backend regression test with mixed difficulties
+Files: types/problem.ts, Problems.tsx, problems.py (SQLAlchemy case()), test_router_problems.py
+
+#### T-P1-121: Problems: notes indicator icon on All Problems tab
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Problem: No visual signal on All Problems landing page to indicate which problems have notes.
+AC:
+1. Problems with notes show a small pencil/note icon inline in Title cell
+2. Problems without notes: no indicator
+3. Blind 75 tab: unchanged (already has Notes column)
+4. Journey: user scans list -> icon signals notes exist -> clicks to detail
+5. Manual smoke: verify icon presence/absence based on notes field
+Files: Problems.tsx (renderProblemRow Title cell)
+
+#### T-P1-122: Problem detail: collapsible My Notes section (default collapsed)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Problem: My Notes section always expanded adds visual noise.
+AC:
+1. My Notes defaults to collapsed, showing only header with toggle chevron
+2. Click header to expand/collapse
+3. No notes = no section shown (unchanged)
+4. State resets on navigation (no persistence for V1)
+5. Journey: open detail -> see collapsed My Notes -> click expand -> read notes -> click collapse
+6. Manual smoke: verify collapse/expand on detail page
+Files: ProblemDetailPage.tsx
+
 ### P2 -- Nice to Have
 
 #### T-P2-112: SSE chunked audio streaming (if latency requires it)
@@ -18,6 +58,22 @@
 - **Complexity**: M
 - **Depends on**: None
 - **Description**: Only if full-MP3 generation latency becomes a UX problem for long content. SSE endpoint streaming base64 MP3 chunks with MediaSource API on frontend. Evaluate need after Phase 2. AC: SSE streams audio chunks, frontend plays without gaps, progress tracked per chunk
+
+#### T-P2-123: Framework: resizable right panel and scrollable tabs in NodeDetailPanel
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Problem: Right panel fixed at 288px (w-72), tabs overflow when names are long.
+AC:
+1. Right panel resizable by dragging left edge (min ~240px, max ~50vw)
+2. Visible drag handle with col-resize cursor
+3. Narrow panel: tabs horizontally scrollable (no overflow/wrap)
+4. Wide panel: tabs render normally
+5. No state persistence for V1
+6. Journey: open Framework -> select node -> drag narrower -> tabs scroll -> drag wider -> tabs spread
+7. Manual smoke: resize at various widths, verify tab accessibility
+Approach: Custom drag handle (no new dep) with mousedown/mousemove/mouseup. Tabs: overflow-x-auto + whitespace-nowrap + flex-shrink-0.
+Files: Framework.tsx, Tabs.tsx, NodeDetailPanel.tsx
 
 ### P3 -- Stretch Goals
 
@@ -34,6 +90,7 @@
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-119: Fix strikethrough + math formula rendering in MarkdownPreview. Problem: (1) ~~strikethrough~~ text not rendering with line-through -- Tailwind v4 prose resets <del> styling. (2) Math 
 - [x] **2026-03-16** -- T-P1-116: Local LeetCode Descriptions (Neetcode.io Fetch)
 - [x] **2026-03-16** -- T-P1-115: Decouple Reading from Synthesis (Text View)
 - [x] **2026-03-16** -- T-P1-114: Unified Faithful Transcript System

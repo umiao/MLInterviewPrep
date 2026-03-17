@@ -92,3 +92,10 @@
 - **Sanity check result**: TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: No task_db change (ad-hoc bugfix)
+
+## 2026-03-16 -- [T-P1-119] Fix strikethrough + math formula rendering in MarkdownPreview
+- **What I did**: (1) Added remark-math + rehype-katex to enable LaTeX math rendering ($inline$ and $$block$$). (2) Fixed Tailwind v4 prose resetting `<del>`/`<s>` text-decoration by adding explicit CSS rule in index.css. (3) Imported KaTeX CSS for proper formula styling.
+- **Deliverables**: src/frontend/src/components/ui/MarkdownPreview.tsx, src/frontend/src/index.css, src/frontend/package.json
+- **Sanity check result**: No new TS errors from changes, Vite build succeeds, pre-existing test failure unrelated
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-119 --status completed`

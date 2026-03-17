@@ -21,6 +21,12 @@ body {
   display: flex;
 }
 
+/* Tailwind v4 prose resets text-decoration on <del>/<s>; restore strikethrough */
+.prose del,
+.prose s {
+  text-decoration: line-through;
+}
+
 /* GitHub-flavored-markdown-inspired styling for full-screen prep notes */
 .prep-prose {
   line-height: 1.8;
