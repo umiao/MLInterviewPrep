@@ -5,12 +5,6 @@
 
 ## In Progress
 
-#### T-P1-127: Content template + ML Fundamentals pillar (Pillar 2) prep docs for all 25 leaf topics
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-126
-- **Description**: Create docs/framework_content_template.md with standard structure (Overview, Core Concepts with LaTeX, Implementation, Interview Patterns, Comparisons, Key Takeaways checklist). Generate detailed senior MLE prep docs for all 25 Pillar 2 leaf topics: Linear Models, Tree Models, SVM, Bias-Variance, Loss Functions, Regularization, Evaluation Metrics, Clustering, Dimensionality Reduction, Anomaly Detection, Gradient Descent, Learning Rate, Convergence, Training Tricks, Numerical/Categorical/Text/Temporal Features, Missing Values, Feature Selection, Oversampling, Loss Reweighting, Cross-Validation, Hyperparameter Tuning, Calibration. AC: all 25 topics have prep docs, LaTeX renders correctly, content is senior MLE depth.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -65,6 +59,7 @@
 
 - [x] **2026-03-17** -- T-P1-134: Fix MarkdownPreview checkbox mismatch caused by remarkMath dollar-sign corruption
 - [x] **2026-03-17** -- T-P1-128: PrevNextNav arrow component + integrate in PrepNotesPage and ProblemDetailPage. Reusable PrevNextNav component with left/right chevrons + tooltip. PrepNotesPage: navigate companies alphabetically. Pro
+- [x] **2026-03-17** -- T-P1-127: Content template + ML Fundamentals pillar (Pillar 2) prep docs for all 25 leaf topics. Create docs/framework_content_template.md with standard structure (Overview, Core Concepts with LaTeX, Implementation, I
 - [x] **2026-03-17** -- T-P1-126: Framework full-screen notes page: backend GET endpoint + useFrameworkNotes hook + FrameworkNotesPage + route + Open Full Page link. End-to-end: (1) GET /framework/nodes/{id} endpoint returning single node. (2) useFrameworkNotes hook mirroring usePrepNo
 - [x] **2026-03-17** -- T-P1-125: Fix checkbox persistence and scroll white space bugs on PrepNotesPage
 - [x] **2026-03-16** -- T-P2-123: Framework: resizable right panel and scrollable tabs in NodeDetailPanel. Problem: Right panel fixed at 288px (w-72), tabs overflow when names are long.

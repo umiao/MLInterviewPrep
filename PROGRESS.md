@@ -161,3 +161,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-134 --status completed`
+
+## 2026-03-17 -- [T-P1-127] Content template + ML Fundamentals pillar (Pillar 2) prep docs for all 25 leaf topics
+- **What I did**: (1) Created `docs/framework_content_template.md` with standard structure (Overview, Core Concepts with LaTeX, Implementation, Interview Patterns, Comparisons, Key Takeaways checklist). (2) Wrote `scripts/seed_pillar2_content.py` with detailed senior MLE-depth prep docs for all 25 Pillar 2 leaf topics: 7 Supervised Learning (Linear Models, Tree Models, SVM, Bias-Variance, Loss Functions, Regularization, Evaluation Metrics), 3 Unsupervised Learning (Clustering, Dimensionality Reduction, Anomaly Detection), 4 Optimization (Gradient Descent, Learning Rate, Convergence, Training Tricks), 6 Feature Engineering (Numerical, Categorical, Text, Temporal, Missing Values, Feature Selection), 2 Sampling & Class Imbalance (Oversampling, Loss Reweighting), 3 Model Selection & Validation (Cross-Validation, Hyperparameter Tuning, Calibration). (3) Each topic has KaTeX-compatible LaTeX formulas, Python implementation snippets, interview pattern tables, comparison tables, and self-assessment checkboxes.
+- **Deliverables**: docs/framework_content_template.md (new), scripts/seed_pillar2_content.py (new), data/mle_prep.db (25 nodes updated)
+- **Sanity check result**: All 25 nodes verified in DB with LaTeX, checkboxes, and tables. TypeScript compiles cleanly. 641 tests pass (1 pre-existing failure unrelated).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-127 --status completed`
