@@ -21,6 +21,7 @@ import PracticeModal from "../components/PracticeModal";
 import ReviewPanel from "../components/ReviewPanel";
 import AddProblemModal from "../components/problems/AddProblemModal";
 import EditProblemModal from "../components/problems/EditProblemModal";
+import ProblemDescriptionModal from "../components/problems/ProblemDescriptionModal";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -117,6 +118,7 @@ export default function Problems() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProblem, setEditProblem] = useState<Problem | null>(null);
   const [deleteProblem, setDeleteProblem] = useState<Problem | null>(null);
+  const [descriptionProblem, setDescriptionProblem] = useState<Problem | null>(null);
 
   const filters: ProblemFilters = useMemo(
     () => ({
@@ -461,23 +463,25 @@ export default function Problems() {
                     </td>
                     <td className="px-3 py-2">
                       <div className="flex items-center gap-2">
-                        {p.url ? (
+                        <button
+                          onClick={() => setDescriptionProblem(p)}
+                          className="text-blue-600 hover:underline font-medium truncate max-w-xs text-left"
+                          title="View description"
+                        >
+                          {p.title}
+                        </button>
+                        {p.url && (
                           <a
                             href={p.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline font-medium truncate max-w-xs"
-                            title={p.title}
+                            className="text-gray-400 hover:text-gray-600 shrink-0"
+                            title="Open on LeetCode"
                           >
-                            {p.title}
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                            </svg>
                           </a>
-                        ) : (
-                          <span
-                            className="font-medium truncate max-w-xs"
-                            title={p.title}
-                          >
-                            {p.title}
-                          </span>
                         )}
                         {p.is_completed && (
                           <Badge variant="green">done</Badge>
@@ -606,6 +610,14 @@ export default function Problems() {
         <ReviewPanel
           problem={reviewProblem}
           onClose={() => setReviewProblem(null)}
+        />
+      )}
+
+      {/* Description Modal */}
+      {descriptionProblem && (
+        <ProblemDescriptionModal
+          problem={descriptionProblem}
+          onClose={() => setDescriptionProblem(null)}
         />
       )}
     </div>

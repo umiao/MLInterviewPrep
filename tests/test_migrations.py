@@ -193,3 +193,106 @@ class TestMigration4ReadingTables:
         assert "reading_progress" not in table_names
         assert "reading_sessions" not in table_names
         assert "audio_cache" not in table_names
+
+
+class TestMigration6TranscriptsTable:
+    """Test migration 6: create transcripts table."""
+
+    def test_transcripts_table_created(self, old_schema_db):
+        """After migration, transcripts table exists with all expected columns."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        table_names = set(insp.get_table_names())
+        assert "transcripts" in table_names
+
+    def test_transcripts_columns(self, old_schema_db):
+        """transcripts table has all expected columns."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("transcripts")}
+        expected = {
+            "id", "content_type", "content_id", "source_hash",
+            "transcript_text", "transcript_hash", "generation_method",
+            "prompt_version", "is_latest", "created_at",
+        }
+        assert expected <= columns
+
+    def test_schema_version_6_recorded(self, old_schema_db):
+        """Migration version 6 is recorded in schema_versions."""
+        _run_migrations(old_schema_db)
+        with old_schema_db.connect() as conn:
+            rows = conn.execute(
+                text("SELECT version FROM schema_versions")
+            ).fetchall()
+        assert 6 in {row[0] for row in rows}
+
+    def test_idempotent(self, old_schema_db):
+        """Running migration 6 twice is safe."""
+        _run_migrations(old_schema_db)
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        assert "transcripts" in set(insp.get_table_names())
+
+    def test_table_missing_before_migration(self, old_schema_db):
+        """Sanity check: transcripts table does NOT exist before migration."""
+        insp = inspect(old_schema_db)
+        table_names = set(insp.get_table_names())
+        assert "transcripts" not in table_names
+
+
+class TestMigration7ProblemDescriptionColumns:
+    """Test migration 7: add description, neetcode_slug, description_source to problems."""
+
+    def test_description_column_added(self, old_schema_db):
+        """After migration, description column exists in problems."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "description" in columns
+
+    def test_neetcode_slug_column_added(self, old_schema_db):
+        """After migration, neetcode_slug column exists in problems."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "neetcode_slug" in columns
+
+    def test_description_source_column_added(self, old_schema_db):
+        """After migration, description_source column exists in problems."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "description_source" in columns
+
+    def test_all_three_columns_added(self, old_schema_db):
+        """After migration, all three new columns exist in problems."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        expected = {"description", "neetcode_slug", "description_source"}
+        assert expected <= columns
+
+    def test_schema_version_7_recorded(self, old_schema_db):
+        """Migration version 7 is recorded in schema_versions."""
+        _run_migrations(old_schema_db)
+        with old_schema_db.connect() as conn:
+            rows = conn.execute(
+                text("SELECT version FROM schema_versions")
+            ).fetchall()
+        assert 7 in {row[0] for row in rows}
+
+    def test_idempotent(self, old_schema_db):
+        """Running migration 7 twice is safe."""
+        _run_migrations(old_schema_db)
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "description" in columns
+
+    def test_columns_missing_before_migration(self, old_schema_db):
+        """Sanity check: new columns do NOT exist before migration."""
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "description" not in columns
+        assert "neetcode_slug" not in columns
+        assert "description_source" not in columns

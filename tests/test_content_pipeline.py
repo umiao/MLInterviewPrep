@@ -17,6 +17,7 @@ from src.backend.services.content_pipeline import (
     get_interview_context,
     get_reading_queue,
     preprocess_for_tts,
+    title_to_neetcode_slug,
 )
 
 
@@ -969,3 +970,21 @@ def test_queue_interview_questions_auto_detected(db_session):
     iq_items = [q for q in queue if q.content_type == CONTENT_TYPE_INTERVIEW_QUESTION]
     assert len(iq_items) == 1
     assert iq_items[0].title == "Design Rate Limiter"
+
+
+# ---------------------------------------------------------------------------
+# title_to_neetcode_slug tests
+# ---------------------------------------------------------------------------
+def test_title_to_neetcode_slug_basic():
+    """Basic title converts to lowercase hyphenated slug."""
+    assert title_to_neetcode_slug("Two Sum") == "two-sum"
+
+
+def test_title_to_neetcode_slug_special_chars():
+    """Special characters (parentheses) are stripped, spaces become hyphens."""
+    assert title_to_neetcode_slug("3Sum (Three Sum)") == "3sum-three-sum"
+
+
+def test_title_to_neetcode_slug_trailing_spaces():
+    """Leading and trailing spaces are stripped."""
+    assert title_to_neetcode_slug("  Valid Parentheses  ") == "valid-parentheses"

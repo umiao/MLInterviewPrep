@@ -21,6 +21,8 @@ export interface ProblemFormData {
   company_tags: string;
   priority: number;
   framework_node_id: number | null;
+  description: string;
+  neetcode_slug: string;
 }
 
 export const EMPTY_FORM: ProblemFormData = {
@@ -35,6 +37,8 @@ export const EMPTY_FORM: ProblemFormData = {
   company_tags: "",
   priority: 2,
   framework_node_id: null,
+  description: "",
+  neetcode_slug: "",
 };
 
 interface ProblemFormFieldsProps {
@@ -193,6 +197,28 @@ export default function ProblemFormFields({
           placeholder="Link to a framework topic..."
         />
       </FormField>
+
+      <FormField label="Description" htmlFor="pf-desc">
+        <textarea
+          id="pf-desc"
+          value={form.description}
+          onChange={(e) => onChange({ description: e.target.value })}
+          className={inputClass}
+          rows={4}
+          placeholder="Problem description (fetched from neetcode or entered manually)"
+        />
+      </FormField>
+
+      <FormField label="Neetcode Slug Override" htmlFor="pf-slug">
+        <input
+          id="pf-slug"
+          type="text"
+          value={form.neetcode_slug}
+          onChange={(e) => onChange({ neetcode_slug: e.target.value })}
+          className={inputClass}
+          placeholder="Override slug for neetcode.io (auto-derived from title if empty)"
+        />
+      </FormField>
     </>
   );
 }
@@ -217,5 +243,7 @@ export function formToPayload(form: ProblemFormData): Record<string, unknown> {
     company_tags: splitCsv(form.company_tags),
     priority: form.priority,
     framework_node_id: form.framework_node_id,
+    description: form.description.trim() || null,
+    neetcode_slug: form.neetcode_slug.trim() || null,
   };
 }

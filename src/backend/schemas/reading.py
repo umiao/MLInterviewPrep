@@ -148,3 +148,15 @@ class ListeningStatsResponse(BaseModel):
     sessions_today: int = Field(description="Sessions started today")
     listening_seconds_today: float = Field(description="Listening duration today in seconds")
     streak_days: int = Field(description="Consecutive days with at least one session")
+
+
+class TranscriptResponse(BaseModel):
+    """Response with faithful spoken-word transcript."""
+
+    content_type: str
+    content_id: int
+    transcript_text: str
+    transcript_hash: str
+    generation_method: str = Field(description="'llm' or 'preprocess_fallback'")
+    from_cache: bool = Field(description="True if returned from cache without LLM call")
+    total_chars: int = Field(description="Length of transcript text in characters")

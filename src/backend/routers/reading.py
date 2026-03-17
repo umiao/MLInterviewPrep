@@ -27,6 +27,7 @@ from src.backend.schemas.reading import (
     SynthesizeAsyncResponse,
     SynthesizeRequest,
     SynthesizeResponse,
+    TranscriptResponse,
 )
 from src.backend.services.content_pipeline import (
     VALID_CONTENT_TYPES,
@@ -34,7 +35,9 @@ from src.backend.services.content_pipeline import (
     compute_content_hash,
     generate_tts_summary,
     get_cached_summary,
+    get_cached_transcript,
     get_content_text,
+    get_or_create_transcript,
     get_reading_queue,
     preprocess_for_tts,
 )
@@ -299,8 +302,9 @@ async def get_content(
     _validate_content_type(content_type)
     raw_text = _get_raw_text_or_404(db, content_type, content_id)
     preprocessed = preprocess_for_tts(raw_text)
-    summary = get_cached_summary(db, content_type, content_id)
-    # Use summary for chunks if available, otherwise preprocessed text
+    cached_tr = get_cached_transcript(db, content_type, content_id)
+    summary = cached_tr.transcript_text if cached_tr else None
+    # Use transcript for chunks if available, otherwise preprocessed text
     text_for_chunks = summary if summary else preprocessed
     chunks = chunk_text(text_for_chunks)
     content_hash = compute_content_hash(raw_text)
@@ -369,6 +373,49 @@ async def get_or_generate_summary(
 
 
 # -----------------------------------------------------------------------
+# GET /reading/transcript/{content_type}/{content_id} -- get/generate transcript
+# -----------------------------------------------------------------------
+@router.get(
+    "/reading/transcript/{content_type}/{content_id}",
+    response_model=TranscriptResponse,
+)
+async def get_transcript(
+    content_type: str,
+    content_id: int,
+    db: Session = Depends(get_db),
+) -> TranscriptResponse:
+    """Return a faithful spoken-word transcript (generates on demand, no audio).
+
+    Args:
+        content_type: Content type string.
+        content_id: ID of the content item.
+        db: Database session.
+
+    Returns:
+        Transcript text with generation metadata.
+    """
+    _validate_content_type(content_type)
+    _get_raw_text_or_404(db, content_type, content_id)
+
+    result = await get_or_create_transcript(db, content_type, content_id)
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"{content_type} with id {content_id} not found",
+        )
+
+    return TranscriptResponse(
+        content_type=content_type,
+        content_id=content_id,
+        transcript_text=result.transcript_text,
+        transcript_hash=result.transcript_hash,
+        generation_method=result.generation_method,
+        from_cache=result.from_cache,
+        total_chars=len(result.transcript_text),
+    )
+
+
+# -----------------------------------------------------------------------
 # POST /reading/synthesize -- cache-aware synthesis with async for long content
 # -----------------------------------------------------------------------
 @router.post("/reading/synthesize", response_model=SynthesizeResponse, responses={202: {"model": SynthesizeAsyncResponse}})
@@ -394,9 +441,10 @@ async def synthesize(
     _validate_content_type(request.content_type)
     raw_text = _get_raw_text_or_404(db, request.content_type, request.content_id)
 
-    # Prefer cached LLM summary over raw preprocessed text
-    cached_summary = get_cached_summary(db, request.content_type, request.content_id)
-    processed_text = cached_summary or preprocess_for_tts(raw_text)
+    # Prefer cached transcript over raw preprocessed text
+    cached_tr = get_cached_transcript(db, request.content_type, request.content_id)
+    processed_text = cached_tr.transcript_text if cached_tr else preprocess_for_tts(raw_text)
+    transcript_hash = cached_tr.transcript_hash if cached_tr else compute_content_hash(processed_text)
 
     if not processed_text.strip():
         raise HTTPException(status_code=400, detail="No speakable text after preprocessing")
@@ -409,7 +457,7 @@ async def synthesize(
     engine = get_tts_engine(engine_name)
     voice = request.voice or settings.TTS_VOICE
     rate = request.rate or settings.TTS_RATE
-    content_hash = compute_content_hash(raw_text)
+    content_hash = transcript_hash
 
     # Browser engine: return text immediately, no caching needed
     if engine.name == "browser":

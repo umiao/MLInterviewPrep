@@ -63,3 +63,13 @@ export interface ListeningStats {
   listening_seconds_today: number;
   streak_days: number;
 }
+
+export interface TranscriptResponse {
+  content_type: ContentType;
+  content_id: number;
+  transcript_text: string;
+  transcript_hash: string;
+  generation_method: "llm" | "preprocess_fallback";
+  from_cache: boolean;
+  total_chars: number;
+}

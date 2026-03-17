@@ -1,4 +1,4 @@
-"""Reading/TTS models: ReadingProgress, ReadingSession, AudioCache."""
+"""Reading/TTS models: ReadingProgress, ReadingSession, AudioCache, Transcript."""
 from sqlalchemy import (
     Boolean,
     Column,
@@ -67,7 +67,11 @@ class AudioCache(Base):
 
 
 class TTSSummary(Base):
-    """Cached LLM-generated TTS-optimized summary for a content item."""
+    """Cached LLM-generated TTS-optimized summary for a content item.
+
+    Deprecated: Use Transcript model instead. Kept for backward compatibility
+    during migration.
+    """
 
     __tablename__ = "tts_summaries"
     __table_args__ = (
@@ -82,4 +86,27 @@ class TTSSummary(Base):
     content_id = Column(Integer, nullable=False)
     content_hash = Column(String, nullable=False)  # SHA-256 of source text for invalidation
     summary_text = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class Transcript(Base):
+    """Faithful spoken-word transcript for TTS, cached by source hash + prompt version."""
+
+    __tablename__ = "transcripts"
+    __table_args__ = (
+        UniqueConstraint(
+            "content_type", "content_id", "source_hash", "prompt_version",
+            name="uq_transcript_content_hash_version",
+        ),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    content_type = Column(String, nullable=False)
+    content_id = Column(Integer, nullable=False)
+    source_hash = Column(String, nullable=False)
+    transcript_text = Column(Text, nullable=False)
+    transcript_hash = Column(String, nullable=False)
+    generation_method = Column(String, nullable=False)  # "llm" or "preprocess_fallback"
+    prompt_version = Column(Integer, nullable=False)
+    is_latest = Column(Boolean, nullable=False, default=True)
     created_at = Column(DateTime, server_default=func.now())

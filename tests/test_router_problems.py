@@ -1445,3 +1445,35 @@ def test_review_queue_empty(test_client):
     resp = test_client.get("/api/problems/review-queue")
     assert resp.status_code == 200
     assert resp.json() == []
+
+
+# ===========================================================================
+# Problem description / neetcode_slug fields
+# ===========================================================================
+
+def test_create_problem_with_description_and_neetcode_slug(test_client):
+    """POST /api/problems with description and neetcode_slug stores them."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Two Sum",
+        "difficulty": "easy",
+        "description": "Given an array of integers...",
+        "neetcode_slug": "two-sum",
+        "description_source": "neetcode",
+    })
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["description"] == "Given an array of integers..."
+    assert data["neetcode_slug"] == "two-sum"
+    assert data["description_source"] == "neetcode"
+
+
+def test_update_problem_with_description(test_client):
+    """PUT /api/problems/{id} updates description field."""
+    resp = test_client.post("/api/problems", json={"title": "Desc Update"})
+    pid = resp.json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={
+        "description": "Updated problem description text.",
+    })
+    assert resp.status_code == 200
+    assert resp.json()["description"] == "Updated problem description text."

@@ -1,13 +1,14 @@
 """Tests for reading/TTS router endpoints.
 
 Covers: queue, progress (CRUD + reset), content retrieval, synthesize
-(sync + async + cache), job polling, and audio serving.
+(sync + async + cache), job polling, audio serving, and transcript retrieval.
 """
 from unittest.mock import AsyncMock, patch
 
 from src.backend.models.company import Company
 from src.backend.models.framework import FrameworkNode
 from src.backend.models.reading import AudioCache, ReadingProgress
+from src.backend.services.content_pipeline import TranscriptResult
 from src.backend.services.tts_engine import SynthesisResult
 
 
@@ -546,3 +547,44 @@ class TestIntegrationFlows:
         for item in resp.json()["items"]:
             assert item["last_chunk_index"] == 0
             assert item["char_offset"] == 0
+
+
+# -----------------------------------------------------------------------
+# GET /reading/transcript/{content_type}/{content_id}
+# -----------------------------------------------------------------------
+class TestGetTranscript:
+    """Tests for GET /reading/transcript/{content_type}/{content_id} endpoint."""
+
+    @patch(
+        "src.backend.routers.reading.get_or_create_transcript",
+        new_callable=AsyncMock,
+    )
+    def test_get_transcript_returns_transcript(
+        self, mock_gen, test_client, db_session,
+    ):
+        """Returns transcript with text, generation_method, and total_chars."""
+        node = _seed_node(db_session, description="Dynamic programming overview.")
+        mock_gen.return_value = TranscriptResult(
+            transcript_text="Dynamic programming is an optimization technique.",
+            transcript_hash="abc123",
+            generation_method="llm",
+            from_cache=False,
+        )
+
+        resp = test_client.get(
+            f"/api/reading/transcript/framework_node/{node.id}",
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "transcript_text" in data
+        assert data["transcript_text"] == "Dynamic programming is an optimization technique."
+        assert data["generation_method"] == "llm"
+        assert data["total_chars"] == len(data["transcript_text"])
+        assert data["content_type"] == "framework_node"
+        assert data["content_id"] == node.id
+        mock_gen.assert_called_once()
+
+    def test_get_transcript_404_for_missing(self, test_client):
+        """Returns 404 for non-existent content ID."""
+        resp = test_client.get("/api/reading/transcript/framework_node/99999")
+        assert resp.status_code == 404

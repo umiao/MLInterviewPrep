@@ -15,6 +15,7 @@ import { api } from "../utils/api";
 import type { Company } from "../types/company";
 import type { AudioPlayerItem, ContentType, ListeningStats, QueueItem, QueueResponse } from "../types/reading";
 import Badge from "../components/ui/Badge";
+import TranscriptViewer from "../components/reading/TranscriptViewer";
 
 /** Map content_type to badge config. */
 const CONTENT_BADGE: Record<ContentType, { label: string; variant: "blue" | "green" | "purple" }> = {
@@ -77,6 +78,7 @@ export default function StudyRadio() {
   // Filters
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
   const [engineSelect, setEngineSelect] = useState<string>("edge");
+  const [readingItem, setReadingItem] = useState<QueueItem | null>(null);
 
   // Fetch companies for filter dropdown
   const companiesQuery = useQuery<Company[]>({
@@ -432,7 +434,14 @@ export default function StudyRadio() {
                     {prog.text}
                   </span>
 
-                  {/* Play button */}
+                  {/* Read + Play buttons */}
+                  <button
+                    onClick={() => setReadingItem(item)}
+                    className="px-2.5 py-1 text-xs border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors shrink-0"
+                    title="Read transcript"
+                  >
+                    Read
+                  </button>
                   <button
                     onClick={() => handlePlayItem(item)}
                     disabled={playing && status === "loading"}
@@ -478,6 +487,13 @@ export default function StudyRadio() {
                   </div>
                   <span className="text-xs text-green-600 shrink-0">Done</span>
                   <button
+                    onClick={() => setReadingItem(item)}
+                    className="px-2.5 py-1 text-xs border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors shrink-0"
+                    title="Read transcript"
+                  >
+                    Read
+                  </button>
+                  <button
                     onClick={() => handlePlayItem(item)}
                     className="px-2.5 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors shrink-0"
                     title="Replay this item"
@@ -489,6 +505,17 @@ export default function StudyRadio() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Transcript Viewer overlay */}
+      {readingItem && (
+        <TranscriptViewer
+          contentType={readingItem.content_type}
+          contentId={readingItem.content_id}
+          title={readingItem.title}
+          onClose={() => setReadingItem(null)}
+          onListen={() => handlePlayItem(readingItem)}
+        />
       )}
     </div>
   );

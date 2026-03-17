@@ -190,6 +190,9 @@ def test_problem_response_from_attributes():
     mock_obj.created_at = datetime(2026, 1, 1)
     mock_obj.last_attempted_at = None
     mock_obj.next_review_at = None
+    mock_obj.description = None
+    mock_obj.neetcode_slug = None
+    mock_obj.description_source = None
 
     p = ProblemResponse.model_validate(mock_obj, from_attributes=True)
     assert p.id == 1
@@ -216,6 +219,9 @@ def test_problem_response_null_tags_become_empty_list():
     mock_obj.created_at = None
     mock_obj.last_attempted_at = None
     mock_obj.next_review_at = None
+    mock_obj.description = None
+    mock_obj.neetcode_slug = None
+    mock_obj.description_source = None
 
     p = ProblemResponse.model_validate(mock_obj, from_attributes=True)
     assert p.tags == []

@@ -25,6 +25,8 @@ function problemToForm(p: Problem): ProblemFormData {
     company_tags: p.company_tags.join(", "),
     priority: p.priority,
     framework_node_id: p.framework_node_id,
+    description: p.description ?? "",
+    neetcode_slug: p.neetcode_slug ?? "",
   };
 }
 

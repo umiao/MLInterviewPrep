@@ -16,6 +16,9 @@ export interface Problem {
   last_attempted_at: string | null;
   next_review_at: string | null;
   framework_node_id: number | null;
+  description: string | null;
+  neetcode_slug: string | null;
+  description_source: string | null;
 }
 
 export type Difficulty = "easy" | "medium" | "hard";

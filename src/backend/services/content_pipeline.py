@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from src.backend.models.company import Company, CompanyTopicWeight
 from src.backend.models.framework import FrameworkNode
 from src.backend.models.problem import Problem
-from src.backend.models.reading import ReadingProgress, TTSSummary
+from src.backend.models.reading import ReadingProgress, Transcript
 from src.backend.models.timeline import InterviewEvent
 from src.backend.services.study_planner import compute_urgency
 
@@ -174,6 +174,8 @@ def get_content_text(db: Session, content_type: str, content_id: int) -> str | N
                     parts.append(f"Tags: {', '.join(tag_list)}.")
             except (json.JSONDecodeError, TypeError):
                 pass
+        if problem.description:
+            parts.append(f"\n{problem.description}")
         return " ".join(parts)
 
     return None
@@ -360,6 +362,17 @@ def preprocess_for_tts(text: str) -> str:
     text = re.sub(r"\bvs\.\s*", "versus ", text)
     text = re.sub(r"\bw/\s", "with ", text)
     text = re.sub(r"\bw/o\s", "without ", text)
+
+    # Expand technical abbreviations for TTS
+    text = re.sub(r"\bML\b", "machine learning", text)
+    text = re.sub(r"\bDL\b", "deep learning", text)
+    text = re.sub(r"\bNLP\b", "natural language processing", text)
+    text = re.sub(r"\bCV\b", "computer vision", text)
+    text = re.sub(r"\bAPI\b", "A P I", text)
+    text = re.sub(r"\bSQL\b", "S Q L", text)
+    text = re.sub(r"\bLLM\b", "L L M", text)
+    # Big-O notation: O(n) -> O of n
+    text = re.sub(r"O\(([^)]+)\)", r"O of \1", text)
 
     # Collapse multiple blank lines to single
     text = re.sub(r"\n{3,}", "\n\n", text)
@@ -591,34 +604,58 @@ def get_reading_queue(
 
 
 # ---------------------------------------------------------------------------
-# TTS summary generation via LLM
+# Transcript generation via LLM (replaces TTS summary)
 # ---------------------------------------------------------------------------
-TTS_SUMMARY_SYSTEM_PROMPT = (
-    "You are a text-to-speech content optimizer. "
-    "Rewrite the following content for TTS narration. "
-    "Make it conversational and easy to follow when listened to. "
-    "Expand all abbreviations (e.g. -> for example, ML -> machine learning). "
-    "Do not include any visual references (tables, diagrams, code blocks, URLs). "
-    "Remove table formatting, checkbox syntax, and placeholder underscores. "
-    "If content contains Chinese text, translate all key points to English "
-    "and integrate them naturally into the narration. "
-    "Keep the key information but make it concise and spoken-word friendly. "
-    "Output ONLY the rewritten text, no preamble or explanation."
+
+# Current prompt version -- bump when prompt changes to invalidate cache
+TRANSCRIPT_PROMPT_VERSION = 1
+
+TRANSCRIPT_SYSTEM_PROMPT = (
+    "You are a faithful text-to-speech transcript adapter. "
+    "Transform written study material into clean spoken-word text, "
+    "preserving all key points and optimizing for spoken delivery.\n\n"
+    "Rules:\n"
+    "- Preserve all factual claims, definitions, formulas, and key points. "
+    "Do NOT over-summarize or drop technical details.\n"
+    "- For structured data (tables, key-value pairs), convert to "
+    "question-answer format when it aids listening comprehension. "
+    "For narrative content, keep the natural flow.\n"
+    "- Remove formatting artifacts: markdown syntax, table borders, "
+    "code block markers, URLs, checkbox syntax, placeholder underscores.\n"
+    "- Expand abbreviations (e.g. -> for example, ML -> machine learning, "
+    "O(n) -> O of n).\n"
+    "- Convert bullet lists into flowing sentences, preserving every point.\n"
+    "- If content contains Chinese text, translate it accurately to English.\n"
+    "- Do NOT add opinions, commentary, or filler phrases.\n"
+    "- Do not drop technical details or skip sections.\n"
+    "- Output ONLY the adapted text, no preamble or explanation."
 )
 
+# Deprecated: kept for backward compatibility with existing cached data
+TTS_SUMMARY_SYSTEM_PROMPT = TRANSCRIPT_SYSTEM_PROMPT
 
-async def generate_tts_summary(
+
+@dataclass
+class TranscriptResult:
+    """Result of transcript generation."""
+
+    transcript_text: str
+    transcript_hash: str
+    generation_method: str  # "llm" or "preprocess_fallback"
+    from_cache: bool
+
+
+async def generate_transcript(
     db: Session,
     content_type: str,
     content_id: int,
-) -> str | None:
-    """Generate an LLM-optimized TTS summary for a content item.
+) -> TranscriptResult | None:
+    """Generate a faithful spoken-word transcript for a content item.
 
-    If a cached summary exists with a matching content_hash, returns it
-    without calling the LLM. If the content has changed (hash mismatch),
-    regenerates the summary.
-
-    Falls back to preprocessed raw text when the LLM is unavailable.
+    Checks the Transcript cache first (matching source_hash + prompt_version
+    + is_latest=True). On cache miss, generates via LLM with fallback to
+    preprocess_for_tts(). The is_latest toggle is wrapped in a single
+    transaction to prevent zero-latest queries mid-operation.
 
     Args:
         db: Database session.
@@ -626,82 +663,129 @@ async def generate_tts_summary(
         content_id: Primary key of the content item.
 
     Returns:
-        The TTS-optimized summary text, or None if content not found.
+        TranscriptResult with text and metadata, or None if content not found.
     """
     raw_text = get_content_text(db, content_type, content_id)
     if raw_text is None:
         return None
 
-    content_hash = compute_content_hash(raw_text)
+    source_hash = compute_content_hash(raw_text)
 
-    # Check cache
+    # Check cache: is_latest=True + matching prompt_version
     cached = (
-        db.query(TTSSummary)
+        db.query(Transcript)
         .filter(
-            TTSSummary.content_type == content_type,
-            TTSSummary.content_id == content_id,
+            Transcript.content_type == content_type,
+            Transcript.content_id == content_id,
+            Transcript.is_latest.is_(True),
+            Transcript.prompt_version == TRANSCRIPT_PROMPT_VERSION,
         )
         .first()
     )
 
-    if cached and cached.content_hash == content_hash:
-        return cached.summary_text
+    if cached and cached.source_hash == source_hash:
+        return TranscriptResult(
+            transcript_text=cached.transcript_text,
+            transcript_hash=cached.transcript_hash,
+            generation_method=cached.generation_method,
+            from_cache=True,
+        )
 
-    # Hash mismatch -> delete stale cache
-    if cached:
-        db.delete(cached)
-        db.commit()
+    # Generate new transcript
+    generation_method = "llm"
+    transcript_text: str | None = None
 
-    # Generate via LLM
     try:
         from src.backend.services.llm_service import LLMService
 
         llm = LLMService()
         result = await llm.chat(
-            system_prompt=TTS_SUMMARY_SYSTEM_PROMPT,
+            system_prompt=TRANSCRIPT_SYSTEM_PROMPT,
             messages=[{"role": "user", "content": raw_text}],
             response_format="text",
-            max_tokens=2048,
+            max_tokens=4096,
         )
 
-        # LLM error returns a dict with "error" key
         if isinstance(result, dict) and "error" in result:
             logger.warning(
-                "LLM summary generation failed for %s/%s: %s",
+                "LLM transcript generation failed for %s/%s: %s",
                 content_type, content_id, result["error"],
             )
-            return preprocess_for_tts(raw_text)
-
-        summary_text = str(result).strip()
-        if not summary_text:
-            return preprocess_for_tts(raw_text)
+            transcript_text = None
+        else:
+            transcript_text = str(result).strip() or None
 
     except Exception:
         logger.exception(
-            "LLM unavailable for summary generation (%s/%s), falling back to preprocessed text",
+            "LLM unavailable for transcript generation (%s/%s), falling back",
             content_type, content_id,
         )
-        return preprocess_for_tts(raw_text)
 
-    # Cache the summary
-    new_entry = TTSSummary(
+    # Fallback to preprocess_for_tts
+    if not transcript_text:
+        transcript_text = preprocess_for_tts(raw_text)
+        generation_method = "preprocess_fallback"
+
+    transcript_hash = compute_content_hash(transcript_text)
+
+    # Single transaction: mark old as not latest, insert new as latest
+    old_latest = (
+        db.query(Transcript)
+        .filter(
+            Transcript.content_type == content_type,
+            Transcript.content_id == content_id,
+            Transcript.is_latest.is_(True),
+        )
+        .all()
+    )
+    for old in old_latest:
+        old.is_latest = False
+
+    new_entry = Transcript(
         content_type=content_type,
         content_id=content_id,
-        content_hash=content_hash,
-        summary_text=summary_text,
+        source_hash=source_hash,
+        transcript_text=transcript_text,
+        transcript_hash=transcript_hash,
+        generation_method=generation_method,
+        prompt_version=TRANSCRIPT_PROMPT_VERSION,
+        is_latest=True,
     )
     db.add(new_entry)
     db.commit()
 
-    return summary_text
+    return TranscriptResult(
+        transcript_text=transcript_text,
+        transcript_hash=transcript_hash,
+        generation_method=generation_method,
+        from_cache=False,
+    )
 
 
-def get_cached_summary(
+async def get_or_create_transcript(
     db: Session,
     content_type: str,
     content_id: int,
-) -> str | None:
-    """Return a cached TTS summary if it exists and is still valid.
+) -> TranscriptResult | None:
+    """Public API: get cached transcript or generate on demand.
+
+    Args:
+        db: Database session.
+        content_type: One of the VALID_CONTENT_TYPES.
+        content_id: Primary key of the content item.
+
+    Returns:
+        TranscriptResult, or None if content not found.
+    """
+    return await generate_transcript(db, content_type, content_id)
+
+
+def get_cached_transcript(
+    db: Session,
+    content_type: str,
+    content_id: int,
+) -> TranscriptResult | None:
+    """Return cached transcript if it exists and is current.
 
     Does NOT call the LLM. Returns None if no valid cache exists.
 
@@ -711,24 +795,93 @@ def get_cached_summary(
         content_id: Primary key of the content item.
 
     Returns:
-        Cached summary text, or None if not available or stale.
+        Cached TranscriptResult, or None if not available or stale.
     """
     raw_text = get_content_text(db, content_type, content_id)
     if raw_text is None:
         return None
 
-    content_hash = compute_content_hash(raw_text)
+    source_hash = compute_content_hash(raw_text)
 
     cached = (
-        db.query(TTSSummary)
+        db.query(Transcript)
         .filter(
-            TTSSummary.content_type == content_type,
-            TTSSummary.content_id == content_id,
+            Transcript.content_type == content_type,
+            Transcript.content_id == content_id,
+            Transcript.is_latest.is_(True),
+            Transcript.prompt_version == TRANSCRIPT_PROMPT_VERSION,
         )
         .first()
     )
 
-    if cached and cached.content_hash == content_hash:
-        return cached.summary_text
+    if cached and cached.source_hash == source_hash:
+        return TranscriptResult(
+            transcript_text=cached.transcript_text,
+            transcript_hash=cached.transcript_hash,
+            generation_method=cached.generation_method,
+            from_cache=True,
+        )
 
     return None
+
+
+# ---------------------------------------------------------------------------
+# Deprecated wrappers (kept for backward compatibility)
+# ---------------------------------------------------------------------------
+async def generate_tts_summary(
+    db: Session,
+    content_type: str,
+    content_id: int,
+) -> str | None:
+    """Deprecated: Use generate_transcript() instead.
+
+    Args:
+        db: Database session.
+        content_type: One of the VALID_CONTENT_TYPES.
+        content_id: Primary key of the content item.
+
+    Returns:
+        Transcript text, or None if content not found.
+    """
+    result = await generate_transcript(db, content_type, content_id)
+    return result.transcript_text if result else None
+
+
+def get_cached_summary(
+    db: Session,
+    content_type: str,
+    content_id: int,
+) -> str | None:
+    """Deprecated: Use get_cached_transcript() instead.
+
+    Args:
+        db: Database session.
+        content_type: One of the VALID_CONTENT_TYPES.
+        content_id: Primary key of the content item.
+
+    Returns:
+        Cached transcript text, or None if not available.
+    """
+    result = get_cached_transcript(db, content_type, content_id)
+    return result.transcript_text if result else None
+
+
+# ---------------------------------------------------------------------------
+# Neetcode slug utility (Task 3)
+# ---------------------------------------------------------------------------
+def title_to_neetcode_slug(title: str) -> str:
+    """Convert a problem title to a neetcode.io URL slug.
+
+    Lowercase, spaces to hyphens, strip non-alphanumeric (except hyphens).
+
+    Args:
+        title: Problem title string.
+
+    Returns:
+        URL-safe slug for neetcode.io.
+    """
+    slug = title.lower().strip()
+    slug = re.sub(r"[^a-z0-9\s-]", "", slug)
+    slug = re.sub(r"[\s]+", "-", slug)
+    slug = re.sub(r"-{2,}", "-", slug)
+    return slug.strip("-")

@@ -1,5 +1,6 @@
 """Problem and Attempt API routes."""
 import json
+import logging
 from datetime import datetime
 from typing import Literal
 
@@ -16,7 +17,10 @@ from src.backend.schemas.problem import (
     ProblemResponse,
     ProblemUpdate,
 )
+from src.backend.services.content_pipeline import title_to_neetcode_slug
 from src.backend.services.spaced_repetition import update_review_schedule
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -41,6 +45,9 @@ def _problem_to_response(p: Problem) -> dict:
         "last_attempted_at": p.last_attempted_at,
         "next_review_at": p.next_review_at,
         "framework_node_id": p.framework_node_id,
+        "description": p.description,
+        "neetcode_slug": p.neetcode_slug,
+        "description_source": p.description_source,
     }
 
 
@@ -201,6 +208,9 @@ def create_problem(
         company_tags=json.dumps(problem.company_tags, ensure_ascii=False),
         priority=problem.priority,
         framework_node_id=problem.framework_node_id,
+        description=problem.description,
+        neetcode_slug=problem.neetcode_slug,
+        description_source=problem.description_source,
         created_at=datetime.utcnow(),
     )
     db.add(db_problem)
@@ -375,3 +385,89 @@ async def review_problem(
         db.commit()
 
     return result
+
+
+@router.post("/problems/{problem_id}/fetch-description")
+async def fetch_description(
+    problem_id: int,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Fetch problem description from neetcode.io and save it.
+
+    Uses neetcode_slug if set, otherwise derives from title.
+
+    Args:
+        problem_id: ID of the problem to fetch description for.
+        db: Database session.
+
+    Returns:
+        Dict with description text and source.
+    """
+    db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
+    if not db_problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+
+    slug = db_problem.neetcode_slug or title_to_neetcode_slug(db_problem.title)
+    url = f"https://neetcode.io/problems/{slug}"
+
+    import httpx
+    from bs4 import BeautifulSoup
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0, follow_redirects=True) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Failed to fetch from neetcode.io (HTTP {exc.response.status_code}). "
+            f"Try manually at: {url}",
+        ) from exc
+    except httpx.RequestError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Network error fetching from neetcode.io: {exc}. "
+            f"Try manually at: {url}",
+        ) from exc
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    # Neetcode question pages typically have the problem text in a specific container
+    # Try multiple selectors for robustness
+    description_text = None
+    for selector in [
+        "div.question-content",
+        "div[class*='description']",
+        "div[class*='problem']",
+        "main",
+    ]:
+        element = soup.select_one(selector)
+        if element and len(element.get_text(strip=True)) > 50:
+            description_text = element.get_text(separator="\n", strip=True)
+            break
+
+    if not description_text:
+        # Fallback: get all text from body
+        body = soup.find("body")
+        if body:
+            description_text = body.get_text(separator="\n", strip=True)
+
+    if not description_text or len(description_text) < 20:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Could not parse description from neetcode.io. "
+            f"Try manually at: {url}",
+        )
+
+    db_problem.description = description_text
+    db_problem.description_source = "neetcode"
+    if not db_problem.neetcode_slug:
+        db_problem.neetcode_slug = slug
+    db.commit()
+
+    return {
+        "description": description_text,
+        "description_source": "neetcode",
+        "neetcode_slug": slug,
+        "url": url,
+    }

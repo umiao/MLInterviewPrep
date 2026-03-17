@@ -218,6 +218,37 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             ")",
         ],
     ),
+    (
+        6,
+        "Create transcripts table for faithful spoken-word transcripts",
+        [
+            "CREATE TABLE IF NOT EXISTS transcripts ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  content_type VARCHAR NOT NULL,"
+            "  content_id INTEGER NOT NULL,"
+            "  source_hash VARCHAR NOT NULL,"
+            "  transcript_text TEXT NOT NULL,"
+            "  transcript_hash VARCHAR NOT NULL,"
+            "  generation_method VARCHAR NOT NULL,"
+            "  prompt_version INTEGER NOT NULL,"
+            "  is_latest BOOLEAN NOT NULL DEFAULT 1,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(content_type, content_id, source_hash, prompt_version)"
+            ")",
+        ],
+    ),
+    (
+        7,
+        "Add description, neetcode_slug, description_source columns to problems",
+        [
+            "ADD_COLUMN_IF_MISSING:problems:description:"
+            "ALTER TABLE problems ADD COLUMN description TEXT",
+            "ADD_COLUMN_IF_MISSING:problems:neetcode_slug:"
+            "ALTER TABLE problems ADD COLUMN neetcode_slug VARCHAR",
+            "ADD_COLUMN_IF_MISSING:problems:description_source:"
+            "ALTER TABLE problems ADD COLUMN description_source VARCHAR",
+        ],
+    ),
 ]
 
 
