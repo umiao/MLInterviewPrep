@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-129: Deep Learning & LLM pillar (Pillar 6) prep docs for all leaf topics
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-127
-- **Description**: Generate detailed prep docs for all Pillar 6 leaf topics following content template. Covers: Transformer architecture, attention mechanisms, pre-trained LMs (BERT/GPT), LLM training & alignment (RLHF/DPO), inference optimization (KV cache, quantization, speculative decoding), RAG, multimodal. AC: all topics have prep docs at senior MLE depth with architecture details, training math, scaling laws.
-
 #### T-P1-130: ML System Design pillar (Pillar 3) prep docs for all leaf topics
 - **Priority**: P1
 - **Complexity**: L
@@ -58,6 +52,7 @@
 > 119 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-17** -- T-P1-134: Fix MarkdownPreview checkbox mismatch caused by remarkMath dollar-sign corruption
+- [x] **2026-03-17** -- T-P1-129: Deep Learning & LLM pillar (Pillar 6) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 6 leaf topics following content template. Covers: Transformer architecture, a
 - [x] **2026-03-17** -- T-P1-128: PrevNextNav arrow component + integrate in PrepNotesPage and ProblemDetailPage. Reusable PrevNextNav component with left/right chevrons + tooltip. PrepNotesPage: navigate companies alphabetically. Pro
 - [x] **2026-03-17** -- T-P1-127: Content template + ML Fundamentals pillar (Pillar 2) prep docs for all 25 leaf topics. Create docs/framework_content_template.md with standard structure (Overview, Core Concepts with LaTeX, Implementation, I
 - [x] **2026-03-17** -- T-P1-126: Framework full-screen notes page: backend GET endpoint + useFrameworkNotes hook + FrameworkNotesPage + route + Open Full Page link. End-to-end: (1) GET /framework/nodes/{id} endpoint returning single node. (2) useFrameworkNotes hook mirroring usePrepNo

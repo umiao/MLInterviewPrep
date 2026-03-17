@@ -168,3 +168,10 @@
 - **Sanity check result**: All 25 nodes verified in DB with LaTeX, checkboxes, and tables. TypeScript compiles cleanly. 641 tests pass (1 pre-existing failure unrelated).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-127 --status completed`
+
+## 2026-03-17 -- [T-P1-129] Deep Learning & LLM pillar (Pillar 6) prep docs for all 24 leaf topics
+- **What I did**: Wrote `scripts/seed_pillar6_content.py` with detailed senior MLE-depth prep docs for all 24 Pillar 6 leaf topics across 6 categories: (1) Transformer Deep Understanding (7 topics: self-attention, multi-head attention, position encoding, layer normalization, feed-forward/SwiGLU, attention variants MQA/GQA/Flash, architecture variants encoder/decoder), (2) Pre-trained Language Models (3 topics: BERT family, GPT family, LLaMA/Mistral), (3) LLM Training & Alignment (5 topics: pre-training, SFT, RLHF/DPO, LoRA/QLoRA PEFT, evaluation & benchmarks), (4) LLM Inference Optimization (4 topics: KV cache/PagedAttention, quantization GPTQ/AWQ/FP8, continuous batching, serving systems vLLM/TRT-LLM), (5) RAG Deep Dive (4 topics: chunking strategies, embedding models, vector databases, advanced RAG patterns), (6) Multimodal (1 topic: vision-language CLIP/LLaVA). Each topic has KaTeX-compatible LaTeX, Python code snippets, interview pattern tables, comparison tables, and self-assessment checkboxes.
+- **Deliverables**: scripts/seed_pillar6_content.py (new), data/mle_prep.db (24 nodes updated)
+- **Sanity check result**: All 24 nodes verified in DB with content (4K-6K chars each), checkboxes, tables, and LaTeX (22/24 with block LaTeX; 2 topics without heavy math as expected). Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-129 --status completed`
