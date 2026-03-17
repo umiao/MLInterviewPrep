@@ -189,3 +189,10 @@
 - **Sanity check result**: All 14 nodes verified in DB with content (4.2K-6.0K chars each), checkboxes, tables, and LaTeX. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-131 --status completed`
+
+## 2026-03-17 -- [T-P2-132] Applied ML pillar (Pillar 4) prep docs for all 18 leaf topics
+- **What I did**: Wrote `scripts/seed_pillar4_content.py` with detailed senior MLE-depth prep docs for all 18 Pillar 4 leaf topics across 7 domain areas: (1) Recommender Systems (3 topics: collaborative filtering, content-based methods, deep recommendation models), (2) Search & IR (4 topics: classic IR/BM25, neural retrieval, query understanding, learning to rank), (3) NLP & LLM Applications (3 topics: text classification, question answering, LLM application patterns), (4) Ads & Monetization (1 topic: CTR prediction), (5) Marketplace & Logistics (3 topics: dynamic pricing, ETA prediction, causal inference), (6) Computer Vision (2 topics: image classification, object detection), (7) Trust & Safety (2 topics: anomaly detection, explainability/SHAP/LIME). Each topic has KaTeX-compatible LaTeX, Python code snippets, interview pattern tables, comparison tables, and self-assessment checkboxes.
+- **Deliverables**: scripts/seed_pillar4_content.py (new), data/mle_prep.db (18 nodes updated)
+- **Sanity check result**: All 18 nodes verified in DB with content (4.5K-6.0K chars each), checkboxes, tables. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-132 --status completed`

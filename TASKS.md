@@ -19,12 +19,6 @@
 - **Depends on**: None
 - **Description**: Only if full-MP3 generation latency becomes a UX problem for long content. SSE endpoint streaming base64 MP3 chunks with MediaSource API on frontend. Evaluate need after Phase 2. AC: SSE streams audio chunks, frontend plays without gaps, progress tracked per chunk
 
-#### T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: T-P1-127
-- **Description**: Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applications, ads & monetization, marketplace & logistics, computer vision, trust & safety. AC: all topics have prep docs at senior MLE depth.
-
 #### T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs
 - **Priority**: P2
 - **Complexity**: L
@@ -39,6 +33,7 @@
 
 > 119 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-17** -- T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applicatio
 - [x] **2026-03-17** -- T-P1-134: Fix MarkdownPreview checkbox mismatch caused by remarkMath dollar-sign corruption
 - [x] **2026-03-17** -- T-P1-131: Math & Statistics pillar (Pillar 7) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 7 leaf topics. Covers: probability distributions, Bayesian inference, hypothe
 - [x] **2026-03-17** -- T-P1-130: ML System Design pillar (Pillar 3) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 3 leaf topics. Covers: design framework methodology, classic problems (rec sy
