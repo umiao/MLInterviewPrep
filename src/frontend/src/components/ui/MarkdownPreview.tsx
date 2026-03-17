@@ -63,19 +63,8 @@ export default function MarkdownPreview({
             if (type === "checkbox") return null;
             return <input type={type} {...rest} />;
           },
-          li: ({ children, ...props }) => {
-            const childArray = Array.isArray(children) ? children : [children];
-
-            // Check if this is a task list item (has a suppressed checkbox = null child)
-            const hasNullChild = childArray.some((c) => c === null);
-            const hasInputChild = childArray.some(
-              (c) =>
-                typeof c === "object" &&
-                c !== null &&
-                "type" in c &&
-                (c as React.ReactElement).type === "input",
-            );
-            const isTask = (hasNullChild || hasInputChild) && checkboxCounter < checkboxLineIndices.length;
+          li: ({ children, className, node: _node, ...props }) => {
+            const isTask = className?.includes("task-list-item") && checkboxCounter < checkboxLineIndices.length;
 
             if (isTask) {
               const lineIdx = checkboxLineIndices[checkboxCounter];
@@ -83,6 +72,7 @@ export default function MarkdownPreview({
               const isChecked = /^[-*]\s*\[[xX]\]/.test(lines[lineIdx].trimStart());
 
               // Filter out null and input children
+              const childArray = Array.isArray(children) ? children : [children];
               const textChildren = childArray.filter(
                 (c) =>
                   c !== null &&

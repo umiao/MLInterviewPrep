@@ -85,3 +85,10 @@
 - **Sanity check result**: 127 router tests pass, ruff clean, TypeScript clean, Vite build succeeds, 140 descriptions fetched and stored
 - **Status**: [DONE] (7 premium problems pending user input)
 - **Request**: No task_db change (user-requested ad-hoc feature)
+
+## 2026-03-16 -- Fix checkbox rendering in MarkdownPreview and double prose nesting
+- **What I did**: (1) Fixed broken task-list checkbox detection in MarkdownPreview -- replaced null/input child scanning (broken in react-markdown v10) with reliable `className.includes("task-list-item")` check from remark-gfm. (2) Removed duplicate `prose` classes from PrepNotesPage and PrepNotesTab outer wrappers to eliminate double prose nesting with MarkdownPreview's own prose context.
+- **Deliverables**: src/frontend/src/components/ui/MarkdownPreview.tsx, src/frontend/src/pages/PrepNotesPage.tsx, src/frontend/src/components/companies/PrepNotesTab.tsx
+- **Sanity check result**: TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: No task_db change (ad-hoc bugfix)

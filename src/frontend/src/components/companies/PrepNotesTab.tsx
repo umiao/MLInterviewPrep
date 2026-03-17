@@ -138,7 +138,7 @@ export default function PrepNotesTab({
           placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
         />
       ) : (
-        <div className="prose prose-sm max-w-none text-sm min-h-[8rem] border border-gray-200 rounded p-3 overflow-y-auto">
+        <div className="text-sm min-h-[8rem] border border-gray-200 rounded p-3 overflow-y-auto">
           {notes ? (
             <MarkdownPreview markdown={notes} onCheckboxClick={handleCheckboxClick} />
           ) : (
