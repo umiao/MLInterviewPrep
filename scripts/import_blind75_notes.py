@@ -9,11 +9,16 @@ Usage:
   python scripts/import_blind75_notes.py --commit
 """
 import argparse
+import io
 import json
 import logging
 import re
 import sys
 from pathlib import Path
+
+# Ensure UTF-8 stdout on Windows (cp1252 cannot encode CJK characters)
+if sys.stdout.encoding != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 # Ensure project root is importable
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -61,8 +66,9 @@ def parse_docx(docx_path: str) -> list[dict]:
     current_lines: list[str] = []
 
     # Pattern to match problem identifiers like "1. Two Sum", "#1", "number: 1"
+    # Include full-width colon \uff1a and full-width period \uff0e for CJK docs
     id_pattern = re.compile(
-        r"(?:^|\s)#?(\d{1,4})[.\s:]+\s*(.*)",
+        r"(?:^|\s)#?(\d{1,4})[.\s:\uff1a\uff0e]+\s*(.*)",
         re.IGNORECASE,
     )
     # Also match "LC 1" or "LeetCode 1" patterns

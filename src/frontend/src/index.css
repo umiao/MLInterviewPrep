@@ -23,7 +23,9 @@ body {
 
 /* Tailwind v4 prose resets text-decoration on <del>/<s>; restore strikethrough */
 .prose del,
-.prose s {
+.prose s,
+.prep-prose del,
+.prep-prose s {
   text-decoration: line-through;
 }
 

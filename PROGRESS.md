@@ -127,3 +127,9 @@
 - **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-123 --status completed`
+
+## 2026-03-16 -- Fix strikethrough in prep-prose + import Blind75 notes
+- **What I did**: (1) Extended the Tailwind v4 strikethrough CSS fix to cover `.prep-prose` in addition to `.prose`, so `~~text~~` renders correctly on the PrepNotesPage. (2) Fixed import_blind75_notes.py regex to handle full-width colon (U+FF1A) used in the CJK docx, plus added UTF-8 stdout wrapper for Windows. Re-parsed all 76 entries (75 Blind75 + 1 extra LC129) from `Blind75 LC解答.docx` and committed to DB (64 updated, 12 skipped).
+- **Deliverables**: src/frontend/src/index.css (CSS fix), scripts/import_blind75_notes.py (regex + encoding fix), data/blind75_parsed.json (76 parsed notes), database updated with 64 problem notes
+- **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
+- **Status**: [DONE]

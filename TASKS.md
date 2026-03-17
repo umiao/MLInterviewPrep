@@ -35,6 +35,7 @@
 - [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
 - [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+- [x] **2026-03-16** -- T-P1-124: Fix strikethrough in prep-prose CSS + fix Blind75 docx import regex for full-width colons
 - [x] **2026-03-16** -- T-P1-122: Problem detail: collapsible My Notes section (default collapsed). Problem: My Notes section always expanded adds visual noise.
 - [x] **2026-03-16** -- T-P1-121: Problems: notes indicator icon on All Problems tab. Problem: No visual signal on All Problems landing page to indicate which problems have notes.
 - [x] **2026-03-16** -- T-P1-120: Problems: add Difficulty as a sort option (frontend + backend). AC:
