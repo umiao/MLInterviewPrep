@@ -106,3 +106,10 @@
 - **Sanity check result**: 130 tests pass, TypeScript compiles cleanly
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-120 --status completed`
+
+## 2026-03-16 -- [T-P1-121] Notes indicator icon on All Problems tab
+- **What I did**: Added a small pencil/edit SVG icon (amber colored) inline in the Title cell of the All Problems tab for problems that have notes. Icon only appears when notes exist and only on the All Problems tab (Blind 75 tab already has a dedicated Notes column).
+- **Deliverables**: src/frontend/src/pages/Problems.tsx
+- **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-121 --status completed`
