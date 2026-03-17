@@ -57,3 +57,10 @@
 - **Sanity check result**: 770/770 tests pass (2 pre-existing failures in test_listening_sessions), ruff clean, TypeScript compiles clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: No task_db change (ad-hoc fixes)
+
+## 2026-03-16 -- Fix: Study Radio returns completed items for History/Replay
+- **What I did**: Backend `get_reading_queue()` was filtering out completed items, so the frontend History section was always empty. Changed the function to split items into pending (capped by limit) and completed (always returned), with pending first. Updated 2 existing tests and added 3 regression tests covering ordering, limit behavior, and the all-completed scenario.
+- **Deliverables**: src/backend/services/content_pipeline.py, tests/test_content_pipeline.py, tests/test_router_reading.py
+- **Sanity check result**: 773/773 tests pass (2 pre-existing failures in test_listening_sessions), ruff clean
+- **Status**: [DONE]
+- **Request**: No task_db change (ad-hoc fix)

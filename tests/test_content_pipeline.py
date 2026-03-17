@@ -511,8 +511,8 @@ def test_reading_queue_includes_interview_questions(db_session):
     assert iq_items[0].title == "Two Sum"
 
 
-def test_reading_queue_excludes_completed(db_session):
-    """Queue excludes items marked as completed in ReadingProgress."""
+def test_reading_queue_returns_completed(db_session):
+    """Queue returns completed items for History/Replay."""
     node = FrameworkNode(
         path="test.done",
         depth=0,
@@ -533,7 +533,8 @@ def test_reading_queue_excludes_completed(db_session):
     db_session.commit()
 
     queue = get_reading_queue(db_session)
-    assert len(queue) == 0
+    assert len(queue) == 1
+    assert queue[0].completed is True
 
 
 def test_reading_queue_attaches_progress(db_session):
@@ -579,6 +580,102 @@ def test_reading_queue_respects_limit(db_session):
 
     queue = get_reading_queue(db_session, limit=3)
     assert len(queue) == 3
+
+
+def test_reading_queue_completed_after_pending(db_session):
+    """Completed items appear after pending items in the queue."""
+    pending_node = FrameworkNode(
+        path="test.pending",
+        depth=0,
+        title="Pending",
+        description="Still listening.",
+        importance=1.0,
+    )
+    completed_node = FrameworkNode(
+        path="test.completed",
+        depth=0,
+        title="Completed",
+        description="Already listened.",
+        importance=1.0,
+    )
+    db_session.add_all([pending_node, completed_node])
+    db_session.commit()
+    db_session.refresh(completed_node)
+
+    progress = ReadingProgress(
+        content_type=CONTENT_TYPE_FRAMEWORK_NODE,
+        content_id=completed_node.id,
+        completed=True,
+    )
+    db_session.add(progress)
+    db_session.commit()
+
+    queue = get_reading_queue(db_session)
+    assert len(queue) == 2
+    assert queue[0].completed is not True
+    assert queue[1].completed is True
+
+
+def test_reading_queue_limit_applies_to_pending_only(db_session):
+    """Limit caps pending items but completed items are always returned."""
+    for i in range(3):
+        db_session.add(FrameworkNode(
+            path=f"test.pend.{i}",
+            depth=0,
+            title=f"Pending {i}",
+            description=f"Content {i}",
+            importance=1.0,
+        ))
+    completed_node = FrameworkNode(
+        path="test.done",
+        depth=0,
+        title="Done",
+        description="Already listened.",
+        importance=1.0,
+    )
+    db_session.add(completed_node)
+    db_session.commit()
+    db_session.refresh(completed_node)
+
+    progress = ReadingProgress(
+        content_type=CONTENT_TYPE_FRAMEWORK_NODE,
+        content_id=completed_node.id,
+        completed=True,
+    )
+    db_session.add(progress)
+    db_session.commit()
+
+    queue = get_reading_queue(db_session, limit=2)
+    pending = [i for i in queue if not i.completed]
+    completed = [i for i in queue if i.completed]
+    assert len(pending) == 2
+    assert len(completed) == 1
+
+
+def test_reading_queue_all_completed_still_returned(db_session):
+    """Queue returns completed items even when no pending items exist."""
+    node = FrameworkNode(
+        path="test.alldone",
+        depth=0,
+        title="All Done",
+        description="Listened to everything.",
+        importance=1.0,
+    )
+    db_session.add(node)
+    db_session.commit()
+    db_session.refresh(node)
+
+    progress = ReadingProgress(
+        content_type=CONTENT_TYPE_FRAMEWORK_NODE,
+        content_id=node.id,
+        completed=True,
+    )
+    db_session.add(progress)
+    db_session.commit()
+
+    queue = get_reading_queue(db_session)
+    assert len(queue) == 1
+    assert queue[0].completed is True
 
 
 def test_reading_queue_urgency_increases_near_interview(db_session):

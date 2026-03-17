@@ -86,8 +86,8 @@ class TestGetQueue:
         assert resp.status_code == 200
         assert resp.json()["total"] <= 2
 
-    def test_queue_excludes_completed(self, test_client, db_session):
-        """Queue excludes items marked as completed."""
+    def test_queue_returns_completed(self, test_client, db_session):
+        """Queue returns completed items (for History/Replay)."""
         node = _seed_node(db_session)
         # Mark as completed
         progress = ReadingProgress(
@@ -100,9 +100,11 @@ class TestGetQueue:
 
         resp = test_client.get("/api/reading/queue")
         assert resp.status_code == 200
-        ids = [i["content_id"] for i in resp.json()["items"]
-               if i["content_type"] == "framework_node"]
-        assert node.id not in ids
+        completed_items = [i for i in resp.json()["items"]
+                          if i["content_type"] == "framework_node"
+                          and i["content_id"] == node.id]
+        assert len(completed_items) == 1
+        assert completed_items[0]["completed"] is True
 
     def test_queue_sorted_by_urgency(self, test_client, db_session):
         """Queue items are sorted by urgency descending."""

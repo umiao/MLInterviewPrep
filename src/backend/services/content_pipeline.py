@@ -580,13 +580,14 @@ def get_reading_queue(
             item.char_offset = prog.char_offset or 0
             item.completed = prog.completed or False
 
-    # Filter out completed items
-    items = [i for i in items if not i.completed]
+    # Split pending vs completed; pending capped by limit, completed always returned
+    pending = [i for i in items if not i.completed]
+    completed = [i for i in items if i.completed]
+    pending.sort(key=lambda x: x.urgency, reverse=True)
+    pending = pending[:limit]
+    completed.sort(key=lambda x: x.urgency, reverse=True)
 
-    # Sort by urgency descending
-    items.sort(key=lambda x: x.urgency, reverse=True)
-
-    return items[:limit]
+    return pending + completed
 
 
 # ---------------------------------------------------------------------------
