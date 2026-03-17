@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
@@ -136,6 +136,46 @@ export default function Framework() {
   const [selectedNode, setSelectedNode] = useState<FrameworkNode | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // -- Resizable right panel --
+  const MIN_PANEL_WIDTH = 240;
+  const DEFAULT_PANEL_WIDTH = 288; // w-72
+  const [panelWidth, setPanelWidth] = useState(DEFAULT_PANEL_WIDTH);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const startWidth = useRef(DEFAULT_PANEL_WIDTH);
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      // Dragging left edge = moving left increases width
+      const delta = startX.current - e.clientX;
+      const maxWidth = Math.floor(window.innerWidth * 0.5);
+      const newWidth = Math.min(maxWidth, Math.max(MIN_PANEL_WIDTH, startWidth.current + delta));
+      setPanelWidth(newWidth);
+    };
+    const onMouseUp = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+  }, []);
+
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    startX.current = e.clientX;
+    startWidth.current = panelWidth;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    e.preventDefault();
+  }, [panelWidth]);
+
   // Build a flat id->node map for breadcrumb ancestor lookup
   const nodeMap = useMemo(() => {
     const map = new Map<number, FrameworkNode>();
@@ -221,7 +261,7 @@ export default function Framework() {
       )}
 
       {/* Main content: sidebar + visualization */}
-      <div className="flex gap-4">
+      <div className="flex">
         {/* Left: main visualization */}
         <div className="flex-1 min-w-0 bg-white rounded-lg border border-gray-200 p-4">
           {viewMode === "tree" ? (
@@ -240,8 +280,19 @@ export default function Framework() {
           )}
         </div>
 
-        {/* Right: node detail + stats */}
-        <div className="w-72 shrink-0 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto">
+        {/* Resize handle */}
+        <div
+          className="w-2 shrink-0 cursor-col-resize flex items-center justify-center group"
+          onMouseDown={handleDragStart}
+        >
+          <div className="w-0.5 h-8 bg-gray-300 rounded group-hover:bg-blue-400 transition-colors" />
+        </div>
+
+        {/* Right: node detail + stats (resizable) */}
+        <div
+          className="shrink-0 space-y-4 max-h-[calc(100vh-8rem)] overflow-y-auto"
+          style={{ width: panelWidth }}
+        >
           {selectedNode && (
             <NodeDetailPanel node={selectedNode} onNodeUpdated={handleNodeUpdated} />
           )}

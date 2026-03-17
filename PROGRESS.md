@@ -120,3 +120,10 @@
 - **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-122 --status completed`
+
+## 2026-03-16 -- [T-P2-123] Resizable right panel and scrollable tabs in Framework
+- **What I did**: Added drag-to-resize functionality to the Framework page right panel. Replaced fixed w-72 with a mouse-draggable left edge (min 240px, max 50vw). Added a visible drag handle with col-resize cursor and hover highlight. Made Tabs component horizontally scrollable with overflow-x-auto + whitespace-nowrap + shrink-0 on tab buttons to prevent wrapping in narrow panels.
+- **Deliverables**: src/frontend/src/pages/Framework.tsx, src/frontend/src/components/ui/Tabs.tsx
+- **Sanity check result**: TypeScript compiles cleanly, 255 backend tests pass (1 pre-existing failure in unrelated listening stats test)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-123 --status completed`

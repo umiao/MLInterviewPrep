@@ -19,22 +19,6 @@
 - **Depends on**: None
 - **Description**: Only if full-MP3 generation latency becomes a UX problem for long content. SSE endpoint streaming base64 MP3 chunks with MediaSource API on frontend. Evaluate need after Phase 2. AC: SSE streams audio chunks, frontend plays without gaps, progress tracked per chunk
 
-#### T-P2-123: Framework: resizable right panel and scrollable tabs in NodeDetailPanel
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Problem: Right panel fixed at 288px (w-72), tabs overflow when names are long.
-AC:
-1. Right panel resizable by dragging left edge (min ~240px, max ~50vw)
-2. Visible drag handle with col-resize cursor
-3. Narrow panel: tabs horizontally scrollable (no overflow/wrap)
-4. Wide panel: tabs render normally
-5. No state persistence for V1
-6. Journey: open Framework -> select node -> drag narrower -> tabs scroll -> drag wider -> tabs spread
-7. Manual smoke: resize at various widths, verify tab accessibility
-Approach: Custom drag handle (no new dep) with mousedown/mousemove/mouseup. Tabs: overflow-x-auto + whitespace-nowrap + flex-shrink-0.
-Files: Framework.tsx, Tabs.tsx, NodeDetailPanel.tsx
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -43,6 +27,7 @@ Files: Framework.tsx, Tabs.tsx, NodeDetailPanel.tsx
 
 > 103 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-16** -- T-P2-123: Framework: resizable right panel and scrollable tabs in NodeDetailPanel. Problem: Right panel fixed at 288px (w-72), tabs overflow when names are long.
 - [x] **2026-03-16** -- T-P2-111: Listening session analytics on Dashboard and StudyRadio. Track listening sessions via ReadingSession model. POST /api/reading/sessions (create/close), GET /api/reading/stats (to
 - [x] **2026-03-16** -- T-P2-110: LLM-generated TTS summaries for long content. Use LLM service to create spoken-word-optimized summaries. Cache in tts_summaries table. Prompt: Rewrite for TTS narrati
 - [x] **2026-03-16** -- T-P2-109: Interview-aware content ordering in reading queue. Enhance get_reading_queue(): query interview_events for upcoming interviews, boost urgency for soonest interview company
