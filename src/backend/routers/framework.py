@@ -68,6 +68,33 @@ def get_framework_tree(
     return _build_tree(nodes, max_depth)
 
 
+@router.get("/framework/nodes/{node_id}", response_model=FrameworkNodeResponse)
+def get_framework_node(
+    node_id: int,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Return a single framework node by ID."""
+    node = db.query(FrameworkNode).filter(FrameworkNode.id == node_id).first()
+    if not node:
+        raise HTTPException(status_code=404, detail="Framework node not found")
+
+    return {
+        "id": node.id,
+        "path": node.path,
+        "depth": node.depth,
+        "title": node.title,
+        "description": node.description,
+        "parent_id": node.parent_id,
+        "status": node.status,
+        "progress_pct": node.progress_pct,
+        "confidence_level": node.confidence_level,
+        "importance": node.importance,
+        "priority": node.priority,
+        "estimated_hours": node.estimated_hours,
+        "children": [],
+    }
+
+
 @router.put("/framework/nodes/{node_id}", response_model=FrameworkNodeResponse)
 def update_framework_node(
     node_id: int,

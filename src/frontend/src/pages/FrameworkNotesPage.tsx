@@ -1,0 +1,253 @@
+import { useMemo } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../utils/api";
+import { useFrameworkNotes } from "../hooks/useFrameworkNotes";
+import MarkdownPreview from "../components/ui/MarkdownPreview";
+import type { FrameworkNode } from "../types/framework";
+
+/** Flatten a tree into a list for sibling navigation. */
+function flattenTree(nodes: FrameworkNode[]): FrameworkNode[] {
+  const result: FrameworkNode[] = [];
+  function walk(list: FrameworkNode[]) {
+    for (const n of list) {
+      result.push(n);
+      if (n.children?.length) walk(n.children);
+    }
+  }
+  walk(nodes);
+  return result;
+}
+
+/** Build breadcrumb path from tree by finding the node and its ancestors. */
+function buildBreadcrumbs(
+  nodes: FrameworkNode[],
+  targetId: number,
+): FrameworkNode[] {
+  const path: FrameworkNode[] = [];
+  function find(list: FrameworkNode[], ancestors: FrameworkNode[]): boolean {
+    for (const n of list) {
+      if (n.id === targetId) {
+        path.push(...ancestors, n);
+        return true;
+      }
+      if (n.children?.length && find(n.children, [...ancestors, n])) {
+        return true;
+      }
+    }
+    return false;
+  }
+  find(nodes, []);
+  return path;
+}
+
+/** Find siblings at the same depth sharing the same parent. */
+function findSiblings(
+  flat: FrameworkNode[],
+  nodeId: number,
+  parentId: number | null,
+): { prev: FrameworkNode | null; next: FrameworkNode | null } {
+  const siblings = flat.filter((n) => n.parent_id === parentId);
+  const idx = siblings.findIndex((n) => n.id === nodeId);
+  return {
+    prev: idx > 0 ? siblings[idx - 1] : null,
+    next: idx < siblings.length - 1 ? siblings[idx + 1] : null,
+  };
+}
+
+/**
+ * Full-screen framework notes page at /framework/:nodeId/notes.
+ */
+export default function FrameworkNotesPage() {
+  const { nodeId: rawId } = useParams<{ nodeId: string }>();
+  const nodeId = Number(rawId);
+  const navigate = useNavigate();
+
+  // Fetch the single node
+  const { data: node, isLoading } = useQuery<FrameworkNode>({
+    queryKey: ["framework", "node", nodeId],
+    queryFn: () => api.get<FrameworkNode>(`/framework/nodes/${nodeId}`),
+    enabled: nodeId > 0,
+  });
+
+  // Use cached tree for breadcrumbs and sibling nav
+  const { data: tree } = useQuery<FrameworkNode[]>({
+    queryKey: ["framework", "tree"],
+    queryFn: () => api.get<FrameworkNode[]>("/framework/tree"),
+    staleTime: 60_000,
+  });
+
+  const flat = useMemo(() => (tree ? flattenTree(tree) : []), [tree]);
+  const breadcrumbs = useMemo(
+    () => (tree ? buildBreadcrumbs(tree, nodeId) : []),
+    [tree, nodeId],
+  );
+  const { prev, next } = useMemo(
+    () => findSiblings(flat, nodeId, node?.parent_id ?? null),
+    [flat, nodeId, node?.parent_id],
+  );
+
+  const {
+    notes,
+    setNotes,
+    mode,
+    setMode,
+    saveStatus,
+    setSaveStatus,
+    handleRetry,
+    handleCheckboxClick,
+  } = useFrameworkNotes({
+    nodeId,
+    initialNotes: node?.description ?? null,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-400">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!node) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-3">
+        <p className="text-gray-500">Node not found.</p>
+        <Link to="/framework" className="text-blue-600 hover:text-blue-800 text-sm">
+          Back to Framework
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Sticky header */}
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3 shrink-0">
+        <div className="flex items-center justify-between">
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-1 text-sm text-gray-500 min-w-0">
+            <Link to="/framework" className="hover:text-gray-700 shrink-0">
+              Framework
+            </Link>
+            {breadcrumbs.map((crumb, i) => (
+              <span key={crumb.id} className="flex items-center gap-1 min-w-0">
+                <span className="text-gray-300">/</span>
+                {i < breadcrumbs.length - 1 ? (
+                  <Link
+                    to={`/framework/${crumb.id}/notes`}
+                    className="hover:text-gray-700 truncate max-w-[120px]"
+                    title={crumb.title}
+                  >
+                    {crumb.title}
+                  </Link>
+                ) : (
+                  <span className="text-gray-800 font-medium truncate max-w-[200px]" title={crumb.title}>
+                    {crumb.title}
+                  </span>
+                )}
+              </span>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {/* Sibling navigation */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => prev && navigate(`/framework/${prev.id}/notes`)}
+                disabled={!prev}
+                className="px-2 py-1 text-sm rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                title={prev ? prev.title : "No previous sibling"}
+              >
+                &larr;
+              </button>
+              <button
+                onClick={() => next && navigate(`/framework/${next.id}/notes`)}
+                disabled={!next}
+                className="px-2 py-1 text-sm rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                title={next ? next.title : "No next sibling"}
+              >
+                &rarr;
+              </button>
+            </div>
+
+            {/* Mode toggle */}
+            <div className="flex gap-1">
+              <button
+                onClick={() => setMode("preview")}
+                className={`text-sm px-3 py-1.5 rounded ${
+                  mode === "preview"
+                    ? "bg-blue-100 text-blue-700 font-medium"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                Preview
+              </button>
+              <button
+                onClick={() => setMode("edit")}
+                className={`text-sm px-3 py-1.5 rounded ${
+                  mode === "edit"
+                    ? "bg-blue-100 text-blue-700 font-medium"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                Edit
+              </button>
+            </div>
+
+            {/* Save status */}
+            <span className="text-sm min-w-[5rem] text-right">
+              {saveStatus === "saving" && (
+                <span className="text-gray-400">Saving...</span>
+              )}
+              {saveStatus === "saved" && (
+                <span className="text-green-600">Saved</span>
+              )}
+              {saveStatus === "error" && (
+                <span className="text-red-600">
+                  Failed{" "}
+                  <button
+                    onClick={handleRetry}
+                    className="underline hover:text-red-800"
+                  >
+                    retry
+                  </button>
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* Content area */}
+      <div className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
+        {mode === "edit" ? (
+          <textarea
+            value={notes}
+            onChange={(e) => {
+              setNotes(e.target.value);
+              if (saveStatus === "saved" || saveStatus === "error") {
+                setSaveStatus("idle");
+              }
+            }}
+            className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
+            placeholder="Write markdown notes here...&#10;&#10;Use LaTeX: $E = mc^2$&#10;&#10;- [ ] Review this topic"
+          />
+        ) : (
+          <div className="prep-prose">
+            {notes ? (
+              <MarkdownPreview
+                markdown={notes}
+                onCheckboxClick={handleCheckboxClick}
+              />
+            ) : (
+              <p className="text-gray-400 italic">
+                No notes yet. Switch to Edit mode to add some.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

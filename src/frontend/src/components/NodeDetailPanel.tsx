@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import { api } from "../utils/api";
@@ -272,6 +273,7 @@ export default function NodeDetailPanel({ node, onNodeUpdated }: Props) {
               )}
               {activeTab === "notes" && (
                 <NotesTab
+                  nodeId={node.id}
                   notesDraft={notesDraft}
                   setNotesDraft={setNotesDraft}
                   notesPreview={notesPreview}
@@ -417,6 +419,7 @@ function DetailsTab({
 // ---- Notes Tab ----
 
 interface NotesTabProps {
+  nodeId: number;
   notesDraft: string;
   setNotesDraft: (s: string) => void;
   notesPreview: boolean;
@@ -425,6 +428,7 @@ interface NotesTabProps {
 }
 
 function NotesTab({
+  nodeId,
   notesDraft,
   setNotesDraft,
   notesPreview,
@@ -453,25 +457,33 @@ function NotesTab({
             Preview
           </button>
         </div>
-        <span
-          className={`text-xs ${
-            notesSaveStatus === "saving"
-              ? "text-gray-400"
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-xs ${
+              notesSaveStatus === "saving"
+                ? "text-gray-400"
+                : notesSaveStatus === "saved"
+                  ? "text-green-600"
+                  : notesSaveStatus === "error"
+                    ? "text-red-600"
+                    : ""
+            }`}
+          >
+            {notesSaveStatus === "saving"
+              ? "Saving..."
               : notesSaveStatus === "saved"
-                ? "text-green-600"
+                ? "Saved"
                 : notesSaveStatus === "error"
-                  ? "text-red-600"
-                  : ""
-          }`}
-        >
-          {notesSaveStatus === "saving"
-            ? "Saving..."
-            : notesSaveStatus === "saved"
-              ? "Saved"
-              : notesSaveStatus === "error"
-                ? "Save failed"
-                : ""}
-        </span>
+                  ? "Save failed"
+                  : ""}
+          </span>
+          <Link
+            to={`/framework/${nodeId}/notes`}
+            className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
+          >
+            Full Page
+          </Link>
+        </div>
       </div>
 
       {/* Editor or preview */}

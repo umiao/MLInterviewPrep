@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 103 completed tasks archived as of latest archival.
+> 119 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -150,3 +150,31 @@
 - Calls POST /api/qa/{id}/summarize
 - Shows summ
 - [x] **2026-03-15** -- T-P2-94: [B7] Frontend: Analytics deep-dive (radar chart, scatter plot, trend lines). AC:\n- Pattern comfort radar chart (Recharts RadarChart) on Problems page or Dashboard\n- Framework confidence vs import
+- [x] **2026-03-16** -- T-P0-113: Fix Radio blank page, TTS preprocessing quality, LinkedIn content sync
+- [x] **2026-03-16** -- T-P0-117: Integrate LinkedIn JD into Prep Notes
+- [x] **2026-03-16** -- T-P0-118: Problems UX: full-page descriptions, markdown rendering, batch fetch, remove Edit/Del
+- [x] **2026-03-16** -- T-P1-108: Listen buttons across app (Companies, Questions, Dashboard, Framework). Add Listen buttons to existing pages using AudioPlayerContext.play(): Companies page (Listen to prep notes per company),
+- [x] **2026-03-16** -- T-P1-114: Unified Faithful Transcript System
+- [x] **2026-03-16** -- T-P1-115: Decouple Reading from Synthesis (Text View)
+- [x] **2026-03-16** -- T-P1-116: Local LeetCode Descriptions (Neetcode.io Fetch)
+- [x] **2026-03-16** -- T-P1-119: Fix strikethrough + math formula rendering in MarkdownPreview. Problem: (1) ~~strikethrough~~ text not rendering with line-through -- Tailwind v4 prose resets <del> styling. (2) Math 
+- [x] **2026-03-16** -- T-P1-120: Problems: add Difficulty as a sort option (frontend + backend). AC:
+1. Sort dropdown includes Difficulty option
+2. Backend sorts semantically: easy(1) < medium(2) < hard(3); null sorts
+- [x] **2026-03-16** -- T-P1-121: Problems: notes indicator icon on All Problems tab. Problem: No visual signal on All Problems landing page to indicate which problems have notes.
+AC:
+1. Problems with notes
+- [x] **2026-03-16** -- T-P1-122: Problem detail: collapsible My Notes section (default collapsed). Problem: My Notes section always expanded adds visual noise.
+AC:
+1. My Notes defaults to collapsed, showing only header 
+- [x] **2026-03-16** -- T-P1-124: Fix strikethrough in prep-prose CSS + fix Blind75 docx import regex for full-width colons
+- [x] **2026-03-16** -- T-P1-95: Add prep_notes to Company model + migration v3 + get_or_create_company service. ## Acceptance Criteria
+1. Company model has `prep_notes` Column(Text, nullable=True)
+2. Migration v3 adds column via ADD
+- [x] **2026-03-16** -- T-P1-96: Auto-link company on timeline event creation via get_or_create_company. ## Acceptance Criteria
+1. timeline router create_event() calls get_or_create_company(event.company_name, db) to resolve 
+- [x] **2026-03-16** -- T-P1-97: PrepNotesTab with checkbox click-toggle + Companies page integration. ## Acceptance Criteria
+1. New utils/markdown.ts: countUnchecked(md) and countChecked(md) using regex ^[-*]\s*\[ \] and ^
+- [x] **2026-03-16** -- T-P1-98: Dashboard timeline prep notes modal + red dots on EventCard. ## Acceptance Criteria
+1. InterviewTimeline: new onCompanyClick(companyName, companyId) prop
+2. EventCard: company_name 

@@ -13,6 +13,7 @@ import Analytics from "./pages/Analytics";
 import PrepNotesPage from "./pages/PrepNotesPage";
 import ProblemDetailPage from "./pages/ProblemDetailPage";
 import StudyRadio from "./pages/StudyRadio";
+import FrameworkNotesPage from "./pages/FrameworkNotesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +36,7 @@ export default function App() {
                 <Route path="problems" element={<Problems />} />
                 <Route path="problems/:problemId" element={<ProblemDetailPage />} />
                 <Route path="framework" element={<Framework />} />
+                <Route path="framework/:nodeId/notes" element={<FrameworkNotesPage />} />
                 <Route path="questions" element={<Questions />} />
                 <Route path="companies" element={<Companies />} />
                 <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />

@@ -140,3 +140,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit), no frontend test files to run
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-125 --status completed`
+
+## 2026-03-17 -- [T-P1-126] Framework full-screen notes page
+- **What I did**: (1) Added GET /framework/nodes/{id} backend endpoint returning a single node. (2) Created useFrameworkNotes hook with debounced auto-save, checkbox persistence, and optimistic updates. (3) Created FrameworkNotesPage at /framework/:nodeId/notes with prep-prose CSS, MarkdownPreview with LaTeX, breadcrumb navigation, and sibling prev/next arrows from cached tree. (4) Added route in App.tsx. (5) Added "Full Page" link in NodeDetailPanel Notes tab.
+- **Deliverables**: src/backend/routers/framework.py, src/frontend/src/hooks/useFrameworkNotes.ts, src/frontend/src/pages/FrameworkNotesPage.tsx, src/frontend/src/components/NodeDetailPanel.tsx, src/frontend/src/App.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit), ruff passes, 102 framework tests pass
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-126 --status completed`
