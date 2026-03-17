@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useFrameworkNotes } from "../hooks/useFrameworkNotes";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
+import PrevNextNav from "../components/ui/PrevNextNav";
 import type { FrameworkNode } from "../types/framework";
 
 /** Flatten a tree into a list for sibling navigation. */
@@ -87,6 +88,11 @@ export default function FrameworkNotesPage() {
     [flat, nodeId, node?.parent_id],
   );
 
+  const handleFrameworkNav = useCallback(
+    (id: number | string) => navigate(`/framework/${id}/notes`),
+    [navigate],
+  );
+
   const {
     notes,
     setNotes,
@@ -152,24 +158,12 @@ export default function FrameworkNotesPage() {
 
           <div className="flex items-center gap-3 shrink-0">
             {/* Sibling navigation */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => prev && navigate(`/framework/${prev.id}/notes`)}
-                disabled={!prev}
-                className="px-2 py-1 text-sm rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                title={prev ? prev.title : "No previous sibling"}
-              >
-                &larr;
-              </button>
-              <button
-                onClick={() => next && navigate(`/framework/${next.id}/notes`)}
-                disabled={!next}
-                className="px-2 py-1 text-sm rounded text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed"
-                title={next ? next.title : "No next sibling"}
-              >
-                &rarr;
-              </button>
-            </div>
+            <PrevNextNav
+              prev={prev ? { id: prev.id, label: prev.title } : null}
+              next={next ? { id: next.id, label: next.title } : null}
+              onNavigate={handleFrameworkNav}
+              enableKeyboard={mode === "preview"}
+            />
 
             {/* Mode toggle */}
             <div className="flex gap-1">

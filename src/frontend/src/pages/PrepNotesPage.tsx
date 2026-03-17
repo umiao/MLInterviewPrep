@@ -1,9 +1,10 @@
-import { useRef, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useRef, useState, useMemo, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { usePrepNotes } from "../hooks/usePrepNotes";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
+import PrevNextNav from "../components/ui/PrevNextNav";
 import type { Company } from "../types/company";
 
 type ImportMode = "append" | "replace";
@@ -15,6 +16,7 @@ export default function PrepNotesPage() {
   const { companyId: rawId } = useParams<{ companyId: string }>();
   const companyId = Number(rawId);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [importMode, setImportMode] = useState<ImportMode>("append");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -24,6 +26,30 @@ export default function PrepNotesPage() {
     enabled: companyId > 0,
   });
 
+  // Fetch all companies for alphabetical prev/next navigation
+  const { data: companies } = useQuery<Company[]>({
+    queryKey: ["companies"],
+    queryFn: () => api.get<Company[]>("/companies"),
+    staleTime: 60_000,
+  });
+
+  const { prevCompany, nextCompany } = useMemo(() => {
+    if (!companies?.length) return { prevCompany: null, nextCompany: null };
+    const sorted = [...companies].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+    const idx = sorted.findIndex((c) => c.id === companyId);
+    return {
+      prevCompany: idx > 0 ? sorted[idx - 1] : null,
+      nextCompany: idx < sorted.length - 1 ? sorted[idx + 1] : null,
+    };
+  }, [companies, companyId]);
+
+  const handleCompanyNav = useCallback(
+    (id: number | string) => navigate(`/companies/${id}/prep`),
+    [navigate],
+  );
+
   const {
     notes,
     setNotes,
@@ -32,7 +58,6 @@ export default function PrepNotesPage() {
     saveStatus,
     setSaveStatus,
     handleRetry,
-    handleCheckboxClick,
   } = usePrepNotes({
     companyId,
     initialNotes: company?.prep_notes ?? null,
@@ -88,7 +113,7 @@ export default function PrepNotesPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3rem)]">
+    <div className="flex flex-col h-full">
       {/* Sticky header */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shrink-0">
         <Link
@@ -103,6 +128,12 @@ export default function PrepNotesPage() {
         </h1>
 
         <div className="flex items-center gap-3">
+          <PrevNextNav
+            prev={prevCompany ? { id: prevCompany.id, label: prevCompany.name } : null}
+            next={nextCompany ? { id: nextCompany.id, label: nextCompany.name } : null}
+            onNavigate={handleCompanyNav}
+            enableKeyboard={mode === "preview"}
+          />
           {/* Mode toggle */}
           <div className="flex gap-1">
             <button
@@ -165,12 +196,9 @@ export default function PrepNotesPage() {
             placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
           />
         ) : (
-          <div className="prep-prose min-h-0 overflow-auto">
+          <div className="prep-prose">
             {notes ? (
-              <MarkdownPreview
-                markdown={notes}
-                onCheckboxClick={handleCheckboxClick}
-              />
+              <MarkdownPreview markdown={notes} />
             ) : (
               <p className="text-gray-400 italic">
                 No prep notes yet. Switch to Edit mode to add some.

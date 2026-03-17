@@ -1,11 +1,12 @@
-import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useState, useMemo, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
 import Badge from "../components/ui/Badge";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
+import PrevNextNav from "../components/ui/PrevNextNav";
 import type { Problem } from "../types/problem";
 
 /**
@@ -17,6 +18,7 @@ export default function ProblemDetailPage() {
   const { problemId: rawId } = useParams<{ problemId: string }>();
   const problemId = Number(rawId);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const toast = useToast();
   const [notesOpen, setNotesOpen] = useState(false);
 
@@ -25,6 +27,31 @@ export default function ProblemDetailPage() {
     queryFn: () => api.get<Problem>(`/problems/${problemId}`),
     enabled: problemId > 0,
   });
+
+  // Fetch problems sorted by last_attempted_at desc for prev/next navigation
+  const { data: problemList } = useQuery<Problem[]>({
+    queryKey: ["problems", { sort_by: "last_attempted_at", sort_order: "desc", limit: 200 }],
+    queryFn: () =>
+      api.get<Problem[]>(
+        "/problems?sort_by=last_attempted_at&sort_order=desc&limit=200",
+      ),
+    staleTime: 60_000,
+  });
+
+  const { prevProblem, nextProblem } = useMemo(() => {
+    if (!problemList?.length) return { prevProblem: null, nextProblem: null };
+    const idx = problemList.findIndex((p) => p.id === problemId);
+    if (idx === -1) return { prevProblem: null, nextProblem: null };
+    return {
+      prevProblem: idx > 0 ? problemList[idx - 1] : null,
+      nextProblem: idx < problemList.length - 1 ? problemList[idx + 1] : null,
+    };
+  }, [problemList, problemId]);
+
+  const handleProblemNav = useCallback(
+    (id: number | string) => navigate(`/problems/${id}`),
+    [navigate],
+  );
 
   const fetchMutation = useMutation({
     mutationFn: () =>
@@ -70,14 +97,19 @@ export default function ProblemDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Breadcrumb */}
-      <div className="mb-4">
+      {/* Breadcrumb + nav */}
+      <div className="mb-4 flex items-center justify-between">
         <Link
           to="/problems"
           className="text-sm text-blue-600 hover:underline"
         >
-          &larr; Back to Problems
+          &#8592; Back to Problems
         </Link>
+        <PrevNextNav
+          prev={prevProblem ? { id: prevProblem.id, label: prevProblem.title } : null}
+          next={nextProblem ? { id: nextProblem.id, label: nextProblem.title } : null}
+          onNavigate={handleProblemNav}
+        />
       </div>
 
       {/* Header */}

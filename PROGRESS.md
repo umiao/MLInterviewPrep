@@ -147,3 +147,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit), ruff passes, 102 framework tests pass
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-126 --status completed`
+
+## 2026-03-17 -- [T-P1-128] PrevNextNav arrow component for PrepNotesPage and ProblemDetailPage
+- **What I did**: (1) Created reusable PrevNextNav component with left/right chevrons, tooltips showing target label, disabled state at boundaries, and keyboard ArrowLeft/Right support (skipped when input/textarea focused). (2) Integrated in PrepNotesPage: fetches companies list, sorts alphabetically, navigates prev/next company prep pages. Keyboard nav enabled only in preview mode. (3) Integrated in ProblemDetailPage: fetches problems sorted by last_attempted_at desc (limit=200), navigates prev/next problem. Keyboard nav always enabled. (4) Refactored FrameworkNotesPage to use PrevNextNav instead of inline buttons, adding keyboard nav in preview mode.
+- **Deliverables**: src/frontend/src/components/ui/PrevNextNav.tsx (new), src/frontend/src/pages/PrepNotesPage.tsx, src/frontend/src/pages/ProblemDetailPage.tsx, src/frontend/src/pages/FrameworkNotesPage.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit), 641 tests pass (1 pre-existing failure unrelated to changes)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-128 --status completed`
