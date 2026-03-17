@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-131: Math & Statistics pillar (Pillar 7) prep docs for all leaf topics
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-127
-- **Description**: Generate detailed prep docs for all Pillar 7 leaf topics. Covers: probability distributions, Bayesian inference, hypothesis testing, linear algebra (SVD, eigendecomposition), calculus & optimization (convexity, Lagrange, KKT). Heavy LaTeX with proofs, derivations, worked examples. AC: all topics have prep docs, LaTeX renders correctly.
-
 ### P2 -- Nice to Have
 
 #### T-P2-112: SSE chunked audio streaming (if latency requires it)
@@ -46,6 +40,7 @@
 > 119 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-17** -- T-P1-134: Fix MarkdownPreview checkbox mismatch caused by remarkMath dollar-sign corruption
+- [x] **2026-03-17** -- T-P1-131: Math & Statistics pillar (Pillar 7) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 7 leaf topics. Covers: probability distributions, Bayesian inference, hypothe
 - [x] **2026-03-17** -- T-P1-130: ML System Design pillar (Pillar 3) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 3 leaf topics. Covers: design framework methodology, classic problems (rec sy
 - [x] **2026-03-17** -- T-P1-129: Deep Learning & LLM pillar (Pillar 6) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 6 leaf topics following content template. Covers: Transformer architecture, a
 - [x] **2026-03-17** -- T-P1-128: PrevNextNav arrow component + integrate in PrepNotesPage and ProblemDetailPage. Reusable PrevNextNav component with left/right chevrons + tooltip. PrepNotesPage: navigate companies alphabetically. Pro

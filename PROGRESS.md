@@ -182,3 +182,10 @@
 - **Sanity check result**: All 19 nodes verified in DB with content (4.5K-5.5K chars each), checkboxes, tables, and LaTeX. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-130 --status completed`
+
+## 2026-03-17 -- [T-P1-131] Math & Statistics pillar (Pillar 7) prep docs for all 14 leaf topics
+- **What I did**: Wrote `scripts/seed_pillar7_content.py` with detailed senior MLE-depth prep docs for all 14 Pillar 7 leaf topics across 3 categories: (1) Probability & Statistics (8 topics: probability basics, common distributions, expectation & variance, MLE & MAP, CLT, hypothesis testing, Bayesian inference, information theory), (2) Linear Algebra (3 topics: matrix operations, eigendecomposition, SVD), (3) Calculus & Optimization (3 topics: multivariable calculus, chain rule & backpropagation, convex optimization). Each topic has KaTeX-compatible LaTeX with proofs/derivations, Python code snippets, interview pattern tables, comparison tables, and self-assessment checkboxes.
+- **Deliverables**: scripts/seed_pillar7_content.py (new), data/mle_prep.db (14 nodes updated)
+- **Sanity check result**: All 14 nodes verified in DB with content (4.2K-6.0K chars each), checkboxes, tables, and LaTeX. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-131 --status completed`
