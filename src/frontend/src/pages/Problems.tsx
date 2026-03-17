@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
 import { useToast } from "../contexts/ToastContext";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
@@ -8,6 +9,7 @@ import EmptyState from "../components/ui/EmptyState";
 import Pagination from "../components/ui/Pagination";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import Badge from "../components/ui/Badge";
+import Tabs from "../components/ui/Tabs";
 import { useFilterParams } from "../hooks/useFilterParams";
 import type {
   Category,
@@ -36,6 +38,11 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   medium: "bg-yellow-100 text-yellow-700",
   hard: "bg-red-100 text-red-700",
 };
+
+const TABS = [
+  { key: "all", label: "All Problems" },
+  { key: "blind75", label: "Blind Grind 75" },
+];
 
 // Stable schema for URL filter params (defined outside component to avoid re-creation)
 const filterSchema = {
@@ -102,9 +109,49 @@ function ReviewBadge({ nextReview }: { nextReview: string | null }) {
   );
 }
 
+function ProgressBar({ completed, total }: { completed: number; total: number }) {
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  return (
+    <div className="flex items-center gap-3">
+      <div className="flex-1 bg-gray-200 rounded-full h-2.5">
+        <div
+          className="bg-green-500 h-2.5 rounded-full transition-all"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-sm font-medium text-gray-600 whitespace-nowrap">
+        {completed} / {total} completed ({pct}%)
+      </span>
+    </div>
+  );
+}
+
 export default function Problems() {
   const queryClient = useQueryClient();
   const toast = useToast();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Tab state from URL
+  const activeTab = searchParams.get("tab") || "all";
+  const setActiveTab = useCallback(
+    (tab: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (tab === "all") {
+            next.delete("tab");
+          } else {
+            next.set("tab", tab);
+          }
+          // Reset page when switching tabs
+          next.delete("page");
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   // ---- filter state (persisted in URL) ----
   const [
@@ -120,11 +167,13 @@ export default function Problems() {
   const [deleteProblem, setDeleteProblem] = useState<Problem | null>(null);
   const [descriptionProblem, setDescriptionProblem] = useState<Problem | null>(null);
 
+  const isBlind75 = activeTab === "blind75";
+
   const filters: ProblemFilters = useMemo(
     () => ({
       difficulty,
       pattern: pattern || undefined,
-      source: source || undefined,
+      source: isBlind75 ? "blind75" : source || undefined,
       company: company || undefined,
       is_completed:
         completed === "all"
@@ -133,8 +182,8 @@ export default function Problems() {
       category,
       sort_by: sortBy,
       sort_order: sortOrder,
-      limit: PAGE_SIZE,
-      offset: page * PAGE_SIZE,
+      limit: isBlind75 ? 200 : PAGE_SIZE,
+      offset: isBlind75 ? 0 : page * PAGE_SIZE,
     }),
     [
       difficulty,
@@ -146,6 +195,7 @@ export default function Problems() {
       sortBy,
       sortOrder,
       page,
+      isBlind75,
     ],
   );
 
@@ -172,7 +222,6 @@ export default function Problems() {
   const error = queryError ? queryError.message : null;
 
   // Client-side text search across title/pattern/company_tags
-  // TODO: Switch to server-side search when dataset exceeds ~500 problems
   const problems = useMemo(() => {
     if (!search) return allProblems;
     const lower = search.toLowerCase();
@@ -183,6 +232,26 @@ export default function Problems() {
         p.company_tags.some((c) => c.toLowerCase().includes(lower)),
     );
   }, [allProblems, search]);
+
+  // For Blind 75 tab: group by pattern
+  const blind75ByPattern = useMemo(() => {
+    if (!isBlind75) return [];
+    const groups: Record<string, Problem[]> = {};
+    for (const p of problems) {
+      const key = p.pattern || "other";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(p);
+    }
+    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
+  }, [problems, isBlind75]);
+
+  const blind75Stats = useMemo(() => {
+    if (!isBlind75) return { completed: 0, total: 0 };
+    return {
+      completed: problems.filter((p) => p.is_completed).length,
+      total: problems.length,
+    };
+  }, [problems, isBlind75]);
 
   // Load all problems once to extract unique patterns for the dropdown
   const { data: allProblemsData } = useQuery({
@@ -237,6 +306,275 @@ export default function Problems() {
   const handleSearchChange = useCallback(
     (value: string) => setSearch(value),
     [setSearch],
+  );
+
+  // Shared table row renderer
+  const renderProblemRow = (p: Problem, showNotes?: boolean) => (
+    <tr
+      key={p.id}
+      className="hover:bg-gray-50 transition-colors"
+    >
+      <td className="px-3 py-2 text-gray-400">
+        {p.leetcode_id ?? "-"}
+      </td>
+      <td className="px-3 py-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setDescriptionProblem(p)}
+            className="text-blue-600 hover:underline font-medium truncate max-w-xs text-left"
+            title="View description"
+          >
+            {p.title}
+          </button>
+          {p.url && (
+            <a
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gray-400 hover:text-gray-600 shrink-0"
+              title="Open on LeetCode"
+            >
+              <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+              </svg>
+            </a>
+          )}
+          {p.is_completed && (
+            <Badge variant="green">done</Badge>
+          )}
+        </div>
+        {p.company_tags.length > 0 && (
+          <div className="flex gap-1 mt-0.5 flex-wrap">
+            {p.company_tags.slice(0, 3).map((c) => (
+              <span
+                key={c}
+                className="text-xs text-gray-400"
+              >
+                {c}
+              </span>
+            ))}
+            {p.company_tags.length > 3 && (
+              <span className="text-xs text-gray-400">
+                +{p.company_tags.length - 3}
+              </span>
+            )}
+          </div>
+        )}
+      </td>
+      <td className="px-3 py-2">
+        {p.difficulty && (
+          <Badge
+            variant={
+              p.difficulty === "easy"
+                ? "green"
+                : p.difficulty === "medium"
+                  ? "yellow"
+                  : "red"
+            }
+            className="capitalize"
+          >
+            {p.difficulty}
+          </Badge>
+        )}
+      </td>
+      {!isBlind75 && (
+        <td className="px-3 py-2">
+          {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
+        </td>
+      )}
+      <td className="px-3 py-2">
+        <ComfortStars level={p.comfort_level} />
+      </td>
+      {showNotes && (
+        <td className="px-3 py-2">
+          {p.notes ? (
+            <button
+              onClick={() => setDescriptionProblem(p)}
+              className="text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded truncate max-w-[120px] block"
+              title={p.notes}
+            >
+              {p.notes.slice(0, 40)}{p.notes.length > 40 ? "..." : ""}
+            </button>
+          ) : (
+            <span className="text-xs text-gray-300">--</span>
+          )}
+        </td>
+      )}
+      <td className="px-3 py-2">
+        <ReviewBadge nextReview={p.next_review_at} />
+      </td>
+      <td className="px-3 py-2">
+        <div className="flex gap-1">
+          <button
+            onClick={() => setPracticeProblem(p)}
+            className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Practice
+          </button>
+          <button
+            onClick={() => setReviewProblem(p)}
+            className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
+          >
+            Review
+          </button>
+          <button
+            onClick={() => setEditProblem(p)}
+            className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => setDeleteProblem(p)}
+            className="text-xs px-2 py-1 border border-red-200 rounded hover:bg-red-50 text-red-600"
+          >
+            Del
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+
+  const renderBlind75Content = () => (
+    <div className="space-y-4">
+      {/* Progress header */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h2 className="text-lg font-semibold text-blue-900 mb-2">Blind Grind 75 Progress</h2>
+        <ProgressBar completed={blind75Stats.completed} total={blind75Stats.total} />
+      </div>
+
+      {loading && <LoadingSpinner message="Loading problems..." />}
+
+      {!loading && problems.length === 0 && (
+        <EmptyState message="No Blind 75 problems found. Import them using the import script." />
+      )}
+
+      {!loading && blind75ByPattern.map(([patternName, patternProblems]) => (
+        <div key={patternName} className="space-y-1">
+          <h3 className="text-sm font-semibold text-gray-700 px-1 capitalize flex items-center gap-2">
+            <Badge variant="blue">{patternName}</Badge>
+            <span className="text-xs text-gray-400 font-normal">
+              {patternProblems.filter((p) => p.is_completed).length}/{patternProblems.length}
+            </span>
+          </h3>
+          <div className="overflow-x-auto rounded border border-gray-200">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
+                <tr>
+                  <th className="px-3 py-2 w-12">#</th>
+                  <th className="px-3 py-2">Title</th>
+                  <th className="px-3 py-2 w-24">Difficulty</th>
+                  <th className="px-3 py-2 w-24">Comfort</th>
+                  <th className="px-3 py-2 w-28">Notes</th>
+                  <th className="px-3 py-2 w-28">Review</th>
+                  <th className="px-3 py-2 w-40">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {patternProblems.map((p) => renderProblemRow(p, true))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  const renderAllProblemsContent = () => (
+    <>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">LeetCode Problems</h1>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-500">
+            {totalCount} problem{totalCount !== 1 ? "s" : ""}
+          </span>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            + Add Problem
+          </button>
+        </div>
+      </div>
+
+      {/* Search + Sort controls */}
+      <div className="flex items-center gap-3 mb-3">
+        <SearchInput
+          value={search}
+          onChange={handleSearchChange}
+          placeholder="Search title, pattern, company..."
+          className="flex-1 max-w-sm"
+        />
+        <div className="flex items-center gap-2 text-sm ml-auto">
+          <label className="text-gray-500">Sort by</label>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortField)}
+            className="border border-gray-300 rounded px-2 py-1"
+          >
+            <option value="created_at">Date added</option>
+            <option value="comfort_level">Comfort</option>
+            <option value="last_attempted_at">Last attempted</option>
+            <option value="next_review_at">Next review</option>
+          </select>
+          <button
+            onClick={() =>
+              setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+            }
+            className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
+            title={`Currently: ${sortOrder}`}
+          >
+            {sortOrder === "asc" ? "Asc" : "Desc"}
+          </button>
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-3">
+          {error}
+        </div>
+      )}
+
+      {/* Loading */}
+      {loading && <LoadingSpinner message="Loading problems..." />}
+
+      {/* Empty state */}
+      {!loading && problems.length === 0 && (
+        <EmptyState
+          message={search ? "No problems match your search." : "No problems found."}
+          action={
+            !search
+              ? { label: "Add your first problem", onClick: () => setShowAddModal(true) }
+              : undefined
+          }
+        />
+      )}
+
+      {/* Table */}
+      {!loading && problems.length > 0 && (
+        <div className="overflow-x-auto rounded border border-gray-200">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
+              <tr>
+                <th className="px-3 py-2 w-12">#</th>
+                <th className="px-3 py-2">Title</th>
+                <th className="px-3 py-2 w-24">Difficulty</th>
+                <th className="px-3 py-2 w-28">Pattern</th>
+                <th className="px-3 py-2 w-24">Comfort</th>
+                <th className="px-3 py-2 w-28">Review</th>
+                <th className="px-3 py-2 w-40">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {problems.map((p) => renderProblemRow(p))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Pagination */}
+      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+    </>
   );
 
   return (
@@ -319,19 +657,21 @@ export default function Problems() {
           </select>
         </fieldset>
 
-        {/* Source */}
-        <fieldset>
-          <legend className="text-xs font-medium text-gray-500 mb-1">
-            Source
-          </legend>
-          <input
-            type="text"
-            value={source}
-            onChange={(e) => setSource(e.target.value)}
-            placeholder="e.g. leetcode"
-            className="w-full text-sm border border-gray-300 rounded px-2 py-1"
-          />
-        </fieldset>
+        {/* Source -- hidden in blind75 tab */}
+        {!isBlind75 && (
+          <fieldset>
+            <legend className="text-xs font-medium text-gray-500 mb-1">
+              Source
+            </legend>
+            <input
+              type="text"
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+              placeholder="e.g. leetcode"
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </fieldset>
+        )}
 
         {/* Company */}
         <fieldset>
@@ -368,205 +708,15 @@ export default function Problems() {
 
       {/* ---- Main Content ---- */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold">LeetCode Problems</h1>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
-              {totalCount} problem{totalCount !== 1 ? "s" : ""}
-            </span>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              + Add Problem
-            </button>
-          </div>
-        </div>
-
-        {/* Search + Sort controls */}
-        <div className="flex items-center gap-3 mb-3">
-          <SearchInput
-            value={search}
-            onChange={handleSearchChange}
-            placeholder="Search title, pattern, company..."
-            className="flex-1 max-w-sm"
-          />
-          <div className="flex items-center gap-2 text-sm ml-auto">
-            <label className="text-gray-500">Sort by</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortField)}
-              className="border border-gray-300 rounded px-2 py-1"
-            >
-              <option value="created_at">Date added</option>
-              <option value="comfort_level">Comfort</option>
-              <option value="last_attempted_at">Last attempted</option>
-              <option value="next_review_at">Next review</option>
-            </select>
-            <button
-              onClick={() =>
-                setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-              }
-              className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-              title={`Currently: ${sortOrder}`}
-            >
-              {sortOrder === "asc" ? "Asc" : "Desc"}
-            </button>
-          </div>
-        </div>
-
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-3">
-            {error}
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading && <LoadingSpinner message="Loading problems..." />}
-
-        {/* Empty state */}
-        {!loading && problems.length === 0 && (
-          <EmptyState
-            message={search ? "No problems match your search." : "No problems found."}
-            action={
-              !search
-                ? { label: "Add your first problem", onClick: () => setShowAddModal(true) }
-                : undefined
-            }
-          />
-        )}
-
-        {/* Table */}
-        {!loading && problems.length > 0 && (
-          <div className="overflow-x-auto rounded border border-gray-200">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
-                <tr>
-                  <th className="px-3 py-2 w-12">#</th>
-                  <th className="px-3 py-2">Title</th>
-                  <th className="px-3 py-2 w-24">Difficulty</th>
-                  <th className="px-3 py-2 w-28">Pattern</th>
-                  <th className="px-3 py-2 w-24">Comfort</th>
-                  <th className="px-3 py-2 w-28">Review</th>
-                  <th className="px-3 py-2 w-40">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {problems.map((p) => (
-                  <tr
-                    key={p.id}
-                    className="hover:bg-gray-50 transition-colors"
-                  >
-                    <td className="px-3 py-2 text-gray-400">
-                      {p.leetcode_id ?? "-"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => setDescriptionProblem(p)}
-                          className="text-blue-600 hover:underline font-medium truncate max-w-xs text-left"
-                          title="View description"
-                        >
-                          {p.title}
-                        </button>
-                        {p.url && (
-                          <a
-                            href={p.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-gray-400 hover:text-gray-600 shrink-0"
-                            title="Open on LeetCode"
-                          >
-                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
-                            </svg>
-                          </a>
-                        )}
-                        {p.is_completed && (
-                          <Badge variant="green">done</Badge>
-                        )}
-                      </div>
-                      {p.company_tags.length > 0 && (
-                        <div className="flex gap-1 mt-0.5 flex-wrap">
-                          {p.company_tags.slice(0, 3).map((c) => (
-                            <span
-                              key={c}
-                              className="text-xs text-gray-400"
-                            >
-                              {c}
-                            </span>
-                          ))}
-                          {p.company_tags.length > 3 && (
-                            <span className="text-xs text-gray-400">
-                              +{p.company_tags.length - 3}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      {p.difficulty && (
-                        <Badge
-                          variant={
-                            p.difficulty === "easy"
-                              ? "green"
-                              : p.difficulty === "medium"
-                                ? "yellow"
-                                : "red"
-                          }
-                          className="capitalize"
-                        >
-                          {p.difficulty}
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="px-3 py-2">
-                      {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
-                    </td>
-                    <td className="px-3 py-2">
-                      <ComfortStars level={p.comfort_level} />
-                    </td>
-                    <td className="px-3 py-2">
-                      <ReviewBadge nextReview={p.next_review_at} />
-                    </td>
-                    <td className="px-3 py-2">
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setPracticeProblem(p)}
-                          className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                          Practice
-                        </button>
-                        <button
-                          onClick={() => setReviewProblem(p)}
-                          className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
-                        >
-                          Review
-                        </button>
-                        <button
-                          onClick={() => setEditProblem(p)}
-                          className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => setDeleteProblem(p)}
-                          className="text-xs px-2 py-1 border border-red-200 rounded hover:bg-red-50 text-red-600"
-                        >
-                          Del
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
-        {/* Pagination */}
-        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+        <Tabs
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        >
+          {(tab) => (
+            tab === "blind75" ? renderBlind75Content() : renderAllProblemsContent()
+          )}
+        </Tabs>
       </div>
 
       {/* Add Problem Modal */}

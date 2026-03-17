@@ -61,6 +61,7 @@ class Problem(Base):
     description = Column(Text, nullable=True)
     neetcode_slug = Column(String, nullable=True)
     description_source = Column(String, nullable=True)  # "neetcode", "manual", "leetcode"
+    notes = Column(Text, nullable=True)
 
     attempts = relationship("Attempt", back_populates="problem", cascade="all, delete-orphan")
     qa_sessions = relationship("QASession", back_populates="problem", cascade="all, delete-orphan")

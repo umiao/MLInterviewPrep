@@ -296,3 +296,37 @@ class TestMigration7ProblemDescriptionColumns:
         assert "description" not in columns
         assert "neetcode_slug" not in columns
         assert "description_source" not in columns
+
+
+class TestMigration8NotesColumn:
+    """Test migration 8: add notes column to problems."""
+
+    def test_notes_column_added(self, old_schema_db):
+        """After migration, notes column exists in problems."""
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "notes" in columns
+
+    def test_schema_version_8_recorded(self, old_schema_db):
+        """Migration version 8 is recorded in schema_versions."""
+        _run_migrations(old_schema_db)
+        with old_schema_db.connect() as conn:
+            rows = conn.execute(
+                text("SELECT version FROM schema_versions")
+            ).fetchall()
+        assert 8 in {row[0] for row in rows}
+
+    def test_idempotent(self, old_schema_db):
+        """Running migration 8 twice is safe."""
+        _run_migrations(old_schema_db)
+        _run_migrations(old_schema_db)
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "notes" in columns
+
+    def test_column_missing_before_migration(self, old_schema_db):
+        """Sanity check: notes column does NOT exist before migration."""
+        insp = inspect(old_schema_db)
+        columns = {col["name"] for col in insp.get_columns("problems")}
+        assert "notes" not in columns

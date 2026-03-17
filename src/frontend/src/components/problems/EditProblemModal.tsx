@@ -27,6 +27,7 @@ function problemToForm(p: Problem): ProblemFormData {
     framework_node_id: p.framework_node_id,
     description: p.description ?? "",
     neetcode_slug: p.neetcode_slug ?? "",
+    notes: p.notes ?? "",
   };
 }
 

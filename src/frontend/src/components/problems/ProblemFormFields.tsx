@@ -23,6 +23,7 @@ export interface ProblemFormData {
   framework_node_id: number | null;
   description: string;
   neetcode_slug: string;
+  notes: string;
 }
 
 export const EMPTY_FORM: ProblemFormData = {
@@ -39,6 +40,7 @@ export const EMPTY_FORM: ProblemFormData = {
   framework_node_id: null,
   description: "",
   neetcode_slug: "",
+  notes: "",
 };
 
 interface ProblemFormFieldsProps {
@@ -209,6 +211,17 @@ export default function ProblemFormFields({
         />
       </FormField>
 
+      <FormField label="Notes" htmlFor="pf-notes">
+        <textarea
+          id="pf-notes"
+          value={form.notes}
+          onChange={(e) => onChange({ notes: e.target.value })}
+          className={inputClass}
+          rows={4}
+          placeholder="Personal solution notes, approach, key insights..."
+        />
+      </FormField>
+
       <FormField label="Neetcode Slug Override" htmlFor="pf-slug">
         <input
           id="pf-slug"
@@ -245,5 +258,6 @@ export function formToPayload(form: ProblemFormData): Record<string, unknown> {
     framework_node_id: form.framework_node_id,
     description: form.description.trim() || null,
     neetcode_slug: form.neetcode_slug.trim() || null,
+    notes: form.notes.trim() || null,
   };
 }

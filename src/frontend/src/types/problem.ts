@@ -19,6 +19,7 @@ export interface Problem {
   description: string | null;
   neetcode_slug: string | null;
   description_source: string | null;
+  notes: string | null;
 }
 
 export type Difficulty = "easy" | "medium" | "hard";

@@ -1,7 +1,7 @@
 /**
  * ProblemDescriptionModal -- shows problem description in-app.
- * If no description, offers "Fetch from Neetcode" button.
- * If fetch fails, provides fallback links to neetcode/leetcode.
+ * If no description, offers "Fetch from LeetCode" / "Fetch from Neetcode" buttons.
+ * Shows "My Notes" section when notes are present.
  */
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -31,9 +31,10 @@ export default function ProblemDescriptionModal({
         neetcode_slug: string;
         url: string;
       }>(`/problems/${problem.id}/fetch-description`),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["problems"] });
-      toast.success("Description fetched from neetcode.io");
+      const source = data.description_source || "external source";
+      toast.success(`Description fetched from ${source}`);
       setFetchError(null);
     },
     onError: (err: Error) => {
@@ -100,7 +101,7 @@ export default function ProblemDescriptionModal({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {problem.description ? (
             <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
               {problem.description}
@@ -117,7 +118,7 @@ export default function ProblemDescriptionModal({
               >
                 {fetchMutation.isPending
                   ? "Fetching..."
-                  : "Fetch from Neetcode"}
+                  : "Fetch Description"}
               </button>
 
               {fetchError && (
@@ -147,6 +148,18 @@ export default function ProblemDescriptionModal({
               )}
             </div>
           )}
+
+          {/* My Notes section */}
+          {problem.notes && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <h3 className="text-sm font-semibold text-amber-800 mb-2">
+                My Notes
+              </h3>
+              <div className="text-sm text-amber-900 whitespace-pre-wrap leading-relaxed">
+                {problem.notes}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -156,12 +169,23 @@ export default function ProblemDescriptionModal({
               <span>Source: {problem.description_source}</span>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
-          >
-            Close
-          </button>
+          <div className="flex items-center gap-2">
+            {problem.description && (
+              <button
+                onClick={() => fetchMutation.mutate()}
+                disabled={fetchMutation.isPending}
+                className="px-3 py-1.5 text-xs border border-gray-300 rounded hover:bg-gray-100 text-gray-600 disabled:opacity-50"
+              >
+                {fetchMutation.isPending ? "Fetching..." : "Re-fetch Description"}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>

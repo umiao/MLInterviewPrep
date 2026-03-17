@@ -71,3 +71,10 @@
 - **Sanity check result**: 784/784 tests pass (excl. 2 pre-existing test_listening_sessions failures), ruff clean, TypeScript compiles clean, Vite build succeeds, DB migrations verified
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-114 --status completed` (Unified Transcript), `T-P1-115` (Decouple Reading), `T-P1-116` (LeetCode Descriptions), `T-P0-117` (LinkedIn JD) -- all completed
+
+## 2026-03-16 -- Blind Grind 75 Backfill & Tab
+- **What I did**: Implemented full Blind Grind 75 feature: (1) Schema: migration v8 adds `notes` column to problems table, updated model/schemas/router/frontend types. (2) Docx import script (`scripts/import_blind75_notes.py`) with two-step workflow: parse docx to JSON preview, then `--commit` to DB. (3) Updated `fetch-description` endpoint to try LeetCode GraphQL API first (extracts title_slug from URL), falls back to neetcode scraping, added 5-second rate limiter. (4) Frontend: added "Blind Grind 75" tab to Problems page with progress bar, pattern-grouped tables, Notes column, deep-linking via `?tab=blind75`. Updated ProblemDescriptionModal with "My Notes" section (amber styling) and re-fetch button. Added notes textarea to ProblemFormFields.
+- **Deliverables**: src/backend/database.py (migration v8), src/backend/models/problem.py, src/backend/schemas/problem.py, src/backend/routers/problems.py, src/backend/scraper/site_configs.py, src/frontend/src/pages/Problems.tsx, src/frontend/src/components/problems/ProblemDescriptionModal.tsx, src/frontend/src/components/problems/ProblemFormFields.tsx, src/frontend/src/components/problems/EditProblemModal.tsx, src/frontend/src/types/problem.ts, scripts/import_blind75_notes.py (new), tests/test_import_blind75_notes.py (new), tests/test_migrations.py, tests/test_router_problems.py
+- **Sanity check result**: 158 tests pass (migrations + router + import), ruff clean, TypeScript clean, Vite build succeeds
+- **Status**: [DONE]
+- **Request**: No task_db change (user-requested ad-hoc feature)

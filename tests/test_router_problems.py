@@ -1477,3 +1477,51 @@ def test_update_problem_with_description(test_client):
     })
     assert resp.status_code == 200
     assert resp.json()["description"] == "Updated problem description text."
+
+
+# ===========================================================================
+# Notes field
+# ===========================================================================
+
+def test_create_problem_with_notes(test_client):
+    """POST /api/problems with notes stores them."""
+    resp = test_client.post("/api/problems", json={
+        "title": "Two Sum Notes",
+        "difficulty": "easy",
+        "notes": "Use hash map, O(n) time.",
+    })
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["notes"] == "Use hash map, O(n) time."
+
+
+def test_create_problem_without_notes(test_client):
+    """POST /api/problems without notes returns null."""
+    resp = test_client.post("/api/problems", json={"title": "No Notes"})
+    assert resp.status_code == 201
+    assert resp.json()["notes"] is None
+
+
+def test_update_problem_notes(test_client):
+    """PUT /api/problems/{id} updates notes field."""
+    resp = test_client.post("/api/problems", json={"title": "Notes Update"})
+    pid = resp.json()["id"]
+    assert resp.json()["notes"] is None
+
+    resp = test_client.put(f"/api/problems/{pid}", json={
+        "notes": "Updated solution notes.",
+    })
+    assert resp.status_code == 200
+    assert resp.json()["notes"] == "Updated solution notes."
+
+
+def test_notes_in_list_response(test_client):
+    """GET /api/problems includes notes in response."""
+    test_client.post("/api/problems", json={
+        "title": "With Notes",
+        "notes": "Some notes here.",
+    })
+    resp = test_client.get("/api/problems")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["notes"] == "Some notes here."

@@ -23,6 +23,7 @@ class ProblemCreate(BaseModel):
     description: str | None = None
     neetcode_slug: str | None = None
     description_source: str | None = None
+    notes: str | None = None
 
 
 class ProblemUpdate(BaseModel):
@@ -44,6 +45,7 @@ class ProblemUpdate(BaseModel):
     description: str | None = None
     neetcode_slug: str | None = None
     description_source: str | None = None
+    notes: str | None = None
 
 
 class ProblemResponse(BaseModel):
@@ -69,6 +71,7 @@ class ProblemResponse(BaseModel):
     description: str | None = None
     neetcode_slug: str | None = None
     description_source: str | None = None
+    notes: str | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

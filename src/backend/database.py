@@ -249,6 +249,14 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ALTER TABLE problems ADD COLUMN description_source VARCHAR",
         ],
     ),
+    (
+        8,
+        "Add notes column to problems",
+        [
+            "ADD_COLUMN_IF_MISSING:problems:notes:"
+            "ALTER TABLE problems ADD COLUMN notes TEXT",
+        ],
+    ),
 ]
 
 

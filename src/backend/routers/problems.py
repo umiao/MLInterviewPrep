@@ -1,6 +1,9 @@
 """Problem and Attempt API routes."""
 import json
 import logging
+import random
+import re
+import time
 from datetime import datetime
 from typing import Literal
 
@@ -48,6 +51,7 @@ def _problem_to_response(p: Problem) -> dict:
         "description": p.description,
         "neetcode_slug": p.neetcode_slug,
         "description_source": p.description_source,
+        "notes": p.notes,
     }
 
 
@@ -211,6 +215,7 @@ def create_problem(
         description=problem.description,
         neetcode_slug=problem.neetcode_slug,
         description_source=problem.description_source,
+        notes=problem.notes,
         created_at=datetime.utcnow(),
     )
     db.add(db_problem)
@@ -387,14 +392,86 @@ async def review_problem(
     return result
 
 
+# Simple in-memory rate limiter for fetch-description: {problem_id: timestamp}
+_fetch_timestamps: dict[int, float] = {}
+_FETCH_COOLDOWN_SECONDS = 5.0
+
+
+def _extract_title_slug(url: str | None) -> str | None:
+    """Extract LeetCode title_slug from a LeetCode problem URL.
+
+    Args:
+        url: LeetCode URL like https://leetcode.com/problems/two-sum/
+
+    Returns:
+        The slug (e.g. 'two-sum') or None if not parseable.
+    """
+    if not url:
+        return None
+    m = re.search(r"leetcode\.com/problems/([a-z0-9-]+)", url)
+    return m.group(1) if m else None
+
+
+async def _fetch_from_leetcode_graphql(title_slug: str) -> str | None:
+    """Try fetching problem description from LeetCode GraphQL API.
+
+    Args:
+        title_slug: The LeetCode problem slug (e.g. 'two-sum').
+
+    Returns:
+        Plain text description or None on failure.
+    """
+    import httpx
+    from bs4 import BeautifulSoup
+
+    from src.backend.scraper.crawler import USER_AGENTS
+
+    query = """
+    query getQuestionDetail($titleSlug: String!) {
+      question(titleSlug: $titleSlug) {
+        content
+      }
+    }
+    """
+
+    headers = {
+        "User-Agent": random.choice(USER_AGENTS),
+        "Referer": "https://leetcode.com",
+        "Origin": "https://leetcode.com",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                "https://leetcode.com/graphql",
+                json={"query": query, "variables": {"titleSlug": title_slug}},
+                headers=headers,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception:
+        logger.warning("LeetCode GraphQL request failed for slug=%s", title_slug)
+        return None
+
+    content_html = data.get("data", {}).get("question", {}).get("content")
+    if not content_html:
+        logger.info("LeetCode GraphQL returned no content for slug=%s (may be premium)", title_slug)
+        return None
+
+    soup = BeautifulSoup(content_html, "html.parser")
+    return soup.get_text(separator="\n", strip=True)
+
+
 @router.post("/problems/{problem_id}/fetch-description")
 async def fetch_description(
     problem_id: int,
     db: Session = Depends(get_db),
 ) -> dict:
-    """Fetch problem description from neetcode.io and save it.
+    """Fetch problem description from LeetCode GraphQL or neetcode.io and save it.
 
-    Uses neetcode_slug if set, otherwise derives from title.
+    Tries LeetCode GraphQL first (using title_slug from URL), falls back to
+    neetcode.io scraping if GraphQL fails or returns no content.
 
     Args:
         problem_id: ID of the problem to fetch description for.
@@ -403,10 +480,35 @@ async def fetch_description(
     Returns:
         Dict with description text and source.
     """
+    # Rate limit check
+    last_fetch = _fetch_timestamps.get(problem_id, 0.0)
+    if time.time() - last_fetch < _FETCH_COOLDOWN_SECONDS:
+        raise HTTPException(
+            status_code=429,
+            detail="Please wait a few seconds before fetching again.",
+        )
+    _fetch_timestamps[problem_id] = time.time()
+
     db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
     if not db_problem:
         raise HTTPException(status_code=404, detail="Problem not found")
 
+    # Try LeetCode GraphQL first
+    title_slug = _extract_title_slug(db_problem.url)
+    if title_slug:
+        description_text = await _fetch_from_leetcode_graphql(title_slug)
+        if description_text and len(description_text) >= 20:
+            db_problem.description = description_text
+            db_problem.description_source = "leetcode"
+            db.commit()
+            return {
+                "description": description_text,
+                "description_source": "leetcode",
+                "neetcode_slug": db_problem.neetcode_slug,
+                "url": db_problem.url,
+            }
+
+    # Fall back to neetcode scraping
     slug = db_problem.neetcode_slug or title_to_neetcode_slug(db_problem.title)
     url = f"https://neetcode.io/problems/{slug}"
 
@@ -432,8 +534,6 @@ async def fetch_description(
 
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # Neetcode question pages typically have the problem text in a specific container
-    # Try multiple selectors for robustness
     description_text = None
     for selector in [
         "div.question-content",
@@ -447,7 +547,6 @@ async def fetch_description(
             break
 
     if not description_text:
-        # Fallback: get all text from body
         body = soup.find("body")
         if body:
             description_text = body.get_text(separator="\n", strip=True)

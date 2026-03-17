@@ -40,6 +40,11 @@ SITE_CONFIGS: dict[str, SiteConfig] = {
         },
         rate_limit_seconds=(10, 20),
     ),
+    "leetcode_graphql": SiteConfig(
+        base_url="https://leetcode.com/graphql",
+        selectors={},
+        rate_limit_seconds=(5, 10),
+    ),
 }
 
 
