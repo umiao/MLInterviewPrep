@@ -32,17 +32,17 @@ Collaborative filtering (CF) is the workhorse of recommendation systems at every
 ## Core Concepts
 
 ### User-Item Interaction Matrix
-Given $m$ users and $n$ items, define $R \in \mathbb{R}^{m \times n}$ where $r_{ui}$ is user $u$'s rating (or implicit signal) for item $i$. In practice $R$ is extremely sparse ($< 1\%$ filled).
+Given $$m$$ users and $$n$$ items, define $$R \in \mathbb{R}^{m \times n}$$ where $$r_{ui}$$ is user $$u$$'s rating (or implicit signal) for item $$i$$. In practice $$R$$ is extremely sparse ($$< 1\%$$ filled).
 
 ### Memory-Based CF
 
-**User-based**: Find users similar to $u$, aggregate their ratings:
+**User-based**: Find users similar to $$u$$, aggregate their ratings:
 
 $$
 \hat{r}_{ui} = \bar{r}_u + \frac{\sum_{v \in \mathcal{N}(u)} \text{sim}(u, v)(r_{vi} - \bar{r}_v)}{\sum_{v \in \mathcal{N}(u)} |\text{sim}(u, v)|}
 $$
 
-**Item-based**: Find items similar to $i$, aggregate user's ratings on them:
+**Item-based**: Find items similar to $$i$$, aggregate user's ratings on them:
 
 $$
 \hat{r}_{ui} = \frac{\sum_{j \in \mathcal{N}(i)} \text{sim}(i, j)\, r_{uj}}{\sum_{j \in \mathcal{N}(i)} |\text{sim}(i, j)|}
@@ -56,7 +56,7 @@ $$
 
 ### Model-Based CF: Matrix Factorization
 
-Decompose $R \approx P Q^T$ where $P \in \mathbb{R}^{m \times k}$ and $Q \in \mathbb{R}^{n \times k}$.
+Decompose $$R \approx P Q^T$$ where $$P \in \mathbb{R}^{m \times k}$$ and $$Q \in \mathbb{R}^{n \times k}$$.
 
 **Objective (with biases)**:
 
@@ -64,11 +64,11 @@ $$
 \min_{P, Q, b} \sum_{(u,i) \in \Omega} \left(r_{ui} - \mu - b_u - b_i - \mathbf{p}_u^T \mathbf{q}_i\right)^2 + \lambda\left(\|\mathbf{p}_u\|^2 + \|\mathbf{q}_i\|^2 + b_u^2 + b_i^2\right)
 $$
 
-where $\Omega$ is the set of observed entries.
+where $$\Omega$$ is the set of observed entries.
 
-**ALS (Alternating Least Squares)**: Fix $Q$, solve for $P$ in closed form, then alternate. Parallelizable -- used at Netflix, Spotify.
+**ALS (Alternating Least Squares)**: Fix $$Q$$, solve for $$P$$ in closed form, then alternate. Parallelizable -- used at Netflix, Spotify.
 
-**SGD update**: $\mathbf{p}_u \leftarrow \mathbf{p}_u + \eta (e_{ui} \mathbf{q}_i - \lambda \mathbf{p}_u)$ where $e_{ui} = r_{ui} - \hat{r}_{ui}$.
+**SGD update**: $$\mathbf{p}_u \leftarrow \mathbf{p}_u + \eta (e_{ui} \mathbf{q}_i - \lambda \mathbf{p}_u)$$ where $$e_{ui} = r_{ui} - \hat{r}_{ui}$$.
 
 ### Implicit Feedback
 When only clicks/views (not ratings) are available, use **Weighted ALS**:
@@ -77,7 +77,7 @@ $$
 \min \sum_{u,i} c_{ui}\left(p_{ui} - \mathbf{p}_u^T \mathbf{q}_i\right)^2 + \lambda(\|P\|^2 + \|Q\|^2)
 $$
 
-where $c_{ui} = 1 + \alpha \cdot f(r_{ui})$ is a confidence weight and $p_{ui} \in \{0,1\}$ is a preference indicator.
+where $$c_{ui} = 1 + \alpha \cdot f(r_{ui})$$ is a confidence weight and $$p_{ui} \in \{0,1\}$$ is a preference indicator.
 
 ## Implementation
 
@@ -132,7 +132,7 @@ def bpr_update(
 
 | Aspect | Memory-Based CF | Model-Based CF (MF) |
 |--------|----------------|---------------------|
-| Scalability | $O(mn)$ similarity computation | $O(|\Omega| k)$ training |
+| Scalability | $$O(mn)$$ similarity computation | $$O(|\Omega| k)$$ training |
 | Cold start | No items with no co-ratings | Can incorporate side features |
 | Latency | Real-time similarity lookup | Pre-computed embeddings |
 | Explainability | "Users like you also liked..." | Latent factors harder to interpret |
@@ -153,13 +153,13 @@ Content-based filtering recommends items similar to what a user has liked before
 ## Core Concepts
 
 ### User Profile Construction
-Build a user profile $\mathbf{u}$ from the feature vectors of items they have interacted with:
+Build a user profile $$\mathbf{u}$$ from the feature vectors of items they have interacted with:
 
 $$
 \mathbf{u} = \frac{\sum_{i \in \mathcal{I}_u} w_i \, \mathbf{x}_i}{\sum_{i \in \mathcal{I}_u} w_i}
 $$
 
-where $\mathbf{x}_i$ is the feature vector of item $i$, $w_i$ is the interaction weight (e.g., rating, dwell time), and $\mathcal{I}_u$ is the set of items user $u$ interacted with.
+where $$\mathbf{x}_i$$ is the feature vector of item $$i$$, $$w_i$$ is the interaction weight (e.g., rating, dwell time), and $$\mathcal{I}_u$$ is the set of items user $$u$$ interacted with.
 
 ### TF-IDF for Text Features
 For text-heavy items (articles, products), TF-IDF provides a strong baseline:
@@ -169,7 +169,7 @@ $$
 $$
 
 ### Similarity Scoring
-Score candidate item $j$ against user profile $\mathbf{u}$:
+Score candidate item $$j$$ against user profile $$\mathbf{u}$$:
 
 $$
 \text{score}(u, j) = \cos(\mathbf{u}, \mathbf{x}_j) = \frac{\mathbf{u} \cdot \mathbf{x}_j}{\|\mathbf{u}\|\, \|\mathbf{x}_j\|}
@@ -184,7 +184,7 @@ Modern approaches use pre-trained embeddings:
 | Images | ResNet / CLIP | 512-2048 |
 | Categories | Learned embedding | 32-128 |
 
-Final item representation: $\mathbf{x}_i = [\mathbf{e}_{\text{text}}; \mathbf{e}_{\text{image}}; \mathbf{e}_{\text{cat}}]$ (concatenation or projection).
+Final item representation: $$\mathbf{x}_i = [\mathbf{e}_{\text{text}}; \mathbf{e}_{\text{image}}; \mathbf{e}_{\text{cat}}]$$ (concatenation or projection).
 
 ### Learning to Recommend
 Train a classifier to predict user-item affinity:
@@ -274,8 +274,8 @@ $$
 \text{score}(u, i) = f_\theta(\mathbf{x}_u)^T g_\phi(\mathbf{x}_i)
 $$
 
-- **User tower** $f_\theta$: encodes user features + history
-- **Item tower** $g_\phi$: encodes item features (text, image, metadata)
+- **User tower** $$f_\theta$$: encodes user features + history
+- **Item tower** $$g_\phi$$: encodes item features (text, image, metadata)
 - At serving: pre-compute item embeddings, use ANN for retrieval
 
 ### Wide & Deep (Google, 2016)
@@ -285,7 +285,7 @@ $$
 \hat{y} = \sigma\!\left(\mathbf{w}_{\text{wide}}^T [\mathbf{x}; \phi(\mathbf{x})] + \mathbf{w}_{\text{deep}}^T \, a^{(L)} + b\right)
 $$
 
-where $\phi(\mathbf{x})$ is cross-product features and $a^{(L)}$ is the deep network output.
+where $$\phi(\mathbf{x})$$ is cross-product features and $$a^{(L)}$$ is the deep network output.
 
 ### Deep & Cross Network (DCN)
 Explicit feature crossing at each layer:
@@ -412,7 +412,7 @@ $$
 \text{IDF}(t) = \log \frac{N}{|\{d : t \in d\}|}
 $$
 
-where $N$ is the total number of documents.
+where $$N$$ is the total number of documents.
 
 ### BM25 (Okapi BM25)
 The standard probabilistic ranking function:
@@ -423,11 +423,11 @@ $$
 
 | Parameter | Typical Value | Effect |
 |-----------|--------------|--------|
-| $k_1$ | 1.2 - 2.0 | Term frequency saturation |
-| $b$ | 0.75 | Document length normalization |
+| $$k_1$$ | 1.2 - 2.0 | Term frequency saturation |
+| $$b$$ | 0.75 | Document length normalization |
 | avgdl | Corpus-dependent | Average document length |
 
-Key insight: $k_1$ controls how quickly TF saturates (diminishing returns for repeated terms). $b$ penalizes long documents.
+Key insight: $$k_1$$ controls how quickly TF saturates (diminishing returns for repeated terms). $$b$$ penalizes long documents.
 
 ### Inverted Index
 The data structure enabling sub-linear retrieval:
@@ -499,12 +499,12 @@ def ndcg_at_k(relevances: list[int], k: int) -> float:
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
 | BM25 as baseline | Any search system | Always start here -- surprisingly hard to beat |
-| Length normalization | Documents of varying length | $b$ parameter prevents long-doc bias |
+| Length normalization | Documents of varying length | $$b$$ parameter prevents long-doc bias |
 | TF saturation | Repeated terms | One occurrence of "ML" matters; ten does not matter 10x more |
 | Inverted index design | System design interviews | Skip pointers, compression, sharding |
 
 ### Common Interview Questions
-- [ ] Explain BM25 and the role of each parameter ($k_1$, $b$).
+- [ ] Explain BM25 and the role of each parameter ($$k_1$$, $$b$$).
 - [ ] Why is BM25 often better than TF-IDF for ranking?
 - [ ] Design an inverted index that can handle 1B documents.
 - [ ] What is NDCG and why is it preferred over precision for graded relevance?
@@ -515,7 +515,7 @@ def ndcg_at_k(relevances: list[int], k: int) -> float:
 | Aspect | TF-IDF | BM25 | Neural Retrieval |
 |--------|--------|------|-----------------|
 | Term frequency | Linear | Saturating | Learned |
-| Length normalization | Cosine norm | $b$ parameter | Implicit |
+| Length normalization | Cosine norm | $$b$$ parameter | Implicit |
 | Semantic matching | None (exact match) | None (exact match) | Yes |
 | Latency | Very fast | Very fast | Slower (embeddings) |
 | Training data needed | None | None | Large amounts |
@@ -541,7 +541,7 @@ $$
 \text{score}(q, d) = E_q(q)^T E_d(d)
 $$
 
-where $E_q, E_d$ are typically BERT-based encoders. Documents are encoded offline; queries at serving time.
+where $$E_q, E_d$$ are typically BERT-based encoders. Documents are encoded offline; queries at serving time.
 
 ### Cross-Encoder
 Joint encoding of query-document pairs:
@@ -550,7 +550,7 @@ $$
 \text{score}(q, d) = \text{MLP}(\text{BERT}([q; \text{SEP}; d]))
 $$
 
-More expressive (full attention between $q$ and $d$) but $O(n)$ inference cost -- only feasible for re-ranking.
+More expressive (full attention between $$q$$ and $$d$$) but $$O(n)$$ inference cost -- only feasible for re-ranking.
 
 ### Contrastive Training
 InfoNCE loss with in-batch negatives:
@@ -573,7 +573,7 @@ Maintains separate encodings but uses MaxSim for richer matching than a single d
 ### ANN Search at Scale
 | Algorithm | Index Build | Query Time | Memory |
 |-----------|------------|------------|--------|
-| HNSW | Slow | $O(\log n)$ | High |
+| HNSW | Slow | $$O(\log n)$$ | High |
 | IVF-PQ | Moderate | Sub-linear | Low (compressed) |
 | ScaNN | Moderate | Sub-linear | Moderate |
 
@@ -634,7 +634,7 @@ def reciprocal_rank_fusion(
 | Aspect | BM25 | Bi-Encoder | Cross-Encoder | ColBERT |
 |--------|------|-----------|---------------|---------|
 | Semantic matching | No | Yes | Yes | Yes |
-| Serving latency | Fastest | Fast (ANN) | Slow ($O(n)$) | Moderate |
+| Serving latency | Fastest | Fast (ANN) | Slow ($$O(n)$$) | Moderate |
 | Expressiveness | Low | Medium | Highest | High |
 | Index size | Inverted index | Dense vectors | N/A (no index) | Token-level vectors |
 | Use case | First stage | First stage | Re-ranking | Either |
@@ -689,9 +689,9 @@ $$
 \hat{q} = \arg\max_{q'} P(q' \mid q) = \arg\max_{q'} P(q \mid q') \, P(q')
 $$
 
-where $P(q \mid q')$ is the error model (edit distance) and $P(q')$ is the language model.
+where $$P(q \mid q')$$ is the error model (edit distance) and $$P(q')$$ is the language model.
 
-**Edit distance** (Levenshtein): minimum insertions, deletions, substitutions to transform $q$ into $q'$.
+**Edit distance** (Levenshtein): minimum insertions, deletions, substitutions to transform $$q$$ into $$q'$$.
 
 ### Named Entity Recognition (NER) in Queries
 Short queries make NER harder:
@@ -795,7 +795,7 @@ $$
 \mathcal{L}_{\text{pointwise}} = \sum_{(q,d)} \ell(\hat{y}_{qd}, y_{qd})
 $$
 
-where $\ell$ is MSE or cross-entropy. Ignores inter-document relationships.
+where $$\ell$$ is MSE or cross-entropy. Ignores inter-document relationships.
 
 **Pairwise** (RankNet, LambdaMART): Optimize relative ordering:
 
@@ -822,7 +822,7 @@ $$
 \lambda_{ij} = \frac{-\sigma}{1 + e^{\sigma(s_i - s_j)}} |\Delta \text{NDCG}_{ij}|
 $$
 
-where $|\Delta \text{NDCG}_{ij}|$ weights each pair by how much swapping $i$ and $j$ changes NDCG. This directly optimizes the ranking metric.
+where $$|\Delta \text{NDCG}_{ij}|$$ weights each pair by how much swapping $$i$$ and $$j$$ changes NDCG. This directly optimizes the ranking metric.
 
 ### Feature Engineering for LTR
 
@@ -841,7 +841,7 @@ $$
 P(\text{click} \mid q, d, \text{pos}) = P(\text{examine} \mid \text{pos}) \cdot P(\text{relevant} \mid q, d)
 $$
 
-**Inverse propensity weighting (IPW)**: weight training examples by $1 / P(\text{examine} \mid \text{pos})$.
+**Inverse propensity weighting (IPW)**: weight training examples by $$1 / P(\text{examine} \mid \text{pos})$$.
 
 ## Implementation
 
@@ -985,8 +985,8 @@ Cost-effective for low-volume, high-cardinality classification tasks.
 ### Class Imbalance
 | Technique | When to Use | Implementation |
 |-----------|------------|---------------|
-| Class weights | Moderate imbalance (1:10) | $w_c = N / (C \cdot N_c)$ in loss |
-| Focal loss | Severe imbalance | $\mathcal{L} = -\alpha_t (1 - p_t)^\gamma \log p_t$ |
+| Class weights | Moderate imbalance (1:10) | $$w_c = N / (C \cdot N_c)$$ in loss |
+| Focal loss | Severe imbalance | $$\mathcal{L} = -\alpha_t (1 - p_t)^\gamma \log p_t$$ |
 | Oversampling (SMOTE) | Small datasets | Synthetic minority examples |
 | Threshold tuning | Precision-recall trade-off | Per-class decision boundaries |
 
@@ -1071,7 +1071,7 @@ $$
 P(\text{start}=i, \text{end}=j \mid q, c) = \text{softmax}(\mathbf{w}_s^T h_i) \cdot \text{softmax}(\mathbf{w}_e^T h_j)
 $$
 
-where $h_i$ are BERT hidden states for the context tokens. Constraint: $j \geq i$ and $j - i < \text{max\_len}$.
+where $$h_i$$ are BERT hidden states for the context tokens. Constraint: $$j \geq i$$ and $$j - i < \text{max\_len}$$.
 
 ### Generative QA
 Generate the answer token-by-token:
@@ -1085,9 +1085,9 @@ using an encoder-decoder (T5) or decoder-only (GPT) model.
 ### Retrieval-Augmented Generation (RAG)
 Combines retrieval with generation:
 
-1. **Retrieve**: $\mathcal{D} = \text{top-k}(\text{retriever}(q))$
-2. **Augment**: $\text{context} = [d_1; d_2; \ldots; d_k]$
-3. **Generate**: $a = \text{LLM}(q, \text{context})$
+1. **Retrieve**: $$\mathcal{D} = \text{top-k}(\text{retriever}(q))$$
+2. **Augment**: $$\text{context} = [d_1; d_2; \ldots; d_k]$$
+3. **Generate**: $$a = \text{LLM}(q, \text{context})$$
 
 $$
 P(a \mid q) = \sum_{d \in \mathcal{D}} P(d \mid q) \cdot P(a \mid q, d)
@@ -1106,8 +1106,8 @@ $$
 
 | Metric | Formula | Use Case |
 |--------|---------|----------|
-| Exact Match (EM) | $\mathbb{1}[\hat{a} = a^*]$ | Short answers |
-| F1 (token overlap) | $2 \cdot \frac{P \cdot R}{P + R}$ | Extractive QA |
+| Exact Match (EM) | $$\mathbb{1}[\hat{a} = a^*]$$ | Short answers |
+| F1 (token overlap) | $$2 \cdot \frac{P \cdot R}{P + R}$$ | Extractive QA |
 | ROUGE-L | Longest common subsequence | Generative QA |
 | Faithfulness | % claims supported by context | RAG systems |
 
@@ -1206,14 +1206,14 @@ $$
 W' = W + \Delta W = W + BA
 $$
 
-where $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times d}$, $r \ll d$. Reduces trainable parameters by 100-1000x.
+where $$B \in \mathbb{R}^{d \times r}$$, $$A \in \mathbb{R}^{r \times d}$$, $$r \ll d$$. Reduces trainable parameters by 100-1000x.
 
 **QLoRA**: Quantize base model to 4-bit, apply LoRA adapters. Enables fine-tuning 65B models on a single GPU.
 
 | Method | Parameters | Memory | Quality |
 |--------|-----------|--------|---------|
 | Full fine-tune | 100% | 4x model size | Best |
-| LoRA ($r$=16) | ~0.1% | 1.2x model size | Near-best |
+| LoRA ($$r$$=16) | ~0.1% | 1.2x model size | Near-best |
 | QLoRA | ~0.1% | 0.3x model size | Slightly lower |
 | Prompt tuning | ~0.001% | 1x model size | Lower |
 
@@ -1336,7 +1336,7 @@ def structured_output_parse(
 CONTENT["pillar4.ads_monetization.ctr_prediction"] = r"""# CTR Prediction
 
 ## Overview
-Click-through rate (CTR) prediction is the core ML problem in computational advertising, driving billions in revenue at Google, Meta, Amazon, and other ad platforms. The task is to predict $P(\text{click} \mid \text{user}, \text{ad}, \text{context})$ accurately at massive scale. A senior MLE must understand feature interactions, calibration, and the unique challenges of ads ML.
+Click-through rate (CTR) prediction is the core ML problem in computational advertising, driving billions in revenue at Google, Meta, Amazon, and other ad platforms. The task is to predict $$P(\text{click} \mid \text{user}, \text{ad}, \text{context})$$ accurately at massive scale. A senior MLE must understand feature interactions, calibration, and the unique challenges of ads ML.
 
 ## Core Concepts
 
@@ -1362,7 +1362,7 @@ $$
 \hat{y} = w_0 + \sum_i w_i x_i + \sum_{i<j} \langle \mathbf{v}_i, \mathbf{v}_j \rangle x_i x_j
 $$
 
-where $\mathbf{v}_i \in \mathbb{R}^k$ are latent vectors. Captures pairwise interactions in $O(nk)$ instead of $O(n^2)$.
+where $$\mathbf{v}_i \in \mathbb{R}^k$$ are latent vectors. Captures pairwise interactions in $$O(nk)$$ instead of $$O(n^2)$$.
 
 **DeepFM**: Combines FM with a deep network:
 
@@ -1383,7 +1383,7 @@ $$
 \text{ECE} = \sum_{b=1}^{B} \frac{|B_b|}{N} \left|\text{acc}(B_b) - \text{conf}(B_b)\right|
 $$
 
-**Platt scaling**: $p_{\text{calibrated}} = \sigma(a \cdot \text{logit} + b)$ where $a, b$ are fit on a validation set.
+**Platt scaling**: $$p_{\text{calibrated}} = \sigma(a \cdot \text{logit} + b)$$ where $$a, b$$ are fit on a validation set.
 
 ### Feature Hashing (Hashing Trick)
 
@@ -1456,7 +1456,7 @@ def platt_scaling(
 | Calibration check | Any CTR model | Poorly calibrated -> wrong bid -> revenue loss |
 | Feature crossing | Sparse categoricals | FM/DCN automate what manual feature engineering does |
 | Online learning | Non-stationary CTR | User behavior shifts fast; daily retraining is often too slow |
-| Negative downsampling | Imbalanced clicks | Sample negatives, then recalibrate: $p' = p / (p + (1-p)/w)$ |
+| Negative downsampling | Imbalanced clicks | Sample negatives, then recalibrate: $$p' = p / (p + (1-p)/w)$$ |
 
 ### Common Interview Questions
 - [ ] Why is calibration critical for CTR models but not for ranking models?
@@ -1498,7 +1498,7 @@ $$
 D(p) = D_0 \cdot e^{-\alpha p + \mathbf{\beta}^T \mathbf{x}}
 $$
 
-where $\alpha$ is price elasticity, $D_0$ is baseline demand, and $\mathbf{x}$ are contextual features (time, location, weather).
+where $$\alpha$$ is price elasticity, $$D_0$$ is baseline demand, and $$\mathbf{x}$$ are contextual features (time, location, weather).
 
 **Price elasticity of demand**:
 
@@ -1506,11 +1506,11 @@ $$
 \epsilon = \frac{\partial D / D}{\partial p / p} = \frac{p}{D} \cdot \frac{\partial D}{\partial p}
 $$
 
-- $|\epsilon| > 1$: elastic (price-sensitive users, e.g., leisure travel)
-- $|\epsilon| < 1$: inelastic (price-insensitive users, e.g., business travel)
+- $$|\epsilon| > 1$$: elastic (price-sensitive users, e.g., leisure travel)
+- $$|\epsilon| < 1$$: inelastic (price-insensitive users, e.g., business travel)
 
 ### Revenue Optimization
-Maximize revenue $R(p) = p \cdot D(p)$:
+Maximize revenue $$R(p) = p \cdot D(p)$$:
 
 $$
 \frac{dR}{dp} = D(p) + p \cdot D'(p) = 0
@@ -1527,10 +1527,10 @@ $$
 m = \max\!\left(1,\; 1 + \gamma \cdot \frac{D_t - S_t}{S_t}\right)
 $$
 
-where $D_t$ is demand, $S_t$ is supply at time $t$. Capped to avoid extreme surges.
+where $$D_t$$ is demand, $$S_t$$ is supply at time $$t$$. Capped to avoid extreme surges.
 
 ### Causal Challenges
-Naive regression on $(p, D)$ pairs gives biased elasticity because price is endogenous:
+Naive regression on $$(p, D)$$ pairs gives biased elasticity because price is endogenous:
 
 $$
 \text{Correlation} \neq \text{Causation}: \quad \text{cov}(p, D) > 0 \text{ (prices rise with demand)}
@@ -1625,7 +1625,7 @@ Estimated Time of Arrival (ETA) prediction is critical for ride-sharing, food de
 ## Core Concepts
 
 ### Problem Formulation
-Predict travel time $T$ given origin, destination, departure time, and context:
+Predict travel time $$T$$ given origin, destination, departure time, and context:
 
 $$
 \hat{T} = f(\text{origin}, \text{dest}, t_{\text{depart}}, \mathbf{x}_{\text{context}})
@@ -1638,7 +1638,7 @@ where context includes weather, traffic, road conditions, and historical pattern
 | Feature Category | Examples | Encoding |
 |-----------------|---------|----------|
 | Spatial | Origin/dest lat-lng, road segments | H3/S2 hexagonal cells, graph embeddings |
-| Temporal | Hour, day of week, holidays | Cyclical: $\sin(2\pi h/24), \cos(2\pi h/24)$ |
+| Temporal | Hour, day of week, holidays | Cyclical: $$\sin(2\pi h/24), \cos(2\pi h/24)$$ |
 | Route | Distance, num turns, road types | Aggregated from routing graph |
 | Real-time | Live traffic speed, incidents | Sliding window averages |
 | Historical | Segment speed by time-of-day | Lookup table + smoothing |
@@ -1651,7 +1651,7 @@ $$
 \hat{T}_{\text{route}} = \sum_{s \in \text{route}} \hat{T}_s = \sum_s \frac{d_s}{\hat{v}_s}
 $$
 
-where $d_s$ is segment length and $\hat{v}_s$ is predicted speed.
+where $$d_s$$ is segment length and $$\hat{v}_s$$ is predicted speed.
 
 **End-to-end**: Predict total time directly from origin-destination features:
 
@@ -1754,7 +1754,7 @@ Causal inference answers "what would happen if" questions that prediction models
 ## Core Concepts
 
 ### Potential Outcomes Framework
-For each unit $i$, define potential outcomes $Y_i(1)$ (treated) and $Y_i(0)$ (control):
+For each unit $$i$$, define potential outcomes $$Y_i(1)$$ (treated) and $$Y_i(0)$$ (control):
 
 $$
 \text{ATE} = E[Y_i(1) - Y_i(0)]
@@ -1777,7 +1777,7 @@ then we can estimate causal effects from observational data. A/B testing guarant
 
 ### Propensity Score Methods
 
-**Propensity score**: $e(x) = P(T=1 \mid X=x)$
+**Propensity score**: $$e(x) = P(T=1 \mid X=x)$$
 
 **Inverse Propensity Weighting (IPW)**:
 
@@ -1803,15 +1803,15 @@ $$
 Assumes **parallel trends**: absent treatment, treated and control would have followed the same trajectory.
 
 ### Instrumental Variables (IV)
-When there is unmeasured confounding, use an instrument $Z$ that affects treatment but not outcome directly:
+When there is unmeasured confounding, use an instrument $$Z$$ that affects treatment but not outcome directly:
 
 $$
 \hat{\tau}_{\text{IV}} = \frac{\text{Cov}(Y, Z)}{\text{Cov}(T, Z)}
 $$
 
 **Two-stage least squares (2SLS)**:
-1. Regress $T$ on $Z$: $\hat{T} = \gamma Z + \delta X$
-2. Regress $Y$ on $\hat{T}$: $Y = \tau \hat{T} + \beta X + \epsilon$
+1. Regress $$T$$ on $$Z$$: $$\hat{T} = \gamma Z + \delta X$$
+2. Regress $$Y$$ on $$\hat{T}$$: $$Y = \tau \hat{T} + \beta X + \epsilon$$
 
 ### Heterogeneous Treatment Effects (CATE)
 
@@ -1915,13 +1915,13 @@ $$
 (f * g)(i, j) = \sum_{m} \sum_{n} f(m, n) \cdot g(i-m, j-n)
 $$
 
-**Output dimension**: For input $H \times W$, kernel $k$, stride $s$, padding $p$:
+**Output dimension**: For input $$H \times W$$, kernel $$k$$, stride $$s$$, padding $$p$$:
 
 $$
 H_{\text{out}} = \left\lfloor\frac{H + 2p - k}{s}\right\rfloor + 1
 $$
 
-**Parameter count**: For $C_{\text{in}}$ input channels, $C_{\text{out}}$ output channels, kernel $k$:
+**Parameter count**: For $$C_{\text{in}}$$ input channels, $$C_{\text{out}}$$ output channels, kernel $$k$$:
 
 $$
 \text{params} = C_{\text{out}} \times (C_{\text{in}} \times k^2 + 1)
@@ -1952,7 +1952,7 @@ $$
 \mathbf{z}_0 = [\mathbf{x}_{\text{class}}; \mathbf{x}_1^p E; \mathbf{x}_2^p E; \ldots; \mathbf{x}_N^p E] + \mathbf{E}_{\text{pos}}
 $$
 
-where $E \in \mathbb{R}^{(P^2 \cdot C) \times D}$ is the patch projection and $P$ is patch size.
+where $$E \in \mathbb{R}^{(P^2 \cdot C) \times D}$$ is the patch projection and $$P$$ is patch size.
 
 Standard transformer encoder processes the sequence. Classification from the [CLS] token.
 
@@ -1967,14 +1967,14 @@ $$
 \text{lr}_{\text{layer } l} = \text{lr}_{\text{base}} \cdot \gamma^{L - l}
 $$
 
-where $\gamma < 1$ gives lower learning rates to earlier layers (discriminative LR).
+where $$\gamma < 1$$ gives lower learning rates to earlier layers (discriminative LR).
 
 ### Data Augmentation
 | Technique | Effect | When to Use |
 |-----------|--------|-------------|
 | Random crop + flip | Spatial invariance | Always |
 | Color jitter | Color invariance | Natural images |
-| Mixup | $\tilde{x} = \lambda x_i + (1-\lambda) x_j$ | Regularization |
+| Mixup | $$\tilde{x} = \lambda x_i + (1-\lambda) x_j$$ | Regularization |
 | CutMix | Patch-based mixing | Better than Mixup for localization |
 | RandAugment | Automated policy search | Large-scale training |
 
@@ -2050,10 +2050,10 @@ Object detection localizes and classifies objects within images, producing bound
 ## Core Concepts
 
 ### Problem Formulation
-For each object $k$ in image $I$, predict:
-- Bounding box: $(x, y, w, h)$ or $(x_1, y_1, x_2, y_2)$
-- Class label: $c_k \in \{1, \ldots, C\}$
-- Confidence: $p_k$
+For each object $$k$$ in image $$I$$, predict:
+- Bounding box: $$(x, y, w, h)$$ or $$(x_1, y_1, x_2, y_2)$$
+- Class label: $$c_k \in \{1, \ldots, C\}$$
+- Confidence: $$p_k$$
 
 ### Intersection over Union (IoU)
 
@@ -2077,7 +2077,7 @@ $$
 ### One-Stage Detectors (YOLO, SSD)
 Predict boxes and classes directly from feature maps without a proposal stage:
 
-**YOLOv3**: Divide image into $S \times S$ grid. Each cell predicts $B$ boxes:
+**YOLOv3**: Divide image into $$S \times S$$ grid. Each cell predicts $$B$$ boxes:
 
 $$
 \text{Loss} = \lambda_{\text{coord}} \mathcal{L}_{\text{box}} + \mathcal{L}_{\text{obj}} + \mathcal{L}_{\text{cls}}
@@ -2099,16 +2099,16 @@ $$
 P_l = \text{Conv}_{1 \times 1}(C_l) + \text{Upsample}(P_{l+1})
 $$
 
-where $C_l$ are backbone features at level $l$ and $P_l$ are pyramid features.
+where $$C_l$$ are backbone features at level $$l$$ and $$P_l$$ are pyramid features.
 
 ### Non-Maximum Suppression (NMS)
 Remove duplicate detections:
 1. Sort by confidence
 2. Keep highest-confidence box
-3. Remove all boxes with $\text{IoU} > \theta$ with the kept box
+3. Remove all boxes with $$\text{IoU} > \theta$$ with the kept box
 4. Repeat
 
-Soft-NMS decays scores instead of hard removal: $s_i \leftarrow s_i \cdot e^{-\text{IoU}^2 / \sigma}$.
+Soft-NMS decays scores instead of hard removal: $$s_i \leftarrow s_i \cdot e^{-\text{IoU}^2 / \sigma}$$.
 
 ### Evaluation: Mean Average Precision (mAP)
 
@@ -2217,7 +2217,7 @@ Anomaly detection identifies unusual patterns that deviate from expected behavio
 
 ### Statistical Methods
 
-**Z-score**: Flag points beyond $k$ standard deviations:
+**Z-score**: Flag points beyond $$k$$ standard deviations:
 
 $$
 z_i = \frac{x_i - \mu}{\sigma}, \quad \text{anomaly if } |z_i| > k
@@ -2229,7 +2229,7 @@ $$
 s(x, n) = 2^{-E[h(x)] / c(n)}
 $$
 
-where $h(x)$ is path length and $c(n)$ is the average path length in a random BST. Score $\approx 1$ for anomalies.
+where $$h(x)$$ is path length and $$c(n)$$ is the average path length in a random BST. Score $$\approx 1$$ for anomalies.
 
 ### ML-Based Methods
 
@@ -2239,7 +2239,7 @@ $$
 \text{score}(x) = \|x - \hat{x}\|^2 = \|x - \text{Dec}(\text{Enc}(x))\|^2
 $$
 
-Anomaly threshold: $\text{score}(x) > \mu_{\text{train}} + k \cdot \sigma_{\text{train}}$
+Anomaly threshold: $$\text{score}(x) > \mu_{\text{train}} + k \cdot \sigma_{\text{train}}$$
 
 **One-Class SVM**: Learn a decision boundary around normal data:
 
@@ -2247,7 +2247,7 @@ $$
 \min_{w, \xi, \rho} \frac{1}{2}\|w\|^2 + \frac{1}{\nu n}\sum_i \xi_i - \rho
 $$
 
-subject to $w^T \phi(x_i) \geq \rho - \xi_i$.
+subject to $$w^T \phi(x_i) \geq \rho - \xi_i$$.
 
 ### Graph-Based Methods
 Model entities as a graph (users, devices, accounts) and detect anomalous structures:
@@ -2266,7 +2266,7 @@ Fraud rates are typically 0.01-0.1%:
 |-----------|------------|-------|
 | Undersampling majority | Small training data | Lose information |
 | SMOTE | Moderate imbalance | Synthetic minority examples |
-| Cost-sensitive learning | Any | Weight: $w_{\text{fraud}} = \text{cost\_ratio}$ |
+| Cost-sensitive learning | Any | Weight: $$w_{\text{fraud}} = \text{cost\_ratio}$$ |
 | Anomaly-first, classify-second | Very rare fraud | Two-stage: detect anomaly, then classify type |
 
 ### Adversarial Robustness
@@ -2352,28 +2352,28 @@ Model explainability is critical for trust & safety, compliance, and debugging. 
 ## Core Concepts
 
 ### SHAP (SHapley Additive exPlanations)
-Based on Shapley values from cooperative game theory. The contribution of feature $i$ to prediction $f(x)$:
+Based on Shapley values from cooperative game theory. The contribution of feature $$i$$ to prediction $$f(x)$$:
 
 $$
 \phi_i = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|!\,(|N|-|S|-1)!}{|N|!} \left[f(S \cup \{i\}) - f(S)\right]
 $$
 
-where $N$ is the set of all features and $f(S)$ is the model output using only features in $S$ (marginalizing over the rest).
+where $$N$$ is the set of all features and $$f(S)$$ is the model output using only features in $$S$$ (marginalizing over the rest).
 
 **Properties (uniqueness)**:
-- **Efficiency**: $\sum_i \phi_i = f(x) - E[f(x)]$ (contributions sum to prediction)
+- **Efficiency**: $$\sum_i \phi_i = f(x) - E[f(x)]$$ (contributions sum to prediction)
 - **Symmetry**: Equal features get equal attribution
-- **Linearity**: $\phi_i(f + g) = \phi_i(f) + \phi_i(g)$
+- **Linearity**: $$\phi_i(f + g) = \phi_i(f) + \phi_i(g)$$
 - **Dummy**: Unused features get zero attribution
 
 ### TreeSHAP
-Exact SHAP values for tree-based models in $O(TLD^2)$:
+Exact SHAP values for tree-based models in $$O(TLD^2)$$:
 
 $$
 \phi_i = \sum_{\text{paths containing } i} \text{contribution weighted by tree structure}
 $$
 
-Much faster than exact Shapley computation ($O(2^n)$).
+Much faster than exact Shapley computation ($$O(2^n)$$).
 
 ### LIME (Local Interpretable Model-agnostic Explanations)
 Approximate model locally with an interpretable model:
@@ -2383,12 +2383,12 @@ $$
 $$
 
 where:
-- $\pi_x$: proximity kernel around $x$
-- $\mathcal{L}$: fidelity loss (how well $g$ approximates $f$ near $x$)
-- $\Omega(g)$: complexity penalty (e.g., number of non-zero coefficients)
+- $$\pi_x$$: proximity kernel around $$x$$
+- $$\mathcal{L}$$: fidelity loss (how well $$g$$ approximates $$f$$ near $$x$$)
+- $$\Omega(g)$$: complexity penalty (e.g., number of non-zero coefficients)
 
 **Process**:
-1. Perturb input $x$ to generate neighborhood samples
+1. Perturb input $$x$$ to generate neighborhood samples
 2. Get model predictions on perturbations
 3. Fit weighted linear model (or decision tree)
 4. Report coefficients as feature importances
@@ -2407,7 +2407,7 @@ $$
 \text{Importance}(i) = \text{metric}(\mathbf{y}, f(\mathbf{X})) - \text{metric}(\mathbf{y}, f(\mathbf{X}_{\text{shuffle } i}))
 $$
 
-Shuffle feature $i$ column, measure performance drop. Model-agnostic but can be misleading with correlated features.
+Shuffle feature $$i$$ column, measure performance drop. Model-agnostic but can be misleading with correlated features.
 
 ### Counterfactual Explanations
 Find the smallest change to input that flips the prediction:
@@ -2491,7 +2491,7 @@ def lime_explain(
 | Consistency | Guaranteed (axioms) | Not guaranteed | Misleading with correlations |
 | Speed | Slow (exact), fast (TreeSHAP) | Fast | Moderate |
 | Model-agnostic | KernelSHAP: yes; TreeSHAP: trees only | Yes | Yes |
-| Additivity | $\sum \phi_i = f(x) - E[f]$ | No guarantee | N/A |
+| Additivity | $$\sum \phi_i = f(x) - E[f]$$ | No guarantee | N/A |
 
 ## Key Takeaways
 - SHAP is the gold standard for local explanations due to its theoretical guarantees

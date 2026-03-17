@@ -32,11 +32,11 @@ Probability is the mathematical language of uncertainty. A senior MLE must fluen
 ## Core Concepts
 
 ### Axioms of Probability
-For a sample space $\Omega$ and event $A$:
+For a sample space $$\Omega$$ and event $$A$$:
 
-1. $P(A) \geq 0$
-2. $P(\Omega) = 1$
-3. For disjoint events $A_1, A_2, \ldots$: $P\!\left(\bigcup_i A_i\right) = \sum_i P(A_i)$
+1. $$P(A) \geq 0$$
+2. $$P(\Omega) = 1$$
+3. For disjoint events $$A_1, A_2, \ldots$$: $$P\!\left(\bigcup_i A_i\right) = \sum_i P(A_i)$$
 
 ### Conditional Probability
 
@@ -44,9 +44,9 @@ $$
 P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \quad P(B) > 0
 $$
 
-**Independence**: $A \perp B \iff P(A \cap B) = P(A)P(B)$
+**Independence**: $$A \perp B \iff P(A \cap B) = P(A)P(B)$$
 
-**Conditional independence**: $A \perp B \mid C \iff P(A \cap B \mid C) = P(A \mid C)P(B \mid C)$
+**Conditional independence**: $$A \perp B \mid C \iff P(A \cap B \mid C) = P(A \mid C)P(B \mid C)$$
 
 ### Bayes' Theorem
 
@@ -56,10 +56,10 @@ $$
 
 | Component | Name | ML Interpretation |
 |-----------|------|-------------------|
-| $P(\theta \mid D)$ | Posterior | Updated belief after seeing data |
-| $P(D \mid \theta)$ | Likelihood | How well model explains data |
-| $P(\theta)$ | Prior | Initial belief before data |
-| $P(D)$ | Evidence | Normalizing constant |
+| $$P(\theta \mid D)$$ | Posterior | Updated belief after seeing data |
+| $$P(D \mid \theta)$$ | Likelihood | How well model explains data |
+| $$P(\theta)$$ | Prior | Initial belief before data |
+| $$P(D)$$ | Evidence | Normalizing constant |
 
 ### Chain Rule of Probability
 
@@ -67,7 +67,7 @@ $$
 P(A_1, A_2, \ldots, A_n) = \prod_{i=1}^{n} P(A_i \mid A_1, \ldots, A_{i-1})
 $$
 
-This is the foundation of autoregressive language models: $P(w_1, \ldots, w_T) = \prod_t P(w_t \mid w_{<t})$.
+This is the foundation of autoregressive language models: $$P(w_1, \ldots, w_T) = \prod_t P(w_t \mid w_{<t})$$.
 
 ### Law of Total Probability
 
@@ -75,7 +75,7 @@ $$
 P(A) = \sum_{i} P(A \mid B_i)\, P(B_i)
 $$
 
-where $\{B_i\}$ partitions $\Omega$. Used in mixture models: $P(x) = \sum_k \pi_k\, P(x \mid z=k)$.
+where $$\{B_i\}$$ partitions $$\Omega$$. Used in mixture models: $$P(x) = \sum_k \pi_k\, P(x \mid z=k)$$.
 
 ## Implementation
 
@@ -127,7 +127,7 @@ posterior = bayes_update(prior, likelihood)
 | Probability meaning | Long-run frequency | Degree of belief |
 | Parameters | Fixed unknowns | Random variables |
 | Inference | MLE, confidence intervals | Posterior, credible intervals |
-| Key formula | $\hat{\theta} = \arg\max P(D \mid \theta)$ | $P(\theta \mid D) \propto P(D \mid \theta) P(\theta)$ |
+| Key formula | $$\hat{\theta} = \arg\max P(D \mid \theta)$$ | $$P(\theta \mid D) \propto P(D \mid \theta) P(\theta)$$ |
 | Strength | No prior needed | Incorporates prior knowledge |
 
 ## Key Takeaways
@@ -148,11 +148,11 @@ Probability distributions are the building blocks of statistical modeling and ML
 
 | Distribution | PMF/Support | Mean | Variance | Use Case |
 |-------------|-------------|------|----------|----------|
-| Bernoulli($p$) | $P(X=1)=p$ | $p$ | $p(1-p)$ | Binary classification |
-| Binomial($n,p$) | $\binom{n}{k}p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | Number of successes |
-| Poisson($\lambda$) | $\frac{\lambda^k e^{-\lambda}}{k!}$ | $\lambda$ | $\lambda$ | Event counts |
-| Geometric($p$) | $(1-p)^{k-1}p$ | $1/p$ | $(1-p)/p^2$ | Trials until first success |
-| Categorical($\mathbf{p}$) | $P(X=k)=p_k$ | -- | -- | Multi-class classification |
+| Bernoulli($$p$$) | $$P(X=1)=p$$ | $$p$$ | $$p(1-p)$$ | Binary classification |
+| Binomial($$n,p$$) | $$\binom{n}{k}p^k(1-p)^{n-k}$$ | $$np$$ | $$np(1-p)$$ | Number of successes |
+| Poisson($$\lambda$$) | $$\frac{\lambda^k e^{-\lambda}}{k!}$$ | $$\lambda$$ | $$\lambda$$ | Event counts |
+| Geometric($$p$$) | $$(1-p)^{k-1}p$$ | $$1/p$$ | $$(1-p)/p^2$$ | Trials until first success |
+| Categorical($$\mathbf{p}$$) | $$P(X=k)=p_k$$ | -- | -- | Multi-class classification |
 
 ### Continuous Distributions
 
@@ -162,31 +162,31 @@ $$
 f(x) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)
 $$
 
-Properties: symmetric, $\mu \pm 1\sigma$ covers 68.3%, $\mu \pm 2\sigma$ covers 95.4%.
+Properties: symmetric, $$\mu \pm 1\sigma$$ covers 68.3%, $$\mu \pm 2\sigma$$ covers 95.4%.
 
-**Exponential($\lambda$)**:
+**Exponential($$\lambda$$)**:
 
 $$
 f(x) = \lambda e^{-\lambda x}, \quad x \geq 0
 $$
 
-Memoryless property: $P(X > s+t \mid X > s) = P(X > t)$. Models inter-arrival times.
+Memoryless property: $$P(X > s+t \mid X > s) = P(X > t)$$. Models inter-arrival times.
 
-**Beta($\alpha, \beta$)**:
+**Beta($$\alpha, \beta$$)**:
 
 $$
 f(x) = \frac{x^{\alpha-1}(1-x)^{\beta-1}}{B(\alpha, \beta)}, \quad x \in [0,1]
 $$
 
-Conjugate prior for Bernoulli/Binomial. Mean $= \alpha/(\alpha+\beta)$.
+Conjugate prior for Bernoulli/Binomial. Mean $$= \alpha/(\alpha+\beta)$$.
 
-**Gamma($\alpha, \beta$)**:
+**Gamma($$\alpha, \beta$$)**:
 
 $$
 f(x) = \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-\beta x}, \quad x > 0
 $$
 
-Conjugate prior for Poisson rate. Exponential is Gamma(1, $\lambda$).
+Conjugate prior for Poisson rate. Exponential is Gamma(1, $$\lambda$$).
 
 ### Multivariate Normal
 
@@ -196,8 +196,8 @@ $$
 
 Key properties:
 - Marginals and conditionals are also Gaussian
-- $X_i \perp X_j \iff \Sigma_{ij} = 0$ (for jointly Gaussian)
-- Mahalanobis distance: $d_M = \sqrt{(\mathbf{x}-\boldsymbol{\mu})^\top \Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})}$
+- $$X_i \perp X_j \iff \Sigma_{ij} = 0$$ (for jointly Gaussian)
+- Mahalanobis distance: $$d_M = \sqrt{(\mathbf{x}-\boldsymbol{\mu})^\top \Sigma^{-1}(\mathbf{x}-\boldsymbol{\mu})}$$
 
 ### Distribution Relationships
 
@@ -250,7 +250,7 @@ def kl_divergence_gaussians(
 | Conjugate priors | Bayesian updates | Beta-Binomial, Gamma-Poisson, Normal-Normal |
 | CLT approximation | Large sample sizes | Sum of iid RVs approaches Normal |
 | Memoryless property | Exponential/Geometric | Only distributions with this property |
-| Reparameterization trick | VAEs, gradient estimation | Sample from $N(0,1)$, shift/scale |
+| Reparameterization trick | VAEs, gradient estimation | Sample from $$N(0,1)$$, shift/scale |
 
 ### Common Interview Questions
 - [ ] When would you use Poisson vs. Negative Binomial for count data?
@@ -263,9 +263,9 @@ def kl_divergence_gaussians(
 
 | Aspect | Gaussian | Poisson | Exponential |
 |--------|----------|---------|-------------|
-| Support | $(-\infty, \infty)$ | $\{0,1,2,\ldots\}$ | $[0, \infty)$ |
-| Parameters | $\mu, \sigma^2$ | $\lambda$ | $\lambda$ |
-| Mean = Variance? | No | Yes | No ($1/\lambda^2$) |
+| Support | $$(-\infty, \infty)$$ | $$\{0,1,2,\ldots\}$$ | $$[0, \infty)$$ |
+| Parameters | $$\mu, \sigma^2$$ | $$\lambda$$ | $$\lambda$$ |
+| Mean = Variance? | No | Yes | No ($$1/\lambda^2$$) |
 | ML use | Regression residuals | Event modeling | Survival analysis |
 
 ## Key Takeaways
@@ -307,9 +307,9 @@ $$
 $$
 
 Properties:
-- $\text{Var}(aX + b) = a^2 \text{Var}(X)$
-- $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\,\text{Cov}(X, Y)$
-- If $X \perp Y$: $\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$
+- $$\text{Var}(aX + b) = a^2 \text{Var}(X)$$
+- $$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y) + 2\,\text{Cov}(X, Y)$$
+- If $$X \perp Y$$: $$\text{Var}(X + Y) = \text{Var}(X) + \text{Var}(Y)$$
 
 ### Covariance and Correlation
 
@@ -321,7 +321,7 @@ $$
 \rho(X, Y) = \frac{\text{Cov}(X, Y)}{\sqrt{\text{Var}(X)\,\text{Var}(Y)}}, \quad -1 \leq \rho \leq 1
 $$
 
-**Key identity**: $\text{Var}\!\left(\sum_i X_i\right) = \sum_i \text{Var}(X_i) + 2\sum_{i<j} \text{Cov}(X_i, X_j)$
+**Key identity**: $$\text{Var}\!\left(\sum_i X_i\right) = \sum_i \text{Var}(X_i) + 2\sum_{i<j} \text{Cov}(X_i, X_j)$$
 
 ### Law of Total Expectation and Variance
 
@@ -341,7 +341,7 @@ $$
 M_X(t) = E[e^{tX}], \quad E[X^n] = M_X^{(n)}(0)
 $$
 
-If $X \perp Y$: $M_{X+Y}(t) = M_X(t) \cdot M_Y(t)$.
+If $$X \perp Y$$: $$M_{X+Y}(t) = M_X(t) \cdot M_Y(t)$$.
 
 ## Implementation
 
@@ -378,22 +378,22 @@ def bias_variance_decomposition(
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
 | Linearity of expectation | Counting problems | Works even for dependent RVs |
-| Indicator variables | Expected value of sums | $E[\sum I_i] = \sum P(A_i)$ |
+| Indicator variables | Expected value of sums | $$E[\sum I_i] = \sum P(A_i)$$ |
 | Variance decomposition | Bias-variance tradeoff | Total = within + between |
 | Tower property | Hierarchical models | Iterate expectation over conditioning |
 
 ### Common Interview Questions
-- [ ] Prove that $\text{Var}(X) = E[X^2] - (E[X])^2$.
-- [ ] Expected number of coupon types collected before having all $n$ types?
+- [ ] Prove that $$\text{Var}(X) = E[X^2] - (E[X])^2$$.
+- [ ] Expected number of coupon types collected before having all $$n$$ types?
 - [ ] Derive the bias-variance decomposition of MSE.
-- [ ] If $X$ and $Y$ have zero correlation, are they independent? Give a counterexample.
-- [ ] What is $\text{Var}(\bar{X})$ for iid samples? Why does this matter for SGD?
+- [ ] If $$X$$ and $$Y$$ have zero correlation, are they independent? Give a counterexample.
+- [ ] What is $$\text{Var}(\bar{X})$$ for iid samples? Why does this matter for SGD?
 
 ## Comparisons
 
 | Aspect | Standard Deviation | MAD (Mean Abs Deviation) |
 |--------|-------------------|--------------------------|
-| Formula | $\sqrt{E[(X-\mu)^2]}$ | $E[|X-\mu|]$ |
+| Formula | $$\sqrt{E[(X-\mu)^2]}$$ | $$E[|X-\mu|]$$ |
 | Sensitivity to outliers | High (squared) | Lower (linear) |
 | Analytically tractable | Yes | Less so |
 | ML usage | Loss functions, confidence | Robust statistics |
@@ -419,10 +419,10 @@ $$
 $$
 
 **Key properties**:
-- Consistent: $\hat{\theta}_{\text{MLE}} \xrightarrow{P} \theta^*$ as $n \to \infty$
+- Consistent: $$\hat{\theta}_{\text{MLE}} \xrightarrow{P} \theta^*$$ as $$n \to \infty$$
 - Asymptotically efficient: achieves Cramer-Rao lower bound
-- Asymptotically normal: $\sqrt{n}(\hat{\theta} - \theta^*) \xrightarrow{d} N(0, I(\theta^*)^{-1})$
-- Invariant: if $\hat{\theta}$ is MLE, then $g(\hat{\theta})$ is MLE of $g(\theta)$
+- Asymptotically normal: $$\sqrt{n}(\hat{\theta} - \theta^*) \xrightarrow{d} N(0, I(\theta^*)^{-1})$$
+- Invariant: if $$\hat{\theta}$$ is MLE, then $$g(\hat{\theta})$$ is MLE of $$g(\theta)$$
 
 ### Fisher Information
 
@@ -430,7 +430,7 @@ $$
 I(\theta) = -E\!\left[\frac{\partial^2 \log P(X \mid \theta)}{\partial \theta^2}\right] = E\!\left[\left(\frac{\partial \log P(X \mid \theta)}{\partial \theta}\right)^2\right]
 $$
 
-**Cramer-Rao bound**: $\text{Var}(\hat{\theta}) \geq \frac{1}{n\, I(\theta)}$
+**Cramer-Rao bound**: $$\text{Var}(\hat{\theta}) \geq \frac{1}{n\, I(\theta)}$$
 
 ### MAP Estimation
 
@@ -440,19 +440,19 @@ $$
 
 ### MLE-MAP-Regularization Connection
 
-| Prior $P(\theta)$ | MAP Objective | Equivalent Regularization |
+| Prior $$P(\theta)$$ | MAP Objective | Equivalent Regularization |
 |-------------------|---------------|---------------------------|
-| $N(0, \sigma^2 I)$ | $\log P(D \mid \theta) - \frac{\|\theta\|_2^2}{2\sigma^2}$ | L2 / Ridge ($\lambda = \frac{1}{\sigma^2}$) |
-| Laplace$(0, b)$ | $\log P(D \mid \theta) - \frac{\|\theta\|_1}{b}$ | L1 / Lasso ($\lambda = \frac{1}{b}$) |
-| Uniform | $\log P(D \mid \theta)$ | No regularization (= MLE) |
+| $$N(0, \sigma^2 I)$$ | $$\log P(D \mid \theta) - \frac{\|\theta\|_2^2}{2\sigma^2}$$ | L2 / Ridge ($$\lambda = \frac{1}{\sigma^2}$$) |
+| Laplace$$(0, b)$$ | $$\log P(D \mid \theta) - \frac{\|\theta\|_1}{b}$$ | L1 / Lasso ($$\lambda = \frac{1}{b}$$) |
+| Uniform | $$\log P(D \mid \theta)$$ | No regularization (= MLE) |
 
 ### Common MLE Derivations
 
-**Gaussian**: $\hat{\mu} = \bar{x}$, $\hat{\sigma}^2 = \frac{1}{n}\sum(x_i - \bar{x})^2$ (biased)
+**Gaussian**: $$\hat{\mu} = \bar{x}$$, $$\hat{\sigma}^2 = \frac{1}{n}\sum(x_i - \bar{x})^2$$ (biased)
 
-**Bernoulli**: $\hat{p} = \bar{x}$
+**Bernoulli**: $$\hat{p} = \bar{x}$$
 
-**Poisson**: $\hat{\lambda} = \bar{x}$
+**Poisson**: $$\hat{\lambda} = \bar{x}$$
 
 ## Implementation
 
@@ -518,7 +518,7 @@ def fisher_information_bernoulli(p: float) -> float:
 ## Key Takeaways
 - MLE maximizes likelihood; MAP adds a prior -- both give point estimates
 - The MLE-to-loss-function mapping explains why we use MSE and cross-entropy
-- Regularization strength $\lambda$ is inversely related to prior variance
+- Regularization strength $$\lambda$$ is inversely related to prior variance
 - Fisher information sets a fundamental limit on estimation precision
 """
 
@@ -531,13 +531,13 @@ The Central Limit Theorem (CLT) is one of the most important results in probabil
 
 ### Statement of CLT
 
-Let $X_1, X_2, \ldots, X_n$ be iid random variables with mean $\mu$ and finite variance $\sigma^2$. Then:
+Let $$X_1, X_2, \ldots, X_n$$ be iid random variables with mean $$\mu$$ and finite variance $$\sigma^2$$. Then:
 
 $$
 \frac{\bar{X}_n - \mu}{\sigma / \sqrt{n}} \xrightarrow{d} N(0, 1) \quad \text{as } n \to \infty
 $$
 
-Equivalently: $\bar{X}_n \approx N\!\left(\mu, \frac{\sigma^2}{n}\right)$ for large $n$.
+Equivalently: $$\bar{X}_n \approx N\!\left(\mu, \frac{\sigma^2}{n}\right)$$ for large $$n$$.
 
 ### Convergence Rate (Berry-Esseen)
 
@@ -545,7 +545,7 @@ $$
 \sup_x \left| P\!\left(\frac{\bar{X}_n - \mu}{\sigma/\sqrt{n}} \leq x\right) - \Phi(x) \right| \leq \frac{C \cdot E[|X - \mu|^3]}{\sigma^3 \sqrt{n}}
 $$
 
-where $C \leq 0.4748$. Convergence is $O(1/\sqrt{n})$.
+where $$C \leq 0.4748$$. Convergence is $$O(1/\sqrt{n})$$.
 
 ### Standard Error
 
@@ -559,11 +559,11 @@ $$
 \bar{X}_n \pm z_{\alpha/2} \cdot \frac{s}{\sqrt{n}}
 $$
 
-For 95% CI: $z_{0.025} = 1.96$. Requires $n \geq 30$ (rule of thumb).
+For 95% CI: $$z_{0.025} = 1.96$$. Requires $$n \geq 30$$ (rule of thumb).
 
 ### Multivariate CLT
 
-For random vectors $\mathbf{X}_i \in \mathbb{R}^d$ with mean $\boldsymbol{\mu}$ and covariance $\Sigma$:
+For random vectors $$\mathbf{X}_i \in \mathbb{R}^d$$ with mean $$\boldsymbol{\mu}$$ and covariance $$\Sigma$$:
 
 $$
 \sqrt{n}(\bar{\mathbf{X}}_n - \boldsymbol{\mu}) \xrightarrow{d} N(\mathbf{0}, \Sigma)
@@ -571,11 +571,11 @@ $$
 
 ### CLT and SGD
 
-Mini-batch gradient: $\hat{g}_B = \frac{1}{B}\sum_{i=1}^{B} \nabla \ell_i(\theta)$
+Mini-batch gradient: $$\hat{g}_B = \frac{1}{B}\sum_{i=1}^{B} \nabla \ell_i(\theta)$$
 
-By CLT: $\hat{g}_B \approx N\!\left(\nabla L(\theta),\, \frac{\Sigma_g}{B}\right)$
+By CLT: $$\hat{g}_B \approx N\!\left(\nabla L(\theta),\, \frac{\Sigma_g}{B}\right)$$
 
-Gradient noise scales as $O(1/\sqrt{B})$ -- this is why larger batch sizes give smoother training but diminishing returns.
+Gradient noise scales as $$O(1/\sqrt{B})$$ -- this is why larger batch sizes give smoother training but diminishing returns.
 
 ## Implementation
 
@@ -623,10 +623,10 @@ def required_sample_size(
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| CLT for A/B testing | Sample size estimation | $n \propto \sigma^2 / \epsilon^2$ |
-| Batch size and noise | SGD convergence | Gradient noise $\sim O(1/\sqrt{B})$ |
+| CLT for A/B testing | Sample size estimation | $$n \propto \sigma^2 / \epsilon^2$$ |
+| Batch size and noise | SGD convergence | Gradient noise $$\sim O(1/\sqrt{B})$$ |
 | Normal approximation | Large count data | Binomial/Poisson to Normal |
-| Delta method | Functions of means | $g(\bar{X}) \approx N(g(\mu), [g'(\mu)]^2 \sigma^2/n)$ |
+| Delta method | Functions of means | $$g(\bar{X}) \approx N(g(\mu), [g'(\mu)]^2 \sigma^2/n)$$ |
 
 ### Common Interview Questions
 - [ ] State the CLT. What are the assumptions? When does it fail?
@@ -639,14 +639,14 @@ def required_sample_size(
 
 | Aspect | CLT (z-test) | t-test | Bootstrap |
 |--------|-------------|--------|-----------|
-| Assumption | Large $n$, known $\sigma$ | Small $n$, unknown $\sigma$ | Minimal |
-| Distribution | Normal | Student-t ($n-1$ df) | Empirical |
-| When to use | $n > 30$ | $n < 30$, normal population | Any distribution |
+| Assumption | Large $$n$$, known $$\sigma$$ | Small $$n$$, unknown $$\sigma$$ | Minimal |
+| Distribution | Normal | Student-t ($$n-1$$ df) | Empirical |
+| When to use | $$n > 30$$ | $$n < 30$$, normal population | Any distribution |
 | Computational cost | Analytical | Analytical | Resampling |
 
 ## Key Takeaways
 - CLT explains why the Normal distribution is so common in practice
-- Standard error decreases as $1/\sqrt{n}$ -- quadruple samples to halve uncertainty
+- Standard error decreases as $$1/\sqrt{n}$$ -- quadruple samples to halve uncertainty
 - In SGD, mini-batch size controls the variance of gradient estimates via CLT
 - Sample size calculations for A/B tests are a direct CLT application
 """
@@ -660,17 +660,17 @@ Hypothesis testing is the statistical framework for making decisions under uncer
 
 ### Framework
 
-1. State null hypothesis $H_0$ and alternative $H_1$
-2. Choose significance level $\alpha$ (typically 0.05)
+1. State null hypothesis $$H_0$$ and alternative $$H_1$$
+2. Choose significance level $$\alpha$$ (typically 0.05)
 3. Compute test statistic and p-value
-4. Reject $H_0$ if p-value $< \alpha$
+4. Reject $$H_0$$ if p-value $$< \alpha$$
 
 ### Error Types
 
-| | $H_0$ true | $H_0$ false |
+| | $$H_0$$ true | $$H_0$$ false |
 |---|---|---|
-| Reject $H_0$ | Type I error ($\alpha$) | Correct (Power = $1-\beta$) |
-| Fail to reject | Correct ($1-\alpha$) | Type II error ($\beta$) |
+| Reject $$H_0$$ | Type I error ($$\alpha$$) | Correct (Power = $$1-\beta$$) |
+| Fail to reject | Correct ($$1-\alpha$$) | Type II error ($$\beta$$) |
 
 ### P-value
 
@@ -678,7 +678,7 @@ $$
 p\text{-value} = P(\text{test stat} \geq \text{observed} \mid H_0 \text{ true})
 $$
 
-**NOT** the probability that $H_0$ is true. It is the probability of seeing data this extreme under $H_0$.
+**NOT** the probability that $$H_0$$ is true. It is the probability of seeing data this extreme under $$H_0$$.
 
 ### Common Test Statistics
 
@@ -706,7 +706,7 @@ $$
 \text{Power} = P(\text{reject } H_0 \mid H_1 \text{ true}) = 1 - \beta
 $$
 
-Required sample size for two-sample test with effect size $\delta$:
+Required sample size for two-sample test with effect size $$\delta$$:
 
 $$
 n \geq \frac{(z_{\alpha/2} + z_\beta)^2 \cdot 2\sigma^2}{\delta^2}
@@ -714,13 +714,13 @@ $$
 
 ### Multiple Testing Correction
 
-When testing $m$ hypotheses simultaneously:
+When testing $$m$$ hypotheses simultaneously:
 
-- **Bonferroni**: reject if $p_i < \alpha/m$ (controls FWER)
-- **Benjamini-Hochberg**: controls FDR at level $\alpha$
-  1. Sort p-values: $p_{(1)} \leq \ldots \leq p_{(m)}$
-  2. Find largest $k$ where $p_{(k)} \leq \frac{k}{m}\alpha$
-  3. Reject all $H_{(1)}, \ldots, H_{(k)}$
+- **Bonferroni**: reject if $$p_i < \alpha/m$$ (controls FWER)
+- **Benjamini-Hochberg**: controls FDR at level $$\alpha$$
+  1. Sort p-values: $$p_{(1)} \leq \ldots \leq p_{(m)}$$
+  2. Find largest $$k$$ where $$p_{(k)} \leq \frac{k}{m}\alpha$$
+  3. Reject all $$H_{(1)}, \ldots, H_{(k)}$$
 
 ## Implementation
 
@@ -781,8 +781,8 @@ def benjamini_hochberg(p_values: np.ndarray, alpha: float = 0.05) -> np.ndarray:
 ### Common Interview Questions
 - [ ] Design an A/B test for a new recommendation algorithm. How do you determine sample size?
 - [ ] What is the difference between statistical and practical significance?
-- [ ] Explain p-value. Why is "$p < 0.05$" not the same as "95% chance the treatment works"?
-- [ ] You run 20 A/B tests and find 1 significant at $\alpha=0.05$. Is this real?
+- [ ] Explain p-value. Why is "$$p < 0.05$$" not the same as "95% chance the treatment works"?
+- [ ] You run 20 A/B tests and find 1 significant at $$\alpha=0.05$$. Is this real?
 - [ ] How would you handle early stopping in an A/B test?
 
 ## Comparisons
@@ -796,7 +796,7 @@ def benjamini_hochberg(p_values: np.ndarray, alpha: float = 0.05) -> np.ndarray:
 | Industry use | A/B testing standard | Growing adoption (Optimizely) |
 
 ## Key Takeaways
-- P-value is NOT $P(H_0 \text{ true})$ -- it is $P(\text{data this extreme} \mid H_0)$
+- P-value is NOT $$P(H_0 \text{ true})$$ -- it is $$P(\text{data this extreme} \mid H_0)$$
 - Always compute required sample size BEFORE running an experiment
 - Multiple testing without correction inflates false discoveries
 - Effect size matters as much as statistical significance
@@ -819,12 +819,12 @@ $$
 
 | Likelihood | Prior | Posterior | Update Rule |
 |-----------|-------|-----------|-------------|
-| Bernoulli($p$) | Beta($\alpha, \beta$) | Beta($\alpha + k, \beta + n - k$) | Add successes/failures |
-| Poisson($\lambda$) | Gamma($\alpha, \beta$) | Gamma($\alpha + \sum x_i, \beta + n$) | Add counts and observations |
-| Normal($\mu$, known $\sigma^2$) | Normal($\mu_0, \sigma_0^2$) | Normal($\tilde{\mu}, \tilde{\sigma}^2$) | Precision-weighted average |
-| Normal(known $\mu$, $\sigma^2$) | Inv-Gamma($\alpha, \beta$) | Inv-Gamma($\alpha + n/2, \beta + S/2$) | Add scaled residuals |
+| Bernoulli($$p$$) | Beta($$\alpha, \beta$$) | Beta($$\alpha + k, \beta + n - k$$) | Add successes/failures |
+| Poisson($$\lambda$$) | Gamma($$\alpha, \beta$$) | Gamma($$\alpha + \sum x_i, \beta + n$$) | Add counts and observations |
+| Normal($$\mu$$, known $$\sigma^2$$) | Normal($$\mu_0, \sigma_0^2$$) | Normal($$\tilde{\mu}, \tilde{\sigma}^2$$) | Precision-weighted average |
+| Normal(known $$\mu$$, $$\sigma^2$$) | Inv-Gamma($$\alpha, \beta$$) | Inv-Gamma($$\alpha + n/2, \beta + S/2$$) | Add scaled residuals |
 
-**Normal-Normal posterior** (known variance $\sigma^2$):
+**Normal-Normal posterior** (known variance $$\sigma^2$$):
 
 $$
 \tilde{\mu} = \frac{\frac{\mu_0}{\sigma_0^2} + \frac{n\bar{x}}{\sigma^2}}{\frac{1}{\sigma_0^2} + \frac{n}{\sigma^2}}, \quad \tilde{\sigma}^2 = \frac{1}{\frac{1}{\sigma_0^2} + \frac{n}{\sigma^2}}
@@ -832,7 +832,7 @@ $$
 
 ### Markov Chain Monte Carlo (MCMC)
 
-**Metropolis-Hastings**: Given current state $\theta$, propose $\theta' \sim q(\theta' \mid \theta)$, accept with probability:
+**Metropolis-Hastings**: Given current state $$\theta$$, propose $$\theta' \sim q(\theta' \mid \theta)$$, accept with probability:
 
 $$
 \alpha = \min\!\left(1, \frac{P(\theta' \mid D)\, q(\theta \mid \theta')}{P(\theta \mid D)\, q(\theta' \mid \theta)}\right)
@@ -846,7 +846,7 @@ $$
 
 ### Variational Inference
 
-Approximate posterior $P(\theta \mid D)$ with tractable $q(\theta; \phi)$:
+Approximate posterior $$P(\theta \mid D)$$ with tractable $$q(\theta; \phi)$$:
 
 $$
 \phi^* = \arg\min_\phi \text{KL}(q(\theta; \phi) \| P(\theta \mid D))
@@ -914,7 +914,7 @@ def metropolis_hastings(
 | Conjugate updates | Online learning, bandits | Closed-form posterior updates |
 | Thompson sampling | Exploration-exploitation | Sample from posterior, act greedily |
 | ELBO maximization | Scalable Bayesian DL | VI trades exactness for speed |
-| Credible intervals | Uncertainty quantification | 95% CI = 95% probability $\theta$ is inside |
+| Credible intervals | Uncertainty quantification | 95% CI = 95% probability $$\theta$$ is inside |
 
 ### Common Interview Questions
 - [ ] Derive the posterior for the Beta-Binomial conjugate model.
@@ -930,7 +930,7 @@ def metropolis_hastings(
 | Accuracy | Asymptotically exact | Approximate |
 | Speed | Slow (sequential) | Fast (optimization) |
 | Scalability | Millions of params: hard | Billions of params: OK |
-| Diagnostics | $\hat{R}$, ESS, trace plots | ELBO convergence |
+| Diagnostics | $$\hat{R}$$, ESS, trace plots | ELBO convergence |
 | Use case | Small models, gold standard | VAEs, BNNs, large-scale |
 
 ## Key Takeaways
@@ -960,9 +960,9 @@ h(X) = -\int f(x) \log f(x)\, dx
 $$
 
 Properties:
-- $H(X) \geq 0$ (discrete), $h(X)$ can be negative (continuous)
-- Maximum entropy discrete: uniform. Maximum entropy continuous with fixed $\mu, \sigma^2$: Gaussian.
-- $H(X, Y) = H(X) + H(Y \mid X) = H(Y) + H(X \mid Y)$
+- $$H(X) \geq 0$$ (discrete), $$h(X)$$ can be negative (continuous)
+- Maximum entropy discrete: uniform. Maximum entropy continuous with fixed $$\mu, \sigma^2$$: Gaussian.
+- $$H(X, Y) = H(X) + H(Y \mid X) = H(Y) + H(X \mid Y)$$
 
 ### Cross-Entropy
 
@@ -970,7 +970,7 @@ $$
 H(p, q) = -\sum_x p(x) \log q(x) = H(p) + D_{\text{KL}}(p \| q)
 $$
 
-This is exactly the loss function for classification: $p$ = true labels, $q$ = model predictions.
+This is exactly the loss function for classification: $$p$$ = true labels, $$q$$ = model predictions.
 
 ### KL Divergence
 
@@ -979,13 +979,13 @@ D_{\text{KL}}(p \| q) = \sum_x p(x) \log \frac{p(x)}{q(x)} = E_p\!\left[\log \fr
 $$
 
 Properties:
-- $D_{\text{KL}}(p \| q) \geq 0$ (Gibbs' inequality)
-- NOT symmetric: $D_{\text{KL}}(p \| q) \neq D_{\text{KL}}(q \| p)$
-- $D_{\text{KL}}(p \| q) = 0 \iff p = q$
+- $$D_{\text{KL}}(p \| q) \geq 0$$ (Gibbs' inequality)
+- NOT symmetric: $$D_{\text{KL}}(p \| q) \neq D_{\text{KL}}(q \| p)$$
+- $$D_{\text{KL}}(p \| q) = 0 \iff p = q$$
 
 **Forward vs. reverse KL**:
-- $D_{\text{KL}}(p \| q)$: mean-seeking (q covers all modes of p)
-- $D_{\text{KL}}(q \| p)$: mode-seeking (q concentrates on one mode)
+- $$D_{\text{KL}}(p \| q)$$: mean-seeking (q covers all modes of p)
+- $$D_{\text{KL}}(q \| p)$$: mode-seeking (q concentrates on one mode)
 
 ### Mutual Information
 
@@ -993,7 +993,7 @@ $$
 I(X; Y) = H(X) - H(X \mid Y) = H(Y) - H(Y \mid X) = D_{\text{KL}}(P_{XY} \| P_X P_Y)
 $$
 
-$I(X; Y) = 0 \iff X \perp Y$. Symmetric and non-negative.
+$$I(X; Y) = 0 \iff X \perp Y$$. Symmetric and non-negative.
 
 ### KL Between Gaussians
 
@@ -1073,8 +1073,8 @@ def kl_gaussians_multivariate(
 |--------|--------------|---------------|-------------|
 | Symmetry | No | Yes | Yes |
 | Triangle inequality | No | Yes (sqrt) | Yes |
-| Bounded | No | Yes ($\leq \log 2$) | No |
-| Zero support handling | Undefined if $q(x)=0$ | Defined | Defined |
+| Bounded | No | Yes ($$\leq \log 2$$) | No |
+| Zero support handling | Undefined if $$q(x)=0$$ | Defined | Defined |
 | GAN use | Original GAN (theory) | -- | WGAN |
 
 ## Key Takeaways
@@ -1097,21 +1097,21 @@ Linear algebra is the computational backbone of ML. A senior MLE must be fluent 
 
 | Operation | Notation | Complexity | Notes |
 |-----------|----------|------------|-------|
-| Matrix multiply | $C = AB$ | $O(n^2m)$ for $A_{n \times m}, B_{m \times p}$ | Most common bottleneck |
-| Transpose | $A^\top$ | $O(1)$ (logical) | $(AB)^\top = B^\top A^\top$ |
-| Inverse | $A^{-1}$ | $O(n^3)$ | Avoid computing explicitly |
-| Determinant | $\det(A)$ | $O(n^3)$ via LU | $\det(AB) = \det(A)\det(B)$ |
-| Trace | $\text{tr}(A)$ | $O(n)$ | $\text{tr}(AB) = \text{tr}(BA)$ |
+| Matrix multiply | $$C = AB$$ | $$O(n^2m)$$ for $$A_{n \times m}, B_{m \times p}$$ | Most common bottleneck |
+| Transpose | $$A^\top$$ | $$O(1)$$ (logical) | $$(AB)^\top = B^\top A^\top$$ |
+| Inverse | $$A^{-1}$$ | $$O(n^3)$$ | Avoid computing explicitly |
+| Determinant | $$\det(A)$$ | $$O(n^3)$$ via LU | $$\det(AB) = \det(A)\det(B)$$ |
+| Trace | $$\text{tr}(A)$$ | $$O(n)$$ | $$\text{tr}(AB) = \text{tr}(BA)$$ |
 
 ### Matrix Types and Properties
 
 | Type | Definition | Key Property |
 |------|-----------|-------------|
-| Symmetric | $A = A^\top$ | Real eigenvalues, orthogonal eigenvectors |
-| Orthogonal | $A^\top A = I$ | Preserves norms: $\|Ax\| = \|x\|$ |
-| Positive definite | $x^\top A x > 0, \forall x \neq 0$ | All eigenvalues $> 0$ |
-| Positive semi-definite | $x^\top A x \geq 0$ | All eigenvalues $\geq 0$ |
-| Idempotent | $A^2 = A$ | Projection matrices |
+| Symmetric | $$A = A^\top$$ | Real eigenvalues, orthogonal eigenvectors |
+| Orthogonal | $$A^\top A = I$$ | Preserves norms: $$\|Ax\| = \|x\|$$ |
+| Positive definite | $$x^\top A x > 0, \forall x \neq 0$$ | All eigenvalues $$> 0$$ |
+| Positive semi-definite | $$x^\top A x \geq 0$$ | All eigenvalues $$\geq 0$$ |
+| Idempotent | $$A^2 = A$$ | Projection matrices |
 
 ### Norms
 
@@ -1133,15 +1133,15 @@ $$
 \text{rank}(A) + \text{nullity}(A) = n \quad \text{(rank-nullity theorem)}
 $$
 
-- $\text{rank}(A) = \text{rank}(A^\top) = \text{rank}(A^\top A)$
-- $A$ is invertible $\iff$ $\text{rank}(A) = n$ $\iff$ $\det(A) \neq 0$
+- $$\text{rank}(A) = \text{rank}(A^\top) = \text{rank}(A^\top A)$$
+- $$A$$ is invertible $$\iff$$ $$\text{rank}(A) = n$$ $$\iff$$ $$\det(A) \neq 0$$
 
 ### Solving Linear Systems
 
-Never compute $A^{-1}b$ explicitly. Instead:
+Never compute $$A^{-1}b$$ explicitly. Instead:
 
-1. **LU decomposition**: general case, $O(n^3)$
-2. **Cholesky**: $A = LL^\top$ for PD matrices, $O(n^3/3)$ -- 2x faster than LU
+1. **LU decomposition**: general case, $$O(n^3)$$
+2. **Cholesky**: $$A = LL^\top$$ for PD matrices, $$O(n^3/3)$$ -- 2x faster than LU
 3. **QR decomposition**: for least squares, numerically stable
 
 $$
@@ -1192,31 +1192,31 @@ def gram_schmidt(V: np.ndarray) -> np.ndarray:
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| Avoid explicit inverse | Any $Ax = b$ | Use `np.linalg.solve`, not `np.linalg.inv` |
+| Avoid explicit inverse | Any $$Ax = b$$ | Use `np.linalg.solve`, not `np.linalg.inv` |
 | Cholesky for PD systems | Covariance matrices, kernels | 2x faster than general solver |
-| Condition number check | Numerical stability | High $\kappa$ = numerically unstable |
-| Low-rank approximation | Dimensionality reduction | Keep top-$k$ singular values |
+| Condition number check | Numerical stability | High $$\kappa$$ = numerically unstable |
+| Low-rank approximation | Dimensionality reduction | Keep top-$$k$$ singular values |
 
 ### Common Interview Questions
 - [ ] Why should you never compute matrix inverses explicitly in practice?
 - [ ] What is the condition number and why does it matter for ML?
-- [ ] Prove that $A^\top A$ is always positive semi-definite.
-- [ ] What is the rank of the outer product $uv^\top$?
+- [ ] Prove that $$A^\top A$$ is always positive semi-definite.
+- [ ] What is the rank of the outer product $$uv^\top$$?
 - [ ] Explain the difference between Frobenius norm and spectral norm.
 
 ## Comparisons
 
 | Solver | When to Use | Complexity | Stability |
 |--------|------------|------------|-----------|
-| LU | General systems | $O(n^3)$ | Good |
-| Cholesky | PD systems (covariance) | $O(n^3/3)$ | Excellent |
-| QR | Least squares | $O(2mn^2)$ | Best |
-| SVD | Rank-deficient systems | $O(mn^2)$ | Best |
+| LU | General systems | $$O(n^3)$$ | Good |
+| Cholesky | PD systems (covariance) | $$O(n^3/3)$$ | Excellent |
+| QR | Least squares | $$O(2mn^2)$$ | Best |
+| SVD | Rank-deficient systems | $$O(mn^2)$$ | Best |
 
 ## Key Takeaways
-- Never compute $A^{-1}$ explicitly -- always use decomposition-based solvers
+- Never compute $$A^{-1}$$ explicitly -- always use decomposition-based solvers
 - Positive definiteness is pervasive: covariance matrices, kernel matrices, Hessians
-- Condition number predicts numerical issues -- add regularization ($A + \lambda I$) if high
+- Condition number predicts numerical issues -- add regularization ($$A + \lambda I$$) if high
 - Frobenius norm = "element-wise L2", spectral norm = largest singular value
 """
 
@@ -1229,7 +1229,7 @@ Eigendecomposition reveals the fundamental structure of linear transformations. 
 
 ### Definition
 
-For a square matrix $A \in \mathbb{R}^{n \times n}$, eigenvalue $\lambda$ and eigenvector $v \neq 0$:
+For a square matrix $$A \in \mathbb{R}^{n \times n}$$, eigenvalue $$\lambda$$ and eigenvector $$v \neq 0$$:
 
 $$
 Av = \lambda v
@@ -1249,9 +1249,9 @@ $$
 A = V \Lambda V^{-1}
 $$
 
-where $V = [v_1 | \cdots | v_n]$ and $\Lambda = \text{diag}(\lambda_1, \ldots, \lambda_n)$.
+where $$V = [v_1 | \cdots | v_n]$$ and $$\Lambda = \text{diag}(\lambda_1, \ldots, \lambda_n)$$.
 
-For **symmetric** matrices ($A = A^\top$):
+For **symmetric** matrices ($$A = A^\top$$):
 
 $$
 A = Q \Lambda Q^\top, \quad Q^\top Q = I
@@ -1260,32 +1260,32 @@ $$
 Properties of symmetric eigendecomposition:
 - All eigenvalues are **real**
 - Eigenvectors are **orthogonal** (can be chosen orthonormal)
-- $A$ is PD $\iff$ all $\lambda_i > 0$
-- $A$ is PSD $\iff$ all $\lambda_i \geq 0$
+- $$A$$ is PD $$\iff$$ all $$\lambda_i > 0$$
+- $$A$$ is PSD $$\iff$$ all $$\lambda_i \geq 0$$
 
 ### Key Properties
 
 | Property | Formula |
 |----------|---------|
-| Trace | $\text{tr}(A) = \sum_i \lambda_i$ |
-| Determinant | $\det(A) = \prod_i \lambda_i$ |
-| Matrix power | $A^k = V \Lambda^k V^{-1}$ |
-| Matrix exponential | $e^A = V e^\Lambda V^{-1}$ |
-| Inverse | $A^{-1} = V \Lambda^{-1} V^{-1}$ (if all $\lambda_i \neq 0$) |
+| Trace | $$\text{tr}(A) = \sum_i \lambda_i$$ |
+| Determinant | $$\det(A) = \prod_i \lambda_i$$ |
+| Matrix power | $$A^k = V \Lambda^k V^{-1}$$ |
+| Matrix exponential | $$e^A = V e^\Lambda V^{-1}$$ |
+| Inverse | $$A^{-1} = V \Lambda^{-1} V^{-1}$$ (if all $$\lambda_i \neq 0$$) |
 
 ### PCA as Eigendecomposition
 
-Given centered data matrix $X \in \mathbb{R}^{n \times d}$:
+Given centered data matrix $$X \in \mathbb{R}^{n \times d}$$:
 
 $$
 C = \frac{1}{n-1} X^\top X
 $$
 
-Eigendecompose covariance: $C = Q \Lambda Q^\top$.
+Eigendecompose covariance: $$C = Q \Lambda Q^\top$$.
 
-Top-$k$ principal components: project onto $Q_k$ (first $k$ eigenvectors).
+Top-$$k$$ principal components: project onto $$Q_k$$ (first $$k$$ eigenvectors).
 
-**Variance explained** by component $j$: $\frac{\lambda_j}{\sum_i \lambda_i}$.
+**Variance explained** by component $$j$$: $$\frac{\lambda_j}{\sum_i \lambda_i}$$.
 
 ### Rayleigh Quotient
 
@@ -1293,7 +1293,7 @@ $$
 R(A, x) = \frac{x^\top A x}{x^\top x}
 $$
 
-$\lambda_{\min} \leq R(A, x) \leq \lambda_{\max}$. Maximum is achieved at the top eigenvector. This is the optimization formulation of PCA.
+$$\lambda_{\min} \leq R(A, x) \leq \lambda_{\max}$$. Maximum is achieved at the top eigenvector. This is the optimization formulation of PCA.
 
 ## Implementation
 
@@ -1353,7 +1353,7 @@ def spectral_clustering_laplacian(
 |---------|------------|-------------|
 | PCA | Dimensionality reduction | Top eigenvectors of covariance = max variance directions |
 | Spectral clustering | Graph-based clustering | Bottom eigenvectors of Laplacian |
-| Power iteration | Dominant eigenvalue | $O(n^2)$ per iteration, for sparse/large matrices |
+| Power iteration | Dominant eigenvalue | $$O(n^2)$$ per iteration, for sparse/large matrices |
 | Hessian eigenvalues | Optimization landscape | Positive eigenvalues = local convexity |
 
 ### Common Interview Questions
@@ -1361,15 +1361,15 @@ def spectral_clustering_laplacian(
 - [ ] What are the eigenvalues of a projection matrix? Of an orthogonal matrix?
 - [ ] How does the power iteration method work? What is its convergence rate?
 - [ ] Explain spectral clustering and the role of the graph Laplacian.
-- [ ] If $A$ has eigenvalues $\lambda_i$, what are the eigenvalues of $A^2$? Of $A^{-1}$?
+- [ ] If $$A$$ has eigenvalues $$\lambda_i$$, what are the eigenvalues of $$A^2$$? Of $$A^{-1}$$?
 
 ## Comparisons
 
 | Aspect | Eigendecomposition | SVD |
 |--------|-------------------|-----|
 | Input | Square matrices only | Any matrix |
-| Symmetric matrix | $A = Q\Lambda Q^\top$ | Same (eigenvalues = singular values if PSD) |
-| Computation | $O(n^3)$ | $O(\min(mn^2, m^2n))$ |
+| Symmetric matrix | $$A = Q\Lambda Q^\top$$ | Same (eigenvalues = singular values if PSD) |
+| Computation | $$O(n^3)$$ | $$O(\min(mn^2, m^2n))$$ |
 | PCA | Via covariance matrix | Directly on data matrix |
 | Stability | Less stable for non-symmetric | More numerically stable |
 
@@ -1389,7 +1389,7 @@ SVD is the most important matrix decomposition in ML. It works for any matrix (n
 
 ### SVD Decomposition
 
-For any matrix $A \in \mathbb{R}^{m \times n}$:
+For any matrix $$A \in \mathbb{R}^{m \times n}$$:
 
 $$
 A = U \Sigma V^\top
@@ -1397,11 +1397,11 @@ $$
 
 | Component | Shape | Properties |
 |-----------|-------|------------|
-| $U$ | $m \times m$ | Orthogonal. Columns = left singular vectors |
-| $\Sigma$ | $m \times n$ | Diagonal. $\sigma_1 \geq \sigma_2 \geq \cdots \geq 0$ |
-| $V$ | $n \times n$ | Orthogonal. Columns = right singular vectors |
+| $$U$$ | $$m \times m$$ | Orthogonal. Columns = left singular vectors |
+| $$\Sigma$$ | $$m \times n$$ | Diagonal. $$\sigma_1 \geq \sigma_2 \geq \cdots \geq 0$$ |
+| $$V$$ | $$n \times n$$ | Orthogonal. Columns = right singular vectors |
 
-**Compact (thin) SVD**: $A = U_r \Sigma_r V_r^\top$ where $r = \text{rank}(A)$.
+**Compact (thin) SVD**: $$A = U_r \Sigma_r V_r^\top$$ where $$r = \text{rank}(A)$$.
 
 ### Relationship to Eigendecomposition
 
@@ -1409,9 +1409,9 @@ $$
 A^\top A = V \Sigma^2 V^\top, \quad AA^\top = U \Sigma^2 U^\top
 $$
 
-- Singular values = $\sqrt{\text{eigenvalues of } A^\top A}$
-- Right singular vectors = eigenvectors of $A^\top A$
-- Left singular vectors = eigenvectors of $AA^\top$
+- Singular values = $$\sqrt{\text{eigenvalues of } A^\top A}$$
+- Right singular vectors = eigenvectors of $$A^\top A$$
+- Left singular vectors = eigenvectors of $$AA^\top$$
 
 ### Eckart-Young Theorem (Optimal Low-Rank Approximation)
 
@@ -1431,7 +1431,7 @@ $$
 A^+ = V \Sigma^+ U^\top, \quad \Sigma^+_{ii} = \begin{cases} 1/\sigma_i & \sigma_i > 0 \\ 0 & \sigma_i = 0 \end{cases}
 $$
 
-Solves least squares: $\hat{x} = A^+ b$ minimizes $\|Ax - b\|_2$.
+Solves least squares: $$\hat{x} = A^+ b$$ minimizes $$\|Ax - b\|_2$$.
 
 ### Applications in ML
 
@@ -1442,7 +1442,7 @@ Solves least squares: $\hat{x} = A^+ b$ minimizes $\|Ax - b\|_2$.
 | Recommender systems | SVD on user-item rating matrix |
 | Image compression | Low-rank approximation per channel |
 | Pseudoinverse | Regularized least squares |
-| Whitening | $X_w = X V \Sigma^{-1}$ |
+| Whitening | $$X_w = X V \Sigma^{-1}$$ |
 
 ## Implementation
 
@@ -1504,7 +1504,7 @@ def matrix_completion_svd(
 ### Common Interview Questions
 - [ ] What is the relationship between SVD and PCA? When would you prefer SVD over eigendecomposition?
 - [ ] Explain the Eckart-Young theorem and its significance for dimensionality reduction.
-- [ ] How are singular values related to eigenvalues of $A^\top A$?
+- [ ] How are singular values related to eigenvalues of $$A^\top A$$?
 - [ ] Describe how SVD is used in recommender systems (matrix factorization).
 - [ ] What is the pseudoinverse and when do you need it?
 
@@ -1512,15 +1512,15 @@ def matrix_completion_svd(
 
 | Aspect | Full SVD | Truncated SVD | Randomized SVD |
 |--------|----------|---------------|----------------|
-| Complexity | $O(\min(mn^2, m^2n))$ | $O(mnk)$ | $O(mn\log k)$ |
+| Complexity | $$O(\min(mn^2, m^2n))$$ | $$O(mnk)$$ | $$O(mn\log k)$$ |
 | Exact | Yes | Yes (top-k) | Approximate |
 | Large matrices | Slow | Better | Fast |
 | Implementation | `np.linalg.svd` | `scipy.sparse.linalg.svds` | `sklearn.utils.extmath.randomized_svd` |
 
 ## Key Takeaways
 - SVD works for ANY matrix -- it is the most general decomposition
-- Truncated SVD gives the best rank-$k$ approximation (Eckart-Young)
-- Use SVD instead of eigendecomposition of $X^\top X$ for numerical stability
+- Truncated SVD gives the best rank-$$k$$ approximation (Eckart-Young)
+- Use SVD instead of eigendecomposition of $$X^\top X$$ for numerical stability
 - SVD-based matrix factorization is the foundation of collaborative filtering
 """
 
@@ -1535,17 +1535,17 @@ Multivariable calculus is the mathematical language of ML optimization. A senior
 
 ### Gradient
 
-For $f: \mathbb{R}^n \to \mathbb{R}$:
+For $$f: \mathbb{R}^n \to \mathbb{R}$$:
 
 $$
 \nabla f(x) = \begin{bmatrix} \frac{\partial f}{\partial x_1} \\ \vdots \\ \frac{\partial f}{\partial x_n} \end{bmatrix}
 $$
 
-The gradient points in the direction of steepest ascent. $\|\nabla f\|$ gives the rate of change.
+The gradient points in the direction of steepest ascent. $$\|\nabla f\|$$ gives the rate of change.
 
 ### Jacobian
 
-For $f: \mathbb{R}^n \to \mathbb{R}^m$:
+For $$f: \mathbb{R}^n \to \mathbb{R}^m$$:
 
 $$
 J_f = \begin{bmatrix} \frac{\partial f_1}{\partial x_1} & \cdots & \frac{\partial f_1}{\partial x_n} \\ \vdots & \ddots & \vdots \\ \frac{\partial f_m}{\partial x_1} & \cdots & \frac{\partial f_m}{\partial x_n} \end{bmatrix} \in \mathbb{R}^{m \times n}
@@ -1553,15 +1553,15 @@ $$
 
 ### Hessian
 
-For $f: \mathbb{R}^n \to \mathbb{R}$:
+For $$f: \mathbb{R}^n \to \mathbb{R}$$:
 
 $$
 H_f = \nabla^2 f = \begin{bmatrix} \frac{\partial^2 f}{\partial x_1^2} & \cdots & \frac{\partial^2 f}{\partial x_1 \partial x_n} \\ \vdots & \ddots & \vdots \\ \frac{\partial^2 f}{\partial x_n \partial x_1} & \cdots & \frac{\partial^2 f}{\partial x_n^2} \end{bmatrix}
 $$
 
 The Hessian is symmetric (Schwarz's theorem). Its eigenvalues determine curvature:
-- All $\lambda_i > 0$: local minimum (PD)
-- All $\lambda_i < 0$: local maximum (ND)
+- All $$\lambda_i > 0$$: local minimum (PD)
+- All $$\lambda_i < 0$$: local maximum (ND)
 - Mixed signs: saddle point
 
 ### Taylor Expansion
@@ -1588,11 +1588,11 @@ $$
 
 | Expression | Derivative |
 |-----------|-----------|
-| $f = a^\top x$ | $\nabla_x f = a$ |
-| $f = x^\top A x$ | $\nabla_x f = (A + A^\top)x$ |
-| $f = \|Ax - b\|_2^2$ | $\nabla_x f = 2A^\top(Ax - b)$ |
-| $f = \log\det(X)$ | $\nabla_X f = X^{-\top}$ |
-| $f = \text{tr}(AXB)$ | $\nabla_X f = A^\top B^\top$ (w.r.t. $X$) |
+| $$f = a^\top x$$ | $$\nabla_x f = a$$ |
+| $$f = x^\top A x$$ | $$\nabla_x f = (A + A^\top)x$$ |
+| $$f = \|Ax - b\|_2^2$$ | $$\nabla_x f = 2A^\top(Ax - b)$$ |
+| $$f = \log\det(X)$$ | $$\nabla_X f = X^{-\top}$$ |
+| $$f = \text{tr}(AXB)$$ | $$\nabla_X f = A^\top B^\top$$ (w.r.t. $$X$$) |
 
 ## Implementation
 
@@ -1663,7 +1663,7 @@ def newtons_method(
 | Taylor expansion | Understanding optimizers | Newton = quadratic approx minimization |
 
 ### Common Interview Questions
-- [ ] Derive the gradient of the MSE loss $\|Xw - y\|^2$ with respect to $w$.
+- [ ] Derive the gradient of the MSE loss $$\|Xw - y\|^2$$ with respect to $$w$$.
 - [ ] What does the Hessian tell us about the loss landscape? How do saddle points affect training?
 - [ ] Explain Newton's method. Why is it not used directly in deep learning?
 - [ ] What is the Jacobian and when do you need it vs. the gradient?
@@ -1673,10 +1673,10 @@ def newtons_method(
 
 | Method | Convergence | Cost per Step | Hessian Needed |
 |--------|------------|---------------|----------------|
-| Gradient descent | Linear $O(\kappa \log 1/\epsilon)$ | $O(n)$ | No |
-| Newton's method | Quadratic | $O(n^3)$ | Yes |
-| Quasi-Newton (L-BFGS) | Superlinear | $O(n)$ | Approximated |
-| Conjugate gradient | $O(\sqrt{\kappa})$ steps | $O(n)$ | No (Hessian-vector products) |
+| Gradient descent | Linear $$O(\kappa \log 1/\epsilon)$$ | $$O(n)$$ | No |
+| Newton's method | Quadratic | $$O(n^3)$$ | Yes |
+| Quasi-Newton (L-BFGS) | Superlinear | $$O(n)$$ | Approximated |
+| Conjugate gradient | $$O(\sqrt{\kappa})$$ steps | $$O(n)$$ | No (Hessian-vector products) |
 
 ## Key Takeaways
 - The gradient is the foundation of all modern ML training
@@ -1694,7 +1694,7 @@ The chain rule is the single most important calculus concept in deep learning. I
 
 ### Univariate Chain Rule
 
-For $y = f(g(x))$:
+For $$y = f(g(x))$$:
 
 $$
 \frac{dy}{dx} = \frac{dy}{dg} \cdot \frac{dg}{dx} = f'(g(x)) \cdot g'(x)
@@ -1702,23 +1702,23 @@ $$
 
 ### Multivariate Chain Rule
 
-For $f: \mathbb{R}^n \to \mathbb{R}$ composed with $g: \mathbb{R}^m \to \mathbb{R}^n$:
+For $$f: \mathbb{R}^n \to \mathbb{R}$$ composed with $$g: \mathbb{R}^m \to \mathbb{R}^n$$:
 
 $$
 \frac{\partial f}{\partial x_j} = \sum_{i=1}^{n} \frac{\partial f}{\partial g_i} \cdot \frac{\partial g_i}{\partial x_j}
 $$
 
-In matrix form: $\nabla_x f = J_g^\top \nabla_g f$
+In matrix form: $$\nabla_x f = J_g^\top \nabla_g f$$
 
 ### Backpropagation Algorithm
 
-For a computation graph with loss $L$:
+For a computation graph with loss $$L$$:
 
 **Forward pass**: compute each node's value from inputs to output.
 
 **Backward pass**: compute gradients from output back to inputs.
 
-For layer $l$ with input $h_{l-1}$, weights $W_l$, and activation $\sigma$:
+For layer $$l$$ with input $$h_{l-1}$$, weights $$W_l$$, and activation $$\sigma$$:
 
 $$
 z_l = W_l h_{l-1} + b_l, \quad h_l = \sigma(z_l)
@@ -1734,34 +1734,34 @@ $$
 
 ### Common Activation Derivatives
 
-| Activation | $\sigma(z)$ | $\sigma'(z)$ |
+| Activation | $$\sigma(z)$$ | $$\sigma'(z)$$ |
 |-----------|-------------|-------------|
-| Sigmoid | $\frac{1}{1+e^{-z}}$ | $\sigma(z)(1-\sigma(z))$ |
-| Tanh | $\frac{e^z - e^{-z}}{e^z + e^{-z}}$ | $1 - \tanh^2(z)$ |
-| ReLU | $\max(0, z)$ | $\mathbf{1}[z > 0]$ |
-| Softmax | $\frac{e^{z_i}}{\sum_j e^{z_j}}$ | $\text{diag}(s) - ss^\top$ |
+| Sigmoid | $$\frac{1}{1+e^{-z}}$$ | $$\sigma(z)(1-\sigma(z))$$ |
+| Tanh | $$\frac{e^z - e^{-z}}{e^z + e^{-z}}$$ | $$1 - \tanh^2(z)$$ |
+| ReLU | $$\max(0, z)$$ | $$\mathbf{1}[z > 0]$$ |
+| Softmax | $$\frac{e^{z_i}}{\sum_j e^{z_j}}$$ | $$\text{diag}(s) - ss^\top$$ |
 
 ### Forward vs Reverse Mode AD
 
-For $f: \mathbb{R}^n \to \mathbb{R}^m$:
+For $$f: \mathbb{R}^n \to \mathbb{R}^m$$:
 
 | Mode | Computes | Cost | Best When |
 |------|----------|------|-----------|
-| Forward (tangent) | One column of Jacobian per pass | $O(n)$ passes for full Jacobian | $n \ll m$ |
-| Reverse (adjoint) | One row of Jacobian per pass | $O(m)$ passes for full Jacobian | $m \ll n$ |
+| Forward (tangent) | One column of Jacobian per pass | $$O(n)$$ passes for full Jacobian | $$n \ll m$$ |
+| Reverse (adjoint) | One row of Jacobian per pass | $$O(m)$$ passes for full Jacobian | $$m \ll n$$ |
 
-Deep learning: $m = 1$ (scalar loss), $n$ = millions of parameters. Reverse mode = ONE backward pass for all gradients.
+Deep learning: $$m = 1$$ (scalar loss), $$n$$ = millions of parameters. Reverse mode = ONE backward pass for all gradients.
 
 ### Vanishing / Exploding Gradients
 
-For an $L$-layer network:
+For an $$L$$-layer network:
 
 $$
 \frac{\partial L}{\partial W_1} \propto \prod_{l=2}^{L} W_l^\top \cdot \text{diag}(\sigma'(z_l))
 $$
 
-- If $\|W_l\| < 1$: gradients vanish exponentially
-- If $\|W_l\| > 1$: gradients explode exponentially
+- If $$\|W_l\| < 1$$: gradients vanish exponentially
+- If $$\|W_l\| > 1$$: gradients explode exponentially
 
 **Solutions**: residual connections, gradient clipping, careful initialization (Xavier/He), LayerNorm/BatchNorm.
 
@@ -1814,8 +1814,8 @@ def softmax_cross_entropy_backward(
 |---------|------------|-------------|
 | Backprop derivation | "Derive gradients for layer X" | Chain rule + cache forward values |
 | Vanishing gradients | Architecture design | ResNets, LSTM gates solve this |
-| Gradient checking | Debugging custom layers | $\frac{f(x+\epsilon) - f(x-\epsilon)}{2\epsilon}$ |
-| Softmax + CE gradient | Output layer | Simplifies to $\hat{y} - y$ |
+| Gradient checking | Debugging custom layers | $$\frac{f(x+\epsilon) - f(x-\epsilon)}{2\epsilon}$$ |
+| Softmax + CE gradient | Output layer | Simplifies to $$\hat{y} - y$$ |
 
 ### Common Interview Questions
 - [ ] Derive backpropagation for a 2-layer MLP with ReLU activation.
@@ -1828,8 +1828,8 @@ def softmax_cross_entropy_backward(
 
 | Aspect | Backpropagation | Numerical Differentiation | Symbolic Differentiation |
 |--------|----------------|--------------------------|-------------------------|
-| Accuracy | Exact (up to float) | Approximate ($O(\epsilon^2)$) | Exact |
-| Speed | $O(\text{forward pass})$ | $O(n \cdot \text{forward})$ | Can be exponential |
+| Accuracy | Exact (up to float) | Approximate ($$O(\epsilon^2)$$) | Exact |
+| Speed | $$O(\text{forward pass})$$ | $$O(n \cdot \text{forward})$$ | Can be exponential |
 | Memory | Stores activations | Minimal | Expression growth |
 | Use case | Training | Gradient checking | Closed-form derivations |
 
@@ -1837,7 +1837,7 @@ def softmax_cross_entropy_backward(
 - Backpropagation IS the chain rule applied via reverse-mode automatic differentiation
 - Reverse mode computes all parameter gradients in a single backward pass
 - The vanishing gradient problem drove architectural innovations (ResNets, LSTMs, normalization)
-- Softmax + cross-entropy gradient simplifying to $\hat{y} - y$ is both elegant and practically important
+- Softmax + cross-entropy gradient simplifying to $$\hat{y} - y$$ is both elegant and practically important
 """
 
 CONTENT["pillar7.calculus_optimization.convex_optimization"] = r"""# Convex Optimization
@@ -1849,27 +1849,27 @@ Convex optimization is the theoretical foundation of ML optimization. While deep
 
 ### Convex Sets and Functions
 
-A set $C$ is **convex** if $\forall x, y \in C, \lambda \in [0,1]$: $\lambda x + (1-\lambda)y \in C$.
+A set $$C$$ is **convex** if $$\forall x, y \in C, \lambda \in [0,1]$$: $$\lambda x + (1-\lambda)y \in C$$.
 
-A function $f$ is **convex** if:
+A function $$f$$ is **convex** if:
 
 $$
 f(\lambda x + (1-\lambda)y) \leq \lambda f(x) + (1-\lambda) f(y)
 $$
 
-Equivalent conditions (for twice-differentiable $f$):
-- **First order**: $f(y) \geq f(x) + \nabla f(x)^\top (y - x)$ (tangent line underestimates)
-- **Second order**: $\nabla^2 f(x) \succeq 0$ (Hessian is PSD everywhere)
+Equivalent conditions (for twice-differentiable $$f$$):
+- **First order**: $$f(y) \geq f(x) + \nabla f(x)^\top (y - x)$$ (tangent line underestimates)
+- **Second order**: $$\nabla^2 f(x) \succeq 0$$ (Hessian is PSD everywhere)
 
 **Strictly convex**: strict inequality (unique global minimum).
 
-**Strongly convex** ($m$-strongly): $\nabla^2 f \succeq mI$, convergence rate depends on $m$.
+**Strongly convex** ($$m$$-strongly): $$\nabla^2 f \succeq mI$$, convergence rate depends on $$m$$.
 
 ### Convex ML Problems
 
 | Problem | Convex? | Why |
 |---------|---------|-----|
-| Linear regression (MSE) | Yes | Quadratic in $w$ |
+| Linear regression (MSE) | Yes | Quadratic in $$w$$ |
 | Logistic regression | Yes | Sum of log-sum-exp (convex) |
 | SVM (hinge loss + L2) | Yes | Convex loss + convex regularizer |
 | Neural networks | No | Non-convex due to compositions |
@@ -1877,7 +1877,7 @@ Equivalent conditions (for twice-differentiable $f$):
 
 ### Lagrangian Duality
 
-For a constrained optimization $\min_x f(x)$ s.t. $g_i(x) \leq 0$, $h_j(x) = 0$:
+For a constrained optimization $$\min_x f(x)$$ s.t. $$g_i(x) \leq 0$$, $$h_j(x) = 0$$:
 
 **Lagrangian**:
 
@@ -1885,43 +1885,43 @@ $$
 \mathcal{L}(x, \lambda, \nu) = f(x) + \sum_i \lambda_i g_i(x) + \sum_j \nu_j h_j(x)
 $$
 
-**Dual function**: $d(\lambda, \nu) = \min_x \mathcal{L}(x, \lambda, \nu)$
+**Dual function**: $$d(\lambda, \nu) = \min_x \mathcal{L}(x, \lambda, \nu)$$
 
-**Weak duality**: $d^* \leq f^*$ (always holds).
+**Weak duality**: $$d^* \leq f^*$$ (always holds).
 
-**Strong duality**: $d^* = f^*$ (holds for convex problems satisfying Slater's condition).
+**Strong duality**: $$d^* = f^*$$ (holds for convex problems satisfying Slater's condition).
 
 ### KKT Conditions
 
 Necessary (and sufficient for convex) conditions for optimality:
 
-1. **Stationarity**: $\nabla_x \mathcal{L} = 0$
-2. **Primal feasibility**: $g_i(x^*) \leq 0$, $h_j(x^*) = 0$
-3. **Dual feasibility**: $\lambda_i \geq 0$
-4. **Complementary slackness**: $\lambda_i g_i(x^*) = 0$
+1. **Stationarity**: $$\nabla_x \mathcal{L} = 0$$
+2. **Primal feasibility**: $$g_i(x^*) \leq 0$$, $$h_j(x^*) = 0$$
+3. **Dual feasibility**: $$\lambda_i \geq 0$$
+4. **Complementary slackness**: $$\lambda_i g_i(x^*) = 0$$
 
 ### Convergence Rates
 
-| Algorithm | Convex | Strongly Convex ($\mu > 0$) |
+| Algorithm | Convex | Strongly Convex ($$\mu > 0$$) |
 |-----------|--------|----------------------------|
-| GD | $O(1/T)$ | $O(e^{-\mu T / L})$ (linear) |
-| SGD | $O(1/\sqrt{T})$ | $O(1/T)$ |
-| Nesterov accelerated | $O(1/T^2)$ | $O(e^{-\sqrt{\mu/L}\, T})$ |
+| GD | $$O(1/T)$$ | $$O(e^{-\mu T / L})$$ (linear) |
+| SGD | $$O(1/\sqrt{T})$$ | $$O(1/T)$$ |
+| Nesterov accelerated | $$O(1/T^2)$$ | $$O(e^{-\sqrt{\mu/L}\, T})$$ |
 | Newton | Quadratic (local) | Quadratic (local) |
 
-Condition number $\kappa = L/\mu$ controls convergence: high $\kappa$ = slow.
+Condition number $$\kappa = L/\mu$$ controls convergence: high $$\kappa$$ = slow.
 
 ### Proximal Methods (for Non-Smooth Problems)
 
-For $\min_x f(x) + g(x)$ where $f$ is smooth and $g$ is non-smooth (e.g., L1):
+For $$\min_x f(x) + g(x)$$ where $$f$$ is smooth and $$g$$ is non-smooth (e.g., L1):
 
 $$
 x^{k+1} = \text{prox}_{\eta g}\!\left(x^k - \eta \nabla f(x^k)\right)
 $$
 
-**Proximal operator**: $\text{prox}_g(v) = \arg\min_x \left\{g(x) + \frac{1}{2}\|x - v\|^2\right\}$
+**Proximal operator**: $$\text{prox}_g(v) = \arg\min_x \left\{g(x) + \frac{1}{2}\|x - v\|^2\right\}$$
 
-For L1: $\text{prox}_{\lambda\|\cdot\|_1}(v)_i = \text{sign}(v_i)\max(|v_i| - \lambda, 0)$ (soft thresholding).
+For L1: $$\text{prox}_{\lambda\|\cdot\|_1}(v)_i = \text{sign}(v_i)\max(|v_i| - \lambda, 0)$$ (soft thresholding).
 
 ## Implementation
 
@@ -1982,9 +1982,9 @@ def check_kkt(
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
 | Convexity check | Choosing optimizer | Convex = guaranteed global optimum |
-| KKT conditions | SVM derivation | Support vectors have $\lambda_i > 0$ |
+| KKT conditions | SVM derivation | Support vectors have $$\lambda_i > 0$$ |
 | L1 vs L2 regularization | Feature selection | L1 proximal = soft thresholding = sparsity |
-| Learning rate from $L$ | Setting hyperparameters | $\eta \leq 1/L$ guarantees convergence |
+| Learning rate from $$L$$ | Setting hyperparameters | $$\eta \leq 1/L$$ guarantees convergence |
 
 ### Common Interview Questions
 - [ ] Prove that logistic regression loss is convex.
@@ -1997,16 +1997,16 @@ def check_kkt(
 
 | Aspect | GD | SGD | Adam |
 |--------|-----|-----|------|
-| Per-step cost | $O(n)$ (full batch) | $O(1)$ (one sample) | $O(1)$ + momentum |
-| Convergence (convex) | $O(1/T)$ | $O(1/\sqrt{T})$ | $O(1/\sqrt{T})$ (theory) |
-| Hyperparameters | $\eta$ | $\eta$, schedule | $\eta$, $\beta_1$, $\beta_2$ |
+| Per-step cost | $$O(n)$$ (full batch) | $$O(1)$$ (one sample) | $$O(1)$$ + momentum |
+| Convergence (convex) | $$O(1/T)$$ | $$O(1/\sqrt{T})$$ | $$O(1/\sqrt{T})$$ (theory) |
+| Hyperparameters | $$\eta$$ | $$\eta$$, schedule | $$\eta$$, $$\beta_1$$, $$\beta_2$$ |
 | Practice (DL) | Rarely used | Good with schedule | Default choice |
 
 ## Key Takeaways
 - Convex problems have global optima -- no bad local minima or saddle points
 - KKT conditions are necessary and sufficient for convex constrained optimization
 - L1 regularization = Laplace prior = soft thresholding = sparsity
-- Condition number $\kappa = L/\mu$ controls how fast gradient methods converge
+- Condition number $$\kappa = L/\mu$$ controls how fast gradient methods converge
 - Deep learning is non-convex but works due to overparameterization and good optimization landscape structure
 """
 

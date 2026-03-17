@@ -50,10 +50,10 @@ Split the model across devices when it exceeds single-GPU memory.
 **Pipeline parallelism**: Split model by layers across stages. Each stage processes a micro-batch, forming a pipeline. GPipe and PipeDream are canonical approaches. Bubble time (idle GPU cycles) is the key inefficiency.
 
 ### ZeRO (Zero Redundancy Optimizer)
-DeepSpeed's ZeRO partitions optimizer states (Stage 1), gradients (Stage 2), and parameters (Stage 3) across data-parallel ranks, reducing per-GPU memory from $O(1)$ to $O(1/N)$ while maintaining data parallelism semantics.
+DeepSpeed's ZeRO partitions optimizer states (Stage 1), gradients (Stage 2), and parameters (Stage 3) across data-parallel ranks, reducing per-GPU memory from $$O(1)$$ to $$O(1/N)$$ while maintaining data parallelism semantics.
 
 ### Communication Primitives
-- **AllReduce**: Sum gradients across all workers. Ring AllReduce has bandwidth cost $O(2(N-1)/N \cdot M)$ where $M$ is message size.
+- **AllReduce**: Sum gradients across all workers. Ring AllReduce has bandwidth cost $$O(2(N-1)/N \cdot M)$$ where $$M$$ is message size.
 - **AllGather**: Reconstruct full tensors from shards (used in ZeRO Stage 3 forward pass).
 - **NCCL**: NVIDIA's collective communication library optimized for GPU topology.
 
@@ -137,21 +137,21 @@ Mixed precision training uses lower-precision numerical formats (FP16 or BF16) f
 **BF16 vs FP16**: BF16 has the same exponent range as FP32 (no overflow issues) but less precision. FP16 has better precision but much smaller range, requiring loss scaling. For LLM training, BF16 is strongly preferred on Ampere+ GPUs.
 
 ### Loss Scaling
-FP16 gradients can underflow to zero for small values. Loss scaling multiplies the loss by a large factor $S$ before backward pass, then divides gradients by $S$ after:
+FP16 gradients can underflow to zero for small values. Loss scaling multiplies the loss by a large factor $$S$$ before backward pass, then divides gradients by $$S$$ after:
 
 $$
 \nabla_\theta \mathcal{L}_{\text{scaled}} = S \cdot \nabla_\theta \mathcal{L}
 $$
 
-**Dynamic loss scaling**: Start with large $S$ (e.g., $2^{16}$), halve on NaN/Inf, double every $N$ steps without overflow.
+**Dynamic loss scaling**: Start with large $$S$$ (e.g., $$2^{16}$$), halve on NaN/Inf, double every $$N$$ steps without overflow.
 
 ### Master Weights
 Maintain FP32 copy of weights (master weights) for the optimizer update. Forward/backward use FP16/BF16 copies. This prevents small updates from being rounded to zero:
 
-If $\eta \cdot g \ll w$ in FP16, the update $w - \eta g = w$ due to rounding. FP32 master weights preserve the update.
+If $$\eta \cdot g \ll w$$ in FP16, the update $$w - \eta g = w$$ due to rounding. FP32 master weights preserve the update.
 
 ### Tensor Cores
-NVIDIA Tensor Cores perform $D = A \times B + C$ where $A, B$ are FP16/BF16 and $C, D$ are FP32. Achieve 2-8x throughput vs FP32 CUDA cores. Require dimensions divisible by 8 (FP16) or 16 (INT8) for optimal utilization.
+NVIDIA Tensor Cores perform $$D = A \times B + C$$ where $$A, B$$ are FP16/BF16 and $$C, D$$ are FP32. Achieve 2-8x throughput vs FP32 CUDA cores. Require dimensions divisible by 8 (FP16) or 16 (INT8) for optimal utilization.
 
 ## Implementation
 
@@ -529,13 +529,13 @@ Reduce numerical precision of weights and activations from FP32 to INT8, INT4, o
 
 **Post-Training Quantization (PTQ)**: Apply quantization after training without retraining. Fast but may lose accuracy for sensitive models.
 
-A tensor $x$ is quantized to $b$-bit integer as:
+A tensor $$x$$ is quantized to $$b$$-bit integer as:
 
 $$
 x_q = \text{round}\left(\frac{x - z}{s}\right), \quad s = \frac{x_{\max} - x_{\min}}{2^b - 1}
 $$
 
-where $s$ is the scale factor and $z$ is the zero-point.
+where $$s$$ is the scale factor and $$z$$ is the zero-point.
 
 **Quantization-Aware Training (QAT)**: Simulate quantization during training using fake quantization nodes. Model learns to be robust to quantization noise. Higher accuracy than PTQ but requires retraining.
 
@@ -557,7 +557,7 @@ $$
 \mathcal{L} = \alpha \cdot \mathcal{L}_{\text{CE}}(y, \hat{y}_s) + (1 - \alpha) \cdot T^2 \cdot \text{KL}\left(\sigma\left(\frac{z_t}{T}\right) \| \sigma\left(\frac{z_s}{T}\right)\right)
 $$
 
-where $T$ is temperature and $\sigma$ is softmax. Higher $T$ reveals more information about teacher's learned structure.
+where $$T$$ is temperature and $$\sigma$$ is softmax. Higher $$T$$ reveals more information about teacher's learned structure.
 
 ## Implementation
 
@@ -623,7 +623,7 @@ Serving large language models presents unique challenges compared to traditional
 ## Core Concepts
 
 ### KV-Cache Management
-During autoregressive generation, attention keys and values from previous tokens are cached to avoid recomputation. For a model with $L$ layers, $H$ heads, dimension $d$, and sequence length $S$:
+During autoregressive generation, attention keys and values from previous tokens are cached to avoid recomputation. For a model with $$L$$ layers, $$H$$ heads, dimension $$d$$, and sequence length $$S$$:
 
 $$
 \text{KV-cache memory} = 2 \times L \times H \times d \times S \times \text{bytes\_per\_element}
@@ -644,7 +644,7 @@ Inspired by OS virtual memory: KV-cache is stored in non-contiguous physical blo
 - Enables ~2-4x more concurrent sequences vs naive allocation
 
 ### Speculative Decoding
-Use a small draft model to generate $k$ candidate tokens, then verify all $k$ in a single forward pass of the large model. Accepts correct tokens, rejects and resamples from the large model's distribution at the first divergence. Achieves 2-3x speedup with zero quality loss when draft model matches well.
+Use a small draft model to generate $$k$$ candidate tokens, then verify all $$k$$ in a single forward pass of the large model. Accepts correct tokens, rejects and resamples from the large model's distribution at the first divergence. Achieves 2-3x speedup with zero quality loss when draft model matches well.
 
 ## Implementation
 
@@ -1035,7 +1035,7 @@ $$
 \text{PSI} = \sum_{i=1}^{k} (p_i - q_i) \ln\left(\frac{p_i}{q_i}\right)
 $$
 
-where $p_i$ and $q_i$ are proportions in bin $i$ for new and reference distributions. PSI < 0.1 indicates no significant shift; PSI > 0.25 indicates major shift.
+where $$p_i$$ and $$q_i$$ are proportions in bin $$i$$ for new and reference distributions. PSI < 0.1 indicates no significant shift; PSI > 0.25 indicates major shift.
 
 **Kolmogorov-Smirnov test**: Non-parametric test for continuous features. Compare CDFs of reference and current data.
 
@@ -1325,13 +1325,13 @@ Model monitoring ensures deployed models continue to perform as expected after d
 
 ### Types of ML Drift
 
-**Data drift (covariate shift)**: Input feature distribution $P(X)$ changes. Example: user demographics shift after marketing campaign. Detectable without labels.
+**Data drift (covariate shift)**: Input feature distribution $$P(X)$$ changes. Example: user demographics shift after marketing campaign. Detectable without labels.
 
-**Concept drift**: Relationship $P(Y|X)$ changes. Example: click-through patterns change due to UI redesign. Requires labels to detect directly.
+**Concept drift**: Relationship $$P(Y|X)$$ changes. Example: click-through patterns change due to UI redesign. Requires labels to detect directly.
 
-**Prediction drift**: Model output distribution $P(\hat{Y})$ changes. Proxy for concept drift when labels are delayed.
+**Prediction drift**: Model output distribution $$P(\hat{Y})$$ changes. Proxy for concept drift when labels are delayed.
 
-**Label drift**: Target distribution $P(Y)$ changes. Example: fraud rate increases during holiday season.
+**Label drift**: Target distribution $$P(Y)$$ changes. Example: fraud rate increases during holiday season.
 
 ### Detection Methods
 

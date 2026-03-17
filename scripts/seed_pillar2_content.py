@@ -38,12 +38,12 @@ $$
 \hat{y} = X\beta, \quad \beta^* = \arg\min_\beta \|y - X\beta\|_2^2 = (X^TX)^{-1}X^Ty
 $$
 
-Closed-form solution exists when $X^TX$ is invertible. Complexity: $O(nd^2 + d^3)$ for $n$ samples and $d$ features.
+Closed-form solution exists when $$X^TX$$ is invertible. Complexity: $$O(nd^2 + d^3)$$ for $$n$$ samples and $$d$$ features.
 
 **Key assumptions**: linearity, independence, homoscedasticity, normality of residuals.
 
 ### Logistic Regression
-For binary classification, models $P(y=1|x)$ using the sigmoid function:
+For binary classification, models $$P(y=1|x)$$ using the sigmoid function:
 
 $$
 P(y=1|x) = \sigma(w^Tx + b) = \frac{1}{1 + e^{-(w^Tx + b)}}
@@ -58,7 +58,7 @@ $$
 No closed-form solution -- optimized via gradient descent or Newton's method.
 
 ### Generalized Linear Models (GLMs)
-Extend linear models through a link function $g$:
+Extend linear models through a link function $$g$$:
 
 $$
 g(E[y|x]) = w^Tx + b
@@ -127,7 +127,7 @@ class LogisticRegression:
 
 ## Key Takeaways
 
-- [ ] Linear regression: know the normal equation and when it breaks (singular $X^TX$, $n < d$)
+- [ ] Linear regression: know the normal equation and when it breaks (singular $$X^TX$$, $$n < d$$)
 - [ ] Logistic regression: understand the probabilistic interpretation and decision boundary
 - [ ] Always standardize features before comparing coefficients
 - [ ] Linear models are the go-to baseline in any ML system design interview
@@ -158,15 +158,15 @@ $$
 **Regression**: variance reduction (MSE split).
 
 ### Random Forest
-Bagging + feature subsampling. Each tree trained on a bootstrap sample with $\sqrt{d}$ random features (classification) or $d/3$ (regression).
+Bagging + feature subsampling. Each tree trained on a bootstrap sample with $$\sqrt{d}$$ random features (classification) or $$d/3$$ (regression).
 
-**Variance reduction**: for $B$ trees with pairwise correlation $\rho$ and individual variance $\sigma^2$:
+**Variance reduction**: for $$B$$ trees with pairwise correlation $$\rho$$ and individual variance $$\sigma^2$$:
 
 $$
 \text{Var}(\bar{f}) = \rho\sigma^2 + \frac{1-\rho}{B}\sigma^2
 $$
 
-Key insight: reducing $\rho$ (via feature subsampling) matters more than increasing $B$.
+Key insight: reducing $$\rho$$ (via feature subsampling) matters more than increasing $$B$$.
 
 ### Gradient Boosted Trees (GBT)
 Sequential ensemble where each tree fits the negative gradient of the loss:
@@ -181,7 +181,7 @@ $$
 \mathcal{L} = \sum_i L(y_i, \hat{y}_i) + \sum_t \left[\gamma T_t + \frac{1}{2}\lambda \|w_t\|^2\right]
 $$
 
-where $T_t$ = number of leaves in tree $t$, $w_t$ = leaf weights.
+where $$T_t$$ = number of leaves in tree $$t$$, $$w_t$$ = leaf weights.
 
 ### LightGBM Optimizations
 - **Gradient-based One-Side Sampling (GOSS)**: keep large-gradient instances, subsample small-gradient
@@ -239,7 +239,7 @@ model = xgb.train(params, dtrain, num_boost_round=500,
 ## Key Takeaways
 
 - [ ] Know Gini vs. entropy: Gini is default in sklearn, nearly identical in practice
-- [ ] Random Forest: understand why $\sqrt{d}$ feature subsampling reduces correlation
+- [ ] Random Forest: understand why $$\sqrt{d}$$ feature subsampling reduces correlation
 - [ ] XGBoost: know the regularized objective and second-order Taylor approximation
 - [ ] LightGBM: leaf-wise growth + GOSS + EFB make it faster for large datasets
 - [ ] SHAP > built-in feature importance for reliable interpretation
@@ -253,23 +253,23 @@ SVMs find the maximum-margin hyperplane separating classes. While less common in
 ## Core Concepts
 
 ### Hard-Margin SVM
-For linearly separable data, find the hyperplane $w^Tx + b = 0$ maximizing the margin $\frac{2}{\|w\|}$:
+For linearly separable data, find the hyperplane $$w^Tx + b = 0$$ maximizing the margin $$\frac{2}{\|w\|}$$:
 
 $$
 \min_{w,b} \frac{1}{2}\|w\|^2 \quad \text{s.t.} \quad y_i(w^Tx_i + b) \geq 1 \;\forall i
 $$
 
 ### Soft-Margin SVM
-Allows misclassification via slack variables $\xi_i \geq 0$:
+Allows misclassification via slack variables $$\xi_i \geq 0$$:
 
 $$
 \min_{w,b,\xi} \frac{1}{2}\|w\|^2 + C\sum_i \xi_i \quad \text{s.t.} \quad y_i(w^Tx_i + b) \geq 1 - \xi_i
 $$
 
-$C$ controls the bias-variance tradeoff: large $C$ = low bias, high variance.
+$$C$$ controls the bias-variance tradeoff: large $$C$$ = low bias, high variance.
 
 ### Dual Formulation and Kernels
-The dual problem introduces Lagrange multipliers $\alpha_i$:
+The dual problem introduces Lagrange multipliers $$\alpha_i$$:
 
 $$
 \max_\alpha \sum_i \alpha_i - \frac{1}{2}\sum_{i,j} \alpha_i \alpha_j y_i y_j K(x_i, x_j) \quad \text{s.t.} \quad 0 \leq \alpha_i \leq C, \; \sum_i \alpha_i y_i = 0
@@ -279,12 +279,12 @@ $$
 
 | Kernel | Formula | Use Case |
 |--------|---------|----------|
-| Linear | $K(x,z) = x^Tz$ | High-dim sparse data (text) |
-| RBF | $K(x,z) = \exp(-\gamma\|x-z\|^2)$ | General nonlinear |
-| Polynomial | $K(x,z) = (x^Tz + c)^d$ | Feature interactions |
+| Linear | $$K(x,z) = x^Tz$$ | High-dim sparse data (text) |
+| RBF | $$K(x,z) = \exp(-\gamma\|x-z\|^2)$$ | General nonlinear |
+| Polynomial | $$K(x,z) = (x^Tz + c)^d$$ | Feature interactions |
 
 ### Support Vectors
-Only data points with $\alpha_i > 0$ (on or inside the margin) affect the decision boundary. Sparsity = efficiency at prediction time.
+Only data points with $$\alpha_i > 0$$ (on or inside the margin) affect the decision boundary. Sparsity = efficiency at prediction time.
 
 ## Implementation
 
@@ -306,14 +306,14 @@ pipe.fit(X_train, y_train)
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
 | Kernel selection | Nonlinear boundaries | RBF is default; linear for high-dim sparse (text) |
-| $C$ and $\gamma$ tuning | Overfitting/underfitting | Grid search on log scale: $C \in [10^{-2}, 10^{3}]$ |
+| $$C$$ and $$\gamma$$ tuning | Overfitting/underfitting | Grid search on log scale: $$C \in [10^{-2}, 10^{3}]$$ |
 | SVM vs. logistic regression | "Which classifier to use?" | SVM focuses on margin (hard examples); LR models probabilities |
-| Hinge loss connection | Loss function questions | SVM loss = hinge: $\max(0, 1 - y \cdot f(x))$ |
+| Hinge loss connection | Loss function questions | SVM loss = hinge: $$\max(0, 1 - y \cdot f(x))$$ |
 
 ### Common Interview Questions
 - [ ] Explain the kernel trick and why it works.
 - [ ] What are support vectors and why are they important?
-- [ ] How does $C$ affect the decision boundary?
+- [ ] How does $$C$$ affect the decision boundary?
 - [ ] When would you choose SVM over logistic regression?
 - [ ] Can SVM do multi-class classification? How?
 
@@ -323,13 +323,13 @@ pipe.fit(X_train, y_train)
 |--------|-------------|-----------|-------------------|
 | Decision boundary | Linear | Nonlinear | Linear |
 | Probabilistic | Via Platt scaling | Via Platt scaling | Native |
-| Scalability | Good ($O(nd)$) | Poor ($O(n^2d)$) | Good |
+| Scalability | Good ($$O(nd)$$) | Poor ($$O(n^2d)$$) | Good |
 | Sparse data | Excellent | Fair | Good |
 
 ## Key Takeaways
 
 - [ ] SVMs maximize margin -- understand the geometric and optimization views
-- [ ] Kernel trick: $K(x,z) = \phi(x)^T\phi(z)$ avoids explicit high-dim mapping
+- [ ] Kernel trick: $$K(x,z) = \phi(x)^T\phi(z)$$ avoids explicit high-dim mapping
 - [ ] Support vectors determine the boundary; other points are irrelevant
 - [ ] Always scale features before training SVMs
 - [ ] Hinge loss is the SVM loss; compare with logistic (log-loss) and perceptron (0-1)
@@ -343,16 +343,16 @@ The bias-variance tradeoff is a fundamental concept explaining model generalizat
 ## Core Concepts
 
 ### Decomposition
-For a model $\hat{f}$ trained on dataset $D$, the expected prediction error at point $x$ is:
+For a model $$\hat{f}$$ trained on dataset $$D$$, the expected prediction error at point $$x$$ is:
 
 $$
 E_D[(y - \hat{f}(x))^2] = \text{Bias}[\hat{f}(x)]^2 + \text{Var}_D[\hat{f}(x)] + \sigma^2
 $$
 
 where:
-- **Bias** $= E_D[\hat{f}(x)] - f(x)$: systematic error from wrong assumptions
-- **Variance** $= E_D[(\hat{f}(x) - E_D[\hat{f}(x)])^2]$: sensitivity to training data
-- $\sigma^2$: irreducible noise (Bayes error)
+- **Bias** $$= E_D[\hat{f}(x)] - f(x)$$: systematic error from wrong assumptions
+- **Variance** $$= E_D[(\hat{f}(x) - E_D[\hat{f}(x)])^2]$$: sensitivity to training data
+- $$\sigma^2$$: irreducible noise (Bayes error)
 
 ### Model Complexity Spectrum
 
@@ -360,7 +360,7 @@ where:
 |-----------|------|----------|---------|
 | Low | High | Low | Linear regression, Naive Bayes |
 | Medium | Medium | Medium | Small neural net, shallow tree ensemble |
-| High | Low | High | Deep tree, k-NN with $k=1$, unpruned neural net |
+| High | Low | High | Deep tree, k-NN with $$k=1$$, unpruned neural net |
 
 ### Regularization as Bias-Variance Control
 Regularization adds bias to reduce variance:
@@ -369,12 +369,12 @@ $$
 \mathcal{L}_{\text{reg}} = \mathcal{L}_{\text{data}} + \lambda \cdot R(w)
 $$
 
-- **L2 (Ridge)**: $R(w) = \|w\|_2^2$ -- shrinks all coefficients, keeps all features
-- **L1 (Lasso)**: $R(w) = \|w\|_1$ -- drives coefficients to zero, feature selection
-- **ElasticNet**: $R(w) = \alpha\|w\|_1 + (1-\alpha)\|w\|_2^2$ -- compromise
+- **L2 (Ridge)**: $$R(w) = \|w\|_2^2$$ -- shrinks all coefficients, keeps all features
+- **L1 (Lasso)**: $$R(w) = \|w\|_1$$ -- drives coefficients to zero, feature selection
+- **ElasticNet**: $$R(w) = \alpha\|w\|_1 + (1-\alpha)\|w\|_2^2$$ -- compromise
 
 ### Double Descent
-Modern deep learning challenges the classical U-shaped curve. In the interpolation regime ($d \gg n$), test error can decrease again after the interpolation threshold:
+Modern deep learning challenges the classical U-shaped curve. In the interpolation regime ($$d \gg n$$), test error can decrease again after the interpolation threshold:
 
 1. Classical regime: more parameters increases variance
 2. Interpolation threshold: peak test error
@@ -392,7 +392,7 @@ Modern deep learning challenges the classical U-shaped curve. In the interpolati
 ### Common Interview Questions
 - [ ] Derive the bias-variance decomposition for MSE.
 - [ ] How do bagging and boosting address bias and variance differently?
-- [ ] Why does $k$-NN with $k=1$ have zero training error but high variance?
+- [ ] Why does $$k$$-NN with $$k=1$$ have zero training error but high variance?
 - [ ] Explain the double descent phenomenon.
 - [ ] How does dropout act as regularization in neural networks?
 
@@ -400,7 +400,7 @@ Modern deep learning challenges the classical U-shaped curve. In the interpolati
 
 - [ ] Bias = underfitting, Variance = overfitting; total error is their sum + noise
 - [ ] Increasing model complexity: bias decreases, variance increases (classically)
-- [ ] Regularization injects bias to control variance -- $\lambda$ is the knob
+- [ ] Regularization injects bias to control variance -- $$\lambda$$ is the knob
 - [ ] Bagging (Random Forest) reduces variance; Boosting (XGBoost) reduces bias
 - [ ] Modern deep learning: double descent means more parameters can help beyond the interpolation threshold
 """
@@ -420,7 +420,7 @@ $$
 \mathcal{L}_{\text{MSE}} = \frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2
 $$
 
-Gradient: $\nabla = -2(y - \hat{y})$. Sensitive to outliers (squared penalty).
+Gradient: $$\nabla = -2(y - \hat{y})$$. Sensitive to outliers (squared penalty).
 
 **Mean Absolute Error (MAE / L1 Loss)**:
 
@@ -456,7 +456,7 @@ $$
 \mathcal{L}_{\text{focal}} = -\alpha_t(1 - p_t)^\gamma \log(p_t)
 $$
 
-Down-weights easy examples when $\gamma > 0$; $\gamma = 2$ is common.
+Down-weights easy examples when $$\gamma > 0$$; $$\gamma = 2$$ is common.
 
 ### Ranking Losses
 
@@ -466,7 +466,7 @@ $$
 \mathcal{L}_{\text{BPR}} = -\sum_{(i,j)} \log \sigma(f(x_i) - f(x_j))
 $$
 
-where item $i$ is preferred over item $j$.
+where item $$i$$ is preferred over item $$j$$.
 
 **Listwise (ListNet)**: uses cross-entropy over top-1 probability distributions.
 
@@ -519,7 +519,7 @@ def focal_loss(y_true, y_pred, gamma=2.0, alpha=0.25):
 - [ ] Each loss implies a probabilistic assumption: MSE = Gaussian noise, MAE = Laplace
 - [ ] Cross-entropy is the standard for classification -- it provides proper probability calibration
 - [ ] Huber loss: quadratic near zero, linear far away -- use when outliers exist but gradients matter
-- [ ] Focal loss: $\gamma$ controls down-weighting of easy examples; critical for detection tasks
+- [ ] Focal loss: $$\gamma$$ controls down-weighting of easy examples; critical for detection tasks
 - [ ] For interviews, know gradients of MSE, cross-entropy, and hinge loss
 """
 
@@ -542,7 +542,7 @@ $$
 \beta_{\text{ridge}} = (X^TX + \lambda I)^{-1}X^Ty
 $$
 
-Adds $\lambda$ to diagonal of $X^TX$, making it always invertible.
+Adds $$\lambda$$ to diagonal of $$X^TX$$, making it always invertible.
 
 ### L1 Regularization (Lasso)
 
@@ -561,16 +561,16 @@ $$
 Combines L1 sparsity with L2 stability. Handles correlated features better than pure Lasso.
 
 ### Dropout
-During training, randomly zero out each neuron with probability $p$:
+During training, randomly zero out each neuron with probability $$p$$:
 
 $$
 \tilde{h}_i = \begin{cases} 0 & \text{with prob } p \\ \frac{h_i}{1-p} & \text{with prob } 1-p \end{cases}
 $$
 
-Equivalent to training an ensemble of $2^n$ sub-networks. At inference, use all neurons (already scaled).
+Equivalent to training an ensemble of $$2^n$$ sub-networks. At inference, use all neurons (already scaled).
 
 ### Early Stopping
-Stop training when validation loss stops improving. Equivalent to L2 regularization in linear models (number of gradient steps acts as inverse of $\lambda$).
+Stop training when validation loss stops improving. Equivalent to L2 regularization in linear models (number of gradient steps acts as inverse of $$\lambda$$).
 
 ### Other Techniques
 
@@ -578,7 +578,7 @@ Stop training when validation loss stops improving. Equivalent to L2 regularizat
 |-----------|-----------|-----------|
 | Data augmentation | Increase effective training set | Vision, NLP |
 | Batch normalization | Reduces internal covariate shift | Deep learning |
-| Label smoothing | Soften one-hot targets: $(1-\epsilon)y + \epsilon/K$ | Classification |
+| Label smoothing | Soften one-hot targets: $$(1-\epsilon)y + \epsilon/K$$ | Classification |
 | Weight tying | Share parameters across layers | Transformers, autoencoders |
 | Mixup | Interpolate training examples | Vision |
 
@@ -622,7 +622,7 @@ loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
 
 - [ ] L2 (Ridge): Gaussian prior on weights, shrinks all weights, always invertible
 - [ ] L1 (Lasso): Laplace prior, produces sparsity, use for feature selection
-- [ ] Dropout: ensemble of sub-networks; scale by $1/(1-p)$ during training (inverted dropout)
+- [ ] Dropout: ensemble of sub-networks; scale by $$1/(1-p)$$ during training (inverted dropout)
 - [ ] Early stopping: cheapest regularization -- always use it
 - [ ] In practice, combine multiple regularizers: weight decay + dropout + early stopping
 """
@@ -677,7 +677,7 @@ $$
 \text{MAE} = \frac{1}{n}\sum|y_i - \hat{y}_i|, \quad R^2 = 1 - \frac{\sum(y_i-\hat{y}_i)^2}{\sum(y_i-\bar{y})^2}
 $$
 
-**MAPE**: $\frac{1}{n}\sum\frac{|y_i - \hat{y}_i|}{|y_i|}$ -- interpretable as percentage but undefined when $y_i = 0$.
+**MAPE**: $$\frac{1}{n}\sum\frac{|y_i - \hat{y}_i|}{|y_i|}$$ -- interpretable as percentage but undefined when $$y_i = 0$$.
 
 ### Ranking Metrics
 
@@ -739,31 +739,31 @@ $$
 
 **Algorithm**: (1) Initialize centroids, (2) Assign points to nearest centroid, (3) Update centroids as cluster means, (4) Repeat until convergence.
 
-Complexity: $O(nKdT)$ for $n$ points, $K$ clusters, $d$ dimensions, $T$ iterations.
+Complexity: $$O(nKdT)$$ for $$n$$ points, $$K$$ clusters, $$d$$ dimensions, $$T$$ iterations.
 
-**K-Means++**: Smart initialization -- first centroid random, subsequent centroids sampled proportional to $D(x)^2$ (distance to nearest existing centroid). Provably $O(\log K)$-competitive with optimal.
+**K-Means++**: Smart initialization -- first centroid random, subsequent centroids sampled proportional to $$D(x)^2$$ (distance to nearest existing centroid). Provably $$O(\log K)$$-competitive with optimal.
 
 ### DBSCAN
 Density-based: groups points in high-density regions, marks sparse points as noise.
 
-Parameters: $\epsilon$ (neighborhood radius), $\text{minPts}$ (minimum neighbors for core point).
+Parameters: $$\epsilon$$ (neighborhood radius), $$\text{minPts}$$ (minimum neighbors for core point).
 
 | Point Type | Definition |
 |-----------|-----------|
-| Core | $\geq \text{minPts}$ neighbors within $\epsilon$ |
-| Border | Within $\epsilon$ of a core point but not core itself |
+| Core | $$\geq \text{minPts}$$ neighbors within $$\epsilon$$ |
+| Border | Within $$\epsilon$$ of a core point but not core itself |
 | Noise | Neither core nor border |
 
-Advantages: discovers arbitrary shapes, handles noise, no need to specify $K$.
+Advantages: discovers arbitrary shapes, handles noise, no need to specify $$K$$.
 
 ### Hierarchical Clustering
-- **Agglomerative** (bottom-up): start with $n$ clusters, merge closest pairs
+- **Agglomerative** (bottom-up): start with $$n$$ clusters, merge closest pairs
 - **Divisive** (top-down): start with 1 cluster, recursively split
 
 Linkage criteria: single (min), complete (max), average, Ward (min variance).
 
 ### Gaussian Mixture Models (GMM)
-Probabilistic clustering: each cluster is a Gaussian $\mathcal{N}(\mu_k, \Sigma_k)$:
+Probabilistic clustering: each cluster is a Gaussian $$\mathcal{N}(\mu_k, \Sigma_k)$$:
 
 $$
 p(x) = \sum_{k=1}^{K} \pi_k \mathcal{N}(x|\mu_k, \Sigma_k)
@@ -794,9 +794,9 @@ n_noise = (labels == -1).sum()
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| Choosing $K$ | "How many clusters?" | Elbow method (inertia), silhouette score, domain knowledge |
+| Choosing $$K$$ | "How many clusters?" | Elbow method (inertia), silhouette score, domain knowledge |
 | K-Means limitations | Non-spherical clusters | Use DBSCAN or GMM for irregular shapes |
-| Scalability | Large datasets | Mini-batch K-Means for $n > 100K$; DBSCAN is $O(n^2)$ without spatial index |
+| Scalability | Large datasets | Mini-batch K-Means for $$n > 100K$$; DBSCAN is $$O(n^2)$$ without spatial index |
 | Evaluation without labels | No ground truth | Silhouette score, Davies-Bouldin index, domain-specific validation |
 
 ### Common Interview Questions
@@ -809,7 +809,7 @@ n_noise = (labels == -1).sum()
 ## Key Takeaways
 
 - [ ] K-Means: fast, simple, assumes spherical clusters of similar size
-- [ ] DBSCAN: no need to specify $K$, finds arbitrary shapes, handles noise
+- [ ] DBSCAN: no need to specify $$K$$, finds arbitrary shapes, handles noise
 - [ ] GMM: soft assignments, flexible cluster shapes via covariance matrices
 - [ ] Always scale features before clustering
 - [ ] Silhouette score is the go-to internal validation metric
@@ -823,21 +823,21 @@ Dimensionality reduction projects high-dimensional data to a lower-dimensional s
 ## Core Concepts
 
 ### PCA (Principal Component Analysis)
-Finds orthogonal directions of maximum variance. Given centered data $X \in \mathbb{R}^{n \times d}$:
+Finds orthogonal directions of maximum variance. Given centered data $$X \in \mathbb{R}^{n \times d}$$:
 
 $$
 X = U\Sigma V^T \quad \text{(SVD)}
 $$
 
-Principal components: columns of $V$. Projected data: $Z = XV_k$ (keep top $k$ components).
+Principal components: columns of $$V$$. Projected data: $$Z = XV_k$$ (keep top $$k$$ components).
 
-**Variance explained** by $k$ components:
+**Variance explained** by $$k$$ components:
 
 $$
 \text{Explained Variance Ratio} = \frac{\sum_{i=1}^{k} \sigma_i^2}{\sum_{i=1}^{d} \sigma_i^2}
 $$
 
-Choose $k$ to retain 95% variance (common heuristic).
+Choose $$k$$ to retain 95% variance (common heuristic).
 
 ### Kernel PCA
 For nonlinear structure, apply PCA in kernel-induced feature space:
@@ -859,7 +859,7 @@ $$
 q_{ij} = \frac{(1+\|y_i-y_j\|^2)^{-1}}{\sum_{k\neq l}(1+\|y_k-y_l\|^2)^{-1}}
 $$
 
-Minimizes KL divergence $KL(P\|Q)$ via gradient descent. **Perplexity** controls effective neighborhood size.
+Minimizes KL divergence $$KL(P\|Q)$$ via gradient descent. **Perplexity** controls effective neighborhood size.
 
 ### UMAP
 Faster alternative to t-SNE with better global structure preservation. Based on topological data analysis. Scales to millions of points.
@@ -923,7 +923,7 @@ Anomaly detection identifies data points that deviate significantly from normal 
 
 ### Statistical Methods
 
-**Z-score**: flag points where $|z| > 3$:
+**Z-score**: flag points where $$|z| > 3$$:
 
 $$
 z = \frac{x - \mu}{\sigma}
@@ -939,13 +939,13 @@ $$
 Key insight: anomalies are easier to isolate (fewer random splits needed).
 
 - Build random trees with random feature + random split value
-- Anomaly score based on average path length $E[h(x)]$:
+- Anomaly score based on average path length $$E[h(x)]$$:
 
 $$
 s(x, n) = 2^{-E[h(x)]/c(n)}
 $$
 
-where $c(n) = 2H(n-1) - 2(n-1)/n$ (average path length in a BST). Score near 1 = anomaly.
+where $$c(n) = 2H(n-1) - 2(n-1)/n$$ (average path length in a BST). Score near 1 = anomaly.
 
 ### One-Class SVM
 Learn a decision boundary around normal data in kernel space:
@@ -954,7 +954,7 @@ $$
 \min_{w,\xi,\rho} \frac{1}{2}\|w\|^2 + \frac{1}{\nu n}\sum_i \xi_i - \rho \quad \text{s.t.} \quad w^T\phi(x_i) \geq \rho - \xi_i
 $$
 
-$\nu$ controls the fraction of outliers (upper bound on anomaly ratio).
+$$\nu$$ controls the fraction of outliers (upper bound on anomaly ratio).
 
 ### Autoencoder-Based
 Train autoencoder on normal data. Anomalies have high reconstruction error:
@@ -1025,7 +1025,7 @@ $$
 |---------|-----------|------|------|
 | Batch GD | Full dataset | Stable gradients | Slow, memory-heavy |
 | Stochastic GD (SGD) | 1 sample | Fast updates, escapes local minima | Noisy |
-| Mini-batch GD | $B$ samples | Best tradeoff | Requires tuning $B$ |
+| Mini-batch GD | $$B$$ samples | Best tradeoff | Requires tuning $$B$$ |
 
 ### Momentum
 
@@ -1033,7 +1033,7 @@ $$
 v_t = \beta v_{t-1} + \nabla \mathcal{L}(w_t), \quad w_{t+1} = w_t - \eta v_t
 $$
 
-Accelerates convergence along consistent gradient directions. Typical $\beta = 0.9$.
+Accelerates convergence along consistent gradient directions. Typical $$\beta = 0.9$$.
 
 **Nesterov Momentum**: look-ahead gradient:
 
@@ -1049,7 +1049,7 @@ $$
 w_{t+1,j} = w_{t,j} - \frac{\eta}{\sqrt{G_{t,jj} + \epsilon}} \nabla_j \mathcal{L}
 $$
 
-where $G_t = \sum_{\tau=1}^{t} g_\tau g_\tau^T$. Problem: learning rate monotonically decreases.
+where $$G_t = \sum_{\tau=1}^{t} g_\tau g_\tau^T$$. Problem: learning rate monotonically decreases.
 
 **RMSProp**: exponential moving average of squared gradients:
 
@@ -1075,7 +1075,7 @@ $$
 w_{t+1} = w_t - \frac{\eta}{\sqrt{\hat{v}_t} + \epsilon}\hat{m}_t
 $$
 
-Defaults: $\beta_1=0.9, \beta_2=0.999, \epsilon=10^{-8}$.
+Defaults: $$\beta_1=0.9, \beta_2=0.999, \epsilon=10^{-8}$$.
 
 **AdamW**: decoupled weight decay (correct L2 regularization for Adam):
 
@@ -1100,10 +1100,10 @@ scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=100)
 | SGD vs. Adam | "Which optimizer?" | Adam converges faster; SGD generalizes better with proper tuning |
 | AdamW for transformers | LLM training | Standard choice; decoupled weight decay is critical |
 | Batch size effects | "How does batch size affect training?" | Larger batch = less noise, may need larger LR (linear scaling rule) |
-| Gradient clipping | Exploding gradients | Clip by norm: $g \leftarrow g \cdot \min(1, \frac{\theta}{\|g\|})$ |
+| Gradient clipping | Exploding gradients | Clip by norm: $$g \leftarrow g \cdot \min(1, \frac{\theta}{\|g\|})$$ |
 
 ### Common Interview Questions
-- [ ] Explain Adam step by step. What do $m_t$ and $v_t$ represent?
+- [ ] Explain Adam step by step. What do $$m_t$$ and $$v_t$$ represent?
 - [ ] Why does AdamW fix the weight decay problem in Adam?
 - [ ] When would you prefer SGD with momentum over Adam?
 - [ ] What causes exploding/vanishing gradients and how do you fix them?
@@ -1136,7 +1136,7 @@ Why: stabilizes training in the initial phase when gradients are large and unrel
 
 ### Common Schedules
 
-**Step Decay**: reduce by factor $\gamma$ every $k$ epochs:
+**Step Decay**: reduce by factor $$\gamma$$ every $$k$$ epochs:
 
 $$
 \eta_t = \eta_0 \cdot \gamma^{\lfloor t/k \rfloor}
@@ -1199,7 +1199,7 @@ scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda)
 |---------|------------|-------------|
 | Warmup necessity | Transformers, large batch | Prevents early divergence from large initial gradients |
 | Cosine vs. step decay | "Which schedule?" | Cosine is smoother, avoids sudden jumps; step is simpler |
-| LR-batch size coupling | Scaling training | Linear scaling: $\eta \propto B$ (up to a point) |
+| LR-batch size coupling | Scaling training | Linear scaling: $$\eta \propto B$$ (up to a point) |
 | Cyclical LR | Escaping local minima | Periodic LR increases help explore loss landscape |
 
 ### Common Interview Questions
@@ -1227,23 +1227,23 @@ Understanding convergence guarantees and loss landscape geometry helps diagnose 
 
 ### Convexity
 
-A function $f$ is convex if:
+A function $$f$$ is convex if:
 
 $$
 f(\alpha x + (1-\alpha)y) \leq \alpha f(x) + (1-\alpha)f(y), \quad \forall \alpha \in [0,1]
 $$
 
-**Strongly convex** (with parameter $\mu > 0$): $f(y) \geq f(x) + \nabla f(x)^T(y-x) + \frac{\mu}{2}\|y-x\|^2$
+**Strongly convex** (with parameter $$\mu > 0$$): $$f(y) \geq f(x) + \nabla f(x)^T(y-x) + \frac{\mu}{2}\|y-x\|^2$$
 
 Convergence rates for gradient descent:
 
-| Condition | Rate | Steps to $\epsilon$-optimal |
+| Condition | Rate | Steps to $$\epsilon$$-optimal |
 |-----------|------|---------------------------|
-| Convex, $L$-smooth | $O(1/T)$ | $O(L/\epsilon)$ |
-| Strongly convex ($\mu$-SC) | $O(e^{-\mu T/L})$ | $O(\frac{L}{\mu}\log\frac{1}{\epsilon})$ |
-| Non-convex, $L$-smooth | $O(1/\sqrt{T})$ to stationary point | $O(L/\epsilon^2)$ |
+| Convex, $$L$$-smooth | $$O(1/T)$$ | $$O(L/\epsilon)$$ |
+| Strongly convex ($$\mu$$-SC) | $$O(e^{-\mu T/L})$$ | $$O(\frac{L}{\mu}\log\frac{1}{\epsilon})$$ |
+| Non-convex, $$L$$-smooth | $$O(1/\sqrt{T})$$ to stationary point | $$O(L/\epsilon^2)$$ |
 
-The condition number $\kappa = L/\mu$ determines how elongated the loss landscape is.
+The condition number $$\kappa = L/\mu$$ determines how elongated the loss landscape is.
 
 ### Saddle Points
 In high dimensions, saddle points are far more common than local minima. At a critical point, the Hessian has both positive and negative eigenvalues.
@@ -1282,7 +1282,7 @@ In high dimensions, saddle points are far more common than local minima. At a cr
 ## Key Takeaways
 
 - [ ] Convex problems: guaranteed global optimum. Deep learning is non-convex but works in practice
-- [ ] Condition number $\kappa = L/\mu$: high $\kappa$ means slow convergence; preconditioning helps
+- [ ] Condition number $$\kappa = L/\mu$$: high $$\kappa$$ means slow convergence; preconditioning helps
 - [ ] Saddle points, not local minima, are the main challenge in high dimensions
 - [ ] SGD noise helps escape saddle points and find flat minima (better generalization)
 - [ ] Skip connections + batch norm + proper initialization = trainable deep networks
@@ -1333,7 +1333,7 @@ $$
 g \leftarrow g \cdot \min\left(1, \frac{\theta}{\|g\|}\right)
 $$
 
-**By value**: $g_i \leftarrow \text{clip}(g_i, -\theta, \theta)$
+**By value**: $$g_i \leftarrow \text{clip}(g_i, -\theta, \theta)$$
 
 Essential for RNNs and Transformer training. Typical max norm: 1.0.
 
@@ -1351,7 +1351,7 @@ Speedup: 2-3x on modern GPUs. Standard in LLM training.
 
 | Trick | What It Does | When to Use |
 |-------|-------------|-------------|
-| Label smoothing | Replace one-hot with $(1-\epsilon, \epsilon/(K-1))$ | Prevents overconfident predictions |
+| Label smoothing | Replace one-hot with $$(1-\epsilon, \epsilon/(K-1))$$ | Prevents overconfident predictions |
 | Exponential Moving Average (EMA) | Average weights over training | Smoother model for evaluation |
 | Stochastic Weight Averaging (SWA) | Average weights from cyclic LR | Better generalization |
 | Gradient accumulation | Simulate larger batch size | GPU memory limited |
@@ -1384,7 +1384,7 @@ for batch in dataloader:
 | BatchNorm vs. LayerNorm | Architecture choice | BN for CNNs (batch stats); LN for Transformers (sequence stats) |
 | Initialization strategy | "How do you initialize?" | He for ReLU; Xavier for sigmoid/tanh; pretrained when available |
 | Training instability diagnosis | "Loss is NaN" | Check: LR too high, no grad clipping, bad init, data issues |
-| Gradient accumulation | Limited GPU memory | Accumulate gradients over $k$ steps, then update |
+| Gradient accumulation | Limited GPU memory | Accumulate gradients over $$k$$ steps, then update |
 
 ### Common Interview Questions
 - [ ] Why is He initialization better than Xavier for ReLU networks?
@@ -1415,16 +1415,16 @@ Proper handling of numerical features is foundational for ML pipelines. Scaling,
 
 | Method | Formula | When to Use |
 |--------|---------|-------------|
-| StandardScaler | $z = \frac{x - \mu}{\sigma}$ | Gaussian-like features; most common |
-| MinMaxScaler | $z = \frac{x - x_{\min}}{x_{\max} - x_{\min}}$ | Bounded features; neural nets |
-| RobustScaler | $z = \frac{x - \text{median}}{\text{IQR}}$ | Outlier-heavy data |
-| MaxAbsScaler | $z = \frac{x}{|x_{\max}|}$ | Sparse data (preserves zeros) |
+| StandardScaler | $$z = \frac{x - \mu}{\sigma}$$ | Gaussian-like features; most common |
+| MinMaxScaler | $$z = \frac{x - x_{\min}}{x_{\max} - x_{\min}}$$ | Bounded features; neural nets |
+| RobustScaler | $$z = \frac{x - \text{median}}{\text{IQR}}$$ | Outlier-heavy data |
+| MaxAbsScaler | $$z = \frac{x}{|x_{\max}|}$$ | Sparse data (preserves zeros) |
 
 ### Transformations
 
-**Log transform**: $x' = \log(x + 1)$ -- handles right-skewed distributions (income, counts).
+**Log transform**: $$x' = \log(x + 1)$$ -- handles right-skewed distributions (income, counts).
 
-**Box-Cox**: $x' = \frac{x^\lambda - 1}{\lambda}$ (requires $x > 0$). Finds optimal $\lambda$ to normalize.
+**Box-Cox**: $$x' = \frac{x^\lambda - 1}{\lambda}$$ (requires $$x > 0$$). Finds optimal $$\lambda$$ to normalize.
 
 **Yeo-Johnson**: generalizes Box-Cox to handle negative values.
 
@@ -1467,7 +1467,7 @@ X_processed = preprocessor.fit_transform(X_train)
 |---------|------------|-------------|
 | Scaling for model type | "Do I need to scale?" | Required for SVM, kNN, linear, NN. Not needed for trees |
 | Data leakage via scaling | "How to preprocess?" | Fit scaler on train only; transform test with train stats |
-| Log transform for skew | Heavily right-skewed | $\log(x+1)$ is simple and effective |
+| Log transform for skew | Heavily right-skewed | $$\log(x+1)$$ is simple and effective |
 | Feature crosses | Linear models | Manual interactions compensate for linearity assumption |
 
 ### Common Interview Questions
@@ -1497,17 +1497,17 @@ Categorical feature encoding is critical for ML pipelines. The choice of encodin
 
 | Method | Output Dim | Preserves Ordinality | Handles High Cardinality |
 |--------|-----------|---------------------|------------------------|
-| One-Hot | $K$ | No | No ($K$ can be huge) |
+| One-Hot | $$K$$ | No | No ($$K$$ can be huge) |
 | Label/Ordinal | 1 | If ordered | Yes |
 | Target Encoding | 1 | No | Yes |
-| Binary Encoding | $\lceil\log_2 K\rceil$ | No | Yes |
-| Hash Encoding | $H$ (fixed) | No | Yes |
-| Embedding | $d$ (learned) | No | Yes |
+| Binary Encoding | $$\lceil\log_2 K\rceil$$ | No | Yes |
+| Hash Encoding | $$H$$ (fixed) | No | Yes |
+| Embedding | $$d$$ (learned) | No | Yes |
 
 ### One-Hot Encoding
-Creates $K$ binary columns. Standard for low-cardinality features ($K < 50$).
+Creates $$K$$ binary columns. Standard for low-cardinality features ($$K < 50$$).
 
-**Trap**: in linear models, $K$ dummy variables are collinear. Drop one column or use regularization.
+**Trap**: in linear models, $$K$$ dummy variables are collinear. Drop one column or use regularization.
 
 ### Target Encoding
 Replace category with mean of target variable:
@@ -1516,18 +1516,18 @@ $$
 x_{\text{encoded}} = \frac{n_k \cdot \bar{y}_k + m \cdot \bar{y}_{\text{global}}}{n_k + m}
 $$
 
-where $m$ is a smoothing parameter (prevents overfitting for rare categories).
+where $$m$$ is a smoothing parameter (prevents overfitting for rare categories).
 
 **Risk**: data leakage if applied naively. Must use cross-validation encoding (fit on fold-out data).
 
 ### Embedding (Learned)
-Map categories to dense vectors $\mathbb{R}^d$ via a lookup table trained end-to-end with the model.
+Map categories to dense vectors $$\mathbb{R}^d$$ via a lookup table trained end-to-end with the model.
 
 $$
 \text{embed}(c) = W[c, :] \in \mathbb{R}^d
 $$
 
-Rule of thumb for $d$: $\min(50, \lceil K/2 \rceil)$ or $\lceil K^{0.25} \rceil$.
+Rule of thumb for $$d$$: $$\min(50, \lceil K/2 \rceil)$$ or $$\lceil K^{0.25} \rceil$$.
 
 ### Hash Encoding (Feature Hashing)
 Map categories to fixed-size vector via hash function:
@@ -1602,7 +1602,7 @@ $$
 - **TF**: how important is the word in this document
 - **IDF**: how rare is the word across all documents
 
-Variants: sublinear TF ($1 + \log \text{TF}$), smooth IDF ($\log\frac{N+1}{df+1} + 1$).
+Variants: sublinear TF ($$1 + \log \text{TF}$$), smooth IDF ($$\log\frac{N+1}{df+1} + 1$$).
 
 ### N-grams
 Capture local word order:
@@ -1622,7 +1622,7 @@ $$
 P(w_o|w_i) = \frac{\exp(v_{w_o}'^T v_{w_i})}{\sum_{w=1}^{V}\exp(v_w'^T v_{w_i})}
 $$
 
-**GloVe**: factorizes co-occurrence matrix. $\log X_{ij} = w_i^T \tilde{w}_j + b_i + \tilde{b}_j$
+**GloVe**: factorizes co-occurrence matrix. $$\log X_{ij} = w_i^T \tilde{w}_j + b_i + \tilde{b}_j$$
 
 **FastText**: extends Word2Vec with subword (character n-gram) embeddings. Handles OOV words.
 
@@ -1706,7 +1706,7 @@ $$
 x_{\sin} = \sin\left(\frac{2\pi \cdot t}{T}\right), \quad x_{\cos} = \cos\left(\frac{2\pi \cdot t}{T}\right)
 $$
 
-where $T$ is the period (24 for hours, 7 for days). This ensures hour 23 and hour 0 are adjacent.
+where $$T$$ is the period (24 for hours, 7 for days). This ensures hour 23 and hour 0 are adjacent.
 
 ### Lag Features
 For time series, create lagged values:
@@ -1813,12 +1813,12 @@ Missing data is ubiquitous in real-world ML. Proper handling prevents bias and i
 - Constant: use a sentinel value (e.g., -1, "UNKNOWN")
 
 **Model-Based Imputation**:
-- **KNN Imputer**: impute from $k$ nearest neighbors' values
+- **KNN Imputer**: impute from $$k$$ nearest neighbors' values
 - **Iterative Imputer (MICE)**: multiple imputation by chained equations. Each feature is modeled as a function of other features iteratively
 - **Matrix factorization**: for recommendation-style missing data
 
 **Indicator Features**:
-Add binary column $\text{is\_missing}_j$ to preserve missingness information:
+Add binary column $$\text{is\_missing}_j$$ to preserve missingness information:
 
 $$
 x_{\text{is\_missing},j} = \begin{cases} 1 & \text{if } x_j \text{ is missing} \\ 0 & \text{otherwise} \end{cases}
@@ -1902,9 +1902,9 @@ $$
 
 Captures nonlinear dependencies. Works for both classification and regression.
 
-**Correlation-based**: Pearson correlation for linear relationships. Remove features with $|r| > 0.95$ to address multicollinearity.
+**Correlation-based**: Pearson correlation for linear relationships. Remove features with $$|r| > 0.95$$ to address multicollinearity.
 
-**Variance threshold**: remove near-constant features ($\text{Var}(X_j) < \epsilon$).
+**Variance threshold**: remove near-constant features ($$\text{Var}(X_j) < \epsilon$$).
 
 **Chi-squared test**: for categorical features vs. categorical target.
 
@@ -1915,16 +1915,16 @@ Use model performance to evaluate feature subsets:
 - **Backward elimination**: start with all features, remove worst one at a time
 - **Recursive Feature Elimination (RFE)**: train model, remove least important feature, repeat
 
-Computationally expensive: $O(d)$ model trainings per step.
+Computationally expensive: $$O(d)$$ model trainings per step.
 
 ### Embedded Methods
 Feature selection built into model training:
 
-**L1 regularization (Lasso)**: drives coefficients to zero. Features with $w_j = 0$ are eliminated.
+**L1 regularization (Lasso)**: drives coefficients to zero. Features with $$w_j = 0$$ are eliminated.
 
 **Tree-based importance**:
-- **Impurity-based**: sum of Gini/entropy reduction across all splits on feature $j$
-- **Permutation importance**: measure accuracy drop when feature $j$ is shuffled
+- **Impurity-based**: sum of Gini/entropy reduction across all splits on feature $$j$$
+- **Permutation importance**: measure accuracy drop when feature $$j$$ is shuffled
 
 $$
 \text{PI}_j = \text{score}_{\text{original}} - \text{score}_{\text{permuted}_j}
@@ -2001,9 +2001,9 @@ Duplicate random minority class samples. Simple but risks overfitting to specifi
 ### SMOTE (Synthetic Minority Over-sampling Technique)
 Generate synthetic samples by interpolating between minority class neighbors:
 
-1. For minority sample $x_i$, find $k$ nearest minority neighbors
-2. Pick a random neighbor $x_{nn}$
-3. Create synthetic sample: $x_{\text{new}} = x_i + \lambda(x_{nn} - x_i)$, where $\lambda \sim U(0,1)$
+1. For minority sample $$x_i$$, find $$k$$ nearest minority neighbors
+2. Pick a random neighbor $$x_{nn}$$
+3. Create synthetic sample: $$x_{\text{new}} = x_i + \lambda(x_{nn} - x_i)$$, where $$\lambda \sim U(0,1)$$
 
 **Variants**:
 
@@ -2025,7 +2025,7 @@ Generate synthetic samples by interpolating between minority class neighbors:
 ### When NOT to Oversample
 - Tree models with native class weights (XGBoost `scale_pos_weight`)
 - Very large datasets (undersampling majority may be better)
-- When the minority class has very few examples ($< 10$) -- SMOTE fails
+- When the minority class has very few examples ($$< 10$$) -- SMOTE fails
 
 ## Implementation
 
@@ -2083,7 +2083,7 @@ $$
 w_k = \frac{n}{K \cdot n_k}
 $$
 
-where $n$ = total samples, $K$ = number of classes, $n_k$ = samples in class $k$.
+where $$n$$ = total samples, $$K$$ = number of classes, $$n_k$$ = samples in class $$k$$.
 
 **Effective number weighting** (Cui et al., 2019):
 
@@ -2091,7 +2091,7 @@ $$
 w_k = \frac{1 - \beta}{1 - \beta^{n_k}}, \quad \beta \in [0, 1)
 $$
 
-As $\beta \to 1$, approaches inverse frequency. $\beta = 0.999$ is common for long-tailed distributions.
+As $$\beta \to 1$$, approaches inverse frequency. $$\beta = 0.999$$ is common for long-tailed distributions.
 
 ### Weighted Loss Functions
 
@@ -2107,7 +2107,7 @@ $$
 \mathcal{L}_{\text{focal}} = -\alpha_t (1-p_t)^\gamma \log(p_t)
 $$
 
-$\gamma > 0$ down-weights easy examples; $\alpha_t$ balances class frequencies. Standard: $\gamma = 2, \alpha = 0.25$.
+$$\gamma > 0$$ down-weights easy examples; $$\alpha_t$$ balances class frequencies. Standard: $$\gamma = 2, \alpha = 0.25$$.
 
 ### Cost-Sensitive Learning
 Asymmetric misclassification costs:
@@ -2116,7 +2116,7 @@ $$
 \text{Expected Cost} = C_{FP} \cdot P(FP) + C_{FN} \cdot P(FN)
 $$
 
-Set class weight $= C_{FN}/C_{FP}$ for the positive class. Common in medical diagnosis (missing disease is worse than false alarm).
+Set class weight $$= C_{FN}/C_{FP}$$ for the positive class. Common in medical diagnosis (missing disease is worse than false alarm).
 
 ### Framework-Specific Implementation
 
@@ -2185,21 +2185,21 @@ Cross-validation (CV) estimates model generalization performance and is essentia
 ## Core Concepts
 
 ### K-Fold Cross-Validation
-Split data into $K$ equal folds. Train on $K-1$ folds, validate on the remaining fold. Repeat $K$ times:
+Split data into $$K$$ equal folds. Train on $$K-1$$ folds, validate on the remaining fold. Repeat $$K$$ times:
 
 $$
 \text{CV Score} = \frac{1}{K}\sum_{k=1}^{K} \text{Score}(f^{(-k)}, D_k)
 $$
 
-where $f^{(-k)}$ is the model trained without fold $k$, evaluated on fold $k$.
+where $$f^{(-k)}$$ is the model trained without fold $$k$$, evaluated on fold $$k$$.
 
-Standard: $K = 5$ or $K = 10$. Tradeoff: larger $K$ = less bias, more variance, more compute.
+Standard: $$K = 5$$ or $$K = 10$$. Tradeoff: larger $$K$$ = less bias, more variance, more compute.
 
 ### Stratified K-Fold
 Maintain class proportions in each fold. Essential for imbalanced datasets.
 
 ### Leave-One-Out (LOO)
-$K = n$ (each sample is its own fold). Nearly unbiased but high variance and computationally expensive. Useful for very small datasets.
+$$K = n$$ (each sample is its own fold). Nearly unbiased but high variance and computationally expensive. Useful for very small datasets.
 
 ### Time Series CV
 Data is ordered by time. Cannot use random splits (data leakage from future).
@@ -2208,9 +2208,9 @@ Data is ordered by time. Cannot use random splits (data leakage from future).
 
 | Fold | Train | Test |
 |------|-------|------|
-| 1 | $[1, T_1]$ | $[T_1+1, T_2]$ |
-| 2 | $[1, T_2]$ | $[T_2+1, T_3]$ |
-| 3 | $[1, T_3]$ | $[T_3+1, T_4]$ |
+| 1 | $$[1, T_1]$$ | $$[T_1+1, T_2]$$ |
+| 2 | $$[1, T_2]$$ | $$[T_2+1, T_3]$$ |
+| 3 | $$[1, T_3]$$ | $$[T_3+1, T_4]$$ |
 
 **Sliding Window**: fixed-size training window. Better when older data is less relevant.
 
@@ -2284,23 +2284,23 @@ Hyperparameter tuning optimizes the parameters not learned during training (lear
 ## Core Concepts
 
 ### Grid Search
-Exhaustively evaluate all combinations. Guaranteed to find best in grid but exponential cost: $O(p^d)$ for $p$ values per $d$ hyperparameters.
+Exhaustively evaluate all combinations. Guaranteed to find best in grid but exponential cost: $$O(p^d)$$ for $$p$$ values per $$d$$ hyperparameters.
 
 ### Random Search (Bergstra & Bengio, 2012)
 Sample hyperparameter combinations randomly. More efficient than grid search:
 
 **Key insight**: most objectives depend on only a few hyperparameters. Random search explores the important dimensions more thoroughly than grid search for the same budget.
 
-With $n$ random trials and $d$ hyperparameters, if only $d_{\text{eff}}$ matter:
-- Random search: effectively $n^{d/d_{\text{eff}}}$ evaluations in important dimensions
-- Grid search: only $n^{1/d}$ evaluations per dimension
+With $$n$$ random trials and $$d$$ hyperparameters, if only $$d_{\text{eff}}$$ matter:
+- Random search: effectively $$n^{d/d_{\text{eff}}}$$ evaluations in important dimensions
+- Grid search: only $$n^{1/d}$$ evaluations per dimension
 
 ### Bayesian Optimization
 Build a surrogate model (typically Gaussian Process or TPE) of the objective function:
 
-1. Fit surrogate to observed $(x, y)$ pairs
-2. Select next $x$ by maximizing acquisition function (Expected Improvement, UCB)
-3. Evaluate true objective at $x$
+1. Fit surrogate to observed $$(x, y)$$ pairs
+2. Select next $$x$$ by maximizing acquisition function (Expected Improvement, UCB)
+3. Evaluate true objective at $$x$$
 4. Update surrogate and repeat
 
 **Expected Improvement**:
@@ -2314,9 +2314,9 @@ Balances exploration (uncertain regions) and exploitation (promising regions).
 ### Hyperband / ASHA
 Multi-fidelity methods: train many configurations for few epochs, promote promising ones:
 
-1. Start $n$ random configurations with budget $b_{\min}$
-2. Evaluate, keep top $1/\eta$ fraction
-3. Increase budget by $\eta$, repeat until $b_{\max}$
+1. Start $$n$$ random configurations with budget $$b_{\min}$$
+2. Evaluate, keep top $$1/\eta$$ fraction
+3. Increase budget by $$\eta$$, repeat until $$b_{\max}$$
 
 Much faster than full training for each configuration. Successive Halving is the core primitive.
 
@@ -2384,7 +2384,7 @@ A well-calibrated model outputs probabilities that reflect true likelihoods: if 
 ## Core Concepts
 
 ### What is Calibration?
-A model $\hat{p}$ is calibrated if:
+A model $$\hat{p}$$ is calibrated if:
 
 $$
 P(Y=1 | \hat{p}(X) = p) = p, \quad \forall p \in [0,1]
@@ -2400,7 +2400,7 @@ $$
 \text{ECE} = \sum_{b=1}^{B} \frac{|B_b|}{n} |acc(B_b) - \text{conf}(B_b)|
 $$
 
-Partition predictions into $B$ bins; compare average confidence vs. accuracy per bin.
+Partition predictions into $$B$$ bins; compare average confidence vs. accuracy per bin.
 
 **Brier Score** (proper scoring rule):
 
@@ -2419,19 +2419,19 @@ $$
 \hat{p}_{\text{cal}} = \sigma(a \cdot f(x) + b)
 $$
 
-Learn $a, b$ on a held-out calibration set. Works well for sigmoid-shaped miscalibration.
+Learn $$a, b$$ on a held-out calibration set. Works well for sigmoid-shaped miscalibration.
 
 **Isotonic Regression** (non-parametric):
 Fit a non-decreasing step function mapping model scores to calibrated probabilities. More flexible but needs more calibration data.
 
 **Temperature Scaling** (neural nets):
-Single parameter $T > 0$:
+Single parameter $$T > 0$$:
 
 $$
 \hat{p}_{\text{cal}} = \text{softmax}(z/T)
 $$
 
-$T > 1$: soften predictions (reduce overconfidence). Optimal $T$ found on validation set.
+$$T > 1$$: soften predictions (reduce overconfidence). Optimal $$T$$ found on validation set.
 
 ### Which Models Need Calibration?
 
@@ -2487,7 +2487,7 @@ plt.ylabel("Fraction of positives")
 - [ ] ECE and reliability diagrams are the primary calibration diagnostics
 - [ ] Platt scaling: parametric (2 params), good for smooth miscalibration
 - [ ] Isotonic regression: non-parametric, flexible, needs more data
-- [ ] Temperature scaling: standard for neural nets, single parameter $T$
+- [ ] Temperature scaling: standard for neural nets, single parameter $$T$$
 """
 
 # ---------------------------------------------------------------------------

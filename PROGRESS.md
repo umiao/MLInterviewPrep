@@ -224,3 +224,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-137 --status completed`
+
+## 2026-03-17 -- [T-P1-138] Fix math delimiters, add code syntax highlighting, document conventions
+- **What I did**: (1) Created `scripts/fix_math_delimiters.py` to convert `$...$` inline math to `$$...$$` across all 8 seed files (1,526 conversions). Script protects code blocks, inline code spans, and currency patterns like `$2M`. (2) Installed `react-syntax-highlighter` and added Prism-based code highlighting (oneDark theme) to `MarkdownPreview.tsx` -- block code gets syntax colors (default: Python), inline code keeps existing gray styling. (3) Re-seeded all 148 framework nodes. (4) Added `## Markdown Content Conventions` section to CLAUDE.md.
+- **Deliverables**: scripts/fix_math_delimiters.py (new), scripts/seed_pillar{1..8}_content.py (converted), src/frontend/src/components/ui/MarkdownPreview.tsx, src/frontend/package.json, CLAUDE.md
+- **Sanity check result**: 811 tests pass, TypeScript compiles, frontend builds, API smoke test confirms `$$O(1)$$` in DB and API responses, currency `$2M` preserved, code block content untouched
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-138 --status completed`

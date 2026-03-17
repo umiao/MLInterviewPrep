@@ -48,7 +48,7 @@ $$
 \text{Candidates} \xrightarrow{\text{L0: Boolean}} \xrightarrow{\text{L1: ANN}} \xrightarrow{\text{L2: Cross-Encoder}} \text{Top-K Results}
 $$
 
-- **L0 -- Inverted Index**: BM25 retrieval over inverted index. $O(\text{postings})$ per query term.
+- **L0 -- Inverted Index**: BM25 retrieval over inverted index. $$O(\text{postings})$$ per query term.
 - **L1 -- Dense Retrieval**: Bi-encoder produces query/doc embeddings, ANN search (HNSW/ScaNN) returns top-1000. Latency budget: 10-50ms.
 - **L2 -- Re-ranking**: Cross-encoder (BERT-based) scores query-doc pairs. Latency: 5-20ms for top-100.
 
@@ -58,7 +58,7 @@ $$
 \text{BM25}(q, d) = \sum_{t \in q} \text{IDF}(t) \cdot \frac{f(t, d) \cdot (k_1 + 1)}{f(t, d) + k_1 \cdot (1 - b + b \cdot \frac{|d|}{\text{avgdl}})}
 $$
 
-where $f(t,d)$ is term frequency, $k_1 \approx 1.2$, $b \approx 0.75$.
+where $$f(t,d)$$ is term frequency, $$k_1 \approx 1.2$$, $$b \approx 0.75$$.
 
 ### Relevance Metrics
 
@@ -284,7 +284,7 @@ Ad Request -> Candidate Selection -> CTR Prediction -> Bid Calculation
 ```
 
 ### Click-Through Rate Prediction
-CTR models predict $P(\text{click} | \text{user, ad, context})$:
+CTR models predict $$P(\text{click} | \text{user, ad, context})$$:
 
 $$
 \text{eCPM} = \text{CTR} \times \text{bid} \times 1000
@@ -444,7 +444,7 @@ $$
 \min \sum_{i,j} c_{ij} x_{ij} \quad \text{s.t.} \quad \sum_j x_{ij} = 1 \; \forall i, \quad x_{ij} \in \{0,1\}
 $$
 
-where $c_{ij}$ is the cost of assigning order $i$ to driver $j$ (distance, ETA, fairness).
+where $$c_{ij}$$ is the cost of assigning order $$i$$ to driver $$j$$ (distance, ETA, fairness).
 
 ### Key Metrics
 
@@ -518,7 +518,7 @@ def greedy_dispatch(
 |--------|----------------|-------------------|----------|
 | Latency | <100ms | 1-5s batches | <100ms (inference) |
 | Optimality | Local | Near-global | Learned policy |
-| Complexity | $O(n \cdot m)$ | $O(n^3)$ Hungarian | Training cost |
+| Complexity | $$O(n \cdot m)$$ | $$O(n^3)$$ Hungarian | Training cost |
 | Fairness | Poor | Configurable | Reward-shaped |
 
 ## Key Takeaways
@@ -691,14 +691,14 @@ $$
 \text{AP} = \int_0^1 p(r) \, dr
 $$
 
-where $p(r)$ is precision at recall $r$. mAP averages AP across classes.
+where $$p(r)$$ is precision at recall $$r$$. mAP averages AP across classes.
 
 **IoU (Intersection over Union)**:
 $$
 \text{IoU} = \frac{|B_{\text{pred}} \cap B_{\text{gt}}|}{|B_{\text{pred}} \cup B_{\text{gt}}|}
 $$
 
-Detection is correct if $\text{IoU} \geq 0.5$ (AP@0.5) or averaged over thresholds (AP@[.5:.95]).
+Detection is correct if $$\text{IoU} \geq 0.5$$ (AP@0.5) or averaged over thresholds (AP@[.5:.95]).
 
 ### Non-Maximum Suppression (NMS)
 
@@ -830,9 +830,9 @@ $$
 
 | Strategy | When to Use |
 |----------|------------|
-| Class weights ($w_+ = 100$) | Always a good baseline |
+| Class weights ($$w_+ = 100$$) | Always a good baseline |
 | SMOTE / oversampling | Tabular data, small datasets |
-| Focal loss: $\alpha(1-p_t)^\gamma \text{CE}$ | Deep models, hard examples |
+| Focal loss: $$\alpha(1-p_t)^\gamma \text{CE}$$ | Deep models, hard examples |
 | Anomaly detection | Unsupervised, novel fraud |
 | Ensemble with isolation forest | Complement supervised model |
 
@@ -1242,7 +1242,7 @@ $$
 \mathcal{L} = -\frac{1}{B} \sum_{i=1}^{B} \log \frac{\exp(\text{sim}(u_i, v_i) / \tau)}{\sum_{j=1}^{B} \exp(\text{sim}(u_i, v_j) / \tau)}
 $$
 
-where $\tau$ is a temperature parameter and $B$ is batch size.
+where $$\tau$$ is a temperature parameter and $$B$$ is batch size.
 
 ### Key Design Decisions
 
@@ -1250,7 +1250,7 @@ where $\tau$ is a temperature parameter and $B$ is batch size.
 |----------|---------|----------|
 | Similarity function | Cosine, dot product | Cosine normalizes magnitude; dot product allows popularity signal |
 | Negative sampling | In-batch, hard negatives | Hard negatives improve quality but need careful mining |
-| Temperature $\tau$ | 0.05 - 0.1 | Lower = sharper distribution = harder training |
+| Temperature $$\tau$$ | 0.05 - 0.1 | Lower = sharper distribution = harder training |
 | Embedding dimension | 64 - 256 | Higher = more expressive but slower ANN |
 | Shared layers | None, partial, full | Shared bottom layers reduce params but limit asymmetry |
 
@@ -1321,7 +1321,7 @@ class TwoTower:
 
 | Aspect | Two-Tower | Cross-Encoder | Matrix Factorization |
 |--------|-----------|--------------|---------------------|
-| Inference | $O(1)$ per pair + ANN | $O(n)$ per query | Pre-computed |
+| Inference | $$O(1)$$ per pair + ANN | $$O(n)$$ per query | Pre-computed |
 | Expressiveness | Moderate | High | Low |
 | Feature support | Rich features | Rich features | ID-only (basic) |
 | Scale | Billions of items | Top-K only | Millions |
@@ -1478,7 +1478,7 @@ ANN algorithms enable sub-linear similarity search over massive vector collectio
 ## Core Concepts
 
 ### Why Approximate?
-Exact nearest neighbor search is $O(n \cdot d)$ for $n$ vectors of dimension $d$. For $n = 10^9$ and $d = 256$, this takes seconds per query. ANN trades small accuracy loss for 100-1000x speedup.
+Exact nearest neighbor search is $$O(n \cdot d)$$ for $$n$$ vectors of dimension $$d$$. For $$n = 10^9$$ and $$d = 256$$, this takes seconds per query. ANN trades small accuracy loss for 100-1000x speedup.
 
 ### Algorithm Families
 
@@ -1494,7 +1494,7 @@ Exact nearest neighbor search is $O(n \cdot d)$ for $n$ vectors of dimension $d$
 
 Builds a multi-layer graph where:
 - Layer 0: All vectors, densely connected
-- Layer $l$: Subset of vectors, $\sim n \cdot e^{-l}$ nodes
+- Layer $$l$$: Subset of vectors, $$\sim n \cdot e^{-l}$$ nodes
 - Search: Start at top layer, greedily descend
 
 Key parameters:
@@ -1504,14 +1504,14 @@ Key parameters:
 
 ### IVF-PQ (Inverted File + Product Quantization)
 
-1. **IVF**: Cluster vectors into $k$ cells using k-means. At query time, search only top-$n_{\text{probe}}$ cells.
-2. **PQ**: Split $d$-dimensional vector into $m$ sub-vectors, quantize each to $b$ bits:
+1. **IVF**: Cluster vectors into $$k$$ cells using k-means. At query time, search only top-$$n_{\text{probe}}$$ cells.
+2. **PQ**: Split $$d$$-dimensional vector into $$m$$ sub-vectors, quantize each to $$b$$ bits:
 
 $$
 \text{Memory per vector} = m \times b \text{ bits}
 $$
 
-For $d=256$, $m=32$, $b=8$: memory = 32 bytes (vs 1024 bytes for float32).
+For $$d=256$$, $$m=32$$, $$b=8$$: memory = 32 bytes (vs 1024 bytes for float32).
 
 Approximate distance:
 $$
@@ -1770,7 +1770,7 @@ $$
 \mathcal{L} = -\sum_{(w, c) \in D} \log \sigma(v_c^T v_w) - \sum_{(w, c') \in D'} \log \sigma(-v_{c'}^T v_w)
 $$
 
-where $D$ is positive pairs, $D'$ is negative samples, $\sigma$ is sigmoid.
+where $$D$$ is positive pairs, $$D'$$ is negative samples, $$\sigma$$ is sigmoid.
 
 ### Contrastive Learning for Embeddings
 
@@ -1788,7 +1788,7 @@ $$
 | Intrinsic: clustering | Semantic grouping | Silhouette score on categories |
 | Extrinsic: retrieval | Downstream utility | Recall@K on retrieval task |
 | Alignment | Cross-modal consistency | Embedding similarity of matched pairs |
-| Uniformity | Space utilization | $\log \mathbb{E}[e^{-2\|z_i - z_j\|^2}]$ |
+| Uniformity | Space utilization | $$\log \mathbb{E}[e^{-2\|z_i - z_j\|^2}]$$ |
 
 ### Embedding Dimension Selection
 
@@ -1922,7 +1922,7 @@ $$
 \text{EMA}(t) = \alpha \cdot x_t + (1 - \alpha) \cdot \text{EMA}(t-1)
 $$
 
-where $\alpha = 1 - e^{-\Delta t / \text{halflife}}$ for time-weighted decay.
+where $$\alpha = 1 - e^{-\Delta t / \text{halflife}}$$ for time-weighted decay.
 
 ### Challenges
 
@@ -2037,8 +2037,8 @@ A/B testing is the gold standard for evaluating ML model changes in production. 
 
 ### Hypothesis Testing Framework
 
-**Null hypothesis**: $H_0: \mu_B - \mu_A = 0$ (no effect)
-**Alternative**: $H_1: \mu_B - \mu_A \neq 0$
+**Null hypothesis**: $$H_0: \mu_B - \mu_A = 0$$ (no effect)
+**Alternative**: $$H_1: \mu_B - \mu_A \neq 0$$
 
 **Z-test for proportions** (e.g., CTR):
 
@@ -2046,17 +2046,17 @@ $$
 Z = \frac{\hat{p}_B - \hat{p}_A}{\sqrt{\hat{p}(1-\hat{p})\left(\frac{1}{n_A} + \frac{1}{n_B}\right)}}
 $$
 
-where $\hat{p} = \frac{n_A \hat{p}_A + n_B \hat{p}_B}{n_A + n_B}$ is the pooled proportion.
+where $$\hat{p} = \frac{n_A \hat{p}_A + n_B \hat{p}_B}{n_A + n_B}$$ is the pooled proportion.
 
 ### Sample Size Calculation
 
-For desired power $1 - \beta$ and significance $\alpha$:
+For desired power $$1 - \beta$$ and significance $$\alpha$$:
 
 $$
 n = \frac{(z_{\alpha/2} + z_\beta)^2 \cdot 2\sigma^2}{\delta^2}
 $$
 
-where $\delta$ is the minimum detectable effect (MDE) and $\sigma^2$ is the variance.
+where $$\delta$$ is the minimum detectable effect (MDE) and $$\sigma^2$$ is the variance.
 
 ### Common Pitfalls
 
@@ -2076,9 +2076,9 @@ $$
 \hat{\mu}_{\text{CUPED}} = \bar{Y} - \theta(\bar{X} - \mathbb{E}[X])
 $$
 
-where $\theta = \text{Cov}(X, Y) / \text{Var}(X)$ and $X$ is pre-experiment metric.
+where $$\theta = \text{Cov}(X, Y) / \text{Var}(X)$$ and $$X$$ is pre-experiment metric.
 
-Variance reduction: $\text{Var}(\hat{\mu}_{\text{CUPED}}) = \text{Var}(Y)(1 - \rho_{XY}^2)$
+Variance reduction: $$\text{Var}(\hat{\mu}_{\text{CUPED}}) = \text{Var}(Y)(1 - \rho_{XY}^2)$$
 
 Can reduce required sample size by 30-50%.
 
@@ -2165,22 +2165,22 @@ The exploration-exploitation tradeoff is fundamental to ML systems that must bot
 
 ### The Multi-Armed Bandit Problem
 
-At each step $t$, choose arm $a_t$ from $K$ arms, observe reward $r_t$:
+At each step $$t$$, choose arm $$a_t$$ from $$K$$ arms, observe reward $$r_t$$:
 
 $$
 \text{Regret}(T) = T \cdot \mu^* - \sum_{t=1}^{T} \mu_{a_t}
 $$
 
-where $\mu^* = \max_a \mu_a$ is the best arm's expected reward.
+where $$\mu^* = \max_a \mu_a$$ is the best arm's expected reward.
 
 ### Key Algorithms
 
 | Algorithm | Strategy | Regret Bound |
 |-----------|----------|-------------|
-| Epsilon-greedy | Random explore with prob $\epsilon$ | $O(\epsilon T + K/\epsilon)$ |
-| UCB1 | Optimistic: pick $\arg\max(\hat{\mu}_a + \sqrt{\frac{2\ln t}{n_a}})$ | $O(\sqrt{KT \ln T})$ |
-| Thompson Sampling | Sample from posterior, pick max | $O(\sqrt{KT \ln T})$ |
-| LinUCB | Contextual: $\hat{\mu} = x^T\theta + \alpha\sqrt{x^T A^{-1} x}$ | $O(d\sqrt{T \ln T})$ |
+| Epsilon-greedy | Random explore with prob $$\epsilon$$ | $$O(\epsilon T + K/\epsilon)$$ |
+| UCB1 | Optimistic: pick $$\arg\max(\hat{\mu}_a + \sqrt{\frac{2\ln t}{n_a}})$$ | $$O(\sqrt{KT \ln T})$$ |
+| Thompson Sampling | Sample from posterior, pick max | $$O(\sqrt{KT \ln T})$$ |
+| LinUCB | Contextual: $$\hat{\mu} = x^T\theta + \alpha\sqrt{x^T A^{-1} x}$$ | $$O(d\sqrt{T \ln T})$$ |
 
 ### Thompson Sampling (Beta-Bernoulli)
 
@@ -2191,10 +2191,10 @@ $$
 $$
 
 Update rule:
-- Click: $\alpha_a \leftarrow \alpha_a + 1$
-- No click: $\beta_a \leftarrow \beta_a + 1$
+- Click: $$\alpha_a \leftarrow \alpha_a + 1$$
+- No click: $$\beta_a \leftarrow \beta_a + 1$$
 
-At each step: sample $\theta_a$ for each arm, pick $\arg\max_a \theta_a$.
+At each step: sample $$\theta_a$$ for each arm, pick $$\arg\max_a \theta_a$$.
 
 ### UCB (Upper Confidence Bound)
 
@@ -2211,7 +2211,7 @@ $$
 r_t = f(x_t, a_t) + \epsilon_t
 $$
 
-LinUCB assumes linear reward: $\mathbb{E}[r|x, a] = x^T \theta_a$
+LinUCB assumes linear reward: $$\mathbb{E}[r|x, a] = x^T \theta_a$$
 
 ## Implementation
 
@@ -2281,8 +2281,8 @@ class EpsilonGreedy:
 | Aspect | Epsilon-Greedy | UCB1 | Thompson Sampling |
 |--------|---------------|------|-------------------|
 | Implementation | Trivial | Simple | Simple |
-| Regret | $O(T^{2/3})$ | $O(\sqrt{KT\ln T})$ | $O(\sqrt{KT\ln T})$ |
-| Adaptability | Fixed $\epsilon$ | Automatic | Automatic |
+| Regret | $$O(T^{2/3})$$ | $$O(\sqrt{KT\ln T})$$ | $$O(\sqrt{KT\ln T})$$ |
+| Adaptability | Fixed $$\epsilon$$ | Automatic | Automatic |
 | Batching | Easy | Difficult | Easy |
 | Bayesian | No | No | Yes |
 
@@ -2319,17 +2319,17 @@ $$
 $$
 
 where:
-- $z_t, z_s$: teacher and student logits
-- $T$: temperature (typically 2-20, higher = softer)
-- $\alpha$: balance between hard and soft labels
-- $\sigma$: softmax function
+- $$z_t, z_s$$: teacher and student logits
+- $$T$$: temperature (typically 2-20, higher = softer)
+- $$\alpha$$: balance between hard and soft labels
+- $$\sigma$$: softmax function
 
 ### Why Soft Labels Work
 
 Soft probability distributions contain **dark knowledge**:
-- A cat image: $P(\text{cat}) = 0.9, P(\text{dog}) = 0.08, P(\text{car}) = 0.001$
+- A cat image: $$P(\text{cat}) = 0.9, P(\text{dog}) = 0.08, P(\text{car}) = 0.001$$
 - The relative probabilities between non-target classes encode similarity structure
-- Higher temperature $T$ amplifies these inter-class relationships
+- Higher temperature $$T$$ amplifies these inter-class relationships
 
 ### Distillation Variants
 
@@ -2461,7 +2461,7 @@ $$
 \mathcal{L} = \sum_k \frac{1}{2\sigma_k^2} \mathcal{L}_k + \log \sigma_k
 $$
 
-where $\sigma_k$ is a learnable task-specific uncertainty parameter.
+where $$\sigma_k$$ is a learnable task-specific uncertainty parameter.
 
 ### Progressive Layered Extraction (PLE)
 
@@ -2477,7 +2477,7 @@ $$
 y_k = h_k\left(\sum_{i=1}^{n} g_k^{(i)}(x) \cdot f_i(x)\right)
 $$
 
-where $g_k$ is a gating network for task $k$ and $f_i$ are shared expert networks.
+where $$g_k$$ is a gating network for task $$k$$ and $$f_i$$ are shared expert networks.
 
 ### Gradient Conflict Resolution
 

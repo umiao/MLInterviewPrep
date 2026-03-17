@@ -198,6 +198,20 @@ the full ruleset.
 
 ---
 
+## Markdown Content Conventions
+
+- **Math delimiters**: Always use `$$...$$` for both inline and display math.
+  Single `$...$` does NOT render (remark-math `singleDollarTextMath: false`).
+  Example: `$$O(n \log n)$$`, not `$O(n \log n)$`.
+- **Fenced code blocks**: Always specify the language (` ```python `, ` ```sql `, etc.).
+  Unspecified blocks default to Python highlighting, but explicit is preferred.
+- **Seed scripts are idempotent**: After modifying content in `scripts/seed_pillar*_content.py`,
+  re-run the script to update the database: `python scripts/seed_pillarN_content.py`.
+- **Math delimiter conversion**: Use `python scripts/fix_math_delimiters.py` to batch-convert
+  `$...$` to `$$...$$` in all seed files. The script skips code blocks and currency patterns.
+
+---
+
 ## Exit Protocol
 
 Before stopping, complete these steps (the **Stop hook** enforces them):

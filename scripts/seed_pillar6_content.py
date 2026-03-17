@@ -32,13 +32,13 @@ Self-attention is the core building block of the Transformer architecture. It al
 ## Core Concepts
 
 ### Scaled Dot-Product Attention
-Given input embeddings $X \in \mathbb{R}^{n \times d}$, we project into queries, keys, and values:
+Given input embeddings $$X \in \mathbb{R}^{n \times d}$$, we project into queries, keys, and values:
 
 $$
 Q = XW^Q, \quad K = XW^K, \quad V = XW^V
 $$
 
-where $W^Q, W^K \in \mathbb{R}^{d \times d_k}$ and $W^V \in \mathbb{R}^{d \times d_v}$.
+where $$W^Q, W^K \in \mathbb{R}^{d \times d_k}$$ and $$W^V \in \mathbb{R}^{d \times d_v}$$.
 
 The attention output is:
 
@@ -46,10 +46,10 @@ $$
 \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
 $$
 
-### Why Scale by $\sqrt{d_k}$?
-Without scaling, for large $d_k$, the dot products $q \cdot k$ have variance proportional to $d_k$. This pushes softmax into saturated regions where gradients vanish. Scaling by $\sqrt{d_k}$ keeps variance at $O(1)$.
+### Why Scale by $$\sqrt{d_k}$$?
+Without scaling, for large $$d_k$$, the dot products $$q \cdot k$$ have variance proportional to $$d_k$$. This pushes softmax into saturated regions where gradients vanish. Scaling by $$\sqrt{d_k}$$ keeps variance at $$O(1)$$.
 
-If $q_i, k_i \sim \mathcal{N}(0, 1)$ i.i.d., then:
+If $$q_i, k_i \sim \mathcal{N}(0, 1)$$ i.i.d., then:
 
 $$
 \text{Var}(q \cdot k) = \sum_{i=1}^{d_k} \text{Var}(q_i k_i) = d_k
@@ -69,11 +69,11 @@ $$
 \text{CausalAttention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right)V
 $$
 
-where $M_{ij} = -\infty$ for $j > i$ (upper triangle), ensuring token $i$ can only attend to positions $\leq i$.
+where $$M_{ij} = -\infty$$ for $$j > i$$ (upper triangle), ensuring token $$i$$ can only attend to positions $$\leq i$$.
 
 ### Complexity Analysis
-- Time: $O(n^2 d)$ for sequence length $n$ and dimension $d$
-- Memory: $O(n^2)$ for the attention matrix
+- Time: $$O(n^2 d)$$ for sequence length $$n$$ and dimension $$d$$
+- Memory: $$O(n^2)$$ for the attention matrix
 - This quadratic scaling is the primary bottleneck for long sequences
 
 ## Implementation
@@ -103,10 +103,10 @@ def causal_mask(n):
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| Explain attention bottleneck | "Why can't Transformers handle long sequences?" | $O(n^2)$ attention matrix; motivates Flash Attention, sparse attention |
+| Explain attention bottleneck | "Why can't Transformers handle long sequences?" | $$O(n^2)$$ attention matrix; motivates Flash Attention, sparse attention |
 | Attention = soft retrieval | "Intuition for self-attention?" | Keys advertise, queries search, values deliver information |
-| Causal masking | "How does GPT prevent seeing future?" | Upper-triangular $-\infty$ mask before softmax |
-| Scaling justification | "Why divide by $\sqrt{d_k}$?" | Prevents softmax saturation from large-variance dot products |
+| Causal masking | "How does GPT prevent seeing future?" | Upper-triangular $$-\infty$$ mask before softmax |
+| Scaling justification | "Why divide by $$\sqrt{d_k}$$?" | Prevents softmax saturation from large-variance dot products |
 
 ### Common Interview Questions
 - [ ] Why is self-attention permutation-equivariant without positional encoding?
@@ -119,17 +119,17 @@ def causal_mask(n):
 
 | Aspect | Self-Attention | RNN | CNN (1D) |
 |--------|---------------|-----|----------|
-| Sequence modeling | Global, $O(1)$ path length | Sequential, $O(n)$ path | Local, $O(n/k)$ path |
+| Sequence modeling | Global, $$O(1)$$ path length | Sequential, $$O(n)$$ path | Local, $$O(n/k)$$ path |
 | Parallelization | Fully parallel | Sequential | Fully parallel |
-| Complexity per layer | $O(n^2 d)$ | $O(n d^2)$ | $O(k n d^2)$ |
+| Complexity per layer | $$O(n^2 d)$$ | $$O(n d^2)$$ | $$O(k n d^2)$$ |
 | Long-range deps | Native | Vanishing gradients | Needs deep stacking |
 
 ## Key Takeaways
 
-- [ ] Self-attention computes pairwise token interactions via $QK^T$ similarity
-- [ ] Scaling by $\sqrt{d_k}$ prevents gradient vanishing in softmax
+- [ ] Self-attention computes pairwise token interactions via $$QK^T$$ similarity
+- [ ] Scaling by $$\sqrt{d_k}$$ prevents gradient vanishing in softmax
 - [ ] Causal mask enforces autoregressive property (no future peeking)
-- [ ] $O(n^2)$ complexity motivates efficient attention variants (Flash, sparse, linear)
+- [ ] $$O(n^2)$$ complexity motivates efficient attention variants (Flash, sparse, linear)
 - [ ] Attention is permutation-equivariant -- position encoding is essential
 """
 
@@ -141,13 +141,13 @@ Multi-head attention (MHA) runs multiple attention operations in parallel with d
 ## Core Concepts
 
 ### Multi-Head Formulation
-Given $h$ heads, each head $i$ computes attention independently:
+Given $$h$$ heads, each head $$i$$ computes attention independently:
 
 $$
 \text{head}_i = \text{Attention}(QW_i^Q, KW_i^K, VW_i^V)
 $$
 
-where $W_i^Q, W_i^K \in \mathbb{R}^{d \times d_k}$, $W_i^V \in \mathbb{R}^{d \times d_v}$, with $d_k = d_v = d/h$.
+where $$W_i^Q, W_i^K \in \mathbb{R}^{d \times d_k}$$, $$W_i^V \in \mathbb{R}^{d \times d_v}$$, with $$d_k = d_v = d/h$$.
 
 The outputs are concatenated and projected:
 
@@ -155,7 +155,7 @@ $$
 \text{MHA}(Q, K, V) = \text{Concat}(\text{head}_1, \ldots, \text{head}_h)W^O
 $$
 
-where $W^O \in \mathbb{R}^{d \times d}$.
+where $$W^O \in \mathbb{R}^{d \times d}$$.
 
 ### Why Multiple Heads?
 - A single attention head can only compute one attention pattern per position
@@ -164,11 +164,11 @@ where $W^O \in \mathbb{R}^{d \times d}$.
 - Empirically, multiple smaller heads outperform one large head of the same total dimension
 
 ### Parameter Count
-For a model with dimension $d$ and $h$ heads:
-- Per head: $3 \times d \times (d/h)$ for Q, K, V projections
-- All heads: $3d^2$ (same as a single large head)
-- Output projection: $d^2$
-- Total MHA: $4d^2$ parameters
+For a model with dimension $$d$$ and $$h$$ heads:
+- Per head: $$3 \times d \times (d/h)$$ for Q, K, V projections
+- All heads: $$3d^2$$ (same as a single large head)
+- Output projection: $$d^2$$
+- Total MHA: $$4d^2$$ parameters
 
 ### Head Pruning and Redundancy
 Research shows many heads can be pruned with minimal quality loss. Michel et al. (2019) found that in some layers, a single head suffices. This motivates:
@@ -210,33 +210,33 @@ class MultiHeadAttention:
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
 | Head specialization | "Why multiple heads?" | Different heads learn different attention patterns (local, global, syntactic) |
-| Param equivalence | "Are MHA params more than single head?" | Same $3d^2$ for Q/K/V; heads split the dimension |
+| Param equivalence | "Are MHA params more than single head?" | Same $$3d^2$$ for Q/K/V; heads split the dimension |
 | Head pruning | "How to make attention faster?" | Many heads are redundant; pruning maintains quality |
-| MHA vs MQA | "Inference optimization" | MQA shares K/V across heads, reducing KV cache by $h\times$ |
+| MHA vs MQA | "Inference optimization" | MQA shares K/V across heads, reducing KV cache by $$h\times$$ |
 
 ### Common Interview Questions
-- [ ] Why does MHA use $d_k = d/h$ instead of full $d$ per head?
+- [ ] Why does MHA use $$d_k = d/h$$ instead of full $$d$$ per head?
 - [ ] How does the total parameter count of MHA compare to single-head attention?
 - [ ] What do different attention heads learn to attend to?
 - [ ] How does MHA relate to ensemble methods?
-- [ ] Explain the output projection $W^O$ -- why is it needed?
+- [ ] Explain the output projection $$W^O$$ -- why is it needed?
 
 ## Comparisons
 
 | Aspect | Multi-Head (MHA) | Multi-Query (MQA) | Grouped-Query (GQA) |
 |--------|-----------------|-------------------|---------------------|
 | K/V per head | Separate | Shared across all | Shared within groups |
-| KV cache size | $2 \times n \times h \times d_k$ | $2 \times n \times d_k$ | $2 \times n \times g \times d_k$ |
+| KV cache size | $$2 \times n \times h \times d_k$$ | $$2 \times n \times d_k$$ | $$2 \times n \times g \times d_k$$ |
 | Quality | Baseline | Slight degradation | Near-MHA quality |
 | Inference speed | Baseline | Fastest | Good balance |
 
 ## Key Takeaways
 
-- [ ] MHA splits $d$ into $h$ heads, each computing attention in $d/h$ dimensions
-- [ ] Total parameter count is $4d^2$ (same cost as one big head + output projection)
+- [ ] MHA splits $$d$$ into $$h$$ heads, each computing attention in $$d/h$$ dimensions
+- [ ] Total parameter count is $$4d^2$$ (same cost as one big head + output projection)
 - [ ] Heads specialize in different attention patterns, improving representation
 - [ ] Many heads can be pruned -- motivates MQA/GQA for efficient inference
-- [ ] Output projection $W^O$ mixes information across heads
+- [ ] Output projection $$W^O$$ mixes information across heads
 """
 
 CONTENT["pillar6.transformer.position_encoding"] = r"""# Position Encoding (Sinusoidal, RoPE, ALiBi)
@@ -255,13 +255,13 @@ $$
 
 Key properties:
 - Each dimension has a different frequency, forming a unique "fingerprint" per position
-- Relative positions can be represented as linear transformations: $PE_{pos+k}$ is a linear function of $PE_{pos}$
+- Relative positions can be represented as linear transformations: $$PE_{pos+k}$$ is a linear function of $$PE_{pos}$$
 - Generalizes to unseen sequence lengths (extrapolation)
 
 ### Learned Absolute Position Embeddings
-A lookup table $E_{pos} \in \mathbb{R}^{L \times d}$ added to token embeddings. Used in BERT, GPT-2.
+A lookup table $$E_{pos} \in \mathbb{R}^{L \times d}$$ added to token embeddings. Used in BERT, GPT-2.
 - Pros: more expressive than sinusoidal
-- Cons: fixed max length $L$; no extrapolation
+- Cons: fixed max length $$L$$; no extrapolation
 
 ### Rotary Position Embeddings (RoPE)
 Used in LLaMA, Mistral, and most modern LLMs. Encodes position by rotating query/key vectors:
@@ -270,9 +270,9 @@ $$
 f(x, m) = \begin{pmatrix} x_1 \\ x_2 \end{pmatrix} \otimes \begin{pmatrix} \cos m\theta \\ \cos m\theta \end{pmatrix} + \begin{pmatrix} -x_2 \\ x_1 \end{pmatrix} \otimes \begin{pmatrix} \sin m\theta \\ \sin m\theta \end{pmatrix}
 $$
 
-where $m$ is position and $\theta_i = 10000^{-2i/d}$.
+where $$m$$ is position and $$\theta_i = 10000^{-2i/d}$$.
 
-The key property: $\langle f(q, m), f(k, n) \rangle$ depends only on $q$, $k$, and the relative position $m - n$:
+The key property: $$\langle f(q, m), f(k, n) \rangle$$ depends only on $$q$$, $$k$$, and the relative position $$m - n$$:
 
 $$
 \text{Re}[\langle f(q, m), f(k, n) \rangle] = g(q, k, m-n)
@@ -285,7 +285,7 @@ $$
 \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + m \cdot [-(i-j)]_{i,j}\right)
 $$
 
-where $m$ is a head-specific slope (geometric sequence, e.g., $2^{-8/h}, 2^{-16/h}, \ldots$).
+where $$m$$ is a head-specific slope (geometric sequence, e.g., $$2^{-8/h}, 2^{-16/h}, \ldots$$).
 
 - No extra parameters or computation in embeddings
 - Strong length extrapolation without fine-tuning
@@ -346,7 +346,7 @@ def apply_rope(x, pos):
 | Aspect | Sinusoidal | Learned | RoPE | ALiBi |
 |--------|-----------|---------|------|-------|
 | Type | Absolute | Absolute | Relative | Relative |
-| Parameters | 0 | $L \times d$ | 0 | 0 (fixed slopes) |
+| Parameters | 0 | $$L \times d$$ | 0 | 0 (fixed slopes) |
 | Extrapolation | Limited | None | With scaling | Native |
 | Used in | Original Transformer | BERT, GPT-2 | LLaMA, Mistral | BLOOM, MPT |
 
@@ -373,7 +373,7 @@ $$
 \text{LayerNorm}(x) = \gamma \odot \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta
 $$
 
-where $\mu = \frac{1}{d}\sum_{i=1}^{d} x_i$, $\sigma^2 = \frac{1}{d}\sum_{i=1}^{d}(x_i - \mu)^2$, and $\gamma, \beta \in \mathbb{R}^d$ are learned.
+where $$\mu = \frac{1}{d}\sum_{i=1}^{d} x_i$$, $$\sigma^2 = \frac{1}{d}\sum_{i=1}^{d}(x_i - \mu)^2$$, and $$\gamma, \beta \in \mathbb{R}^d$$ are learned.
 
 ### Pre-Norm vs Post-Norm
 
@@ -447,7 +447,7 @@ def rms_norm(x, gamma, eps=1e-5):
 | Aspect | LayerNorm | RMSNorm | BatchNorm |
 |--------|----------|---------|-----------|
 | Normalization axis | Feature (per token) | Feature (per token) | Batch (across samples) |
-| Parameters | $2d$ ($\gamma, \beta$) | $d$ ($\gamma$ only) | $2d$ + running stats |
+| Parameters | $$2d$$ ($$\gamma, \beta$$) | $$d$$ ($$\gamma$$ only) | $$2d$$ + running stats |
 | Mean centering | Yes | No | Yes |
 | Inference behavior | Same as training | Same as training | Uses running statistics |
 | Used in | GPT-2, BERT | LLaMA, Mistral | CNNs, ResNets |
@@ -458,7 +458,7 @@ def rms_norm(x, gamma, eps=1e-5):
 - [ ] Pre-norm (LN before sublayer) is standard in modern LLMs for stable training
 - [ ] RMSNorm drops mean centering for speed; empirically equivalent to LayerNorm
 - [ ] BatchNorm is unsuitable for Transformers due to variable lengths and small batches
-- [ ] Learned scale ($\gamma$) and shift ($\beta$) restore representational capacity
+- [ ] Learned scale ($$\gamma$$) and shift ($$\beta$$) restore representational capacity
 """
 
 CONTENT["pillar6.transformer.feed_forward"] = r"""# Feed-Forward Networks (SwiGLU)
@@ -475,7 +475,7 @@ $$
 \text{FFN}(x) = \max(0, xW_1 + b_1)W_2 + b_2
 $$
 
-where $W_1 \in \mathbb{R}^{d \times d_{ff}}$, $W_2 \in \mathbb{R}^{d_{ff} \times d}$, typically $d_{ff} = 4d$.
+where $$W_1 \in \mathbb{R}^{d \times d_{ff}}$$, $$W_2 \in \mathbb{R}^{d_{ff} \times d}$$, typically $$d_{ff} = 4d$$.
 
 ### Gated Linear Units (GLU)
 Dauphin et al. proposed gating the linear transform:
@@ -484,7 +484,7 @@ $$
 \text{GLU}(x) = (xW_1) \odot \sigma(xW_{\text{gate}})
 $$
 
-where $\sigma$ is sigmoid and $\odot$ is element-wise multiplication.
+where $$\sigma$$ is sigmoid and $$\odot$$ is element-wise multiplication.
 
 ### SwiGLU (Used in LLaMA, PaLM)
 Replaces ReLU with Swish-gated variant:
@@ -503,19 +503,19 @@ $$
 \text{FFN}(x) = (\text{SiLU}(xW_{\text{gate}}) \odot xW_1)W_2
 $$
 
-Note: SwiGLU has 3 weight matrices ($W_1, W_{\text{gate}}, W_2$) vs 2 for standard FFN. To keep param count similar, $d_{ff}$ is reduced (e.g., $d_{ff} = \frac{8d}{3}$ rounded to multiple of 256).
+Note: SwiGLU has 3 weight matrices ($$W_1, W_{\text{gate}}, W_2$$) vs 2 for standard FFN. To keep param count similar, $$d_{ff}$$ is reduced (e.g., $$d_{ff} = \frac{8d}{3}$$ rounded to multiple of 256).
 
 ### FFN as Key-Value Memory
 Geva et al. (2021) showed FFN layers act as key-value memories:
-- $W_1$ rows are "keys" (patterns to match)
-- $W_2$ columns are "values" (information to retrieve)
+- $$W_1$$ rows are "keys" (patterns to match)
+- $$W_2$$ columns are "values" (information to retrieve)
 - ReLU/SwiGLU acts as sparse gating, activating relevant memories
 
 ### Parameter Distribution
-For a standard Transformer block with dim $d$:
-- Attention: $4d^2$ (Q, K, V, O projections)
-- FFN (standard): $2 \times d \times 4d = 8d^2$
-- FFN (SwiGLU, $d_{ff} = 8d/3$): $3 \times d \times 8d/3 = 8d^2$
+For a standard Transformer block with dim $$d$$:
+- Attention: $$4d^2$$ (Q, K, V, O projections)
+- FFN (standard): $$2 \times d \times 4d = 8d^2$$
+- FFN (SwiGLU, $$d_{ff} = 8d/3$$): $$3 \times d \times 8d/3 = 8d^2$$
 - FFN accounts for ~67% of each block's parameters
 
 ## Implementation
@@ -541,7 +541,7 @@ def swiglu_ffn(x, W_gate, W1, W2):
 | SwiGLU advantage | "Why not plain ReLU FFN?" | Gating allows selective information flow; empirically better |
 | FFN as memory | "What do FFN layers store?" | Key-value memory interpretation; factual knowledge storage |
 | Param count | "Where are most Transformer params?" | FFN has ~2/3 of block parameters |
-| $d_{ff}$ sizing | "Why $8d/3$ in LLaMA?" | Keeps total params same as $4d$ ReLU FFN despite 3 matrices |
+| $$d_{ff}$$ sizing | "Why $$8d/3$$ in LLaMA?" | Keeps total params same as $$4d$$ ReLU FFN despite 3 matrices |
 
 ### Common Interview Questions
 - [ ] Why does SwiGLU outperform ReLU in FFN layers?
@@ -554,9 +554,9 @@ def swiglu_ffn(x, W_gate, W1, W2):
 
 | Aspect | ReLU FFN | GeLU FFN | SwiGLU FFN |
 |--------|---------|---------|------------|
-| Activation | $\max(0, x)$ | $x\Phi(x)$ | $x\sigma(x) \odot \text{linear}$ |
+| Activation | $$\max(0, x)$$ | $$x\Phi(x)$$ | $$x\sigma(x) \odot \text{linear}$$ |
 | Weight matrices | 2 | 2 | 3 |
-| $d_{ff}$ for same params | $4d$ | $4d$ | $8d/3$ |
+| $$d_{ff}$$ for same params | $$4d$$ | $$4d$$ | $$8d/3$$ |
 | Quality | Baseline | Better | Best |
 | Used in | Original Transformer | GPT-2, BERT | LLaMA, PaLM, Mistral |
 
@@ -565,7 +565,7 @@ def swiglu_ffn(x, W_gate, W1, W2):
 - [ ] FFN is a position-wise MLP applied independently per token
 - [ ] SwiGLU (gated SiLU) is the standard in modern LLMs; empirically superior to ReLU
 - [ ] FFN has ~67% of block parameters and acts as a key-value memory
-- [ ] $d_{ff}$ is adjusted (typically $8d/3$) in SwiGLU to match ReLU param count
+- [ ] $$d_{ff}$$ is adjusted (typically $$8d/3$$) in SwiGLU to match ReLU param count
 - [ ] No biases in modern LLMs (LLaMA, Mistral) for simplicity and efficiency
 """
 
@@ -583,24 +583,24 @@ $$
 \text{head}_i = \text{Attention}(QW_i^Q, KW^K, VW^V)
 $$
 
-- KV cache reduced by $h\times$ (e.g., $32\times$ for LLaMA-7B)
+- KV cache reduced by $$h\times$$ (e.g., $$32\times$$ for LLaMA-7B)
 - Slight quality degradation vs MHA
 - Used in PaLM, Falcon
 
 ### Grouped-Query Attention (GQA)
-Ainslie et al. (2023): intermediate between MHA and MQA. Heads are divided into $g$ groups; each group shares K/V.
+Ainslie et al. (2023): intermediate between MHA and MQA. Heads are divided into $$g$$ groups; each group shares K/V.
 
 $$
 \text{head}_i = \text{Attention}(QW_i^Q, KW_{\lfloor i \cdot g/h \rfloor}^K, VW_{\lfloor i \cdot g/h \rfloor}^V)
 $$
 
-- $g = h$: equivalent to MHA
-- $g = 1$: equivalent to MQA
-- Typical: $g = 8$ with $h = 32$ (LLaMA 2 70B, Mistral)
+- $$g = h$$: equivalent to MHA
+- $$g = 1$$: equivalent to MQA
+- Typical: $$g = 8$$ with $$h = 32$$ (LLaMA 2 70B, Mistral)
 - Near-MHA quality with significant KV cache savings
 
 ### Flash Attention (Dao et al., 2022)
-IO-aware exact attention algorithm that avoids materializing the full $n \times n$ attention matrix:
+IO-aware exact attention algorithm that avoids materializing the full $$n \times n$$ attention matrix:
 
 **Key idea**: Tile the Q, K, V matrices into blocks that fit in SRAM (fast on-chip memory), compute partial softmax in tiles, accumulate results.
 
@@ -615,20 +615,20 @@ $$
 $$
 
 Performance:
-- Memory: $O(n)$ instead of $O(n^2)$ (no materialized attention matrix)
+- Memory: $$O(n)$$ instead of $$O(n^2)$$ (no materialized attention matrix)
 - Speed: 2-4x faster due to reduced HBM reads/writes
 - Exact (not approximate) -- numerically identical to standard attention
 - Flash Attention 2: further 2x speedup via better parallelism and work partitioning
 
 ### Sliding Window Attention
-Used in Mistral: each token attends only to a local window of size $W$:
+Used in Mistral: each token attends only to a local window of size $$W$$:
 
 $$
 A_{ij} = \begin{cases} \frac{q_i \cdot k_j}{\sqrt{d_k}} & \text{if } |i - j| \leq W \\ -\infty & \text{otherwise} \end{cases}
 $$
 
-- Reduces complexity to $O(nW)$
-- With $L$ layers and window $W$, effective receptive field is $L \times W$
+- Reduces complexity to $$O(nW)$$
+- With $$L$$ layers and window $$W$$, effective receptive field is $$L \times W$$
 - Combined with GQA in Mistral 7B
 
 ### Multi-Latent Attention (MLA)
@@ -638,7 +638,7 @@ $$
 c_t = W^{DKV} h_t, \quad K = W^{UK} c_t, \quad V = W^{UV} c_t
 $$
 
-- Caches only the compressed $c_t$ (much smaller than full K/V)
+- Caches only the compressed $$c_t$$ (much smaller than full K/V)
 - Maintains quality via joint compression of K and V
 
 ## Implementation
@@ -666,15 +666,15 @@ def grouped_query_attention(Q, K, V, n_heads, n_kv_groups):
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| KV cache sizing | "How to reduce inference memory?" | MQA/GQA reduce KV cache by $h/g$ factor |
-| Flash Attention | "How to handle long sequences?" | IO-aware tiling; $O(n)$ memory, exact computation |
-| GQA trade-off | "Balance quality vs efficiency" | $g$ groups: knob between MHA quality and MQA speed |
-| Sliding window | "Local attention approaches" | $O(nW)$ per layer; $L \times W$ effective receptive field |
+| KV cache sizing | "How to reduce inference memory?" | MQA/GQA reduce KV cache by $$h/g$$ factor |
+| Flash Attention | "How to handle long sequences?" | IO-aware tiling; $$O(n)$$ memory, exact computation |
+| GQA trade-off | "Balance quality vs efficiency" | $$g$$ groups: knob between MHA quality and MQA speed |
+| Sliding window | "Local attention approaches" | $$O(nW)$$ per layer; $$L \times W$$ effective receptive field |
 
 ### Common Interview Questions
 - [ ] How does GQA interpolate between MHA and MQA?
 - [ ] Why is Flash Attention faster despite doing the same FLOPs?
-- [ ] What is the KV cache memory for a 70B model with GQA ($g=8$)?
+- [ ] What is the KV cache memory for a 70B model with GQA ($$g=8$$)?
 - [ ] How does sliding window attention achieve long-range dependency with local windows?
 - [ ] Compare the memory vs quality trade-offs of MQA, GQA, and MLA.
 
@@ -682,8 +682,8 @@ def grouped_query_attention(Q, K, V, n_heads, n_kv_groups):
 
 | Aspect | MHA | MQA | GQA | Flash Attention |
 |--------|-----|-----|-----|----------------|
-| KV heads | $h$ | 1 | $g$ ($1 < g < h$) | N/A (orthogonal) |
-| KV cache | $2nhd_k$ | $2nd_k$ | $2ngd_k$ | No change |
+| KV heads | $$h$$ | 1 | $$g$$ ($$1 < g < h$$) | N/A (orthogonal) |
+| KV cache | $$2nhd_k$$ | $$2nd_k$$ | $$2ngd_k$$ | No change |
 | Quality | Best | Slight drop | Near MHA | Identical to MHA |
 | Training change | Baseline | Need retraining | Uptraining works | Drop-in replacement |
 | Inference speed | Baseline | Fastest | Fast | 2-4x faster |
@@ -691,9 +691,9 @@ def grouped_query_attention(Q, K, V, n_heads, n_kv_groups):
 ## Key Takeaways
 
 - [ ] MQA shares K/V across all heads; GQA shares within groups -- both reduce KV cache
-- [ ] Flash Attention: IO-aware tiling gives $O(n)$ memory and 2-4x speedup, exact results
-- [ ] GQA with $g=8$ is the sweet spot for modern LLMs (LLaMA 2 70B, Mistral)
-- [ ] Sliding window attention: $O(nW)$ complexity, $L \times W$ effective receptive field
+- [ ] Flash Attention: IO-aware tiling gives $$O(n)$$ memory and 2-4x speedup, exact results
+- [ ] GQA with $$g=8$$ is the sweet spot for modern LLMs (LLaMA 2 70B, Mistral)
+- [ ] Sliding window attention: $$O(nW)$$ complexity, $$L \times W$$ effective receptive field
 - [ ] These optimizations are orthogonal and combinable: GQA + Flash + sliding window
 """
 
@@ -838,8 +838,8 @@ $$
 - Later shown to be unhelpful (RoBERTa removes it)
 
 ### BERT Architecture Details
-- BERT-base: $L=12, d=768, h=12$, 110M params
-- BERT-large: $L=24, d=1024, h=16$, 340M params
+- BERT-base: $$L=12, d=768, h=12$$, 110M params
+- BERT-large: $$L=24, d=1024, h=16$$, 340M params
 - WordPiece tokenizer with 30K vocab
 - Learned absolute position embeddings (max 512 tokens)
 - Input: [CLS] + tokens_A + [SEP] + tokens_B + [SEP]
@@ -964,11 +964,11 @@ P(y|x, \text{examples}) \approx P(y | \text{demo}_1, \ldots, \text{demo}_k, x)
 $$
 
 - Zero-shot: task description only
-- Few-shot: $k$ input-output examples in context
+- Few-shot: $$k$$ input-output examples in context
 - No gradient updates -- pure inference-time adaptation
 
 ### Scaling Laws (Kaplan et al., 2020)
-Performance follows power laws with compute $C$, data $D$, and parameters $N$:
+Performance follows power laws with compute $$C$$, data $$D$$, and parameters $$N$$:
 
 $$
 L(N) \approx \left(\frac{N_c}{N}\right)^{\alpha_N}, \quad L(D) \approx \left(\frac{D_c}{D}\right)^{\alpha_D}
@@ -977,7 +977,7 @@ $$
 Key findings:
 - Loss scales smoothly as a power law with model size and data
 - Larger models are more sample-efficient
-- Optimal allocation: scale $N$ and $D$ together (Chinchilla: $D \approx 20N$)
+- Optimal allocation: scale $$N$$ and $$D$$ together (Chinchilla: $$D \approx 20N$$)
 
 ### Chinchilla Scaling (Hoffmann et al., 2022)
 Revised scaling: for fixed compute budget, balance model size and data:
@@ -1017,7 +1017,7 @@ output = model.generate(**inputs, max_new_tokens=5)
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| Scaling laws | "How to allocate compute budget?" | Chinchilla: $D \approx 20N$ tokens for compute-optimal training |
+| Scaling laws | "How to allocate compute budget?" | Chinchilla: $$D \approx 20N$$ tokens for compute-optimal training |
 | ICL mechanism | "How does few-shot work?" | Implicit Bayesian inference over pre-training distribution |
 | GPT vs BERT | "When to use which?" | GPT: generation, reasoning. BERT: classification, retrieval |
 | Emergent abilities | "What changes with scale?" | ICL, CoT reasoning, instruction following appear at ~100B+ |
@@ -1042,7 +1042,7 @@ output = model.generate(**inputs, max_new_tokens=5)
 ## Key Takeaways
 
 - [ ] GPT family: decoder-only autoregressive LMs trained on next-token prediction
-- [ ] Scaling laws: loss follows power laws with $N$, $D$, $C$; Chinchilla ratio $D \approx 20N$
+- [ ] Scaling laws: loss follows power laws with $$N$$, $$D$$, $$C$$; Chinchilla ratio $$D \approx 20N$$
 - [ ] In-context learning: emergent at scale; no gradient updates, pure conditioning
 - [ ] GPT-4 is likely MoE (~1.8T total, ~220B active per token)
 - [ ] Open alternatives (LLaMA, Mistral) match GPT-3.5 quality with fewer parameters
@@ -1058,7 +1058,7 @@ LLaMA (Meta) and Mistral represent the state-of-the-art in open-weight LLMs. The
 ### LLaMA Architecture (Meta, 2023)
 Key design choices vs original Transformer:
 - **RMSNorm** instead of LayerNorm (faster, no mean centering)
-- **SwiGLU activation** instead of ReLU in FFN ($d_{ff} = 8d/3$)
+- **SwiGLU activation** instead of ReLU in FFN ($$d_{ff} = 8d/3$$)
 - **RoPE** instead of learned position embeddings
 - **Pre-norm** (normalize before attention/FFN)
 - **No bias** in linear layers
@@ -1066,7 +1066,7 @@ Key design choices vs original Transformer:
 
 ### LLaMA Model Sizes
 
-| Model | Layers | $d$ | Heads | KV Heads | Params | Training Tokens |
+| Model | Layers | $$d$$ | Heads | KV Heads | Params | Training Tokens |
 |-------|--------|-----|-------|----------|--------|----------------|
 | LLaMA 2 7B | 32 | 4096 | 32 | 32 (MHA) | 7B | 2T |
 | LLaMA 2 13B | 40 | 5120 | 40 | 40 (MHA) | 13B | 2T |
@@ -1076,15 +1076,15 @@ Key design choices vs original Transformer:
 
 ### Mistral Architecture
 Mistral 7B innovations:
-- **Sliding Window Attention**: window size $W = 4096$; effective context $L \times W$
+- **Sliding Window Attention**: window size $$W = 4096$$; effective context $$L \times W$$
 - **GQA**: 8 KV heads for 32 query heads
-- **Rolling buffer KV cache**: fixed cache size $W$, older entries overwritten
+- **Rolling buffer KV cache**: fixed cache size $$W$$, older entries overwritten
 - **Pre-fill and chunking**: process prompt in chunks for memory efficiency
 
 Mixtral 8x7B (MoE):
 - 8 expert FFNs per layer, top-2 routing
 - Total params: 46.7B; active params per token: ~13B
-- Router: $G(x) = \text{TopK}(\text{softmax}(xW_g), k=2)$
+- Router: $$G(x) = \text{TopK}(\text{softmax}(xW_g), k=2)$$
 
 ### Tokenization
 - LLaMA: SentencePiece BPE, 32K vocab
@@ -1092,7 +1092,7 @@ Mixtral 8x7B (MoE):
 - Mistral: SentencePiece BPE, 32K vocab
 
 ### Training Details
-- Optimizer: AdamW ($\beta_1=0.9, \beta_2=0.95$)
+- Optimizer: AdamW ($$\beta_1=0.9, \beta_2=0.95$$)
 - Cosine learning rate schedule with warmup
 - Weight decay: 0.1
 - Context length: 4096 (LLaMA 2), extended to 8K-128K with RoPE scaling
@@ -1166,7 +1166,7 @@ output = model.generate(inputs, max_new_tokens=256)
 CONTENT["pillar6.llm_training_alignment.pretraining"] = r"""# Pre-training
 
 ## Overview
-Pre-training is the foundational phase where LLMs learn language representations from massive unlabeled corpora. It determines model capabilities, and the compute budget (often $10^{23}$-$10^{25}$ FLOPs) dominates total cost. Understanding pre-training choices -- data, objectives, optimization, and infrastructure -- is critical for senior MLE roles.
+Pre-training is the foundational phase where LLMs learn language representations from massive unlabeled corpora. It determines model capabilities, and the compute budget (often $$10^{23}$$-$$10^{25}$$ FLOPs) dominates total cost. Understanding pre-training choices -- data, objectives, optimization, and infrastructure -- is critical for senior MLE roles.
 
 ## Core Concepts
 
@@ -1190,13 +1190,13 @@ $$
 Split document into prefix, middle, suffix; train on PSM or SPM orderings.
 
 ### Training Compute Estimation
-For a Transformer with $N$ parameters, processing $D$ tokens:
+For a Transformer with $$N$$ parameters, processing $$D$$ tokens:
 
 $$
 C \approx 6ND \text{ FLOPs (forward + backward)}
 $$
 
-For LLaMA 2 70B on 2T tokens: $C \approx 6 \times 70 \times 10^9 \times 2 \times 10^{12} = 8.4 \times 10^{23}$ FLOPs.
+For LLaMA 2 70B on 2T tokens: $$C \approx 6 \times 70 \times 10^9 \times 2 \times 10^{12} = 8.4 \times 10^{23}$$ FLOPs.
 
 ### Data Pipeline
 1. **Collection**: CommonCrawl, Wikipedia, Books, Code, ArXiv
@@ -1213,7 +1213,7 @@ For LLaMA 2 70B on 2T tokens: $C \approx 6 \times 70 \times 10^9 \times 2 \times
 
 ### Optimization
 
-**Optimizer**: AdamW with $\beta_1 = 0.9, \beta_2 = 0.95, \epsilon = 10^{-8}$
+**Optimizer**: AdamW with $$\beta_1 = 0.9, \beta_2 = 0.95, \epsilon = 10^{-8}$$
 
 $$
 m_t = \beta_1 m_{t-1} + (1-\beta_1) g_t, \quad v_t = \beta_2 v_{t-1} + (1-\beta_2) g_t^2
@@ -1223,7 +1223,7 @@ $$
 \theta_t = \theta_{t-1} - \eta \left(\frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon} + \lambda \theta_{t-1}\right)
 $$
 
-**Learning rate schedule**: Linear warmup (2K steps) + cosine decay to $\eta_{\min} = 0.1 \eta_{\max}$.
+**Learning rate schedule**: Linear warmup (2K steps) + cosine decay to $$\eta_{\min} = 0.1 \eta_{\max}$$.
 
 **Weight decay**: 0.1 (decoupled from Adam update).
 
@@ -1253,7 +1253,7 @@ def chinchilla_optimal(compute_budget_flops):
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| Compute budget allocation | "How to size a model?" | Chinchilla: $D \approx 20N$; balance params and data |
+| Compute budget allocation | "How to size a model?" | Chinchilla: $$D \approx 20N$$; balance params and data |
 | Data quality | "What matters most in pre-training?" | Quality > quantity; dedup and filtering are critical |
 | Training infrastructure | "How do you train a 70B model?" | 3D parallelism: TP within node, PP across nodes, DP for batch |
 | Loss spikes | "What goes wrong during pre-training?" | Learning rate too high, data corruption, numerical instability |
@@ -1276,8 +1276,8 @@ def chinchilla_optimal(compute_budget_flops):
 
 ## Key Takeaways
 
-- [ ] Pre-training cost: $C \approx 6ND$ FLOPs; dominates total training budget
-- [ ] Chinchilla scaling: $D \approx 20N$ for compute-optimal training
+- [ ] Pre-training cost: $$C \approx 6ND$$ FLOPs; dominates total training budget
+- [ ] Chinchilla scaling: $$D \approx 20N$$ for compute-optimal training
 - [ ] Data quality (dedup, filtering) matters more than raw quantity
 - [ ] 3D parallelism (TP + PP + DP/FSDP) enables training at scale
 - [ ] Cosine LR schedule with warmup is the standard; weight decay = 0.1
@@ -1316,7 +1316,7 @@ Chat templates vary by model (Alpaca, Vicuna, ChatML, Mistral).
 - **Diversity**: Cover reasoning, coding, math, creative writing, safety refusals
 
 ### SFT Hyperparameters (Typical)
-- Learning rate: $1 \times 10^{-5}$ to $5 \times 10^{-5}$ (10-100x smaller than pre-training)
+- Learning rate: $$1 \times 10^{-5}$$ to $$5 \times 10^{-5}$$ (10-100x smaller than pre-training)
 - Epochs: 2-5 (small datasets), 1-2 (large datasets)
 - Batch size: 32-128 (effective, with gradient accumulation)
 - Warmup: 3-10% of steps
@@ -1390,7 +1390,7 @@ trainer.train()
 
 - [ ] SFT: train on (instruction, response) pairs with loss only on response tokens
 - [ ] Data quality >> quantity; 1K curated examples can match 50K noisy ones
-- [ ] Low learning rate ($10^{-5}$) and few epochs prevent catastrophic forgetting
+- [ ] Low learning rate ($$10^{-5}$$) and few epochs prevent catastrophic forgetting
 - [ ] Sequence packing maximizes GPU utilization for short examples
 - [ ] LoRA/QLoRA are practical alternatives when GPU memory is limited
 """
@@ -1409,20 +1409,20 @@ RLHF aligns LLM outputs with human preferences beyond what SFT alone achieves. I
 4. **RL Optimization**: Use RM signal to optimize LLM via PPO
 
 ### Reward Model Training
-Given human preference pairs $(y_w \succ y_l | x)$ (chosen over rejected):
+Given human preference pairs $$(y_w \succ y_l | x)$$ (chosen over rejected):
 
 $$
 \mathcal{L}_{\text{RM}} = -\log \sigma(r_\theta(x, y_w) - r_\theta(x, y_l))
 $$
 
-This is the Bradley-Terry model: the probability that $y_w$ is preferred is:
+This is the Bradley-Terry model: the probability that $$y_w$$ is preferred is:
 
 $$
 P(y_w \succ y_l) = \sigma(r(x, y_w) - r(x, y_l))
 $$
 
 ### PPO (Proximal Policy Optimization)
-Optimize the policy $\pi_\theta$ to maximize reward while staying close to the SFT model $\pi_{\text{ref}}$:
+Optimize the policy $$\pi_\theta$$ to maximize reward while staying close to the SFT model $$\pi_{\text{ref}}$$:
 
 $$
 \max_\theta \mathbb{E}_{x \sim \mathcal{D}, y \sim \pi_\theta(y|x)} \left[r_\phi(x, y) - \beta \text{KL}(\pi_\theta \| \pi_{\text{ref}})\right]
@@ -1517,7 +1517,7 @@ trainer.train()
 - [ ] RLHF: reward model trained on preferences, then PPO to optimize policy
 - [ ] DPO: directly optimize preferences without RM or RL; simpler and competitive
 - [ ] KL penalty prevents reward hacking (over-optimizing the reward model)
-- [ ] $\beta$ controls exploration-exploitation: high $\beta$ = stay close to SFT model
+- [ ] $$\beta$$ controls exploration-exploitation: high $$\beta$$ = stay close to SFT model
 - [ ] Constitutional AI uses AI-generated feedback for scalable alignment
 """
 
@@ -1529,17 +1529,17 @@ Parameter-Efficient Fine-Tuning (PEFT) methods adapt large models by updating on
 ## Core Concepts
 
 ### LoRA (Low-Rank Adaptation)
-Hu et al., 2021: Instead of updating the full weight matrix $W \in \mathbb{R}^{d \times d}$, learn a low-rank decomposition:
+Hu et al., 2021: Instead of updating the full weight matrix $$W \in \mathbb{R}^{d \times d}$$, learn a low-rank decomposition:
 
 $$
 W' = W + \Delta W = W + BA
 $$
 
-where $B \in \mathbb{R}^{d \times r}$, $A \in \mathbb{R}^{r \times d}$, and $r \ll d$ (typically $r = 8, 16, 64$).
+where $$B \in \mathbb{R}^{d \times r}$$, $$A \in \mathbb{R}^{r \times d}$$, and $$r \ll d$$ (typically $$r = 8, 16, 64$$).
 
-Initialization: $A \sim \mathcal{N}(0, \sigma^2)$, $B = 0$ (so $\Delta W = 0$ at start).
+Initialization: $$A \sim \mathcal{N}(0, \sigma^2)$$, $$B = 0$$ (so $$\Delta W = 0$$ at start).
 
-Scaling factor: $\Delta W = \frac{\alpha}{r} BA$, where $\alpha$ is a hyperparameter.
+Scaling factor: $$\Delta W = \frac{\alpha}{r} BA$$, where $$\alpha$$ is a hyperparameter.
 
 ### Why Low-Rank Works
 Aghajanyan et al. (2020) showed that pre-trained models have low intrinsic dimensionality. Fine-tuning updates live in a low-dimensional subspace:
@@ -1548,13 +1548,13 @@ $$
 \text{rank}(\Delta W) \ll \min(d_{\text{in}}, d_{\text{out}})
 $$
 
-Even $r = 4$ captures most of the fine-tuning signal for many tasks.
+Even $$r = 4$$ captures most of the fine-tuning signal for many tasks.
 
 ### Parameter Savings
-For a Transformer with $L$ layers, applying LoRA to Q, K, V, O projections:
-- Full FT: $L \times 4d^2$ trainable params
-- LoRA ($r=16$): $L \times 4 \times 2 \times d \times r = 8Ldr$ trainable params
-- For $d=4096, r=16$: reduction factor $= d/(2r) = 128\times$
+For a Transformer with $$L$$ layers, applying LoRA to Q, K, V, O projections:
+- Full FT: $$L \times 4d^2$$ trainable params
+- LoRA ($$r=16$$): $$L \times 4 \times 2 \times d \times r = 8Ldr$$ trainable params
+- For $$d=4096, r=16$$: reduction factor $$= d/(2r) = 128\times$$
 
 ### QLoRA (Quantized LoRA)
 Dettmers et al., 2023: Combines 4-bit quantization with LoRA:
@@ -1589,9 +1589,9 @@ $$
 
 ### LoRA Best Practices
 - Apply to all linear layers (Q, K, V, O, FFN up, FFN gate, FFN down)
-- Rank $r$: 16-64 for instruction tuning; 8-16 for simple tasks
-- Learning rate: 2-10x higher than full FT (e.g., $2 \times 10^{-4}$)
-- $\alpha$: often set to $2r$ or $r$
+- Rank $$r$$: 16-64 for instruction tuning; 8-16 for simple tasks
+- Learning rate: 2-10x higher than full FT (e.g., $$2 \times 10^{-4}$$)
+- $$\alpha$$: often set to $$2r$$ or $$r$$
 - Multiple LoRA adapters can be merged or swapped at inference
 
 ## Implementation
@@ -1625,7 +1625,7 @@ model.print_trainable_parameters()  # ~0.5% of total
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| LoRA rank selection | "How to choose $r$?" | Task complexity determines rank; 16-64 for instruction tuning |
+| LoRA rank selection | "How to choose $$r$$?" | Task complexity determines rank; 16-64 for instruction tuning |
 | Full FT vs LoRA | "When to use each?" | LoRA: memory-constrained, multi-task. Full FT: maximum quality |
 | QLoRA for 70B | "Fine-tune 70B on 1 GPU?" | 4-bit base + FP16 LoRA; ~48 GB for 70B |
 | Adapter merging | "Serve multiple tasks?" | Merge LoRA into base weights; zero inference overhead |
@@ -1633,7 +1633,7 @@ model.print_trainable_parameters()  # ~0.5% of total
 ### Common Interview Questions
 - [ ] Why does low-rank adaptation work for fine-tuning?
 - [ ] How does QLoRA reduce memory compared to full fine-tuning?
-- [ ] What is the trade-off between LoRA rank $r$ and quality?
+- [ ] What is the trade-off between LoRA rank $$r$$ and quality?
 - [ ] How do you serve multiple LoRA adapters efficiently?
 - [ ] Compare LoRA, adapters, and prefix tuning.
 
@@ -1649,11 +1649,11 @@ model.print_trainable_parameters()  # ~0.5% of total
 
 ## Key Takeaways
 
-- [ ] LoRA: $\Delta W = BA$ with $r \ll d$; 0.1-1% of params, near-full quality
+- [ ] LoRA: $$\Delta W = BA$$ with $$r \ll d$$; 0.1-1% of params, near-full quality
 - [ ] QLoRA: 4-bit NF4 base + FP16 LoRA; fine-tune 70B on a single 48GB GPU
 - [ ] Apply LoRA to all linear layers, not just attention projections
 - [ ] LoRA adapters can be merged into base weights for zero inference overhead
-- [ ] Higher rank $r$ = more capacity but more memory; 16-64 is typical sweet spot
+- [ ] Higher rank $$r$$ = more capacity but more memory; 16-64 is typical sweet spot
 """
 
 CONTENT["pillar6.llm_training_alignment.evaluation"] = r"""# LLM Evaluation & Benchmarks
@@ -1718,13 +1718,13 @@ Use a strong LLM (GPT-4) to evaluate other models:
 ### Evaluation Methodology
 - **Few-shot prompting**: standard for benchmarks (0-shot, 5-shot, etc.)
 - **Chain-of-Thought**: for reasoning tasks (GSM8K, MATH)
-- **pass@k**: for code generation, probability of $\geq 1$ correct in $k$ samples
+- **pass@k**: for code generation, probability of $$\geq 1$$ correct in $$k$$ samples
 
 $$
 \text{pass}@k = 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}
 $$
 
-where $n$ = total samples, $c$ = correct samples.
+where $$n$$ = total samples, $$c$$ = correct samples.
 
 ## Implementation
 
@@ -1791,7 +1791,7 @@ KV cache is the key optimization for autoregressive LLM inference, avoiding reco
 ## Core Concepts
 
 ### KV Cache Basics
-During autoregressive generation, each new token needs attention over all previous tokens. Without caching, this requires $O(n^2)$ compute per sequence.
+During autoregressive generation, each new token needs attention over all previous tokens. Without caching, this requires $$O(n^2)$$ compute per sequence.
 
 **With KV cache**: Store the K and V tensors for all previous tokens. For each new token, only compute its Q, then attend to cached K/V:
 
@@ -1799,18 +1799,18 @@ $$
 \text{Attention}_t = \text{softmax}\left(\frac{q_t K_{1:t}^T}{\sqrt{d_k}}\right) V_{1:t}
 $$
 
-Per-token cost drops from $O(n \cdot d)$ to $O(d)$ for K/V computation (only need the new token's K, V).
+Per-token cost drops from $$O(n \cdot d)$$ to $$O(d)$$ for K/V computation (only need the new token's K, V).
 
 ### KV Cache Memory
-For a model with $L$ layers, $h$ KV heads, head dim $d_k$, sequence length $n$:
+For a model with $$L$$ layers, $$h$$ KV heads, head dim $$d_k$$, sequence length $$n$$:
 
 $$
 \text{KV cache} = 2 \times L \times h_{\text{kv}} \times d_k \times n \times \text{bytes per element}
 $$
 
 Example (LLaMA 2 70B, FP16):
-- $L=80, h_{\text{kv}}=8, d_k=128, n=4096$
-- KV cache = $2 \times 80 \times 8 \times 128 \times 4096 \times 2 = 1.34$ GB per sequence
+- $$L=80, h_{\text{kv}}=8, d_k=128, n=4096$$
+- KV cache = $$2 \times 80 \times 8 \times 128 \times 4096 \times 2 = 1.34$$ GB per sequence
 - For batch size 32: 42.9 GB just for KV cache
 
 ### Pre-fill vs Decode Phases
@@ -1878,7 +1878,7 @@ def kv_cache_size_gb(n_layers, n_kv_heads, head_dim, seq_len,
 
 | Pattern | When to Use | Key Insight |
 |---------|------------|-------------|
-| KV cache sizing | "How much memory for inference?" | $2 L h_{\text{kv}} d_k n \times$ bytes; often dominates model weights |
+| KV cache sizing | "How much memory for inference?" | $$2 L h_{\text{kv}} d_k n \times$$ bytes; often dominates model weights |
 | Pre-fill vs decode | "Why is first token slow?" | Pre-fill: compute-bound parallel. Decode: memory-bound sequential |
 | PagedAttention | "How does vLLM improve throughput?" | Virtual memory for KV cache; eliminates fragmentation |
 | Cache compression | "Reduce inference memory" | Quantize KV to INT8, use GQA, sliding window, or token eviction |
@@ -1898,15 +1898,15 @@ def kv_cache_size_gb(n_layers, n_kv_heads, head_dim, seq_len,
 | Max sequences | Low | High (2-4x) | High |
 | Prefix sharing | No | Yes (CoW) | No |
 | Complexity | Simple | Moderate | Simple |
-| Context limit | Max length | Max length | Window $\times$ layers |
+| Context limit | Max length | Max length | Window $$\times$$ layers |
 
 ## Key Takeaways
 
-- [ ] KV cache: store K/V for past tokens to avoid $O(n^2)$ recomputation
-- [ ] Memory formula: $2 L h_{\text{kv}} d_k n \times$ bytes per element per sequence
+- [ ] KV cache: store K/V for past tokens to avoid $$O(n^2)$$ recomputation
+- [ ] Memory formula: $$2 L h_{\text{kv}} d_k n \times$$ bytes per element per sequence
 - [ ] PagedAttention: virtual memory for KV cache; near-zero waste, prefix sharing
 - [ ] Pre-fill is compute-bound; decode is memory-bound -- different optimization strategies
-- [ ] GQA reduces KV cache by $h/g$ factor; INT8 quantization gives another 2x
+- [ ] GQA reduces KV cache by $$h/g$$ factor; INT8 quantization gives another 2x
 """
 
 CONTENT["pillar6.llm_inference.quantization"] = r"""# Quantization (GPTQ, AWQ, FP8)
@@ -1917,7 +1917,7 @@ Quantization reduces model precision from FP16/BF16 to lower bit-widths (INT8, I
 ## Core Concepts
 
 ### Quantization Basics
-Map a continuous range $[x_{\min}, x_{\max}]$ to discrete levels:
+Map a continuous range $$[x_{\min}, x_{\max}]$$ to discrete levels:
 
 **Symmetric quantization**:
 
@@ -1931,7 +1931,7 @@ $$
 x_q = \text{round}\left(\frac{x - z}{s}\right), \quad s = \frac{x_{\max} - x_{\min}}{2^b - 1}
 $$
 
-Dequantization: $\hat{x} = s \cdot x_q + z$
+Dequantization: $$\hat{x} = s \cdot x_q + z$$
 
 ### Weight-Only Quantization
 Quantize only weights; activations remain in FP16:
@@ -1963,7 +1963,7 @@ $$
 s_j = \left(\frac{\max(|X_j|)}{\max(|W_j|)}\right)^\alpha, \quad \hat{W}_j = \text{Quant}(W_j \cdot s_j) / s_j
 $$
 
-where $\alpha$ balances weight and activation error (typically $\alpha = 0.5$).
+where $$\alpha$$ balances weight and activation error (typically $$\alpha = 0.5$$).
 
 - Slightly better than GPTQ at same bit-width
 - Hardware-friendly (no mixed-precision compute needed)
@@ -2017,7 +2017,7 @@ model = AutoGPTQForCausalLM.from_quantized(
 | Quantization method selection | "How to shrink a 70B model?" | GPTQ/AWQ for INT4 weights; FP8 for weight+activation |
 | Quality-size trade-off | "How much quality do you lose?" | 4-bit: 1-3% loss; 8-bit: <1% loss; 3-bit: significant |
 | Calibration importance | "Why calibration data?" | Determines quantization parameters (scales, zeros) |
-| Deployment sizing | "How much memory for inference?" | $N_{\text{params}} \times b / 8$ bytes for $b$-bit quantization |
+| Deployment sizing | "How much memory for inference?" | $$N_{\text{params}} \times b / 8$$ bytes for $$b$$-bit quantization |
 
 ### Common Interview Questions
 - [ ] How does GPTQ minimize quantization error?
@@ -2219,8 +2219,8 @@ HuggingFace's serving solution:
 ### Speculative Decoding
 Use a small "draft" model to generate candidate tokens, then verify in parallel with the main model:
 
-1. Draft model generates $k$ tokens autoregressively
-2. Main model scores all $k$ tokens in one forward pass
+1. Draft model generates $$k$$ tokens autoregressively
+2. Main model scores all $$k$$ tokens in one forward pass
 3. Accept tokens where main model agrees; reject and resample from main model where it disagrees
 
 $$
@@ -2332,7 +2332,7 @@ $$
 \text{chunk}_i = \text{text}[i \times s : i \times s + c]
 $$
 
-where $c$ = chunk size, $s$ = stride ($s = c - \text{overlap}$).
+where $$c$$ = chunk size, $$s$$ = stride ($$s = c - \text{overlap}$$).
 
 - Simplest approach; works well for uniform content
 - Typical: 256-512 tokens with 50-100 token overlap
@@ -2485,7 +2485,7 @@ $$
 \mathcal{L} = -\log \frac{e^{\text{sim}(q, k^+)/\tau}}{\sum_{j} e^{\text{sim}(q, k_j)/\tau}}
 $$
 
-where $\tau$ is temperature, $k^+$ is the positive pair, and negatives are in-batch.
+where $$\tau$$ is temperature, $$k^+$$ is the positive pair, and negatives are in-batch.
 
 **Hard negative mining**: Sample negatives that are similar but not relevant (e.g., BM25 top-k that are not actual matches). Critical for quality.
 
@@ -2505,7 +2505,7 @@ $$
 \text{score}(q, d) = \cos(f(q), f(d))
 $$
 
-**Cross-encoder**: jointly encode query and document; more accurate but $O(n)$.
+**Cross-encoder**: jointly encode query and document; more accurate but $$O(n)$$.
 
 $$
 \text{score}(q, d) = \text{classifier}(\text{BERT}([q; d]))
@@ -2524,9 +2524,9 @@ $$
 | OpenAI text-embedding-3 | 256-3072 | 8191 | Proprietary | Strong API, MRL |
 
 ### Similarity Metrics
-- **Cosine similarity**: $\cos(a, b) = \frac{a \cdot b}{\|a\| \|b\|}$ -- standard for normalized embeddings
-- **Dot product**: $a \cdot b$ -- same as cosine for unit vectors; faster
-- **Euclidean distance**: $\|a - b\|_2$ -- equivalent ranking to cosine for unit vectors
+- **Cosine similarity**: $$\cos(a, b) = \frac{a \cdot b}{\|a\| \|b\|}$$ -- standard for normalized embeddings
+- **Dot product**: $$a \cdot b$$ -- same as cosine for unit vectors; faster
+- **Euclidean distance**: $$\|a - b\|_2$$ -- equivalent ranking to cosine for unit vectors
 
 ## Implementation
 
@@ -2570,9 +2570,9 @@ top_idx = np.argmax(scores)
 | Aspect | BM25 (Sparse) | Bi-Encoder (Dense) | Cross-Encoder | ColBERT (Late) |
 |--------|--------------|-------------------|---------------|----------------|
 | Representation | Term frequency | Single vector | Joint encoding | Multi-vector |
-| Speed (retrieval) | Very fast | Fast (ANN) | Slow ($O(n)$) | Medium |
+| Speed (retrieval) | Very fast | Fast (ANN) | Slow ($$O(n)$$) | Medium |
 | Semantic matching | No | Yes | Best | Yes |
-| Index size | Inverted index | $n \times d$ floats | None (online) | $n \times l \times d$ |
+| Index size | Inverted index | $$n \times d$$ floats | None (online) | $$n \times l \times d$$ |
 | Use case | First stage | Retrieval | Reranking | Retrieval+quality |
 
 ## Key Takeaways
@@ -2592,7 +2592,7 @@ Vector databases store and index high-dimensional embeddings for fast approximat
 ## Core Concepts
 
 ### Exact vs Approximate Search
-**Exact (brute-force)**: compute distance to every vector. $O(nd)$ per query.
+**Exact (brute-force)**: compute distance to every vector. $$O(nd)$$ per query.
 - Guaranteed correct results
 - Impractical for >1M vectors
 
@@ -2603,8 +2603,8 @@ Vector databases store and index high-dimensional embeddings for fast approximat
 ### Index Types
 
 **IVF (Inverted File Index)**:
-- Cluster vectors into $C$ centroids via k-means
-- At query time, search only the $n_{\text{probe}}$ nearest clusters
+- Cluster vectors into $$C$$ centroids via k-means
+- At query time, search only the $$n_{\text{probe}}$$ nearest clusters
 - Trade-off: more probes = higher recall, slower search
 
 $$
@@ -2649,7 +2649,7 @@ $$
 
 - Reciprocal Rank Fusion (RRF) is a popular combination method
 - Sparse catches exact matches; dense catches semantic matches
-- Typically $\alpha = 0.3$-$0.7$ (tune per use case)
+- Typically $$\alpha = 0.3$$-$$0.7$$ (tune per use case)
 
 ### Filtering and Metadata
 Production requirements beyond ANN:
@@ -2793,7 +2793,7 @@ $$
 \text{RRF}(d) = \sum_{r \in \text{rankings}} \frac{1}{k + \text{rank}_r(d)}
 $$
 
-where $k$ is typically 60. RRF is robust to score scale differences between retrievers.
+where $$k$$ is typically 60. RRF is robust to score scale differences between retrievers.
 
 ### Structured / Graph RAG
 - **Knowledge Graph RAG**: extract entities/relations, traverse graph for context
@@ -2804,7 +2804,7 @@ where $k$ is typically 60. RRF is robust to score scale differences between retr
 
 **Retrieval metrics**:
 - **Recall@k**: fraction of relevant docs in top-k
-- **MRR (Mean Reciprocal Rank)**: $\frac{1}{|Q|}\sum_{q} \frac{1}{\text{rank}_q}$
+- **MRR (Mean Reciprocal Rank)**: $$\frac{1}{|Q|}\sum_{q} \frac{1}{\text{rank}_q}$$
 - **NDCG@k**: normalized discounted cumulative gain
 
 **Generation metrics (RAGAS framework)**:
@@ -2894,7 +2894,7 @@ $$
 \mathcal{L} = -\frac{1}{N}\sum_{i=1}^{N}\left[\log \frac{e^{\text{sim}(I_i, T_i)/\tau}}{\sum_j e^{\text{sim}(I_i, T_j)/\tau}} + \log \frac{e^{\text{sim}(T_i, I_i)/\tau}}{\sum_j e^{\text{sim}(T_i, I_j)/\tau}}\right]
 $$
 
-where $\text{sim}(I, T) = \frac{f(I) \cdot g(T)}{\|f(I)\| \|g(T)\|}$.
+where $$\text{sim}(I, T) = \frac{f(I) \cdot g(T)}{\|f(I)\| \|g(T)\|}$$.
 
 **Key properties**:
 - Zero-shot classification: compare image embedding with text embeddings of class names
@@ -2904,7 +2904,7 @@ where $\text{sim}(I, T) = \frac{f(I) \cdot g(T)}{\|f(I)\| \|g(T)\|}$.
 ### Vision Transformer (ViT)
 Image encoder used in CLIP and VLMs:
 
-1. Split image into $P \times P$ patches (typically $P = 14$ or $16$)
+1. Split image into $$P \times P$$ patches (typically $$P = 14$$ or $$16$$)
 2. Linearly project each patch to embedding dimension
 3. Add position embeddings + [CLS] token
 4. Process through Transformer encoder
@@ -2913,7 +2913,7 @@ $$
 z_0 = [\text{CLS}; x_1W_E; x_2W_E; \ldots; x_NW_E] + E_{\text{pos}}
 $$
 
-For 224x224 image with P=14: $N = (224/14)^2 = 256$ patches.
+For 224x224 image with P=14: $$N = (224/14)^2 = 256$$ patches.
 
 ### LLaVA (Large Language and Vision Assistant)
 Liu et al., 2023: Connect a vision encoder to an LLM for multimodal conversation.
@@ -2927,7 +2927,7 @@ $$
 h_{\text{img}} = W_{\text{proj}} \cdot \text{ViT}(\text{image})
 $$
 
-Input to LLM: $[\text{system}; h_{\text{img}}; \text{user query}]$
+Input to LLM: $$[\text{system}; h_{\text{img}}; \text{user query}]$$
 
 **Training stages**:
 1. Pre-training: align vision-language features (595K image-text pairs, freeze LLM)
@@ -2951,7 +2951,7 @@ Input to LLM: $[\text{system}; h_{\text{img}}; \text{user query}]$
 - **Zero-shot classification**: CLIP-style text-image matching
 
 ### CLIP Limitations
-- Bag-of-words behavior: "a dog chasing a cat" $\approx$ "a cat chasing a dog"
+- Bag-of-words behavior: "a dog chasing a cat" $$\approx$$ "a cat chasing a dog"
 - Poor at counting, spatial relations, fine-grained attributes
 - Biases from web-scraped training data
 - Fixed resolution (224x224 in original)

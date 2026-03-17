@@ -2,6 +2,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 
 interface MarkdownPreviewProps {
@@ -55,6 +57,29 @@ export default function MarkdownPreview({
             // Suppress native checkboxes from remark-gfm; handled by li override
             if (type === "checkbox") return null;
             return <input type={type} {...rest} />;
+          },
+          code: ({ children, className, ...rest }) => {
+            const match = /language-(\w+)/.exec(className || "");
+            const isBlock =
+              match != null ||
+              (typeof children === "string" && children.includes("\n"));
+            if (isBlock) {
+              return (
+                <SyntaxHighlighter
+                  style={oneDark}
+                  language={match?.[1] ?? "python"}
+                  PreTag="div"
+                  {...rest}
+                >
+                  {String(children).replace(/\n$/, "")}
+                </SyntaxHighlighter>
+              );
+            }
+            return (
+              <code className={className} {...rest}>
+                {children}
+              </code>
+            );
           },
           li: ({ children, className, node: _node, ...props }) => {
             if (!className?.includes("task-list-item")) {
