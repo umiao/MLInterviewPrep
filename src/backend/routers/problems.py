@@ -224,6 +224,26 @@ def create_problem(
     return _problem_to_response(db_problem)
 
 
+@router.get("/problems/{problem_id}", response_model=ProblemResponse)
+def get_problem(
+    problem_id: int,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Get a single problem by ID.
+
+    Args:
+        problem_id: ID of the problem.
+        db: Database session.
+
+    Returns:
+        ProblemResponse dict.
+    """
+    db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
+    if not db_problem:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    return _problem_to_response(db_problem)
+
+
 @router.put("/problems/{problem_id}", response_model=ProblemResponse)
 def update_problem(
     problem_id: int,
@@ -459,8 +479,12 @@ async def _fetch_from_leetcode_graphql(title_slug: str) -> str | None:
         logger.info("LeetCode GraphQL returned no content for slug=%s (may be premium)", title_slug)
         return None
 
+    # Return cleaned HTML preserving formatting (tables, code blocks, lists)
     soup = BeautifulSoup(content_html, "html.parser")
-    return soup.get_text(separator="\n", strip=True)
+    # Remove script/style tags for safety
+    for tag in soup.find_all(["script", "style"]):
+        tag.decompose()
+    return str(soup)
 
 
 @router.post("/problems/{problem_id}/fetch-description")
@@ -543,13 +567,18 @@ async def fetch_description(
     ]:
         element = soup.select_one(selector)
         if element and len(element.get_text(strip=True)) > 50:
-            description_text = element.get_text(separator="\n", strip=True)
+            # Remove script/style tags for safety
+            for tag in element.find_all(["script", "style"]):
+                tag.decompose()
+            description_text = str(element)
             break
 
     if not description_text:
         body = soup.find("body")
         if body:
-            description_text = body.get_text(separator="\n", strip=True)
+            for tag in body.find_all(["script", "style"]):
+                tag.decompose()
+            description_text = str(body)
 
     if not description_text or len(description_text) < 20:
         raise HTTPException(
@@ -569,4 +598,108 @@ async def fetch_description(
         "description_source": "neetcode",
         "neetcode_slug": slug,
         "url": url,
+    }
+
+
+@router.post("/problems/fetch-all-descriptions")
+async def fetch_all_descriptions(
+    db: Session = Depends(get_db),
+) -> dict:
+    """Batch-fetch descriptions for all problems missing them.
+
+    Iterates through problems without descriptions, tries LeetCode GraphQL
+    then neetcode.io fallback. Returns summary of successes and failures.
+
+    Args:
+        db: Database session.
+
+    Returns:
+        Dict with fetched count, failed list, and total processed.
+    """
+    import asyncio
+
+    problems = (
+        db.query(Problem)
+        .filter(
+            (Problem.description.is_(None)) | (Problem.description == "")
+        )
+        .all()
+    )
+
+    fetched = 0
+    failed: list[dict] = []
+
+    for p in problems:
+        # Try LeetCode GraphQL first
+        title_slug = _extract_title_slug(p.url)
+        description_text = None
+        source = None
+
+        if title_slug:
+            description_text = await _fetch_from_leetcode_graphql(title_slug)
+            if description_text and len(description_text) >= 20:
+                source = "leetcode"
+
+        # Fallback to neetcode scraping
+        if not description_text or len(description_text or "") < 20:
+            slug = p.neetcode_slug or title_to_neetcode_slug(p.title)
+            neetcode_url = f"https://neetcode.io/problems/{slug}"
+
+            import httpx
+            from bs4 import BeautifulSoup
+
+            try:
+                async with httpx.AsyncClient(
+                    timeout=15.0, follow_redirects=True
+                ) as client:
+                    resp = await client.get(neetcode_url)
+                    resp.raise_for_status()
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                for selector in [
+                    "div.question-content",
+                    "div[class*='description']",
+                    "div[class*='problem']",
+                    "main",
+                ]:
+                    element = soup.select_one(selector)
+                    if element and len(element.get_text(strip=True)) > 50:
+                        for tag in element.find_all(["script", "style"]):
+                            tag.decompose()
+                        description_text = str(element)
+                        source = "neetcode"
+                        if not p.neetcode_slug:
+                            p.neetcode_slug = slug
+                        break
+            except Exception as exc:
+                logger.warning(
+                    "Batch fetch failed for problem %d (%s): %s",
+                    p.id,
+                    p.title,
+                    exc,
+                )
+
+        if description_text and len(description_text) >= 20:
+            p.description = description_text
+            p.description_source = source
+            fetched += 1
+        else:
+            slug = p.neetcode_slug or title_to_neetcode_slug(p.title)
+            failed.append({
+                "id": p.id,
+                "title": p.title,
+                "url": p.url,
+                "neetcode_slug": slug,
+                "neetcode_url": f"https://neetcode.io/problems/{slug}",
+            })
+
+        # Rate limit: 2 second delay between fetches
+        await asyncio.sleep(2)
+
+    db.commit()
+
+    return {
+        "fetched": fetched,
+        "failed": failed,
+        "total_processed": len(problems),
     }

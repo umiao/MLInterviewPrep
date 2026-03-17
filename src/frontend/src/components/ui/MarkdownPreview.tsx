@@ -1,19 +1,37 @@
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface MarkdownPreviewProps {
   markdown: string;
-  onCheckboxClick: (lineIndex: number) => void;
+  onCheckboxClick?: (lineIndex: number) => void;
+}
+
+/** Green checkmark SVG (GitHub PR style). */
+function CheckIcon() {
+  return (
+    <svg className="w-4 h-4 text-green-600 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="currentColor">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z" />
+    </svg>
+  );
+}
+
+/** Gray circle (unchecked). */
+function UncheckedIcon() {
+  return (
+    <svg className="w-4 h-4 text-gray-300 shrink-0 mt-0.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <circle cx="8" cy="8" r="6" />
+    </svg>
+  );
 }
 
 /**
- * Renders markdown with clickable checkboxes.
- * Shared by PrepNotesTab (inline panel) and PrepNotesPage (full screen).
+ * Renders markdown with GFM support (tables, strikethrough, task lists)
+ * and consistent checkbox icons (GitHub PR style).
  */
 export default function MarkdownPreview({
   markdown,
   onCheckboxClick,
 }: MarkdownPreviewProps) {
-  // Build a map: which list items correspond to checkbox lines
   const lines = markdown.split("\n");
   const checkboxLineIndices: number[] = [];
   for (let i = 0; i < lines.length; i++) {
@@ -23,69 +41,78 @@ export default function MarkdownPreview({
     }
   }
 
-  // Track which checkbox item we're rendering
   let checkboxCounter = 0;
 
   return (
-    <ReactMarkdown
-      components={{
-        li: ({ children, ...props }) => {
-          // Detect if this li contains a checkbox (input type=checkbox)
-          const childArray = Array.isArray(children) ? children : [children];
-          const hasCheckbox = childArray.some(
-            (child) =>
-              typeof child === "object" &&
-              child !== null &&
-              "type" in child &&
-              (child as React.ReactElement).type === "input",
-          );
+    <div className="prose prose-sm max-w-none
+      prose-table:border-collapse prose-table:w-full
+      prose-th:border prose-th:border-gray-300 prose-th:bg-gray-50 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:text-xs prose-th:font-semibold prose-th:text-gray-600
+      prose-td:border prose-td:border-gray-200 prose-td:px-3 prose-td:py-2 prose-td:text-sm
+      prose-tr:even:bg-gray-50
+      prose-code:bg-gray-100 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none
+      prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:rounded-lg prose-pre:p-4
+      prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+      prose-headings:text-gray-900
+      prose-strong:text-gray-900
+    ">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          input: ({ type, ...rest }) => {
+            // Suppress native checkboxes from remark-gfm; handled by li override
+            if (type === "checkbox") return null;
+            return <input type={type} {...rest} />;
+          },
+          li: ({ children, ...props }) => {
+            const childArray = Array.isArray(children) ? children : [children];
 
-          if (hasCheckbox && checkboxCounter < checkboxLineIndices.length) {
-            const lineIdx = checkboxLineIndices[checkboxCounter];
-            checkboxCounter++;
-            const isChecked = /^[-*]\s*\[[xX]\]/.test(
-              lines[lineIdx].trimStart(),
+            // Check if this is a task list item (has a suppressed checkbox = null child)
+            const hasNullChild = childArray.some((c) => c === null);
+            const hasInputChild = childArray.some(
+              (c) =>
+                typeof c === "object" &&
+                c !== null &&
+                "type" in c &&
+                (c as React.ReactElement).type === "input",
             );
+            const isTask = (hasNullChild || hasInputChild) && checkboxCounter < checkboxLineIndices.length;
 
-            return (
-              <li
-                {...props}
-                className="list-none flex items-start gap-1.5 cursor-pointer select-none"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onCheckboxClick(lineIdx);
-                }}
-              >
-                <span className="mt-0.5 shrink-0">
-                  {isChecked ? (
-                    <span className="inline-block w-4 h-4 border-2 border-blue-500 bg-blue-500 rounded text-white text-xs leading-4 text-center">
-                      x
-                    </span>
-                  ) : (
-                    <span className="inline-block w-4 h-4 border-2 border-gray-300 rounded" />
-                  )}
-                </span>
-                <span className={isChecked ? "line-through text-gray-400" : ""}>
-                  {childArray.filter(
-                    (child) =>
-                      !(
-                        typeof child === "object" &&
-                        child !== null &&
-                        "type" in child &&
-                        (child as React.ReactElement).type === "input"
-                      ),
-                  )}
-                </span>
-              </li>
-            );
-          }
+            if (isTask) {
+              const lineIdx = checkboxLineIndices[checkboxCounter];
+              checkboxCounter++;
+              const isChecked = /^[-*]\s*\[[xX]\]/.test(lines[lineIdx].trimStart());
 
-          return <li {...props}>{children}</li>;
-        },
-      }}
-    >
-      {markdown}
-    </ReactMarkdown>
+              // Filter out null and input children
+              const textChildren = childArray.filter(
+                (c) =>
+                  c !== null &&
+                  !(typeof c === "object" && c !== null && "type" in c && (c as React.ReactElement).type === "input"),
+              );
+
+              return (
+                <li
+                  {...props}
+                  className={`list-none flex items-start gap-2 my-0.5 ${onCheckboxClick ? "cursor-pointer select-none" : ""}`}
+                  onClick={onCheckboxClick ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCheckboxClick(lineIdx);
+                  } : undefined}
+                >
+                  {isChecked ? <CheckIcon /> : <UncheckedIcon />}
+                  <span className={isChecked ? "line-through text-gray-400" : ""}>
+                    {textChildren}
+                  </span>
+                </li>
+              );
+            }
+
+            return <li {...props}>{children}</li>;
+          },
+        }}
+      >
+        {markdown}
+      </ReactMarkdown>
+    </div>
   );
 }

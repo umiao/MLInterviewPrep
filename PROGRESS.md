@@ -78,3 +78,10 @@
 - **Sanity check result**: 158 tests pass (migrations + router + import), ruff clean, TypeScript clean, Vite build succeeds
 - **Status**: [DONE]
 - **Request**: No task_db change (user-requested ad-hoc feature)
+
+## 2026-03-16 -- Problems UX overhaul: full-page descriptions, markdown rendering, batch fetch
+- **What I did**: (1) Removed Edit/Del buttons from problem rows (unused, cluttering). (2) Installed remark-gfm and updated MarkdownPreview with GFM support (tables, strikethrough) and GitHub-PR-style checkbox icons (green check / gray circle). (3) Replaced ProblemDescriptionModal with full-screen ProblemDetailPage at `/problems/:problemId`. Problem titles now Link to detail page. (4) Backend now stores raw HTML from LeetCode GraphQL instead of stripped text, preserving formatting. Added `GET /problems/{problem_id}` and `POST /problems/fetch-all-descriptions` endpoints. (5) Batch-fetched 140/147 descriptions; 7 premium problems need manual input. (6) Added "Fetch All Descriptions" button with failure report panel showing unfetchable problems.
+- **Deliverables**: src/frontend/src/components/ui/MarkdownPreview.tsx, src/frontend/src/pages/Problems.tsx, src/frontend/src/pages/ProblemDetailPage.tsx (new), src/frontend/src/App.tsx, src/backend/routers/problems.py, src/frontend/package.json (remark-gfm)
+- **Sanity check result**: 127 router tests pass, ruff clean, TypeScript clean, Vite build succeeds, 140 descriptions fetched and stored
+- **Status**: [DONE] (7 premium problems pending user input)
+- **Request**: No task_db change (user-requested ad-hoc feature)

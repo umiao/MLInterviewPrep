@@ -38,5 +38,6 @@
 - [x] **2026-03-16** -- T-P1-115: Decouple Reading from Synthesis (Text View)
 - [x] **2026-03-16** -- T-P1-114: Unified Faithful Transcript System
 - [x] **2026-03-16** -- T-P1-108: Listen buttons across app (Companies, Questions, Dashboard, Framework). Add Listen buttons to existing pages using AudioPlayerContext.play(): Companies page (Listen to prep notes per company),
+- [x] **2026-03-16** -- T-P0-118: Problems UX: full-page descriptions, markdown rendering, batch fetch, remove Edit/Del
 - [x] **2026-03-16** -- T-P0-117: Integrate LinkedIn JD into Prep Notes
 - [x] **2026-03-16** -- T-P0-113: Fix Radio blank page, TTS preprocessing quality, LinkedIn content sync

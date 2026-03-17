@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
-import { useToast } from "../contexts/ToastContext";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import SearchInput from "../components/ui/SearchInput";
 import EmptyState from "../components/ui/EmptyState";
 import Pagination from "../components/ui/Pagination";
-import ConfirmDialog from "../components/ui/ConfirmDialog";
 import Badge from "../components/ui/Badge";
 import Tabs from "../components/ui/Tabs";
 import { useFilterParams } from "../hooks/useFilterParams";
@@ -21,9 +19,8 @@ import type {
 } from "../types/problem";
 import PracticeModal from "../components/PracticeModal";
 import ReviewPanel from "../components/ReviewPanel";
+import { useToast } from "../contexts/ToastContext";
 import AddProblemModal from "../components/problems/AddProblemModal";
-import EditProblemModal from "../components/problems/EditProblemModal";
-import ProblemDescriptionModal from "../components/problems/ProblemDescriptionModal";
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
 const CATEGORIES: { value: Category; label: string }[] = [
@@ -126,10 +123,17 @@ function ProgressBar({ completed, total }: { completed: number; total: number })
   );
 }
 
+interface FetchAllResult {
+  fetched: number;
+  failed: { id: number; title: string; url: string | null; neetcode_slug: string; neetcode_url: string }[];
+  total_processed: number;
+}
+
 export default function Problems() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [fetchAllResult, setFetchAllResult] = useState<FetchAllResult | null>(null);
 
   // Tab state from URL
   const activeTab = searchParams.get("tab") || "all";
@@ -163,9 +167,21 @@ export default function Problems() {
   const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
   const [reviewProblem, setReviewProblem] = useState<Problem | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editProblem, setEditProblem] = useState<Problem | null>(null);
-  const [deleteProblem, setDeleteProblem] = useState<Problem | null>(null);
-  const [descriptionProblem, setDescriptionProblem] = useState<Problem | null>(null);
+
+  // ---- fetch all descriptions mutation ----
+  const fetchAllMutation = useMutation({
+    mutationFn: () => api.post<FetchAllResult>("/problems/fetch-all-descriptions"),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["problems"] });
+      toast.success(`Fetched ${data.fetched} descriptions. ${data.failed.length} failed.`);
+      if (data.failed.length > 0) {
+        setFetchAllResult(data);
+      }
+    },
+    onError: (err: Error) => {
+      toast.error(err.message || "Failed to fetch descriptions");
+    },
+  });
 
   const isBlind75 = activeTab === "blind75";
 
@@ -290,19 +306,6 @@ export default function Problems() {
     }
   }, [filterKey, setPage]);
 
-  // ---- delete mutation ----
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => api.del(`/problems/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["problems"] });
-      toast.success("Problem deleted");
-      setDeleteProblem(null);
-    },
-    onError: (err: Error) => {
-      toast.error(err.message || "Failed to delete problem");
-    },
-  });
-
   const handleSearchChange = useCallback(
     (value: string) => setSearch(value),
     [setSearch],
@@ -319,13 +322,13 @@ export default function Problems() {
       </td>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setDescriptionProblem(p)}
-            className="text-blue-600 hover:underline font-medium truncate max-w-xs text-left"
+          <Link
+            to={`/problems/${p.id}`}
+            className="text-blue-600 hover:underline font-medium truncate max-w-xs block"
             title="View description"
           >
             {p.title}
-          </button>
+          </Link>
           {p.url && (
             <a
               href={p.url}
@@ -388,13 +391,13 @@ export default function Problems() {
       {showNotes && (
         <td className="px-3 py-2">
           {p.notes ? (
-            <button
-              onClick={() => setDescriptionProblem(p)}
+            <Link
+              to={`/problems/${p.id}`}
               className="text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded truncate max-w-[120px] block"
               title={p.notes}
             >
               {p.notes.slice(0, 40)}{p.notes.length > 40 ? "..." : ""}
-            </button>
+            </Link>
           ) : (
             <span className="text-xs text-gray-300">--</span>
           )}
@@ -416,18 +419,6 @@ export default function Problems() {
             className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
           >
             Review
-          </button>
-          <button
-            onClick={() => setEditProblem(p)}
-            className="text-xs px-2 py-1 border border-gray-300 rounded hover:bg-gray-100 text-gray-600"
-          >
-            Edit
-          </button>
-          <button
-            onClick={() => setDeleteProblem(p)}
-            className="text-xs px-2 py-1 border border-red-200 rounded hover:bg-red-50 text-red-600"
-          >
-            Del
           </button>
         </div>
       </td>
@@ -488,6 +479,13 @@ export default function Problems() {
             {totalCount} problem{totalCount !== 1 ? "s" : ""}
           </span>
           <button
+            onClick={() => fetchAllMutation.mutate()}
+            disabled={fetchAllMutation.isPending}
+            className="px-3 py-1.5 text-sm border border-gray-300 rounded hover:bg-gray-100 text-gray-600 disabled:opacity-50"
+          >
+            {fetchAllMutation.isPending ? "Fetching..." : "Fetch All Descriptions"}
+          </button>
+          <button
             onClick={() => setShowAddModal(true)}
             className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
           >
@@ -495,6 +493,54 @@ export default function Problems() {
           </button>
         </div>
       </div>
+
+      {/* Fetch-all failures report */}
+      {fetchAllResult && fetchAllResult.failed.length > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold text-amber-800">
+              {fetchAllResult.failed.length} problem{fetchAllResult.failed.length !== 1 ? "s" : ""} could not be fetched
+            </h3>
+            <button
+              onClick={() => setFetchAllResult(null)}
+              className="text-xs text-amber-600 hover:underline"
+            >
+              Dismiss
+            </button>
+          </div>
+          <p className="text-xs text-amber-700 mb-2">
+            Please verify the neetcode links below are correct. If not, provide the correct slug.
+          </p>
+          <div className="space-y-1">
+            {fetchAllResult.failed.map((f) => (
+              <div key={f.id} className="flex items-center gap-2 text-xs">
+                <Link to={`/problems/${f.id}`} className="text-blue-600 hover:underline font-medium">
+                  {f.title}
+                </Link>
+                <span className="text-gray-400">-</span>
+                <a
+                  href={f.neetcode_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-amber-700 hover:underline"
+                >
+                  {f.neetcode_url}
+                </a>
+                {f.url && (
+                  <a
+                    href={f.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-500 hover:underline"
+                  >
+                    [LeetCode]
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Search + Sort controls */}
       <div className="flex items-center gap-3 mb-3">
@@ -725,24 +771,6 @@ export default function Problems() {
         onClose={() => setShowAddModal(false)}
       />
 
-      {/* Edit Problem Modal */}
-      <EditProblemModal
-        problem={editProblem}
-        onClose={() => setEditProblem(null)}
-      />
-
-      {/* Delete Confirm Dialog */}
-      <ConfirmDialog
-        open={deleteProblem !== null}
-        onClose={() => setDeleteProblem(null)}
-        onConfirm={() => deleteProblem && deleteMutation.mutate(deleteProblem.id)}
-        title="Delete Problem"
-        message={`Are you sure you want to delete "${deleteProblem?.title}"? This will also delete all associated attempts and QA sessions.`}
-        confirmLabel="Delete"
-        confirmVariant="danger"
-        loading={deleteMutation.isPending}
-      />
-
       {/* Practice Modal */}
       {practiceProblem && (
         <PracticeModal
@@ -763,13 +791,6 @@ export default function Problems() {
         />
       )}
 
-      {/* Description Modal */}
-      {descriptionProblem && (
-        <ProblemDescriptionModal
-          problem={descriptionProblem}
-          onClose={() => setDescriptionProblem(null)}
-        />
-      )}
     </div>
   );
 }
