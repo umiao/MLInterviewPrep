@@ -175,3 +175,10 @@
 - **Sanity check result**: All 24 nodes verified in DB with content (4K-6K chars each), checkboxes, tables, and LaTeX (22/24 with block LaTeX; 2 topics without heavy math as expected). Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-129 --status completed`
+
+## 2026-03-17 -- [T-P1-130] ML System Design pillar (Pillar 3) prep docs for all 19 leaf topics
+- **What I did**: Wrote `scripts/seed_pillar3_content.py` with detailed senior MLE-depth prep docs for all 19 Pillar 3 leaf topics across 2 categories: (1) Classic Design Problems (9 topics: search & retrieval, recommendation systems, ads & click prediction, marketplace & logistics, NLP & LLM systems, computer vision systems, fraud & trust safety, ML infrastructure design, generative AI systems), (2) Building Blocks (10 topics: two-tower model, multi-stage ranking, ANN, feature store, embedding techniques, real-time feature computation, A/B testing, exploration/exploitation, knowledge distillation, multi-task learning). Each topic has KaTeX-compatible LaTeX, Python code snippets, interview pattern tables, comparison tables, and self-assessment checkboxes.
+- **Deliverables**: scripts/seed_pillar3_content.py (new), data/mle_prep.db (19 nodes updated)
+- **Sanity check result**: All 19 nodes verified in DB with content (4.5K-5.5K chars each), checkboxes, tables, and LaTeX. Ruff passes. 641 tests pass (1 pre-existing failure unrelated).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-130 --status completed`

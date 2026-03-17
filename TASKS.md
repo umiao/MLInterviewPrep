@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-130: ML System Design pillar (Pillar 3) prep docs for all leaf topics
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-127
-- **Description**: Generate detailed prep docs for all Pillar 3 leaf topics. Covers: design framework methodology, classic problems (rec sys, search ranking, ads, fraud), building blocks (feature store, model serving, A/B testing, monitoring). AC: all topics have prep docs with end-to-end system diagrams, latency/throughput analysis, scaling considerations.
-
 #### T-P1-131: Math & Statistics pillar (Pillar 7) prep docs for all leaf topics
 - **Priority**: P1
 - **Complexity**: L
@@ -52,6 +46,7 @@
 > 119 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-17** -- T-P1-134: Fix MarkdownPreview checkbox mismatch caused by remarkMath dollar-sign corruption
+- [x] **2026-03-17** -- T-P1-130: ML System Design pillar (Pillar 3) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 3 leaf topics. Covers: design framework methodology, classic problems (rec sy
 - [x] **2026-03-17** -- T-P1-129: Deep Learning & LLM pillar (Pillar 6) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 6 leaf topics following content template. Covers: Transformer architecture, a
 - [x] **2026-03-17** -- T-P1-128: PrevNextNav arrow component + integrate in PrepNotesPage and ProblemDetailPage. Reusable PrevNextNav component with left/right chevrons + tooltip. PrepNotesPage: navigate companies alphabetically. Pro
 - [x] **2026-03-17** -- T-P1-127: Content template + ML Fundamentals pillar (Pillar 2) prep docs for all 25 leaf topics. Create docs/framework_content_template.md with standard structure (Overview, Core Concepts with LaTeX, Implementation, I
