@@ -29,6 +29,8 @@
 
 - [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.
 - [x] **2026-03-17** -- T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applicatio
+- [x] **2026-03-17** -- T-P1-137: Fix Prep Notes Display: full-screen MD rendering + framework tree notes links
+- [x] **2026-03-17** -- T-P1-136: Fix scroll sync to use dual refs (container + textarea) for correct capture/restore targets
 - [x] **2026-03-17** -- T-P1-135: Sticky toolbar + scroll position sync for PrepNotes
 - [x] **2026-03-17** -- T-P1-134: Fix MarkdownPreview checkbox mismatch caused by remarkMath dollar-sign corruption
 - [x] **2026-03-17** -- T-P1-131: Math & Statistics pillar (Pillar 7) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 7 leaf topics. Covers: probability distributions, Bayesian inference, hypothe

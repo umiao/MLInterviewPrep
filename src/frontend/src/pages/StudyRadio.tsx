@@ -8,6 +8,7 @@
  * 4. History: recently completed items
  */
 import { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAudioPlayerContext } from "../contexts/AudioPlayerContext";
 import { useToast } from "../contexts/ToastContext";
@@ -74,6 +75,7 @@ export default function StudyRadio() {
     setAutoAdvance,
   } = useAudioPlayerContext();
   const toast = useToast();
+  const navigate = useNavigate();
 
   // Filters
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>("");
@@ -152,6 +154,20 @@ export default function StudyRadio() {
       });
     },
     [play],
+  );
+
+  /** Navigate to full-screen page for framework/prep, or open modal for questions. */
+  const handleReadItem = useCallback(
+    (item: QueueItem) => {
+      if (item.content_type === "framework_node") {
+        navigate(`/framework/${item.content_id}/notes`);
+      } else if (item.content_type === "prep_notes") {
+        navigate(`/companies/${item.content_id}/prep`);
+      } else {
+        setReadingItem(item);
+      }
+    },
+    [navigate],
   );
 
   const progress = duration > 0 ? currentTime / duration : 0;
@@ -436,7 +452,7 @@ export default function StudyRadio() {
 
                   {/* Read + Play buttons */}
                   <button
-                    onClick={() => setReadingItem(item)}
+                    onClick={() => handleReadItem(item)}
                     className="px-2.5 py-1 text-xs border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors shrink-0"
                     title="Read transcript"
                   >
@@ -487,7 +503,7 @@ export default function StudyRadio() {
                   </div>
                   <span className="text-xs text-green-600 shrink-0">Done</span>
                   <button
-                    onClick={() => setReadingItem(item)}
+                    onClick={() => handleReadItem(item)}
                     className="px-2.5 py-1 text-xs border border-gray-300 text-gray-600 rounded hover:bg-gray-100 transition-colors shrink-0"
                     title="Read transcript"
                   >

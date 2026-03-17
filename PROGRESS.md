@@ -217,3 +217,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-136 --status completed`
+
+## 2026-03-17 -- [T-P1-137] Full-screen MD rendering for Study Radio + framework tree notes links
+- **What I did**: (1) Study Radio "Read" button now navigates to full-screen pages (`/framework/:nodeId/notes` for framework nodes, `/companies/:companyId/prep` for prep notes) instead of opening the small TranscriptViewer modal. Interview questions still use the modal. (2) Added a notes icon-link on each node in FrameworkTreeView that links to `/framework/:nodeId/notes` with stopPropagation to avoid triggering onSelect.
+- **Deliverables**: src/frontend/src/pages/StudyRadio.tsx, src/frontend/src/components/FrameworkTreeView.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-137 --status completed`
