@@ -154,3 +154,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit), 641 tests pass (1 pre-existing failure unrelated to changes)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-128 --status completed`
+
+## 2026-03-17 -- [T-P1-134] Fix MarkdownPreview checkbox mismatch from remarkMath corruption
+- **What I did**: (1) Replaced fragile counter-based checkbox state detection in MarkdownPreview with direct hast node child inspection (`inputChild.properties.checked`), using `node.position.start.line` for click line index. Removed `checkboxLineIndices`, `checkboxCounter`, and `lines` array. (2) Disabled single-dollar math parsing in remarkMath (`singleDollarTextMath: false`) to prevent `$250K` being parsed as math and corrupting the AST. (3) Updated LinkedIn prep notes in DB to use `$$...$$` for the two legitimate math expressions.
+- **Deliverables**: src/frontend/src/components/ui/MarkdownPreview.tsx, data/mle_prep.db
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-134 --status completed`

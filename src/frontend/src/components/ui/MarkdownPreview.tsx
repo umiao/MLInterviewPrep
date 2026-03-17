@@ -35,17 +35,6 @@ export default function MarkdownPreview({
   markdown,
   onCheckboxClick,
 }: MarkdownPreviewProps) {
-  const lines = markdown.split("\n");
-  const checkboxLineIndices: number[] = [];
-  for (let i = 0; i < lines.length; i++) {
-    const trimmed = lines[i].trimStart();
-    if (/^[-*]\s*\[[ xX]\]/.test(trimmed)) {
-      checkboxLineIndices.push(i);
-    }
-  }
-
-  let checkboxCounter = 0;
-
   return (
     <div className="prose prose-sm max-w-none
       prose-table:border-collapse prose-table:w-full
@@ -59,7 +48,7 @@ export default function MarkdownPreview({
       prose-strong:text-gray-900
     ">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, remarkMath]}
+        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
         rehypePlugins={[rehypeKatex]}
         components={{
           input: ({ type, ...rest }) => {
@@ -68,40 +57,43 @@ export default function MarkdownPreview({
             return <input type={type} {...rest} />;
           },
           li: ({ children, className, node: _node, ...props }) => {
-            const isTask = className?.includes("task-list-item") && checkboxCounter < checkboxLineIndices.length;
-
-            if (isTask) {
-              const lineIdx = checkboxLineIndices[checkboxCounter];
-              checkboxCounter++;
-              const isChecked = /^[-*]\s*\[[xX]\]/.test(lines[lineIdx].trimStart());
-
-              // Filter out null and input children
-              const childArray = Array.isArray(children) ? children : [children];
-              const textChildren = childArray.filter(
-                (c) =>
-                  c !== null &&
-                  !(typeof c === "object" && c !== null && "type" in c && (c as React.ReactElement).type === "input"),
-              );
-
-              return (
-                <li
-                  {...props}
-                  className={`list-none flex items-start gap-2 my-0.5 ${onCheckboxClick ? "cursor-pointer select-none" : ""}`}
-                  onClick={onCheckboxClick ? (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onCheckboxClick(lineIdx);
-                  } : undefined}
-                >
-                  {isChecked ? <CheckIcon /> : <UncheckedIcon />}
-                  <span className={isChecked ? "line-through text-gray-400" : ""}>
-                    {textChildren}
-                  </span>
-                </li>
-              );
+            if (!className?.includes("task-list-item")) {
+              return <li {...props}>{children}</li>;
             }
 
-            return <li {...props}>{children}</li>;
+            // Read checked state from hast node's input child
+            const inputChild = (_node?.children as any[])?.find(
+              (c: any) => c.tagName === "input" && c.properties?.type === "checkbox"
+            );
+            const isChecked = !!inputChild?.properties?.checked;
+
+            // Line index from hast node position (1-based -> 0-based)
+            const lineIdx = (_node?.position?.start?.line ?? 1) - 1;
+
+            // Filter out null and input children
+            const childArray = Array.isArray(children) ? children : [children];
+            const textChildren = childArray.filter(
+              (c) =>
+                c !== null &&
+                !(typeof c === "object" && c !== null && "type" in c && (c as React.ReactElement).type === "input"),
+            );
+
+            return (
+              <li
+                {...props}
+                className={`list-none flex items-start gap-2 my-0.5 ${onCheckboxClick ? "cursor-pointer select-none" : ""}`}
+                onClick={onCheckboxClick ? (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onCheckboxClick(lineIdx);
+                } : undefined}
+              >
+                {isChecked ? <CheckIcon /> : <UncheckedIcon />}
+                <span className={isChecked ? "line-through text-gray-400" : ""}>
+                  {textChildren}
+                </span>
+              </li>
+            );
           },
         }}
       >
