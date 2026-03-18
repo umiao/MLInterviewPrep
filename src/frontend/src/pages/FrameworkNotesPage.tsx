@@ -5,7 +5,53 @@ import { api } from "../utils/api";
 import { useFrameworkNotes } from "../hooks/useFrameworkNotes";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
-import type { FrameworkNode } from "../types/framework";
+import type { FrameworkNode, NodeStatus } from "../types/framework";
+
+const STATUS_COLORS: Record<NodeStatus, string> = {
+  not_started: "bg-red-400",
+  in_progress: "bg-yellow-400",
+  review: "bg-blue-400",
+  mastered: "bg-green-400",
+};
+
+const STATUS_LABELS: Record<NodeStatus, string> = {
+  not_started: "Not Started",
+  in_progress: "In Progress",
+  review: "Review",
+  mastered: "Mastered",
+};
+
+/** Recursively collect all leaf nodes (no children). */
+function collectLeaves(node: FrameworkNode): FrameworkNode[] {
+  if (!node.children?.length) return [node];
+  return node.children.flatMap(collectLeaves);
+}
+
+/** Group leaf descendants by their immediate parent category. */
+function getGroupedLeaves(
+  node: FrameworkNode,
+): { category: string; leaves: FrameworkNode[] }[] {
+  if (!node.children?.length) return [];
+
+  const groups: { category: string; leaves: FrameworkNode[] }[] = [];
+  for (const child of node.children) {
+    if (!child.children?.length) continue; // skip direct leaves for now
+    const leaves = collectLeaves(child);
+    if (leaves.length > 0) {
+      groups.push({ category: child.title, leaves });
+    }
+  }
+
+  // If all direct children are leaves (no sub-categories), group under "Topics"
+  if (groups.length === 0) {
+    const directLeaves = node.children.filter((c) => !c.children?.length);
+    if (directLeaves.length) {
+      groups.push({ category: "Topics", leaves: directLeaves });
+    }
+  }
+
+  return groups;
+}
 
 /** Flatten a tree into a list for sibling navigation. */
 function flattenTree(nodes: FrameworkNode[]): FrameworkNode[] {
@@ -86,6 +132,16 @@ export default function FrameworkNotesPage() {
   const { prev, next } = useMemo(
     () => findSiblings(flat, nodeId, node?.parent_id ?? null),
     [flat, nodeId, node?.parent_id],
+  );
+
+  // Find the current node in the tree (with children populated)
+  const treeNode = useMemo(
+    () => flat.find((n) => n.id === nodeId) ?? null,
+    [flat, nodeId],
+  );
+  const groupedLeaves = useMemo(
+    () => (treeNode ? getGroupedLeaves(treeNode) : []),
+    [treeNode],
   );
 
   const handleFrameworkNav = useCallback(
@@ -234,6 +290,52 @@ export default function FrameworkNotesPage() {
                 markdown={notes}
                 onCheckboxClick={handleCheckboxClick}
               />
+            ) : groupedLeaves.length > 0 ? (
+              <div className="max-w-4xl">
+                <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                  {node.title}
+                </h2>
+                {groupedLeaves.map((group) => (
+                  <section key={group.category} className="mb-8">
+                    <h3 className="text-lg font-bold text-gray-700 mb-3">
+                      {group.category}
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {group.leaves.map((leaf) => (
+                        <button
+                          key={leaf.id}
+                          onClick={() => handleFrameworkNav(leaf.id)}
+                          className="text-left p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-sm transition-all"
+                        >
+                          <div className="flex items-center gap-2 mb-2">
+                            <span
+                              className={`w-2.5 h-2.5 rounded-full shrink-0 ${STATUS_COLORS[leaf.status]}`}
+                              title={STATUS_LABELS[leaf.status]}
+                            />
+                            <span className="text-sm font-medium text-gray-800 truncate">
+                              {leaf.title}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-blue-500 rounded-full transition-all"
+                                style={{ width: `${leaf.progress_pct}%` }}
+                              />
+                            </div>
+                            <span className="text-xs text-gray-400 shrink-0">
+                              {leaf.progress_pct}%
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+                <p className="text-sm text-gray-400 italic mt-4">
+                  Switch to Edit mode to add overview notes for this topic.
+                </p>
+              </div>
             ) : (
               <p className="text-gray-400 italic">
                 No notes yet. Switch to Edit mode to add some.

@@ -253,3 +253,10 @@
 - **Sanity check result**: TypeScript type check clean, production build succeeds
 - **Status**: [DONE]
 - **Request**: No task ID (ad-hoc user request)
+
+## 2026-03-18 -- Landing page for parent framework nodes without notes
+- **What I did**: Replaced the empty "No notes yet" message on parent framework nodes with a landing page showing all leaf descendant nodes grouped by category. Each leaf is a clickable card with status dot, title, and progress bar. Added helper functions `collectLeaves` and `getGroupedLeaves`. Edit mode and existing-notes display unchanged.
+- **Deliverables**: src/frontend/src/pages/FrameworkNotesPage.tsx (modified)
+- **Sanity check result**: `npx tsc --noEmit` clean, `npx vite build` succeeds
+- **Status**: [DONE]
+- **Request**: No task ID (ad-hoc user request)
