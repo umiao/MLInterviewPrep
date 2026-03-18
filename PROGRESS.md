@@ -238,3 +238,18 @@
 - **Sanity check result**: 811 tests pass, TypeScript compiles cleanly, ruff clean
 - **Status**: [DONE]
 - **Request**: Tasks T-P1-139 through T-P1-142 marked completed
+
+
+## 2026-03-17 -- Seed companies from application tracking spreadsheet
+- **What I did**: Read the Excel tracking file (已投递追踪.xlsx), parsed 20 unique companies with their applied positions and notes, and created an idempotent seed script to insert them into the DB. LinkedIn and DoorDash already existed (2 prior entries); 20 new companies added (Google, Airbnb, Uber, Netflix, Glean, Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coinbase, Quora, Intuit, Snap, OpenAI, Anthropic). Each company has position details in notes field, status=applied, applied_at=2026-03-17.
+- **Deliverables**: scripts/seed_companies.py (new)
+- **Sanity check result**: 22 total companies verified in DB via query
+- **Status**: [DONE]
+- **Request**: No task ID (ad-hoc user request)
+
+## 2026-03-17 -- Red dot logic change + card click-to-prep navigation
+- **What I did**: Changed company card red dot from counting unchecked markdown checkboxes to showing whenever prep_notes is non-empty AND status is not "rejected". Changed card click in kanban to navigate to full-screen prep notes page (`/companies/:id/prep`) instead of opening the side panel. Added `useNavigate` import. Kept `CompanyDetailPanel` and its tab badge intact.
+- **Deliverables**: src/frontend/src/pages/Companies.tsx (modified)
+- **Sanity check result**: TypeScript type check clean, production build succeeds
+- **Status**: [DONE]
+- **Request**: No task ID (ad-hoc user request)

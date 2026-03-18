@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   DragDropContext,
@@ -505,7 +506,8 @@ function CompanyCard({
   company: Company;
   onClick: () => void;
 }) {
-  const unchecked = countUnchecked(company.prep_notes);
+  const hasPrepNotes = !!company.prep_notes?.trim();
+  const inPipeline = company.status !== "rejected";
   return (
     <button
       onClick={onClick}
@@ -514,8 +516,8 @@ function CompanyCard({
       <div className="flex items-start justify-between gap-2">
         <span className="font-medium text-sm truncate flex items-center gap-1.5">
           {company.name}
-          {unchecked > 0 && (
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full shrink-0" title={`${unchecked} unchecked prep item${unchecked !== 1 ? "s" : ""}`} />
+          {hasPrepNotes && inPipeline && (
+            <span className="inline-block w-2 h-2 bg-red-500 rounded-full shrink-0" title="Has prep notes" />
           )}
         </span>
         {company.group_tag && (
@@ -612,6 +614,7 @@ function KanbanColumn({
 export default function Companies() {
   const queryClient = useQueryClient();
   const toast = useToast();
+  const navigate = useNavigate();
   const { data: companies = [], isLoading: loading, error: queryError } = useQuery({
     queryKey: ["companies"],
     queryFn: () => api.get<Company[]>("/companies"),
@@ -721,7 +724,7 @@ export default function Companies() {
                 label={s.label}
                 colorClass={s.color}
                 companies={byStatus[s.value]}
-                onCardClick={setSelectedCompany}
+                onCardClick={(c) => navigate(`/companies/${c.id}/prep`)}
               />
             ))}
           </div>
