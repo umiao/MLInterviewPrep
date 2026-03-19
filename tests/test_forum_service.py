@@ -13,7 +13,7 @@ from src.backend.services.forum_service import (
     fetch_next_unfetched,
     fetch_single_post,
     get_fetch_progress,
-    import_post_to_prep_notes,
+    import_post_to_document,
     retry_failed,
     scrape_seed_page,
 )
@@ -324,11 +324,11 @@ class TestRetryFailed:
         assert results == []
 
 
-# --- import_post_to_prep_notes ---
+# --- import_post_to_document ---
 
 
-class TestImportPostToPrepNotes:
-    """Tests for importing posts to company prep notes."""
+class TestImportPostToDocument:
+    """Tests for importing posts to company documents."""
 
     def _create_post(self, db_session, seed) -> ForumPost:
         """Helper to create a fetched post."""
@@ -355,35 +355,78 @@ class TestImportPostToPrepNotes:
         db_session.refresh(post)
         return post
 
-    def test_import_appends_with_header(self, db_session, seed, company) -> None:
-        """Import appends post content with metadata header."""
+    def test_import_creates_document(self, db_session, seed, company) -> None:
+        """Import creates a CompanyDocument with post content."""
         post = self._create_post(db_session, seed)
-        result = import_post_to_prep_notes(db_session, post.id, company.id)
+        doc = import_post_to_document(db_session, post.id, company.id)
 
-        assert "Forum Post: Test Interview Post" in result.prep_notes
-        assert "Interview experience at LinkedIn." in result.prep_notes
-        assert "thread-123" in result.prep_notes
-        assert "External ID" in result.prep_notes
+        assert doc.company_id == company.id
+        assert doc.title == "LinkedIn"  # seed label
+        assert doc.source_type == "forum_import"
+        assert "Forum Post: Test Interview Post" in doc.content
+        assert "Interview experience at LinkedIn." in doc.content
+        assert "thread-123" in doc.content
 
-    def test_import_uses_separator(self, db_session, seed, company) -> None:
-        """Second import uses --- separator."""
+    def test_import_appends_to_existing_document(self, db_session, seed, company) -> None:
+        """Second import appends to same document with separator."""
         post = self._create_post(db_session, seed)
-        company.prep_notes = "Existing notes here."
+        doc1 = import_post_to_document(db_session, post.id, company.id)
+
+        # Create another post and import
+        link2 = ForumPostLink(
+            forum_seed_id=seed.id,
+            url="https://www.1point3acres.com/bbs/thread-456-1-1.html",
+            external_post_id="456",
+            title="Second Post",
+            status="fetched",
+        )
+        db_session.add(link2)
+        db_session.flush()
+        post2 = ForumPost(
+            forum_post_link_id=link2.id,
+            raw_text="Another interview.",
+            content_hash="def456",
+            fetched_at=datetime(2026, 3, 16, 10, 0),
+        )
+        db_session.add(post2)
         db_session.commit()
+        db_session.refresh(post2)
 
-        result = import_post_to_prep_notes(db_session, post.id, company.id)
-        assert "Existing notes here.\n\n---\n\n## Forum Post:" in result.prep_notes
+        doc2 = import_post_to_document(db_session, post2.id, company.id)
+        assert doc1.id == doc2.id  # Same document
+        assert "\n\n---\n\n## Forum Post: Second Post" in doc2.content
+
+    def test_import_to_specific_doc_id(self, db_session, seed, company) -> None:
+        """Import to a specific document by doc_id."""
+        from src.backend.models.company import CompanyDocument
+
+        target_doc = CompanyDocument(
+            company_id=company.id,
+            title="Custom Doc",
+            content="Existing.",
+            source_type="manual",
+        )
+        db_session.add(target_doc)
+        db_session.commit()
+        db_session.refresh(target_doc)
+
+        post = self._create_post(db_session, seed)
+        doc = import_post_to_document(
+            db_session, post.id, company.id, doc_id=target_doc.id
+        )
+        assert doc.id == target_doc.id
+        assert "Existing.\n\n---\n\n## Forum Post:" in doc.content
 
     def test_import_invalid_post_raises(self, db_session, company) -> None:
         """Invalid post ID raises ValueError."""
         with pytest.raises(ValueError, match="ForumPost.*not found"):
-            import_post_to_prep_notes(db_session, 9999, company.id)
+            import_post_to_document(db_session, 9999, company.id)
 
     def test_import_invalid_company_raises(self, db_session, seed) -> None:
         """Invalid company ID raises ValueError."""
         post = self._create_post(db_session, seed)
         with pytest.raises(ValueError, match="Company.*not found"):
-            import_post_to_prep_notes(db_session, post.id, 9999)
+            import_post_to_document(db_session, post.id, 9999)
 
 
 # --- get_fetch_progress ---

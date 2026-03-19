@@ -7,10 +7,16 @@ import { useScrollRestore } from "../hooks/useScrollRestore";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
+import {
+  useCompanyDocuments,
+  useUpdateDocument,
+  type CompanyDocument,
+} from "../hooks/useForumPosts";
 import type { Company } from "../types/company";
 
 type ImportMode = "append" | "replace";
-type PageTab = "notes" | "forum";
+/** "notes" = main prep_notes, "forum" = forum tab, "doc:N" = child document N */
+type PageTab = "notes" | "forum" | `doc:${number}`;
 
 /**
  * Full-screen prep notes page at /companies/:companyId/prep.
@@ -73,6 +79,15 @@ export default function PrepNotesPage() {
 
   const { captureScroll } = useScrollRestore(contentRef, textareaRef, mode);
   captureScrollRef.current = captureScroll;
+
+  // Child documents
+  const { data: documents } = useCompanyDocuments(companyId);
+
+  // Parse active document ID from tab
+  const activeDocId =
+    typeof activeTab === "string" && activeTab.startsWith("doc:")
+      ? Number(activeTab.slice(4))
+      : null;
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -138,27 +153,25 @@ export default function PrepNotesPage() {
           <h1 className="text-lg font-semibold text-gray-800">
             {company.name}
           </h1>
-          <div className="flex gap-1 border border-gray-200 rounded p-0.5">
-            <button
+          <div className="flex gap-1 border border-gray-200 rounded p-0.5 overflow-x-auto">
+            <TabButton
+              label="Notes"
+              active={activeTab === "notes"}
               onClick={() => setActiveTab("notes")}
-              className={`text-sm px-3 py-1 rounded ${
-                activeTab === "notes"
-                  ? "bg-gray-100 text-gray-800 font-medium"
-                  : "text-gray-500 hover:bg-gray-50"
-              }`}
-            >
-              Notes
-            </button>
-            <button
+            />
+            {documents?.map((doc) => (
+              <TabButton
+                key={doc.id}
+                label={doc.title}
+                active={activeTab === `doc:${doc.id}`}
+                onClick={() => setActiveTab(`doc:${doc.id}`)}
+              />
+            ))}
+            <TabButton
+              label="Forum Posts"
+              active={activeTab === "forum"}
               onClick={() => setActiveTab("forum")}
-              className={`text-sm px-3 py-1 rounded ${
-                activeTab === "forum"
-                  ? "bg-gray-100 text-gray-800 font-medium"
-                  : "text-gray-500 hover:bg-gray-50"
-              }`}
-            >
-              Forum Posts
-            </button>
+            />
           </div>
         </div>
 
@@ -169,8 +182,8 @@ export default function PrepNotesPage() {
             onNavigate={handleCompanyNav}
             enableKeyboard={mode === "preview"}
           />
-          {/* Mode toggle -- notes tab only */}
-          {activeTab === "notes" && (
+          {/* Mode toggle -- notes/doc tabs only */}
+          {(activeTab === "notes" || activeDocId !== null) && (
             <>
               <div className="flex gap-1">
                 <button
@@ -286,9 +299,108 @@ export default function PrepNotesPage() {
             </div>
           </div>
         </>
+      ) : activeDocId !== null ? (
+        <DocumentViewer companyId={companyId} docId={activeDocId} mode={mode} switchMode={switchMode} />
       ) : (
         <div className="flex-1 overflow-auto p-6 min-h-0">
           <ForumPostsTab companyId={companyId} />
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Sub-components                                                     */
+/* ------------------------------------------------------------------ */
+
+function TabButton({
+  label,
+  active,
+  onClick,
+}: {
+  label: string;
+  active: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-sm px-3 py-1 rounded whitespace-nowrap ${
+        active
+          ? "bg-gray-100 text-gray-800 font-medium"
+          : "text-gray-500 hover:bg-gray-50"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function DocumentViewer({
+  companyId,
+  docId,
+  mode,
+  switchMode,
+}: {
+  companyId: number;
+  docId: number;
+  mode: "edit" | "preview";
+  switchMode: (m: "edit" | "preview") => void;
+}) {
+  const { data: doc, isLoading } = useQuery<CompanyDocument>({
+    queryKey: ["companyDocument", companyId, docId],
+    queryFn: () =>
+      api.get<CompanyDocument>(`/companies/${companyId}/documents/${docId}`),
+    enabled: docId > 0,
+  });
+  const updateDoc = useUpdateDocument(companyId);
+  const [localContent, setLocalContent] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Sync local state when doc loads or changes
+  const content = localContent ?? doc?.content ?? "";
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-400">
+        Loading document...
+      </div>
+    );
+  }
+  if (!doc) {
+    return (
+      <div className="flex items-center justify-center h-64 text-gray-400">
+        Document not found.
+      </div>
+    );
+  }
+
+  return (
+    <div ref={contentRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
+      {mode === "edit" ? (
+        <textarea
+          ref={textareaRef}
+          value={content}
+          onChange={(e) => setLocalContent(e.target.value)}
+          onBlur={() => {
+            if (localContent !== null && localContent !== doc.content) {
+              updateDoc.mutate({ docId, content: localContent });
+            }
+          }}
+          className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
+          placeholder="Document content..."
+        />
+      ) : (
+        <div className="prep-prose">
+          {content ? (
+            <MarkdownPreview markdown={content} />
+          ) : (
+            <p className="text-gray-400 italic">
+              Empty document. Switch to Edit mode to add content.
+            </p>
+          )}
         </div>
       )}
     </div>

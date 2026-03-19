@@ -332,8 +332,17 @@ class TestCmdImport:
 
         captured = capsys.readouterr()
         assert "Imported post" in captured.out
-        updated = db_session.query(Company).filter(Company.id == company.id).first()
-        assert "Interview experience content" in updated.prep_notes
+        assert "document" in captured.out
+        # Content goes to CompanyDocument, not prep_notes
+        from src.backend.models.company import CompanyDocument
+
+        doc = (
+            db_session.query(CompanyDocument)
+            .filter(CompanyDocument.company_id == company.id)
+            .first()
+        )
+        assert doc is not None
+        assert "Interview experience content" in doc.content
 
     def test_import_company_not_found(self, db_session) -> None:
         """import with nonexistent company exits with code 1."""

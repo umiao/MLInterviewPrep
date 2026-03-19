@@ -261,7 +261,7 @@ class TestImportEndpoint:
     """Tests for forum post import endpoint."""
 
     def test_import_post(self, test_client, _seed_and_company, db_session):
-        """POST /forum/posts/{id}/import appends to company prep notes."""
+        """POST /forum/posts/{id}/import creates a company document."""
         company_id, seed_id = _seed_and_company
 
         link = ForumPostLink(
@@ -288,8 +288,10 @@ class TestImportEndpoint:
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["id"] == company_id
-        assert "Design a recommendation system" in data["prep_notes"]
+        assert data["company_id"] == company_id
+        assert data["title"] == "TestCo interviews"  # seed label
+        assert "Design a recommendation system" in data["content"]
+        assert data["source_type"] == "forum_import"
 
     def test_import_post_not_found(self, test_client, _seed_and_company):
         """POST /forum/posts/{id}/import returns 404 for missing post."""

@@ -28,7 +28,7 @@ from src.backend.services.forum_service import (  # noqa: E402
     fetch_next_unfetched,
     fetch_single_post,
     get_fetch_progress,
-    import_post_to_prep_notes,
+    import_post_to_document,
     retry_failed,
     scrape_seed_page,
 )
@@ -224,11 +224,11 @@ def cmd_import(args: argparse.Namespace) -> None:
             print(f"Error: Company '{args.company}' not found", file=sys.stderr)
             sys.exit(1)
 
-        updated = import_post_to_prep_notes(db, args.post_id, company.id)
-        notes_len = len(updated.prep_notes) if updated.prep_notes else 0
+        doc = import_post_to_document(db, args.post_id, company.id)
+        content_len = len(doc.content) if doc.content else 0
         print(
-            f"Imported post {args.post_id} to '{updated.name}' "
-            f"prep_notes ({notes_len} chars)"
+            f"Imported post {args.post_id} to '{company.name}' "
+            f"document '{doc.title}' ({content_len} chars)"
         )
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)

@@ -73,6 +73,7 @@ class ForumProgressResponse(BaseModel):
 
 
 class ForumImportRequest(BaseModel):
-    """Schema for importing a forum post to prep notes."""
+    """Schema for importing a forum post to a company document."""
 
     company_id: int
+    doc_id: int | None = None

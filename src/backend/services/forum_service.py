@@ -7,7 +7,7 @@ from re import match as re_match
 
 from sqlalchemy.orm import Session
 
-from src.backend.models.company import Company
+from src.backend.models.company import Company, CompanyDocument
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.scraper.crawler import PlaywrightCrawler
 from src.backend.scraper.extractors import compute_content_hash
@@ -275,23 +275,25 @@ async def retry_failed(
     return results
 
 
-def import_post_to_prep_notes(
-    db: Session, post_id: int, company_id: int
-) -> Company:
-    """Append forum post content to a company's prep notes.
+def import_post_to_document(
+    db: Session, post_id: int, company_id: int, doc_id: int | None = None
+) -> CompanyDocument:
+    """Append forum post content to a company document.
 
-    Uses the same separator pattern as routers/companies.py upload endpoint.
+    If doc_id is provided, appends to that document. Otherwise creates or
+    finds a document titled after the seed label for the post's seed.
 
     Args:
         db: Database session.
         post_id: ID of the ForumPost to import.
         company_id: ID of the target Company.
+        doc_id: Optional target document ID. Auto-resolves if None.
 
     Returns:
-        Updated Company object.
+        Updated CompanyDocument object.
 
     Raises:
-        ValueError: If post or company not found.
+        ValueError: If post, company, or document not found.
     """
     post = db.query(ForumPost).filter(ForumPost.id == post_id).first()
     if not post:
@@ -300,6 +302,40 @@ def import_post_to_prep_notes(
     company = db.query(Company).filter(Company.id == company_id).first()
     if not company:
         raise ValueError(f"Company {company_id} not found")
+
+    # Resolve target document
+    if doc_id:
+        doc = (
+            db.query(CompanyDocument)
+            .filter(
+                CompanyDocument.id == doc_id,
+                CompanyDocument.company_id == company_id,
+            )
+            .first()
+        )
+        if not doc:
+            raise ValueError(f"CompanyDocument {doc_id} not found")
+    else:
+        # Auto-resolve: use seed label or default title
+        seed = post.post_link.forum_seed
+        doc_title = seed.label or f"{seed.source_site} posts"
+        doc = (
+            db.query(CompanyDocument)
+            .filter(
+                CompanyDocument.company_id == company_id,
+                CompanyDocument.title == doc_title,
+            )
+            .first()
+        )
+        if not doc:
+            doc = CompanyDocument(
+                company_id=company_id,
+                title=doc_title,
+                content="",
+                source_type="forum_import",
+            )
+            db.add(doc)
+            db.flush()
 
     # Build header with metadata
     link = post.post_link
@@ -316,14 +352,14 @@ def import_post_to_prep_notes(
     )
     content = header + "\n" + post.raw_text
 
-    if not company.prep_notes:
-        company.prep_notes = content
+    if not doc.content:
+        doc.content = content
     else:
-        company.prep_notes = company.prep_notes + "\n\n---\n\n" + content
+        doc.content = doc.content + "\n\n---\n\n" + content
 
     db.commit()
-    db.refresh(company)
-    return company
+    db.refresh(doc)
+    return doc
 
 
 def get_fetch_progress(db: Session, seed_id: int) -> dict:

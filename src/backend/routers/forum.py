@@ -3,8 +3,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from src.backend.database import get_db
+from src.backend.models.company import CompanyDocument
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
-from src.backend.schemas.company import CompanyResponse
+from src.backend.schemas.company import CompanyDocumentResponse
 from src.backend.schemas.forum import (
     ForumImportRequest,
     ForumPostLinkResponse,
@@ -18,32 +19,11 @@ from src.backend.services.forum_service import (
     fetch_next_unfetched,
     fetch_single_post,
     get_fetch_progress,
-    import_post_to_prep_notes,
+    import_post_to_document,
     scrape_seed_page,
 )
 
 router = APIRouter()
-
-
-def _company_to_response(c) -> dict:
-    """Convert Company ORM to response dict.
-
-    Args:
-        c: Company ORM instance.
-
-    Returns:
-        Dict matching CompanyResponse schema.
-    """
-    return {
-        "id": c.id,
-        "name": c.name,
-        "group_tag": c.group_tag,
-        "interview_stages": c.interview_stages_list,
-        "status": c.status,
-        "applied_at": c.applied_at,
-        "notes": c.notes,
-        "prep_notes": c.prep_notes,
-    }
 
 
 @router.get("/forum/seeds", response_model=list[ForumSeedResponse])
@@ -257,27 +237,30 @@ def get_post(
     return post
 
 
-@router.post("/forum/posts/{post_id}/import", response_model=CompanyResponse)
+@router.post("/forum/posts/{post_id}/import", response_model=CompanyDocumentResponse)
 def import_post(
     post_id: int,
     body: ForumImportRequest,
     db: Session = Depends(get_db),
-) -> dict:
-    """Import a forum post into a company's prep notes.
+) -> CompanyDocument:
+    """Import a forum post into a company document.
+
+    If doc_id is provided in the request, appends to that document.
+    Otherwise auto-resolves based on the seed label.
 
     Args:
         post_id: ID of the forum post.
-        body: Import request with company_id.
+        body: Import request with company_id and optional doc_id.
         db: Database session.
 
     Returns:
-        Updated Company as dict.
+        Updated CompanyDocument object.
     """
     try:
-        company = import_post_to_prep_notes(db, post_id, body.company_id)
+        doc = import_post_to_document(db, post_id, body.company_id, body.doc_id)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    return _company_to_response(company)
+    return doc
 
 
 @router.get(

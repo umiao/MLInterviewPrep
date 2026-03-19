@@ -128,14 +128,78 @@ export function useFetchNext(seedId: number) {
   });
 }
 
-/** Import a forum post into a company's prep notes. */
+/* ------------------------------------------------------------------ */
+/*  Company Document types & hooks                                     */
+/* ------------------------------------------------------------------ */
+
+export interface CompanyDocument {
+  id: number;
+  company_id: number;
+  title: string;
+  content: string;
+  source_type: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+/** Import a forum post into a company document. */
 export function useImportPost() {
   const qc = useQueryClient();
-  return useMutation<unknown, Error, { postId: number; companyId: number }>({
-    mutationFn: ({ postId, companyId }) =>
-      api.post(`/forum/posts/${postId}/import`, { company_id: companyId }),
+  return useMutation<
+    CompanyDocument,
+    Error,
+    { postId: number; companyId: number; docId?: number }
+  >({
+    mutationFn: ({ postId, companyId, docId }) =>
+      api.post<CompanyDocument>(`/forum/posts/${postId}/import`, {
+        company_id: companyId,
+        ...(docId !== undefined && { doc_id: docId }),
+      }),
     onSuccess: (_data, { companyId }) => {
+      qc.invalidateQueries({ queryKey: ["companyDocuments", companyId] });
       qc.invalidateQueries({ queryKey: ["companies", companyId] });
+    },
+  });
+}
+
+/** List company documents. */
+export function useCompanyDocuments(companyId: number) {
+  return useQuery<CompanyDocument[]>({
+    queryKey: ["companyDocuments", companyId],
+    queryFn: () =>
+      api.get<CompanyDocument[]>(`/companies/${companyId}/documents`),
+    enabled: companyId > 0,
+  });
+}
+
+/** Get a single company document. */
+export function useCompanyDocument(companyId: number, docId: number) {
+  return useQuery<CompanyDocument>({
+    queryKey: ["companyDocument", companyId, docId],
+    queryFn: () =>
+      api.get<CompanyDocument>(`/companies/${companyId}/documents/${docId}`),
+    enabled: companyId > 0 && docId > 0,
+  });
+}
+
+/** Update a company document. */
+export function useUpdateDocument(companyId: number) {
+  const qc = useQueryClient();
+  return useMutation<
+    CompanyDocument,
+    Error,
+    { docId: number; title?: string; content?: string }
+  >({
+    mutationFn: ({ docId, ...body }) =>
+      api.put<CompanyDocument>(
+        `/companies/${companyId}/documents/${docId}`,
+        body,
+      ),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ["companyDocuments", companyId] });
+      qc.invalidateQueries({
+        queryKey: ["companyDocument", companyId, data.id],
+      });
     },
   });
 }
