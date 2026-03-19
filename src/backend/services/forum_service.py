@@ -1,7 +1,9 @@
 """Forum scraping service layer -- two-phase scrape + import to prep notes."""
 
+import asyncio
 import logging
 import os
+import random
 from datetime import datetime
 from re import match as re_match
 
@@ -11,7 +13,13 @@ from src.backend.models.company import Company, CompanyDocument
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.scraper.crawler import PlaywrightCrawler
 from src.backend.scraper.extractors import compute_content_hash
-from src.backend.scraper.forum_extractors import extract_post_content, extract_post_links
+from src.backend.scraper.forum_extractors import (
+    derive_page_url,
+    extract_max_page,
+    extract_post_content,
+    extract_post_links,
+)
+from src.backend.scraper.site_configs import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -55,41 +63,35 @@ async def _fetch_html(
     return html
 
 
-async def scrape_seed_page(
-    db: Session, seed_id: int, crawler: PlaywrightCrawler
-) -> list[ForumPostLink]:
-    """Phase A: Fetch index page for a seed and extract/upsert post links.
+def _upsert_links_from_html(
+    db: Session,
+    seed_id: int,
+    html: str,
+    base_url: str,
+    order_offset: int = 0,
+) -> tuple[list[ForumPostLink], int]:
+    """Extract post links from HTML and upsert into the database.
 
-    Idempotent -- re-running discovers new posts without duplicating existing ones.
-    Updates titles if they changed for existing links.
+    Idempotent -- existing links get title updates, new links are inserted.
 
     Args:
         db: Database session.
-        seed_id: ID of the ForumSeed to scrape.
-        crawler: PlaywrightCrawler for fetching pages.
+        seed_id: ID of the ForumSeed.
+        html: Raw HTML of the index page.
+        base_url: Base URL for resolving relative hrefs.
+        order_offset: Shifts fetch_order for pages beyond 1.
 
     Returns:
-        List of ForumPostLink objects (both new and updated).
-
-    Raises:
-        ValueError: If seed_id not found.
+        Tuple of (all_links, new_count) where new_count is genuinely new links.
     """
-    seed = db.query(ForumSeed).filter(ForumSeed.id == seed_id).first()
-    if not seed:
-        raise ValueError(f"ForumSeed {seed_id} not found")
-
-    html = await _fetch_html(crawler, seed.url)
-    if not html:
-        logger.warning("No HTML fetched for seed %d (%s)", seed_id, seed.url)
-        return []
-
-    raw_links = extract_post_links(html, seed.url)
+    raw_links = extract_post_links(html, base_url)
     result: list[ForumPostLink] = []
+    new_count = 0
 
     for item in raw_links:
         url = item["url"]
         title = item["title"]
-        order = item["order"]
+        order = item["order"] + order_offset
         ext_id = _extract_external_id(url)
 
         # Check for existing link by URL (unique constraint)
@@ -128,11 +130,158 @@ async def scrape_seed_page(
         )
         db.add(link)
         result.append(link)
+        new_count += 1
+
+    db.flush()
+    return result, new_count
+
+
+async def scrape_seed_page(
+    db: Session, seed_id: int, crawler: PlaywrightCrawler
+) -> list[ForumPostLink]:
+    """Phase A: Fetch index page for a seed and extract/upsert post links.
+
+    Idempotent -- re-running discovers new posts without duplicating existing ones.
+    Updates titles if they changed for existing links.
+
+    Args:
+        db: Database session.
+        seed_id: ID of the ForumSeed to scrape.
+        crawler: PlaywrightCrawler for fetching pages.
+
+    Returns:
+        List of ForumPostLink objects (both new and updated).
+
+    Raises:
+        ValueError: If seed_id not found.
+    """
+    seed = db.query(ForumSeed).filter(ForumSeed.id == seed_id).first()
+    if not seed:
+        raise ValueError(f"ForumSeed {seed_id} not found")
+
+    html = await _fetch_html(crawler, seed.url)
+    if not html:
+        logger.warning("No HTML fetched for seed %d (%s)", seed_id, seed.url)
+        return []
+
+    result, _new_count = _upsert_links_from_html(db, seed_id, html, seed.url)
 
     seed.last_scraped_at = datetime.utcnow()
     db.commit()
 
     return result
+
+
+async def scrape_seed_pages(
+    db: Session,
+    seed_id: int,
+    crawler: PlaywrightCrawler,
+    max_pages: int = 1,
+    auto_detect: bool = True,
+) -> dict:
+    """Multi-page scraping: fetch multiple index pages for a seed.
+
+    Fetches page 1, optionally detects max pages from pagination,
+    then loops through subsequent pages with rate limiting and early stop.
+
+    Args:
+        db: Database session.
+        seed_id: ID of the ForumSeed to scrape.
+        crawler: PlaywrightCrawler for fetching pages.
+        max_pages: Maximum number of pages to scrape.
+        auto_detect: If True, cap max_pages by detected pagination max.
+
+    Returns:
+        Dict with pages_scraped, total_links, new_links, max_page_detected,
+        stopped_early.
+
+    Raises:
+        ValueError: If seed_id not found.
+    """
+    seed = db.query(ForumSeed).filter(ForumSeed.id == seed_id).first()
+    if not seed:
+        raise ValueError(f"ForumSeed {seed_id} not found")
+
+    # Page 1
+    html = await _fetch_html(crawler, seed.url)
+    if not html:
+        logger.warning("No HTML fetched for seed %d (%s)", seed_id, seed.url)
+        return {
+            "pages_scraped": 0,
+            "total_links": 0,
+            "new_links": 0,
+            "max_page_detected": 1,
+            "stopped_early": False,
+        }
+
+    page1_links, page1_new = _upsert_links_from_html(db, seed_id, html, seed.url)
+    total_links = len(page1_links)
+    new_links = page1_new
+    pages_scraped = 1
+
+    # Detect max page from pagination
+    detected_max = extract_max_page(html) if auto_detect else max_pages
+    effective_max = min(max_pages, detected_max) if auto_detect else max_pages
+
+    # Rate limit config
+    config = get_config(seed.source_site)
+    rate_low, rate_high = config.rate_limit_seconds
+
+    stopped_early = False
+    zero_new_streak = 0
+    cumulative_links = len(page1_links)
+
+    for page in range(2, effective_max + 1):
+        # Rate limit
+        delay = random.uniform(rate_low, rate_high) + random.uniform(0, 3)
+        await asyncio.sleep(delay)
+
+        # Derive URL and fetch
+        page_url = derive_page_url(seed.url, page)
+        page_html = await _fetch_html(crawler, page_url)
+        if not page_html:
+            logger.warning("Page %d: empty response, skipping", page)
+            pages_scraped += 1
+            continue
+
+        page_links, page_new = _upsert_links_from_html(
+            db, seed_id, page_html, seed.url, order_offset=cumulative_links
+        )
+        page_total = len(page_links)
+        cumulative_links += page_total
+        total_links += page_total
+        new_links += page_new
+        pages_scraped += 1
+
+        logger.info(
+            "Page %d/%d: %d links (%d new), cumulative %d",
+            page,
+            effective_max,
+            page_total,
+            page_new,
+            cumulative_links,
+        )
+
+        # Early stop: 3 consecutive pages with 0 new links, after page 5
+        if page_new == 0:
+            zero_new_streak += 1
+        else:
+            zero_new_streak = 0
+
+        if zero_new_streak >= 3 and page >= 5:
+            stopped_early = True
+            break
+
+    seed.last_scraped_at = datetime.utcnow()
+    db.commit()
+
+    return {
+        "pages_scraped": pages_scraped,
+        "total_links": total_links,
+        "new_links": new_links,
+        "max_page_detected": detected_max,
+        "stopped_early": stopped_early,
+    }
 
 
 async def fetch_single_post(

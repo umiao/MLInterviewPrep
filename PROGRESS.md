@@ -136,3 +136,10 @@
 - **Sanity check result**: All 936 tests pass. Ruff clean. Existing 17 forum extractor tests unchanged and passing.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-151 --status completed`
+
+## 2026-03-19 -- [T-P0-152] Forum service: refactor scrape_seed_page + add scrape_seed_pages
+- **What I did**: Extracted `_upsert_links_from_html` helper from `scrape_seed_page` (returns `(all_links, new_count)` tuple, accepts `order_offset` for multi-page). Simplified `scrape_seed_page` to delegate to the helper. Added `scrape_seed_pages` function with rate limiting (via site_configs), auto-detect pagination (via `extract_max_page`), early stop after 3 consecutive zero-new pages past page 5, and structured logging. Added `TestScrapeSeedPages` class with 5 tests: single_page, multi_page, auto_detect, early_stop, page_failure_continues.
+- **Deliverables**: src/backend/services/forum_service.py (modified), tests/test_forum_service.py (modified)
+- **Sanity check result**: All 941 tests pass. Ruff clean. Existing 28 TestScrapeSeedPage tests unchanged and passing.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-152 --status completed`

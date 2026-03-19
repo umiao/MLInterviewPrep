@@ -2,7 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -16,10 +16,14 @@ from src.backend.services.forum_service import (
     import_post_to_document,
     retry_failed,
     scrape_seed_page,
+    scrape_seed_pages,
 )
 
 FIXTURES = Path(__file__).parent / "fixtures"
 INDEX_HTML = (FIXTURES / "forum_index.html").read_text(encoding="utf-8")
+INDEX_WITH_PAGINATION_HTML = (
+    FIXTURES / "forum_index_with_pagination.html"
+).read_text(encoding="utf-8")
 POST_HTML = (FIXTURES / "forum_post.html").read_text(encoding="utf-8")
 
 
@@ -479,3 +483,144 @@ class TestGetFetchProgress:
 
         progress = get_fetch_progress(db_session, seed.id)
         assert progress["last_fetched_url"] == link.url
+
+
+# --- scrape_seed_pages ---
+
+
+@pytest.fixture()
+def paginated_seed(db_session):
+    """Create a ForumSeed with tag-N-N.html URL for pagination tests."""
+    s = ForumSeed(
+        url="https://www.1point3acres.com/bbs/tag-415-1.html",
+        source_site="1point3acres",
+        label="LinkedIn paginated",
+    )
+    db_session.add(s)
+    db_session.commit()
+    db_session.refresh(s)
+    return s
+
+
+class TestScrapeSeedPages:
+    """Tests for multi-page scraping."""
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_single_page(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """max_pages=1 returns correct stats without fetching additional pages."""
+        mock_crawler.fetch_page_cdp.return_value = INDEX_WITH_PAGINATION_HTML
+        stats = await scrape_seed_pages(
+            db_session, paginated_seed.id, mock_crawler, max_pages=1
+        )
+        assert stats["pages_scraped"] == 1
+        assert stats["total_links"] == 5
+        assert stats["new_links"] == 5
+        assert stats["max_page_detected"] == 255
+        assert stats["stopped_early"] is False
+        mock_sleep.assert_not_called()
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_multi_page(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """Multi-page scrape fetches links from all pages with correct order_offset."""
+        # Build a page 2 HTML with unique thread IDs
+        page2_html = INDEX_WITH_PAGINATION_HTML.replace(
+            "thread-1169245", "thread-2000001"
+        ).replace(
+            "thread-1169223", "thread-2000002"
+        ).replace(
+            "thread-1169229", "thread-2000003"
+        ).replace(
+            "thread-1168589", "thread-2000004"
+        ).replace(
+            "thread-1167565", "thread-2000005"
+        )
+        mock_crawler.fetch_page_cdp.side_effect = [
+            INDEX_WITH_PAGINATION_HTML,  # page 1 (5 links)
+            page2_html,  # page 2 (5 different links)
+        ]
+        stats = await scrape_seed_pages(
+            db_session, paginated_seed.id, mock_crawler, max_pages=2
+        )
+        assert stats["pages_scraped"] == 2
+        assert stats["total_links"] == 10  # 5 from each page
+        assert stats["new_links"] == 10  # all new on first run
+
+        # Verify order_offset: page 2 links should have fetch_order >= 5
+        all_links = (
+            db_session.query(ForumPostLink)
+            .filter(ForumPostLink.forum_seed_id == paginated_seed.id)
+            .order_by(ForumPostLink.fetch_order)
+            .all()
+        )
+        page2_links = [lk for lk in all_links if lk.fetch_order >= 5]
+        assert len(page2_links) == 5
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_auto_detect(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """Auto-detect caps effective_max by detected pagination max."""
+        # Pagination fixture has max_page=255. With max_pages=3, effective=3
+        mock_crawler.fetch_page_cdp.side_effect = [
+            INDEX_WITH_PAGINATION_HTML,  # page 1
+            INDEX_HTML,  # page 2
+            INDEX_HTML,  # page 3
+        ]
+        stats = await scrape_seed_pages(
+            db_session, paginated_seed.id, mock_crawler, max_pages=3
+        )
+        assert stats["pages_scraped"] == 3
+        assert stats["max_page_detected"] == 255
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_early_stop(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """Early stop triggers after 3 consecutive pages with 0 new links past page 5."""
+        # Page 1: pagination fixture. Pages 2-8: same HTML as page 1 (all dupes).
+        mock_crawler.fetch_page_cdp.return_value = INDEX_WITH_PAGINATION_HTML
+        stats = await scrape_seed_pages(
+            db_session,
+            paginated_seed.id,
+            mock_crawler,
+            max_pages=10,
+            auto_detect=False,
+        )
+        # Page 1: 5 new. Pages 2-4: 0 new each (streak=1,2,3 but page<5).
+        # Page 5: 0 new (streak=4, page>=5 -> stop after page 5 check)
+        # Actually: page 2 streak=1, page 3 streak=2, page 4 streak=3 but page<5.
+        # page 5: streak=4 and page>=5 -> stop.
+        assert stats["stopped_early"] is True
+        assert stats["new_links"] == 5  # only page 1 had new links
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_page_failure_continues(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """Empty HTML on one page doesn't abort scraping."""
+        mock_crawler.fetch_page_cdp.side_effect = [
+            INDEX_WITH_PAGINATION_HTML,  # page 1: ok
+            "",  # page 2: failure
+            INDEX_HTML,  # page 3: ok
+        ]
+        # Need cookie fallback to also fail for page 2
+        mock_crawler.fetch_page_with_cookie.return_value = ""
+        stats = await scrape_seed_pages(
+            db_session,
+            paginated_seed.id,
+            mock_crawler,
+            max_pages=3,
+            auto_detect=False,
+        )
+        assert stats["pages_scraped"] == 3
+        # Links from page 1 + page 3
+        assert stats["total_links"] >= 5

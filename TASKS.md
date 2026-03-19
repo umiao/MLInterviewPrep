@@ -9,55 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-152: Forum service: refactor scrape_seed_page + add scrape_seed_pages
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-151
-- **Description**: Refactor src/backend/services/forum_service.py for multi-page scraping:
-
-Step 1: Extract helper (refactoring safety: run existing TestScrapeSeedPage tests before and after)
-- Extract _upsert_links_from_html(db, seed_id, html, base_url, order_offset=0) -> tuple[list[ForumPostLink], int]
-  - Contains current extract+upsert logic from scrape_seed_page() lines 86-133
-  - Returns (all_links, new_count) where new_count = genuinely new links inserted
-  - order_offset shifts fetch_order for pages beyond 1. Caller passes running total of links seen so far (NOT hardcoded page*20)
-- Simplify scrape_seed_page() to: fetch HTML via _fetch_html -> call _upsert_links_from_html -> update seed.last_scraped_at -> commit
-  - Same function signature, same return type, same behavior
-
-Step 2: Add new function
-- scrape_seed_pages(db: Session, seed_id: int, crawler: PlaywrightCrawler, max_pages: int = 1, auto_detect: bool = True) -> dict
-  - Load ForumSeed, validate exists
-  - Fetch page 1 via _fetch_html(crawler, seed.url)
-  - Call _upsert_links_from_html for page 1
-  - If auto_detect: call extract_max_page(html) on page 1 HTML to get detected max
-  - effective_max = min(max_pages, detected_max) if auto_detect else max_pages
-  - Loop pages 2..effective_max:
-    a. Rate limit: await asyncio.sleep(random.uniform(*get_config(seed.source_site).rate_limit_seconds) + random.uniform(0, 3))
-    b. Derive URL: derive_page_url(seed.url, page)
-    c. Fetch HTML via _fetch_html(crawler, url)
-    d. If empty HTML: logger.warning('Page %d: empty response, skipping', page); continue (do NOT abort)
-    e. Call _upsert_links_from_html(db, seed_id, html, seed.url, order_offset=cumulative_links)
-    f. Structured logging: logger.info('Page %d/%d: %d links (%d new), cumulative %d', page, effective_max, page_total, page_new, running_total)
-    g. Early stop: if page_new == 0, increment zero_new_streak; else reset to 0. If zero_new_streak >= 3 and page >= 5: break, set stopped_early=True
-  - Update seed.last_scraped_at, db.commit()
-  - Return: {'pages_scraped': int, 'total_links': int, 'new_links': int, 'max_page_detected': int, 'stopped_early': bool}
-
-Imports needed: random, derive_page_url, extract_max_page from forum_extractors, get_config from site_configs
-
-Tests (add to tests/test_forum_service.py):
-- TestScrapeSeedPages class:
-  - test_single_page: max_pages=1 returns correct stats
-  - test_multi_page: mock crawler returns different HTML per URL (use side_effect), verify links from both pages, order_offset correct
-  - test_auto_detect: mock page 1 with pagination HTML, verify effective_max is capped
-  - test_early_stop: mock pages returning 0 new links after page 5, verify stopped_early=True
-  - test_page_failure_continues: one page returns empty HTML, others succeed, verify scraping continues
-- Must mock asyncio.sleep to avoid slow tests
-
-AC:
-- Existing TestScrapeSeedPage tests pass UNCHANGED (characterization test for refactoring safety)
-- All new TestScrapeSeedPages tests pass
-- _upsert_links_from_html is private but tested indirectly through both scrape_seed_page and scrape_seed_pages
-- ruff clean
-
 #### T-P0-153: Forum scrape CLI + API: pagination params
 - **Priority**: P0
 - **Complexity**: S
@@ -156,6 +107,7 @@ AC:
 - [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
+- [x] **2026-03-19** -- T-P0-152: Forum service: refactor scrape_seed_page + add scrape_seed_pages. Refactor src/backend/services/forum_service.py for multi-page scraping:
 - [x] **2026-03-19** -- T-P0-151: Forum extractor: derive_page_url + extract_max_page pure functions. Add two pure functions to src/backend/scraper/forum_extractors.py:
 - [x] **2026-03-19** -- T-P0-149: Frontend ForumPostsTab component + integration into PrepNotesPage. Create ForumPostsTab React component and integrate it as a tab in the existing PrepNotesPage.
 - [x] **2026-03-19** -- T-P0-148: Forum API routes + Pydantic schemas. Create src/backend/routers/forum.py and src/backend/schemas/forum.py for the forum scraping REST API.
