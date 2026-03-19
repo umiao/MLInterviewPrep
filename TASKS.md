@@ -9,31 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P2-145: Forum HTML extractors with jammer stripping (1point3acres)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum pages.
-
-**Functions:**
-1. def extract_post_links(html: str, base_url: str) -> list[dict]: Extract post links from tag/index page. Returns [{url: abs_url, title: str, order: int}]. Selectors: ul.hotlist li a for links, href is relative (e.g. thread-1169245-1-1.html), resolve to absolute with base_url. Title from ul.hotlist li a div first text node.
-2. def extract_post_content(html: str) -> dict: Extract content from individual post page. Returns {title, body, external_post_id, author, date}. Selectors: title=div.postlist h2, body=div.message span[itemprop=articleBody] (first match = OP), post_id=div.display.pi itemid attr (pidNNNNN), date=meta[itemprop=datePublished] content attr. Must strip font.jammer elements before text extraction (anti-scraping noise).
-
-**Test fixtures:** Copy trimmed HTML fragments from tmp/ to tests/fixtures/forum_index.html and tests/fixtures/forum_post.html (50-100 lines each).
-
-**Encoding:** Use BeautifulSoup(html, html.parser) with no encoding override.
-
-**Reuse:** Import compute_content_hash from src/backend/scraper/extractors.py.
-
-**AC:**
-1. extract_post_links returns correct count of links from index fixture
-2. All returned URLs are absolute (not relative)
-3. Each link dict has url, title, order keys
-4. extract_post_content returns correct title and body from post fixture
-5. Jammer font.jammer tags stripped -- no random noise in body text
-6. external_post_id extracted correctly
-7. Tests: tests/test_forum_extractors.py with HTML fixtures
-
 #### T-P0-146: Forum service layer (two-phase scrape + import to prep notes)
 - **Priority**: P0
 - **Complexity**: M
@@ -231,6 +206,7 @@ Follow patterns from src/frontend/src/hooks/usePrepNotes.ts (TanStack useQuery/u
 
 > 136 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
 - [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.

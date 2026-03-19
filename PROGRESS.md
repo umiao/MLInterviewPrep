@@ -281,3 +281,10 @@
 - **Sanity check result**: All 835 tests pass. Ruff clean. CDP mode does not close browser (only page). Cookie parsing handles empty strings. Rate limiting verified in delay range.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-144 --status completed`
+
+## 2026-03-19 -- [T-P2-145] Forum HTML extractors with jammer stripping
+- **What I did**: Created forum_extractors.py with two BeautifulSoup-based functions: extract_post_links (parses ul.hotlist for thread links, resolves to absolute URLs) and extract_post_content (extracts OP title/body/author/date/post_id, strips font.jammer anti-scraping noise). Created HTML test fixtures from real 1point3acres pages.
+- **Deliverables**: src/backend/scraper/forum_extractors.py (new), tests/fixtures/forum_index.html (new), tests/fixtures/forum_post.html (new), tests/test_forum_extractors.py (new, 17 tests)
+- **Sanity check result**: All 852 tests pass. Ruff clean. Jammer stripping verified -- no noise in extracted body. URLs correctly resolved to absolute. Only OP body extracted (not replies).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-145 --status completed`
