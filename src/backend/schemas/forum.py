@@ -72,6 +72,16 @@ class ForumProgressResponse(BaseModel):
     last_fetched_url: str | None = None
 
 
+class ForumScrapeStatsResponse(BaseModel):
+    """Schema for multi-page scrape stats response."""
+
+    pages_scraped: int
+    total_links: int
+    new_links: int
+    max_page_detected: int = 1
+    stopped_early: bool = False
+
+
 class ForumImportRequest(BaseModel):
     """Schema for importing a forum post to a company document."""
 

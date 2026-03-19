@@ -143,3 +143,10 @@
 - **Sanity check result**: All 941 tests pass. Ruff clean. Existing 28 TestScrapeSeedPage tests unchanged and passing.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-152 --status completed`
+
+## 2026-03-19 -- [T-P0-153] Forum scrape CLI + API: pagination params
+- **What I did**: Added `ForumScrapeStatsResponse` schema. Updated `POST /seeds/{seed_id}/scrape` endpoint to accept `max_pages` query param -- when >1, calls `scrape_seed_pages` and returns stats; when ==1, keeps existing single-page behavior. Updated CLI `scrape` subcommand with `--pages N` and `--no-auto-detect` flags, printing formatted stats for multi-page scrapes. Added 2 CLI parser tests and 1 router test (mocked `scrape_seed_pages`).
+- **Deliverables**: src/backend/schemas/forum.py (modified), src/backend/routers/forum.py (modified), scripts/forum_scrape.py (modified), tests/test_forum_scrape_cli.py (modified), tests/test_router_forum.py (modified)
+- **Sanity check result**: All 944 tests pass. Ruff clean. Existing tests unchanged and passing.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-153 --status completed`

@@ -31,6 +31,7 @@ from src.backend.services.forum_service import (  # noqa: E402
     import_post_to_document,
     retry_failed,
     scrape_seed_page,
+    scrape_seed_pages,
 )
 
 # Domain -> source_site mapping
@@ -136,11 +137,29 @@ def cmd_scrape(args: argparse.Namespace) -> None:
             sys.exit(1)
 
         crawler = PlaywrightCrawler()
-        links = asyncio.run(scrape_seed_page(db, args.seed_id, crawler))
-        print(f"Discovered {len(links)} links for seed {args.seed_id}")
-        for link in links:
-            title = link.title or "(no title)"
-            print(f"  [{link.id}] {title} - {link.url}")
+
+        if args.pages > 1:
+            auto_detect = not args.no_auto_detect
+            stats = asyncio.run(
+                scrape_seed_pages(
+                    db,
+                    args.seed_id,
+                    crawler,
+                    max_pages=args.pages,
+                    auto_detect=auto_detect,
+                )
+            )
+            print(f"Pages scraped:      {stats['pages_scraped']}")
+            print(f"Total links:        {stats['total_links']}")
+            print(f"New links:          {stats['new_links']}")
+            print(f"Max page detected:  {stats['max_page_detected']}")
+            print(f"Stopped early:      {stats['stopped_early']}")
+        else:
+            links = asyncio.run(scrape_seed_page(db, args.seed_id, crawler))
+            print(f"Discovered {len(links)} links for seed {args.seed_id}")
+            for link in links:
+                title = link.title or "(no title)"
+                print(f"  [{link.id}] {title} - {link.url}")
     finally:
         db.close()
 
@@ -297,6 +316,14 @@ def build_parser() -> argparse.ArgumentParser:
         "scrape", help="Phase A: scrape seed page for post links"
     )
     p_scrape.add_argument("seed_id", type=int, help="Seed ID to scrape")
+    p_scrape.add_argument(
+        "--pages", type=int, default=1,
+        help="Number of pages to scrape (default: 1)"
+    )
+    p_scrape.add_argument(
+        "--no-auto-detect", action="store_true",
+        help="Disable auto-detection of max page from pagination"
+    )
     p_scrape.set_defaults(func=cmd_scrape)
 
     # fetch

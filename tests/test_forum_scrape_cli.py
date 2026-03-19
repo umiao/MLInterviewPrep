@@ -128,6 +128,21 @@ class TestBuildParser:
         assert args.command == "retry-failed"
         assert args.seed_id == 3
 
+    def test_scrape_parses_pages_flag(self) -> None:
+        """Parse scrape with --pages flag."""
+        parser = build_parser()
+        args = parser.parse_args(["scrape", "42", "--pages", "5"])
+        assert args.seed_id == 42
+        assert args.pages == 5
+        assert args.no_auto_detect is False
+
+    def test_scrape_parses_no_auto_detect(self) -> None:
+        """Parse scrape with --no-auto-detect flag."""
+        parser = build_parser()
+        args = parser.parse_args(["scrape", "42", "--pages", "3", "--no-auto-detect"])
+        assert args.pages == 3
+        assert args.no_auto_detect is True
+
 
 class TestCmdAddSeed:
     """Tests for the add-seed command with DB interaction."""

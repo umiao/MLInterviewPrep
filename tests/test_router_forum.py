@@ -1,4 +1,6 @@
 """Tests for forum API routes."""
+from unittest.mock import AsyncMock, patch
+
 import pytest
 
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
@@ -163,6 +165,35 @@ class TestLinkEndpoints:
         """POST /forum/seeds/{id}/scrape returns 404 for missing seed."""
         resp = test_client.post("/api/forum/seeds/99999/scrape")
         assert resp.status_code == 404
+
+    def test_scrape_with_max_pages(self, test_client, _seed_and_company):
+        """POST /forum/seeds/{id}/scrape?max_pages=3 returns stats dict."""
+        _, seed_id = _seed_and_company
+
+        mock_stats = {
+            "pages_scraped": 3,
+            "total_links": 60,
+            "new_links": 55,
+            "max_page_detected": 10,
+            "stopped_early": False,
+        }
+
+        with patch(
+            "src.backend.routers.forum.scrape_seed_pages",
+            new_callable=AsyncMock,
+            return_value=mock_stats,
+        ):
+            resp = test_client.post(
+                f"/api/forum/seeds/{seed_id}/scrape?max_pages=3"
+            )
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["pages_scraped"] == 3
+        assert data["total_links"] == 60
+        assert data["new_links"] == 55
+        assert data["max_page_detected"] == 10
+        assert data["stopped_early"] is False
 
 
 class TestPostEndpoints:

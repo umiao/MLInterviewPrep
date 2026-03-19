@@ -1,5 +1,5 @@
 """Forum scraping API routes."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 
 from src.backend.database import get_db
@@ -11,6 +11,7 @@ from src.backend.schemas.forum import (
     ForumPostLinkResponse,
     ForumPostResponse,
     ForumProgressResponse,
+    ForumScrapeStatsResponse,
     ForumSeedCreate,
     ForumSeedResponse,
 )
@@ -21,6 +22,7 @@ from src.backend.services.forum_service import (
     get_fetch_progress,
     import_post_to_document,
     scrape_seed_page,
+    scrape_seed_pages,
 )
 
 router = APIRouter()
@@ -98,22 +100,24 @@ def delete_seed(
     db.commit()
 
 
-@router.post(
-    "/forum/seeds/{seed_id}/scrape",
-    response_model=list[ForumPostLinkResponse],
-)
+@router.post("/forum/seeds/{seed_id}/scrape")
 async def scrape_links(
     seed_id: int,
+    max_pages: int = Query(1, ge=1),
     db: Session = Depends(get_db),
-) -> list[ForumPostLink]:
-    """Phase A: scrape index page and discover post links.
+) -> list[ForumPostLinkResponse] | ForumScrapeStatsResponse:
+    """Phase A: scrape index page(s) and discover post links.
+
+    When max_pages == 1, returns a list of discovered links.
+    When max_pages > 1, returns scrape stats (pages_scraped, total_links, etc.).
 
     Args:
         seed_id: ID of the seed to scrape.
+        max_pages: Maximum number of pages to scrape.
         db: Database session.
 
     Returns:
-        List of discovered ForumPostLink objects.
+        List of ForumPostLink responses (single page) or scrape stats (multi-page).
     """
     seed = db.query(ForumSeed).filter(ForumSeed.id == seed_id).first()
     if not seed:
@@ -121,6 +125,11 @@ async def scrape_links(
 
     crawler = PlaywrightCrawler()
     try:
+        if max_pages > 1:
+            stats = await scrape_seed_pages(
+                db, seed_id, crawler, max_pages=max_pages
+            )
+            return ForumScrapeStatsResponse(**stats)
         return await scrape_seed_page(db, seed_id, crawler)
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

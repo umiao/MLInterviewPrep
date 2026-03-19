@@ -9,46 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-153: Forum scrape CLI + API: pagination params
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-152
-- **Description**: Wire pagination to CLI and API. Three files to modify:
-
-1. src/backend/schemas/forum.py -- add response model:
-   class ForumScrapeStatsResponse(BaseModel):
-       pages_scraped: int
-       total_links: int
-       new_links: int
-       max_page_detected: int = 1
-       stopped_early: bool = False
-
-2. src/backend/routers/forum.py -- update scrape endpoint:
-   - Add max_pages: int = Query(1, ge=1) parameter to POST /seeds/{seed_id}/scrape
-   - When max_pages > 1: call scrape_seed_pages(db, seed_id, crawler, max_pages=max_pages)
-   - Return ForumScrapeStatsResponse
-   - When max_pages == 1: keep existing behavior (call scrape_seed_page, return list)
-   - Import scrape_seed_pages from forum_service, ForumScrapeStatsResponse from schemas
-
-3. scripts/forum_scrape.py -- update scrape subcommand:
-   - Add --pages N argument (type=int, default=1) to p_scrape parser
-   - Add --no-auto-detect flag (action='store_true')
-   - In cmd_scrape():
-     - If args.pages > 1: call asyncio.run(scrape_seed_pages(db, seed_id, crawler, max_pages=args.pages, auto_detect=not args.no_auto_detect))
-     - Print formatted stats: Pages scraped, Total links, New links, Max page detected, Stopped early
-     - If args.pages == 1: keep existing behavior (call scrape_seed_page, print link list)
-   - Import scrape_seed_pages from forum_service
-
-Tests:
-- tests/test_forum_scrape_cli.py: add test_scrape_parses_pages_flag and test_scrape_parses_no_auto_detect
-- tests/test_router_forum.py: add test_scrape_with_max_pages (verify query param accepted, mock returns stats dict)
-
-AC:
-- python scripts/forum_scrape.py scrape --help shows --pages and --no-auto-detect options
-- Existing tests in test_forum_scrape_cli.py and test_router_forum.py pass unchanged
-- New tests pass
-- ruff clean
-
 #### T-P0-154: Live scrape: LinkedIn 1point3acres first 5 pages
 - **Priority**: P0
 - **Complexity**: S
@@ -107,6 +67,7 @@ AC:
 - [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
+- [x] **2026-03-19** -- T-P0-153: Forum scrape CLI + API: pagination params. Wire pagination to CLI and API. Three files to modify:
 - [x] **2026-03-19** -- T-P0-152: Forum service: refactor scrape_seed_page + add scrape_seed_pages. Refactor src/backend/services/forum_service.py for multi-page scraping:
 - [x] **2026-03-19** -- T-P0-151: Forum extractor: derive_page_url + extract_max_page pure functions. Add two pure functions to src/backend/scraper/forum_extractors.py:
 - [x] **2026-03-19** -- T-P0-149: Frontend ForumPostsTab component + integration into PrepNotesPage. Create ForumPostsTab React component and integrate it as a tab in the existing PrepNotesPage.
