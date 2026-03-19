@@ -295,3 +295,10 @@
 - **Sanity check result**: All 879 tests pass. Ruff clean. Idempotency verified (scrape twice = no duplicates). Failed status + retry_count incremented on error. Import appends with correct separator pattern.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-146 --status completed`
+
+## 2026-03-19 -- [T-P0-147] Forum CLI script (scripts/forum_scrape.py)
+- **What I did**: Created scripts/forum_scrape.py with 7 argparse subcommands wrapping forum_service: add-seed (auto-detects source_site from URL domain, resolves --company name to ID), list-seeds, scrape (Phase A), fetch (--next/--all/--link-id with 2s rate limiting), status (progress summary), import (post to company prep_notes), retry-failed. All commands use asyncio.run() to bridge sync CLI with async service functions. Error handling exits with code 1 and human-readable messages.
+- **Deliverables**: scripts/forum_scrape.py (new), tests/test_forum_scrape_cli.py (new, 24 tests)
+- **Sanity check result**: All 903 tests pass. Ruff clean. All 7 subcommands parse correctly. DB interaction tested for add-seed, list-seeds, status, import commands.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-147 --status completed`

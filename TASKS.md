@@ -9,40 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-147: Forum CLI script (scripts/forum_scrape.py)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-146
-- **Description**: Create scripts/forum_scrape.py as the primary CLI interface wrapping the forum service layer.
-
-**Subcommands (via argparse):**
-- `add-seed <url> [--company <name>] [--label <text>]` -- Create ForumSeed. Auto-detect source_site from URL domain. If --company provided, look up Company by name and set company_id.
-- `list-seeds` -- Print all ForumSeeds with id, url, label, company, last_scraped_at.
-- `scrape <seed_id>` -- Phase A: call scrape_seed_page(), print discovered link count.
-- `fetch <seed_id> [--next | --all | --link-id <id>]` -- Phase B: --next fetches next pending, --all fetches all pending sequentially with delay, --link-id fetches specific link.
-- `status <seed_id>` -- Print fetch progress: total/pending/fetched/failed counts.
-- `import <post_id> --company <name>` -- Import raw_text to company prep_notes.
-- `retry-failed <seed_id>` -- Call retry_failed(), print results.
-
-**Implementation:**
-- Use asyncio.run() to bridge sync argparse with async service functions.
-- Initialize DB via init_db(), get session via SessionLocal().
-- Instantiate PlaywrightCrawler() for scrape/fetch commands.
-- Print results in human-readable format (not JSON).
-
-**Error handling:** Catch exceptions, print user-friendly error messages, exit with code 1 on failure.
-
-**AC:**
-1. All 7 subcommands parse correctly and call the right service function
-2. add-seed auto-detects source_site=1point3acres from URL
-3. add-seed with --company resolves company name to company_id
-4. scrape prints discovered link count
-5. fetch --all processes all pending links with rate limiting
-6. status prints progress summary
-7. import appends to prep_notes successfully
-8. retry-failed resets and re-fetches failed links
-9. Smoke test: manual run with real seed URL (requires Chrome with CDP or cookie)
-
 #### T-P0-148: Forum API routes + Pydantic schemas
 - **Priority**: P0
 - **Complexity**: S
@@ -161,6 +127,7 @@ Follow patterns from src/frontend/src/hooks/usePrepNotes.ts (TanStack useQuery/u
 - [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
+- [x] **2026-03-19** -- T-P0-147: Forum CLI script (scripts/forum_scrape.py). Create scripts/forum_scrape.py as the primary CLI interface wrapping the forum service layer.
 - [x] **2026-03-19** -- T-P0-146: Forum service layer (two-phase scrape + import to prep notes). Create src/backend/services/forum_service.py with business logic for the two-phase forum scraping workflow.
 - [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.
 - [x] **2026-03-17** -- T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applicatio
