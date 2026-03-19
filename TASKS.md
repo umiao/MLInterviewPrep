@@ -9,51 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-148: Forum API routes + Pydantic schemas
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-146
-- **Description**: Create src/backend/routers/forum.py and src/backend/schemas/forum.py for the forum scraping REST API.
-
-**Schemas (src/backend/schemas/forum.py):**
-- ForumSeedCreate: url (str, min_length=1), source_site (Literal["1point3acres"]), label (str|None), company_id (int|None)
-- ForumSeedResponse: id, url, source_site, label, company_id, is_active, last_scraped_at, created_at. model_config = ConfigDict(from_attributes=True)
-- ForumPostLinkResponse: id, forum_seed_id, url, external_post_id, title, discovered_at, status, retry_count, last_error, fetch_order. from_attributes=True
-- ForumPostResponse: id, forum_post_link_id, raw_text, content_hash, author, published_at, fetched_at, company_id. from_attributes=True
-- ForumProgressResponse: total (int), pending (int), fetched (int), failed (int), last_fetched_url (str|None)
-- ForumImportRequest: company_id (int)
-
-**Endpoints (src/backend/routers/forum.py):**
-| Method | Path | Purpose |
-|--------|------|---------|
-| GET | /forum/seeds | List seeds (optional query params: company_id, source_site) |
-| POST | /forum/seeds | Add seed (body: ForumSeedCreate) |
-| DELETE | /forum/seeds/{id} | Remove seed + cascade |
-| POST | /forum/seeds/{id}/scrape | Phase A: collect links (returns list of ForumPostLinkResponse) |
-| GET | /forum/seeds/{id}/links | List post links with status (returns list of ForumPostLinkResponse) |
-| POST | /forum/links/{id}/fetch | Phase B: fetch single post (returns ForumPostResponse) |
-| POST | /forum/seeds/{id}/fetch-next | Fetch next unfetched (returns ForumPostResponse or 204) |
-| GET | /forum/posts/{id} | Get raw post content (returns ForumPostResponse) |
-| POST | /forum/posts/{id}/import | Import to prep notes (body: ForumImportRequest, returns company) |
-| GET | /forum/seeds/{id}/progress | Fetch progress (returns ForumProgressResponse) |
-
-**Router registration:** Add to main.py: `from src.backend.routers.forum import router as forum_router` and `app.include_router(forum_router, prefix="/api")`
-
-**DB session:** Use `db: Session = Depends(get_db)` pattern matching existing routers.
-
-**Async endpoints:** scrape and fetch endpoints must be async (they call async service functions). Use run_in_executor or make the endpoint async and await the service.
-
-**AC:**
-1. All 10 endpoints return correct HTTP status codes
-2. POST /forum/seeds creates seed and returns ForumSeedResponse
-3. POST /forum/seeds/{id}/scrape returns list of discovered links
-4. POST /forum/links/{id}/fetch returns fetched post content
-5. GET /forum/seeds/{id}/progress returns accurate counts
-6. POST /forum/posts/{id}/import appends to prep notes and returns updated company
-7. DELETE cascade works (seed + links + posts removed)
-8. Router registered in main.py under /api prefix
-9. Tests: tests/test_router_forum.py with TestClient + in-memory DB
-
 #### T-P0-149: Frontend ForumPostsTab component + integration into PrepNotesPage
 - **Priority**: P0
 - **Complexity**: M
@@ -127,6 +82,7 @@ Follow patterns from src/frontend/src/hooks/usePrepNotes.ts (TanStack useQuery/u
 - [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
+- [x] **2026-03-19** -- T-P0-148: Forum API routes + Pydantic schemas. Create src/backend/routers/forum.py and src/backend/schemas/forum.py for the forum scraping REST API.
 - [x] **2026-03-19** -- T-P0-147: Forum CLI script (scripts/forum_scrape.py). Create scripts/forum_scrape.py as the primary CLI interface wrapping the forum service layer.
 - [x] **2026-03-19** -- T-P0-146: Forum service layer (two-phase scrape + import to prep notes). Create src/backend/services/forum_service.py with business logic for the two-phase forum scraping workflow.
 - [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.

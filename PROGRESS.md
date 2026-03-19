@@ -302,3 +302,10 @@
 - **Sanity check result**: All 903 tests pass. Ruff clean. All 7 subcommands parse correctly. DB interaction tested for add-seed, list-seeds, status, import commands.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-147 --status completed`
+
+## 2026-03-19 -- [T-P0-148] Forum API routes + Pydantic schemas
+- **What I did**: Created src/backend/schemas/forum.py with 6 Pydantic schemas (ForumSeedCreate, ForumSeedResponse, ForumPostLinkResponse, ForumPostResponse, ForumProgressResponse, ForumImportRequest). Created src/backend/routers/forum.py with 10 REST endpoints: GET/POST/DELETE seeds, POST scrape, GET links, POST fetch single/next, GET post, POST import, GET progress. Registered router in main.py under /api prefix. Async endpoints for scrape/fetch operations.
+- **Deliverables**: src/backend/schemas/forum.py (new), src/backend/routers/forum.py (new), tests/test_router_forum.py (new, 25 tests)
+- **Sanity check result**: All 928 tests pass. Ruff clean. All 10 endpoints tested for correct status codes, CRUD operations, cascade delete, progress counts, and import to prep notes.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-148 --status completed`

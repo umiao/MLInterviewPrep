@@ -20,6 +20,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from src.backend.config import get_settings
 from src.backend.database import init_db
 from src.backend.routers.companies import router as companies_router
+from src.backend.routers.forum import router as forum_router
 from src.backend.routers.framework import router as framework_router
 from src.backend.routers.problems import router as problems_router
 from src.backend.routers.qa import router as qa_router
@@ -144,6 +145,7 @@ app.include_router(companies_router, prefix="/api")
 app.include_router(scraper_router, prefix="/api")
 app.include_router(timeline_router, prefix="/api")
 app.include_router(reading_router, prefix="/api")
+app.include_router(forum_router, prefix="/api")
 
 
 @app.get("/api/dashboard")
