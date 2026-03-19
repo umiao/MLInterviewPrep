@@ -267,3 +267,10 @@
 - **Sanity check result**: `ruff check src/ tests/` passes clean. `bash scripts/check.sh` runs end-to-end (1 pre-existing flaky test unrelated to changes).
 - **Status**: [DONE]
 - **Request**: No task ID (ad-hoc user request)
+
+## 2026-03-19 -- [T-P2-143] Forum models + migration v9
+- **What I did**: Created ForumSeed, ForumPostLink, ForumPost SQLAlchemy models in src/backend/models/forum.py. Added migration v9 to database.py with three CREATE TABLE IF NOT EXISTS statements. Registered models in models/__init__.py.
+- **Deliverables**: src/backend/models/forum.py (new), src/backend/database.py (migration v9), src/backend/models/__init__.py (updated), tests/test_models_forum.py (new, 13 tests)
+- **Sanity check result**: All 13 forum model tests pass. Ruff clean. Migration idempotent. Cascade delete verified. UNIQUE and CHECK constraints enforced. Pre-existing test_client error (onepoint3acres_cookie in .env but not config.py) unrelated to changes.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-143 --status completed`

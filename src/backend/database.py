@@ -257,6 +257,46 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ALTER TABLE problems ADD COLUMN notes TEXT",
         ],
     ),
+    (
+        9,
+        "Create forum_seeds, forum_post_links, forum_posts tables",
+        [
+            "CREATE TABLE IF NOT EXISTS forum_seeds ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  url TEXT NOT NULL UNIQUE,"
+            "  source_site VARCHAR NOT NULL,"
+            "  label TEXT,"
+            "  company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL,"
+            "  is_active BOOLEAN DEFAULT 1,"
+            "  last_scraped_at TIMESTAMP,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE TABLE IF NOT EXISTS forum_post_links ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  forum_seed_id INTEGER NOT NULL REFERENCES forum_seeds(id) ON DELETE CASCADE,"
+            "  url TEXT NOT NULL UNIQUE,"
+            "  external_post_id TEXT UNIQUE,"
+            "  title TEXT,"
+            "  discovered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  status VARCHAR NOT NULL DEFAULT 'pending'"
+            "    CHECK(status IN ('pending', 'fetched', 'failed')),"
+            "  retry_count INTEGER DEFAULT 0,"
+            "  last_error TEXT,"
+            "  fetch_order INTEGER"
+            ")",
+            "CREATE TABLE IF NOT EXISTS forum_posts ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  forum_post_link_id INTEGER NOT NULL UNIQUE"
+            "    REFERENCES forum_post_links(id) ON DELETE CASCADE,"
+            "  raw_text TEXT NOT NULL,"
+            "  content_hash TEXT NOT NULL,"
+            "  author TEXT,"
+            "  published_at TEXT,"
+            "  fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  company_id INTEGER REFERENCES companies(id) ON DELETE SET NULL"
+            ")",
+        ],
+    ),
 ]
 
 
