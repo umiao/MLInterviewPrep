@@ -29,16 +29,31 @@ export function useFrameworkNotes({
 
   const lastSavedRef = useRef(initialNotes ?? "");
   const isSavingRef = useRef(false);
+  const saveVersionRef = useRef(0);
+  const nodeIdRef = useRef(nodeId);
 
-  // Sync from parent (initial load or external refetch).
+  // Sync from parent (initial load, external refetch, or nodeId change).
   useEffect(() => {
+    if (nodeIdRef.current !== nodeId) {
+      // Node changed — reset state, bump version to invalidate pending saves
+      nodeIdRef.current = nodeId;
+      saveVersionRef.current += 1;
+      const incoming = initialNotes ?? "";
+      setNotes(incoming);
+      lastSavedRef.current = incoming;
+      setSaveStatus("idle");
+      setMode("preview");
+      isSavingRef.current = false;
+      return;
+    }
+    // Same node, external refresh
     if (isSavingRef.current) return;
     const incoming = initialNotes ?? "";
     if (incoming !== lastSavedRef.current) {
       setNotes(incoming);
       lastSavedRef.current = incoming;
     }
-  }, [initialNotes]);
+  }, [nodeId, initialNotes]);
 
   // Debounced auto-save
   const debouncedNotes = useDebounce(notes, 500);
@@ -78,9 +93,12 @@ export function useFrameworkNotes({
     },
   });
 
-  // Auto-save when debounced notes change (and differ from last saved)
+  // Auto-save when debounced notes change (and differ from last saved).
+  // Version guard: if nodeId changed since debounce started, skip the save.
   useEffect(() => {
+    const version = saveVersionRef.current;
     if (debouncedNotes !== lastSavedRef.current) {
+      if (version !== saveVersionRef.current) return;
       setSaveStatus("saving");
       saveMutation.mutate({ description: debouncedNotes });
     }

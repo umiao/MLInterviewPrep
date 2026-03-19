@@ -129,15 +129,17 @@ export default function FrameworkNotesPage() {
     () => (tree ? buildBreadcrumbs(tree, nodeId) : []),
     [tree, nodeId],
   );
-  const { prev, next } = useMemo(
-    () => findSiblings(flat, nodeId, node?.parent_id ?? null),
-    [flat, nodeId, node?.parent_id],
-  );
 
   // Find the current node in the tree (with children populated)
   const treeNode = useMemo(
     () => flat.find((n) => n.id === nodeId) ?? null,
     [flat, nodeId],
+  );
+
+  // Use tree-derived parent_id to avoid race with async node query
+  const { prev, next } = useMemo(
+    () => findSiblings(flat, nodeId, treeNode?.parent_id ?? null),
+    [flat, nodeId, treeNode?.parent_id],
   );
   const groupedLeaves = useMemo(
     () => (treeNode ? getGroupedLeaves(treeNode) : []),
