@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     TTS_VOICE: str = "en-US-AriaNeural"
     TTS_RATE: str = "+0%"  # edge-tts rate string, e.g. "+20%", "-10%"
 
+    # Forum scraping settings
+    ONEPOINT3ACRES_COOKIE: str = ""
+    CHROME_DEBUG_PORT: int = 9222
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

@@ -51,3 +51,115 @@ class PlaywrightCrawler:
         except Exception as e:
             logger.warning("Failed to fetch %s: %s", url, e)
             return ""
+
+    async def fetch_page_cdp(
+        self,
+        url: str,
+        port: int = 9222,
+        delay: tuple[int, int] = (5, 15),
+    ) -> str:
+        """Fetch page by attaching to a running Chrome instance via CDP.
+
+        Connects to Chrome DevTools Protocol on the given port, opens a new
+        page in the existing browser context, navigates to the URL, and
+        returns the HTML.  The browser itself is NOT closed -- only the page.
+
+        Args:
+            url: URL to fetch.
+            port: Chrome debug port (default 9222).
+            delay: Min/max seconds for rate-limiting sleep.
+
+        Returns:
+            Page HTML content, or empty string on error.
+        """
+        await asyncio.sleep(random.uniform(*delay))
+
+        try:
+            from playwright.async_api import async_playwright
+
+            async with async_playwright() as p:
+                browser = await p.chromium.connect_over_cdp(
+                    f"http://localhost:{port}"
+                )
+                try:
+                    # Use the first (default) browser context
+                    context = browser.contexts[0]
+                    page = await context.new_page()
+                    try:
+                        await page.goto(
+                            url, wait_until="domcontentloaded", timeout=30000
+                        )
+                        html = await page.content()
+                        return html
+                    finally:
+                        await page.close()
+                finally:
+                    # Disconnect from CDP without closing the browser
+                    browser.close()
+        except Exception as e:
+            logger.warning("CDP fetch failed for %s: %s", url, e)
+            return ""
+
+    async def fetch_page_with_cookie(
+        self,
+        url: str,
+        cookie_str: str,
+        delay: tuple[int, int] = (5, 15),
+    ) -> str:
+        """Fetch page using a headless browser with injected cookies.
+
+        Launches a headless Chromium instance, parses the cookie string,
+        adds cookies to the browser context, then navigates to the URL.
+
+        Args:
+            url: URL to fetch.
+            cookie_str: Raw cookie header string (``key=val; key2=val2``).
+            delay: Min/max seconds for rate-limiting sleep.
+
+        Returns:
+            Page HTML content, or empty string on error.
+        """
+        await asyncio.sleep(random.uniform(*delay))
+
+        try:
+            from urllib.parse import urlparse
+
+            from playwright.async_api import async_playwright
+
+            parsed = urlparse(url)
+            domain = parsed.hostname or ""
+
+            cookies = []
+            for pair in cookie_str.split(";"):
+                pair = pair.strip()
+                if "=" not in pair:
+                    continue
+                name, value = pair.split("=", 1)
+                cookies.append(
+                    {
+                        "name": name.strip(),
+                        "value": value.strip(),
+                        "domain": domain,
+                        "path": "/",
+                    }
+                )
+
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                try:
+                    context = await browser.new_context(
+                        user_agent=random.choice(USER_AGENTS)
+                    )
+                    if cookies:
+                        await context.add_cookies(cookies)
+                    page = await context.new_page()
+                    await page.goto(
+                        url, wait_until="domcontentloaded", timeout=30000
+                    )
+                    html = await page.content()
+                    return html
+                finally:
+                    await browser.close()
+        except Exception as e:
+            logger.warning("Cookie fetch failed for %s: %s", url, e)
+            return ""

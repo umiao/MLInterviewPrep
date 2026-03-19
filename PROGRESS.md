@@ -274,3 +274,10 @@
 - **Sanity check result**: All 13 forum model tests pass. Ruff clean. Migration idempotent. Cascade delete verified. UNIQUE and CHECK constraints enforced. Pre-existing test_client error (onepoint3acres_cookie in .env but not config.py) unrelated to changes.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-143 --status completed`
+
+## 2026-03-19 -- [T-P2-144] Playwright CDP attach + cookie fallback methods
+- **What I did**: Added two new async methods to PlaywrightCrawler: fetch_page_cdp (CDP attach to running Chrome) and fetch_page_with_cookie (headless with injected cookies). Added ONEPOINT3ACRES_COOKIE and CHROME_DEBUG_PORT to config.py Settings and .env.example.
+- **Deliverables**: src/backend/scraper/crawler.py (2 new methods), src/backend/config.py (2 new settings), .env.example (updated), tests/test_crawler_cdp_cookie.py (new, 11 tests)
+- **Sanity check result**: All 835 tests pass. Ruff clean. CDP mode does not close browser (only page). Cookie parsing handles empty strings. Rate limiting verified in delay range.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-144 --status completed`

@@ -9,33 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages from authenticated sites.
-
-**New methods:**
-1. async def fetch_page_cdp(self, url: str, port: int = 9222, delay: tuple[int, int] = (5, 15)) -> str: Attach to running Chrome via CDP. Uses playwright.chromium.connect_over_cdp(). Opens new page in existing context, navigates, gets content, closes page (NOT browser). Rate limiting via asyncio.sleep(random.uniform(*delay)).
-2. async def fetch_page_with_cookie(self, url: str, cookie_str: str, delay: tuple[int, int] = (5, 15)) -> str: Launch headless Chromium, parse cookie_str, add cookies to context, navigate. Same rate limiting.
-
-**Config changes:**
-- config.py: Add ONEPOINT3ACRES_COOKIE: str = "" and CHROME_DEBUG_PORT: int = 9222 to Settings
-- .env.example: Add both keys
-
-**Error handling:** Return empty string on error (matching existing fetch_page pattern). Log warnings.
-
-**Import:** from playwright.async_api import async_playwright inside method body (matching existing pattern).
-
-**AC:**
-1. fetch_page_cdp connects to CDP endpoint and returns HTML string
-2. fetch_page_with_cookie launches headless with cookies and returns HTML
-3. Both return empty string on connection/timeout errors with logged warning
-4. Rate limiting delay applied before each fetch
-5. CDP mode does NOT close the browser (only the page)
-6. Config.py has both new settings, .env.example updated
-7. Tests: unit tests with mocked playwright (async)
-
 #### T-P2-145: Forum HTML extractors with jammer stripping (1point3acres)
 - **Priority**: P0
 - **Complexity**: S
@@ -258,6 +231,7 @@ Follow patterns from src/frontend/src/hooks/usePrepNotes.ts (TanStack useQuery/u
 
 > 136 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
 - [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.
 - [x] **2026-03-17** -- T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applicatio
