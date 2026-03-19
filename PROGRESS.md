@@ -150,3 +150,10 @@
 - **Sanity check result**: All 944 tests pass. Ruff clean. Existing tests unchanged and passing.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-153 --status completed`
+
+## 2026-03-19 -- [T-P0-154] Live scrape: LinkedIn 1point3acres first 5 pages
+- **What I did**: Executed the live scraping pipeline for LinkedIn on 1point3acres. Fixed 3 bugs discovered during execution: (1) `forum_service._fetch_html` used `os.environ.get()` which doesn't load `.env` -- switched to `get_settings()` from pydantic-settings. (2) `extract_post_links` only supported `ul.hotlist` layout but the real page uses a table layout (`th > a[href*=thread-]`) -- added table layout strategy with href deduplication. (3) `_upsert_links_from_html` didn't check for `external_post_id` conflicts within the same seed -- added same-seed dedup. Successfully scraped 5 pages: 100 post links discovered, all pending. Max page detected: 255.
+- **Deliverables**: src/backend/services/forum_service.py (modified), src/backend/scraper/forum_extractors.py (modified), tests/fixtures/forum_index_table.html (new), tests/test_forum_extractors.py (modified)
+- **Sanity check result**: All 945 tests pass. Ruff clean. Live scrape verified: 100 links in DB, status command confirms all pending.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-154 --status completed`

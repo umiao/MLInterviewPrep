@@ -2,13 +2,13 @@
 
 import asyncio
 import logging
-import os
 import random
 from datetime import datetime
 from re import match as re_match
 
 from sqlalchemy.orm import Session
 
+from src.backend.config import get_settings
 from src.backend.models.company import Company, CompanyDocument
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.scraper.crawler import PlaywrightCrawler
@@ -56,7 +56,8 @@ async def _fetch_html(
     if html:
         return html
 
-    cookie = os.environ.get("ONEPOINT3ACRES_COOKIE", "")
+    settings = get_settings()
+    cookie = settings.ONEPOINT3ACRES_COOKIE
     if cookie:
         logger.info("CDP failed for %s, falling back to cookie method", url)
         html = await crawler.fetch_page_with_cookie(url, cookie)
@@ -103,22 +104,23 @@ def _upsert_links_from_html(
             result.append(existing)
             continue
 
-        # Check external_post_id conflict from different seed
+        # Check external_post_id conflict
         if ext_id:
             conflict = (
                 db.query(ForumPostLink)
-                .filter(
-                    ForumPostLink.external_post_id == ext_id,
-                    ForumPostLink.forum_seed_id != seed_id,
-                )
+                .filter(ForumPostLink.external_post_id == ext_id)
                 .first()
             )
             if conflict:
-                logger.info(
-                    "external_post_id %s already exists from seed %d, skipping",
-                    ext_id,
-                    conflict.forum_seed_id,
-                )
+                if conflict.forum_seed_id == seed_id:
+                    # Same seed, different URL: treat as duplicate
+                    result.append(conflict)
+                else:
+                    logger.info(
+                        "external_post_id %s already exists from seed %d, skipping",
+                        ext_id,
+                        conflict.forum_seed_id,
+                    )
                 continue
 
         link = ForumPostLink(

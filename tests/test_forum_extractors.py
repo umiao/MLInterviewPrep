@@ -73,9 +73,22 @@ class TestExtractPostLinks:
         assert extract_post_links("", "https://example.com") == []
 
     def test_no_hotlist_returns_empty(self) -> None:
-        """HTML without ul.hotlist should return empty list."""
+        """HTML without ul.hotlist or thread links should return empty list."""
         html = "<html><body><div>No posts here</div></body></html>"
         assert extract_post_links(html, "https://example.com") == []
+
+    def test_table_layout(self) -> None:
+        """Should extract links from table layout (th > a[href*=thread-])."""
+        html = (FIXTURES_DIR / "forum_index_table.html").read_text(
+            encoding="utf-8"
+        )
+        links = extract_post_links(
+            html, "https://www.1point3acres.com/bbs/"
+        )
+        assert len(links) == 3
+        assert links[0]["url"].endswith("thread-1169229-1-1.html")
+        assert links[0]["title"] == "MLE phone screen"
+        assert links[2]["order"] == 2
 
 
 # --- extract_post_content tests ---

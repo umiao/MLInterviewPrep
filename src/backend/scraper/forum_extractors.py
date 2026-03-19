@@ -74,8 +74,9 @@ def extract_max_page(html: str) -> int:
 def extract_post_links(html: str, base_url: str) -> list[dict]:
     """Extract post links from a forum tag/index page.
 
-    Parses the ul.hotlist structure used by 1point3acres to list threads.
-    Each li contains an anchor with a relative href and a div with the title.
+    Supports two 1point3acres page layouts:
+    1. Table layout (div.bm_c): thread links in th cells within table rows.
+    2. Hotlist layout (ul.hotlist): thread links in li > a elements.
 
     Args:
         html: Raw HTML of the index/tag page.
@@ -90,6 +91,25 @@ def extract_post_links(html: str, base_url: str) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
     results: list[dict] = []
 
+    # Strategy 1: Table layout (div.bm_c > table > tr > th > a[href*=thread-])
+    thread_re = re.compile(r"thread-\d+")
+    th_links = soup.select("th a[href]")
+    thread_anchors = [a for a in th_links if thread_re.search(a.get("href", ""))]
+    if thread_anchors:
+        seen_hrefs: set[str] = set()
+        idx = 0
+        for anchor in thread_anchors:
+            href = anchor.get("href", "")
+            if href in seen_hrefs:
+                continue
+            seen_hrefs.add(href)
+            title = anchor.get_text(strip=True)
+            abs_url = urljoin(base_url, href)
+            results.append({"url": abs_url, "title": title, "order": idx})
+            idx += 1
+        return results
+
+    # Strategy 2: Hotlist layout (ul.hotlist li a)
     hotlist = soup.select("ul.hotlist li a")
     for idx, anchor in enumerate(hotlist):
         href = anchor.get("href", "")
@@ -99,7 +119,6 @@ def extract_post_links(html: str, base_url: str) -> list[dict]:
         # Title is in the first div's text (excluding the span.by)
         title_div = anchor.select_one("div")
         if title_div:
-            # Get text excluding child span elements (which hold author info)
             by_span = title_div.select_one("span.by")
             if by_span:
                 by_span.decompose()
@@ -108,12 +127,7 @@ def extract_post_links(html: str, base_url: str) -> list[dict]:
             title = anchor.get_text(strip=True)
 
         abs_url = urljoin(base_url, href)
-
-        results.append({
-            "url": abs_url,
-            "title": title,
-            "order": idx,
-        })
+        results.append({"url": abs_url, "title": title, "order": idx})
 
     return results
 

@@ -78,3 +78,9 @@
 - **What went wrong / What I learned**: The Stop hook (lint_check.py) is not guaranteed to run on every session exit. If Claude's final response is pure text with no tool call, the hook infrastructure never triggers. Additionally, the lint cache (`last_lint_pass`) could produce false passes if files changed between the cache write and the next session.
 - **Fix / Correct approach**: (1) Added `scripts/check.sh` as a unified ruff+pytest runner. (2) Made running `bash scripts/check.sh` Step 0 in the Exit Protocol (CLAUDE.md) -- this is the primary defense. (3) Removed lint cache from lint_check.py so every Stop hook invocation runs a fresh check. The Stop hook remains as a backup safety net.
 - **Tags**: #hooks #lint #ruff #exit-protocol #cache
+
+### [2026-03-19] Test fixtures based on assumed HTML structure break on real pages
+- **Context**: Forum extractor `extract_post_links` used `ul.hotlist li a` selector based on a hypothetical page structure. Live scrape returned 0 links because the real 1point3acres tag page uses a Discuz table layout (`th > a[href*=thread-]`).
+- **What went wrong / What I learned**: Three issues surfaced only during live execution: (1) The extractor's CSS selector was wrong for the actual page. (2) `os.environ.get()` in the service didn't load `.env` -- only pydantic-settings `get_settings()` does. (3) Each `th` contained duplicate thread links (2 anchors per row), causing UNIQUE constraint violations on `external_post_id`.
+- **Fix / Correct approach**: (1) Added dual-strategy extractor: try table layout first, fall back to hotlist. Deduplicate by href. (2) Use `get_settings()` instead of `os.environ.get()` for config values loaded from `.env`. (3) Added same-seed `external_post_id` conflict check in upsert. Key takeaway: always validate extractors against real HTML before marking scraper tasks as done.
+- **Tags**: #scraper #extractors #testing #live-validation #pydantic-settings
