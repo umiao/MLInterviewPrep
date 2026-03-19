@@ -42,6 +42,7 @@ class ForumPostLinkResponse(BaseModel):
     retry_count: int = 0
     last_error: str | None = None
     fetch_order: int | None = None
+    post_id: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

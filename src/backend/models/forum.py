@@ -11,6 +11,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from src.backend.database import Base
@@ -60,6 +61,11 @@ class ForumPostLink(Base):
     post = relationship(
         "ForumPost", back_populates="post_link", cascade="all, delete-orphan", uselist=False
     )
+
+    @hybrid_property
+    def post_id(self) -> int | None:
+        """Return the associated ForumPost ID if fetched, else None."""
+        return self.post.id if self.post else None
 
 
 class ForumPost(Base):

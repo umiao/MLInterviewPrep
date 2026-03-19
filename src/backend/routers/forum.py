@@ -1,6 +1,6 @@
 """Forum scraping API routes."""
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.backend.database import get_db
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
@@ -168,6 +168,7 @@ def list_links(
         raise HTTPException(status_code=404, detail="Seed not found")
     return (
         db.query(ForumPostLink)
+        .options(joinedload(ForumPostLink.post))
         .filter(ForumPostLink.forum_seed_id == seed_id)
         .order_by(ForumPostLink.fetch_order)
         .all()
