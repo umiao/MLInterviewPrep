@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from hook_utils import check_stop_cache, run_hook, write_stop_cache  # noqa: E402
+from hook_utils import run_hook  # noqa: E402
 
 # <!-- CUSTOMIZE: Set your lint command and paths -->
 LINT_COMMAND = ["ruff", "check"]
@@ -80,11 +80,6 @@ def scan_emoji(root: str) -> tuple[list[str], list[str]]:
 
 def main(hook_input: dict) -> None:
     """Run lint check and emoji scan, blocking exit on lint errors or emoji found."""
-    # --- Cache check: skip if no files changed since last pass ---
-    if check_stop_cache("lint"):
-        print("[LINT GUARD] No files changed since last pass -- skipping (cached PASS)", file=sys.stderr)
-        sys.exit(0)
-
     blocked = False
 
     # --- Lint check ---
@@ -128,8 +123,6 @@ def main(hook_input: dict) -> None:
     if blocked:
         sys.exit(2)
 
-    # All checks passed -- write cache
-    write_stop_cache("lint")
     sys.exit(0)
 
 

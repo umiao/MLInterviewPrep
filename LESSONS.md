@@ -72,3 +72,9 @@
   5. **Visual affordances** -- sticky elements need `border-b` separator to distinguish from content. Functional, not decorative.
   6. **Guard arithmetic** -- `maxScroll <= 0` must short-circuit explicitly. Never leave division-by-zero protection as "mentioned in edge cases".
 - **Tags**: #react #scroll #sticky #hooks #ui-patterns #code-review
+
+### [2026-03-18] Stop hooks don't fire when Claude ends with pure text (no tool call)
+- **Context**: A ruff F401 error (`import pytest` unused in test_import_blind75_notes.py) slipped through because the session ended with a pure text response, and the Stop hook only fires after tool calls.
+- **What went wrong / What I learned**: The Stop hook (lint_check.py) is not guaranteed to run on every session exit. If Claude's final response is pure text with no tool call, the hook infrastructure never triggers. Additionally, the lint cache (`last_lint_pass`) could produce false passes if files changed between the cache write and the next session.
+- **Fix / Correct approach**: (1) Added `scripts/check.sh` as a unified ruff+pytest runner. (2) Made running `bash scripts/check.sh` Step 0 in the Exit Protocol (CLAUDE.md) -- this is the primary defense. (3) Removed lint cache from lint_check.py so every Stop hook invocation runs a fresh check. The Stop hook remains as a backup safety net.
+- **Tags**: #hooks #lint #ruff #exit-protocol #cache

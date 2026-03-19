@@ -216,6 +216,9 @@ the full ruleset.
 
 Before stopping, complete these steps (the **Stop hook** enforces them):
 
+0. **Run checks**: Execute `bash scripts/check.sh` and confirm all pass.
+   This is the PRIMARY defense -- the Stop hook is a backup safety net
+   that may not fire if the session ends without a tool call.
 1. **Verify**: Run code, check outputs exist, run tests if applicable
 2. **PROGRESS.md**: Append a session entry (format below)
 3. **TASKS.md**: Update task status via `task_db.py update T-XX-N --status completed`

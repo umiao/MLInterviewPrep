@@ -260,3 +260,10 @@
 - **Sanity check result**: `npx tsc --noEmit` clean, `npx vite build` succeeds
 - **Status**: [DONE]
 - **Request**: No task ID (ad-hoc user request)
+
+## 2026-03-18 -- Fix lint error + harden pre-exit checks
+- **What I did**: Fixed ruff F401 (unused `import pytest` in test_import_blind75_notes.py). Created `scripts/check.sh` as unified ruff+pytest runner. Added Step 0 to CLAUDE.md Exit Protocol requiring `bash scripts/check.sh` as primary defense. Removed unreliable lint cache from lint_check.py. Deleted stale `.claude/last_lint_pass`.
+- **Deliverables**: tests/test_import_blind75_notes.py, scripts/check.sh (new), CLAUDE.md, .claude/hooks/lint_check.py, LESSONS.md
+- **Sanity check result**: `ruff check src/ tests/` passes clean. `bash scripts/check.sh` runs end-to-end (1 pre-existing flaky test unrelated to changes).
+- **Status**: [DONE]
+- **Request**: No task ID (ad-hoc user request)
