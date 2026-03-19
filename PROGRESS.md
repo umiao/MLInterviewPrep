@@ -129,3 +129,10 @@
 - **Sanity check result**: All 928 tests pass. Ruff clean. TypeScript compiles with no errors. Frontend components follow existing TanStack Query and api utility patterns.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-149 --status completed`
+
+## 2026-03-19 -- [T-P0-151] Forum extractor: derive_page_url + extract_max_page pure functions
+- **What I did**: Added two pure functions to forum_extractors.py: `derive_page_url` (anchored regex replacement for tag-N-N.html page numbers, raises ValueError on mismatch) and `extract_max_page` (parses div.pg pagination block, tries a.last href then fallback span text, returns 1 when no pagination). Created forum_index_with_pagination.html fixture with realistic div.pg block. Added TestDerivePageUrl (4 tests) and TestExtractMaxPage (3 tests) classes.
+- **Deliverables**: src/backend/scraper/forum_extractors.py (modified), tests/test_forum_extractors.py (modified), tests/fixtures/forum_index_with_pagination.html (new)
+- **Sanity check result**: All 936 tests pass. Ruff clean. Existing 17 forum extractor tests unchanged and passing.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-151 --status completed`

@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 
 from src.backend.scraper.forum_extractors import (
+    derive_page_url,
+    extract_max_page,
     extract_post_content,
     extract_post_links,
 )
@@ -132,3 +134,56 @@ class TestExtractPostContent:
         assert "LinkedIn workload" in result["body"]
         # Should not contain noise patterns
         assert ". .noise" not in result["body"]
+
+
+# --- derive_page_url tests ---
+
+
+class TestDerivePageUrl:
+    """Tests for derive_page_url."""
+
+    def test_basic(self) -> None:
+        """Replace page 1 with page 5."""
+        url = "https://www.1point3acres.com/bbs/tag-415-1.html"
+        assert derive_page_url(url, 5) == "https://www.1point3acres.com/bbs/tag-415-5.html"
+
+    def test_page_1(self) -> None:
+        """Replace page 5 back to page 1."""
+        url = "https://www.1point3acres.com/bbs/tag-415-5.html"
+        assert derive_page_url(url, 1) == "https://www.1point3acres.com/bbs/tag-415-1.html"
+
+    def test_invalid_url(self) -> None:
+        """Non-matching URL should raise ValueError."""
+        with pytest.raises(ValueError, match="does not match"):
+            derive_page_url("https://example.com/not-a-tag-page", 1)
+
+    def test_high_page(self) -> None:
+        """Page 255 should work correctly."""
+        url = "https://www.1point3acres.com/bbs/tag-415-1.html"
+        result = derive_page_url(url, 255)
+        assert result == "https://www.1point3acres.com/bbs/tag-415-255.html"
+
+
+# --- extract_max_page tests ---
+
+
+@pytest.fixture()
+def index_with_pagination_html() -> str:
+    """Load forum index HTML fixture with pagination."""
+    return (FIXTURES_DIR / "forum_index_with_pagination.html").read_text(encoding="utf-8")
+
+
+class TestExtractMaxPage:
+    """Tests for extract_max_page."""
+
+    def test_with_pagination(self, index_with_pagination_html: str) -> None:
+        """Should extract max page from a.last href."""
+        assert extract_max_page(index_with_pagination_html) == 255
+
+    def test_no_pagination(self, index_html: str) -> None:
+        """HTML without div.pg should return 1."""
+        assert extract_max_page(index_html) == 1
+
+    def test_empty_html(self) -> None:
+        """Empty string should return 1."""
+        assert extract_max_page("") == 1

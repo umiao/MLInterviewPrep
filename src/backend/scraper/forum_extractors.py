@@ -1,10 +1,74 @@
 """HTML content extraction for 1point3acres forum pages."""
 
+import re
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
 from src.backend.scraper.extractors import compute_content_hash  # noqa: F401
+
+# Matches 1point3acres tag index URLs like tag-415-1.html
+_TAG_PAGE_RE = re.compile(r"(tag-\d+-)(\d+)(\.html)")
+
+
+def derive_page_url(base_url: str, page: int) -> str:
+    """Replace the page number in a 1point3acres tag index URL.
+
+    Args:
+        base_url: A URL matching the pattern tag-{id}-{page}.html.
+        page: The target page number.
+
+    Returns:
+        URL with the page number replaced.
+
+    Raises:
+        ValueError: If base_url does not match the expected pattern.
+    """
+    match = _TAG_PAGE_RE.search(base_url)
+    if not match:
+        raise ValueError(
+            f"URL does not match tag-N-N.html pattern: {base_url}"
+        )
+    return base_url[: match.start()] + match.group(1) + str(page) + match.group(3) + base_url[match.end():]
+
+
+def extract_max_page(html: str) -> int:
+    """Extract the maximum page number from a forum index page's pagination.
+
+    Looks for the div.pg pagination container. Tries a.last href first,
+    then falls back to the '/ NNN' span text.
+
+    Args:
+        html: Raw HTML of the index/tag page.
+
+    Returns:
+        Maximum page number, or 1 if no pagination found.
+    """
+    if not html:
+        return 1
+
+    soup = BeautifulSoup(html, "html.parser")
+    pg_div = soup.select_one("div.pg")
+    if not pg_div:
+        return 1
+
+    # Try a.last href
+    last_link = pg_div.select_one("a.last")
+    if last_link:
+        href = last_link.get("href", "")
+        match = _TAG_PAGE_RE.search(href)
+        if match:
+            return int(match.group(2))
+
+    # Fallback: span with '/ NNN' text
+    for span in pg_div.select("span"):
+        title = span.get("title", "")
+        text = title or span.get_text()
+        page_match = re.search(r"/\s*(\d+)", text)
+        if page_match:
+            return int(page_match.group(1))
+
+    return 1
 
 
 def extract_post_links(html: str, base_url: str) -> list[dict]:
