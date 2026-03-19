@@ -9,54 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-146: Forum service layer (two-phase scrape + import to prep notes)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P2-143, T-P2-144, T-P2-145
-- **Description**: Create src/backend/services/forum_service.py with business logic for the two-phase forum scraping workflow.
-
-**Functions (all async except import_post_to_prep_notes and get_fetch_progress):**
-
-1. `async def scrape_seed_page(db, seed_id: int, crawler: PlaywrightCrawler) -> list[ForumPostLink]:`
-   - Phase A: Fetch index page for the given ForumSeed, extract links via extract_post_links().
-   - Upsert to DB: for each extracted link, INSERT OR IGNORE (dedup by url UNIQUE constraint).
-   - If external_post_id conflicts with existing row from different seed, skip and log info.
-   - Update existing link titles if they changed.
-   - Update ForumSeed.last_scraped_at on success.
-   - Idempotent: re-running discovers new posts without duplicating existing ones.
-   - Fetching: Use crawler.fetch_page_cdp() as primary, fall back to fetch_page_with_cookie() if CDP fails and ONEPOINT3ACRES_COOKIE is set.
-
-2. `async def fetch_single_post(db, link_id: int, crawler: PlaywrightCrawler) -> ForumPost | None:`
-   - Phase B: Fetch individual post page for a ForumPostLink.
-   - Skip if link.status == fetched (already done).
-   - On success: extract content via extract_post_content(), create ForumPost with raw_text + content_hash (via compute_content_hash), set link.status=fetched.
-   - On failure: set link.status=failed, increment link.retry_count, store error in link.last_error.
-   - Content dedup: if content_hash matches existing ForumPost, log warning but still save.
-
-3. `async def fetch_next_unfetched(db, seed_id: int, crawler: PlaywrightCrawler) -> ForumPost | None:`
-   - Find next ForumPostLink with status=pending ordered by fetch_order, call fetch_single_post.
-
-4. `async def retry_failed(db, seed_id: int, crawler: PlaywrightCrawler) -> list[ForumPost]:`
-   - Reset all status=failed links for this seed to pending (clear retry_count and last_error).
-   - Then fetch them sequentially via fetch_single_post.
-
-5. `def import_post_to_prep_notes(db, post_id: int, company_id: int) -> Company:`
-   - Append ForumPost.raw_text to Company.prep_notes with header format including title, source URL, fetched timestamp, post_id, external_id.
-   - Uses existing separator pattern from routers/companies.py line 149.
-
-6. `def get_fetch_progress(db, seed_id: int) -> dict:`
-   - Return {total: int, pending: int, fetched: int, failed: int, last_fetched_url: str|None}.
-
-**AC:**
-1. scrape_seed_page is idempotent -- running twice on same HTML produces no duplicate links
-2. fetch_single_post sets status=fetched on success with correct raw_text and content_hash
-3. fetch_single_post sets status=failed with retry_count incremented and last_error on failure
-4. fetch_next_unfetched returns None when all links are fetched
-5. retry_failed resets failed links to pending and re-fetches them
-6. import_post_to_prep_notes appends with correct header format and separator
-7. get_fetch_progress returns accurate counts
-8. Tests: tests/test_forum_service.py with in-memory DB + mocked crawler (AsyncMock for fetch methods)
-
 #### T-P0-147: Forum CLI script (scripts/forum_scrape.py)
 - **Priority**: P0
 - **Complexity**: S
@@ -209,6 +161,7 @@ Follow patterns from src/frontend/src/hooks/usePrepNotes.ts (TanStack useQuery/u
 - [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
+- [x] **2026-03-19** -- T-P0-146: Forum service layer (two-phase scrape + import to prep notes). Create src/backend/services/forum_service.py with business logic for the two-phase forum scraping workflow.
 - [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.
 - [x] **2026-03-17** -- T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applicatio
 - [x] **2026-03-17** -- T-P1-142: Seed DoorDash and Uber interview events

@@ -288,3 +288,10 @@
 - **Sanity check result**: All 852 tests pass. Ruff clean. Jammer stripping verified -- no noise in extracted body. URLs correctly resolved to absolute. Only OP body extracted (not replies).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-145 --status completed`
+
+## 2026-03-19 -- [T-P0-146] Forum service layer (two-phase scrape + import)
+- **What I did**: Created forum_service.py with 6 functions: scrape_seed_page (Phase A: index scrape + upsert links, idempotent), fetch_single_post (Phase B: individual post fetch with content extraction), fetch_next_unfetched, retry_failed, import_post_to_prep_notes (appends to company notes with metadata header and --- separator), get_fetch_progress. CDP-first fetching with cookie fallback. External ID extraction from thread URLs. Content dedup via hash.
+- **Deliverables**: src/backend/services/forum_service.py (new), tests/test_forum_service.py (new, 27 tests)
+- **Sanity check result**: All 879 tests pass. Ruff clean. Idempotency verified (scrape twice = no duplicates). Failed status + retry_count incremented on error. Import appends with correct separator pattern.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-146 --status completed`
