@@ -6,10 +6,13 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
-from src.backend.models.company import Company, CompanyTopicWeight
+from src.backend.models.company import Company, CompanyDocument, CompanyTopicWeight
 from src.backend.models.framework import FrameworkNode
 from src.backend.schemas.company import (
     CompanyCreate,
+    CompanyDocumentCreate,
+    CompanyDocumentResponse,
+    CompanyDocumentUpdate,
     CompanyResponse,
     CompanyUpdate,
     TopicWeightCreate,
@@ -266,3 +269,167 @@ def get_company_focus(
         }
         for weight, node in rows
     ]
+
+
+# --- Company Documents ---
+
+
+@router.get(
+    "/companies/{company_id}/documents",
+    response_model=list[CompanyDocumentResponse],
+)
+def list_documents(
+    company_id: int,
+    db: Session = Depends(get_db),
+) -> list[CompanyDocument]:
+    """List all child documents for a company.
+
+    Args:
+        company_id: Company ID.
+        db: Database session.
+
+    Returns:
+        List of CompanyDocument objects.
+    """
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return (
+        db.query(CompanyDocument)
+        .filter(CompanyDocument.company_id == company_id)
+        .order_by(CompanyDocument.created_at)
+        .all()
+    )
+
+
+@router.post(
+    "/companies/{company_id}/documents",
+    response_model=CompanyDocumentResponse,
+    status_code=201,
+)
+def create_document(
+    company_id: int,
+    body: CompanyDocumentCreate,
+    db: Session = Depends(get_db),
+) -> CompanyDocument:
+    """Create a child document for a company.
+
+    Args:
+        company_id: Company ID.
+        body: Document creation data.
+        db: Database session.
+
+    Returns:
+        Created CompanyDocument object.
+    """
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+    doc = CompanyDocument(
+        company_id=company_id,
+        title=body.title,
+        content=body.content,
+        source_type=body.source_type,
+    )
+    db.add(doc)
+    db.commit()
+    db.refresh(doc)
+    return doc
+
+
+@router.get(
+    "/companies/{company_id}/documents/{doc_id}",
+    response_model=CompanyDocumentResponse,
+)
+def get_document(
+    company_id: int,
+    doc_id: int,
+    db: Session = Depends(get_db),
+) -> CompanyDocument:
+    """Get a single company document.
+
+    Args:
+        company_id: Company ID.
+        doc_id: Document ID.
+        db: Database session.
+
+    Returns:
+        CompanyDocument object.
+    """
+    doc = (
+        db.query(CompanyDocument)
+        .filter(
+            CompanyDocument.id == doc_id,
+            CompanyDocument.company_id == company_id,
+        )
+        .first()
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return doc
+
+
+@router.put(
+    "/companies/{company_id}/documents/{doc_id}",
+    response_model=CompanyDocumentResponse,
+)
+def update_document(
+    company_id: int,
+    doc_id: int,
+    body: CompanyDocumentUpdate,
+    db: Session = Depends(get_db),
+) -> CompanyDocument:
+    """Update a company document (title and/or content).
+
+    Args:
+        company_id: Company ID.
+        doc_id: Document ID.
+        body: Update data.
+        db: Database session.
+
+    Returns:
+        Updated CompanyDocument object.
+    """
+    doc = (
+        db.query(CompanyDocument)
+        .filter(
+            CompanyDocument.id == doc_id,
+            CompanyDocument.company_id == company_id,
+        )
+        .first()
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    update_data = body.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(doc, field, value)
+    db.commit()
+    db.refresh(doc)
+    return doc
+
+
+@router.delete("/companies/{company_id}/documents/{doc_id}", status_code=204)
+def delete_document(
+    company_id: int,
+    doc_id: int,
+    db: Session = Depends(get_db),
+) -> None:
+    """Delete a company document.
+
+    Args:
+        company_id: Company ID.
+        doc_id: Document ID.
+        db: Database session.
+    """
+    doc = (
+        db.query(CompanyDocument)
+        .filter(
+            CompanyDocument.id == doc_id,
+            CompanyDocument.company_id == company_id,
+        )
+        .first()
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    db.delete(doc)
+    db.commit()

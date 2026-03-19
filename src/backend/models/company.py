@@ -1,16 +1,18 @@
-"""Company models: Company, CompanyTopicWeight."""
+"""Company models: Company, CompanyTopicWeight, CompanyDocument."""
 import json
 
 from sqlalchemy import (
     CheckConstraint,
     Column,
     Date,
+    DateTime,
     Float,
     ForeignKey,
     Integer,
     PrimaryKeyConstraint,
     String,
     Text,
+    func,
 )
 from sqlalchemy.orm import relationship
 
@@ -39,6 +41,9 @@ class Company(Base):
 
     topic_weights = relationship(
         "CompanyTopicWeight", back_populates="company", cascade="all, delete-orphan"
+    )
+    documents = relationship(
+        "CompanyDocument", back_populates="company", cascade="all, delete-orphan"
     )
 
     @property
@@ -71,3 +76,19 @@ class CompanyTopicWeight(Base):
 
     company = relationship("Company", back_populates="topic_weights")
     framework_node = relationship("FrameworkNode")
+
+
+class CompanyDocument(Base):
+    """A child document under a company (e.g. forum interview posts)."""
+
+    __tablename__ = "company_documents"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    company_id = Column(Integer, ForeignKey("companies.id"), nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False, default="")
+    source_type = Column(String, nullable=False, default="manual")
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    company = relationship("Company", back_populates="documents")

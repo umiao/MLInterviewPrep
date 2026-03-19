@@ -297,6 +297,23 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             ")",
         ],
     ),
+    (
+        10,
+        "Create company_documents table for child docs per company",
+        [
+            "CREATE TABLE IF NOT EXISTS company_documents ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,"
+            "  title VARCHAR NOT NULL,"
+            "  content TEXT NOT NULL DEFAULT '',"
+            "  source_type VARCHAR NOT NULL DEFAULT 'manual',"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_company_documents_company_id "
+            "ON company_documents(company_id)",
+        ],
+    ),
 ]
 
 
