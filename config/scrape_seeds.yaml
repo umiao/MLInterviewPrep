@@ -1,0 +1,17 @@
+# Seed URLs for forum scraping. Claude reads this via /scrape skill.
+# Human edits this file to add/remove targets.
+# All runtime state (progress, errors, resume points) lives in the DB.
+
+companies:
+  - name: LinkedIn
+    seeds:
+      - url: "https://www.1point3acres.com/bbs/tag-123-1.html"
+        label: "linkedin-interview-1p3a"
+
+  - name: DoorDash
+    seeds:
+      - url: "https://www.1point3acres.com/bbs/tag-456-1.html"
+        label: "doordash-interview-1p3a"
+
+defaults:
+  mode: full        # "links-only" | "full" (Phase A+B)

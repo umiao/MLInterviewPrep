@@ -29,6 +29,7 @@ class ForumSeed(Base):
     company_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     last_scraped_at = Column(DateTime, nullable=True)
+    last_scraped_page = Column(Integer, nullable=True, default=None)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     post_links = relationship(

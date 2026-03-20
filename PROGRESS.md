@@ -164,3 +164,17 @@
 - **Sanity check result**: All 945 tests pass. Ruff clean.
 - **Status**: [DONE]
 - **Request**: No task status change needed (ad-hoc bugfix)
+
+## 2026-03-20 -- Scraper performance overhaul + full link collection + post extractor fix
+- **What I did**: (1) Analyzed DB: 100 links from 5 pages, 29% interview-relevant, 2% coverage. (2) Fixed triple rate-limiting (site config 20-45s + CDP 5-15s + cookie 5-15s -> single 0.5-5s layer). (3) Added per-page DB commits (crash lost all progress before). (4) Added `start_page` param for resumable scraping. (5) Improved early exit: removed `page>=5` guard, count first page in zero-new streak. (6) Added TCP probe for CDP port to skip Playwright startup when no Chrome debug instance. (7) Fixed post content extractor for real HTML: h1.ts title, [itemprop=articleBody] body, author from .authi before nbsp. (8) Scraped pages 6-~120: 2,559 total links collected (41% interview-related). (9) Fetched 9/10 test posts successfully.
+- **Deliverables**: src/backend/services/forum_service.py, src/backend/scraper/crawler.py, src/backend/scraper/site_configs.py, src/backend/scraper/forum_extractors.py, scripts/forum_scrape.py, tests/test_forum_service.py
+- **Sanity check result**: All 85 forum tests pass. 9/10 live post fetches succeeded. 2,559 links in DB.
+- **Status**: [PARTIAL] Pages 123-255 not yet scraped (early exit false positive on overlap zone). 1 post (#14) failed extraction (likely locked/deleted page).
+- **Request**: No task status change needed (ad-hoc improvement)
+
+## 2026-03-20 -- Cron-driven forum scraping system (scrape protocol v2)
+- **What I did**: Built full scraping automation infrastructure: (1) YAML config file (`config/scrape_seeds.yaml`) for declarative seed management. (2) Strict schema validator (`scrape_config.py`) with unknown-key rejection. (3) `last_scraped_page` column + migration for resume tracking. (4) Content quality check (MIN_POST_CONTENT_LENGTH=50) to catch login walls. (5) `batch-status` CLI command for all-seeds progress table. (6) `--limit N` flag for batched fetch runs. (7) `/scrape` skill with full procedure (config sync, Phase A/B, cron setup, escalation rules).
+- **Deliverables**: config/scrape_seeds.yaml, src/backend/scraper/scrape_config.py, src/backend/models/forum.py, src/backend/database.py (migration 11), src/backend/services/forum_service.py, scripts/forum_scrape.py, .claude/skills/scrape/SKILL.md, tests/test_scrape_config.py, tests/test_migrations.py, tests/test_forum_service.py
+- **Sanity check result**: All 965 tests pass. Config validator catches typos. batch-status shows real DB state. Migration adds column correctly.
+- **Status**: [DONE]
+- **Request**: No task status change needed (plan implementation)

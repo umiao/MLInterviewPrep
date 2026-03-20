@@ -314,6 +314,14 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ON company_documents(company_id)",
         ],
     ),
+    (
+        11,
+        "Add last_scraped_page column to forum_seeds",
+        [
+            "ADD_COLUMN_IF_MISSING:forum_seeds:last_scraped_page:"
+            "ALTER TABLE forum_seeds ADD COLUMN last_scraped_page INTEGER",
+        ],
+    ),
 ]
 
 

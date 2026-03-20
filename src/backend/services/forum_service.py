@@ -23,6 +23,9 @@ from src.backend.scraper.site_configs import get_config
 
 logger = logging.getLogger(__name__)
 
+# Posts shorter than this are likely login walls or empty pages
+MIN_POST_CONTENT_LENGTH = 50
+
 
 def _extract_external_id(url: str) -> str | None:
     """Extract external post ID from a forum URL.
@@ -255,6 +258,7 @@ async def scrape_seed_pages(
 
     # Commit first page immediately so progress is durable
     seed.last_scraped_at = datetime.utcnow()
+    seed.last_scraped_page = start_page
     db.commit()
 
     # Detect max page from pagination (always fetch page 1 for this if needed)
@@ -308,6 +312,7 @@ async def scrape_seed_pages(
 
             # Commit per-page: crash-safe, progress is never lost
             seed.last_scraped_at = datetime.utcnow()
+            seed.last_scraped_page = page
             db.commit()
 
             logger.info(
@@ -383,6 +388,18 @@ async def fetch_single_post(
         return None
 
     raw_text = content["body"]
+
+    # Content quality check: reject suspiciously short posts (login wall, empty)
+    if len(raw_text.strip()) < MIN_POST_CONTENT_LENGTH:
+        link.status = "failed"
+        link.retry_count = (link.retry_count or 0) + 1
+        link.last_error = (
+            f"Content too short ({len(raw_text.strip())} chars) "
+            f"-- possible login wall"
+        )
+        db.commit()
+        return None
+
     content_hash = compute_content_hash(raw_text)
 
     # Content dedup warning

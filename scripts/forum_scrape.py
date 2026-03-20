@@ -185,8 +185,9 @@ def cmd_fetch(args: argparse.Namespace) -> None:
                 print("No post fetched (already fetched or failed)")
 
         elif args.all:
+            limit = args.limit
             count = 0
-            while True:
+            while limit is None or count < limit:
                 post = asyncio.run(
                     fetch_next_unfetched(db, args.seed_id, crawler)
                 )
@@ -254,6 +255,38 @@ def cmd_import(args: argparse.Namespace) -> None:
     except ValueError as e:
         print(f"Error: {e}", file=sys.stderr)
         sys.exit(1)
+    finally:
+        db.close()
+
+
+def cmd_batch_status(args: argparse.Namespace) -> None:
+    """Handle the batch-status subcommand -- show progress for all seeds."""
+    db = SessionLocal()
+    try:
+        seeds = db.query(ForumSeed).all()
+        if not seeds:
+            print("No seeds found.")
+            return
+
+        # Header
+        print(
+            f"{'ID':>3} | {'Label':<25} | {'Total':>5} | {'Fetched':>7} "
+            f"| {'Pending':>7} | {'Failed':>6} | {'Last Page':>9}"
+        )
+        print(
+            f"{'---':>3} | {'-' * 25} | {'-----':>5} | {'-------':>7} "
+            f"| {'-------':>7} | {'------':>6} | {'-' * 9}"
+        )
+
+        for s in seeds:
+            progress = get_fetch_progress(db, s.id)
+            label = (s.label or "")[:25]
+            last_page = str(s.last_scraped_page) if s.last_scraped_page else "-"
+            print(
+                f"{s.id:>3} | {label:<25} | {progress['total']:>5} "
+                f"| {progress['fetched']:>7} | {progress['pending']:>7} "
+                f"| {progress['failed']:>6} | {last_page:>9}"
+            )
     finally:
         db.close()
 
@@ -350,6 +383,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--link-id", type=int,
         help="Fetch a specific link by ID"
     )
+    p_fetch.add_argument(
+        "--limit", type=int, default=None,
+        help="Max posts to fetch this run (only with --all)"
+    )
     p_fetch.set_defaults(func=cmd_fetch)
 
     # status
@@ -369,6 +406,12 @@ def build_parser() -> argparse.ArgumentParser:
         help="Company name to import into"
     )
     p_import.set_defaults(func=cmd_import)
+
+    # batch-status
+    p_batch = subparsers.add_parser(
+        "batch-status", help="Show progress for all seeds"
+    )
+    p_batch.set_defaults(func=cmd_batch_status)
 
     # retry-failed
     p_retry = subparsers.add_parser(

@@ -272,6 +272,32 @@ class TestFetchSinglePost:
         assert post.published_at  # Has a date string
 
 
+    @pytest.mark.asyncio()
+    async def test_fetch_short_content_fails(
+        self, db_session, seed, mock_crawler
+    ) -> None:
+        """Content shorter than MIN_POST_CONTENT_LENGTH is rejected as possible login wall."""
+        await scrape_seed_page(db_session, seed.id, mock_crawler)
+        link = db_session.query(ForumPostLink).first()
+
+        # Return HTML that extracts to very short content
+        short_html = """
+        <html><body>
+        <h1 class="ts">Short</h1>
+        <div itemprop="articleBody">tiny</div>
+        <div class="authi">author&nbsp;</div>
+        </body></html>
+        """
+        mock_crawler.fetch_page_cdp.return_value = short_html
+        result = await fetch_single_post(db_session, link.id, mock_crawler)
+
+        assert result is None
+        db_session.refresh(link)
+        assert link.status == "failed"
+        assert "too short" in link.last_error
+        assert "login wall" in link.last_error
+
+
 # --- fetch_next_unfetched ---
 
 
@@ -637,6 +663,34 @@ class TestScrapeSeedPages:
         assert stats["pages_scraped"] == 3
         assert stats["new_links"] == 0
         assert stats["last_page"] == 8
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_last_scraped_page_tracked(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """last_scraped_page is updated in DB after each page."""
+        page2_html = INDEX_WITH_PAGINATION_HTML.replace(
+            "thread-1169245", "thread-3000001"
+        ).replace(
+            "thread-1169223", "thread-3000002"
+        ).replace(
+            "thread-1169229", "thread-3000003"
+        ).replace(
+            "thread-1168589", "thread-3000004"
+        ).replace(
+            "thread-1167565", "thread-3000005"
+        )
+        mock_crawler.fetch_page_cdp.side_effect = [
+            INDEX_WITH_PAGINATION_HTML,  # page 1
+            page2_html,  # page 2
+        ]
+        stats = await scrape_seed_pages(
+            db_session, paginated_seed.id, mock_crawler, max_pages=2
+        )
+        assert stats["pages_scraped"] == 2
+        db_session.refresh(paginated_seed)
+        assert paginated_seed.last_scraped_page == 2
 
     @pytest.mark.asyncio()
     @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
