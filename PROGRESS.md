@@ -178,3 +178,10 @@
 - **Sanity check result**: All 965 tests pass. Config validator catches typos. batch-status shows real DB state. Migration adds column correctly.
 - **Status**: [DONE]
 - **Request**: No task status change needed (plan implementation)
+
+## 2026-03-20 -- Scrape protocol refinements: timeout, seed URLs, cron simplification
+- **What I did**: (1) Replaced `--limit N` with `--timeout-minutes N` for time-based fetch runs (e.g. 300 = 5 hours). (2) Fixed LinkedIn seed URL in config: `tag-123` -> `tag-415` (matching DB). (3) Added real DoorDash seed URL `tag/doordash-1829-1.html`. (4) Simplified cron from 2 jobs to 1 daily 2:00 AM full scrape with 5h timeout.
+- **Deliverables**: config/scrape_seeds.yaml, scripts/forum_scrape.py, .claude/skills/scrape/SKILL.md
+- **Sanity check result**: All 965 tests pass. Config validates. Seed URLs match DB.
+- **Status**: [DONE]
+- **Request**: No task status change needed

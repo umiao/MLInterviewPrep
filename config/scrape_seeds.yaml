@@ -5,7 +5,7 @@
 companies:
   - name: LinkedIn
     seeds:
-      - url: "https://www.1point3acres.com/bbs/tag-123-1.html"
+      - url: "https://www.1point3acres.com/bbs/tag-415-1.html"
         label: "linkedin-interview-1p3a"
 
   - name: DoorDash
