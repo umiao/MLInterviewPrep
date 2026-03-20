@@ -147,6 +147,7 @@ def cmd_scrape(args: argparse.Namespace) -> None:
                     crawler,
                     max_pages=args.pages,
                     auto_detect=auto_detect,
+                    start_page=args.start_page,
                 )
             )
             print(f"Pages scraped:      {stats['pages_scraped']}")
@@ -154,6 +155,7 @@ def cmd_scrape(args: argparse.Namespace) -> None:
             print(f"New links:          {stats['new_links']}")
             print(f"Max page detected:  {stats['max_page_detected']}")
             print(f"Stopped early:      {stats['stopped_early']}")
+            print(f"Last page:          {stats['last_page']}")
         else:
             links = asyncio.run(scrape_seed_page(db, args.seed_id, crawler))
             print(f"Discovered {len(links)} links for seed {args.seed_id}")
@@ -319,6 +321,10 @@ def build_parser() -> argparse.ArgumentParser:
     p_scrape.add_argument(
         "--pages", type=int, default=1,
         help="Number of pages to scrape (default: 1)"
+    )
+    p_scrape.add_argument(
+        "--start-page", type=int, default=1,
+        help="Page number to start from (default: 1, for resuming)"
     )
     p_scrape.add_argument(
         "--no-auto-detect", action="store_true",

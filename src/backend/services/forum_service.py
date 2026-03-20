@@ -39,10 +39,31 @@ def _extract_external_id(url: str) -> str | None:
     return m.group(1) if m else None
 
 
+def _is_cdp_available(port: int = 9222) -> bool:
+    """Quick TCP probe to check if Chrome debug port is listening.
+
+    Args:
+        port: Chrome debug port to check.
+
+    Returns:
+        True if port accepts connections, False otherwise.
+    """
+    import socket
+
+    try:
+        with socket.create_connection(("localhost", port), timeout=0.5):
+            return True
+    except (ConnectionRefusedError, OSError):
+        return False
+
+
 async def _fetch_html(
     crawler: PlaywrightCrawler, url: str, port: int = 9222
 ) -> str:
-    """Fetch HTML via CDP first, fall back to cookie method.
+    """Fetch HTML via CDP (if available) or cookie method.
+
+    Probes the CDP port first with a fast TCP check (~0.5s) to avoid
+    the expensive Playwright startup when no Chrome debug instance is running.
 
     Args:
         crawler: PlaywrightCrawler instance.
@@ -52,16 +73,20 @@ async def _fetch_html(
     Returns:
         HTML string (may be empty on failure).
     """
-    html = await crawler.fetch_page_cdp(url, port=port)
-    if html:
-        return html
+    if _is_cdp_available(port):
+        html = await crawler.fetch_page_cdp(url, port=port)
+        if html:
+            return html
+        logger.info("CDP connected but fetch failed for %s, trying cookie", url)
 
     settings = get_settings()
     cookie = settings.ONEPOINT3ACRES_COOKIE
     if cookie:
-        logger.info("CDP failed for %s, falling back to cookie method", url)
         html = await crawler.fetch_page_with_cookie(url, cookie)
-    return html
+        return html
+
+    logger.warning("No CDP and no cookie configured, cannot fetch %s", url)
+    return ""
 
 
 def _upsert_links_from_html(
@@ -180,11 +205,13 @@ async def scrape_seed_pages(
     crawler: PlaywrightCrawler,
     max_pages: int = 1,
     auto_detect: bool = True,
+    start_page: int = 1,
 ) -> dict:
     """Multi-page scraping: fetch multiple index pages for a seed.
 
-    Fetches page 1, optionally detects max pages from pagination,
-    then loops through subsequent pages with rate limiting and early stop.
+    Fetches pages starting from start_page, optionally detects max pages
+    from pagination, then loops through subsequent pages with rate limiting
+    and early stop (3 consecutive pages with 0 new links).
 
     Args:
         db: Database session.
@@ -192,10 +219,12 @@ async def scrape_seed_pages(
         crawler: PlaywrightCrawler for fetching pages.
         max_pages: Maximum number of pages to scrape.
         auto_detect: If True, cap max_pages by detected pagination max.
+        start_page: Page number to start from (default 1). Use to resume
+            from where a previous scrape left off.
 
     Returns:
         Dict with pages_scraped, total_links, new_links, max_page_detected,
-        stopped_early.
+        stopped_early, last_page.
 
     Raises:
         ValueError: If seed_id not found.
@@ -204,25 +233,39 @@ async def scrape_seed_pages(
     if not seed:
         raise ValueError(f"ForumSeed {seed_id} not found")
 
-    # Page 1
-    html = await _fetch_html(crawler, seed.url)
+    # First page (may be start_page, not necessarily page 1)
+    first_url = derive_page_url(seed.url, start_page) if start_page > 1 else seed.url
+    html = await _fetch_html(crawler, first_url)
     if not html:
-        logger.warning("No HTML fetched for seed %d (%s)", seed_id, seed.url)
+        logger.warning("No HTML fetched for seed %d (%s)", seed_id, first_url)
         return {
             "pages_scraped": 0,
             "total_links": 0,
             "new_links": 0,
             "max_page_detected": 1,
             "stopped_early": False,
+            "last_page": start_page,
         }
 
-    page1_links, page1_new = _upsert_links_from_html(db, seed_id, html, seed.url)
-    total_links = len(page1_links)
-    new_links = page1_new
+    first_links, first_new = _upsert_links_from_html(db, seed_id, html, seed.url)
+    total_links = len(first_links)
+    new_links = first_new
     pages_scraped = 1
+    last_page = start_page
 
-    # Detect max page from pagination
-    detected_max = extract_max_page(html) if auto_detect else max_pages
+    # Commit first page immediately so progress is durable
+    seed.last_scraped_at = datetime.utcnow()
+    db.commit()
+
+    # Detect max page from pagination (always fetch page 1 for this if needed)
+    if auto_detect and start_page == 1:
+        detected_max = extract_max_page(html)
+    elif auto_detect:
+        # Fetch page 1 just for pagination detection
+        page1_html = await _fetch_html(crawler, seed.url)
+        detected_max = extract_max_page(page1_html) if page1_html else max_pages
+    else:
+        detected_max = max_pages
     effective_max = min(max_pages, detected_max) if auto_detect else max_pages
 
     # Rate limit config
@@ -230,52 +273,61 @@ async def scrape_seed_pages(
     rate_low, rate_high = config.rate_limit_seconds
 
     stopped_early = False
-    zero_new_streak = 0
-    cumulative_links = len(page1_links)
+    # Count first page toward the zero-new streak
+    zero_new_streak = 1 if first_new == 0 else 0
+    cumulative_links = len(first_links)
 
-    for page in range(2, effective_max + 1):
-        # Rate limit
-        delay = random.uniform(rate_low, rate_high) + random.uniform(0, 3)
-        await asyncio.sleep(delay)
+    # Early stop check for first page (all 3 consecutive zeros already seen)
+    if zero_new_streak >= 3:
+        stopped_early = True
 
-        # Derive URL and fetch
-        page_url = derive_page_url(seed.url, page)
-        page_html = await _fetch_html(crawler, page_url)
-        if not page_html:
-            logger.warning("Page %d: empty response, skipping", page)
+    if not stopped_early:
+        for page in range(start_page + 1, start_page + effective_max):
+            # Rate limit
+            delay = random.uniform(rate_low, rate_high)
+            await asyncio.sleep(delay)
+
+            # Derive URL and fetch
+            page_url = derive_page_url(seed.url, page)
+            page_html = await _fetch_html(crawler, page_url)
+            if not page_html:
+                logger.warning("Page %d: empty response, skipping", page)
+                pages_scraped += 1
+                last_page = page
+                continue
+
+            page_links, page_new = _upsert_links_from_html(
+                db, seed_id, page_html, seed.url, order_offset=cumulative_links
+            )
+            page_total = len(page_links)
+            cumulative_links += page_total
+            total_links += page_total
+            new_links += page_new
             pages_scraped += 1
-            continue
+            last_page = page
 
-        page_links, page_new = _upsert_links_from_html(
-            db, seed_id, page_html, seed.url, order_offset=cumulative_links
-        )
-        page_total = len(page_links)
-        cumulative_links += page_total
-        total_links += page_total
-        new_links += page_new
-        pages_scraped += 1
+            # Commit per-page: crash-safe, progress is never lost
+            seed.last_scraped_at = datetime.utcnow()
+            db.commit()
 
-        logger.info(
-            "Page %d/%d: %d links (%d new), cumulative %d",
-            page,
-            effective_max,
-            page_total,
-            page_new,
-            cumulative_links,
-        )
+            logger.info(
+                "Page %d/%d: %d links (%d new), cumulative %d",
+                page,
+                start_page + effective_max - 1,
+                page_total,
+                page_new,
+                cumulative_links,
+            )
 
-        # Early stop: 3 consecutive pages with 0 new links, after page 5
-        if page_new == 0:
-            zero_new_streak += 1
-        else:
-            zero_new_streak = 0
+            # Early stop: 3 consecutive pages with 0 new links
+            if page_new == 0:
+                zero_new_streak += 1
+            else:
+                zero_new_streak = 0
 
-        if zero_new_streak >= 3 and page >= 5:
-            stopped_early = True
-            break
-
-    seed.last_scraped_at = datetime.utcnow()
-    db.commit()
+            if zero_new_streak >= 3:
+                stopped_early = True
+                break
 
     return {
         "pages_scraped": pages_scraped,
@@ -283,6 +335,7 @@ async def scrape_seed_pages(
         "new_links": new_links,
         "max_page_detected": detected_max,
         "stopped_early": stopped_early,
+        "last_page": last_page,
     }
 
 

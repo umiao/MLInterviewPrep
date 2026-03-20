@@ -8,7 +8,7 @@ class SiteConfig:
 
     base_url: str
     selectors: dict[str, str]
-    rate_limit_seconds: tuple[int, int]
+    rate_limit_seconds: tuple[float, float]
 
 
 SITE_CONFIGS: dict[str, SiteConfig] = {
@@ -29,7 +29,7 @@ SITE_CONFIGS: dict[str, SiteConfig] = {
             "post_title": "a.thread-title",
             "post_body": "div.thread-content",
         },
-        rate_limit_seconds=(20, 45),
+        rate_limit_seconds=(0.5, 5),
     ),
     "leetcode_discuss": SiteConfig(
         base_url="https://leetcode.com/discuss",

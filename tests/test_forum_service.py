@@ -26,6 +26,18 @@ INDEX_WITH_PAGINATION_HTML = (
 ).read_text(encoding="utf-8")
 POST_HTML = (FIXTURES / "forum_post.html").read_text(encoding="utf-8")
 
+# Patch CDP probe so tests use mock crawler's fetch_page_cdp directly
+pytestmark = pytest.mark.usefixtures("_bypass_cdp_probe")
+
+
+@pytest.fixture(autouse=True)
+def _bypass_cdp_probe():
+    """Make _is_cdp_available return True so mock crawler's CDP path is used."""
+    with patch(
+        "src.backend.services.forum_service._is_cdp_available", return_value=True
+    ):
+        yield
+
 
 @pytest.fixture()
 def seed(db_session):
@@ -584,8 +596,8 @@ class TestScrapeSeedPages:
     async def test_early_stop(
         self, mock_sleep, db_session, paginated_seed, mock_crawler
     ) -> None:
-        """Early stop triggers after 3 consecutive pages with 0 new links past page 5."""
-        # Page 1: pagination fixture. Pages 2-8: same HTML as page 1 (all dupes).
+        """Early stop triggers after 3 consecutive pages with 0 new links."""
+        # Page 1: pagination fixture. Pages 2+: same HTML as page 1 (all dupes).
         mock_crawler.fetch_page_cdp.return_value = INDEX_WITH_PAGINATION_HTML
         stats = await scrape_seed_pages(
             db_session,
@@ -594,12 +606,37 @@ class TestScrapeSeedPages:
             max_pages=10,
             auto_detect=False,
         )
-        # Page 1: 5 new. Pages 2-4: 0 new each (streak=1,2,3 but page<5).
-        # Page 5: 0 new (streak=4, page>=5 -> stop after page 5 check)
-        # Actually: page 2 streak=1, page 3 streak=2, page 4 streak=3 but page<5.
-        # page 5: streak=4 and page>=5 -> stop.
+        # Page 1: 5 new, streak=0.
+        # Page 2: 0 new, streak=1. Page 3: 0 new, streak=2.
+        # Page 4: 0 new, streak=3 -> early stop.
         assert stats["stopped_early"] is True
+        assert stats["pages_scraped"] == 4
         assert stats["new_links"] == 5  # only page 1 had new links
+        assert stats["last_page"] == 4
+
+    @pytest.mark.asyncio()
+    @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)
+    async def test_early_stop_from_start_page(
+        self, mock_sleep, db_session, paginated_seed, mock_crawler
+    ) -> None:
+        """Early stop works correctly with start_page > 1 (resume scenario)."""
+        # Pre-populate links from pages 1-5
+        mock_crawler.fetch_page_cdp.return_value = INDEX_WITH_PAGINATION_HTML
+        await scrape_seed_pages(
+            db_session, paginated_seed.id, mock_crawler,
+            max_pages=1, auto_detect=False,
+        )
+        # Now resume from page 6 -- all pages return same HTML (all dupes)
+        stats = await scrape_seed_pages(
+            db_session, paginated_seed.id, mock_crawler,
+            max_pages=10, auto_detect=False, start_page=6,
+        )
+        # Page 6: 0 new (streak=1 since page 6 result counted).
+        # Page 7: 0 new (streak=2). Page 8: 0 new (streak=3) -> stop.
+        assert stats["stopped_early"] is True
+        assert stats["pages_scraped"] == 3
+        assert stats["new_links"] == 0
+        assert stats["last_page"] == 8
 
     @pytest.mark.asyncio()
     @patch("src.backend.services.forum_service.asyncio.sleep", new_callable=AsyncMock)

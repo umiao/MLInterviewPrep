@@ -56,7 +56,7 @@ class PlaywrightCrawler:
         self,
         url: str,
         port: int = 9222,
-        delay: tuple[int, int] = (5, 15),
+        delay: tuple[float, float] = (0, 0),
     ) -> str:
         """Fetch page by attaching to a running Chrome instance via CDP.
 
@@ -64,15 +64,18 @@ class PlaywrightCrawler:
         page in the existing browser context, navigates to the URL, and
         returns the HTML.  The browser itself is NOT closed -- only the page.
 
+        Rate limiting should be handled by the caller (service layer), not here.
+
         Args:
             url: URL to fetch.
             port: Chrome debug port (default 9222).
-            delay: Min/max seconds for rate-limiting sleep.
+            delay: Min/max seconds for optional sleep (default 0 -- caller handles rate limiting).
 
         Returns:
             Page HTML content, or empty string on error.
         """
-        await asyncio.sleep(random.uniform(*delay))
+        if delay != (0, 0):
+            await asyncio.sleep(random.uniform(*delay))
 
         try:
             from playwright.async_api import async_playwright
@@ -104,22 +107,25 @@ class PlaywrightCrawler:
         self,
         url: str,
         cookie_str: str,
-        delay: tuple[int, int] = (5, 15),
+        delay: tuple[float, float] = (0, 0),
     ) -> str:
         """Fetch page using a headless browser with injected cookies.
 
         Launches a headless Chromium instance, parses the cookie string,
         adds cookies to the browser context, then navigates to the URL.
 
+        Rate limiting should be handled by the caller (service layer), not here.
+
         Args:
             url: URL to fetch.
             cookie_str: Raw cookie header string (``key=val; key2=val2``).
-            delay: Min/max seconds for rate-limiting sleep.
+            delay: Min/max seconds for optional sleep (default 0 -- caller handles rate limiting).
 
         Returns:
             Page HTML content, or empty string on error.
         """
-        await asyncio.sleep(random.uniform(*delay))
+        if delay != (0, 0):
+            await asyncio.sleep(random.uniform(*delay))
 
         try:
             from urllib.parse import urlparse
