@@ -75,7 +75,8 @@
 - **Task IDs are auto-generated.** Never invent IDs manually.
   Use `task_db.py add --title "..." --priority P0` and the system assigns the next ID.
 - **For batch operations**: use `task_db.py batch --commands '[...]'` to wrap multiple
-  commands atomically.
+  commands atomically. Use **flat keys** (not nested `args`):
+  `{"cmd": "add", "title": "...", "priority": "P0", "description": "..."}`
 
 ## Behavior Rules
 - **Fix violations immediately**: When a check you run (lint, emoji scan, tests) discovers

@@ -1178,14 +1178,29 @@ class TaskStore:
             for cmd_dict in commands:
                 cmd = cmd_dict.get("cmd", "")
 
+                # Support both flat and nested-args formats:
+                #   {"cmd": "add", "title": "..."}          (flat)
+                #   {"cmd": "add", "args": {"title": "..."}} (nested)
+                if "args" in cmd_dict and isinstance(cmd_dict["args"], dict):
+                    merged = {**cmd_dict["args"], **{
+                        k: v for k, v in cmd_dict.items()
+                        if k not in ("cmd", "args")
+                    }}
+                    cmd_dict = {"cmd": cmd, **merged}
+
                 # Replace $LAST references
                 for key in ("id", "on"):
                     if cmd_dict.get(key) == "$LAST" and last_id:
                         cmd_dict[key] = last_id
 
                 if cmd == "add":
+                    title = cmd_dict.get("title", "")
+                    if not title.strip():
+                        raise ValueError(
+                            "batch add: title is required and cannot be empty"
+                        )
                     task = self.add(
-                        title=cmd_dict.get("title", ""),
+                        title=title,
                         priority=cmd_dict.get("priority", "P2"),
                         complexity=cmd_dict.get("complexity", "S"),
                         description=cmd_dict.get("description", ""),

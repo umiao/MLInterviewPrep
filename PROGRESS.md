@@ -185,3 +185,10 @@
 - **Sanity check result**: All 965 tests pass. Config validates. Seed URLs match DB.
 - **Status**: [DONE]
 - **Request**: No task status change needed
+
+## 2026-03-20 -- Plan full-page forum extraction + fix batch command bug
+- **What I did**: (1) Explored forum scraper system, identified that extract_post_content() only captures OP, not replies. (2) Designed 3-task plan (T-P2-155/156/157) for full-page extraction with corrected format template locked, selector fallback strategy, and YAGNI-compliant scope (no replies_json, no view_count). (3) Discovered and fixed critical bug in task_db.py batch command: CLAUDE.md and SKILL.md documented nested `args` format but code read flat keys, causing silent data loss (empty titles/descriptions). (4) Added validation to reject empty titles in batch add. (5) Fixed docs in CLAUDE.md and SKILL.md. (6) Added 6 regression tests for batch format handling.
+- **Deliverables**: .claude/hooks/task_store.py (batch args fix + validation), tests/test_task_batch.py (new), CLAUDE.md (docs fix), .claude/skills/task-planning/SKILL.md (docs fix)
+- **Sanity check result**: 971 tests pass, ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-155 --status active` (reset from in_progress, not yet started)

@@ -84,8 +84,8 @@ Use `task_db.py` to create tasks. For multiple tasks, use batch mode:
 
 ```bash
 python .claude/hooks/task_db.py batch --commands '[
-  {"cmd": "add", "args": {"title": "...", "priority": "P0", "complexity": "M", "description": "..."}},
-  {"cmd": "add", "args": {"title": "...", "priority": "P1", "complexity": "S", "description": "..."}}
+  {"cmd": "add", "title": "...", "priority": "P0", "complexity": "M", "description": "..."},
+  {"cmd": "add", "title": "...", "priority": "P1", "complexity": "S", "description": "..."}
 ]'
 ```
 
