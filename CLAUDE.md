@@ -110,12 +110,14 @@
   it does NOT alter existing ones. In-memory test DBs hide this gap.
 
 ### Task Planning Mode
-When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":
-- **ONLY** read code and use `task_db.py` commands (add/update/reorder tasks, set dependencies)
-- Do **NOT** execute any task, write code, create files, or run tests
-- Do **NOT** use TaskCreate/TaskUpdate/TaskList tools (session-only, not persistent)
-- Write clear task specs with acceptance criteria, complexity, and dependencies
-- End by summarizing what changed
+Use `/task-planning` to enter enforced plan mode. This activates a PreToolUse hook
+that hard-blocks Write, Edit, and mutating Bash commands. Only read-only tools and
+`task_db.py` commands pass through. The skill guides the full procedure (scope,
+decompose, write to DB, validate, deactivate). See `.claude/skills/task-planning/SKILL.md`.
+
+Manual activation: `python .claude/hooks/plan_mode.py activate`
+Manual deactivation: `python .claude/hooks/plan_mode.py deactivate`
+Validate output: `python .claude/hooks/plan_validate.py`
 
 ## Task Planning Rules
 

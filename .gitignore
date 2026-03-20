@@ -38,6 +38,7 @@ htmlcov/
 # Claude autonomous mode state (ephemeral, per-session)
 .claude/session_state.json
 .claude/checkpoint.json
+.claude/state.json
 .claude/last_*_pass
 .claude/autonomous.lock
 .claude/tasks.db
