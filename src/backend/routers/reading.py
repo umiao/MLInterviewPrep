@@ -726,7 +726,7 @@ async def get_listening_stats(
             session_dates.add(_to_aware(s.started_at).date())
 
     streak = 0
-    check_date = date.today()
+    check_date = datetime.now(UTC).date()
     while check_date in session_dates:
         streak += 1
         check_date -= timedelta(days=1)

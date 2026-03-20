@@ -157,3 +157,10 @@
 - **Sanity check result**: All 945 tests pass. Ruff clean. Live scrape verified: 100 links in DB, status command confirms all pending.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-154 --status completed`
+
+## 2026-03-19 -- Bugfix: timezone mismatch in listening streak calculation
+- **What I did**: Ran full lint+test suite (`scripts/check.sh`). Found 1 failure: `test_stats_streak` expected streak_days==3 but got 2. Root cause: `date.today()` (local time) vs `datetime.now(UTC).date()` (UTC) mismatch in streak calculation at `src/backend/routers/reading.py:729`. Fixed by using `datetime.now(UTC).date()` consistently.
+- **Deliverables**: src/backend/routers/reading.py (1-line fix)
+- **Sanity check result**: All 945 tests pass. Ruff clean.
+- **Status**: [DONE]
+- **Request**: No task status change needed (ad-hoc bugfix)
