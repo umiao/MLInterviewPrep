@@ -19,9 +19,9 @@ EVENTS = [
     {
         "company_name": "Uber",
         "event_type": "hr_call",
-        "title": "HR Interview",
+        "title": "HR Talk with Jaclyn",
         "description": "HR screening call",
-        "scheduled_at": "2026-03-27T10:00:00",
+        "scheduled_at": "2026-03-23T11:10:00",
         "duration_minutes": 30,
         "status": "upcoming",
     },
