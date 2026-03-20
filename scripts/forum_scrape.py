@@ -185,9 +185,13 @@ def cmd_fetch(args: argparse.Namespace) -> None:
                 print("No post fetched (already fetched or failed)")
 
         elif args.all:
-            limit = args.limit
+            timeout = args.timeout_minutes
+            deadline = time.monotonic() + timeout * 60 if timeout else None
             count = 0
-            while limit is None or count < limit:
+            while True:
+                if deadline and time.monotonic() >= deadline:
+                    print(f"Timeout reached ({timeout} min), stopping.")
+                    break
                 post = asyncio.run(
                     fetch_next_unfetched(db, args.seed_id, crawler)
                 )
@@ -384,8 +388,8 @@ def build_parser() -> argparse.ArgumentParser:
         help="Fetch a specific link by ID"
     )
     p_fetch.add_argument(
-        "--limit", type=int, default=None,
-        help="Max posts to fetch this run (only with --all)"
+        "--timeout-minutes", type=int, default=None,
+        help="Stop fetching after this many minutes (only with --all)"
     )
     p_fetch.set_defaults(func=cmd_fetch)
 

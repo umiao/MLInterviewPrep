@@ -63,10 +63,10 @@ Skip this step if `--resume` flag is set (Phase B only).
 Unless `--links-only` was specified:
 
 ```bash
-python scripts/forum_scrape.py fetch <seed_id> --all --limit 50
+python scripts/forum_scrape.py fetch <seed_id> --all --timeout-minutes 300
 ```
 
-The `--limit 50` prevents unbounded runs. Repeat if more pending posts remain.
+The `--timeout-minutes 300` caps the run at 5 hours, then exits gracefully.
 
 ### Step 5 -- Retry & report
 
@@ -86,8 +86,7 @@ Create two recurring jobs using CronCreate:
 
 | Job | Schedule | What it does |
 |-----|----------|--------------|
-| Fetch batch | `17 */4 * * *` (every 4 hours) | `/scrape --resume` -- drains pending via `fetch --limit 50` |
-| Discover | `42 2 * * *` (daily 2:42 AM) | `/scrape --links-only` -- re-scans from page 1, early-stops |
+| Full scrape | `0 2 * * *` (daily 2:00 AM) | `/scrape` -- discover new links + fetch pending content, 5-hour timeout |
 
 **Important**: CronCreate jobs are session-only (die on exit, 7-day max).
 Print this warning to the user after setup.

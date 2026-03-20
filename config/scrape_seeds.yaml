@@ -10,7 +10,7 @@ companies:
 
   - name: DoorDash
     seeds:
-      - url: "https://www.1point3acres.com/bbs/tag-456-1.html"
+      - url: "https://www.1point3acres.com/bbs/tag/doordash-1829-1.html"
         label: "doordash-interview-1p3a"
 
 defaults:
