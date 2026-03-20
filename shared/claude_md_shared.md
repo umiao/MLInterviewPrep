@@ -26,6 +26,11 @@
   PowerShell alternative.
 
 ## Prohibited Actions
+- **Never use bare `python` in hook commands or scripts.** The Windows Store
+  stub (`AppData/Local/Microsoft/WindowsApps/python.exe`) exits with code 49.
+  Use `/c/Anaconda/python.exe` (absolute path) in `settings.json` hooks.
+  The SessionStart hook `setup_python_env.sh` injects Anaconda into PATH
+  for Bash tool calls via `CLAUDE_ENV_FILE`.
 - Never hardcode API keys, cookies, or personal info
 - Never use emoji characters anywhere in the project
 - Never use subprocess.run(text=True) without encoding="utf-8"

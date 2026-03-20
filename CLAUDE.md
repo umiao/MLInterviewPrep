@@ -59,6 +59,11 @@
   PowerShell alternative.
 
 ## Prohibited Actions
+- **Never use bare `python` in hook commands or scripts.** The Windows Store
+  stub (`AppData/Local/Microsoft/WindowsApps/python.exe`) exits with code 49.
+  Use `/c/Anaconda/python.exe` (absolute path) in `settings.json` hooks.
+  The SessionStart hook `setup_python_env.sh` injects Anaconda into PATH
+  for Bash tool calls via `CLAUDE_ENV_FILE`.
 - Never hardcode API keys, cookies, or personal info
 - Never use emoji characters anywhere in the project
 - Never use subprocess.run(text=True) without encoding="utf-8"
@@ -75,8 +80,7 @@
 - **Task IDs are auto-generated.** Never invent IDs manually.
   Use `task_db.py add --title "..." --priority P0` and the system assigns the next ID.
 - **For batch operations**: use `task_db.py batch --commands '[...]'` to wrap multiple
-  commands atomically. Use **flat keys** (not nested `args`):
-  `{"cmd": "add", "title": "...", "priority": "P0", "description": "..."}`
+  commands atomically.
 
 ## Behavior Rules
 - **Fix violations immediately**: When a check you run (lint, emoji scan, tests) discovers
@@ -104,21 +108,14 @@
   and config between the two.  Every delta is a finding.  Do NOT skip to
   output-format analysis or external doc research before completing this diff.
   Analysis of "why" comes AFTER identifying "what's different."
-- **Schema migration rule**: When adding a column to an existing SQLAlchemy model,
-  you MUST also: (1) add a versioned migration in `_run_migrations()` in
-  `database.py`, (2) add a migration-specific test that creates old schema,
-  runs migration, verifies new schema. `create_all()` only creates new tables --
-  it does NOT alter existing ones. In-memory test DBs hide this gap.
 
 ### Task Planning Mode
-Use `/task-planning` to enter enforced plan mode. This activates a PreToolUse hook
-that hard-blocks Write, Edit, and mutating Bash commands. Only read-only tools and
-`task_db.py` commands pass through. The skill guides the full procedure (scope,
-decompose, write to DB, validate, deactivate). See `.claude/skills/task-planning/SKILL.md`.
-
-Manual activation: `python .claude/hooks/plan_mode.py activate`
-Manual deactivation: `python .claude/hooks/plan_mode.py deactivate`
-Validate output: `python .claude/hooks/plan_validate.py`
+When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":
+- **ONLY** read code and use `task_db.py` commands (add/update/reorder tasks, set dependencies)
+- Do **NOT** execute any task, write code, create files, or run tests
+- Do **NOT** use TaskCreate/TaskUpdate/TaskList tools (session-only, not persistent)
+- Write clear task specs with acceptance criteria, complexity, and dependencies
+- End by summarizing what changed
 
 ## Task Planning Rules
 
@@ -201,27 +198,10 @@ the full ruleset.
 
 ---
 
-## Markdown Content Conventions
-
-- **Math delimiters**: Always use `$$...$$` for both inline and display math.
-  Single `$...$` does NOT render (remark-math `singleDollarTextMath: false`).
-  Example: `$$O(n \log n)$$`, not `$O(n \log n)$`.
-- **Fenced code blocks**: Always specify the language (` ```python `, ` ```sql `, etc.).
-  Unspecified blocks default to Python highlighting, but explicit is preferred.
-- **Seed scripts are idempotent**: After modifying content in `scripts/seed_pillar*_content.py`,
-  re-run the script to update the database: `python scripts/seed_pillarN_content.py`.
-- **Math delimiter conversion**: Use `python scripts/fix_math_delimiters.py` to batch-convert
-  `$...$` to `$$...$$` in all seed files. The script skips code blocks and currency patterns.
-
----
-
 ## Exit Protocol
 
 Before stopping, complete these steps (the **Stop hook** enforces them):
 
-0. **Run checks**: Execute `bash scripts/check.sh` and confirm all pass.
-   This is the PRIMARY defense -- the Stop hook is a backup safety net
-   that may not fire if the session ends without a tool call.
 1. **Verify**: Run code, check outputs exist, run tests if applicable
 2. **PROGRESS.md**: Append a session entry (format below)
 3. **TASKS.md**: Update task status via `task_db.py update T-XX-N --status completed`

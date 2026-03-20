@@ -6,12 +6,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/block_dangerous.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/block_dangerous.py\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/commit_msg_guard.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/commit_msg_guard.py\"",
             "timeout": 10
           }
         ]
@@ -21,12 +21,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/secret_guard.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/secret_guard.py\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/tasks_md_guard.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/tasks_md_guard.py\"",
             "timeout": 10
           }
         ]
@@ -38,12 +38,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/file_watch_warn.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/file_watch_warn.py\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/yaml_validate.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/yaml_validate.py\"",
             "timeout": 10
           }
         ]
@@ -59,12 +59,12 @@
           },
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_check.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_check.py\"",
             "timeout": 30
           },
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/test_check.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/test_check.py\"",
             "timeout": 300
           }
         ]
@@ -75,12 +75,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/archive_check.py\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_context.py\"",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/archive_check.py\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_context.py\"",
             "timeout": 10
           }
         ]
