@@ -138,6 +138,10 @@ def extract_post_content(html: str) -> dict:
     Parses the first (OP) post from a 1point3acres thread page.
     Strips font.jammer elements (anti-scraping noise) before extracting text.
 
+    Supports two layouts found on 1point3acres:
+    1. Modern layout: h1.ts title, [itemprop=articleBody] body, .authi author
+    2. Legacy layout: div.postlist h2, div.message span body, div.display.pi id
+
     Args:
         html: Raw HTML of the post page.
 
@@ -150,40 +154,63 @@ def extract_post_content(html: str) -> dict:
 
     soup = BeautifulSoup(html, "html.parser")
 
-    # Title from postlist h2
+    # Title: try h1.ts first (modern), then div.postlist h2 (legacy)
     title = ""
-    h2 = soup.select_one("div.postlist h2")
-    if h2:
-        title = h2.get_text(strip=True)
+    h1 = soup.select_one("h1.ts")
+    if h1:
+        title = h1.get_text(strip=True)
+    else:
+        h2 = soup.select_one("div.postlist h2")
+        if h2:
+            title = h2.get_text(strip=True)
 
-    # First OP post body: first span[itemprop=articleBody]
+    # Strip common title prefixes like [面试经验]
+    if title.startswith("[") and "]" in title:
+        title = title[title.index("]") + 1 :].strip()
+
+    # Body: first [itemprop=articleBody] (works in both layouts)
     body = ""
-    body_span = soup.select_one("div.message span[itemprop=articleBody]")
-    if body_span:
-        # Strip jammer elements before extracting text
-        for jammer in body_span.select("font.jammer"):
+    body_el = soup.select_one("[itemprop=articleBody]")
+    if not body_el:
+        # Fallback: first td.t_f (Discuz table layout)
+        body_el = soup.select_one("td.t_f")
+    if body_el:
+        for jammer in body_el.select("font.jammer"):
             jammer.decompose()
-        body = body_span.get_text(separator="\n", strip=True)
+        body = body_el.get_text(separator="\n", strip=True)
 
-    # External post ID from div.display.pi itemid attr (pidNNNNN)
+    # External post ID: div.display.pi (legacy) or thread ID from URL in page
     external_post_id = ""
     display_div = soup.select_one("div.display.pi")
     if display_div:
         item_id = display_div.get("itemid", "")
         if item_id.startswith("pid"):
-            external_post_id = item_id[3:]  # Strip "pid" prefix
+            external_post_id = item_id[3:]
 
-    # Author from first itemprop=author element
+    # Author: .authi text before nbsp (modern), or [itemprop=author] (legacy)
+    # Pattern in .authi: "username\xa0timestamp|other_links"
+    # The username is always before the first \xa0 (non-breaking space).
     author = ""
-    author_el = soup.select_one("[itemprop=author]")
-    if author_el:
-        author = author_el.get_text(strip=True)
+    authi = soup.select_one(".authi")
+    if authi:
+        raw = authi.get_text()
+        # Split on non-breaking space -- username is before it
+        parts = raw.split("\xa0", 1)
+        author = parts[0].strip()
+    else:
+        author_el = soup.select_one("[itemprop=author]")
+        if author_el:
+            author = author_el.get_text(strip=True)
 
-    # Date from meta[itemprop=datePublished] content attr
+    # Date: meta[itemprop=datePublished] (legacy) or em#authorposton (modern)
     date = ""
     date_meta = soup.select_one("meta[itemprop=datePublished]")
     if date_meta:
         date = date_meta.get("content", "")
+    else:
+        em = soup.select_one("em[id^=authorposton]")
+        if em:
+            date = em.get_text(strip=True)
 
     return {
         "title": title,
