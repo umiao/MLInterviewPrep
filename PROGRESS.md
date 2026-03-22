@@ -240,3 +240,9 @@
 - **Deliverables**: `src/frontend/src/pages/SystemDesignDetail.tsx` (rewritten), `src/frontend/src/hooks/useSystemDesignNotes.ts` (rewritten), module-arbitration DB updated
 - **Sanity check result**: TypeScript type-check passes, Vite build succeeds. Module-arbitration now has 8 distinct sections.
 - **Status**: [DONE]
+
+## 2026-03-22 16:30 -- [T-P1-172] System Design Module 5: Database Systems Comparison
+- **What I did**: Added new system design module (slug: database-comparison, display_order: 5) covering Cassandra, HBase, DynamoDB, ScyllaDB, CockroachDB, TiDB, MongoDB. Created HTML architecture comparison diagram with AP/CP system groupings, write/read path comparison, CAP theorem visual, and 7-database comparison table. Wrote content script with all 8 sections: Overview (2K chars), Architecture (5.9K), Data Flow (4.3K), Formulas (3.6K), Production Constraints (3.4K), Trade-offs (4.8K), Defense Q&A (7.6K), Verbal Outline (4.4K). Updated seed script and diagram generator.
+- **Deliverables**: `scripts/seed_system_designs.py` (updated), `scripts/content_database_comparison.py` (new), `scripts/generate_diagram_screenshots.py` (updated), `src/frontend/public/static/system-designs/html/database_comparison.html` (new), `database_comparison.png` (generated, 145KB)
+- **Sanity check result**: TypeScript type-check passes, Vite build succeeds. All 8 sections populated (2K-7.6K chars). Diagram PNG renders correctly with architecture comparison layout. Module visible as 5th entry in system design list.
+- **Status**: [DONE]

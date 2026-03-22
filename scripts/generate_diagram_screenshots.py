@@ -18,6 +18,7 @@ DIAGRAMS = [
     "llm_orchestration",
     "pbe_pipeline",
     "ranking_allocation",
+    "database_comparison",
 ]
 
 

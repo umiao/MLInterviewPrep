@@ -11,6 +11,147 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once)
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: ## Goal
+Add a comprehensive system design module on distributed task queues, covering deep failure analysis, recovery mechanisms, and exactly-once semantics. This is an interview-focused deep dive, not a surface-level overview.
+
+## Content Scope (8-section structure)
+
+### S1 Overview & Motivation
+- What is a distributed task queue and why it matters
+- Core contract: producer enqueues, broker stores, consumer executes, acknowledges
+- Why "fire and forget" breaks in production
+
+### S2 Architecture Deep Dive
+- Broker options: Redis (Celery), RabbitMQ, SQS, Kafka
+- Redis as broker:
+  - Default RDB persistence: data loss between snapshots if crash
+  - AOF mode: fsync behavior differences during rewrite
+  - Trade-off: performance vs durability
+- RabbitMQ:
+  - Durable queues + persistent messages + publisher confirms
+  - Mirrored queues for HA, quorum queues (Raft-based)
+- Architecture diagram: producer -> broker -> worker pool -> result backend
+
+### S3 Data Flow & Key Components
+- Happy path: enqueue -> dequeue -> execute -> ack -> done
+- Failure paths (THE CORE OF THIS MODULE):
+
+**Scenario 1: Worker crash during execution**
+- Task dequeued, worker starts processing, worker crashes (OOM / SIGKILL)
+- Application-level error handling has NO chance to run
+- Broker's visibility timeout expires -> task redelivered
+- BUT: partial side-effects (dirty writes) already committed
+- Need: idempotency to handle re-execution safely
+
+**Scenario 2: How to implement idempotency**
+- Idempotency key per task (UUID)
+- Check-before-write pattern
+- Database unique constraints as natural idempotency
+- Conditional writes (optimistic locking, compare-and-swap)
+- Outbox pattern for multi-system consistency
+
+**Scenario 3: Worker timeout -> broker redispatches -> original worker recovers**
+- Worker A takes task, becomes slow (GC pause, network partition)
+- Broker declares timeout, gives task to Worker B
+- Worker A recovers, both A and B now execute same task
+- Race conditions: ack ownership (whose ack is valid?), duplicate execution, conflicting writes
+- Solution: fencing tokens / lease IDs
+
+**Scenario 4: Task succeeds but ack lost**
+- Worker completes task, sends ack, network drops ack
+- Broker thinks task failed -> redelivers
+- Same as scenario 1 from idempotency perspective
+
+**Scenario 5: Poison pill (permanently failing task)**
+- Invalid parameters, logic bug, missing dependency
+- Task fails, retried, fails again, infinite loop
+- How to distinguish from transient failures?
+- Solutions: max retry count, dead letter queue (DLQ), exponential backoff with jitter
+- DLQ monitoring and alerting
+
+**Scenario 6: Deployment - old/new version workers running concurrently**
+- Rolling deploy: v1 and v2 workers coexist
+- Task serialization format changes between versions
+- Graceful shutdown: drain in-flight tasks before process exit
+- SIGTERM handling: stop accepting new tasks, finish current, ack, exit
+
+**Scenario 7: Empty/malformed payload submitted**
+- Validation at enqueue time vs execution time
+- Schema validation, contract enforcement
+
+### S4 Formulas & Algorithms
+- Retry strategies: exponential backoff formula with jitter
+- Visibility timeout calculation: expected_execution_time * safety_factor
+- Circuit breaker thresholds
+- Dead letter criteria: max_retries, max_age, error_type classification
+
+### S5 Production Constraints
+- Throughput: tasks/sec by broker type
+- Latency: enqueue-to-start, end-to-end
+- Durability guarantees by broker configuration
+- Memory/storage implications of retry queues and DLQs
+
+### S6 Trade-off Analysis
+- At-most-once vs at-least-once vs exactly-once: pick two, compensate third
+- Message loss vs message duplication: which side to favor? Business-level compensation
+- Broker durability vs throughput (Redis RDB vs AOF vs RabbitMQ persistent)
+- Synchronous ack vs async ack
+- Push vs pull consumer models
+
+### S7 Adversarial Defense Q&A (SCENARIO-BASED)
+Structure: "Given this system, what happens when X? Walk through the complete chain."
+
+- **Q: Worker crashes during execution. Walk through the full recovery chain.**
+  Complete answer: crash -> no ack -> visibility timeout -> broker redelivers -> new worker picks up -> idempotency check -> safe re-execution -> ack
+
+- **Q: Broker restarts. What happens to in-flight tasks?**
+  Redis RDB: lost. Redis AOF: depends on fsync policy. RabbitMQ durable: survives. SQS: managed, survives.
+
+- **Q: Same task executed by two workers simultaneously. Side effects may be irreversible.**
+  Fencing tokens, lease-based ownership, idempotent operations, compensating transactions for irreversible side effects
+
+- **Q: Task succeeds but ack is lost.**
+  At-least-once delivery -> idempotency saves you. Without idempotency: duplicate side effects.
+
+- **Q: Poison pill enters the queue and fails repeatedly.**
+  DLQ after N retries. Error classification: retriable (timeout, network) vs permanent (validation, logic). Alerting on DLQ depth.
+
+- **Q: Empty payload submitted.**
+  Validation at gateway/producer side. Schema enforcement. Reject or DLQ immediately.
+
+- **Q: How do you achieve exactly-once execution?**
+  You don't -- you achieve "at-least-once delivery + idempotent execution = effectively-once processing". True exactly-once requires transactional outbox + idempotent consumer.
+
+- **Q: Two workers execute same task, one does irreversible action (sent email, charged card). How to handle?**
+  Reservation pattern: claim before execute. Distributed lock with TTL. Compensating transaction (refund). Accept business-level duplication with dedup downstream.
+
+- **Q: How do you discover a task that will never succeed?**
+  Error type classification, DLQ routing, max retry policy, monitoring retry count distribution, alert on tasks exceeding p99 retry count.
+
+### S8 Verbal Outline
+- 3-min version: problem statement, core architecture, key failure mode + solution
+- 10-min version: full walkthrough of architecture, 3 failure scenarios with recovery chains, trade-off analysis, exactly-once methodology
+
+## Implementation
+1. Add seed entry (slug: distributed-task-queue, display_order: 6)
+2. Create content script: scripts/content_distributed_task_queue.py
+3. Create HTML architecture diagram (producer -> broker -> worker pool, with failure points annotated)
+4. Generate PNG, seed DB, verify all 8 sections
+
+## Acceptance Criteria
+- [ ] New module visible in system design list
+- [ ] All 8 sections populated with deep, interview-ready content
+- [ ] Each of the 7 failure scenarios has a complete walkthrough
+- [ ] Defense Q&A covers all scenarios listed above
+- [ ] Diagram shows architecture with failure points annotated
+- [ ] Content distinguishes transient vs permanent failures
+- [ ] Exactly-once methodology clearly explained
+- [ ] Verbal outline covers 3-min and 10-min delivery
+
 ### P2 -- Nice to Have
 
 #### T-P2-112: SSE chunked audio streaming (if latency requires it)
@@ -126,6 +267,7 @@ S - straightforward wiring, two functions to modify
 
 > 158 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-22** -- T-P1-172: System Design Module 5: Database Systems Comparison (Cassandra focus). ## Goal
 - [x] **2026-03-22** -- T-P1-171: System Design detail: single-page layout with bookmark nav + fix module-arbitration content. ## Problem
 - [x] **2026-03-22** -- T-P1-170: Diagram click-to-fullscreen lightbox overlay. ## Problem
 - [x] **2026-03-22** -- T-P1-169: Diagram screenshots: crop whitespace and increase render size. ## Problem

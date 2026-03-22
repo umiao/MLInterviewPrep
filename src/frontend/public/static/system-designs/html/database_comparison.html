@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; width: 1600px; }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 16px; color: #1a1a2e; }
+  .subtitle { font-size: 15px; text-align: center; color: #555; margin-bottom: 20px; }
+
+  .main-layout { display: flex; gap: 16px; }
+  .left-col { width: 520px; flex-shrink: 0; }
+  .right-col { flex: 1; }
+
+  .section-header {
+    font-size: 15px; font-weight: 700; padding: 6px 10px; border-radius: 4px 4px 0 0;
+    color: #fff; text-align: center;
+  }
+  .section-box {
+    border: 2px solid; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+  }
+
+  /* Color scheme */
+  .ap { border-color: #2e86ab; }
+  .ap .section-header { background: #2e86ab; }
+  .cp { border-color: #6b5b95; }
+  .cp .section-header { background: #6b5b95; }
+  .managed { border-color: #3a9d5d; }
+  .managed .section-header { background: #3a9d5d; }
+  .cap { border-color: #e07b39; }
+  .cap .section-header { background: #e07b39; }
+
+  .box {
+    border: 1.5px solid #888; border-radius: 4px; padding: 8px 10px;
+    font-size: 14px; text-align: center; background: #fff; min-height: 44px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .box-green { background: #d4edda; border-color: #6b9e7a; }
+  .box-blue { background: #d6eaf8; border-color: #5b9bd5; }
+  .box-purple { background: #e8d5f5; border-color: #8e6baf; }
+  .box-yellow { background: #fff3cd; border-color: #c9a825; }
+  .box-orange { background: #fde2c8; border-color: #e07b39; }
+  .box-gray { background: #e9ecef; border-color: #999; }
+  .box-pink { background: #f8d7da; border-color: #c0616e; }
+  .box-teal { background: #d1ecf1; border-color: #0c5460; }
+  .box-red { background: #f5c6cb; border-color: #c0616e; }
+
+  .box-title { font-weight: 700; font-size: 14px; }
+  .box-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+  .arrow { text-align: center; color: #555; font-size: 20px; line-height: 20px; padding: 2px 0; }
+  .arrow-right { display: inline-block; color: #555; font-size: 18px; padding: 0 4px; }
+  .arrow-label { font-size: 11px; color: #666; font-style: italic; }
+
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .row-stretch { display: flex; gap: 8px; align-items: stretch; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .flex1 { flex: 1; }
+
+  .label { font-size: 12px; color: #444; text-align: center; padding: 2px 0; }
+  .section-label { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px; }
+
+  .ap-bg { background: #eef6fb; }
+  .cp-bg { background: #f3f0f7; }
+  .managed-bg { background: #f0faf4; }
+
+  .trait { font-size: 10px; color: #333; text-align: left; margin-top: 4px; line-height: 1.4; }
+
+  table.compare {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;
+  }
+  table.compare th {
+    background: #343a40; color: #fff; padding: 6px 8px; text-align: center;
+    font-weight: 600; font-size: 12px;
+  }
+  table.compare td {
+    border: 1px solid #dee2e6; padding: 5px 8px; text-align: center; font-size: 11px;
+  }
+  table.compare tr:nth-child(even) { background: #f8f9fa; }
+  table.compare .db-name { font-weight: 700; text-align: left; }
+  .tag-ap { background: #d6eaf8; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
+  .tag-cp { background: #e8d5f5; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
+  .tag-ca { background: #d4edda; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<h1>Database Systems Comparison: Distributed Storage Architectures</h1>
+<p class="subtitle">Architecture comparison across Cassandra, HBase, DynamoDB, ScyllaDB, CockroachDB, MongoDB -- CAP trade-offs, consistency models, selection criteria</p>
+
+<div class="main-layout">
+  <!-- LEFT: AP Systems + Write/Read Paths -->
+  <div class="left-col">
+
+    <!-- AP Systems -->
+    <div class="section-box ap ap-bg">
+      <div class="section-header">AP Systems (Availability + Partition Tolerance)</div>
+      <div style="padding: 8px 0;">
+
+        <div class="row-stretch">
+          <div class="box box-blue flex1">
+            <div class="box-title">Cassandra</div>
+            <div class="trait">
+              Ring topology, consistent hashing<br>
+              Gossip protocol (peer-to-peer)<br>
+              LSM-tree storage engine<br>
+              Tunable consistency (R+W>N)<br>
+              <span class="tag-ap">AP</span> (default eventual)
+            </div>
+          </div>
+          <div class="box box-teal flex1">
+            <div class="box-title">ScyllaDB</div>
+            <div class="trait">
+              Cassandra-compatible API<br>
+              C++ rewrite, shard-per-core<br>
+              No JVM GC pauses<br>
+              Automatic memory management<br>
+              <span class="tag-ap">AP</span> (same model)
+            </div>
+          </div>
+        </div>
+
+        <div style="height: 8px;"></div>
+
+        <div class="row-stretch">
+          <div class="box box-green flex1">
+            <div class="box-title">DynamoDB</div>
+            <div class="trait">
+              Fully managed (AWS)<br>
+              Partition-based, auto-scaling<br>
+              Provisioned / on-demand capacity<br>
+              DAX caching layer<br>
+              <span class="tag-ap">AP</span> (eventual default, strong optional per-read)
+            </div>
+          </div>
+          <div class="box box-yellow flex1">
+            <div class="box-title">MongoDB</div>
+            <div class="trait">
+              Document model (BSON)<br>
+              Replica sets + sharding<br>
+              WiredTiger (B-tree) engine<br>
+              Flexible schema<br>
+              <span class="tag-ca">CA</span> (CP with replica sets)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Write Path Comparison -->
+    <div class="section-box cap" style="background: #fff8f0;">
+      <div class="section-header" style="background: #e07b39;">Write Path Comparison</div>
+      <div style="padding: 8px 0;">
+        <div class="row">
+          <div class="box box-blue flex1" style="min-height: 60px;">
+            <div class="box-title">LSM-Tree (Cassandra/ScyllaDB)</div>
+            <div class="box-sub">WAL -> Memtable -> SSTable flush</div>
+            <div class="box-sub">Sequential I/O, write-optimized</div>
+          </div>
+          <div class="box box-purple flex1" style="min-height: 60px;">
+            <div class="box-title">WAL + Memstore (HBase)</div>
+            <div class="box-sub">WAL -> Memstore -> HFile on HDFS</div>
+            <div class="box-sub">HDFS replication for durability</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="box box-green flex1" style="min-height: 60px;">
+            <div class="box-title">B-Tree (CockroachDB/MongoDB)</div>
+            <div class="box-sub">WAL -> B-tree pages (in-place update)</div>
+            <div class="box-sub">Read-optimized, random I/O on write</div>
+          </div>
+          <div class="box box-orange flex1" style="min-height: 60px;">
+            <div class="box-title">Managed (DynamoDB)</div>
+            <div class="box-sub">Abstracted storage layer</div>
+            <div class="box-sub">Multi-AZ replication built-in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Read Path -->
+    <div class="section-box cap" style="background: #fff8f0;">
+      <div class="section-header" style="background: #c57030;">Read Path: Bloom Filters & Compaction</div>
+      <div style="padding: 8px 0;">
+        <div class="box box-gray" style="margin-bottom: 6px;">
+          <div class="box-title">Read: Key Lookup -> Bloom Filter -> SSTable/HFile/B-tree</div>
+          <div class="box-sub">Bloom filter: probabilistic membership check (false positive rate ~ 1%)</div>
+        </div>
+        <div class="row">
+          <div class="box box-blue flex1">
+            <div class="box-title">Size-Tiered</div>
+            <div class="box-sub">Write-optimized<br>Space amplification</div>
+          </div>
+          <div class="box box-purple flex1">
+            <div class="box-title">Leveled</div>
+            <div class="box-sub">Read-optimized<br>Write amplification</div>
+          </div>
+          <div class="box box-teal flex1">
+            <div class="box-title">TWCS</div>
+            <div class="box-sub">Time-window<br>TTL workloads</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CP Systems + CAP + Comparison Table -->
+  <div class="right-col">
+
+    <!-- CP Systems -->
+    <div class="section-box cp cp-bg">
+      <div class="section-header">CP Systems (Consistency + Partition Tolerance)</div>
+      <div style="padding: 8px 0;">
+
+        <div class="row-stretch">
+          <div class="box box-purple flex1">
+            <div class="box-title">HBase</div>
+            <div class="trait">
+              Master-slave architecture<br>
+              HDFS-backed storage<br>
+              Strong consistency (single master)<br>
+              Column-family data model<br>
+              <span class="tag-cp">CP</span>
+            </div>
+          </div>
+          <div class="box box-pink flex1">
+            <div class="box-title">CockroachDB</div>
+            <div class="trait">
+              Distributed SQL (PostgreSQL wire)<br>
+              Raft consensus per range<br>
+              Serializable isolation (MVCC)<br>
+              Geo-partitioning<br>
+              <span class="tag-cp">CP</span>
+            </div>
+          </div>
+          <div class="box box-red flex1">
+            <div class="box-title">TiDB / TiKV</div>
+            <div class="trait">
+              Raft-based, MVCC<br>
+              MySQL-compatible SQL layer<br>
+              TiKV storage + TiDB compute<br>
+              HTAP (OLTP + OLAP)<br>
+              <span class="tag-cp">CP</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CAP Theorem Visual -->
+    <div class="section-box cap" style="background: #fff8f0;">
+      <div class="section-header">CAP Theorem: Practical Application</div>
+      <div style="padding: 8px 0;">
+        <div class="row-stretch">
+          <div class="col flex1" style="gap: 4px;">
+            <div class="box box-blue" style="min-height: 50px;">
+              <div class="box-title">AP: High Availability</div>
+              <div class="box-sub">Cassandra, ScyllaDB, DynamoDB</div>
+              <div class="trait" style="text-align: center;">
+                Every request gets a response<br>
+                Eventual consistency trade-off<br>
+                Use: user-facing, latency-critical
+              </div>
+            </div>
+          </div>
+          <div class="col flex1" style="gap: 4px;">
+            <div class="box box-purple" style="min-height: 50px;">
+              <div class="box-title">CP: Strong Consistency</div>
+              <div class="box-sub">HBase, CockroachDB, TiDB</div>
+              <div class="trait" style="text-align: center;">
+                Linearizable reads/writes<br>
+                Availability sacrifice under partition<br>
+                Use: financial, inventory, auth
+              </div>
+            </div>
+          </div>
+          <div class="col flex1" style="gap: 4px;">
+            <div class="box box-yellow" style="min-height: 50px;">
+              <div class="box-title">Tunable Consistency</div>
+              <div class="box-sub">Cassandra (R+W>N), DynamoDB (per-read)</div>
+              <div class="trait" style="text-align: center;">
+                R+W>N = strong consistency<br>
+                Trade latency for consistency<br>
+                Per-query flexibility
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <table class="compare">
+      <tr>
+        <th>Database</th>
+        <th>CAP</th>
+        <th>Data Model</th>
+        <th>Storage Engine</th>
+        <th>Consistency</th>
+        <th>p99 Write</th>
+        <th>p99 Read</th>
+        <th>Ops Complexity</th>
+      </tr>
+      <tr>
+        <td class="db-name">Cassandra</td>
+        <td><span class="tag-ap">AP</span></td>
+        <td>Wide-column</td>
+        <td>LSM-tree</td>
+        <td>Tunable</td>
+        <td>&lt;5ms</td>
+        <td>&lt;10ms</td>
+        <td>Medium</td>
+      </tr>
+      <tr>
+        <td class="db-name">ScyllaDB</td>
+        <td><span class="tag-ap">AP</span></td>
+        <td>Wide-column</td>
+        <td>LSM (C++)</td>
+        <td>Tunable</td>
+        <td>&lt;2ms</td>
+        <td>&lt;5ms</td>
+        <td>Medium</td>
+      </tr>
+      <tr>
+        <td class="db-name">DynamoDB</td>
+        <td><span class="tag-ap">AP</span></td>
+        <td>Key-value/Doc</td>
+        <td>Managed</td>
+        <td>Eventual/Strong</td>
+        <td>&lt;10ms</td>
+        <td>&lt;10ms</td>
+        <td>Low</td>
+      </tr>
+      <tr>
+        <td class="db-name">HBase</td>
+        <td><span class="tag-cp">CP</span></td>
+        <td>Wide-column</td>
+        <td>LSM on HDFS</td>
+        <td>Strong</td>
+        <td>&lt;15ms</td>
+        <td>&lt;10ms</td>
+        <td>High</td>
+      </tr>
+      <tr>
+        <td class="db-name">CockroachDB</td>
+        <td><span class="tag-cp">CP</span></td>
+        <td>Relational (SQL)</td>
+        <td>Pebble (LSM)</td>
+        <td>Serializable</td>
+        <td>&lt;20ms</td>
+        <td>&lt;10ms</td>
+        <td>Medium</td>
+      </tr>
+      <tr>
+        <td class="db-name">TiDB</td>
+        <td><span class="tag-cp">CP</span></td>
+        <td>Relational (SQL)</td>
+        <td>RocksDB (TiKV)</td>
+        <td>Snapshot/Serial</td>
+        <td>&lt;15ms</td>
+        <td>&lt;10ms</td>
+        <td>High</td>
+      </tr>
+      <tr>
+        <td class="db-name">MongoDB</td>
+        <td><span class="tag-ca">CP*</span></td>
+        <td>Document</td>
+        <td>WiredTiger</td>
+        <td>Configurable</td>
+        <td>&lt;10ms</td>
+        <td>&lt;5ms</td>
+        <td>Medium</td>
+      </tr>
+    </table>
+
+  </div>
+</div>
+
+</body>
+</html>
