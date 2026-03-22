@@ -228,3 +228,15 @@
 - **Deliverables**: 4 HTML files modified (`src/frontend/public/static/system-designs/html/*.html`), `scripts/generate_diagram_screenshots.py` (modified), 4 PNGs regenerated (68-95 KB, up from 52-75 KB)
 - **Sanity check result**: All 4 PNGs generated. Visual inspection confirms larger text, minimal whitespace borders, clean auto-cropping.
 - **Status**: [DONE]
+
+## 2026-03-22 14:30 -- [T-P1-170] Diagram click-to-fullscreen lightbox overlay
+- **What I did**: Created `ImageLightbox` component (pure React + Tailwind, no external libs). Click diagram image -> fixed fullscreen overlay with dark backdrop (bg-black/80). Image fills 95vw/95vh with object-contain. Click backdrop or press Escape to close. `e.stopPropagation()` prevents list page card navigation when clicking diagram. Integrated into both SystemDesignDetail (architecture tab) and SystemDesignList (card thumbnails).
+- **Deliverables**: `src/frontend/src/components/ui/ImageLightbox.tsx` (new), `SystemDesignDetail.tsx` (modified), `SystemDesignList.tsx` (modified)
+- **Sanity check result**: TypeScript type-check passes, Vite build succeeds.
+- **Status**: [DONE]
+
+## 2026-03-22 15:30 -- [T-P1-171] Single-page layout with bookmark nav + fix module-arbitration content
+- **What I did**: Replaced tab-based layout in SystemDesignDetail with a single scrollable page showing all 8 sections. Added sticky bookmark nav with IntersectionObserver-based scroll highlighting. Refactored useSystemDesignNotes hook to manage all section contents simultaneously with per-section debounced auto-save. In edit mode, all section textareas visible with individual save status indicators. Ran content_module_arbitration.py to populate all 8 sections with distinct content (1.6K-3.6K chars each).
+- **Deliverables**: `src/frontend/src/pages/SystemDesignDetail.tsx` (rewritten), `src/frontend/src/hooks/useSystemDesignNotes.ts` (rewritten), module-arbitration DB updated
+- **Sanity check result**: TypeScript type-check passes, Vite build succeeds. Module-arbitration now has 8 distinct sections.
+- **Status**: [DONE]

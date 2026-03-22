@@ -1,4 +1,4 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
@@ -17,6 +17,7 @@ const SECTIONS = Object.keys(SECTION_LABELS) as SystemDesignSection[];
 
 /**
  * Full-screen system design detail page at /system-design/:slug.
+ * Single scrollable page with all sections + sticky bookmark nav.
  */
 export default function SystemDesignDetail() {
   const { slug } = useParams<{ slug: string }>();
@@ -54,19 +55,71 @@ export default function SystemDesignDetail() {
   );
 
   const {
-    activeSection,
-    switchSection,
-    notes,
-    setNotes,
     mode,
     switchMode,
-    saveStatus,
-    setSaveStatus,
-    handleRetry,
+    highlightedSection,
+    setHighlightedSection,
+    sectionContents,
+    updateSection,
+    saveStatuses,
+    aggregateSaveStatus,
+    retrySection,
   } = useSystemDesignNotes({
     slug: slug ?? "",
     initialData: design ?? null,
   });
+
+  // --- IntersectionObserver for bookmark highlighting ---
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the topmost visible section
+        let topEntry: IntersectionObserverEntry | null = null;
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (
+              !topEntry ||
+              entry.boundingClientRect.top < topEntry.boundingClientRect.top
+            ) {
+              topEntry = entry;
+            }
+          }
+        }
+        if (topEntry?.target) {
+          const sectionId = topEntry.target.getAttribute("data-section");
+          if (sectionId) {
+            setHighlightedSection(sectionId as SystemDesignSection);
+          }
+        }
+      },
+      {
+        root: container,
+        rootMargin: "-10% 0px -80% 0px",
+        threshold: 0,
+      },
+    );
+
+    for (const section of SECTIONS) {
+      const el = sectionRefs.current[section];
+      if (el) observer.observe(el);
+    }
+
+    return () => observer.disconnect();
+  }, [design, setHighlightedSection]);
+
+  /** Smooth-scroll to a section within the scroll container. */
+  const scrollToSection = useCallback((section: SystemDesignSection) => {
+    const el = sectionRefs.current[section];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
 
   if (isLoading) {
     return (
@@ -143,39 +196,31 @@ export default function SystemDesignDetail() {
             </button>
           </div>
 
-          {/* Save status */}
+          {/* Aggregate save status */}
           <span className="text-sm min-w-[5rem] text-right">
-            {saveStatus === "saving" && (
+            {aggregateSaveStatus === "saving" && (
               <span className="text-gray-400">Saving...</span>
             )}
-            {saveStatus === "saved" && (
+            {aggregateSaveStatus === "saved" && (
               <span className="text-green-600">Saved</span>
             )}
-            {saveStatus === "error" && (
-              <span className="text-red-600">
-                Failed{" "}
-                <button
-                  onClick={handleRetry}
-                  className="underline hover:text-red-800"
-                >
-                  retry
-                </button>
-              </span>
+            {aggregateSaveStatus === "error" && (
+              <span className="text-red-600">Save failed</span>
             )}
           </span>
         </div>
       </header>
 
-      {/* Tab bar */}
-      <div className="border-b border-gray-200 px-6 py-2 bg-white shrink-0">
+      {/* Sticky bookmark nav */}
+      <nav className="sticky top-[57px] z-10 border-b border-gray-200 px-6 py-2 bg-white shrink-0">
         <div className="flex gap-1 overflow-x-auto">
           {SECTIONS.map((section) => (
             <button
               key={section}
-              onClick={() => switchSection(section)}
-              className={`text-sm px-3 py-1 rounded whitespace-nowrap ${
-                activeSection === section
-                  ? "bg-gray-100 text-gray-800 font-medium"
+              onClick={() => scrollToSection(section)}
+              className={`text-sm px-3 py-1 rounded whitespace-nowrap transition-colors ${
+                highlightedSection === section
+                  ? "bg-blue-100 text-blue-700 font-medium"
                   : "text-gray-500 hover:bg-gray-50"
               }`}
             >
@@ -183,42 +228,78 @@ export default function SystemDesignDetail() {
             </button>
           ))}
         </div>
-      </div>
+      </nav>
 
-      {/* Content area */}
-      <div className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
-        {/* Diagram image on Architecture tab */}
-        {activeSection === "architecture" && design.diagram_filename && (
-          <ImageLightbox
-            src={`/static/system-designs/${design.diagram_filename}`}
-            className="w-full max-h-96 object-contain mb-6 rounded border"
-            alt={`${design.title} architecture diagram`}
-          />
-        )}
+      {/* Scrollable content area with all sections */}
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-auto min-h-0"
+      >
+        <div className="max-w-4xl mx-auto px-6 py-6 space-y-10">
+          {SECTIONS.map((section) => (
+            <section
+              key={section}
+              ref={(el) => {
+                sectionRefs.current[section] = el;
+              }}
+              data-section={section}
+              className="scroll-mt-28"
+            >
+              {/* Section header */}
+              <div className="flex items-center gap-3 mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  {SECTION_LABELS[section]}
+                </h2>
+                {mode === "edit" && saveStatuses[section] === "saving" && (
+                  <span className="text-xs text-gray-400">Saving...</span>
+                )}
+                {mode === "edit" && saveStatuses[section] === "saved" && (
+                  <span className="text-xs text-green-600">Saved</span>
+                )}
+                {mode === "edit" && saveStatuses[section] === "error" && (
+                  <span className="text-xs text-red-600">
+                    Failed{" "}
+                    <button
+                      onClick={() => retrySection(section)}
+                      className="underline hover:text-red-800"
+                    >
+                      retry
+                    </button>
+                  </span>
+                )}
+              </div>
 
-        {mode === "edit" ? (
-          <textarea
-            value={notes}
-            onChange={(e) => {
-              setNotes(e.target.value);
-              if (saveStatus === "saved" || saveStatus === "error") {
-                setSaveStatus("idle");
-              }
-            }}
-            className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
-            placeholder="Write markdown content here..."
-          />
-        ) : (
-          <div className="prep-prose">
-            {notes ? (
-              <MarkdownPreview markdown={notes} />
-            ) : (
-              <p className="text-gray-400 italic">
-                No content yet. Switch to Edit mode to add content.
-              </p>
-            )}
-          </div>
-        )}
+              {/* Architecture diagram inline */}
+              {section === "architecture" && design.diagram_filename && (
+                <ImageLightbox
+                  src={`/static/system-designs/${design.diagram_filename}`}
+                  className="w-full max-h-96 object-contain mb-6 rounded border"
+                  alt={`${design.title} architecture diagram`}
+                />
+              )}
+
+              {/* Content: edit or preview */}
+              {mode === "edit" ? (
+                <textarea
+                  value={sectionContents[section]}
+                  onChange={(e) => updateSection(section, e.target.value)}
+                  className="w-full min-h-[200px] border border-gray-300 rounded px-4 py-3 text-base font-mono resize-y"
+                  placeholder={`Write ${SECTION_LABELS[section]} content here...`}
+                />
+              ) : (
+                <div className="prep-prose">
+                  {sectionContents[section] ? (
+                    <MarkdownPreview markdown={sectionContents[section]} />
+                  ) : (
+                    <p className="text-gray-400 italic">
+                      No content yet. Switch to Edit mode to add content.
+                    </p>
+                  )}
+                </div>
+              )}
+            </section>
+          ))}
+        </div>
       </div>
     </div>
   );
