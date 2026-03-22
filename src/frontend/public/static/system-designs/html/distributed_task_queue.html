@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; width: 1600px; }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 6px; color: #1a1a2e; }
+  .subtitle { font-size: 14px; text-align: center; color: #555; margin-bottom: 18px; }
+
+  .main-layout { display: flex; gap: 16px; }
+  .left-col { width: 540px; flex-shrink: 0; }
+  .right-col { flex: 1; }
+
+  .section-header {
+    font-size: 15px; font-weight: 700; padding: 6px 10px; border-radius: 4px 4px 0 0;
+    color: #fff; text-align: center;
+  }
+  .section-box {
+    border: 2px solid; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+  }
+
+  .happy { border-color: #2e86ab; }
+  .happy .section-header { background: #2e86ab; }
+  .failure { border-color: #c0392b; }
+  .failure .section-header { background: #c0392b; }
+  .recovery { border-color: #27ae60; }
+  .recovery .section-header { background: #27ae60; }
+  .broker { border-color: #8e44ad; }
+  .broker .section-header { background: #8e44ad; }
+  .semantics { border-color: #e07b39; }
+  .semantics .section-header { background: #e07b39; }
+
+  .box {
+    border: 1.5px solid #888; border-radius: 4px; padding: 8px 10px;
+    font-size: 14px; text-align: center; background: #fff; min-height: 44px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .box-green { background: #d4edda; border-color: #6b9e7a; }
+  .box-blue { background: #d6eaf8; border-color: #5b9bd5; }
+  .box-purple { background: #e8d5f5; border-color: #8e6baf; }
+  .box-yellow { background: #fff3cd; border-color: #c9a825; }
+  .box-orange { background: #fde2c8; border-color: #e07b39; }
+  .box-gray { background: #e9ecef; border-color: #999; }
+  .box-pink { background: #f8d7da; border-color: #c0616e; }
+  .box-teal { background: #d1ecf1; border-color: #0c5460; }
+  .box-red { background: #f5c6cb; border-color: #c0616e; }
+
+  .box-title { font-weight: 700; font-size: 14px; }
+  .box-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+  .arrow { text-align: center; color: #555; font-size: 20px; line-height: 20px; padding: 2px 0; }
+  .arrow-right { display: inline-block; color: #555; font-size: 18px; padding: 0 4px; }
+  .arrow-label { font-size: 11px; color: #666; font-style: italic; }
+
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .row-stretch { display: flex; gap: 8px; align-items: stretch; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .flex1 { flex: 1; }
+
+  .label { font-size: 12px; color: #444; text-align: center; padding: 2px 0; }
+  .section-label { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px; }
+
+  .trait { font-size: 10px; color: #333; text-align: left; margin-top: 4px; line-height: 1.4; }
+
+  .fail-icon { color: #c0392b; font-weight: 700; font-size: 16px; }
+  .ok-icon { color: #27ae60; font-weight: 700; font-size: 16px; }
+
+  table.compare {
+    width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px;
+  }
+  table.compare th {
+    background: #343a40; color: #fff; padding: 6px 8px; text-align: center;
+    font-weight: 600; font-size: 12px;
+  }
+  table.compare td {
+    border: 1px solid #dee2e6; padding: 5px 8px; text-align: center; font-size: 11px;
+  }
+  table.compare tr:nth-child(even) { background: #f8f9fa; }
+  table.compare .scenario { font-weight: 700; text-align: left; }
+
+  .tag-fail { background: #f5c6cb; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 600; color: #721c24; }
+  .tag-ok { background: #d4edda; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 600; color: #155724; }
+  .tag-warn { background: #fff3cd; border-radius: 3px; padding: 1px 5px; font-size: 10px; font-weight: 600; color: #856404; }
+</style>
+</head>
+<body>
+
+<h1>Distributed Task Queue: Failure Modes, Idempotency & Exactly-Once</h1>
+<p class="subtitle">Architecture with annotated failure points -- Producer / Broker / Worker Pool / Result Backend</p>
+
+<div class="main-layout">
+  <!-- LEFT: Architecture + Happy Path + Failure Scenarios -->
+  <div class="left-col">
+
+    <!-- Core Architecture -->
+    <div class="section-box happy" style="background: #f0f8ff;">
+      <div class="section-header">Core Architecture -- Happy Path</div>
+      <div style="padding: 8px 0;">
+
+        <div class="row">
+          <div class="box box-green flex1">
+            <div class="box-title">Producer</div>
+            <div class="box-sub">API server / scheduler</div>
+          </div>
+          <div>
+            <span class="arrow-right">--></span>
+            <div class="arrow-label">enqueue</div>
+          </div>
+          <div class="box box-purple flex1">
+            <div class="box-title">Broker</div>
+            <div class="box-sub">Redis / RabbitMQ / SQS / Kafka</div>
+          </div>
+          <div>
+            <span class="arrow-right">--></span>
+            <div class="arrow-label">dequeue</div>
+          </div>
+          <div class="box box-blue flex1">
+            <div class="box-title">Worker Pool</div>
+            <div class="box-sub">Celery / Sidekiq / custom</div>
+          </div>
+        </div>
+
+        <div class="row" style="justify-content: flex-end; margin-top: 4px;">
+          <div class="box box-yellow" style="width: 180px;">
+            <div class="box-title">Result Backend</div>
+            <div class="box-sub">DB / Redis / S3</div>
+          </div>
+          <div>
+            <span class="arrow-right"><--</span>
+            <div class="arrow-label">ack + result</div>
+          </div>
+          <div class="box box-blue" style="width: 160px;">
+            <div class="box-sub">execute -> ack -> done</div>
+          </div>
+        </div>
+
+        <div class="label" style="margin-top: 6px;">Happy path: enqueue -> dequeue -> execute -> ack -> result stored</div>
+      </div>
+    </div>
+
+    <!-- Failure Scenarios -->
+    <div class="section-box failure" style="background: #fdf2f2;">
+      <div class="section-header">7 Failure Scenarios (annotated on architecture)</div>
+      <div style="padding: 8px 0;">
+
+        <div class="row-stretch">
+          <div class="box box-red flex1" style="text-align: left;">
+            <div class="box-title"><span class="fail-icon">X</span> S1: Worker crash mid-execution</div>
+            <div class="trait">
+              OOM / SIGKILL -- no graceful cleanup<br>
+              Partial side-effects already committed<br>
+              Broker timeout -> redeliver -> <b>need idempotency</b>
+            </div>
+          </div>
+          <div class="box box-red flex1" style="text-align: left;">
+            <div class="box-title"><span class="fail-icon">X</span> S2: Ack lost (network drop)</div>
+            <div class="trait">
+              Task succeeds, ack never reaches broker<br>
+              Broker thinks task failed -> redelivers<br>
+              Same idempotency requirement as S1
+            </div>
+          </div>
+        </div>
+
+        <div class="row-stretch">
+          <div class="box box-orange flex1" style="text-align: left;">
+            <div class="box-title"><span class="tag-warn">!</span> S3: Timeout + dual execution</div>
+            <div class="trait">
+              Worker A slow (GC, partition)<br>
+              Broker redispatches to Worker B<br>
+              Worker A recovers -- both execute<br>
+              <b>Fix: fencing tokens / lease IDs</b>
+            </div>
+          </div>
+          <div class="box box-orange flex1" style="text-align: left;">
+            <div class="box-title"><span class="tag-warn">!</span> S4: Poison pill</div>
+            <div class="trait">
+              Invalid params / logic bug<br>
+              Fails -> retries -> fails forever<br>
+              <b>Fix: max retries + DLQ + backoff</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-stretch">
+          <div class="box box-pink flex1" style="text-align: left;">
+            <div class="box-title"><span class="fail-icon">X</span> S5: Broker crash/restart</div>
+            <div class="trait">
+              Redis RDB: in-flight tasks lost<br>
+              Redis AOF: depends on fsync policy<br>
+              RabbitMQ durable: survives restart<br>
+              SQS: managed, always survives
+            </div>
+          </div>
+          <div class="box box-pink flex1" style="text-align: left;">
+            <div class="box-title"><span class="tag-warn">!</span> S6: Rolling deploy</div>
+            <div class="trait">
+              v1 + v2 workers coexist<br>
+              Serialization format mismatch<br>
+              <b>Fix: graceful drain + SIGTERM</b>
+            </div>
+          </div>
+        </div>
+
+        <div class="row-stretch">
+          <div class="box box-gray flex1" style="text-align: left;">
+            <div class="box-title"><span class="tag-warn">!</span> S7: Malformed payload</div>
+            <div class="trait">
+              Empty or invalid task data submitted<br>
+              Validate at enqueue (gateway) not just execute<br>
+              Schema enforcement + reject or DLQ
+            </div>
+          </div>
+          <div class="box box-teal flex1" style="text-align: left;">
+            <div class="box-title"><span class="ok-icon">+</span> Idempotency Toolkit</div>
+            <div class="trait">
+              UUID idempotency keys<br>
+              Check-before-write / DB unique constraints<br>
+              Optimistic locking / CAS<br>
+              Outbox pattern for multi-system
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: Broker Comparison + Recovery + Delivery Semantics -->
+  <div class="right-col">
+
+    <!-- Broker Comparison -->
+    <div class="section-box broker" style="background: #f8f0fc;">
+      <div class="section-header">Broker Comparison</div>
+      <div style="padding: 8px 0;">
+        <div class="row-stretch">
+          <div class="box box-purple flex1">
+            <div class="box-title">Redis (Celery)</div>
+            <div class="trait">
+              In-memory, ultra-fast<br>
+              RDB: snapshots (data loss risk)<br>
+              AOF: append-only (fsync trade-off)<br>
+              No native ack -- client-side<br>
+              Best for: low-latency, loss-tolerant
+            </div>
+          </div>
+          <div class="box box-blue flex1">
+            <div class="box-title">RabbitMQ</div>
+            <div class="trait">
+              AMQP protocol, rich routing<br>
+              Durable queues + persistent msgs<br>
+              Publisher confirms + consumer acks<br>
+              Quorum queues (Raft-based HA)<br>
+              Best for: reliable task routing
+            </div>
+          </div>
+        </div>
+        <div class="row-stretch">
+          <div class="box box-green flex1">
+            <div class="box-title">SQS (AWS)</div>
+            <div class="trait">
+              Fully managed, auto-scaling<br>
+              Visibility timeout for ack<br>
+              DLQ built-in<br>
+              At-least-once delivery<br>
+              Best for: serverless / AWS-native
+            </div>
+          </div>
+          <div class="box box-yellow flex1">
+            <div class="box-title">Kafka</div>
+            <div class="trait">
+              Log-based, append-only<br>
+              Consumer groups + offsets<br>
+              Exactly-once (transactions)<br>
+              High throughput, replay<br>
+              Best for: event streaming + tasks
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recovery Mechanisms -->
+    <div class="section-box recovery" style="background: #f0faf4;">
+      <div class="section-header">Recovery & Exactly-Once Methodology</div>
+      <div style="padding: 8px 0;">
+        <div class="row">
+          <div class="box box-green flex1">
+            <div class="box-title">At-Least-Once Delivery</div>
+            <div class="trait">
+              Broker redelivers on timeout/nack<br>
+              Duplicates possible<br>
+              <b>Most common choice</b>
+            </div>
+          </div>
+          <div style="text-align: center; padding: 0 4px;">
+            <span class="arrow-right">+</span>
+          </div>
+          <div class="box box-teal flex1">
+            <div class="box-title">Idempotent Consumer</div>
+            <div class="trait">
+              Dedup by idempotency key<br>
+              DB unique constraints<br>
+              Compare-and-swap writes
+            </div>
+          </div>
+          <div style="text-align: center; padding: 0 4px;">
+            <span class="arrow-right">=</span>
+          </div>
+          <div class="box box-yellow flex1">
+            <div class="box-title">Effectively-Once</div>
+            <div class="trait">
+              Not true exactly-once<br>
+              "At-least-once + idempotent =<br>
+              effectively-once processing"
+            </div>
+          </div>
+        </div>
+
+        <div style="height: 6px;"></div>
+        <div class="row-stretch">
+          <div class="box box-gray flex1">
+            <div class="box-title">Retry Strategy</div>
+            <div class="trait">
+              Exponential backoff + jitter<br>
+              delay = base * 2^attempt + random(0, jitter)<br>
+              Max retries -> DLQ routing<br>
+              Error classification: transient vs permanent
+            </div>
+          </div>
+          <div class="box box-orange flex1">
+            <div class="box-title">Fencing & Leases</div>
+            <div class="trait">
+              Fencing token per task assignment<br>
+              Worker must present valid token on ack<br>
+              Stale token rejected -> prevents dual-write<br>
+              Lease TTL > expected execution time
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delivery Semantics Comparison Table -->
+    <div class="section-box semantics" style="background: #fef9f2;">
+      <div class="section-header">Failure Scenario Quick Reference</div>
+      <table class="compare">
+        <tr>
+          <th>Scenario</th>
+          <th>Symptom</th>
+          <th>Root Cause</th>
+          <th>Solution</th>
+        </tr>
+        <tr>
+          <td class="scenario">Worker crash</td>
+          <td>Partial side-effects</td>
+          <td>No graceful shutdown</td>
+          <td><span class="tag-ok">Idempotency</span></td>
+        </tr>
+        <tr>
+          <td class="scenario">Lost ack</td>
+          <td>Duplicate execution</td>
+          <td>Network partition</td>
+          <td><span class="tag-ok">Idempotency</span></td>
+        </tr>
+        <tr>
+          <td class="scenario">Dual execution</td>
+          <td>Conflicting writes</td>
+          <td>Timeout + recovery</td>
+          <td><span class="tag-warn">Fencing tokens</span></td>
+        </tr>
+        <tr>
+          <td class="scenario">Poison pill</td>
+          <td>Infinite retry loop</td>
+          <td>Permanent failure</td>
+          <td><span class="tag-warn">DLQ + max retries</span></td>
+        </tr>
+        <tr>
+          <td class="scenario">Broker crash</td>
+          <td>In-flight task loss</td>
+          <td>Persistence gap</td>
+          <td><span class="tag-fail">Durable broker</span></td>
+        </tr>
+        <tr>
+          <td class="scenario">Rolling deploy</td>
+          <td>Deserialization errors</td>
+          <td>Version mismatch</td>
+          <td><span class="tag-warn">Drain + SIGTERM</span></td>
+        </tr>
+        <tr>
+          <td class="scenario">Bad payload</td>
+          <td>Task always fails</td>
+          <td>No input validation</td>
+          <td><span class="tag-ok">Schema validation</span></td>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

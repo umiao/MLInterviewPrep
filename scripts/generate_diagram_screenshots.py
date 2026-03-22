@@ -19,6 +19,7 @@ DIAGRAMS = [
     "pbe_pipeline",
     "ranking_allocation",
     "database_comparison",
+    "distributed_task_queue",
 ]
 
 

@@ -1,6 +1,6 @@
 """Seed script for system design modules.
 
-Inserts 5 system design case study modules with metadata.
+Inserts 6 system design case study modules with metadata.
 Idempotent: upserts by slug (if exists, updates title/subtitle/diagram/order only).
 Content sections are left empty for manual population.
 """
@@ -66,6 +66,16 @@ MODULES: list[dict[str, str | int]] = [
         ),
         "diagram_filename": "database_comparison.png",
         "display_order": 5,
+    },
+    {
+        "slug": "distributed-task-queue",
+        "title": "Distributed Task Queue: Failure Modes, Idempotency & Exactly-Once",
+        "subtitle": (
+            "Deep failure analysis across 7 scenarios -- worker crash, dual execution, "
+            "poison pill, broker restart -- with idempotency and fencing token solutions"
+        ),
+        "diagram_filename": "distributed_task_queue.png",
+        "display_order": 6,
     },
 ]
 
