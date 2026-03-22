@@ -192,3 +192,39 @@
 - **Sanity check result**: 971 tests pass, ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-155 --status active` (reset from in_progress, not yet started)
+
+## 2026-03-22 07:15 -- Plan System Design Showcase feature + update Uber prep notes
+- **What I did**: (1) Updated Uber HR prep notes with JD key elements from Shopping Ranking Team JD -- added 5 key requirement keywords, updated self-intro/Q2/Q3 to reference Shopping team + GenAI angle, checked "Review JD" checkbox, re-ran backfill. (2) Planned full System Design Showcase feature: analyzed 4 architecture diagrams (Module Arbitration, LLM Orchestration, PBE Pipeline, Ranking-as-Allocation), created comprehensive implementation plan (v2) with unified narrative, 8-section content structure per module (added Production Constraints + Adversarial Defense Q&A + Verbal Outline per review feedback). Created 8 tasks (T-P1-158~165) in task_db covering backend model/API, frontend sidebar/routes/pages, and content for all 4 modules.
+- **Deliverables**: `docs/uber_hr_call_prep.md` (updated), `docs/PLAN_system_design_showcase.md` (new, v2), 8 tasks in task_db (T-P1-158~165)
+- **Sanity check result**: Tasks verified in DB, TASKS.md regenerated, plan file sent to user via Discord for review.
+- **Status**: [DONE] (planning phase complete, awaiting review before execution)
+
+## 2026-03-22 08:00 -- Execute System Design Showcase feature (T-P1-158~165)
+- **What I did**: Executed all 8 tasks for the System Design Showcase feature via parallel subagents. Phase 1 (infra): T-P1-158 backend model/API/seed + T-P1-159 frontend sidebar/routes/types. Phase 2 (UI): T-P1-160 landing page with narrative + card grid + T-P1-161 detail page with 8-tab layout/hook/auto-save. Phase 3 (content): T-P1-162~165 populated all 4 modules with 8 sections each (overview, architecture, dataflow, formulas, production constraints, trade-offs, adversarial defense, verbal outline). Total content: 91,786 chars across 32 sections.
+- **Deliverables**: Backend: `src/backend/models/system_design.py`, `src/backend/routers/system_design.py`, registered in main.py, `scripts/seed_system_designs.py`. Frontend: `src/frontend/src/pages/SystemDesignList.tsx`, `src/frontend/src/pages/SystemDesignDetail.tsx`, `src/frontend/src/hooks/useSystemDesignNotes.ts`, `src/frontend/src/types/system-design.ts`, updated Sidebar.tsx + App.tsx. Content: `scripts/content_module_arbitration.py`, `scripts/content_llm_orchestration.py`, `scripts/content_pbe_pipeline.py`, `scripts/content_ranking_allocation.py`. Static: 4 diagram images in `src/frontend/public/static/system-designs/`.
+- **Sanity check result**: All 4 modules verified 8/8 sections populated (19K-34K chars each). TypeScript compiles clean (tsc --noEmit). TASKS.md regenerated.
+- **Status**: [DONE]
+
+## 2026-03-22 12:45 -- Investigate ECONNREFUSED errors + plan 3 new tasks
+- **What I did**: Investigated root cause of Vite proxy ECONNREFUSED errors on startup. Found startup race condition in `scripts/dev.py` (backend and frontend start simultaneously, Vite ready before uvicorn). Also discovered Docker nginx.conf port mismatch (8000 vs 8100). Planned 3 tasks: T-P1-166 (dev.py health-check gate), T-P1-167 (nginx port fix), T-P1-168 (replace static screenshots with HTML-rendered diagrams). Sent analysis and plan to user via Discord for review.
+- **Deliverables**: 3 tasks added to task_db (T-P1-166, T-P1-167, T-P1-168), TASKS.md regenerated
+- **Sanity check result**: Root cause confirmed by reading dev.py (lines 106-132 show simultaneous startup). nginx.conf port mismatch confirmed. Tasks verified in DB.
+- **Status**: [DONE] (planning only, awaiting user review before execution)
+
+## 2026-03-22 12:55 -- [T-P1-166/167/168] Fix startup race, nginx port, HTML diagrams
+- **What I did**: (1) T-P1-166: Added health-check gate in `scripts/dev.py` -- backend now starts first, polls `/api/health` every 0.5s (max 30s), then starts frontend. Eliminates ECONNREFUSED on startup. (2) T-P1-167: Fixed `src/frontend/nginx.conf` proxy_pass port from 8000 to 8100 to match backend. (3) T-P1-168: Created 4 HTML diagram source files in `static/system-designs/html/`, used Playwright to generate PNG screenshots replacing the original JPGs. Updated seed script to reference .png, re-seeded DB.
+- **Deliverables**: `scripts/dev.py` (modified), `src/frontend/nginx.conf` (modified), 4 HTML files in `src/frontend/public/static/system-designs/html/`, 4 PNG files in `src/frontend/public/static/system-designs/`, `scripts/generate_diagram_screenshots.py` (new), `scripts/seed_system_designs.py` (updated .jpg->.png)
+- **Sanity check result**: All 4 PNGs generated successfully (52-75 KB). DB re-seeded with .png filenames. Frontend references diagram_filename dynamically -- no code changes needed.
+- **Status**: [DONE]
+
+## 2026-03-22 13:50 -- Plan T-P1-169/170/171 + fix autonomous_run.sh for sub-projects
+- **What I did**: (1) Planned 3 improvement tasks: T-P1-169 (crop/resize diagrams), T-P1-170 (lightbox overlay), T-P1-171 (single-page layout + fix module-arbitration duplicate content). Found module-arbitration has all 8 tabs with identical content (all overview text). (2) Updated CLAUDE.md (root + MLInterviewPrep) with explicit multi-task execution rule: always use autonomous_run.sh, never execute in main context. (3) Fixed autonomous_run.sh: added `project_dir` parameter for sub-project support, auto-reset `all_done` flag on start, use `cd` subshell to run claude from correct directory. Fixed `--cwd` flag (not supported by claude CLI).
+- **Deliverables**: `scripts/autonomous_run.sh` (updated with sub-project support), root `CLAUDE.md` (updated), `MLInterviewPrep/CLAUDE.md` (updated), 3 tasks in task_db (T-P1-169/170/171)
+- **Sanity check result**: Tasks verified in DB. autonomous_run.sh first run failed (root TASKS.md had no tasks, stale all_done=true). Fixed and re-launched with `bash scripts/autonomous_run.sh 3 MLInterviewPrep`.
+- **Status**: [DONE] (autonomous run in progress for task execution)
+
+## 2026-03-22 14:15 -- [T-P1-169] Crop whitespace and increase render size for diagram PNGs
+- **What I did**: Scaled up all 4 HTML diagram sources: body padding 24px->8px, width 1200px->1600px, all font sizes increased ~1.4x (titles 16->22px, box text 10->14px, sub-text 8->11px, section headers 11->15px). Updated `generate_diagram_screenshots.py` to use `body.screenshot()` (element-level) instead of `page.screenshot(full_page=True)` for auto-cropping, and increased viewport from 1280x900 to 1680x1200.
+- **Deliverables**: 4 HTML files modified (`src/frontend/public/static/system-designs/html/*.html`), `scripts/generate_diagram_screenshots.py` (modified), 4 PNGs regenerated (68-95 KB, up from 52-75 KB)
+- **Sanity check result**: All 4 PNGs generated. Visual inspection confirms larger text, minimal whitespace borders, clean auto-cropping.
+- **Status**: [DONE]

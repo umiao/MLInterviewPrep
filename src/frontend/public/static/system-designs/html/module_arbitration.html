@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; width: 1600px; }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 16px; color: #1a1a2e; }
+  .subtitle { font-size: 15px; text-align: center; color: #555; margin-bottom: 20px; }
+
+  .main-layout { display: flex; gap: 16px; }
+  .offline-col { width: 460px; flex-shrink: 0; }
+  .online-col { flex: 1; }
+
+  .section-header {
+    font-size: 15px; font-weight: 700; padding: 6px 10px; border-radius: 4px 4px 0 0;
+    color: #fff; text-align: center;
+  }
+  .section-box {
+    border: 2px solid; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+  }
+
+  /* Color scheme */
+  .offline { border-color: #6b5b95; }
+  .offline .section-header { background: #6b5b95; }
+  .online { border-color: #2e86ab; }
+  .online .section-header { background: #2e86ab; }
+  .stage1 { border-color: #a8d5ba; background: #f0faf4; }
+  .stage1 .section-header { background: #3a9d5d; }
+  .stage2 { border-color: #f4a261; background: #fff8f0; }
+  .stage2 .section-header { background: #e07b39; }
+  .core { border-color: #e76f51; background: #fef2ef; }
+
+  .box {
+    border: 1.5px solid #888; border-radius: 4px; padding: 8px 10px;
+    font-size: 14px; text-align: center; background: #fff; min-height: 44px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .box-green { background: #d4edda; border-color: #6b9e7a; }
+  .box-blue { background: #d6eaf8; border-color: #5b9bd5; }
+  .box-purple { background: #e8d5f5; border-color: #8e6baf; }
+  .box-yellow { background: #fff3cd; border-color: #c9a825; }
+  .box-orange { background: #fde2c8; border-color: #e07b39; }
+  .box-gray { background: #e9ecef; border-color: #999; }
+  .box-pink { background: #f8d7da; border-color: #c0616e; }
+
+  .box-title { font-weight: 700; font-size: 14px; }
+  .box-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+  .arrow { text-align: center; color: #555; font-size: 20px; line-height: 20px; padding: 2px 0; }
+  .arrow-right { display: inline-block; color: #555; font-size: 18px; padding: 0 4px; }
+  .arrow-label { font-size: 11px; color: #666; font-style: italic; }
+
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .row-stretch { display: flex; gap: 8px; align-items: stretch; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .flex1 { flex: 1; }
+
+  .db-icon {
+    width: 52px; height: 44px; border: 1.5px solid #888; border-radius: 4px;
+    background: #e9ecef; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; text-align: center;
+  }
+
+  .label { font-size: 12px; color: #444; text-align: center; padding: 2px 0; }
+  .section-label { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 8px; }
+
+  .offline-bg { background: #f3f0f7; }
+  .online-bg { background: #eef6fb; }
+</style>
+</head>
+<body>
+
+<h1>Module Generation & Arbitration Workflow: A Content Marketplace for eBay SRP</h1>
+<p class="subtitle">Two-stage SRP module generation and arbitration: offline value estimation and online runtime arbitration for whole-page optimization</p>
+
+<div class="main-layout">
+  <!-- OFFLINE COLUMN -->
+  <div class="offline-col">
+    <div class="section-box offline offline-bg">
+      <div class="section-header">Offline / Pre-computing</div>
+      <div style="padding: 8px 0;">
+
+        <!-- Module Registration -->
+        <div class="box box-green" style="margin-bottom: 8px;">
+          <div class="box-title">Module Registration</div>
+          <div class="box-sub">Module Enrollment</div>
+          <div class="box-sub" style="font-size: 10px; margin-top: 4px; text-align: left;">
+            Module Metadata<br>
+            Slots, ads vs organic<br>
+            Target Placements<br>
+            A/B Variant Registration
+          </div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+        <div class="box box-gray" style="margin-bottom: 8px;">
+          <div class="box-title">Module Register Table</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <!-- Module Performance & Features -->
+        <div class="box box-purple" style="margin-bottom: 8px;">
+          <div class="box-title">Module Performance & Features</div>
+          <div class="box-sub">from BBOW/AC/Purchase to Module Attribution</div>
+        </div>
+
+        <div class="row" style="margin-top: 6px;">
+          <div class="box box-blue flex1">
+            <div class="box-title">Module Insights</div>
+            <div class="box-sub">DB / GDS</div>
+          </div>
+          <div class="arrow-right">&#8594;</div>
+          <div class="col flex1">
+            <div class="box box-yellow">
+              <div class="box-title">Periodic Batch</div>
+              <div class="box-sub">Update (e.g., d/h)</div>
+            </div>
+            <div class="box box-yellow">
+              <div class="box-title">Module Insights</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-green" style="margin-bottom: 6px;">
+          <div class="box-title">Feature Engineering & Model Training</div>
+        </div>
+
+        <div class="row">
+          <div class="box box-blue flex1">
+            <div class="box-title">Contextual Value Predictor Models</div>
+          </div>
+          <div class="box box-blue flex1">
+            <div class="box-title">Global Thompson Sampling / Placement Strategies</div>
+            <div class="box-sub">(n_p per Module)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ONLINE COLUMN -->
+  <div class="online-col">
+    <div class="section-box online online-bg">
+      <div class="section-header">Online Two-Stage Query Execution</div>
+      <div style="padding: 8px 0;">
+
+        <!-- Stage 1 -->
+        <div class="section-box stage1" style="margin-bottom: 10px;">
+          <div class="section-header">Stage 1: River & Module Content (Adaptive - oMACE by Pool)</div>
+
+          <div class="row" style="margin-top: 8px;">
+            <div class="box box-blue" style="width: 110px;">
+              <div class="box-title">Query context</div>
+              <div class="box-sub">user, query, intent</div>
+            </div>
+            <div class="arrow-right">&#8594;</div>
+            <div class="box box-green" style="width: 100px;">
+              <div class="box-title">Orchestrator</div>
+            </div>
+            <div class="arrow-right">&#8594;</div>
+            <div class="col flex1">
+              <div class="box box-yellow">
+                <div class="box-title">River Content Items</div>
+                <div class="box-sub">In-Cassini Modules (e.g., Carousel)</div>
+              </div>
+              <div class="box box-yellow">
+                <div class="box-title">Stage-1 River Output</div>
+                <div class="box-sub">ranked organic contents and external modules</div>
+              </div>
+            </div>
+            <div class="arrow-right">&#8594;</div>
+            <div class="col" style="width: 110px;">
+              <div class="box box-gray">
+                <div class="box-title">Search Service / External Providers</div>
+              </div>
+              <div class="box box-gray">
+                <div class="box-title">SaaS/TnS stage</div>
+              </div>
+              <div class="box-sub">Query external module content to persist</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="section-box stage2">
+          <div class="section-header">Stage 2: Module Arbitration (The Core)</div>
+
+          <div style="padding: 8px 0;">
+            <div class="label" style="margin-bottom: 6px; font-weight: 700;">Module Arbitration System</div>
+
+            <div class="row-stretch">
+              <div class="box box-orange flex1">
+                <div class="box-title">Module Placement Optimizer</div>
+                <div class="box-sub" style="margin-top: 4px; text-align: left; font-size: 10px;">
+                  Decides num/loc of slots<br>
+                  for each placement<br>
+                  Predicts contextual value<br>
+                  Gains and cost<br>
+                  (oMACE by pool)
+                </div>
+              </div>
+
+              <div class="arrow-right">&#8594;</div>
+
+              <div class="box box-orange flex1">
+                <div class="box-title">Module Filter</div>
+                <div class="box-sub" style="margin-top: 4px; text-align: left; font-size: 10px;">
+                  Filters based on<br>
+                  eligibility, relevance,<br>
+                  duplication, policy
+                </div>
+              </div>
+
+              <div class="arrow-right">&#8594;</div>
+
+              <div class="box box-orange flex1">
+                <div class="box-title">River Composition & Blender</div>
+                <div class="box-sub" style="margin-top: 4px; text-align: left; font-size: 10px;">
+                  Interleaves the value-<br>
+                  optimized module<br>
+                  placements with<br>
+                  organic listings
+                </div>
+              </div>
+            </div>
+
+            <div class="arrow">&#8595;</div>
+
+            <div class="box box-pink" style="margin-bottom: 6px;">
+              <div class="box-title">Page Composer</div>
+              <div class="box-sub">Compose a search result page given the blended river + external modules. Page layout optimizations.</div>
+            </div>
+
+            <div class="row">
+              <div class="box box-gray flex1">
+                <div class="box-title">Funnel Events / Kafka stream</div>
+                <div class="box-sub">content clicks and impressions</div>
+              </div>
+              <div class="arrow-right">&#8594;</div>
+              <div class="box box-yellow flex1">
+                <div class="box-title">Aggregated Module Engagement Stats</div>
+              </div>
+              <div class="arrow-right">&#8594;</div>
+              <div class="box box-green" style="width: 100px;">
+                <div class="box-title">Adaptive tuning</div>
+                <div class="box-sub">Query context & Regression models</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; width: 1600px; }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 6px; color: #1a1a2e; }
+  .subtitle { font-size: 15px; text-align: center; color: #555; margin-bottom: 20px; }
+
+  .section-header {
+    font-size: 15px; font-weight: 700; padding: 6px 10px; border-radius: 4px 4px 0 0;
+    color: #fff; text-align: center;
+  }
+  .section-box {
+    border: 2px solid; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+  }
+
+  .online { border-color: #2e86ab; background: #eef6fb; }
+  .online .section-header { background: #2e86ab; }
+  .offline { border-color: #6b5b95; background: #f3f0f7; }
+  .offline .section-header { background: #6b5b95; }
+  .ingest { border-color: #e07b39; background: #fff8f0; }
+  .ingest .section-header { background: #e07b39; }
+  .ml { border-color: #3a9d5d; background: #f0faf4; }
+  .ml .section-header { background: #3a9d5d; }
+
+  .box {
+    border: 1.5px solid #888; border-radius: 4px; padding: 8px 10px;
+    font-size: 14px; text-align: center; background: #fff; min-height: 44px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .box-green { background: #d4edda; border-color: #6b9e7a; }
+  .box-blue { background: #d6eaf8; border-color: #5b9bd5; }
+  .box-purple { background: #e8d5f5; border-color: #8e6baf; }
+  .box-yellow { background: #fff3cd; border-color: #c9a825; }
+  .box-orange { background: #fde2c8; border-color: #e07b39; }
+  .box-gray { background: #e9ecef; border-color: #999; }
+  .box-pink { background: #f8d7da; border-color: #c0616e; }
+
+  .box-title { font-weight: 700; font-size: 14px; }
+  .box-sub { font-size: 11px; color: #555; margin-top: 2px; }
+
+  .arrow { text-align: center; color: #555; font-size: 20px; line-height: 20px; padding: 2px 0; }
+  .arrow-right { display: inline-block; color: #555; font-size: 18px; padding: 0 4px; }
+
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .flex1 { flex: 1; }
+
+  .label { font-size: 12px; color: #444; text-align: center; padding: 2px 0; font-weight: 700; }
+
+  .main-layout { display: flex; gap: 16px; }
+</style>
+</head>
+<body>
+
+<h1>Product-Based Experience (PBE) Logging & Dataset Pipeline: End-to-End System Overview</h1>
+<p class="subtitle">KDD/SIGIR Aligned</p>
+
+<div class="main-layout">
+  <!-- LEFT: Online Search Serving -->
+  <div style="width: 280px; flex-shrink: 0;">
+    <div class="section-box online">
+      <div class="section-header">Online Search Serving (User-Facing)</div>
+      <div style="padding: 8px 0;">
+        <div class="row">
+          <div class="box box-gray" style="width: 70px;">
+            <div class="box-title">Search Request</div>
+            <div class="box-sub">PBE Carousel / Product Edition</div>
+          </div>
+          <div class="arrow-right">&#8594;</div>
+          <div class="col flex1">
+            <div class="box box-blue">
+              <div class="box-title">Search Front End</div>
+            </div>
+            <div class="arrow">&#8595;</div>
+            <div class="box box-green">
+              <div class="box-title">Request PBE Results</div>
+            </div>
+          </div>
+          <div class="arrow-right">&#8594;</div>
+          <div class="col" style="width: 80px;">
+            <div class="box box-yellow">
+              <div class="box-title">Ordered Products</div>
+            </div>
+            <div class="arrow">&#8595;</div>
+            <div class="box box-yellow">
+              <div class="box-title">Search Content Combiner</div>
+            </div>
+            <div class="arrow">&#8595;</div>
+            <div class="box box-orange">
+              <div class="box-title">Cassini Ranking Engine</div>
+              <div class="box-sub">(with tracking IDs)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+        <div class="box box-pink" style="margin-bottom: 6px;">
+          <div class="box-title">Inject Trackable IDs & HTML Attributes</div>
+          <div class="box-sub">(data-viewport, data-interaction)</div>
+        </div>
+
+        <div style="border-top: 1px dashed #aaa; margin: 8px 0; padding-top: 8px;">
+          <div class="label">Interaction Events</div>
+          <div class="box-sub" style="text-align: center; margin-bottom: 4px;">(Clicks, Viewport, Sojourner Events)</div>
+
+          <div class="row">
+            <div class="box box-gray flex1">
+              <div class="box-title">Async Log</div>
+              <div class="box-sub">Product Features</div>
+            </div>
+            <div class="box box-gray flex1">
+              <div class="box-title">Async Log</div>
+              <div class="box-sub">Streaming Features (epid, ModuleID)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: Dual-Stream Data Ingestion -->
+  <div style="flex: 1;">
+    <div class="section-box ingest">
+      <div class="section-header">Dual-Stream Data Ingestion</div>
+      <div style="padding: 8px 0;">
+        <div class="row">
+          <div class="col flex1">
+            <div class="box box-orange">
+              <div class="box-title">Sojourner / Ubi Raw Behavioral Logs</div>
+            </div>
+            <div class="arrow">&#8595;</div>
+            <div class="box box-yellow">
+              <div class="box-title">Spark Join: Navigation & ID Resolution</div>
+            </div>
+          </div>
+          <div class="col flex1">
+            <div class="box box-orange">
+              <div class="box-title">Streaming Feature Logs</div>
+            </div>
+            <div class="arrow">&#8595;</div>
+            <div class="box box-yellow">
+              <div class="box-title">Spark Streaming: Feature Ingestion</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 6px;">
+          <div class="box box-gray" style="width: 100px;">
+            <div class="box-title">Kafka Feature Broker</div>
+          </div>
+          <div class="arrow-right">&#8594;</div>
+          <div class="box box-purple flex1">
+            <div class="box-title">Intermediate Table: Viewport-Aligned Impressions</div>
+            <div class="box-sub">(Exposure, Rank, Position, Carousel, Slot)</div>
+          </div>
+          <div class="arrow-right">&#8594;</div>
+          <div class="box box-purple flex1">
+            <div class="box-title">Internal Tables (Typed ML/GPL)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Offline Data Processing & ML -->
+  <div style="width: 260px; flex-shrink: 0;">
+    <div class="section-box offline">
+      <div class="section-header">Offline Data Processing & Attribution (Data Lakehouse)</div>
+      <div style="padding: 8px 0;">
+        <div class="box box-purple" style="margin-bottom: 6px;">
+          <div class="box-title">Analytics Engine</div>
+          <div class="box-sub">Feature Store & Aggregation</div>
+        </div>
+        <div class="arrow">&#8595;</div>
+        <div class="box box-purple" style="margin-bottom: 6px;">
+          <div class="box-title">Formal Attribution</div>
+          <div class="box-sub">Module Discovery Model</div>
+        </div>
+        <div class="arrow">&#8595;</div>
+        <div class="box box-gray">
+          <div class="box-title">Product-Indexed Labels + Features</div>
+        </div>
+
+        <div class="label" style="margin-top: 6px;">Deploy New Ranking Policy</div>
+      </div>
+    </div>
+
+    <div class="section-box ml">
+      <div class="section-header">Machine Learning Loop</div>
+      <div style="padding: 8px 0;">
+        <div class="box box-green" style="margin-bottom: 6px;">
+          <div class="box-title">ML Training Pipeline</div>
+        </div>
+        <div class="arrow">&#8595;</div>
+        <div class="box box-green">
+          <div class="box-title">Ranking Model</div>
+        </div>
+
+        <div style="margin-top: 8px; font-size: 11px; color: #555; text-align: center;">
+          Blue = Online Serving<br>
+          Orange = Data Ingestion<br>
+          Purple = Offline Attribution<br>
+          Green = ML Loop
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 12px;">
+  Figure 3: End-to-end PBE optimization: trackable IDs and viewport logging,
+  asynchronous feature logging, offline attribution, and training-data materialization.
+</p>
+
+</body>
+</html>
