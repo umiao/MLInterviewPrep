@@ -19,8 +19,13 @@ from src.backend.services.company_service import get_or_create_company  # noqa: 
 
 PREP_NOTES_PATH = Path(
     r"C:\Users\Shenghui Xu\Desktop\2026 跳槽准备"
-    r"\2026_03_15_LinkedIn_HR_Call\linkedin_hr_call_prep.md"
+    r"\_Archived_2026_03_15_LinkedIn_HR_Call\linkedin_hr_call_prep.md"
 )
+
+# Company prep notes stored in docs/ directory
+COMPANY_PREP_NOTES: dict[str, Path] = {
+    "Uber": PROJECT_ROOT / "docs" / "uber_hr_call_prep.md",
+}
 
 
 def _invalidate_tts_cache(db: "Session", content_type: str, content_id: int) -> None:  # type: ignore[name-defined]  # noqa: F821
@@ -68,6 +73,23 @@ def main() -> None:
             # Invalidate stale TTS caches for this content
             _invalidate_tts_cache(db, "prep_notes", linkedin.id)
             db.commit()
+
+        # 2b. Import prep notes for companies with docs/ markdown files
+        for company_name, notes_path in COMPANY_PREP_NOTES.items():
+            company = get_or_create_company(company_name, db)
+            db.commit()
+            if not notes_path.exists():
+                print(f"{company_name} prep notes file not found: {notes_path}")
+                continue
+            prep_text = notes_path.read_text(encoding="utf-8")
+            if company.prep_notes == prep_text:
+                print(f"{company_name} prep_notes already up to date, skipping.")
+            else:
+                company.prep_notes = prep_text
+                db.commit()
+                print(f"{company_name} prep_notes: {len(prep_text)} chars imported")
+                _invalidate_tts_cache(db, "prep_notes", company.id)
+                db.commit()
 
         # 3. Link existing events to companies
         events = db.query(InterviewEvent).all()

@@ -9,148 +9,174 @@
 
 ### P0 -- Must Have (core functionality)
 
-### P1 -- Should Have (agentic intelligence)
-
-#### T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once)
-- **Priority**: P1
-- **Complexity**: L
+#### T-P0-178: Ad-hoc: commit all uncommitted changes from previous sessions
+- **Priority**: P0
+- **Complexity**: S
 - **Depends on**: None
-- **Description**: ## Goal
-Add a comprehensive system design module on distributed task queues, covering deep failure analysis, recovery mechanisms, and exactly-once semantics. This is an interview-focused deep dive, not a surface-level overview.
+- **Description**: ## Problem
+Multiple sessions modified files without committing. Need a cleanup commit.
 
-## Content Scope (8-section structure)
+## Uncommitted Changes
+Modified: .gitignore, CLAUDE.md, PROGRESS.md, TASKS.md, archive/completed_tasks.md, 
+config/scrape_seeds.yaml, scripts/backfill_interviews.py, scripts/dev.py, 
+scripts/forum_scrape.py, src/backend/main.py, src/backend/models/__init__.py,
+src/backend/services/forum_service.py, src/frontend/nginx.conf, 
+src/frontend/src/App.tsx, src/frontend/src/components/Sidebar.tsx
 
-### S1 Overview & Motivation
-- What is a distributed task queue and why it matters
-- Core contract: producer enqueues, broker stores, consumer executes, acknowledges
-- Why "fire and forget" breaks in production
+Untracked: docs/PLAN_system_design_showcase.md, docs/uber_hr_call_prep.md,
+scripts/content_*.py (4 files), src/backend/models/system_design.py,
+src/backend/routers/system_design.py, src/frontend/public/static/system-designs/*.jpg,
+src/frontend/src/types/system-design.ts
 
-### S2 Architecture Deep Dive
-- Broker options: Redis (Celery), RabbitMQ, SQS, Kafka
-- Redis as broker:
-  - Default RDB persistence: data loss between snapshots if crash
-  - AOF mode: fsync behavior differences during rewrite
-  - Trade-off: performance vs durability
-- RabbitMQ:
-  - Durable queues + persistent messages + publisher confirms
-  - Mirrored queues for HA, quorum queues (Raft-based)
-- Architecture diagram: producer -> broker -> worker pool -> result backend
-
-### S3 Data Flow & Key Components
-- Happy path: enqueue -> dequeue -> execute -> ack -> done
-- Failure paths (THE CORE OF THIS MODULE):
-
-**Scenario 1: Worker crash during execution**
-- Task dequeued, worker starts processing, worker crashes (OOM / SIGKILL)
-- Application-level error handling has NO chance to run
-- Broker's visibility timeout expires -> task redelivered
-- BUT: partial side-effects (dirty writes) already committed
-- Need: idempotency to handle re-execution safely
-
-**Scenario 2: How to implement idempotency**
-- Idempotency key per task (UUID)
-- Check-before-write pattern
-- Database unique constraints as natural idempotency
-- Conditional writes (optimistic locking, compare-and-swap)
-- Outbox pattern for multi-system consistency
-
-**Scenario 3: Worker timeout -> broker redispatches -> original worker recovers**
-- Worker A takes task, becomes slow (GC pause, network partition)
-- Broker declares timeout, gives task to Worker B
-- Worker A recovers, both A and B now execute same task
-- Race conditions: ack ownership (whose ack is valid?), duplicate execution, conflicting writes
-- Solution: fencing tokens / lease IDs
-
-**Scenario 4: Task succeeds but ack lost**
-- Worker completes task, sends ack, network drops ack
-- Broker thinks task failed -> redelivers
-- Same as scenario 1 from idempotency perspective
-
-**Scenario 5: Poison pill (permanently failing task)**
-- Invalid parameters, logic bug, missing dependency
-- Task fails, retried, fails again, infinite loop
-- How to distinguish from transient failures?
-- Solutions: max retry count, dead letter queue (DLQ), exponential backoff with jitter
-- DLQ monitoring and alerting
-
-**Scenario 6: Deployment - old/new version workers running concurrently**
-- Rolling deploy: v1 and v2 workers coexist
-- Task serialization format changes between versions
-- Graceful shutdown: drain in-flight tasks before process exit
-- SIGTERM handling: stop accepting new tasks, finish current, ack, exit
-
-**Scenario 7: Empty/malformed payload submitted**
-- Validation at enqueue time vs execution time
-- Schema validation, contract enforcement
-
-### S4 Formulas & Algorithms
-- Retry strategies: exponential backoff formula with jitter
-- Visibility timeout calculation: expected_execution_time * safety_factor
-- Circuit breaker thresholds
-- Dead letter criteria: max_retries, max_age, error_type classification
-
-### S5 Production Constraints
-- Throughput: tasks/sec by broker type
-- Latency: enqueue-to-start, end-to-end
-- Durability guarantees by broker configuration
-- Memory/storage implications of retry queues and DLQs
-
-### S6 Trade-off Analysis
-- At-most-once vs at-least-once vs exactly-once: pick two, compensate third
-- Message loss vs message duplication: which side to favor? Business-level compensation
-- Broker durability vs throughput (Redis RDB vs AOF vs RabbitMQ persistent)
-- Synchronous ack vs async ack
-- Push vs pull consumer models
-
-### S7 Adversarial Defense Q&A (SCENARIO-BASED)
-Structure: "Given this system, what happens when X? Walk through the complete chain."
-
-- **Q: Worker crashes during execution. Walk through the full recovery chain.**
-  Complete answer: crash -> no ack -> visibility timeout -> broker redelivers -> new worker picks up -> idempotency check -> safe re-execution -> ack
-
-- **Q: Broker restarts. What happens to in-flight tasks?**
-  Redis RDB: lost. Redis AOF: depends on fsync policy. RabbitMQ durable: survives. SQS: managed, survives.
-
-- **Q: Same task executed by two workers simultaneously. Side effects may be irreversible.**
-  Fencing tokens, lease-based ownership, idempotent operations, compensating transactions for irreversible side effects
-
-- **Q: Task succeeds but ack is lost.**
-  At-least-once delivery -> idempotency saves you. Without idempotency: duplicate side effects.
-
-- **Q: Poison pill enters the queue and fails repeatedly.**
-  DLQ after N retries. Error classification: retriable (timeout, network) vs permanent (validation, logic). Alerting on DLQ depth.
-
-- **Q: Empty payload submitted.**
-  Validation at gateway/producer side. Schema enforcement. Reject or DLQ immediately.
-
-- **Q: How do you achieve exactly-once execution?**
-  You don't -- you achieve "at-least-once delivery + idempotent execution = effectively-once processing". True exactly-once requires transactional outbox + idempotent consumer.
-
-- **Q: Two workers execute same task, one does irreversible action (sent email, charged card). How to handle?**
-  Reservation pattern: claim before execute. Distributed lock with TTL. Compensating transaction (refund). Accept business-level duplication with dedup downstream.
-
-- **Q: How do you discover a task that will never succeed?**
-  Error type classification, DLQ routing, max retry policy, monitoring retry count distribution, alert on tasks exceeding p99 retry count.
-
-### S8 Verbal Outline
-- 3-min version: problem statement, core architecture, key failure mode + solution
-- 10-min version: full walkthrough of architecture, 3 failure scenarios with recovery chains, trade-off analysis, exactly-once methodology
-
-## Implementation
-1. Add seed entry (slug: distributed-task-queue, display_order: 6)
-2. Create content script: scripts/content_distributed_task_queue.py
-3. Create HTML architecture diagram (producer -> broker -> worker pool, with failure points annotated)
-4. Generate PNG, seed DB, verify all 8 sections
+## Fix
+1. Review all changes to ensure no secrets or sensitive data
+2. Stage all relevant files
+3. Commit with descriptive message covering the work done
+4. Do NOT commit .claude/worktrees/ or any temp files
 
 ## Acceptance Criteria
-- [ ] New module visible in system design list
-- [ ] All 8 sections populated with deep, interview-ready content
-- [ ] Each of the 7 failure scenarios has a complete walkthrough
-- [ ] Defense Q&A covers all scenarios listed above
-- [ ] Diagram shows architecture with failure points annotated
-- [ ] Content distinguishes transient vs permanent failures
-- [ ] Exactly-once methodology clearly explained
-- [ ] Verbal outline covers 3-min and 10-min delivery
+- [ ] All modified and new files committed
+- [ ] No secrets in committed files
+- [ ] git status clean after commit
+
+### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Problem
+1. Blind Grind75 tab does not display the sort-by dropdown that is already implemented and visible in the All Problems tab
+2. Filter selections (difficulty, category, pattern, etc.) should persist when switching between tabs
+
+## Current State
+- `Problems.tsx`: Sort bar with sortBy/sortOrder is rendered but may be hidden or not applied in Blind75 tab
+- `useFilterParams` hook persists filter state in URL params including `tab` param
+- Blind75 tab has its own grouped layout but shares the same filter state
+
+## Fix
+1. Ensure sort-by dropdown and sort order toggle are visible in Blind75 tab
+2. Apply sort within each pattern group in Blind75 view
+3. Verify filter state (difficulty, status, etc.) carries over when switching tabs
+4. URL params should reflect all filter/sort state for both tabs
+
+## Acceptance Criteria
+- [ ] Sort-by dropdown visible and functional in Blind75 tab
+- [ ] Sort applies within pattern groups
+- [ ] Switching tabs preserves filter selections
+- [ ] URL params update correctly when changing filters/sort in either tab
+- [ ] Manually verify: set difficulty=hard in All tab, switch to Blind75, filter still applied
+
+#### T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Problem
+Blind Grind75 tab only shows problems grouped by pattern. User wants an "All Problems" flat list view as well, displayed twice (like a toggle or sub-section).
+
+## Current State
+- Blind75 tab groups problems by `pattern` field
+- Each group has a header with pattern name and mini-progress bar
+- No option to view all Blind75 problems in a flat table
+
+## Fix
+1. Add a view toggle in Blind75 tab: "Grouped by Pattern" | "All Problems"
+2. "All Problems" view shows the same table as the All tab but filtered to source=blind75
+3. Both views share the same sort/filter state
+4. Default to grouped view (current behavior)
+
+## Acceptance Criteria
+- [ ] Toggle visible at top of Blind75 tab
+- [ ] "All Problems" shows flat table with all blind75 problems
+- [ ] "Grouped by Pattern" shows current grouped layout
+- [ ] Sort and filters apply correctly in both views
+- [ ] Manually verify: switch between views, data is consistent
+
+#### T-P1-176: LeetCode: Move Practice/Review actions from table to ProblemDetailPage
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Problem
+Practice and Review buttons are in the table Actions column. User cannot see the problem description/details while practicing or reviewing. These actions should be on the ProblemDetailPage where the problem is visible.
+
+## Current State
+- `Problems.tsx`: Actions column has Practice button (opens PracticeModal) and Review button (opens ReviewPanel)
+- `ProblemDetailPage.tsx`: Shows problem description, notes, but no Practice/Review actions
+- `PracticeModal.tsx`: Full-screen modal with timer, notes, result entry
+- `ReviewPanel.tsx`: Side panel with AI review and Q&A
+
+## Fix
+1. Add Practice and Review buttons to ProblemDetailPage
+2. On ProblemDetailPage:
+   - Practice button opens PracticeModal (same component, reused)
+   - Review button opens ReviewPanel (same component, as side panel or section below)
+3. Remove or de-emphasize the Practice/Review buttons from the table Actions column
+   - Keep a minimal action (e.g., just a link icon to detail page) in the table
+   - Or keep practice/review in table but make detail page the primary location
+4. Problem description remains visible when using Practice/Review on detail page
+
+## Acceptance Criteria
+- [ ] ProblemDetailPage has Practice and Review buttons/sections
+- [ ] Clicking Practice on detail page opens PracticeModal with problem context visible
+- [ ] Clicking Review on detail page opens ReviewPanel alongside problem description
+- [ ] Table Actions column simplified (detail page is primary action location)
+- [ ] Manually verify: go to problem detail, click Practice, can see problem while timing
+
+#### T-P1-177: LeetCode: Add solution notes for 4 problems (K-Similar Strings, Longest Continuous Subarray, Russian Doll, Merge K Lists)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Goal
+Update 4 LeetCode problems with user-provided solution notes. Find or create these problems in the DB, then set their `notes` field.
+
+## Problems and Notes
+
+### 1. K-Similar Strings (LC 854)
+URL: https://leetcode.cn/problems/k-similar-strings/description/
+Notes:
+- BFS/DFS search approach: simulate every possible swap to match the first mismatched position
+- Key optimizations/pruning:
+  1. Skip already-matching positions (no need to swap matched chars)
+  2. Only modify s1 to match s2 (don't sync both)
+  3. Process one mismatched char at a time, break immediately after swap
+  4. Track all generated strings (s1 variants) to prevent revisiting
+- Pattern: BFS + pruning
+
+### 2. Longest Continuous Subarray With Absolute Diff <= Limit (LC 1438)
+URL: https://leetcode.cn/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/description/
+Notes:
+- Sliding window with two monotonic deques (one for max, one for min)
+- Move right pointer, add new element to both deques (maintaining monotonicity)
+- Check if abs(max - min) > limit; if so, shrink left pointer, pop from deques
+- Since limit >= 0, we can always find a valid window (single element satisfies)
+- Pattern: Sliding Window + Monotonic Deque
+
+### 3. Russian Doll Envelopes (LC 354)
+URL: https://leetcode.cn/problems/russian-doll-envelopes/description/
+Notes:
+- Sort envelopes: width ascending, height descending (same width can't nest)
+- Reduce to Longest Increasing Subsequence (LIS) on height dimension
+- Use binary search for O(n log n) LIS
+- Pattern: Sort + LIS (Binary Search)
+
+### 4. Merge K Sorted Lists (LC 23)
+URL: https://leetcode.cn/problems/merge-k-sorted-lists/
+Notes:
+- Approach 1: Min-heap -- push all list heads into heap, pop min, push next
+- Approach 2: Divide and conquer -- recursively merge pairs, log(k) rounds of pairwise merge sort
+- Pattern: Heap / Divide and Conquer
+
+## Implementation
+1. For each problem, search DB by URL or title
+2. If not found, create the problem entry with appropriate metadata (difficulty, tags, pattern)
+3. Set the `notes` field with the solution notes in markdown format
+4. Mark as completed (is_completed=True) with appropriate comfort level
+
+## Acceptance Criteria
+- [ ] All 4 problems exist in DB with correct metadata
+- [ ] Each problem has solution notes populated
+- [ ] Notes visible on ProblemDetailPage "My Notes" section
+- [ ] Problems marked as completed
 
 ### P2 -- Nice to Have
 
@@ -267,6 +293,7 @@ S - straightforward wiring, two functions to modify
 
 > 158 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-22** -- T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once). ## Goal
 - [x] **2026-03-22** -- T-P1-172: System Design Module 5: Database Systems Comparison (Cassandra focus). ## Goal
 - [x] **2026-03-22** -- T-P1-171: System Design detail: single-page layout with bookmark nav + fix module-arbitration content. ## Problem
 - [x] **2026-03-22** -- T-P1-170: Diagram click-to-fullscreen lightbox overlay. ## Problem

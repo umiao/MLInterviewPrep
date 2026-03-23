@@ -26,6 +26,7 @@ from src.backend.routers.problems import router as problems_router
 from src.backend.routers.qa import router as qa_router
 from src.backend.routers.reading import router as reading_router
 from src.backend.routers.scraper import router as scraper_router
+from src.backend.routers.system_design import router as system_design_router
 from src.backend.routers.timeline import router as timeline_router
 
 logger = logging.getLogger(__name__)
@@ -146,6 +147,7 @@ app.include_router(scraper_router, prefix="/api")
 app.include_router(timeline_router, prefix="/api")
 app.include_router(reading_router, prefix="/api")
 app.include_router(forum_router, prefix="/api")
+app.include_router(system_design_router, prefix="/api")
 
 
 @app.get("/api/dashboard")

@@ -371,6 +371,22 @@ async def fetch_single_post(
         logger.info("Link %d already fetched, skipping", link_id)
         return None
 
+    # Secondary idempotency guard: check DB for an existing ForumPost.
+    # Protects against SQLAlchemy identity-map staleness across asyncio.run() calls.
+    existing_post = (
+        db.query(ForumPost).filter(ForumPost.forum_post_link_id == link_id).first()
+    )
+    if existing_post:
+        logger.warning(
+            "Link %d has existing ForumPost %d but status=%s -- fixing status",
+            link_id,
+            existing_post.id,
+            link.status,
+        )
+        link.status = "fetched"
+        db.commit()
+        return None
+
     html = await _fetch_html(crawler, link.url)
     if not html:
         link.status = "failed"

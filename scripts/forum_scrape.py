@@ -17,6 +17,8 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse
 
+from sqlalchemy.exc import IntegrityError
+
 # Allow running from project root
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -188,20 +190,49 @@ def cmd_fetch(args: argparse.Namespace) -> None:
             timeout = args.timeout_minutes
             deadline = time.monotonic() + timeout * 60 if timeout else None
             count = 0
+            failures = 0
             while True:
                 if deadline and time.monotonic() >= deadline:
                     print(f"Timeout reached ({timeout} min), stopping.")
                     break
-                post = asyncio.run(
-                    fetch_next_unfetched(db, args.seed_id, crawler)
-                )
+                try:
+                    post = asyncio.run(
+                        fetch_next_unfetched(db, args.seed_id, crawler)
+                    )
+                except IntegrityError as exc:
+                    # DB constraint violation (e.g., duplicate forum_post_link_id).
+                    # Roll back and continue -- the secondary guard in fetch_single_post
+                    # will fix the stale-status row on the next iteration.
+                    print(f"[WARN] IntegrityError, rolling back and continuing: {exc.orig}")
+                    db.rollback()
+                    failures += 1
+                    time.sleep(2)
+                    continue
                 if not post:
+                    # Distinguish: no pending links remain vs single fetch failed.
+                    # fetch_next_unfetched returns None both when no pending link
+                    # is found AND when fetch_single_post fails (failure sets
+                    # link.status='failed' before returning None). Re-query to check.
+                    still_pending = (
+                        db.query(ForumPostLink)
+                        .filter(
+                            ForumPostLink.forum_seed_id == args.seed_id,
+                            ForumPostLink.status == "pending",
+                        )
+                        .first()
+                    )
+                    if still_pending:
+                        # A single fetch failed; skip it and continue.
+                        failures += 1
+                        time.sleep(2)
+                        continue
                     break
                 count += 1
+                failures = 0
                 print(f"  [{count}] post id={post.id} ({len(post.raw_text)} chars)")
                 # Rate limiting: 2 second delay between fetches
                 time.sleep(2)
-            print(f"Fetched {count} posts total")
+            print(f"Fetched {count} posts total ({failures} consecutive failures at end)")
 
         else:
             # Default: --next (fetch one)

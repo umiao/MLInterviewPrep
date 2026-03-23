@@ -246,3 +246,21 @@
 - **Deliverables**: `scripts/seed_system_designs.py` (updated), `scripts/content_database_comparison.py` (new), `scripts/generate_diagram_screenshots.py` (updated), `src/frontend/public/static/system-designs/html/database_comparison.html` (new), `database_comparison.png` (generated, 145KB)
 - **Sanity check result**: TypeScript type-check passes, Vite build succeeds. All 8 sections populated (2K-7.6K chars). Diagram PNG renders correctly with architecture comparison layout. Module visible as 5th entry in system design list.
 - **Status**: [DONE]
+
+## 2026-03-22 17:30 -- [T-P1-173] System Design Module 6: Distributed Task Queue
+- **What I did**: Added new system design module (slug: distributed-task-queue, display_order: 6) covering failure modes, idempotency, and exactly-once semantics. Created HTML architecture diagram showing core architecture (producer/broker/worker pool/result backend), 7 failure scenarios (worker crash, lost ack, dual execution, poison pill, broker crash, rolling deploy, malformed payload), broker comparison (Redis/RabbitMQ/SQS/Kafka), recovery mechanisms, and failure scenario quick reference table. Wrote content script with all 8 sections: Overview (2.5K chars), Architecture (4.3K), Data Flow (7.1K), Formulas (3.6K), Production Constraints (2.8K), Trade-offs (4.9K), Defense Q&A (10.5K), Verbal Outline (5.2K). Updated seed script and diagram generator.
+- **Deliverables**: `scripts/seed_system_designs.py` (updated), `scripts/content_distributed_task_queue.py` (new), `scripts/generate_diagram_screenshots.py` (updated), `src/frontend/public/static/system-designs/html/distributed_task_queue.html` (new), `distributed_task_queue.png` (generated, 158KB)
+- **Sanity check result**: TypeScript type-check passes, Vite build succeeds. All 8 sections populated (2.5K-10.5K chars). Diagram PNG renders correctly. Module visible as 6th entry in system design list.
+- **Status**: [DONE]
+
+## 2026-03-22 20:40 -- Update LinkedIn interview data: phone screen scheduled
+- **What I did**: (1) Updated LinkedIn company status from 'applied' to 'phone_screen'. (2) Added new InterviewEvent (id=4): SWE Phone Screen 1 - AI Engineer, April 2 2026 1:00-2:00 PM PDT, Zoom Video, status=upcoming. (3) Added CompanyDocument (id=2) with phone screen scheduling details and prep checklist.
+- **Deliverables**: Database updated (companies table: LinkedIn status, interview_events table: new event id=4, company_documents table: new doc id=2)
+- **Sanity check result**: Verification query confirms LinkedIn status=phone_screen, event id=4 scheduled_at=2026-04-02T13:00:00-07:00, document created.
+- **Status**: [DONE]
+
+## 2026-03-22 21:30 -- Plan LeetCode improvements + commit rule enforcement
+- **What I did**: (1) Planned 4 LeetCode tasks: T-P1-174 (Blind75 sort/filter sync), T-P1-175 (Blind75 flat view), T-P1-176 (Practice/Review to detail page), T-P1-177 (4 LC solutions with notes). (2) Added commit rule to CLAUDE.md requiring every session to commit before exit. (3) Updated autonomous_run.sh prompt to include git commit step. (4) Added T-P0-178 cleanup commit task for all uncommitted changes from prior sessions.
+- **Deliverables**: 5 tasks in task_db (T-P1-174~177, T-P0-178), CLAUDE.md updated (commit rule), autonomous_run.sh updated (commit in prompt)
+- **Sanity check result**: Tasks verified in DB. TASKS.md regenerated.
+- **Status**: [DONE] (planning complete, awaiting user confirmation to execute)

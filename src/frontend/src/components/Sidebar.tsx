@@ -4,6 +4,7 @@ const navItems = [
   { to: "/", label: "Dashboard" },
   { to: "/problems", label: "LeetCode" },
   { to: "/framework", label: "Framework" },
+  { to: "/system-design", label: "System Design" },
   { to: "/questions", label: "Questions" },
   { to: "/companies", label: "Companies" },
   { to: "/radio", label: "Study Radio" },

@@ -192,6 +192,23 @@ recent progress, and lessons. Trust its output at session start.
    "last_working_file": "src/...", "last_working_line": 42}
   ```
 
+### Multi-Task Execution Rule
+When the user approves a plan with multiple tasks, **always** delegate execution to
+`scripts/autonomous_run.sh` (serial, one task per session). **Never** execute multiple
+tasks sequentially in the main conversation context. The main context should only:
+1. Plan tasks (add to task_db)
+2. Launch `autonomous_run.sh`
+3. Report results when complete
+
+This prevents context window exhaustion and shared state corruption.
+
+### Commit Rule (applies to ALL sessions including autonomous)
+Every session that modifies files **must** commit changes before exiting.
+- Use the standard commit format: `[T-XX-N] Brief English description`
+- Stage only relevant files (no `.env`, no credentials)
+- This applies to autonomous_run.sh sessions, main context sessions, and any ad-hoc work
+- If a session performs substantive work but exits without committing, that is a bug
+
 ### Autonomous Mode
 When triggered via `scripts/autonomous_run.sh`, read `docs/workflow/autonomous.md` for
 the full ruleset.

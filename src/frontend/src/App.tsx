@@ -14,6 +14,8 @@ import PrepNotesPage from "./pages/PrepNotesPage";
 import ProblemDetailPage from "./pages/ProblemDetailPage";
 import StudyRadio from "./pages/StudyRadio";
 import FrameworkNotesPage from "./pages/FrameworkNotesPage";
+import SystemDesignList from "./pages/SystemDesignList";
+import SystemDesignDetail from "./pages/SystemDesignDetail";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +40,8 @@ export default function App() {
                 <Route path="framework" element={<Framework />} />
                 <Route path="framework/:nodeId" element={<Framework />} />
                 <Route path="framework/:nodeId/notes" element={<FrameworkNotesPage />} />
+                <Route path="system-design" element={<SystemDesignList />} />
+                <Route path="system-design/:slug" element={<SystemDesignDetail />} />
                 <Route path="questions" element={<Questions />} />
                 <Route path="companies" element={<Companies />} />
                 <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />

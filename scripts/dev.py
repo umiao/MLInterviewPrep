@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import sys
 import threading
+import urllib.request
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -120,6 +121,26 @@ def main() -> None:
         cwd=str(PROJECT_ROOT),
         env=env,
     )
+
+    # Wait for backend to be ready before starting frontend
+    print("[dev] Waiting for backend to be ready...")
+    backend_ready = False
+    for _attempt in range(60):  # 30 seconds max (60 * 0.5s)
+        if backend_proc.poll() is not None:
+            print(f"[dev] Backend exited unexpectedly with code {backend_proc.returncode}.")
+            sys.exit(1)
+        try:
+            urllib.request.urlopen("http://localhost:8100/api/health", timeout=1)
+            backend_ready = True
+            print("[dev] Backend ready.")
+            break
+        except Exception:
+            threading.Event().wait(0.5)
+
+    if not backend_ready:
+        print("[dev] Backend failed to start within 30s. Aborting.")
+        _terminate_process(backend_proc)
+        sys.exit(1)
 
     frontend_proc = subprocess.Popen(
         [npm, "run", "dev"],

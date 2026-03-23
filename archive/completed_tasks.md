@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 136 completed tasks archived as of latest archival.
+> 158 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -197,3 +197,47 @@ AC:
 - [x] **2026-03-16** -- T-P2-123: Framework: resizable right panel and scrollable tabs in NodeDetailPanel. Problem: Right panel fixed at 288px (w-72), tabs overflow when names are long.
 AC:
 1. Right panel resizable by dragging 
+- [x] **2026-03-19** -- T-P0-146: Forum service layer (two-phase scrape + import to prep notes). Create src/backend/services/forum_service.py with business logic for the two-phase forum scraping workflow.
+
+**Functions
+- [x] **2026-03-19** -- T-P0-147: Forum CLI script (scripts/forum_scrape.py). Create scripts/forum_scrape.py as the primary CLI interface wrapping the forum service layer.
+
+**Subcommands (via argpar
+- [x] **2026-03-19** -- T-P0-148: Forum API routes + Pydantic schemas. Create src/backend/routers/forum.py and src/backend/schemas/forum.py for the forum scraping REST API.
+
+**Schemas (src/ba
+- [x] **2026-03-19** -- T-P0-149: Frontend ForumPostsTab component + integration into PrepNotesPage. Create ForumPostsTab React component and integrate it as a tab in the existing PrepNotesPage.
+
+**New files:**
+1. `src/fr
+- [x] **2026-03-19** -- T-P0-151: Forum extractor: derive_page_url + extract_max_page pure functions. Add two pure functions to src/backend/scraper/forum_extractors.py:
+
+1. derive_page_url(base_url: str, page: int) -> str
+
+- [x] **2026-03-19** -- T-P0-152: Forum service: refactor scrape_seed_page + add scrape_seed_pages. Refactor src/backend/services/forum_service.py for multi-page scraping:
+
+Step 1: Extract helper (refactoring safety: run
+- [x] **2026-03-19** -- T-P0-153: Forum scrape CLI + API: pagination params. Wire pagination to CLI and API. Three files to modify:
+
+1. src/backend/schemas/forum.py -- add response model:
+   class 
+- [x] **2026-03-19** -- T-P0-154: Live scrape: LinkedIn 1point3acres first 5 pages. Execute the live scraping pipeline. This is a manual execution task, not a code task.
+
+Prerequisites: T-P0-151, T-P0-152
+- [x] **2026-03-17** -- T-P1-140: Framework: URL-driven selection + tree auto-expand + row-click expand
+- [x] **2026-03-17** -- T-P1-141: Framework: checkbox progress calc + parent propagation
+- [x] **2026-03-17** -- T-P1-142: Seed DoorDash and Uber interview events
+- [x] **2026-03-22** -- T-P1-158: Backend: Add SystemDesign model, API endpoints, and seed data. Create SystemDesign model with 8 section columns (overview, architecture, dataflow, formulas, production_constraints, tr
+- [x] **2026-03-22** -- T-P1-159: Frontend: Add System Design sidebar link and route definitions. Add 'System Design' to Sidebar.tsx navItems (between Framework and Questions). Add routes: /system-design -> SystemDesig
+- [x] **2026-03-22** -- T-P1-160: Frontend: Create SystemDesignPage (landing/list page). Landing page with unified narrative blockquote at top + 2x2 card grid. Each card: diagram thumbnail, title, subtitle. Cl
+- [x] **2026-03-22** -- T-P1-161: Frontend: Create SystemDesignDetailPage (module detail template). Full-screen detail page with 8-tab navigation (Overview, Architecture, Data Flow, Formulas, Production Constraints, Trad
+- [x] **2026-03-22** -- T-P1-162: Content: Module Arbitration - Content Marketplace for eBay SRP. All 8 sections for Module Arbitration. Includes production constraints (50K QPS, <10ms arbitration, 500M impressions/day
+- [x] **2026-03-22** -- T-P1-163: Content: LLM Artifact Orchestration for Structured Search. All 8 sections for LLM Orchestration. Includes production constraints (7B model, P99 65ms, 99.95% availability). Defense
+- [x] **2026-03-17** -- T-P2-132: Applied ML pillar (Pillar 4) prep docs for all leaf topics. Generate detailed prep docs for all Pillar 4 leaf topics. Covers: recommender systems, search & IR, NLP & LLM applicatio
+- [x] **2026-03-17** -- T-P2-133: Remaining pillars (Coding P1, Infra P5, Behavioral P8) prep docs. Generate prep docs for Pillars 1, 5, 8 leaf topics. Coding: DS cheat sheets, algorithm paradigms, MLE-specific patterns.
+- [x] **2026-03-19** -- T-P2-143: Forum models (ForumSeed, ForumPostLink, ForumPost) + migration v9. Create src/backend/models/forum.py with 3 SQLAlchemy models for the two-phase forum scraping workflow.
+
+**Models:**
+- Fo
+- [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
+- [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
