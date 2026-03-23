@@ -227,29 +227,48 @@ class TestCompanyAndWeights:
         detail = test_client.get(f"/api/companies/{company_id}").json()
         assert detail["topic_weights"][0]["weight"] == 4.5
 
-    def test_company_focus_filters_high_progress(self, test_client, seed_framework):
+    def test_company_focus_filters_high_progress(
+        self, test_client, seed_framework, db_session
+    ):
         """Focus endpoint excludes nodes with progress >= 80%."""
+        from src.backend.models.framework import FrameworkNode
+
         root, child = seed_framework
+
+        # Add a second child so root doesn't auto-master when one child masters
+        child2 = FrameworkNode(
+            parent_id=root.id,
+            path="pillar1.trees",
+            depth=1,
+            title="Trees",
+            importance=1.0,
+            priority="P1",
+            estimated_hours=5,
+        )
+        db_session.add(child2)
+        db_session.commit()
+
         _, company_id = _create_company(test_client, name="Amazon")
 
-        # Set weights for both nodes
+        # Set weights for root and first child
         test_client.post(f"/api/companies/{company_id}/weights", json=[
             {"framework_node_id": root.id, "weight": 3.0},
             {"framework_node_id": child.id, "weight": 4.0},
         ])
 
-        # Both at 0% progress -> both in focus
+        # All at 0% progress -> both weighted nodes in focus
         focus = test_client.get(f"/api/companies/{company_id}/focus").json()
         assert len(focus) == 2
         # Ordered by weight DESC
         assert focus[0]["weight"] >= focus[1]["weight"]
 
-        # Set child to mastered (100% progress)
+        # Set first child to mastered (100% progress)
+        # Root stays in_progress because child2 is still not_started
         test_client.put(f"/api/framework/nodes/{child.id}", json={
             "status": "mastered",
         })
 
-        # Now only root should be in focus
+        # Now only root should be in focus (child is >= 80%, root is ~50%)
         focus2 = test_client.get(f"/api/companies/{company_id}/focus").json()
         assert len(focus2) == 1
         assert focus2[0]["node_id"] == root.id
@@ -438,7 +457,8 @@ class TestEndToEndJourney:
         final_stats = test_client.get("/api/framework/stats").json()
         assert final_stats["total_study_logs"] == 1
         assert final_stats["overall_progress_pct"] > 0
-        assert final_stats["by_status"]["in_progress"] == 1
+        # Both child and parent (propagated) should be in_progress
+        assert final_stats["by_status"]["in_progress"] == 2
 
 
 class TestEdgeCases:

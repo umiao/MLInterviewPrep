@@ -1,4 +1,5 @@
 """Framework tree and study log API routes."""
+import logging
 from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -17,6 +18,8 @@ from src.backend.schemas.framework import (
 )
 from src.backend.schemas.problem import ProblemResponse
 from src.backend.schemas.scraper import InterviewQuestionResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -95,13 +98,45 @@ def get_framework_node(
     }
 
 
-def _propagate_progress(node_id: int, db: Session) -> None:
-    """Recalculate progress for all ancestors in one transaction."""
+def _derive_status(child_statuses: list[str]) -> str:
+    """Derive parent status from children using priority model.
+
+    Priority: mastered > review > in_progress > not_started.
+    All children mastered -> mastered. All not_started -> not_started.
+    Otherwise -> in_progress (covers any mixed state).
+
+    Args:
+        child_statuses: List of status strings from child nodes.
+
+    Returns:
+        Derived status string for the parent.
+    """
+    statuses = set(child_statuses)
+    if statuses == {"mastered"}:
+        return "mastered"
+    if statuses == {"not_started"}:
+        return "not_started"
+    return "in_progress"
+
+
+def _propagate_upward(node_id: int, db: Session) -> None:
+    """Recalculate progress_pct AND status for all ancestors.
+
+    Walks up the tree from node_id, recalculating each parent's
+    progress (importance-weighted average) and status (derived from
+    children). Timestamps are only-set-never-cleared.
+
+    Args:
+        node_id: The node whose ancestors need recalculation.
+        db: Active database session.
+    """
     node = db.query(FrameworkNode).filter(FrameworkNode.id == node_id).first()
     if not node or node.parent_id is None:
         return
+    visited: set[int] = set()
     current_parent_id = node.parent_id
-    while current_parent_id is not None:
+    while current_parent_id is not None and current_parent_id not in visited:
+        visited.add(current_parent_id)
         parent = db.query(FrameworkNode).filter(
             FrameworkNode.id == current_parent_id
         ).first()
@@ -111,6 +146,7 @@ def _propagate_progress(node_id: int, db: Session) -> None:
             FrameworkNode.parent_id == current_parent_id
         ).all()
         if children:
+            # Progress: weighted average by importance
             total_importance = sum(c.importance for c in children)
             if total_importance > 0:
                 weighted = sum(c.progress_pct * c.importance for c in children)
@@ -119,7 +155,25 @@ def _propagate_progress(node_id: int, db: Session) -> None:
                 parent.progress_pct = round(
                     sum(c.progress_pct for c in children) / len(children), 1
                 )
+
+            # Status: derive from children
+            new_status = _derive_status([c.status for c in children])
+
+            # Timestamps: only-set-never-clear
+            now = datetime.utcnow()
+            if new_status != "not_started" and parent.started_at is None:
+                parent.started_at = now
+            if new_status == "mastered" and parent.completed_at is None:
+                parent.completed_at = now
+
+            parent.status = new_status
+
         current_parent_id = parent.parent_id
+    if current_parent_id in visited:
+        logger.critical(
+            "Cycle detected in framework tree at node_id=%d, "
+            "stopping propagation", current_parent_id
+        )
 
 
 @router.put("/framework/nodes/{node_id}", response_model=FrameworkNodeResponse)
@@ -136,23 +190,22 @@ def update_framework_node(
     update_data = node_update.model_dump(exclude_unset=True)
     now = datetime.utcnow()
 
-    # Status transition side effects
+    # Status transition side effects (timestamps only-set-never-clear)
     if "status" in update_data:
         new_status = update_data["status"]
-        if new_status == "in_progress" and node.started_at is None:
+        if new_status != "not_started" and node.started_at is None:
             node.started_at = now
-        elif new_status == "mastered":
-            node.completed_at = now
+        if new_status == "mastered":
+            if node.completed_at is None:
+                node.completed_at = now
             node.progress_pct = 100.0
-        elif node.status == "mastered" and new_status != "mastered":
-            node.completed_at = None
 
     for field, value in update_data.items():
         setattr(node, field, value)
 
     db.flush()  # flush node changes
-    if "progress_pct" in update_data:
-        _propagate_progress(node_id, db)
+    if "progress_pct" in update_data or "status" in update_data:
+        _propagate_upward(node_id, db)
     db.commit()
     db.refresh(node)
 
@@ -240,10 +293,24 @@ def create_study_log(
     db.add(log)
 
     # Update node
-    node.last_studied_at = datetime.utcnow()
+    now = datetime.utcnow()
+    node.last_studied_at = now
 
-    # Auto-increment progress based on total study hours vs estimated
-    if node.estimated_hours and node.estimated_hours > 0:
+    # Auto-start: logging study on a not_started leaf -> in_progress
+    if node.status == "not_started":
+        node.status = "in_progress"
+        if node.started_at is None:
+            node.started_at = now
+
+    # Auto-increment progress for leaf nodes only (parent progress comes
+    # from children via propagation)
+    children_count = (
+        db.query(func.count(FrameworkNode.id))
+        .filter(FrameworkNode.parent_id == node_id)
+        .scalar()
+        or 0
+    )
+    if children_count == 0 and node.estimated_hours and node.estimated_hours > 0:
         total_minutes = (
             db.query(func.sum(StudyLog.duration_minutes))
             .filter(StudyLog.framework_node_id == node_id)
@@ -253,6 +320,9 @@ def create_study_log(
         total_hours = total_minutes / 60.0
         new_progress = min(95.0, (total_hours / node.estimated_hours) * 100)
         node.progress_pct = new_progress
+
+    db.flush()
+    _propagate_upward(node_id, db)
 
     db.commit()
     db.refresh(log)

@@ -335,20 +335,30 @@ function DetailsTab({
 }: DetailsTabProps) {
   return (
     <div className="space-y-2 text-sm">
-      {/* Status selector */}
+      {/* Status selector -- disabled for parent nodes (auto-derived from children) */}
       <div>
-        <label className="block text-gray-500 text-xs mb-1">Status</label>
-        <select
-          value={editStatus}
-          onChange={(e) => setEditStatus(e.target.value as NodeStatus)}
-          className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-        >
-          {STATUS_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <label className="block text-gray-500 text-xs mb-1">
+          Status{node.children.length > 0 && (
+            <span className="text-gray-400 ml-1">(auto from children)</span>
+          )}
+        </label>
+        {node.children.length > 0 ? (
+          <div className="w-full border border-gray-200 bg-gray-50 rounded px-2 py-1.5 text-sm text-gray-600">
+            {STATUS_OPTIONS.find((o) => o.value === editStatus)?.label ?? editStatus}
+          </div>
+        ) : (
+          <select
+            value={editStatus}
+            onChange={(e) => setEditStatus(e.target.value as NodeStatus)}
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          >
+            {STATUS_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Confidence slider */}
@@ -396,7 +406,14 @@ function DetailsTab({
       {/* Read-only fields */}
       <div className="flex justify-between">
         <span className="text-gray-500">Progress</span>
-        <span className="font-medium">{Math.round(node.progress_pct)}%</span>
+        <span className="font-medium">
+          {Math.round(node.progress_pct)}%
+          {node.children.length > 0 && (
+            <span className="text-gray-400 text-xs ml-1">
+              ({node.children.filter((c) => c.status === "mastered").length}/{node.children.length} mastered)
+            </span>
+          )}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-500">Importance</span>
