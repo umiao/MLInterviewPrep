@@ -84,25 +84,6 @@ function ComfortStars({ level }: { level: number }) {
   );
 }
 
-function ReviewBadge({ nextReview }: { nextReview: string | null }) {
-  if (!nextReview) return null;
-  const due = new Date(nextReview);
-  const now = new Date();
-  const overdue = due <= now;
-  const daysUntil = Math.ceil(
-    (due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-  );
-  if (!overdue && daysUntil > 3) return null;
-  return (
-    <span
-      className={`text-xs px-1.5 py-0.5 rounded ${
-        overdue ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
-      }`}
-    >
-      {overdue ? "Review due" : `Review in ${daysUntil}d`}
-    </span>
-  );
-}
 
 function ProgressBar({ completed, total }: { completed: number; total: number }) {
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
@@ -455,9 +436,6 @@ export default function Problems() {
         </td>
       )}
       <td className="px-3 py-2">
-        <ReviewBadge nextReview={p.next_review_at} />
-      </td>
-      <td className="px-3 py-2">
         <Link
           to={`/problems/${p.id}`}
           className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
@@ -488,7 +466,6 @@ export default function Problems() {
           <option value="comfort_level">Comfort</option>
           <option value="difficulty">Difficulty</option>
           <option value="last_attempted_at">Last attempted</option>
-          <option value="next_review_at">Next review</option>
         </select>
         <button
           onClick={() =>
@@ -548,7 +525,6 @@ export default function Problems() {
                 <th className="px-3 py-2 w-28">Pattern</th>
                 <th className="px-3 py-2 w-24">Comfort</th>
                 <th className="px-3 py-2 w-28">Notes</th>
-                <th className="px-3 py-2 w-28">Review</th>
                 <th className="px-3 py-2 w-20">Actions</th>
               </tr>
             </thead>
@@ -577,8 +553,7 @@ export default function Problems() {
                   <th className="px-3 py-2 w-24">Difficulty</th>
                   <th className="px-3 py-2 w-24">Comfort</th>
                   <th className="px-3 py-2 w-28">Notes</th>
-                  <th className="px-3 py-2 w-28">Review</th>
-                  <th className="px-3 py-2 w-20">Actions</th>
+                    <th className="px-3 py-2 w-20">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -699,7 +674,6 @@ export default function Problems() {
                 <th className="px-3 py-2 w-24">Difficulty</th>
                 <th className="px-3 py-2 w-28">Pattern</th>
                 <th className="px-3 py-2 w-24">Comfort</th>
-                <th className="px-3 py-2 w-28">Review</th>
                 <th className="px-3 py-2 w-20">Actions</th>
               </tr>
             </thead>
