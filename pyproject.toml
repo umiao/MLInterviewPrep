@@ -45,3 +45,7 @@ markers = [
     "slow: marks tests as slow",
     "integration: marks tests requiring network access",
 ]
+filterwarnings = [
+    "ignore::PendingDeprecationWarning:starlette",
+    "ignore::DeprecationWarning:httpx",
+]

@@ -178,7 +178,7 @@ class TestImportFrameworkNodes:
         ).first()
         assert child is not None
         assert child.parent_id is not None
-        parent = db_session.query(FrameworkNode).get(child.parent_id)
+        parent = db_session.get(FrameworkNode, child.parent_id)
         assert parent.path == "coding"
 
     def test_skip_existing_path(self, test_client, db_session, seed_framework):

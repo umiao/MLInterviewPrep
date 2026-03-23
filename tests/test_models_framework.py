@@ -347,6 +347,7 @@ def test_company_topic_weight_composite_pk(db_session):
     db_session.add(w1)
     db_session.commit()
 
+    db_session.expunge(w1)
     w2 = CompanyTopicWeight(company_id=c.id, framework_node_id=n.id, weight=4.0)
     db_session.add(w2)
     with pytest.raises(IntegrityError):
