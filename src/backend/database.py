@@ -326,6 +326,10 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
         12,
         "Fix NULL priority in problems table",
         [
+            # Ensure priority column exists before updating (safe for minimal test schemas)
+            "ADD_COLUMN_IF_MISSING:problems:priority:"
+            "ALTER TABLE problems ADD COLUMN priority INTEGER DEFAULT 2"
+            " CHECK(priority BETWEEN 1 AND 3)",
             "UPDATE problems SET priority = 2 WHERE priority IS NULL",
         ],
     ),
