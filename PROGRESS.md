@@ -288,3 +288,9 @@
 - **Deliverables**: Modified `src/frontend/src/pages/ProblemDetailPage.tsx`, `src/frontend/src/pages/Problems.tsx`
 - **Sanity check result**: TypeScript check clean (`tsc --noEmit`), Vite build succeeds
 - **Status**: [DONE]
+
+## 2026-03-23 00:10 -- [T-P1-177] Add solution notes for 4 LeetCode problems
+- **What I did**: Updated notes for K-Similar Strings (LC 854) and Merge K Sorted Lists (LC 23), replacing Chinese notes with structured English notes. Created two new problem entries: Longest Continuous Subarray (LC 1438) and Russian Doll Envelopes (LC 354) with full metadata and notes. All 4 marked completed with comfort_level=3.
+- **Deliverables**: Modified `data/mle_prep.db` (2 updates, 2 inserts)
+- **Sanity check result**: All 4 problems verified in DB with correct notes, completion status, and metadata. Frontend ProblemDetailPage has "My Notes" section that renders when notes exist.
+- **Status**: [DONE]

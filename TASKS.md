@@ -11,62 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-177: LeetCode: Add solution notes for 4 problems (K-Similar Strings, Longest Continuous Subarray, Russian Doll, Merge K Lists)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Goal
-Update 4 LeetCode problems with user-provided solution notes. Find or create these problems in the DB, then set their `notes` field.
-
-## Problems and Notes
-
-### 1. K-Similar Strings (LC 854)
-URL: https://leetcode.cn/problems/k-similar-strings/description/
-Notes:
-- BFS/DFS search approach: simulate every possible swap to match the first mismatched position
-- Key optimizations/pruning:
-  1. Skip already-matching positions (no need to swap matched chars)
-  2. Only modify s1 to match s2 (don't sync both)
-  3. Process one mismatched char at a time, break immediately after swap
-  4. Track all generated strings (s1 variants) to prevent revisiting
-- Pattern: BFS + pruning
-
-### 2. Longest Continuous Subarray With Absolute Diff <= Limit (LC 1438)
-URL: https://leetcode.cn/problems/longest-continuous-subarray-with-absolute-diff-less-than-or-equal-to-limit/description/
-Notes:
-- Sliding window with two monotonic deques (one for max, one for min)
-- Move right pointer, add new element to both deques (maintaining monotonicity)
-- Check if abs(max - min) > limit; if so, shrink left pointer, pop from deques
-- Since limit >= 0, we can always find a valid window (single element satisfies)
-- Pattern: Sliding Window + Monotonic Deque
-
-### 3. Russian Doll Envelopes (LC 354)
-URL: https://leetcode.cn/problems/russian-doll-envelopes/description/
-Notes:
-- Sort envelopes: width ascending, height descending (same width can't nest)
-- Reduce to Longest Increasing Subsequence (LIS) on height dimension
-- Use binary search for O(n log n) LIS
-- Pattern: Sort + LIS (Binary Search)
-
-### 4. Merge K Sorted Lists (LC 23)
-URL: https://leetcode.cn/problems/merge-k-sorted-lists/
-Notes:
-- Approach 1: Min-heap -- push all list heads into heap, pop min, push next
-- Approach 2: Divide and conquer -- recursively merge pairs, log(k) rounds of pairwise merge sort
-- Pattern: Heap / Divide and Conquer
-
-## Implementation
-1. For each problem, search DB by URL or title
-2. If not found, create the problem entry with appropriate metadata (difficulty, tags, pattern)
-3. Set the `notes` field with the solution notes in markdown format
-4. Mark as completed (is_completed=True) with appropriate comfort level
-
-## Acceptance Criteria
-- [ ] All 4 problems exist in DB with correct metadata
-- [ ] Each problem has solution notes populated
-- [ ] Notes visible on ProblemDetailPage "My Notes" section
-- [ ] Problems marked as completed
-
 ### P2 -- Nice to Have
 
 #### T-P2-112: SSE chunked audio streaming (if latency requires it)
@@ -182,6 +126,7 @@ S - straightforward wiring, two functions to modify
 
 > 158 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-22** -- T-P1-177: LeetCode: Add solution notes for 4 problems (K-Similar Strings, Longest Continuous Subarray, Russian Doll, Merge K Lists). ## Goal
 - [x] **2026-03-22** -- T-P1-176: LeetCode: Move Practice/Review actions from table to ProblemDetailPage. ## Problem
 - [x] **2026-03-22** -- T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view. ## Problem
 - [x] **2026-03-22** -- T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab. ## Problem
