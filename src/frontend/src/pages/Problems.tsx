@@ -270,6 +270,7 @@ export default function Problems() {
             cmp = (a.last_attempted_at ?? "").localeCompare(b.last_attempted_at ?? "");
             break;
           case "next_review_at":
+            // next_review_at sort kept for type compatibility but unused in UI
             cmp = (a.next_review_at ?? "").localeCompare(b.next_review_at ?? "");
             break;
           default: // created_at

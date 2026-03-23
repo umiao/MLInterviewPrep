@@ -51,7 +51,6 @@ export interface FocusTopic {
 }
 
 export interface DashboardToday {
-  due_reviews: number;
   suggested_focus_topic: FocusTopic | null;
   streak_days: number;
 }

@@ -25,8 +25,8 @@ import type { ListeningStats } from "../types/reading";
 
 function TodayFocusSkeleton() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {[1, 2, 3].map((i) => (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {[1, 2].map((i) => (
         <div key={i} className="bg-white rounded-lg border border-gray-200 p-5 space-y-3">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-8 w-16" />
@@ -41,25 +41,7 @@ function TodayFocusCards({ data }: { data: DashboardToday }) {
   const navigate = useNavigate();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      {/* Due Reviews */}
-      <button
-        type="button"
-        onClick={() => navigate("/problems?review=due")}
-        className="bg-white rounded-lg border border-gray-200 p-5 text-left
-                   hover:border-blue-300 hover:shadow-sm transition-all cursor-pointer"
-      >
-        <p className="text-sm text-gray-500 mb-1">Due Reviews</p>
-        <p className={`text-3xl font-bold ${
-          data.due_reviews > 0 ? "text-amber-600" : "text-green-600"
-        }`}>
-          {data.due_reviews}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          {data.due_reviews > 0 ? "Problems need review" : "All caught up!"}
-        </p>
-      </button>
-
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       {/* Weakest Topic */}
       <button
         type="button"

@@ -318,3 +318,9 @@
 - **Deliverables**: `src/backend/models/system_design.py`, `src/backend/routers/system_design.py`
 - **Sanity check result**: `ruff check src/backend/` passes clean. 923/924 tests pass (1 pre-existing failure in test_timeline unrelated to this change).
 - **Status**: [DONE]
+
+## 2026-03-22 -- [T-P1-182] Remove Review column from Problems table
+- **What I did**: Removed the broken "Due Reviews" dashboard card (linked to non-existent `/problems?review=due` filter). Removed `due_reviews` from `DashboardToday` type. Adjusted dashboard grid from 3 to 2 columns. The ReviewBadge component and Review table column were already absent from the codebase. Backend spaced_repetition logic preserved.
+- **Deliverables**: `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/types/dashboard.ts`, `src/frontend/src/pages/Problems.tsx`
+- **Sanity check result**: TypeScript compiles clean (`tsc --noEmit`). 288/289 tests pass (1 pre-existing failure). Ruff: 1 pre-existing error (unrelated).
+- **Status**: [DONE]
