@@ -294,3 +294,9 @@
 - **Deliverables**: Modified `data/mle_prep.db` (2 updates, 2 inserts)
 - **Sanity check result**: All 4 problems verified in DB with correct notes, completion status, and metadata. Frontend ProblemDetailPage has "My Notes" section that renders when notes exist.
 - **Status**: [DONE]
+
+## 2026-03-23 04:50 -- Ad-hoc: Add 2 extra LC problems + Discord fix + commit rule
+- **What I did**: (1) Added LC 339 (Nested List Weight Sum) and LC 364 (Nested List Weight Sum II) to DB with solution notes. (2) Fixed Discord channel access (re-added channel to allowlist). (3) Updated CLAUDE.md with commit rule and autonomous_run.sh with git commit step (done in earlier session, committed by T-P0-178). (4) LinkedIn phone screen event added (April 2, 2026).
+- **Deliverables**: DB updated (2 new problems: LC 339, LC 364), Discord access.json fixed
+- **Sanity check result**: Both problems created in DB. Discord replies working again. All 5 autonomous tasks (T-P0-178, T-P1-174~177) completed and committed.
+- **Status**: [DONE]
