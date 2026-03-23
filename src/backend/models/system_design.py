@@ -1,5 +1,5 @@
 """System design case study model."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import Column, DateTime, Integer, String, Text
 
@@ -28,9 +28,9 @@ class SystemDesign(Base):
     verbal_outline = Column(Text, nullable=True)          # S8: Verbal Outline (3-min & 10-min)
 
     display_order = Column(Integer, default=0)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
     updated_at = Column(
         DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )

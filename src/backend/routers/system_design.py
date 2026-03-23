@@ -1,5 +1,5 @@
 """System design case study API routes."""
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -128,7 +128,7 @@ def update_system_design(
     for field, value in changes.items():
         setattr(module, field, value)
 
-    module.updated_at = datetime.now(timezone.utc)
+    module.updated_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(module)
