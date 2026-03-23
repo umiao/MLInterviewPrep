@@ -300,3 +300,9 @@
 - **Deliverables**: DB updated (2 new problems: LC 339, LC 364), Discord access.json fixed
 - **Sanity check result**: Both problems created in DB. Discord replies working again. All 5 autonomous tasks (T-P0-178, T-P1-174~177) completed and committed.
 - **Status**: [DONE]
+
+## 2026-03-23 05:00 -- Backlog cleanup: clear remaining P2 tasks
+- **What I did**: Verified LC 339 (730 chars notes) and LC 364 (1367 chars notes) both in DB with is_completed=True. Closed 4 remaining P2 backlog tasks (T-P2-112, T-P2-155, T-P2-156, T-P2-157) per user request. TASKS.md regenerated. Task queue now empty.
+- **Deliverables**: TASKS.md (regenerated, all tasks completed)
+- **Sanity check result**: 0 active tasks remaining. All 19 tasks in completed status.
+- **Status**: [DONE]
