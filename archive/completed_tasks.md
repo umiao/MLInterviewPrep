@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 158 completed tasks archived as of latest archival.
+> 175 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -241,3 +241,45 @@ Prerequisites: T-P0-151, T-P0-152
 - Fo
 - [x] **2026-03-19** -- T-P2-144: Playwright CDP attach + cookie fallback methods on PlaywrightCrawler. Extend existing src/backend/scraper/crawler.py PlaywrightCrawler class with two new async methods for fetching pages fro
 - [x] **2026-03-19** -- T-P2-145: Forum HTML extractors with jammer stripping (1point3acres). Create src/backend/scraper/forum_extractors.py with BeautifulSoup-based extraction functions for 1point3acres forum page
+- [x] **2026-03-22** -- T-P0-178: Ad-hoc: commit all uncommitted changes from previous sessions. ## Problem
+Multiple sessions modified files without committing. Need a cleanup commit.
+
+## Uncommitted Changes
+Modified:
+- [x] **2026-03-22** -- T-P0-179: Fix /api/problems 500 error (NULL priority). 2 problems had NULL priority causing Pydantic validation failure. Fixed schema, response builder, and added migration.
+- [x] **2026-03-22** -- T-P0-180: Fix ruff lint errors (4x UP017 datetime.UTC). 4 auto-fixable UP017 errors in system_design.py. Run ruff check --fix. Acceptance: ruff check src/backend/ passes clean.
+- [x] **2026-03-22** -- T-P1-164: Content: PBE Logging & Dataset Pipeline. All 8 sections for PBE Pipeline. Includes production constraints (500M impressions/day, 5-min micro-batch, 2TB daily). D
+- [x] **2026-03-22** -- T-P1-165: Content: Ranking-as-Allocation / Diversity Allotment Policy Framework. All 8 sections for Ranking-as-Allocation (SIGNATURE PROJECT - deepest coverage). Includes production constraints (50K QP
+- [x] **2026-03-22** -- T-P1-166: Fix dev.py startup race condition: wait for backend health before starting frontend. ## Problem
+`scripts/dev.py` starts backend (uvicorn) and frontend (Vite) simultaneously.
+Vite starts faster, browser imm
+- [x] **2026-03-22** -- T-P1-167: Fix Docker nginx.conf proxy port mismatch (8000 -> 8100). ## Problem
+`src/frontend/nginx.conf` has `proxy_pass http://backend:8000;` but backend runs on port 8100.
+Docker deploym
+- [x] **2026-03-22** -- T-P1-168: System Design: replace static screenshots with HTML-rendered diagrams. ## Problem
+System design architecture diagrams are currently static JPG screenshots provided by user.
+These should be re
+- [x] **2026-03-22** -- T-P1-169: Diagram screenshots: crop whitespace and increase render size. ## Problem
+1. HTML diagram PNGs have excessive white margins/borders
+2. Diagrams render too small on the page
+
+## Fix
+1.
+- [x] **2026-03-22** -- T-P1-170: Diagram click-to-fullscreen lightbox overlay. ## Problem
+Diagrams on the system design page are small. User wants click-to-enlarge to fullscreen as a temporary overla
+- [x] **2026-03-22** -- T-P1-171: System Design detail: single-page layout with bookmark nav + fix module-arbitration content. ## Problem
+1. Tab-based layout splits content into separate views, losing context. User wants all sections on one scroll
+- [x] **2026-03-22** -- T-P1-172: System Design Module 5: Database Systems Comparison (Cassandra focus). ## Goal
+Add a new system design module covering database system comparison, centered on Cassandra and its competitors.
+
+
+- [x] **2026-03-22** -- T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once). ## Goal
+Add a comprehensive system design module on distributed task queues, covering deep failure analysis, recovery me
+- [x] **2026-03-22** -- T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab. ## Problem
+1. Blind Grind75 tab does not display the sort-by dropdown that is already implemented and visible in the All
+- [x] **2026-03-22** -- T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view. ## Problem
+Blind Grind75 tab only shows problems grouped by pattern. User wants an "All Problems" flat list view as well
+- [x] **2026-03-22** -- T-P1-176: LeetCode: Move Practice/Review actions from table to ProblemDetailPage. ## Problem
+Practice and Review buttons are in the table Actions column. User cannot see the problem description/details 
+- [x] **2026-03-22** -- T-P1-177: LeetCode: Add solution notes for 4 problems (K-Similar Strings, Longest Continuous Subarray, Russian Doll, Merge K Lists). ## Goal
+Update 4 LeetCode problems with user-provided solution notes. Find or create these problems in the DB, then set 

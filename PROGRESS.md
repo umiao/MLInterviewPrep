@@ -332,7 +332,7 @@
 - **Status**: [DONE]
 
 ## 2026-03-23 06:45 -- [T-P1-183] Framework progress sync: auto-propagate status and progress upward
-- **What I did**: Implemented auto status+progress propagation from child to parent nodes. New _derive_status() uses priority model (mastered > review > in_progress > not_started). Refactored _propagate_progress to _propagate_upward with status derivation, cycle detection (log critical, no raise), and only-set-never-clear timestamps. Study log auto-starts leaf nodes and only auto-progresses leaves. Frontend: disabled status dropdown for parent nodes, shows "auto from children" + mastered/total count.
-- **Deliverables**: `src/backend/routers/framework.py`, `src/frontend/src/components/NodeDetailPanel.tsx`, `tests/test_integration_framework_study.py`
-- **Sanity check result**: 992/996 tests pass (4 pre-existing test_timeline failures). All 30 framework tests pass. TypeScript clean. Ruff clean.
+- **What I did**: Implemented auto status+progress propagation from child to parent nodes. (1) Backend: new `_derive_status()` with priority model (mastered > review > in_progress > not_started). Refactored `_propagate_progress` to `_propagate_upward` with status derivation, cycle detection (log critical, no raise), and only-set-never-clear timestamps. Study log auto-starts leaf nodes and only auto-progresses leaves. (2) Frontend: disabled status dropdown for parent nodes, shows "auto from children" + mastered/total count. (3) Tests: 25 new tests in `test_propagation.py` covering `_derive_status` unit tests, progress propagation (weighted, multi-level), status rollback scenarios, timestamp immutability, child deletion, and study log auto-start + propagation. (4) Migration script for recalculating stale parent progress/status bottom-up.
+- **Deliverables**: `src/backend/routers/framework.py`, `src/frontend/src/components/NodeDetailPanel.tsx`, `tests/test_propagation.py` (new, 25 tests), `scripts/migrate_recalculate_parent_progress.py` (new)
+- **Sanity check result**: 1017/1021 tests pass (4 pre-existing test_timeline failures). All 25 propagation tests pass. TypeScript clean. Ruff clean.
 - **Status**: [DONE]
