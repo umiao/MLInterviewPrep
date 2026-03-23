@@ -282,3 +282,9 @@
 - **Deliverables**: Modified `src/frontend/src/pages/Problems.tsx`
 - **Sanity check result**: TypeScript check clean (`tsc --noEmit`), Vite build succeeds
 - **Status**: [DONE]
+
+## 2026-03-22 23:50 -- [T-P1-176] Move Practice/Review actions to ProblemDetailPage
+- **What I did**: Added Practice and Review buttons to ProblemDetailPage header, wired up PracticeModal and ReviewPanel overlays. Replaced table Practice/Review buttons in Problems.tsx with a single "View" link to the detail page. Removed unused PracticeModal/ReviewPanel imports and state from Problems.tsx.
+- **Deliverables**: Modified `src/frontend/src/pages/ProblemDetailPage.tsx`, `src/frontend/src/pages/Problems.tsx`
+- **Sanity check result**: TypeScript check clean (`tsc --noEmit`), Vite build succeeds
+- **Status**: [DONE]

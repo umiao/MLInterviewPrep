@@ -11,36 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-176: LeetCode: Move Practice/Review actions from table to ProblemDetailPage
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Problem
-Practice and Review buttons are in the table Actions column. User cannot see the problem description/details while practicing or reviewing. These actions should be on the ProblemDetailPage where the problem is visible.
-
-## Current State
-- `Problems.tsx`: Actions column has Practice button (opens PracticeModal) and Review button (opens ReviewPanel)
-- `ProblemDetailPage.tsx`: Shows problem description, notes, but no Practice/Review actions
-- `PracticeModal.tsx`: Full-screen modal with timer, notes, result entry
-- `ReviewPanel.tsx`: Side panel with AI review and Q&A
-
-## Fix
-1. Add Practice and Review buttons to ProblemDetailPage
-2. On ProblemDetailPage:
-   - Practice button opens PracticeModal (same component, reused)
-   - Review button opens ReviewPanel (same component, as side panel or section below)
-3. Remove or de-emphasize the Practice/Review buttons from the table Actions column
-   - Keep a minimal action (e.g., just a link icon to detail page) in the table
-   - Or keep practice/review in table but make detail page the primary location
-4. Problem description remains visible when using Practice/Review on detail page
-
-## Acceptance Criteria
-- [ ] ProblemDetailPage has Practice and Review buttons/sections
-- [ ] Clicking Practice on detail page opens PracticeModal with problem context visible
-- [ ] Clicking Review on detail page opens ReviewPanel alongside problem description
-- [ ] Table Actions column simplified (detail page is primary action location)
-- [ ] Manually verify: go to problem detail, click Practice, can see problem while timing
-
 #### T-P1-177: LeetCode: Add solution notes for 4 problems (K-Similar Strings, Longest Continuous Subarray, Russian Doll, Merge K Lists)
 - **Priority**: P1
 - **Complexity**: S
@@ -212,6 +182,7 @@ S - straightforward wiring, two functions to modify
 
 > 158 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-22** -- T-P1-176: LeetCode: Move Practice/Review actions from table to ProblemDetailPage. ## Problem
 - [x] **2026-03-22** -- T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view. ## Problem
 - [x] **2026-03-22** -- T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab. ## Problem
 - [x] **2026-03-22** -- T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once). ## Goal

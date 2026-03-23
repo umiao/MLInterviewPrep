@@ -17,8 +17,6 @@ import type {
   SortField,
   SortOrder,
 } from "../types/problem";
-import PracticeModal from "../components/PracticeModal";
-import ReviewPanel from "../components/ReviewPanel";
 import { useToast } from "../contexts/ToastContext";
 import AddProblemModal from "../components/problems/AddProblemModal";
 
@@ -182,8 +180,6 @@ export default function Problems() {
   ] = useFilterParams(filterSchema);
 
   // ---- modal state ----
-  const [practiceProblem, setPracticeProblem] = useState<Problem | null>(null);
-  const [reviewProblem, setReviewProblem] = useState<Problem | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
 
   // ---- fetch all descriptions mutation ----
@@ -462,20 +458,12 @@ export default function Problems() {
         <ReviewBadge nextReview={p.next_review_at} />
       </td>
       <td className="px-3 py-2">
-        <div className="flex gap-1">
-          <button
-            onClick={() => setPracticeProblem(p)}
-            className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Practice
-          </button>
-          <button
-            onClick={() => setReviewProblem(p)}
-            className="text-xs px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
-          >
-            Review
-          </button>
-        </div>
+        <Link
+          to={`/problems/${p.id}`}
+          className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
+        >
+          View
+        </Link>
       </td>
     </tr>
   );
@@ -561,7 +549,7 @@ export default function Problems() {
                 <th className="px-3 py-2 w-24">Comfort</th>
                 <th className="px-3 py-2 w-28">Notes</th>
                 <th className="px-3 py-2 w-28">Review</th>
-                <th className="px-3 py-2 w-40">Actions</th>
+                <th className="px-3 py-2 w-20">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -590,7 +578,7 @@ export default function Problems() {
                   <th className="px-3 py-2 w-24">Comfort</th>
                   <th className="px-3 py-2 w-28">Notes</th>
                   <th className="px-3 py-2 w-28">Review</th>
-                  <th className="px-3 py-2 w-40">Actions</th>
+                  <th className="px-3 py-2 w-20">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
@@ -712,7 +700,7 @@ export default function Problems() {
                 <th className="px-3 py-2 w-28">Pattern</th>
                 <th className="px-3 py-2 w-24">Comfort</th>
                 <th className="px-3 py-2 w-28">Review</th>
-                <th className="px-3 py-2 w-40">Actions</th>
+                <th className="px-3 py-2 w-20">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -875,25 +863,6 @@ export default function Problems() {
         onClose={() => setShowAddModal(false)}
       />
 
-      {/* Practice Modal */}
-      {practiceProblem && (
-        <PracticeModal
-          problem={practiceProblem}
-          onClose={() => setPracticeProblem(null)}
-          onSubmitted={() => {
-            setPracticeProblem(null);
-            queryClient.invalidateQueries({ queryKey: ["problems"] });
-          }}
-        />
-      )}
-
-      {/* Review Panel */}
-      {reviewProblem && (
-        <ReviewPanel
-          problem={reviewProblem}
-          onClose={() => setReviewProblem(null)}
-        />
-      )}
 
     </div>
   );

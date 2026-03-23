@@ -7,6 +7,8 @@ import Badge from "../components/ui/Badge";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
+import PracticeModal from "../components/PracticeModal";
+import ReviewPanel from "../components/ReviewPanel";
 import type { Problem } from "../types/problem";
 
 /**
@@ -21,6 +23,8 @@ export default function ProblemDetailPage() {
   const navigate = useNavigate();
   const toast = useToast();
   const [notesOpen, setNotesOpen] = useState(false);
+  const [showPractice, setShowPractice] = useState(false);
+  const [showReview, setShowReview] = useState(false);
 
   const { data: problem, isLoading } = useQuery<Problem>({
     queryKey: ["problem", problemId],
@@ -164,6 +168,21 @@ export default function ProblemDetailPage() {
             </span>
           )}
         </div>
+        {/* Practice / Review action buttons */}
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={() => setShowPractice(true)}
+            className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Practice
+          </button>
+          <button
+            onClick={() => setShowReview(true)}
+            className="px-4 py-2 text-sm font-medium bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            Review
+          </button>
+        </div>
       </div>
 
       {/* Description */}
@@ -285,6 +304,27 @@ export default function ProblemDetailPage() {
           </a>
         </div>
       </div>
+
+      {/* Practice Modal */}
+      {showPractice && (
+        <PracticeModal
+          problem={problem}
+          onClose={() => setShowPractice(false)}
+          onSubmitted={() => {
+            setShowPractice(false);
+            queryClient.invalidateQueries({ queryKey: ["problem", problemId] });
+            queryClient.invalidateQueries({ queryKey: ["problems"] });
+          }}
+        />
+      )}
+
+      {/* Review Panel */}
+      {showReview && (
+        <ReviewPanel
+          problem={problem}
+          onClose={() => setShowReview(false)}
+        />
+      )}
     </div>
   );
 }
