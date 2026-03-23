@@ -503,15 +503,18 @@ async def _fetch_from_leetcode_graphql(title_slug: str) -> str | None:
 @router.post("/problems/{problem_id}/fetch-description")
 async def fetch_description(
     problem_id: int,
+    force: bool = Query(default=False),
     db: Session = Depends(get_db),
 ) -> dict:
     """Fetch problem description from LeetCode GraphQL or neetcode.io and save it.
 
     Tries LeetCode GraphQL first (using title_slug from URL), falls back to
     neetcode.io scraping if GraphQL fails or returns no content.
+    Skips if description already exists unless force=True (idempotency).
 
     Args:
         problem_id: ID of the problem to fetch description for.
+        force: If True, overwrite existing description.
         db: Database session.
 
     Returns:
@@ -529,6 +532,16 @@ async def fetch_description(
     db_problem = db.query(Problem).filter(Problem.id == problem_id).first()
     if not db_problem:
         raise HTTPException(status_code=404, detail="Problem not found")
+
+    # Idempotency: skip if description already exists unless force=True
+    if not force and db_problem.description and len(db_problem.description) >= 20:
+        return {
+            "description": db_problem.description,
+            "description_source": db_problem.description_source,
+            "neetcode_slug": db_problem.neetcode_slug,
+            "url": db_problem.url,
+            "skipped": True,
+        }
 
     # Try LeetCode GraphQL first
     title_slug = _extract_title_slug(db_problem.url)
