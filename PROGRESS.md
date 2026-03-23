@@ -312,3 +312,9 @@
 - **Deliverables**: `src/backend/schemas/problem.py` (priority now int|None), `src/backend/routers/problems.py` (None->2 fallback), `src/backend/database.py` (migration 12)
 - **Sanity check result**: All /api/problems endpoints return 200 with limit=20,50,200. Previously failed at limit>=3 due to bad record at sort position 3.
 - **Status**: [DONE]
+
+## 2026-03-23 06:15 -- [T-P0-180] Fix ruff lint errors (UP017 datetime.UTC)
+- **What I did**: Ran `ruff check --fix` on `src/backend/models/system_design.py` and `src/backend/routers/system_design.py` to replace `timezone.utc` with `datetime.UTC` (UP017 rule). Total 8 auto-fixed errors across both files.
+- **Deliverables**: `src/backend/models/system_design.py`, `src/backend/routers/system_design.py`
+- **Sanity check result**: `ruff check src/backend/` passes clean. 923/924 tests pass (1 pre-existing failure in test_timeline unrelated to this change).
+- **Status**: [DONE]
