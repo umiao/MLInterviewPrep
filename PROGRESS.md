@@ -336,3 +336,15 @@
 - **Deliverables**: `src/backend/routers/framework.py`, `src/frontend/src/components/NodeDetailPanel.tsx`, `tests/test_propagation.py` (new, 25 tests), `scripts/migrate_recalculate_parent_progress.py` (new)
 - **Sanity check result**: 1017/1021 tests pass (4 pre-existing test_timeline failures). All 25 propagation tests pass. TypeScript clean. Ruff clean.
 - **Status**: [DONE]
+
+## 2026-03-23 10:30 -- Fix CI test warnings and deprecation issues
+- **What I did**: Fixed 3 categories of pytest warnings flagged in CI: (1) Replaced deprecated `Query.get()` with `Session.get()` in test_import.py, (2) Fixed SAWarning in test_models_framework.py by expunging first instance before adding conflicting PK, (3) Added filterwarnings in pyproject.toml for starlette/httpx dependency deprecation warnings. Note: the 4 test_timeline failures and 4 ruff UP017 errors were already fixed in commit 1a3b648.
+- **Deliverables**: `tests/test_import.py`, `tests/test_models_framework.py`, `pyproject.toml`
+- **Sanity check result**: 996 passed, 0 failed, 0 warnings. Ruff: all checks passed.
+- **Status**: [DONE]
+
+## 2026-03-23 11:40 -- Update Uber prep notes with Phone Screen section
+- **What I did**: Added Part 8 (Phone Screen Prep) to uber_hr_call_prep.md based on recruiter call notes. Covers: process structure (2 phone screens + 4 virtual onsites, 4-5 week timeline), problem-solving approach (clarify -> explore -> tradeoff -> code), content areas (DSA, DP, ML algo coding KNN/ANN, edge cases, test generation), communication/pacing strategy (reserve 10+ min for experience, 5 min for questions). Also updated Part 5 with actual recruiter call notes. Re-imported to DB (27,509 chars).
+- **Deliverables**: `docs/uber_hr_call_prep.md` (updated)
+- **Sanity check result**: DB verified -- Uber prep_notes contains Phone Screen Prep section.
+- **Status**: [DONE]

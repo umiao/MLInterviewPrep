@@ -274,20 +274,15 @@ with a few other ML roles in the Bay Area, nothing at offer stage yet."
 
 ---
 
-## Part 5: Call Notes Area
-
-> The recruiter will share useful info -- jot it down for later interview rounds.
+## Part 5: Call Notes (From Recruiter Screen)
 
 | Item | Notes |
 |------|-------|
-| Interview rounds & order | |
-| Expected timeline | |
-| Interviewer roles/names | |
-| Key evaluation dimensions | |
-| Team/org name | |
-| Next action items | |
-| Level discussion | |
-| Other useful info | |
+| Interview rounds & order | 2x Phone Screen (1hr coding each) -> 4x Virtual Onsite (1hr each) |
+| Expected timeline | 4-5 weeks from recruiter screen to process completion |
+| Platform | HackerRank for coding challenges |
+| Key evaluation dimensions | Technical competence, Communication, Problem solving |
+| Team matching | Team Virtual Onsite (VO) determines specific team placement |
 
 ---
 
@@ -440,6 +435,86 @@ For Machine Learning Engineer roles, Uber typically runs:
 - **Trade-off Reasoning** -- Accuracy vs latency vs cost vs marketplace stability
 - **Operational Maturity** -- Model drift, monitoring, debugging, graceful degradation
 - **Cross-functional Communication** -- Explaining technical decisions to non-technical stakeholders
+
+---
+
+## Part 8: Phone Screen Prep
+
+> **Format**: 2 rounds, each 1hr on HackerRank. NOT ML-specific -- general software engineering coding.
+>
+> **Evaluation pillars**: Technical competence + Communication + Problem solving. The key is finding the right balance across all three -- pure coding speed without explanation is not enough.
+
+---
+
+### 8.1 Process Structure
+
+| Stage | Format | Duration |
+|-------|--------|----------|
+| Phone Screen 1 | HackerRank coding | 1 hr |
+| Phone Screen 2 | HackerRank coding | 1 hr |
+| Virtual Onsite (4 rounds) | System design, ML, behavioral, team match | 4 x 1 hr |
+
+Total timeline: ~4-5 weeks from first phone screen to final decision. The Team VO round determines which specific team you match with.
+
+---
+
+### 8.2 Problem-Solving Approach
+
+**Do NOT jump straight into coding.** The interviewer is evaluating your thought process as much as the solution itself.
+
+1. **Clarify the objective** -- Restate the problem, confirm constraints and edge cases
+2. **Explore multiple approaches** -- Discuss 2-3 possible solutions at a high level
+3. **Analyze tradeoffs** -- Compare time/space complexity, readability, edge case handling
+4. **Propose and justify your choice** -- Explain why this approach fits best
+5. **Code it cleanly** -- Then implement with clear structure
+
+**Anticipate and lead the cadence.** Don't wait for the interviewer to prompt each step -- drive the conversation forward. Show you can structure your own thinking.
+
+---
+
+### 8.3 Content Areas
+
+| Area | Details | Priority |
+|------|---------|----------|
+| **DSA fundamentals** | Arrays, strings, trees, graphs, hash maps | High |
+| **Dynamic Programming** | DP is explicitly possible -- practice common patterns (knapsack, LIS, grid paths) | High |
+| **ML algorithm coding** | KNN implementation, possibly ANN (approximate nearest neighbor) | Medium-High |
+| **Syntax fluency** | Write clean Python without constantly looking up API -- interviewer notices hesitation | High |
+| **Edge/corner cases** | Proactively identify: empty input, single element, overflow, duplicates | High |
+| **Test case generation** | Demonstrate ability to create your own test cases -- don't just rely on provided examples | High |
+| **Complexity analysis** | State time and space complexity for every approach discussed | High |
+
+---
+
+### 8.4 Communication and Style
+
+**Coding style matters:**
+- Clean, readable code with meaningful variable names
+- Modular structure (helper functions where appropriate)
+- Be prepared to defend your solution choices
+
+**Adaptability:**
+- If the interviewer suggests a different direction, pivot gracefully
+- Show you can incorporate feedback in real-time -- this signals coachability
+
+**Pacing (critical):**
+- Do NOT spend the entire hour on coding
+- Reserve ~10+ minutes for experience discussion or follow-up questions
+- Reserve ~5 minutes at the end for your own questions
+- Rough allocation: ~5 min problem understanding, ~35-40 min coding + discussion, ~10 min experience, ~5 min your questions
+
+---
+
+### 8.5 Phone Screen Checklist
+
+- [ ] Practice 5+ HackerRank medium problems (DSA focus, timed 35-40 min each)
+- [ ] Practice 2-3 DP problems (tabulation + memoization approaches)
+- [ ] Implement KNN from scratch (distance metrics, k selection, edge cases)
+- [ ] Review ANN concepts (locality-sensitive hashing, tree-based approaches)
+- [ ] Practice talking through solutions aloud while coding
+- [ ] Do at least 2 mock interviews with the "clarify -> explore -> tradeoff -> code" flow
+- [ ] Prepare 2-3 concise experience talking points (~2 min each) for the non-coding portion
+- [ ] Review Python standard library: collections, heapq, bisect, itertools
 
 ---
 
