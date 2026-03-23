@@ -264,3 +264,15 @@
 - **Deliverables**: 5 tasks in task_db (T-P1-174~177, T-P0-178), CLAUDE.md updated (commit rule), autonomous_run.sh updated (commit in prompt)
 - **Sanity check result**: Tasks verified in DB. TASKS.md regenerated.
 - **Status**: [DONE] (planning complete, awaiting user confirmation to execute)
+
+## 2026-03-22 22:00 -- [T-P0-178] Commit all uncommitted changes from prior sessions
+- **What I did**: Reviewed all modified and untracked files for secrets/sensitive data (none found), staged 29 files spanning system design module infrastructure, scraper improvements, dev.py health wait, nginx port fix, .gitignore hardening, CLAUDE.md updates, Uber HR prep notes, and task/progress bookkeeping. Committed as single cleanup commit.
+- **Deliverables**: Git commit 821ecc7 with 29 files, 4632 insertions
+- **Sanity check result**: git status clean (only .claude/worktrees/ untracked, intentionally excluded)
+- **Status**: [DONE]
+
+## 2026-03-22 23:00 -- [T-P1-174] Blind75 tab: add sort/search controls + sort within groups
+- **What I did**: Extracted sort/search bar into shared `renderSortBar()` used by both All Problems and Blind75 tabs. Added client-side sort within pattern groups in Blind75 view (supports all 5 sort fields + asc/desc). Filter state already persists across tab switches via URL params.
+- **Deliverables**: Modified `src/frontend/src/pages/Problems.tsx`
+- **Sanity check result**: TypeScript check clean (`tsc --noEmit`), Vite build succeeds
+- **Status**: [DONE]

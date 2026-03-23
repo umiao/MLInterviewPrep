@@ -249,7 +249,7 @@ export default function Problems() {
     );
   }, [allProblems, search]);
 
-  // For Blind 75 tab: group by pattern
+  // For Blind 75 tab: group by pattern with sort applied within groups
   const blind75ByPattern = useMemo(() => {
     if (!isBlind75) return [];
     const groups: Record<string, Problem[]> = {};
@@ -258,8 +258,34 @@ export default function Problems() {
       if (!groups[key]) groups[key] = [];
       groups[key].push(p);
     }
+    // Sort within each group by the active sort field
+    const DIFFICULTY_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
+    const dir = sortOrder === "asc" ? 1 : -1;
+    for (const group of Object.values(groups)) {
+      group.sort((a, b) => {
+        let cmp = 0;
+        switch (sortBy) {
+          case "difficulty":
+            cmp = (DIFFICULTY_ORDER[a.difficulty ?? ""] ?? 9) - (DIFFICULTY_ORDER[b.difficulty ?? ""] ?? 9);
+            break;
+          case "comfort_level":
+            cmp = a.comfort_level - b.comfort_level;
+            break;
+          case "last_attempted_at":
+            cmp = (a.last_attempted_at ?? "").localeCompare(b.last_attempted_at ?? "");
+            break;
+          case "next_review_at":
+            cmp = (a.next_review_at ?? "").localeCompare(b.next_review_at ?? "");
+            break;
+          default: // created_at
+            cmp = (a.created_at ?? "").localeCompare(b.created_at ?? "");
+            break;
+        }
+        return cmp * dir;
+      });
+    }
     return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  }, [problems, isBlind75]);
+  }, [problems, isBlind75, sortBy, sortOrder]);
 
   const blind75Stats = useMemo(() => {
     if (!isBlind75) return { completed: 0, total: 0 };
@@ -436,6 +462,41 @@ export default function Problems() {
     </tr>
   );
 
+  // Shared sort/search bar rendered in both tabs
+  const renderSortBar = () => (
+    <div className="flex items-center gap-3 mb-3">
+      <SearchInput
+        value={search}
+        onChange={handleSearchChange}
+        placeholder="Search title, pattern, company..."
+        className="flex-1 max-w-sm"
+      />
+      <div className="flex items-center gap-2 text-sm ml-auto">
+        <label className="text-gray-500">Sort by</label>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as SortField)}
+          className="border border-gray-300 rounded px-2 py-1"
+        >
+          <option value="created_at">Date added</option>
+          <option value="comfort_level">Comfort</option>
+          <option value="difficulty">Difficulty</option>
+          <option value="last_attempted_at">Last attempted</option>
+          <option value="next_review_at">Next review</option>
+        </select>
+        <button
+          onClick={() =>
+            setSortOrder(sortOrder === "asc" ? "desc" : "asc")
+          }
+          className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
+          title={`Currently: ${sortOrder}`}
+        >
+          {sortOrder === "asc" ? "Asc" : "Desc"}
+        </button>
+      </div>
+    </div>
+  );
+
   const renderBlind75Content = () => (
     <div className="space-y-4">
       {/* Progress header */}
@@ -443,6 +504,9 @@ export default function Problems() {
         <h2 className="text-lg font-semibold text-blue-900 mb-2">Blind Grind 75 Progress</h2>
         <ProgressBar completed={blind75Stats.completed} total={blind75Stats.total} />
       </div>
+
+      {/* Search + Sort controls */}
+      {renderSortBar()}
 
       {loading && <LoadingSpinner message="Loading problems..." />}
 
@@ -554,37 +618,7 @@ export default function Problems() {
       )}
 
       {/* Search + Sort controls */}
-      <div className="flex items-center gap-3 mb-3">
-        <SearchInput
-          value={search}
-          onChange={handleSearchChange}
-          placeholder="Search title, pattern, company..."
-          className="flex-1 max-w-sm"
-        />
-        <div className="flex items-center gap-2 text-sm ml-auto">
-          <label className="text-gray-500">Sort by</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as SortField)}
-            className="border border-gray-300 rounded px-2 py-1"
-          >
-            <option value="created_at">Date added</option>
-            <option value="comfort_level">Comfort</option>
-            <option value="difficulty">Difficulty</option>
-            <option value="last_attempted_at">Last attempted</option>
-            <option value="next_review_at">Next review</option>
-          </select>
-          <button
-            onClick={() =>
-              setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-            }
-            className="px-2 py-1 border border-gray-300 rounded hover:bg-gray-100"
-            title={`Currently: ${sortOrder}`}
-          >
-            {sortOrder === "asc" ? "Asc" : "Desc"}
-          </button>
-        </div>
-      </div>
+      {renderSortBar()}
 
       {/* Error */}
       {error && (

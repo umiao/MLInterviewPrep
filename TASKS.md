@@ -9,63 +9,7 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-178: Ad-hoc: commit all uncommitted changes from previous sessions
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Problem
-Multiple sessions modified files without committing. Need a cleanup commit.
-
-## Uncommitted Changes
-Modified: .gitignore, CLAUDE.md, PROGRESS.md, TASKS.md, archive/completed_tasks.md, 
-config/scrape_seeds.yaml, scripts/backfill_interviews.py, scripts/dev.py, 
-scripts/forum_scrape.py, src/backend/main.py, src/backend/models/__init__.py,
-src/backend/services/forum_service.py, src/frontend/nginx.conf, 
-src/frontend/src/App.tsx, src/frontend/src/components/Sidebar.tsx
-
-Untracked: docs/PLAN_system_design_showcase.md, docs/uber_hr_call_prep.md,
-scripts/content_*.py (4 files), src/backend/models/system_design.py,
-src/backend/routers/system_design.py, src/frontend/public/static/system-designs/*.jpg,
-src/frontend/src/types/system-design.ts
-
-## Fix
-1. Review all changes to ensure no secrets or sensitive data
-2. Stage all relevant files
-3. Commit with descriptive message covering the work done
-4. Do NOT commit .claude/worktrees/ or any temp files
-
-## Acceptance Criteria
-- [ ] All modified and new files committed
-- [ ] No secrets in committed files
-- [ ] git status clean after commit
-
 ### P1 -- Should Have (agentic intelligence)
-
-#### T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Problem
-1. Blind Grind75 tab does not display the sort-by dropdown that is already implemented and visible in the All Problems tab
-2. Filter selections (difficulty, category, pattern, etc.) should persist when switching between tabs
-
-## Current State
-- `Problems.tsx`: Sort bar with sortBy/sortOrder is rendered but may be hidden or not applied in Blind75 tab
-- `useFilterParams` hook persists filter state in URL params including `tab` param
-- Blind75 tab has its own grouped layout but shares the same filter state
-
-## Fix
-1. Ensure sort-by dropdown and sort order toggle are visible in Blind75 tab
-2. Apply sort within each pattern group in Blind75 view
-3. Verify filter state (difficulty, status, etc.) carries over when switching tabs
-4. URL params should reflect all filter/sort state for both tabs
-
-## Acceptance Criteria
-- [ ] Sort-by dropdown visible and functional in Blind75 tab
-- [ ] Sort applies within pattern groups
-- [ ] Switching tabs preserves filter selections
-- [ ] URL params update correctly when changing filters/sort in either tab
-- [ ] Manually verify: set difficulty=hard in All tab, switch to Blind75, filter still applied
 
 #### T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view
 - **Priority**: P1
@@ -293,6 +237,7 @@ S - straightforward wiring, two functions to modify
 
 > 158 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-22** -- T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab. ## Problem
 - [x] **2026-03-22** -- T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once). ## Goal
 - [x] **2026-03-22** -- T-P1-172: System Design Module 5: Database Systems Comparison (Cassandra focus). ## Goal
 - [x] **2026-03-22** -- T-P1-171: System Design detail: single-page layout with bookmark nav + fix module-arbitration content. ## Problem
@@ -303,3 +248,4 @@ S - straightforward wiring, two functions to modify
 - [x] **2026-03-22** -- T-P1-166: Fix dev.py startup race condition: wait for backend health before starting frontend. ## Problem
 - [x] **2026-03-22** -- T-P1-165: Content: Ranking-as-Allocation / Diversity Allotment Policy Framework. All 8 sections for Ranking-as-Allocation (SIGNATURE PROJECT - deepest coverage). Includes production constraints (50K QP
 - [x] **2026-03-22** -- T-P1-164: Content: PBE Logging & Dataset Pipeline. All 8 sections for PBE Pipeline. Includes production constraints (500M impressions/day, 5-min micro-batch, 2TB daily). D
+- [x] **2026-03-22** -- T-P0-178: Ad-hoc: commit all uncommitted changes from previous sessions. ## Problem
