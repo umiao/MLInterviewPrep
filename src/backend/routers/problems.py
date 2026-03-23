@@ -41,7 +41,7 @@ def _problem_to_response(p: Problem) -> dict:
         "category": p.category,
         "source": p.source,
         "company_tags": p.company_tags_list,
-        "priority": p.priority,
+        "priority": p.priority if p.priority is not None else 2,
         "is_completed": p.is_completed,
         "comfort_level": p.comfort_level,
         "created_at": p.created_at,

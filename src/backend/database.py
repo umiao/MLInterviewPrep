@@ -322,6 +322,13 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ALTER TABLE forum_seeds ADD COLUMN last_scraped_page INTEGER",
         ],
     ),
+    (
+        12,
+        "Fix NULL priority in problems table",
+        [
+            "UPDATE problems SET priority = 2 WHERE priority IS NULL",
+        ],
+    ),
 ]
 
 

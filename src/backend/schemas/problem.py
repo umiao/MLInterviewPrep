@@ -61,7 +61,7 @@ class ProblemResponse(BaseModel):
     category: str = "algorithm"
     source: str | None = None
     company_tags: list[str] = []
-    priority: int = 2
+    priority: int | None = 2
     is_completed: bool = False
     comfort_level: int = 0
     created_at: datetime | None = None

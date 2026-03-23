@@ -306,3 +306,9 @@
 - **Deliverables**: TASKS.md (regenerated, all tasks completed)
 - **Sanity check result**: 0 active tasks remaining. All 19 tasks in completed status.
 - **Status**: [DONE]
+
+## 2026-03-23 05:30 -- Fix /api/problems 500 error (NULL priority)
+- **What I did**: Investigated backend crash when frontend loads /problems page. Root cause: 2 problem records (id=152, id=153) had NULL priority field, but ProblemResponse Pydantic schema required non-optional int. FastAPI response_model validation failed with 500. Fixed schema to accept None, added fallback default in _problem_to_response, added migration 12 to fix existing NULL data, and patched DB directly.
+- **Deliverables**: `src/backend/schemas/problem.py` (priority now int|None), `src/backend/routers/problems.py` (None->2 fallback), `src/backend/database.py` (migration 12)
+- **Sanity check result**: All /api/problems endpoints return 200 with limit=20,50,200. Previously failed at limit>=3 due to bad record at sort position 3.
+- **Status**: [DONE]
