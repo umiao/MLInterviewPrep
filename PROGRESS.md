@@ -324,3 +324,15 @@
 - **Deliverables**: `src/frontend/src/pages/Dashboard.tsx`, `src/frontend/src/types/dashboard.ts`, `src/frontend/src/pages/Problems.tsx`
 - **Sanity check result**: TypeScript compiles clean (`tsc --noEmit`). 288/289 tests pass (1 pre-existing failure). Ruff: 1 pre-existing error (unrelated).
 - **Status**: [DONE]
+
+## 2026-03-23 06:20 -- [T-P1-181] Fetch missing problem descriptions
+- **What I did**: Fetched descriptions for 5 problems missing them (id=151-155). 3 fetched from LeetCode GraphQL (151-153), 2 premium problems (LC 339, 364) fetched from user-provided URLs (algo.monster, hellointerview). Added idempotency protection (force param) to single-problem fetch-description endpoint. All 155/155 problems now have descriptions.
+- **Deliverables**: `src/backend/routers/problems.py` (force param), DB updated
+- **Sanity check result**: 0 problems with NULL/empty description.
+- **Status**: [DONE]
+
+## 2026-03-23 06:45 -- [T-P1-183] Framework progress sync: auto-propagate status and progress upward
+- **What I did**: Implemented auto status+progress propagation from child to parent nodes. New _derive_status() uses priority model (mastered > review > in_progress > not_started). Refactored _propagate_progress to _propagate_upward with status derivation, cycle detection (log critical, no raise), and only-set-never-clear timestamps. Study log auto-starts leaf nodes and only auto-progresses leaves. Frontend: disabled status dropdown for parent nodes, shows "auto from children" + mastered/total count.
+- **Deliverables**: `src/backend/routers/framework.py`, `src/frontend/src/components/NodeDetailPanel.tsx`, `tests/test_integration_framework_study.py`
+- **Sanity check result**: 992/996 tests pass (4 pre-existing test_timeline failures). All 30 framework tests pass. TypeScript clean. Ruff clean.
+- **Status**: [DONE]
