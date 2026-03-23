@@ -137,6 +137,24 @@ export default function Problems() {
 
   // Tab state from URL
   const activeTab = searchParams.get("tab") || "all";
+  const blind75View = searchParams.get("blind75View") || "grouped";
+  const setBlind75View = useCallback(
+    (view: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (view === "grouped") {
+            next.delete("blind75View");
+          } else {
+            next.set("blind75View", view);
+          }
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
   const setActiveTab = useCallback(
     (tab: string) => {
       setSearchParams(
@@ -417,7 +435,7 @@ export default function Problems() {
           </Badge>
         )}
       </td>
-      {!isBlind75 && (
+      {(!isBlind75 || blind75View === "flat") && (
         <td className="px-3 py-2">
           {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
         </td>
@@ -505,7 +523,23 @@ export default function Problems() {
         <ProgressBar completed={blind75Stats.completed} total={blind75Stats.total} />
       </div>
 
-      {/* Search + Sort controls */}
+      {/* View toggle + Search + Sort controls */}
+      <div className="flex items-center gap-3 mb-1">
+        <div className="inline-flex rounded border border-gray-300 text-sm">
+          <button
+            onClick={() => setBlind75View("grouped")}
+            className={`px-3 py-1 ${blind75View === "grouped" ? "bg-blue-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"} rounded-l`}
+          >
+            Grouped by Pattern
+          </button>
+          <button
+            onClick={() => setBlind75View("flat")}
+            className={`px-3 py-1 ${blind75View === "flat" ? "bg-blue-600 text-white" : "bg-white text-gray-600 hover:bg-gray-50"} rounded-r border-l border-gray-300`}
+          >
+            All Problems
+          </button>
+        </div>
+      </div>
       {renderSortBar()}
 
       {loading && <LoadingSpinner message="Loading problems..." />}
@@ -514,7 +548,31 @@ export default function Problems() {
         <EmptyState message="No Blind 75 problems found. Import them using the import script." />
       )}
 
-      {!loading && blind75ByPattern.map(([patternName, patternProblems]) => (
+      {/* Flat (ungrouped) view */}
+      {!loading && blind75View === "flat" && problems.length > 0 && (
+        <div className="overflow-x-auto rounded border border-gray-200">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
+              <tr>
+                <th className="px-3 py-2 w-12">#</th>
+                <th className="px-3 py-2">Title</th>
+                <th className="px-3 py-2 w-24">Difficulty</th>
+                <th className="px-3 py-2 w-28">Pattern</th>
+                <th className="px-3 py-2 w-24">Comfort</th>
+                <th className="px-3 py-2 w-28">Notes</th>
+                <th className="px-3 py-2 w-28">Review</th>
+                <th className="px-3 py-2 w-40">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {problems.map((p) => renderProblemRow(p, true))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Grouped by pattern view */}
+      {!loading && blind75View === "grouped" && blind75ByPattern.map(([patternName, patternProblems]) => (
         <div key={patternName} className="space-y-1">
           <h3 className="text-sm font-semibold text-gray-700 px-1 capitalize flex items-center gap-2">
             <Badge variant="blue">{patternName}</Badge>

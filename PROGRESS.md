@@ -276,3 +276,9 @@
 - **Deliverables**: Modified `src/frontend/src/pages/Problems.tsx`
 - **Sanity check result**: TypeScript check clean (`tsc --noEmit`), Vite build succeeds
 - **Status**: [DONE]
+
+## 2026-03-22 23:30 -- [T-P1-175] Blind75 tab: add ungrouped flat list view toggle
+- **What I did**: Added a "Grouped by Pattern" / "All Problems" toggle to the Blind75 tab. The flat view shows a single table with all blind75 problems including the Pattern column. View state persists via `blind75View` URL param. Default remains grouped view. Both views share sort/filter state.
+- **Deliverables**: Modified `src/frontend/src/pages/Problems.tsx`
+- **Sanity check result**: TypeScript check clean (`tsc --noEmit`), Vite build succeeds
+- **Status**: [DONE]

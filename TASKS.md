@@ -11,31 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Problem
-Blind Grind75 tab only shows problems grouped by pattern. User wants an "All Problems" flat list view as well, displayed twice (like a toggle or sub-section).
-
-## Current State
-- Blind75 tab groups problems by `pattern` field
-- Each group has a header with pattern name and mini-progress bar
-- No option to view all Blind75 problems in a flat table
-
-## Fix
-1. Add a view toggle in Blind75 tab: "Grouped by Pattern" | "All Problems"
-2. "All Problems" view shows the same table as the All tab but filtered to source=blind75
-3. Both views share the same sort/filter state
-4. Default to grouped view (current behavior)
-
-## Acceptance Criteria
-- [ ] Toggle visible at top of Blind75 tab
-- [ ] "All Problems" shows flat table with all blind75 problems
-- [ ] "Grouped by Pattern" shows current grouped layout
-- [ ] Sort and filters apply correctly in both views
-- [ ] Manually verify: switch between views, data is consistent
-
 #### T-P1-176: LeetCode: Move Practice/Review actions from table to ProblemDetailPage
 - **Priority**: P1
 - **Complexity**: S
@@ -237,6 +212,7 @@ S - straightforward wiring, two functions to modify
 
 > 158 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-22** -- T-P1-175: LeetCode: Blind75 add 'All Problems' ungrouped view alongside grouped view. ## Problem
 - [x] **2026-03-22** -- T-P1-174: LeetCode: Blind75 tab missing sort-by controls + filter state not shared with All tab. ## Problem
 - [x] **2026-03-22** -- T-P1-173: System Design Module 6: Distributed Task Queue (failure modes, idempotency, exactly-once). ## Goal
 - [x] **2026-03-22** -- T-P1-172: System Design Module 5: Database Systems Comparison (Cassandra focus). ## Goal
