@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 
@@ -148,11 +148,40 @@ function StarSection({ label, content }: { label: string; content: string | null
   );
 }
 
-function ExampleCard({ example }: { example: BehavioralExample }) {
+function ExampleCard({
+  example,
+  focused,
+  onClearFocus,
+}: {
+  example: BehavioralExample;
+  focused?: boolean;
+  onClearFocus?: () => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (focused) {
+      setExpanded(true);
+      // Small delay to let the DOM render before scrolling
+      const timer = setTimeout(() => {
+        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [focused]);
 
   return (
-    <div className="bg-white rounded-lg p-4 mb-3 border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all">
+    <div
+      ref={cardRef}
+      id={`example-${example.example_id}`}
+      className={`bg-white rounded-lg p-4 mb-3 border transition-all ${
+        focused
+          ? "border-blue-500 shadow-md ring-2 ring-blue-200"
+          : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
+      }`}
+      onAnimationEnd={onClearFocus}
+    >
       <div
         className="flex items-center justify-between cursor-pointer select-none"
         onClick={() => setExpanded((prev) => !prev)}
@@ -243,11 +272,13 @@ function QuestionRow({
   examples,
   expanded,
   onToggle,
+  onExampleClick,
 }: {
   question: BehavioralQuestion;
   examples: BehavioralExample[];
   expanded: boolean;
   onToggle: () => void;
+  onExampleClick: (exampleId: string) => void;
 }) {
   const linkedExamples = examples.filter((ex) =>
     ex.linked_questions.some((lq) => lq.question_id === question.question_id)
@@ -296,9 +327,16 @@ function QuestionRow({
                   <span className="text-xs font-mono text-gray-400">
                     {ex.example_id}
                   </span>
-                  <span className="text-sm text-gray-800 font-medium">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onExampleClick(ex.example_id);
+                    }}
+                    className="text-sm text-blue-600 font-medium hover:text-blue-800 hover:underline text-left"
+                    title="View full STAR example"
+                  >
                     {ex.title}
-                  </span>
+                  </button>
                 </div>
                 {link?.relevance_note && (
                   <blockquote className="text-xs text-green-600 border-l-2 border-green-300 pl-2 mb-2">
@@ -410,6 +448,15 @@ export default function BehavioralQuestions() {
   const [viewMode, setViewMode] = useState<ViewMode>("questions");
   const [search, setSearch] = useState("");
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
+  const [focusedExampleId, setFocusedExampleId] = useState<string | null>(null);
+
+  const handleExampleClick = (exampleId: string) => {
+    setFocusedExampleId(exampleId);
+    setViewMode("examples");
+    // Clear category filter so the focused example is visible
+    setSelectedCategory(null);
+    setSearch("");
+  };
 
   const toggleQuestion = (id: number) => {
     setExpandedQuestions((prev) => {
@@ -520,6 +567,7 @@ export default function BehavioralQuestions() {
                 examples={examples}
                 expanded={expandedQuestions.has(q.id)}
                 onToggle={() => toggleQuestion(q.id)}
+                onExampleClick={handleExampleClick}
               />
             ))
           )}
@@ -543,7 +591,12 @@ export default function BehavioralQuestions() {
                 (ex.situation ?? "").toLowerCase().includes(search.toLowerCase())
             )
             .map((ex) => (
-              <ExampleCard key={ex.id} example={ex} />
+              <ExampleCard
+                key={ex.id}
+                example={ex}
+                focused={focusedExampleId === ex.example_id}
+                onClearFocus={() => setFocusedExampleId(null)}
+              />
             ))}
         </div>
       )}
