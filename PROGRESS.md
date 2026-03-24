@@ -360,3 +360,9 @@
 - **Deliverables**: `src/frontend/src/pages/BehavioralQuestions.tsx` (rewritten)
 - **Sanity check result**: TypeScript clean (tsc --noEmit), Vite build clean, 996 backend tests pass
 - **Status**: [DONE]
+
+## 2026-03-24 23:59 -- [T-P1-43] Extract ML system design interview patterns into system design module
+- **What I did**: Verified that seed_system_designs.py module 8 ('ml-system-design-patterns') comprehensively covers the 10.5KB source file (system Design经验总结归纳.txt). Content maps: state machine design (sections 一-三) -> architecture/formulas, L1-L2-L3 defense framework + technical decision table (sections 3/5) -> defense/dataflow, production constraints (section 4) -> production_constraints, engineering lessons (section 6) -> tradeoffs. Frontend patterns (section 2: auto-save hook, tab layout) correctly excluded as implementation details, not interview patterns. Ran seed (0 inserted, 8 updated). Deleted source file and now-empty parent directory.
+- **Deliverables**: DB record with 8 populated sections (13,558 chars total: overview 935c, architecture 1704c, dataflow 1845c, formulas 1009c, production_constraints 1283c, tradeoffs 2007c, defense 2549c, verbal_outline 2226c)
+- **Sanity check result**: Seed script ran successfully, DB query confirmed all 8 sections populated, source file and directory deleted
+- **Status**: [DONE]
