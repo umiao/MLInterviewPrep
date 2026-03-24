@@ -348,3 +348,15 @@
 - **Deliverables**: `docs/uber_hr_call_prep.md` (updated)
 - **Sanity check result**: DB verified -- Uber prep_notes contains Phone Screen Prep section.
 - **Status**: [DONE]
+
+## 2026-03-24 06:50 -- Split Uber prep into HR Call + Phone Screen documents
+- **What I did**: Moved section 7.6 (MLE Interview Process Overview) and Part 8 (Phone Screen Prep) from `uber_hr_call_prep.md` into a new `uber_phone_screen_prep.md`. Updated backfill script to create a CompanyDocument record for the phone screen file, so Uber now shows two tabs in the app: "Notes" (HR Call, 22,799 chars) and "Phone Screen Prep" (4,906 chars). Added `COMPANY_DOCUMENTS` dict to backfill for extensibility.
+- **Deliverables**: `docs/uber_phone_screen_prep.md` (new), `docs/uber_hr_call_prep.md` (trimmed), `scripts/backfill_interviews.py` (extended)
+- **Sanity check result**: DB verified -- Uber has prep_notes + 1 CompanyDocument. Frontend tabs render via existing `useCompanyDocuments` hook.
+- **Status**: [DONE]
+
+## 2026-03-24 21:30 -- [T-P0-36] Fix BehavioralQuestions page styling to match light theme
+- **What I did**: Rewrote BehavioralQuestions.tsx to fix 4 issues: (1) Converted entire page from dark theme (bg-gray-800, text-white) to light theme (bg-white cards, text-gray-800, border-gray-200) matching Layout.tsx and Dashboard.tsx conventions. (2) Replaced cryptic category abbreviations (ADP, OWN, etc) with full names via CATEGORY_LABELS lookup + tooltips on filter buttons. (3) Overhauled heatmap: larger cells (min-w-[90px]), full category names in headers, proper text contrast (green-800/900/white on green backgrounds), wrapped in white card with border. (4) Fixed expand/collapse bug by lifting question expansion state to parent via Set<number> (expandedQuestions) instead of per-row useState, preventing state loss on re-render.
+- **Deliverables**: `src/frontend/src/pages/BehavioralQuestions.tsx` (rewritten)
+- **Sanity check result**: TypeScript clean (tsc --noEmit), Vite build clean, 996 backend tests pass
+- **Status**: [DONE]
