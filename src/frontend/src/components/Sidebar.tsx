@@ -5,6 +5,7 @@ const navItems = [
   { to: "/problems", label: "LeetCode" },
   { to: "/framework", label: "Framework" },
   { to: "/system-design", label: "System Design" },
+  { to: "/behavioral", label: "Behavioral" },
   { to: "/questions", label: "Questions" },
   { to: "/companies", label: "Companies" },
   { to: "/radio", label: "Study Radio" },

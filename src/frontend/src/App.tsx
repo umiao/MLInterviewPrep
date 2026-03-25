@@ -16,6 +16,7 @@ import StudyRadio from "./pages/StudyRadio";
 import FrameworkNotesPage from "./pages/FrameworkNotesPage";
 import SystemDesignList from "./pages/SystemDesignList";
 import SystemDesignDetail from "./pages/SystemDesignDetail";
+import BehavioralQuestions from "./pages/BehavioralQuestions";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -42,6 +43,7 @@ export default function App() {
                 <Route path="framework/:nodeId/notes" element={<FrameworkNotesPage />} />
                 <Route path="system-design" element={<SystemDesignList />} />
                 <Route path="system-design/:slug" element={<SystemDesignDetail />} />
+                <Route path="behavioral" element={<BehavioralQuestions />} />
                 <Route path="questions" element={<Questions />} />
                 <Route path="companies" element={<Companies />} />
                 <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />
