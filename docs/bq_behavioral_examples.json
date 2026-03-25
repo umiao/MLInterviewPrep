@@ -7,11 +7,11 @@
       "2026_03_26_Doordash面试准备/4. Conversational Search.md",
       "User-provided Discord messages (2026-03-24)"
     ],
-    "total_examples": 21,
+    "total_examples": 22,
     "date_created": "2026-03-24",
-    "last_updated": "2026-03-25",
+    "last_updated": "2026-03-24",
     "task_id": "T-P0-30",
-    "update_task_id": "T-P0-47"
+    "update_task_id": "T-P0-48"
   },
   "examples": [
     {
@@ -860,6 +860,62 @@
         {
           "q": "What if the declarative system had a fundamentally different architecture?",
           "a": "The research phase specifically validated architectural alignment. If the core expression format had been different, would have flagged it as a real incompatibility rather than proceeding with an incompatible interim solution."
+        }
+      ]
+    },
+    {
+      "id": "EX-22",
+      "title": "Delegation Decision --- Hashing Algorithm for Experiment Platform",
+      "source_project": "Experiment Platform / Seller Group Testing",
+      "situation": "Building seller group testing for the experiment platform. I had a working hash approach (sellerID * prime, take high bits) for assigning sellers to experiment groups. A researcher on the team preferred using a standard hash function instead. The custom approach worked correctly but only I found it intuitive --- a maintenance risk for the team.",
+      "task": "Decide between my working custom hash and the researcher's preference for a standard algorithm. The broader challenge: how to delegate a key technical decision while ensuring the outcome meets quality requirements (uniformity across groups, performance, latency).",
+      "action": "Recognized that \"only I find it intuitive\" is a signal, not a feature. Made a deliberate choice to hand decision authority to the researcher, but defined a clear acceptance framework: the chosen algorithm must demonstrate (1) uniform distribution across seller groups, (2) acceptable performance benchmarks, (3) within latency budget. This was not abdication --- it was structured delegation with measurable criteria. The researcher had the freedom to choose the approach but accountability to the quality bar.",
+      "result": "The researcher found MurmurHash, which was superior to my original approach. During evaluation, they also discovered that the existing dedupe hash had an ItemID distribution issue --- a latent bug my custom approach would not have caught. They built a reusable hashing library that benefited multiple teams. The outcome was strictly better than what I would have produced alone: better algorithm, bug found, reusable artifact, and the researcher gained deep ownership of the hashing subsystem.",
+      "evidence_quotes": [
+        "\"Only I find it intuitive\" is a risk for team maintenance --- recognized this as a signal to delegate",
+        "Defined acceptance framework: uniformity, performance, latency --- structured delegation, not abdication",
+        "Researcher found MurmurHash, discovered existing dedupe hash had ItemID distribution issue, built reusable library"
+      ],
+      "principle_tags": [
+        "leadership",
+        "delegation",
+        "problem_solving",
+        "teamwork"
+      ],
+      "cross_references": [
+        {
+          "question_id": "LDR-6",
+          "relevance_note": "Direct answer: chose to delegate hashing decision rather than use own working solution, because maintainability > personal preference"
+        },
+        {
+          "question_id": "LDR-8",
+          "relevance_note": "Trusted researcher to make the key algorithm decision while providing quality framework --- resulted in strictly better outcome"
+        },
+        {
+          "question_id": "LDR-9",
+          "relevance_note": "Ensured quality through acceptance criteria (uniformity, performance, latency) rather than micromanaging the algorithm choice"
+        },
+        {
+          "question_id": "LDR-7",
+          "relevance_note": "Empowered researcher who gained ownership, discovered latent bug, and built reusable library --- grew from executing to owning"
+        },
+        {
+          "question_id": "PS-5",
+          "relevance_note": "Multiple viable options (custom prime hash vs standard hash vs MurmurHash) --- chose delegation framework over picking one directly"
+        }
+      ],
+      "defense_qa": [
+        {
+          "q": "Why not just use your working solution if it was correct?",
+          "a": "Correctness is necessary but not sufficient. \"Only I find it intuitive\" means high bus factor risk. Delegation produced a standard algorithm (MurmurHash) that any engineer can understand, plus discovered a latent distribution bug. The team outcome was strictly better."
+        },
+        {
+          "q": "How is this different from just not wanting to do the work?",
+          "a": "I had a working solution --- delegation was the harder path. I defined the acceptance framework, reviewed the evaluation, and stayed accountable for the outcome. The thesis: delegation is not \"I cannot so you do it\" --- it is recognizing the right person owning the decision produces better results."
+        },
+        {
+          "q": "What if the researcher had not found a better solution?",
+          "a": "The acceptance framework was the safety net. If their choice failed uniformity or performance criteria, we would iterate --- not revert to my approach by default, but work together on meeting the bar. The framework made the decision reversible without undermining autonomy."
         }
       ]
     }

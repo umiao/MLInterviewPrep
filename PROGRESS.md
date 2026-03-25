@@ -366,3 +366,9 @@
 - **Deliverables**: DB record with 8 populated sections (13,558 chars total: overview 935c, architecture 1704c, dataflow 1845c, formulas 1009c, production_constraints 1283c, tradeoffs 2007c, defense 2549c, verbal_outline 2226c)
 - **Sanity check result**: Seed script ran successfully, DB query confirmed all 8 sections populated, source file and directory deleted
 - **Status**: [DONE]
+
+## 2026-03-24 -- [T-P0-48] Import delegation decision BQ story: hashing experiment platform
+- **What I did**: Created EX-22 (delegation decision -- hashing algorithm for experiment platform) with full STAR content, 3 defense Q&As, and 5 cross-references (LDR-6, LDR-7, LDR-8, LDR-9, PS-5). Added to bq_behavioral_examples.json, saved raw story to docs/bq_story_L_delegation_hashing.md, ran seed script to import into database.
+- **Deliverables**: `docs/bq_behavioral_examples.json` (EX-22 added, total 22 examples), `docs/bq_story_L_delegation_hashing.md` (raw story), DB updated (26 examples, 118 links)
+- **Sanity check result**: Seed script confirmed: 1 example inserted, 5 links created. DB state: 115 questions, 26 examples, 118 links.
+- **Status**: [DONE]
