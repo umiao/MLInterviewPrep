@@ -7,11 +7,11 @@
       "2026_03_26_Doordash面试准备/4. Conversational Search.md",
       "User-provided Discord messages (2026-03-24)"
     ],
-    "total_examples": 20,
+    "total_examples": 21,
     "date_created": "2026-03-24",
     "last_updated": "2026-03-25",
     "task_id": "T-P0-30",
-    "update_task_id": "T-P0-46"
+    "update_task_id": "T-P0-47"
   },
   "examples": [
     {
@@ -26,15 +26,40 @@
         "pokemon → 结果几乎全是 TCG card，但用户实际购买 ~50% 是 games / toys / figures / 周边",
         "项目从未被指派，完全由自己发现、推动、跨 team 落地"
       ],
-      "principle_tags": ["ownership", "innovation", "problem_solving"],
+      "principle_tags": [
+        "ownership",
+        "innovation",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "OWN-6", "relevance_note": "Bold risk: invested entire Hacker Week on an unassigned problem that challenged core ranking assumptions"},
-        {"question_id": "INN-1", "relevance_note": "Identified opportunity through independent data analysis of abandoned queries"},
-        {"question_id": "INN-2", "relevance_note": "Entirely self-started project, from problem discovery to working prototype"},
-        {"question_id": "PS-15", "relevance_note": "Identified intent collapse through data analysis of purchase vs. display distributions"},
-        {"question_id": "PS-2", "relevance_note": "Creative solution: cheap intent-coverage proxy instead of expensive holistic ranking"},
-        {"question_id": "IMP-2", "relevance_note": "Story I enrichment: identified user experience problem (kids' book results dominated by Harry Potter, baby book series returning duplicates)"},
-        {"question_id": "OWN-11", "relevance_note": "Story I enrichment: took ownership of a challenging situation — initiated as personal Hackweek project, won award, persisted across team transfers"}
+        {
+          "question_id": "OWN-6",
+          "relevance_note": "Bold risk: invested entire Hacker Week on an unassigned problem that challenged core ranking assumptions"
+        },
+        {
+          "question_id": "INN-1",
+          "relevance_note": "Identified opportunity through independent data analysis of abandoned queries"
+        },
+        {
+          "question_id": "INN-2",
+          "relevance_note": "Entirely self-started project, from problem discovery to working prototype"
+        },
+        {
+          "question_id": "PS-15",
+          "relevance_note": "Identified intent collapse through data analysis of purchase vs. display distributions"
+        },
+        {
+          "question_id": "PS-2",
+          "relevance_note": "Creative solution: cheap intent-coverage proxy instead of expensive holistic ranking"
+        },
+        {
+          "question_id": "IMP-2",
+          "relevance_note": "Story I enrichment: identified user experience problem (kids' book results dominated by Harry Potter, baby book series returning duplicates)"
+        },
+        {
+          "question_id": "OWN-11",
+          "relevance_note": "Story I enrichment: took ownership of a challenging situation — initiated as personal Hackweek project, won award, persisted across team transfers"
+        }
       ]
     },
     {
@@ -50,14 +75,36 @@
         "主动 transfer 到 Final Ranking team，将问题重新定义为 ranking problem，获得完整 ownership",
         "问题跟着人走——这是我主动做的选择，不是被动的妥协"
       ],
-      "principle_tags": ["ownership", "adaptability", "leadership"],
+      "principle_tags": [
+        "ownership",
+        "adaptability",
+        "leadership"
+      ],
       "cross_references": [
-        {"question_id": "ADP-14", "relevance_note": "Faced organizational roadblock (no experiment slots, out-of-scope mandate) and found creative workaround through team transfer"},
-        {"question_id": "OWN-11", "relevance_note": "Took ownership of a challenging situation by transferring teams to follow the problem"},
-        {"question_id": "COM-2", "relevance_note": "Persuaded new team to take on diversity ranking by reframing it as a ranking problem"},
-        {"question_id": "ADP-4", "relevance_note": "Adapted approach mid-project: from pushing within wrong team to strategically transferring"},
-        {"question_id": "COL-3", "relevance_note": "Story I enrichment: drove project across multiple teams — from relevance team to final ranking team, multi-team production deployment"},
-        {"question_id": "COL-5", "relevance_note": "Story I enrichment: aligned different teams on shared goal — reframed diversity as ranking problem to gain cross-team buy-in"}
+        {
+          "question_id": "ADP-14",
+          "relevance_note": "Faced organizational roadblock (no experiment slots, out-of-scope mandate) and found creative workaround through team transfer"
+        },
+        {
+          "question_id": "OWN-11",
+          "relevance_note": "Took ownership of a challenging situation by transferring teams to follow the problem"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded new team to take on diversity ranking by reframing it as a ranking problem"
+        },
+        {
+          "question_id": "ADP-4",
+          "relevance_note": "Adapted approach mid-project: from pushing within wrong team to strategically transferring"
+        },
+        {
+          "question_id": "COL-3",
+          "relevance_note": "Story I enrichment: drove project across multiple teams — from relevance team to final ranking team, multi-team production deployment"
+        },
+        {
+          "question_id": "COL-5",
+          "relevance_note": "Story I enrichment: aligned different teams on shared goal — reframed diversity as ranking problem to gain cross-team buy-in"
+        }
       ]
     },
     {
@@ -73,13 +120,32 @@
         "100 刀首饰的 conversion rate 可以高于 5 刀商品的 5 倍",
         "问题不在于模型选型，而在于 pointwise 框架本身的建模假设是错的"
       ],
-      "principle_tags": ["problem_solving", "innovation", "impact"],
+      "principle_tags": [
+        "problem_solving",
+        "innovation",
+        "impact"
+      ],
       "cross_references": [
-        {"question_id": "PS-1", "relevance_note": "Difficult technical decision: challenged industry-standard Sale NDCG proxy in favor of GMB"},
-        {"question_id": "INN-8", "relevance_note": "Questioned traditional pairwise LTR approach and proposed allocation-based paradigm"},
-        {"question_id": "PS-11", "relevance_note": "Used data (price vs conversion analysis) to identify that Sale NDCG was optimizing the wrong thing"},
-        {"question_id": "IMP-5", "relevance_note": "Redefined what success means for ranking: GMB over Sale NDCG"},
-        {"question_id": "PS-4", "relevance_note": "Broke down complex calibration problem: group-level accuracy masking individual insensitivity"}
+        {
+          "question_id": "PS-1",
+          "relevance_note": "Difficult technical decision: challenged industry-standard Sale NDCG proxy in favor of GMB"
+        },
+        {
+          "question_id": "INN-8",
+          "relevance_note": "Questioned traditional pairwise LTR approach and proposed allocation-based paradigm"
+        },
+        {
+          "question_id": "PS-11",
+          "relevance_note": "Used data (price vs conversion analysis) to identify that Sale NDCG was optimizing the wrong thing"
+        },
+        {
+          "question_id": "IMP-5",
+          "relevance_note": "Redefined what success means for ranking: GMB over Sale NDCG"
+        },
+        {
+          "question_id": "PS-4",
+          "relevance_note": "Broke down complex calibration problem: group-level accuracy masking individual insensitivity"
+        }
       ]
     },
     {
@@ -95,12 +161,28 @@
         "leadership 逐渐认可，转变了对这类 query 的优化目标定义",
         "关键时间节点是当 abandonment 数据被纳入 team OKR 之后"
       ],
-      "principle_tags": ["communication", "impact", "problem_solving"],
+      "principle_tags": [
+        "communication",
+        "impact",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "COM-2", "relevance_note": "Persuaded leadership to change optimization targets by reframing MRR decrease as evidence of correct behavior"},
-        {"question_id": "COM-1", "relevance_note": "Explained complex metric theory (pairwise independence assumption) to non-technical stakeholders"},
-        {"question_id": "PS-14", "relevance_note": "Balanced data (MRR down) with deeper intuition (GMB up means net positive) to make correct decision"},
-        {"question_id": "IMP-1", "relevance_note": "Changed how the organization measures success for top-funnel queries"}
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded leadership to change optimization targets by reframing MRR decrease as evidence of correct behavior"
+        },
+        {
+          "question_id": "COM-1",
+          "relevance_note": "Explained complex metric theory (pairwise independence assumption) to non-technical stakeholders"
+        },
+        {
+          "question_id": "PS-14",
+          "relevance_note": "Balanced data (MRR down) with deeper intuition (GMB up means net positive) to make correct decision"
+        },
+        {
+          "question_id": "IMP-1",
+          "relevance_note": "Changed how the organization measures success for top-funnel queries"
+        }
       ]
     },
     {
@@ -115,12 +197,28 @@
         "Over-invested in deep models (thousands of trees) before confronting latency budgets — as sole MLE I should have set the deployment envelope first",
         "Engineering deployability is the real constraint — fancy ideas fail when the underlying system relies on heavy caching or offline precomputation"
       ],
-      "principle_tags": ["adaptability", "execution", "problem_solving"],
+      "principle_tags": [
+        "adaptability",
+        "execution",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "ADP-5", "relevance_note": "Made a mistake (over-investing in deep models) and learned to front-load deployability constraints"},
-        {"question_id": "ADP-15", "relevance_note": "Biggest lesson from this project: define deployment envelope before model design"},
-        {"question_id": "EXE-3", "relevance_note": "Solved complex latency problem through multi-approach exploration (early exit + cheap rejection)"},
-        {"question_id": "PS-10", "relevance_note": "Tough trade-off: accuracy vs latency, chose pragmatic approach that met production constraints"}
+        {
+          "question_id": "ADP-5",
+          "relevance_note": "Made a mistake (over-investing in deep models) and learned to front-load deployability constraints"
+        },
+        {
+          "question_id": "ADP-15",
+          "relevance_note": "Biggest lesson from this project: define deployment envelope before model design"
+        },
+        {
+          "question_id": "EXE-3",
+          "relevance_note": "Solved complex latency problem through multi-approach exploration (early exit + cheap rejection)"
+        },
+        {
+          "question_id": "PS-10",
+          "relevance_note": "Tough trade-off: accuracy vs latency, chose pragmatic approach that met production constraints"
+        }
       ]
     },
     {
@@ -136,13 +234,32 @@
         "每次复用都能实现 0.6%+ 独立 GMB gain",
         "Platform primitive 的价值远大于单次优化"
       ],
-      "principle_tags": ["impact", "innovation", "execution"],
+      "principle_tags": [
+        "impact",
+        "innovation",
+        "execution"
+      ],
       "cross_references": [
-        {"question_id": "IMP-8", "relevance_note": "Designed a scalable and sustainable solution — allocation primitive reused across verticals"},
-        {"question_id": "IMP-10", "relevance_note": "Focused on long-term impact: framework reuse (200M+) far exceeded first experiment (+1% GMB)"},
-        {"question_id": "INN-11", "relevance_note": "Optimized existing ranking system by fundamentally redesigning it as allocation"},
-        {"question_id": "INN-6", "relevance_note": "Proposed bidding+allocation strategy that led to paradigm shift in search ranking"},
-        {"question_id": "IMP-7", "relevance_note": "Prioritized building hard infrastructure (reusable framework) over quick one-off optimization"}
+        {
+          "question_id": "IMP-8",
+          "relevance_note": "Designed a scalable and sustainable solution — allocation primitive reused across verticals"
+        },
+        {
+          "question_id": "IMP-10",
+          "relevance_note": "Focused on long-term impact: framework reuse (200M+) far exceeded first experiment (+1% GMB)"
+        },
+        {
+          "question_id": "INN-11",
+          "relevance_note": "Optimized existing ranking system by fundamentally redesigning it as allocation"
+        },
+        {
+          "question_id": "INN-6",
+          "relevance_note": "Proposed bidding+allocation strategy that led to paradigm shift in search ranking"
+        },
+        {
+          "question_id": "IMP-7",
+          "relevance_note": "Prioritized building hard infrastructure (reusable framework) over quick one-off optimization"
+        }
       ]
     },
     {
@@ -158,13 +275,32 @@
         "User: dataset和problem formulation从根本上的不合理之处",
         "User: 已有ranking logic以及retrieval会不断放大自身的bias"
       ],
-      "principle_tags": ["problem_solving", "communication", "innovation"],
+      "principle_tags": [
+        "problem_solving",
+        "communication",
+        "innovation"
+      ],
       "cross_references": [
-        {"question_id": "PS-13", "relevance_note": "Data analysis revealed the dataset itself was biased — changed the course of the project from model optimization to problem reformulation"},
-        {"question_id": "INN-8", "relevance_note": "Questioned the traditional approach of testing models on ranking dataset, proposed fixing the evaluation methodology instead"},
-        {"question_id": "COM-2", "relevance_note": "Persuaded team and XFN stakeholders to change direction from model tuning to dataset/formulation fix"},
-        {"question_id": "COL-5", "relevance_note": "Aligned different teams on fixing the problem at source through XFN collaboration"},
-        {"question_id": "PS-12", "relevance_note": "Made data-driven choice despite limited clean data — identified that the data itself was the problem"}
+        {
+          "question_id": "PS-13",
+          "relevance_note": "Data analysis revealed the dataset itself was biased — changed the course of the project from model optimization to problem reformulation"
+        },
+        {
+          "question_id": "INN-8",
+          "relevance_note": "Questioned the traditional approach of testing models on ranking dataset, proposed fixing the evaluation methodology instead"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded team and XFN stakeholders to change direction from model tuning to dataset/formulation fix"
+        },
+        {
+          "question_id": "COL-5",
+          "relevance_note": "Aligned different teams on fixing the problem at source through XFN collaboration"
+        },
+        {
+          "question_id": "PS-12",
+          "relevance_note": "Made data-driven choice despite limited clean data — identified that the data itself was the problem"
+        }
       ]
     },
     {
@@ -180,13 +316,32 @@
         "User: prod的baseline神秘的下降了，但其他人对此并没有觉得有什么问题因为用的是最新的prod作为control",
         "User: escalate给VP以后最终促成了更彻底的调查和对于module arbitration的上线和team的成立"
       ],
-      "principle_tags": ["ownership", "communication", "problem_solving"],
+      "principle_tags": [
+        "ownership",
+        "communication",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "OWN-1", "relevance_note": "Took ownership of investigating a problem no one else noticed, and escalated it despite organizational inertia"},
-        {"question_id": "PS-15", "relevance_note": "Identified prod degradation through historical data comparison that others missed"},
-        {"question_id": "COM-3", "relevance_note": "Delivered difficult news (cumulative prod degradation) to VP-level leadership"},
-        {"question_id": "OWN-6", "relevance_note": "Bold risk to escalate to VP when others didn't see a problem"},
-        {"question_id": "INN-1", "relevance_note": "Identified systemic opportunity: module proliferation problem led to creation of arbitration framework"}
+        {
+          "question_id": "OWN-1",
+          "relevance_note": "Took ownership of investigating a problem no one else noticed, and escalated it despite organizational inertia"
+        },
+        {
+          "question_id": "PS-15",
+          "relevance_note": "Identified prod degradation through historical data comparison that others missed"
+        },
+        {
+          "question_id": "COM-3",
+          "relevance_note": "Delivered difficult news (cumulative prod degradation) to VP-level leadership"
+        },
+        {
+          "question_id": "OWN-6",
+          "relevance_note": "Bold risk to escalate to VP when others didn't see a problem"
+        },
+        {
+          "question_id": "INN-1",
+          "relevance_note": "Identified systemic opportunity: module proliferation problem led to creation of arbitration framework"
+        }
       ]
     },
     {
@@ -202,13 +357,32 @@
         "User: 简单的传递keyword可能被我们的search engine误解并且断句断词得到不相关的结果",
         "User: 发现了proxy item得到了很好的结果，实现了对于已有infra和技术的最大程度利用和最快的test unblock"
       ],
-      "principle_tags": ["innovation", "execution", "problem_solving"],
+      "principle_tags": [
+        "innovation",
+        "execution",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "PS-2", "relevance_note": "Creative solution: proxy items instead of query rewriting to bridge LLM-search gap"},
-        {"question_id": "INN-4", "relevance_note": "Innovative solution that maximized existing infrastructure reuse"},
-        {"question_id": "EXE-2", "relevance_note": "Handled setback (query rewrite failure) by pivoting to proxy item approach"},
-        {"question_id": "ADP-4", "relevance_note": "Adapted approach mid-project when LLM query rewriting failed"},
-        {"question_id": "PS-5", "relevance_note": "Had multiple options (fix LLM, retrain search, proxy items) and chose the most pragmatic one"}
+        {
+          "question_id": "PS-2",
+          "relevance_note": "Creative solution: proxy items instead of query rewriting to bridge LLM-search gap"
+        },
+        {
+          "question_id": "INN-4",
+          "relevance_note": "Innovative solution that maximized existing infrastructure reuse"
+        },
+        {
+          "question_id": "EXE-2",
+          "relevance_note": "Handled setback (query rewrite failure) by pivoting to proxy item approach"
+        },
+        {
+          "question_id": "ADP-4",
+          "relevance_note": "Adapted approach mid-project when LLM query rewriting failed"
+        },
+        {
+          "question_id": "PS-5",
+          "relevance_note": "Had multiple options (fix LLM, retrain search, proxy items) and chose the most pragmatic one"
+        }
       ]
     },
     {
@@ -224,15 +398,30 @@
         "debiased curve（A/B lift - A/A lift）是我在发现 bucketing drift 导致 naive A/B 有系统性误差之后加入的",
         "三条独立信号指向同一方向，这是工业界合理的 causality standard"
       ],
-      "principle_tags": ["execution", "innovation", "problem_solving"],
+      "principle_tags": [
+        "execution",
+        "innovation",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "EXE-1", "relevance_note": "Led the evaluation framework design end-to-end, from discovery of bucketing drift to SIGIR publication"},
-        {"question_id": "INN-14", "relevance_note": "Established evaluation best practices (debiased curves, paired replay) that the team adopted"},
-        {"question_id": "PS-11", "relevance_note": "Used data (A/A drift analysis) to design a more rigorous evaluation methodology"},
-        {"question_id": "IMP-6", "relevance_note": "Built maintainable evaluation infrastructure supporting both production and academic needs"}
+        {
+          "question_id": "EXE-1",
+          "relevance_note": "Led the evaluation framework design end-to-end, from discovery of bucketing drift to SIGIR publication"
+        },
+        {
+          "question_id": "INN-14",
+          "relevance_note": "Established evaluation best practices (debiased curves, paired replay) that the team adopted"
+        },
+        {
+          "question_id": "PS-11",
+          "relevance_note": "Used data (A/A drift analysis) to design a more rigorous evaluation methodology"
+        },
+        {
+          "question_id": "IMP-6",
+          "relevance_note": "Built maintainable evaluation infrastructure supporting both production and academic needs"
+        }
       ]
-    }
-    ,
+    },
     {
       "id": "EX-11",
       "title": "Mentoring Intern on Overpromise / Goal Visibility",
@@ -242,12 +431,28 @@
       "action": "Raised the issue during weekly 1:1, framed it around 'how to better showcase your contributions' rather than 'you're doing it wrong.' Shared rule of thumb: don't be overly technical in updates; always revisit goals, objectives, current progress, and confidence level on completion. Taught him the distinction between leaders' interest in visibility/roadmap vs. raw technical details. Coached on balancing energy allocation: producing smoother, phased deliverables with verifiable milestones instead of overly aggressive multi-week goals.",
       "result": "Intern improved his goal updates significantly, showcased contributions effectively, and received a return offer. Also discussed academia vs. industry differences (depth-first vs. stakeholder-aligned, XFN-heavy work style).",
       "evidence_quotes": [],
-      "principle_tags": ["leadership", "communication", "adaptability"],
+      "principle_tags": [
+        "leadership",
+        "communication",
+        "adaptability"
+      ],
       "cross_references": [
-        {"question_id": "LDR-1", "relevance_note": "Coached/mentored PhD intern on goal communication and stakeholder visibility"},
-        {"question_id": "LDR-2", "relevance_note": "Addressed performance perception issue with junior team member constructively"},
-        {"question_id": "LDR-4", "relevance_note": "Taught intern how to set and communicate goals with phased milestones"},
-        {"question_id": "LDR-11", "relevance_note": "Helped struggling team member improve performance presentation, leading to return offer"}
+        {
+          "question_id": "LDR-1",
+          "relevance_note": "Coached/mentored PhD intern on goal communication and stakeholder visibility"
+        },
+        {
+          "question_id": "LDR-2",
+          "relevance_note": "Addressed performance perception issue with junior team member constructively"
+        },
+        {
+          "question_id": "LDR-4",
+          "relevance_note": "Taught intern how to set and communicate goals with phased milestones"
+        },
+        {
+          "question_id": "LDR-11",
+          "relevance_note": "Helped struggling team member improve performance presentation, leading to return offer"
+        }
       ]
     },
     {
@@ -259,12 +464,28 @@
       "action": "Recognized the unhealthy work pattern and communicated that 'keeping instances alive' was not a sustainable approach. Explained that resources should only be allocated during active job runs, then released. Personally helped with the migration despite resistance (learning cost + code architecture differences: no in-memory data review, need for more tests, high cost of single-run failures, dependency management, packaging/mounting). Built a template class that loads raw logging data, generates dataset, runs a simple LR model, enabling anyone in the team to onboard easily.",
       "result": "Interns successfully adapted to internal tech stack. The template and workflow became a reusable resource for the entire research team, improving alignment and collaboration across all researchers.",
       "evidence_quotes": [],
-      "principle_tags": ["leadership", "innovation", "collaboration"],
+      "principle_tags": [
+        "leadership",
+        "innovation",
+        "collaboration"
+      ],
       "cross_references": [
-        {"question_id": "LDR-1", "relevance_note": "Mentored PhD interns through production stack transition"},
-        {"question_id": "LDR-5", "relevance_note": "Empowered interns by building reusable template enabling independent onboarding"},
-        {"question_id": "INN-5", "relevance_note": "Identified and fixed inefficient process (24/7 instance running) with proper resource lifecycle"},
-        {"question_id": "INN-14", "relevance_note": "Built template class that improved entire research team's productivity and onboarding"}
+        {
+          "question_id": "LDR-1",
+          "relevance_note": "Mentored PhD interns through production stack transition"
+        },
+        {
+          "question_id": "LDR-5",
+          "relevance_note": "Empowered interns by building reusable template enabling independent onboarding"
+        },
+        {
+          "question_id": "INN-5",
+          "relevance_note": "Identified and fixed inefficient process (24/7 instance running) with proper resource lifecycle"
+        },
+        {
+          "question_id": "INN-14",
+          "relevance_note": "Built template class that improved entire research team's productivity and onboarding"
+        }
       ]
     },
     {
@@ -276,13 +497,32 @@
       "action": "Had multiple private conversations, articulating key principles: the paper should represent actual contribution to the manuscript. Proposed that all participants who made substantive contributions be included, but ranking should be agreed upon collectively per standard academic ethics (contribution-based). Stated clearly that 'authorship as gift' was unacceptable. Intern prepared supporting materials (academic traditions, conference submission requirements). When dispute escalated, both managers were brought in.",
       "result": "Manager agreed with the contribution-based position. The team established a lasting norm: check if someone made the single largest contribution; if not, rotate first authorship. This rule was applied going forward --- no further authorship disputes arose.",
       "evidence_quotes": [],
-      "principle_tags": ["collaboration", "communication", "leadership"],
+      "principle_tags": [
+        "collaboration",
+        "communication",
+        "leadership"
+      ],
       "cross_references": [
-        {"question_id": "COL-1", "relevance_note": "Resolved disagreement with colleague over authorship through principled negotiation"},
-        {"question_id": "COM-2", "relevance_note": "Persuaded team to adopt contribution-based authorship norms over gift authorship"},
-        {"question_id": "LDR-3", "relevance_note": "Made tough call to stand up for contribution-based authorship despite escalation risk"},
-        {"question_id": "INN-15", "relevance_note": "Established best practice for authorship that prevented future disputes"},
-        {"question_id": "COM-4", "relevance_note": "Ensured fair authorship principles were heard despite colleague's louder claims"}
+        {
+          "question_id": "COL-1",
+          "relevance_note": "Resolved disagreement with colleague over authorship through principled negotiation"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded team to adopt contribution-based authorship norms over gift authorship"
+        },
+        {
+          "question_id": "LDR-3",
+          "relevance_note": "Made tough call to stand up for contribution-based authorship despite escalation risk"
+        },
+        {
+          "question_id": "INN-15",
+          "relevance_note": "Established best practice for authorship that prevented future disputes"
+        },
+        {
+          "question_id": "COM-4",
+          "relevance_note": "Ensured fair authorship principles were heard despite colleague's louder claims"
+        }
       ]
     },
     {
@@ -294,16 +534,44 @@
       "action": "Spent ~1 week on feasibility study; identified critical blockers: AI couldn't easily plug into indexing pipeline, couldn't read inventory; cost analysis showed only ~tens of QPS vs. 40K peak; latency was prohibitive. Convinced manager to pivot: instead of chasing agentic search, find the most promising low-hanging fruit to build org confidence in AI. Deep-dived into backlog of severe relevance issues; discovered LLM-as-Judge could effectively identify, classify, and label difficult samples. Overcame challenges: over-focused initially on AI-human agreement metrics, LLM instruction-following was immature (JSON failures, NSFW blocks), offline comparison showed no improvement initially (diagnosed as dataset quality issue).",
       "result": "Won across multiple relevance metrics + GMB win + increased user engagement. Project became production infrastructure adopted by ads and other teams to measure impact of their changes on user experience and relevance.",
       "evidence_quotes": [],
-      "principle_tags": ["adaptability", "innovation", "problem_solving"],
+      "principle_tags": [
+        "adaptability",
+        "innovation",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "ADP-6", "relevance_note": "Navigated highly ambiguous project with no clear requirements or precedent for LLM in production"},
-        {"question_id": "ADP-8", "relevance_note": "Made decisions with limited data about LLM feasibility in production search"},
-        {"question_id": "ADP-4", "relevance_note": "Adapted approach mid-project: pivoted from agentic search to LLM-as-Judge"},
-        {"question_id": "INN-4", "relevance_note": "Innovative LLM-as-Judge solution for relevance labeling"},
-        {"question_id": "PS-2", "relevance_note": "Creative pivot: found LLM-as-Judge as low-hanging fruit instead of full agentic search"},
-        {"question_id": "COM-2", "relevance_note": "Persuaded manager to pivot from flashy agentic search to pragmatic LLM-as-Judge"},
-        {"question_id": "IMP-4", "relevance_note": "LLM-as-Judge became production infrastructure adopted across multiple teams"},
-        {"question_id": "INN-6", "relevance_note": "Proposed LLM-as-Judge strategy that became major relevance measurement infrastructure"}
+        {
+          "question_id": "ADP-6",
+          "relevance_note": "Navigated highly ambiguous project with no clear requirements or precedent for LLM in production"
+        },
+        {
+          "question_id": "ADP-8",
+          "relevance_note": "Made decisions with limited data about LLM feasibility in production search"
+        },
+        {
+          "question_id": "ADP-4",
+          "relevance_note": "Adapted approach mid-project: pivoted from agentic search to LLM-as-Judge"
+        },
+        {
+          "question_id": "INN-4",
+          "relevance_note": "Innovative LLM-as-Judge solution for relevance labeling"
+        },
+        {
+          "question_id": "PS-2",
+          "relevance_note": "Creative pivot: found LLM-as-Judge as low-hanging fruit instead of full agentic search"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded manager to pivot from flashy agentic search to pragmatic LLM-as-Judge"
+        },
+        {
+          "question_id": "IMP-4",
+          "relevance_note": "LLM-as-Judge became production infrastructure adopted across multiple teams"
+        },
+        {
+          "question_id": "INN-6",
+          "relevance_note": "Proposed LLM-as-Judge strategy that became major relevance measurement infrastructure"
+        }
       ]
     },
     {
@@ -315,13 +583,32 @@
       "action": "Initially felt frustrated ('innocent' --- followed the process, confirmed with team). Manager provided strong support: affirmed I did nothing wrong, offered to attend VP/Senior Director incident meetings together. Shifted from defensive/adversarial mindset to constructive mode. Led discussions with cross-org teams about their 'informal stakeholder' status. Proposed systematic improvements: regular cross-team alignment mechanism, safety knobs, advance deprecation warnings/archival alerts instead of abrupt removal.",
       "result": "Spent a week on redeployment and RCA reports. Established new cross-team communication norms for model lifecycle management. Transformed a stressful incident into lasting process improvement.",
       "evidence_quotes": [],
-      "principle_tags": ["adaptability", "ownership", "innovation"],
+      "principle_tags": [
+        "adaptability",
+        "ownership",
+        "innovation"
+      ],
       "cross_references": [
-        {"question_id": "ADP-5", "relevance_note": "Handled mistake (model deprecation incident) constructively despite following correct process"},
-        {"question_id": "ADP-11", "relevance_note": "Overcame major setback: model deprecation caused cross-team tickets and VP-level meetings"},
-        {"question_id": "ADP-14", "relevance_note": "Pushed through significant roadblock by shifting from defensive to constructive mindset"},
-        {"question_id": "INN-5", "relevance_note": "Improved model lifecycle process with cross-team alignment, safety knobs, and deprecation warnings"},
-        {"question_id": "OWN-1", "relevance_note": "Took ownership of failure even though process was followed --- led RCA and improvement effort"}
+        {
+          "question_id": "ADP-5",
+          "relevance_note": "Handled mistake (model deprecation incident) constructively despite following correct process"
+        },
+        {
+          "question_id": "ADP-11",
+          "relevance_note": "Overcame major setback: model deprecation caused cross-team tickets and VP-level meetings"
+        },
+        {
+          "question_id": "ADP-14",
+          "relevance_note": "Pushed through significant roadblock by shifting from defensive to constructive mindset"
+        },
+        {
+          "question_id": "INN-5",
+          "relevance_note": "Improved model lifecycle process with cross-team alignment, safety knobs, and deprecation warnings"
+        },
+        {
+          "question_id": "OWN-1",
+          "relevance_note": "Took ownership of failure even though process was followed --- led RCA and improvement effort"
+        }
       ]
     },
     {
@@ -333,13 +620,32 @@
       "action": "Urgently coordinated with backend team to rollback and fix. Post-incident: discussed with manager about being more strategic --- engaging other teams proactively rather than avoiding 'bothering' them. Established new practice: ensure counterpart team's tech lead / senior IC is informed; require at least one approver from the relevant business/team (not just meeting the generic '2 approvers' policy).",
       "result": "Could not fundamentally fix the static compilation issue at the time, but the experience and backend familiarity led to being invited to participate in the major 'declarative artifactory' initiative --- converting static compiled C++ resource/dependency/feature/model loading to dynamic, fundamentally eliminating this class of risk.",
       "evidence_quotes": [],
-      "principle_tags": ["adaptability", "ownership", "execution"],
+      "principle_tags": [
+        "adaptability",
+        "ownership",
+        "execution"
+      ],
       "cross_references": [
-        {"question_id": "PS-6", "relevance_note": "Took calculated risk: proactively did latency optimization without infra team support"},
-        {"question_id": "ADP-5", "relevance_note": "Made a mistake due to unknown tribal knowledge; learned to engage cross-team proactively"},
-        {"question_id": "ADP-15", "relevance_note": "Biggest lesson: always inform counterpart team's tech lead, don't go it alone on infra changes"},
-        {"question_id": "ADP-12", "relevance_note": "Project didn't go as planned --- deployment incident turned into opportunity for declarative artifactory work"},
-        {"question_id": "OWN-6", "relevance_note": "Bold risk: took on infra-boundary work without dedicated support to unblock team"}
+        {
+          "question_id": "PS-6",
+          "relevance_note": "Took calculated risk: proactively did latency optimization without infra team support"
+        },
+        {
+          "question_id": "ADP-5",
+          "relevance_note": "Made a mistake due to unknown tribal knowledge; learned to engage cross-team proactively"
+        },
+        {
+          "question_id": "ADP-15",
+          "relevance_note": "Biggest lesson: always inform counterpart team's tech lead, don't go it alone on infra changes"
+        },
+        {
+          "question_id": "ADP-12",
+          "relevance_note": "Project didn't go as planned --- deployment incident turned into opportunity for declarative artifactory work"
+        },
+        {
+          "question_id": "OWN-6",
+          "relevance_note": "Bold risk: took on infra-boundary work without dedicated support to unblock team"
+        }
       ]
     },
     {
@@ -351,12 +657,28 @@
       "action": "Felt demoralized; shared the feedback with manager who expressed understanding and support. Recognized the lesson: sometimes you must be accountable for things not done by you and outside your familiarity. Developed a better practice/policy for engineer-researcher collaboration (aligned with existing org policy that PRs should be engineer-owned). Proactively reached out to the senior IC to explain the full context and share improvement plan.",
       "result": "Built mutual respect with the senior IC; became good professional friends. Both later became known in the org for rigorous checklist adherence, fast response times, and conscientious on-call work.",
       "evidence_quotes": [],
-      "principle_tags": ["adaptability", "communication", "ownership"],
+      "principle_tags": [
+        "adaptability",
+        "communication",
+        "ownership"
+      ],
       "cross_references": [
-        {"question_id": "ADP-19", "relevance_note": "Most challenging feedback received: senior IC questioned basic engineering quality"},
-        {"question_id": "COM-5", "relevance_note": "Received harsh feedback; responded by proactively reaching out with context and improvement plan"},
-        {"question_id": "ADP-16", "relevance_note": "Proactively sought feedback context from senior IC, turned negative relationship into professional friendship"},
-        {"question_id": "ADP-18", "relevance_note": "Learned from mistake: PRs should always be engineer-owned, improved collaboration process"}
+        {
+          "question_id": "ADP-19",
+          "relevance_note": "Most challenging feedback received: senior IC questioned basic engineering quality"
+        },
+        {
+          "question_id": "COM-5",
+          "relevance_note": "Received harsh feedback; responded by proactively reaching out with context and improvement plan"
+        },
+        {
+          "question_id": "ADP-16",
+          "relevance_note": "Proactively sought feedback context from senior IC, turned negative relationship into professional friendship"
+        },
+        {
+          "question_id": "ADP-18",
+          "relevance_note": "Learned from mistake: PRs should always be engineer-owned, improved collaboration process"
+        }
       ]
     },
     {
@@ -368,13 +690,32 @@
       "action": "Recognized this was not a reasonable 1-engineer, 1-quarter project. Proactively discussed with manager and reached alignment: this was fundamentally a multi-manager 'route dispute' --- each had preferred tech stacks and couldn't convince each other. Shifted approach: instead of personally trying to complete an entire team's quarterly project, provided analysis of pros/cons, required resources, and timelines --- let leaders decide. Corrected director's expectation of 'executable migration plan for next quarter.'",
       "result": "Leadership accepted the analysis; distributed training was deprioritized and removed from next quarter's roadmap. Reinforced lesson about historical tech debt, deep coupling, and that distributed training is not always better (especially for tree models where parallelization bottlenecks are well-documented).",
       "evidence_quotes": [],
-      "principle_tags": ["execution", "communication", "adaptability"],
+      "principle_tags": [
+        "execution",
+        "communication",
+        "adaptability"
+      ],
       "cross_references": [
-        {"question_id": "EXE-8", "relevance_note": "Successfully re-scoped project from 'executable migration plan' to 'analysis for leadership decision'"},
-        {"question_id": "EXE-6", "relevance_note": "Balanced conflicting stakeholder requirements: manager and director preferred different tech stacks"},
-        {"question_id": "EXE-11", "relevance_note": "Prioritized when everything seemed equally important: 2-3 business projects vs. distributed training exploration"},
-        {"question_id": "PS-3", "relevance_note": "Prioritized tasks on high-pressure project by providing analysis rather than attempting execution alone"},
-        {"question_id": "COM-2", "relevance_note": "Persuaded leadership to deprioritize distributed training based on resource/feasibility analysis"}
+        {
+          "question_id": "EXE-8",
+          "relevance_note": "Successfully re-scoped project from 'executable migration plan' to 'analysis for leadership decision'"
+        },
+        {
+          "question_id": "EXE-6",
+          "relevance_note": "Balanced conflicting stakeholder requirements: manager and director preferred different tech stacks"
+        },
+        {
+          "question_id": "EXE-11",
+          "relevance_note": "Prioritized when everything seemed equally important: 2-3 business projects vs. distributed training exploration"
+        },
+        {
+          "question_id": "PS-3",
+          "relevance_note": "Prioritized tasks on high-pressure project by providing analysis rather than attempting execution alone"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded leadership to deprioritize distributed training based on resource/feasibility analysis"
+        }
       ]
     },
     {
@@ -386,12 +727,28 @@
       "action": "Spent significant time explaining the confounder to PMs; tried slides but found concrete examples most effective. Used relatable analogy: 'If we're both sellers and the system randomly gives us different treatments, but our products appear on the same page, neither our individual comparison nor our outcomes are valid --- qualified sellers should always receive the same treatment.' Worked through the problem to reach a compromise: instead of buyer-ID-based splits, run different treatments by time-of-day or day-of-week with 100% traffic.",
       "result": "PM acknowledged the problem's validity. Implemented time-based experiment design as a workable compromise for seller-side testing.",
       "evidence_quotes": [],
-      "principle_tags": ["communication", "problem_solving", "collaboration"],
+      "principle_tags": [
+        "communication",
+        "problem_solving",
+        "collaboration"
+      ],
       "cross_references": [
-        {"question_id": "COM-1", "relevance_note": "Explained complex A/B testing confounder to non-technical PM using concrete analogies"},
-        {"question_id": "PS-11", "relevance_note": "Used data and statistical reasoning to identify critical experiment design flaw"},
-        {"question_id": "PS-2", "relevance_note": "Creative compromise: time-based experiment design instead of buyer-ID splits for seller testing"},
-        {"question_id": "COM-2", "relevance_note": "Persuaded PM to change experiment approach based on technical evidence of confounder"}
+        {
+          "question_id": "COM-1",
+          "relevance_note": "Explained complex A/B testing confounder to non-technical PM using concrete analogies"
+        },
+        {
+          "question_id": "PS-11",
+          "relevance_note": "Used data and statistical reasoning to identify critical experiment design flaw"
+        },
+        {
+          "question_id": "PS-2",
+          "relevance_note": "Creative compromise: time-based experiment design instead of buyer-ID splits for seller testing"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded PM to change experiment approach based on technical evidence of confounder"
+        }
       ]
     },
     {
@@ -407,18 +764,103 @@
         "Blanket new-seller penalties could be a bigger legal risk than the fraud they aim to prevent",
         "Escalation goal was not 'let me win' but ensuring the decision was made with full information"
       ],
-      "principle_tags": ["ethics", "ownership", "communication", "problem_solving"],
+      "principle_tags": [
+        "ethics",
+        "ownership",
+        "communication",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "IMP-11", "relevance_note": "Direct answer: ethical dilemma between maintaining existing system (easier) vs. advocating for fairness to new sellers despite opposition"},
-        {"question_id": "IMP-14", "relevance_note": "Researched platform liability and privacy/security obligations to build compliance case"},
-        {"question_id": "IMP-15", "relevance_note": "Advocated for responsible practices: precision modeling over blanket penalties that harm new sellers"},
-        {"question_id": "COM-2", "relevance_note": "Multi-phase persuasion: data research, industry cases, legal framework, then escalation when working-level persuasion failed"},
-        {"question_id": "PS-1", "relevance_note": "Difficult technical decision: seller-only vs. seller-listing cross-modeling, with non-obvious compliance and business implications"}
+        {
+          "question_id": "IMP-11",
+          "relevance_note": "Direct answer: ethical dilemma between maintaining existing system (easier) vs. advocating for fairness to new sellers despite opposition"
+        },
+        {
+          "question_id": "IMP-14",
+          "relevance_note": "Researched platform liability and privacy/security obligations to build compliance case"
+        },
+        {
+          "question_id": "IMP-15",
+          "relevance_note": "Advocated for responsible practices: precision modeling over blanket penalties that harm new sellers"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Multi-phase persuasion: data research, industry cases, legal framework, then escalation when working-level persuasion failed"
+        },
+        {
+          "question_id": "PS-1",
+          "relevance_note": "Difficult technical decision: seller-only vs. seller-listing cross-modeling, with non-obvious compliance and business implications"
+        }
       ],
       "defense_qa": [
-        {"q": "How do you view researcher's opposition?", "a": "His concern was legitimate; buyer experience IS core. Disagreement was not about whether to protect buyers, but HOW. Blanket new-seller penalties are a lazy solution; precision modeling truly protects buyers without harming the ecosystem."},
-        {"q": "Was your escalation timing right?", "a": "Did thorough research first, attempted working-level persuasion, only escalated after exhausting personal effort."},
-        {"q": "What if leadership chose researcher's approach?", "a": "Escalation goal was not 'let me win' but ensuring the decision was made with full information. Would disagree and commit, but ensured an informed decision process."}
+        {
+          "q": "How do you view researcher's opposition?",
+          "a": "His concern was legitimate; buyer experience IS core. Disagreement was not about whether to protect buyers, but HOW. Blanket new-seller penalties are a lazy solution; precision modeling truly protects buyers without harming the ecosystem."
+        },
+        {
+          "q": "Was your escalation timing right?",
+          "a": "Did thorough research first, attempted working-level persuasion, only escalated after exhausting personal effort."
+        },
+        {
+          "q": "What if leadership chose researcher's approach?",
+          "a": "Escalation goal was not 'let me win' but ensuring the decision was made with full information. Would disagree and commit, but ensured an informed decision process."
+        }
+      ]
+    },
+    {
+      "id": "EX-21",
+      "title": "Tech Debt Balance --- Declarative Artifactory Proof of Concept",
+      "source_project": "Search Ranking / Feature Delivery",
+      "situation": "Developing query triage and regex-based model features that needed to deploy on the team's new declarative artifactory system. But the system was repeatedly delayed, blocking feature delivery with no clear timeline.",
+      "task": "Find a path that unblocks feature delivery without creating a throwaway workaround. Core question: which values of the declarative system can be captured now, so the work remains aligned with long-term architecture?",
+      "action": "Phase 1 --- Technical insight. Deep research revealed the declarative system's architectural essence: you can hand-write the JSON ranking rule expression and string that would otherwise require Scala/C++ repo builds. The real blockers were storage, versioning, and deployment infrastructure --- not generating the expression itself. Phase 2 --- Solution design and validation. Designed approach using eBay's internal caching system for storage, injecting named expressions as parameters into the search engine. Key technical challenge: generating reliable code outside the large search system context and safely injecting it. Built parity tests and tooling proving hand-generated named expressions were identical to profiling-layer generated ones. Phase 3 --- Driving adoption. Demoed equivalence to the team. Declarative team had no objections --- parity test provided hard evidence. Solution went live, enabling rapid relevance issue classification and near-realtime fixes.",
+      "result": "Feature shipped on time with business win, not blocked for a year. When declarative system finally became ready, migration was smooth --- core expression implementation was already consistent, migration only needed store and versioning robustness. The interim solution effectively became early validation for the declarative system.",
+      "evidence_quotes": [
+        "Tech debt is not a fast-vs-clean binary --- it is whether you truly understand the system's architectural essence",
+        "Identified boundary between core (named expr generation) and peripheral (storage/versioning/deployment infrastructure)",
+        "Parity test provided hard evidence that hand-generated named expr was identical to profiling-layer generated ones"
+      ],
+      "principle_tags": [
+        "problem_solving",
+        "innovation",
+        "impact",
+        "ownership"
+      ],
+      "cross_references": [
+        {
+          "question_id": "IMP-3",
+          "relevance_note": "Direct answer: balanced tech debt with feature delivery by identifying architectural boundary between core expression generation and peripheral infrastructure"
+        },
+        {
+          "question_id": "IMP-4",
+          "relevance_note": "Improved the delivery process by creating a caching-based proof of concept that also served as early validation for the declarative system"
+        },
+        {
+          "question_id": "PS-1",
+          "relevance_note": "Difficult technical decision: build interim solution vs. wait for delayed infrastructure, with non-obvious insight that core and peripheral could be separated"
+        },
+        {
+          "question_id": "INN-4",
+          "relevance_note": "Innovative solution: used caching system + param injection to replicate the declarative system's core value without its full infrastructure"
+        },
+        {
+          "question_id": "IMP-7",
+          "relevance_note": "Future-proofing: designed interim solution aligned with long-term architecture so migration was incremental, not a rewrite"
+        }
+      ],
+      "defense_qa": [
+        {
+          "q": "Was not this just a workaround that added tech debt?",
+          "a": "No --- the key insight was separating core from peripheral. The expression generation (core) was identical to what the declarative system would produce. Only storage/versioning (peripheral) differed. Migration was incremental, not a rewrite."
+        },
+        {
+          "q": "How did you convince the team this was not throwaway code?",
+          "a": "Built parity tests proving hand-generated output was identical to profiling-layer output. Hard evidence, not promises. The declarative team had no objections because the proof was mechanical."
+        },
+        {
+          "q": "What if the declarative system had a fundamentally different architecture?",
+          "a": "The research phase specifically validated architectural alignment. If the core expression format had been different, would have flagged it as a real incompatibility rather than proceeding with an incompatible interim solution."
+        }
       ]
     }
   ],
@@ -428,10 +870,19 @@
       "title": "Brand Recall Disagreement Resolution",
       "source": "blog_proj Teamwork Q1",
       "linked_question_id": "COL-1",
-      "principle_tags": ["collaboration", "problem_solving"],
+      "principle_tags": [
+        "collaboration",
+        "problem_solving"
+      ],
       "cross_references": [
-        {"question_id": "COL-1", "relevance_note": "Direct answer: resolved disagreement with data-driven analysis showing 15% latency increase, proposed query rewrite alternative"},
-        {"question_id": "PS-1", "relevance_note": "Technical decision between compound key lookup vs query rewrite, chose based on latency analysis"}
+        {
+          "question_id": "COL-1",
+          "relevance_note": "Direct answer: resolved disagreement with data-driven analysis showing 15% latency increase, proposed query rewrite alternative"
+        },
+        {
+          "question_id": "PS-1",
+          "relevance_note": "Technical decision between compound key lookup vs query rewrite, chose based on latency analysis"
+        }
       ]
     },
     {
@@ -439,10 +890,19 @@
       "title": "Code Review Standards Alignment",
       "source": "blog_proj Teamwork Q2",
       "linked_question_id": "COL-2",
-      "principle_tags": ["collaboration", "leadership"],
+      "principle_tags": [
+        "collaboration",
+        "leadership"
+      ],
       "cross_references": [
-        {"question_id": "COL-2", "relevance_note": "Direct answer: addressed repetitive review requests constructively, established shared guidelines"},
-        {"question_id": "LDR-4", "relevance_note": "Set clear standards for code review process, improving team-wide efficiency"}
+        {
+          "question_id": "COL-2",
+          "relevance_note": "Direct answer: addressed repetitive review requests constructively, established shared guidelines"
+        },
+        {
+          "question_id": "LDR-4",
+          "relevance_note": "Set clear standards for code review process, improving team-wide efficiency"
+        }
       ]
     },
     {
@@ -450,11 +910,24 @@
       "title": "Cross-Functional LLM Ad Relevance Pipeline",
       "source": "blog_proj Teamwork Q3",
       "linked_question_id": "COL-3",
-      "principle_tags": ["collaboration", "innovation", "execution"],
+      "principle_tags": [
+        "collaboration",
+        "innovation",
+        "execution"
+      ],
       "cross_references": [
-        {"question_id": "COL-3", "relevance_note": "Direct answer: collaborated with ads and DS teams on LLM-based relevance pipeline"},
-        {"question_id": "COL-5", "relevance_note": "Aligned ads team's pass-through rate goal with overall VP-level relevance objectives"},
-        {"question_id": "INN-4", "relevance_note": "Innovative LLM-powered relevance judgment pipeline for rapid A/B testing"}
+        {
+          "question_id": "COL-3",
+          "relevance_note": "Direct answer: collaborated with ads and DS teams on LLM-based relevance pipeline"
+        },
+        {
+          "question_id": "COL-5",
+          "relevance_note": "Aligned ads team's pass-through rate goal with overall VP-level relevance objectives"
+        },
+        {
+          "question_id": "INN-4",
+          "relevance_note": "Innovative LLM-powered relevance judgment pipeline for rapid A/B testing"
+        }
       ]
     },
     {
@@ -462,10 +935,19 @@
       "title": "Team Communication via Prediction Market Meetings",
       "source": "blog_proj Teamwork Q4",
       "linked_question_id": "COL-4",
-      "principle_tags": ["collaboration", "leadership"],
+      "principle_tags": [
+        "collaboration",
+        "leadership"
+      ],
       "cross_references": [
-        {"question_id": "COL-4", "relevance_note": "Direct answer: introduced prediction market meetings and daily standups to improve communication"},
-        {"question_id": "INN-14", "relevance_note": "Established new meeting format (prediction markets) that improved team productivity by 30%"}
+        {
+          "question_id": "COL-4",
+          "relevance_note": "Direct answer: introduced prediction market meetings and daily standups to improve communication"
+        },
+        {
+          "question_id": "INN-14",
+          "relevance_note": "Established new meeting format (prediction markets) that improved team productivity by 30%"
+        }
       ]
     }
   ]
