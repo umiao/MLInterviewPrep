@@ -7,11 +7,11 @@
       "2026_03_26_Doordash面试准备/4. Conversational Search.md",
       "User-provided Discord messages (2026-03-24)"
     ],
-    "total_examples": 19,
+    "total_examples": 20,
     "date_created": "2026-03-24",
     "last_updated": "2026-03-25",
     "task_id": "T-P0-30",
-    "update_task_id": "T-P0-44"
+    "update_task_id": "T-P0-46"
   },
   "examples": [
     {
@@ -392,6 +392,33 @@
         {"question_id": "PS-11", "relevance_note": "Used data and statistical reasoning to identify critical experiment design flaw"},
         {"question_id": "PS-2", "relevance_note": "Creative compromise: time-based experiment design instead of buyer-ID splits for seller testing"},
         {"question_id": "COM-2", "relevance_note": "Persuaded PM to change experiment approach based on technical evidence of confounder"}
+      ]
+    },
+    {
+      "id": "EX-20",
+      "title": "Seller Risk Modeling Fairness --- Ethical Dilemma and Escalation",
+      "source_project": "Search Ranking / Risk Guardrails",
+      "situation": "As search ranking MLE, while reviewing risk guardrails, discovered that the sell risk model was systematically unfair to new sellers. New sellers received high risk scores immediately after registration with zero transactions, creating a vicious cycle where they could never build a reputation.",
+      "task": "Believed the approach needed to shift from seller-only modeling to seller-listing cross-modeling, allowing new sellers to be fairly evaluated through listing quality. This direction faced strong opposition from the principal researcher who designed the original system.",
+      "action": "Phase 1 --- Initial conflict at design review. Researcher framed the issue as trading revenue for buyer experience and argued for raising the seller bar. Understood his concern but believed this framing ignored a critical fairness problem. Phase 2 --- Deep research. Used PayPal and other industry cases to demonstrate the tradeoff is part of compliance: how much false-positive transaction blocking are you willing to accept to prevent one real fraud? Pursuing absolute avoidance essentially requires whitelist mechanisms, making business impossible. Researched platform liability legal framework; found platform's core obligations focus on reporting mechanisms, info collection, takedown procedures, and privacy protections. No evidence supported blanket unfriendly mechanisms toward new sellers, which could actually constitute a bigger legal risk. Phase 3 --- Escalation. Brought research to revision design phase to convince researcher, but failed. Judged the disagreement exceeded pure technical scope. After aligning with manager, escalated to senior director and higher leadership.",
+      "result": "Leadership referenced the research and researcher's concerns, collaborated with legal department, and ultimately confirmed the precision modeling direction. This direction also aligned with the company's strategic push into recommerce.",
+      "evidence_quotes": [
+        "Sell risk model systematically unfair to new sellers: high risk score with zero transactions = vicious cycle",
+        "Blanket new-seller penalties could be a bigger legal risk than the fraud they aim to prevent",
+        "Escalation goal was not 'let me win' but ensuring the decision was made with full information"
+      ],
+      "principle_tags": ["ethics", "ownership", "communication", "problem_solving"],
+      "cross_references": [
+        {"question_id": "IMP-11", "relevance_note": "Direct answer: ethical dilemma between maintaining existing system (easier) vs. advocating for fairness to new sellers despite opposition"},
+        {"question_id": "IMP-14", "relevance_note": "Researched platform liability and privacy/security obligations to build compliance case"},
+        {"question_id": "IMP-15", "relevance_note": "Advocated for responsible practices: precision modeling over blanket penalties that harm new sellers"},
+        {"question_id": "COM-2", "relevance_note": "Multi-phase persuasion: data research, industry cases, legal framework, then escalation when working-level persuasion failed"},
+        {"question_id": "PS-1", "relevance_note": "Difficult technical decision: seller-only vs. seller-listing cross-modeling, with non-obvious compliance and business implications"}
+      ],
+      "defense_qa": [
+        {"q": "How do you view researcher's opposition?", "a": "His concern was legitimate; buyer experience IS core. Disagreement was not about whether to protect buyers, but HOW. Blanket new-seller penalties are a lazy solution; precision modeling truly protects buyers without harming the ecosystem."},
+        {"q": "Was your escalation timing right?", "a": "Did thorough research first, attempted working-level persuasion, only escalated after exhausting personal effort."},
+        {"q": "What if leadership chose researcher's approach?", "a": "Escalation goal was not 'let me win' but ensuring the decision was made with full information. Would disagree and commit, but ensured an informed decision process."}
       ]
     }
   ],
