@@ -11,7 +11,34 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: All hooks in helixos settings.json use bare `python` which resolves to the Windows Store stub (exit 49) on this machine. MLInterviewPrep already has the fix applied.
+
+Actions needed:
+1. Copy .claude/hooks/setup_python_env.sh from MLInterviewPrep to helixos (writes Anaconda to CLAUDE_ENV_FILE)
+2. Update helixos .claude/settings.json: replace all `python \"$CLAUDE_PROJECT_DIR/...\"` with `/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.../...\"` in ALL hook commands
+3. Add SessionStart hook entry: {\"type\": \"command\", \"command\": \"bash \\\"$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh\\\"\", \"timeout\": 10}
+
+Reference: MLInterviewPrep/.claude/settings.json (correct format) and MLInterviewPrep/.claude/hooks/setup_python_env.sh (source file to copy)
+
+Verification: After fix, run `/c/Anaconda/python.exe .claude/hooks/plan_mode.py status` to confirm hooks work.
+
 ### P2 -- Nice to Have
+
+#### T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: MLInterviewPrep CLAUDE.md Prohibited Actions has this rule (lines 62-66):
+
+  Never use bare `python` in hook commands or scripts. The Windows Store stub exits with code 49. Use `/c/Anaconda/python.exe` (absolute path) in settings.json hooks. The SessionStart hook setup_python_env.sh injects Anaconda into PATH for Bash tool calls via CLAUDE_ENV_FILE.
+
+helixos CLAUDE.md has the lesson in LESSONS.md (line 266) but not in Prohibited Actions. Add the rule to the Prohibited Actions section to prevent recurrence.
+
+Should be done AFTER [SYNC] helixos: Fix broken hooks task.
 
 ### P3 -- Stretch Goals
 

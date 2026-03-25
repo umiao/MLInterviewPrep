@@ -57,3 +57,9 @@ htmlcov/
 # Misc
 *.log
 /tmp
+
+# Runtime databases
+interview_prep.db
+
+# Claude worktrees
+.claude/worktrees/
