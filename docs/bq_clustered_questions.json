@@ -1,0 +1,243 @@
+{
+  "metadata": {
+    "source": "blog_proj/source/_drafts/Behavioral-Interview-Questions-Crack.md",
+    "total_questions": 115,
+    "original_categories": 23,
+    "clustered_categories": 9,
+    "date_created": "2026-03-24",
+    "task_id": "T-P0-29"
+  },
+  "categories": [
+    {
+      "id": "ownership",
+      "name": "Ownership & Accountability",
+      "description": "Taking responsibility, going above and beyond, bold risk-taking, demonstrating resilience when things go wrong",
+      "questions": [
+        {"id": "OWN-1", "text": "Give an example of a time when you took complete ownership of a failure.", "original_category": "Ownership and Accountability"},
+        {"id": "OWN-2", "text": "Describe a situation where you went above and beyond to meet a deadline.", "original_category": "Ownership and Accountability"},
+        {"id": "OWN-3", "text": "How do you handle feedback on your own performance?", "original_category": "Ownership and Accountability"},
+        {"id": "OWN-4", "text": "Tell me about a time when you had to take responsibility for a team's performance.", "original_category": "Ownership and Accountability"},
+        {"id": "OWN-5", "text": "How do you ensure that you deliver quality work consistently?", "original_category": "Ownership and Accountability"},
+        {"id": "OWN-6", "text": "Tell me about a time when you took a bold risk at work.", "original_category": "Meta Values Alignment"},
+        {"id": "OWN-7", "text": "How have you demonstrated resilience in your career?", "original_category": "Meta Values Alignment"},
+        {"id": "OWN-8", "text": "Describe a situation where you were moving fast and made a mistake.", "original_category": "Meta Values Alignment"},
+        {"id": "OWN-9", "text": "Explain a time when you had to move fast and innovate without all the information.", "original_category": "Meta Values Alignment"},
+        {"id": "OWN-10", "text": "How do you demonstrate Meta's value of focusing on long-term impact?", "original_category": "Meta Values Alignment"},
+        {"id": "OWN-11", "text": "Tell me about a time when you took ownership of a challenging situation.", "original_category": "Technical Leadership"}
+      ]
+    },
+    {
+      "id": "leadership",
+      "name": "Leadership & People Development",
+      "description": "Mentoring, coaching, empowering others, delegation, handling performance issues, setting goals",
+      "questions": [
+        {"id": "LDR-1", "text": "Describe a time when you coached or mentored someone.", "original_category": "Leadership and Mentorship"},
+        {"id": "LDR-2", "text": "How do you handle performance issues with junior team members?", "original_category": "Leadership and Mentorship"},
+        {"id": "LDR-3", "text": "Tell me about a time you had to make a tough call as a leader.", "original_category": "Leadership and Mentorship"},
+        {"id": "LDR-4", "text": "Explain how you handle setting goals for yourself and others.", "original_category": "Leadership and Mentorship"},
+        {"id": "LDR-5", "text": "Describe a time when you empowered someone on your team.", "original_category": "Leadership and Mentorship"},
+        {"id": "LDR-6", "text": "How do you decide when to delegate vs. handle tasks yourself?", "original_category": "Delegation and Empowerment"},
+        {"id": "LDR-7", "text": "Tell me about a time when you successfully empowered a team member.", "original_category": "Delegation and Empowerment"},
+        {"id": "LDR-8", "text": "Describe a situation where you had to trust someone else to make a key decision.", "original_category": "Delegation and Empowerment"},
+        {"id": "LDR-9", "text": "How do you ensure quality while delegating responsibilities?", "original_category": "Delegation and Empowerment"},
+        {"id": "LDR-10", "text": "Give an example of a time when you built someone's confidence through delegation.", "original_category": "Delegation and Empowerment"},
+        {"id": "LDR-11", "text": "Describe a time when you helped a struggling team member improve their performance.", "original_category": "Teamwork and Collaboration"}
+      ]
+    },
+    {
+      "id": "collaboration",
+      "name": "Teamwork & Cross-Functional Collaboration",
+      "description": "Working across teams, resolving disagreements, aligning stakeholders, building consensus across organizational boundaries",
+      "questions": [
+        {"id": "COL-1", "text": "Describe a time when you disagreed with a team member. How did you resolve it?", "original_category": "Teamwork and Collaboration", "has_answer": true},
+        {"id": "COL-2", "text": "How do you handle conflicts within a team?", "original_category": "Teamwork and Collaboration", "has_answer": true},
+        {"id": "COL-3", "text": "Tell me about a time you worked with a cross-functional team to achieve a common goal.", "original_category": "Teamwork and Collaboration", "has_answer": true},
+        {"id": "COL-4", "text": "How do you ensure effective communication within your team?", "original_category": "Teamwork and Collaboration", "has_answer": true},
+        {"id": "COL-5", "text": "How do you align different teams or stakeholders on a shared goal?", "original_category": "Cross-Functional Communication"},
+        {"id": "COL-6", "text": "Describe a time when you had to communicate a complex technical concept to an executive.", "original_category": "Cross-Functional Communication"},
+        {"id": "COL-7", "text": "Tell me about a project where you worked closely with both technical and non-technical teams.", "original_category": "Cross-Functional Communication"},
+        {"id": "COL-8", "text": "Describe a time when you managed expectations for multiple stakeholders.", "original_category": "Cross-Functional Communication"},
+        {"id": "COL-9", "text": "How do you handle competing priorities from different departments?", "original_category": "Cross-Functional Communication"}
+      ]
+    },
+    {
+      "id": "communication",
+      "name": "Communication & Influence",
+      "description": "Persuading others, delivering difficult messages, explaining technical concepts, ensuring ideas are heard, handling disagreement on feedback",
+      "questions": [
+        {"id": "COM-1", "text": "How do you explain complex technical details to a non-technical stakeholder?", "original_category": "Communication and Influence"},
+        {"id": "COM-2", "text": "Describe a time when you had to persuade others to change direction.", "original_category": "Communication and Influence"},
+        {"id": "COM-3", "text": "Tell me about a time when you had to deliver bad news to a team.", "original_category": "Communication and Influence"},
+        {"id": "COM-4", "text": "How do you ensure your ideas and opinions are heard within a team?", "original_category": "Communication and Influence"},
+        {"id": "COM-5", "text": "Describe a time when you received feedback you disagreed with. How did you respond?", "original_category": "Communication and Influence"}
+      ]
+    },
+    {
+      "id": "problem_solving",
+      "name": "Problem Solving & Data-Driven Decisions",
+      "description": "Analytical thinking, creative solutions, using data for decisions, risk assessment, balancing risk and reward",
+      "questions": [
+        {"id": "PS-1", "text": "Walk me through a difficult technical decision you had to make.", "original_category": "Problem Solving and Decision Making"},
+        {"id": "PS-2", "text": "Describe a time when you solved a problem creatively.", "original_category": "Problem Solving and Decision Making"},
+        {"id": "PS-3", "text": "How do you prioritize tasks on a high-pressure project?", "original_category": "Problem Solving and Decision Making"},
+        {"id": "PS-4", "text": "Give an example of a time when you analyzed a complex problem and broke it down.", "original_category": "Problem Solving and Decision Making"},
+        {"id": "PS-5", "text": "Describe a time when you had multiple options and had to choose one.", "original_category": "Problem Solving and Decision Making"},
+        {"id": "PS-6", "text": "Describe a time when you took a calculated risk. What was the outcome?", "original_category": "Risk Assessment and Management"},
+        {"id": "PS-7", "text": "How do you balance risk and reward in your decision-making?", "original_category": "Risk Assessment and Management"},
+        {"id": "PS-8", "text": "Tell me about a time when a project you led involved a high degree of uncertainty.", "original_category": "Risk Assessment and Management"},
+        {"id": "PS-9", "text": "Give an example of a time you had to act on incomplete information.", "original_category": "Risk Assessment and Management"},
+        {"id": "PS-10", "text": "Describe a situation where you had to make a tough trade-off to keep a project moving forward.", "original_category": "Risk Assessment and Management"},
+        {"id": "PS-11", "text": "Describe a time when you used data to make a key decision.", "original_category": "Data-Driven Decision Making"},
+        {"id": "PS-12", "text": "How do you ensure you're making data-driven choices when data is limited?", "original_category": "Data-Driven Decision Making"},
+        {"id": "PS-13", "text": "Give an example of how data changed the course of a project you were working on.", "original_category": "Data-Driven Decision Making"},
+        {"id": "PS-14", "text": "How do you balance data insights with intuition in your decision-making process?", "original_category": "Data-Driven Decision Making"},
+        {"id": "PS-15", "text": "Tell me about a time when you identified an issue through data analysis alone.", "original_category": "Data-Driven Decision Making"}
+      ]
+    },
+    {
+      "id": "innovation",
+      "name": "Innovation & Strategic Thinking",
+      "description": "Identifying improvements, proposing new approaches, scaling solutions, process optimization, challenging status quo",
+      "questions": [
+        {"id": "INN-1", "text": "Describe a time when you identified an opportunity for improvement.", "original_category": "Initiative and Innovation"},
+        {"id": "INN-2", "text": "Tell me about a project or idea you started on your own.", "original_category": "Initiative and Innovation"},
+        {"id": "INN-3", "text": "How do you decide which new technologies to experiment with?", "original_category": "Initiative and Innovation"},
+        {"id": "INN-4", "text": "Describe a time when you implemented an innovative solution.", "original_category": "Initiative and Innovation"},
+        {"id": "INN-5", "text": "Tell me about a time when you improved an inefficient process.", "original_category": "Initiative and Innovation"},
+        {"id": "INN-6", "text": "What's a new process or strategy you proposed that led to a major improvement?", "original_category": "Innovation and Strategic Thinking"},
+        {"id": "INN-7", "text": "How do you ensure you're not just solving the immediate problem but also thinking strategically?", "original_category": "Innovation and Strategic Thinking"},
+        {"id": "INN-8", "text": "Describe a time when you questioned a traditional approach and proposed something new.", "original_category": "Innovation and Strategic Thinking"},
+        {"id": "INN-9", "text": "Tell me about a time when you developed a creative solution to a complex problem.", "original_category": "Innovation and Strategic Thinking"},
+        {"id": "INN-10", "text": "How do you identify areas for innovation within an existing project?", "original_category": "Innovation and Strategic Thinking"},
+        {"id": "INN-11", "text": "Explain how you've improved or optimized an existing system.", "original_category": "Scaling and Process Improvement"},
+        {"id": "INN-12", "text": "Describe a time when you scaled a solution to support higher traffic or a larger audience.", "original_category": "Scaling and Process Improvement"},
+        {"id": "INN-13", "text": "How do you approach improving a well-established but inefficient process?", "original_category": "Scaling and Process Improvement"},
+        {"id": "INN-14", "text": "Tell me about a process you put in place that improved the team's productivity.", "original_category": "Scaling and Process Improvement"},
+        {"id": "INN-15", "text": "Give an example of when you helped establish best practices for your team.", "original_category": "Scaling and Process Improvement"}
+      ]
+    },
+    {
+      "id": "adaptability",
+      "name": "Adaptability & Resilience",
+      "description": "Handling ambiguity, learning from failures, adjusting to change, navigating unclear requirements, bouncing back from setbacks",
+      "questions": [
+        {"id": "ADP-1", "text": "Tell me about a time when you had to quickly learn a new technology or skill.", "original_category": "Adaptability and Learning"},
+        {"id": "ADP-2", "text": "Describe a time you had to adjust to a significant change in a project.", "original_category": "Adaptability and Learning"},
+        {"id": "ADP-3", "text": "How do you handle rapidly changing requirements?", "original_category": "Adaptability and Learning"},
+        {"id": "ADP-4", "text": "Explain a situation where you had to adapt your approach mid-project.", "original_category": "Adaptability and Learning"},
+        {"id": "ADP-5", "text": "Describe a time when you made a mistake. How did you handle it, and what did you learn?", "original_category": "Adaptability and Learning"},
+        {"id": "ADP-6", "text": "Tell me about a project that started with a lot of ambiguity. How did you navigate it?", "original_category": "Handling Ambiguity"},
+        {"id": "ADP-7", "text": "How do you approach a project with incomplete requirements or uncertain outcomes?", "original_category": "Handling Ambiguity"},
+        {"id": "ADP-8", "text": "Describe a situation where you had to make decisions with limited data.", "original_category": "Handling Ambiguity"},
+        {"id": "ADP-9", "text": "How do you establish clear goals and metrics for an unclear project?", "original_category": "Handling Ambiguity"},
+        {"id": "ADP-10", "text": "Describe a time when you created a plan in a highly ambiguous environment.", "original_category": "Handling Ambiguity"},
+        {"id": "ADP-11", "text": "Describe a major setback you experienced and how you overcame it.", "original_category": "Learning from Failures"},
+        {"id": "ADP-12", "text": "Tell me about a project you led that didn't go as planned. What would you do differently?", "original_category": "Learning from Failures"},
+        {"id": "ADP-13", "text": "How do you handle failure, and how do you encourage resilience within your team?", "original_category": "Learning from Failures"},
+        {"id": "ADP-14", "text": "Describe a time when you faced a significant roadblock and how you pushed through it.", "original_category": "Learning from Failures"},
+        {"id": "ADP-15", "text": "What's the biggest lesson you've learned from a failed project?", "original_category": "Learning from Failures"},
+        {"id": "ADP-16", "text": "Describe a time when you sought feedback on your performance.", "original_category": "Personal Growth"},
+        {"id": "ADP-17", "text": "How do you identify areas for your own growth, especially at a senior level?", "original_category": "Personal Growth"},
+        {"id": "ADP-18", "text": "Tell me about a recent mistake you made and what you learned from it.", "original_category": "Personal Growth"},
+        {"id": "ADP-19", "text": "What's the most challenging piece of feedback you've received?", "original_category": "Personal Growth"},
+        {"id": "ADP-20", "text": "How do you stay motivated and engaged in your work?", "original_category": "Personal Growth"}
+      ]
+    },
+    {
+      "id": "execution",
+      "name": "Execution & Project Management",
+      "description": "Managing large-scale projects, handling deadlines, re-scoping, recovering from setbacks, leading technical projects end-to-end",
+      "questions": [
+        {"id": "EXE-1", "text": "Describe a time when you led a technical project from start to finish.", "original_category": "Technical Leadership"},
+        {"id": "EXE-2", "text": "How do you handle setbacks in project timelines?", "original_category": "Technical Leadership"},
+        {"id": "EXE-3", "text": "Explain a complex technical problem you solved and your approach.", "original_category": "Technical Leadership"},
+        {"id": "EXE-4", "text": "How do you stay updated with industry trends and incorporate them into your work?", "original_category": "Technical Leadership"},
+        {"id": "EXE-5", "text": "Tell me about a time when you managed a large-scale project with tight deadlines.", "original_category": "Complex Project Management"},
+        {"id": "EXE-6", "text": "Describe a project where you had to balance conflicting stakeholder requirements.", "original_category": "Complex Project Management"},
+        {"id": "EXE-7", "text": "How do you handle project delays when you're dependent on other teams?", "original_category": "Complex Project Management"},
+        {"id": "EXE-8", "text": "Give an example of a time when you needed to re-scope a project.", "original_category": "Complex Project Management"},
+        {"id": "EXE-9", "text": "Describe a time when you dealt with a major project setback and how you recovered.", "original_category": "Complex Project Management"},
+        {"id": "EXE-10", "text": "Describe a time when you had to manage multiple deadlines for high-stakes projects.", "original_category": "Handling Competing Deadlines"},
+        {"id": "EXE-11", "text": "How do you prioritize tasks when everything seems equally important?", "original_category": "Handling Competing Deadlines"},
+        {"id": "EXE-12", "text": "Tell me about a time when you had to shift priorities at the last minute.", "original_category": "Handling Competing Deadlines"},
+        {"id": "EXE-13", "text": "How do you balance immediate tasks with longer-term projects?", "original_category": "Handling Competing Deadlines"},
+        {"id": "EXE-14", "text": "Give an example of how you've managed your time effectively to meet competing deadlines.", "original_category": "Handling Competing Deadlines"}
+      ]
+    },
+    {
+      "id": "impact",
+      "name": "Impact & Long-Term Vision",
+      "description": "Product thinking, user impact, future-proofing, sustainability, ethical considerations, balancing short-term and long-term",
+      "questions": [
+        {"id": "IMP-1", "text": "Tell me about a product feature you designed or improved. How did it impact users?", "original_category": "Product Thinking and Impact"},
+        {"id": "IMP-2", "text": "Describe a time when you prioritized user experience in a technical decision.", "original_category": "Product Thinking and Impact"},
+        {"id": "IMP-3", "text": "How do you balance technical debt with feature delivery?", "original_category": "Product Thinking and Impact"},
+        {"id": "IMP-4", "text": "Give an example of a time you improved a process or system that added significant value.", "original_category": "Product Thinking and Impact"},
+        {"id": "IMP-5", "text": "How do you approach defining success for a project?", "original_category": "Product Thinking and Impact"},
+        {"id": "IMP-6", "text": "How do you ensure the long-term maintainability of the systems you build?", "original_category": "Long-Term Impact"},
+        {"id": "IMP-7", "text": "Tell me about a time when you prioritized future-proofing over short-term results.", "original_category": "Long-Term Impact"},
+        {"id": "IMP-8", "text": "Describe a situation where you designed a solution to be scalable and sustainable.", "original_category": "Long-Term Impact"},
+        {"id": "IMP-9", "text": "How do you weigh short-term gains against long-term goals?", "original_category": "Long-Term Impact"},
+        {"id": "IMP-10", "text": "Give an example of a project where you focused on long-term impact.", "original_category": "Long-Term Impact"},
+        {"id": "IMP-11", "text": "Describe a time when you faced an ethical dilemma in your work.", "original_category": "Ethics and Responsible Innovation"},
+        {"id": "IMP-12", "text": "How do you ensure your work aligns with Meta's commitment to responsible innovation?", "original_category": "Ethics and Responsible Innovation"},
+        {"id": "IMP-13", "text": "Tell me about a time when you had to make a tough ethical decision on a project.", "original_category": "Ethics and Responsible Innovation"},
+        {"id": "IMP-14", "text": "How do you approach privacy and security concerns in your projects?", "original_category": "Ethics and Responsible Innovation"},
+        {"id": "IMP-15", "text": "Give an example of when you advocated for responsible practices in product design.", "original_category": "Ethics and Responsible Innovation"}
+      ]
+    }
+  ],
+  "existing_answers": [
+    {
+      "question_id": "COL-1",
+      "question_text": "Describe a time when you disagreed with a team member. How did you resolve it?",
+      "answer": {
+        "situation": "In the search science team, we were tasked with an incremental recall project to improve brand-related query results. One teammate, focused on precision, proposed storing a <site, category, query> compound key with brands as values in a lookup table. His approach required a new query for each related brand, which would increase system load.",
+        "task": "I aimed to ensure both accuracy and efficiency, knowing that multiple queries could significantly increase latency and strain our caching resources.",
+        "action": "I conducted a detailed analysis, demonstrating that multiple queries could increase latency by >15%, and shared alternative solutions. I also facilitated a discussion, listening to his concerns about maintaining accuracy. I proposed using a query rewrite to simplify the solution and eliminate the need for multiple queries. By balancing data and collaborative discussion, I addressed concerns around accuracy and gained the team's alignment.",
+        "result": "The team agreed on the query rewrite, achieving our recall objectives while meeting the GMV and latency increase launching criteria (<3%), delivered the project on time. This experience reinforced the value of balancing technical trade-offs with collaborative, data-driven decision-making."
+      }
+    },
+    {
+      "question_id": "COL-2",
+      "question_text": "How do you handle conflicts within a team?",
+      "answer": {
+        "situation": "In a recent project, a teammate's code review requests became repetitive and delayed progress, as they were often for tests already covered / not required by the current codebase merge policy. This created some tension, as our schedules were impacted.",
+        "task": "I aimed to address his concerns constructively while ensuring we kept our timeline and strengthened our team's review practices.",
+        "action": "I initiated a direct conversation to clarify his review standards and shared my testing approach, showing which tests were already covered. To resolve the matter for the longer term, I suggested we develop shared review guidelines and volunteered to draft an initial proposal, which I then discussed with the project lead.",
+        "result": "This approach helped align our team on standards, making reviews smoother and more efficient. The project stayed on schedule, and our team became more empowered to handle future reviews constructively."
+      }
+    },
+    {
+      "question_id": "COL-3",
+      "question_text": "Tell me about a time you worked with a cross-functional team to achieve a common goal.",
+      "answer": {
+        "situation": "Our team collaborated with the ads team to enhance ad relevance by developing a high-velocity, low-cost pipeline for A/B testing and relevance analysis.",
+        "task": "I was tasked with creating scalable relevance guardrails and implementing an LLM-based relevance judgment system to streamline ad evaluation while ensuring high-quality results.",
+        "action": "I proactively engaged with both the ads and data science teams to clarify their KPIs and understand their challenges. The ads team aimed for a high relevance filter pass-through rate, which initially seemed misaligned with our objectives. Through effective cross-team communication, we worked to identify common ground and prioritized the overall VP-level goals. I then designed an innovative LLM-powered relevance judgment pipeline that provided on-demand scoring for rapid testing iterations. By establishing clear guardrails and automating key A/B testing components, we improved accuracy and efficiency.",
+        "result": "This new pipeline enabled us to scale A/B testing by 50% while cutting evaluation costs by 30%. The ads team gained quicker, data-driven insights, leading to a 20% increase in ad engagement and strengthening our alignment with overall relevance objectives."
+      }
+    },
+    {
+      "question_id": "COL-4",
+      "question_text": "How do you ensure effective communication within your team?",
+      "answer": {
+        "situation": "In my previous role, our team faced challenges with unclear expectations and infrequent updates, leading to misunderstandings and project delays. The weekly update engagement is not high enough.",
+        "task": "My goal was to enhance communication and ensure alignment on project progress among all team members.",
+        "action": "I leveraged a progress tracking tool called Airflow, introduced by our senior director. I established regular 'prediction market' meetings, encouraging team members to share their goals and estimate the likelihood of achieving them, which fostered open dialogue and accountability. Additionally, I initiated daily stand-up meetings for quick updates and conducted one-on-one check-ins to address individual concerns and challenges, ensuring everyone felt heard.",
+        "result": "These initiatives significantly improved collaboration, resulting in a 30% reduction in project delays. The enhanced communication not only created a more engaged team atmosphere but also boosted morale, ultimately leading to increased productivity and successful project outcomes."
+      }
+    }
+  ],
+  "category_summary": {
+    "ownership": {"question_count": 11, "answered": 0},
+    "leadership": {"question_count": 11, "answered": 0},
+    "collaboration": {"question_count": 9, "answered": 4},
+    "communication": {"question_count": 5, "answered": 0},
+    "problem_solving": {"question_count": 15, "answered": 0},
+    "innovation": {"question_count": 15, "answered": 0},
+    "adaptability": {"question_count": 20, "answered": 0},
+    "execution": {"question_count": 14, "answered": 0},
+    "impact": {"question_count": 15, "answered": 0}
+  }
+}

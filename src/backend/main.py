@@ -19,6 +19,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.backend.config import get_settings
 from src.backend.database import init_db
+from src.backend.routers.behavioral import router as behavioral_router
 from src.backend.routers.companies import router as companies_router
 from src.backend.routers.forum import router as forum_router
 from src.backend.routers.framework import router as framework_router
@@ -139,6 +140,7 @@ def health_check() -> dict:
     return {"status": "ok"}
 
 
+app.include_router(behavioral_router, prefix="/api")
 app.include_router(problems_router, prefix="/api")
 app.include_router(qa_router, prefix="/api")
 app.include_router(framework_router, prefix="/api")

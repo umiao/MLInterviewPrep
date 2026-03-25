@@ -323,6 +323,49 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
         ],
     ),
     (
+        13,
+        "Create behavioral_questions, behavioral_examples, question_example_links tables",
+        [
+            "CREATE TABLE IF NOT EXISTS behavioral_questions ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  question_id VARCHAR NOT NULL UNIQUE,"
+            "  text TEXT NOT NULL,"
+            "  category_id VARCHAR NOT NULL,"
+            "  category_name VARCHAR NOT NULL,"
+            "  original_category VARCHAR,"
+            "  difficulty VARCHAR,"
+            "  company_target VARCHAR,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_behavioral_questions_category_id "
+            "ON behavioral_questions(category_id)",
+            "CREATE TABLE IF NOT EXISTS behavioral_examples ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  example_id VARCHAR NOT NULL UNIQUE,"
+            "  title VARCHAR NOT NULL,"
+            "  source_project VARCHAR,"
+            "  situation TEXT,"
+            "  task TEXT,"
+            "  action TEXT,"
+            "  result TEXT,"
+            "  evidence_quotes TEXT,"
+            "  principle_tags TEXT,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE TABLE IF NOT EXISTS question_example_links ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  question_id INTEGER NOT NULL REFERENCES behavioral_questions(id) ON DELETE CASCADE,"
+            "  example_id INTEGER NOT NULL REFERENCES behavioral_examples(id) ON DELETE CASCADE,"
+            "  relevance_note TEXT,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_qel_question_id "
+            "ON question_example_links(question_id)",
+            "CREATE INDEX IF NOT EXISTS ix_qel_example_id "
+            "ON question_example_links(example_id)",
+        ],
+    ),
+    (
         12,
         "Fix NULL priority in problems table",
         [
