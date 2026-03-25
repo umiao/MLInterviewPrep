@@ -372,3 +372,16 @@
 - **Deliverables**: `docs/bq_behavioral_examples.json` (EX-22 added, total 22 examples), `docs/bq_story_L_delegation_hashing.md` (raw story), DB updated (26 examples, 118 links)
 - **Sanity check result**: Seed script confirmed: 1 example inserted, 5 links created. DB state: 115 questions, 26 examples, 118 links.
 - **Status**: [DONE]
+
+## 2026-03-25 16:20 -- [PLAN] LinkedIn Phone Screen Interview Questions Import
+- **What I did**: Read 7 screenshots + text file from LinkedIn interview experiences (C:/Users/Shenghui Xu/Desktop/2026 跳槽准备/tmp_LinkedIn_面经/). Extracted ~50 questions across 5 categories (Coding ~15, ML System Design/Product ~25, ML Theory/Stats ~5, ML Coding ~3, Behavioral ~2). Created 4 tasks (T-P1-59 through T-P1-62) with full extracted question lists embedded in descriptions for autonomous execution context. Plan approved by user.
+- **Deliverables**: Tasks T-P1-59 (coding), T-P1-60 (ml_system_design), T-P1-61 (ml_theory+coding+behavioral), T-P1-62 (bulk import) added to task_db
+- **Sanity check result**: All 4 tasks created with dependencies (T-P1-62 depends on 59/60/61). TASKS.md regenerated.
+- **Status**: [DONE] Planning complete, awaiting autonomous execution
+
+## 2026-03-25 -- [T-P1-59] Extract LinkedIn Coding questions with full solutions
+- **What I did**: Extracted and expanded 15 coding questions from LinkedIn phone screen interviews into full Q&A format. Sources: 文本面经.txt (items 1-3, 5-6, 11, 13, 15, 17-20) and screenshots (S27 consecutive subsequences, S30 SQL article views, S32 SQL+Python video posts). Each includes complete English problem statement, detailed solution with code, complexity analysis, tags, and difficulty estimate. Breakdown: 8 algorithm/DS (O(1) DS, course schedule, find leaves, centroid decomposition, Trie, nested list sum, convex number, locker toggle), 3 advanced (BST common ancestor, function mapping sort, coins DP), 1 backtracking (phone number), 1 array (consecutive subsequences), 2 SQL/data (article types, video uploads). Deduped against ml_theory_and_coding.json (items 7, 10, 12, 16 already extracted there).
+- **Deliverables**: MLInterviewPrep/data/linkedin_seed/coding.json (15 questions)
+- **Sanity check result**: JSON validated against InterviewQuestionCreate schema. All 15 entries pass: company=LinkedIn, valid question_type=coding, non-empty tags, difficulty in {easy,medium,hard}, interview_round=phone_screen.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-59 --status completed`
