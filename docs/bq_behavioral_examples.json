@@ -7,11 +7,11 @@
       "2026_03_26_Doordash面试准备/4. Conversational Search.md",
       "User-provided Discord messages (2026-03-24)"
     ],
-    "total_examples": 22,
+    "total_examples": 24,
     "date_created": "2026-03-24",
-    "last_updated": "2026-03-24",
+    "last_updated": "2026-03-25",
     "task_id": "T-P0-30",
-    "update_task_id": "T-P0-48"
+    "update_task_id": "T-P1-49"
   },
   "examples": [
     {
@@ -59,6 +59,22 @@
         {
           "question_id": "OWN-11",
           "relevance_note": "Story I enrichment: took ownership of a challenging situation — initiated as personal Hackweek project, won award, persisted across team transfers"
+        },
+        {
+          "question_id": "OWN-9",
+          "relevance_note": "Invested Hacker Week building diversity prototype with incomplete information about production viability"
+        },
+        {
+          "question_id": "INN-9",
+          "relevance_note": "Creative solution: cheap intent-coverage proxy instead of expensive holistic ranking rewrite"
+        },
+        {
+          "question_id": "INN-10",
+          "relevance_note": "Identified intent collapse as innovation area through abandoned query data analysis"
+        },
+        {
+          "question_id": "ADP-20",
+          "relevance_note": "Self-initiated Hacker Week project driven by curiosity about abandoned query patterns"
         }
       ]
     },
@@ -104,6 +120,14 @@
         {
           "question_id": "COL-5",
           "relevance_note": "Story I enrichment: aligned different teams on shared goal — reframed diversity as ranking problem to gain cross-team buy-in"
+        },
+        {
+          "question_id": "OWN-7",
+          "relevance_note": "Showed resilience by transferring teams rather than accepting organizational constraints"
+        },
+        {
+          "question_id": "ADP-17",
+          "relevance_note": "Recognized own gap: had not translated business case into team OKR language early enough"
         }
       ]
     },
@@ -218,6 +242,10 @@
         {
           "question_id": "PS-10",
           "relevance_note": "Tough trade-off: accuracy vs latency, chose pragmatic approach that met production constraints"
+        },
+        {
+          "question_id": "OWN-8",
+          "relevance_note": "Over-invested in latency optimization before validating deployability --- moved fast, corrected course"
         }
       ]
     },
@@ -259,6 +287,26 @@
         {
           "question_id": "IMP-7",
           "relevance_note": "Prioritized building hard infrastructure (reusable framework) over quick one-off optimization"
+        },
+        {
+          "question_id": "OWN-10",
+          "relevance_note": "Allocation framework grew from Hacker Week prototype to 200M+ annualized long-term platform impact"
+        },
+        {
+          "question_id": "INN-12",
+          "relevance_note": "Scaled diversity ranking from single vertical to 200M+ annualized impact across multiple verticals"
+        },
+        {
+          "question_id": "PS-7",
+          "relevance_note": "Balanced risk of challenging core ranking assumptions against potential 200M+ reward"
+        },
+        {
+          "question_id": "IMP-9",
+          "relevance_note": "Invested in reusable allocation framework over short-term single-vertical win"
+        },
+        {
+          "question_id": "EXE-13",
+          "relevance_note": "Balanced immediate experiment wins with building a long-term reusable platform primitive"
         }
       ]
     },
@@ -341,6 +389,10 @@
         {
           "question_id": "INN-1",
           "relevance_note": "Identified systemic opportunity: module proliferation problem led to creation of arbitration framework"
+        },
+        {
+          "question_id": "ADP-13",
+          "relevance_note": "Escalated prod degradation to VP, maintained team morale through incident resolution"
         }
       ]
     },
@@ -382,6 +434,26 @@
         {
           "question_id": "PS-5",
           "relevance_note": "Had multiple options (fix LLM, retrain search, proxy items) and chose the most pragmatic one"
+        },
+        {
+          "question_id": "INN-9",
+          "relevance_note": "Proxy item breakthrough for conversational search --- creative workaround for cold-start problem"
+        },
+        {
+          "question_id": "PS-9",
+          "relevance_note": "Built conversational search proxy on incomplete information about user intent patterns"
+        },
+        {
+          "question_id": "ADP-7",
+          "relevance_note": "Conversational search started with uncertain outcomes; proxy item approach emerged through iteration"
+        },
+        {
+          "question_id": "ADP-9",
+          "relevance_note": "Established proxy-based metrics for unclear conversational search project"
+        },
+        {
+          "question_id": "ADP-10",
+          "relevance_note": "Created plan for conversational search in ambiguous environment with no prior art"
         }
       ]
     },
@@ -419,6 +491,10 @@
         {
           "question_id": "IMP-6",
           "relevance_note": "Built maintainable evaluation infrastructure supporting both production and academic needs"
+        },
+        {
+          "question_id": "OWN-5",
+          "relevance_note": "Established debiased evaluation framework ensuring consistent quality in experiment results"
         }
       ]
     },
@@ -452,6 +528,10 @@
         {
           "question_id": "LDR-11",
           "relevance_note": "Helped struggling team member improve performance presentation, leading to return offer"
+        },
+        {
+          "question_id": "OWN-5",
+          "relevance_note": "Taught intern structured goal-setting ensuring consistent quality in deliverables"
         }
       ]
     },
@@ -485,6 +565,10 @@
         {
           "question_id": "INN-14",
           "relevance_note": "Built template class that improved entire research team's productivity and onboarding"
+        },
+        {
+          "question_id": "INN-13",
+          "relevance_note": "Improved established notebook-only workflow by building production template class for research team"
         }
       ]
     },
@@ -571,6 +655,26 @@
         {
           "question_id": "INN-6",
           "relevance_note": "Proposed LLM-as-Judge strategy that became major relevance measurement infrastructure"
+        },
+        {
+          "question_id": "INN-3",
+          "relevance_note": "Explored LLM technologies to find pragmatic application matching team capabilities"
+        },
+        {
+          "question_id": "ADP-1",
+          "relevance_note": "Quickly learned LLM capabilities when given vague AI mandate from leadership"
+        },
+        {
+          "question_id": "ADP-7",
+          "relevance_note": "LLM exploration started with incomplete requirements from vague AI mandate"
+        },
+        {
+          "question_id": "ADP-10",
+          "relevance_note": "Created structured plan to evaluate LLM applications in highly ambiguous AI mandate"
+        },
+        {
+          "question_id": "EXE-4",
+          "relevance_note": "Incorporated LLM industry trends into pragmatic team project planning"
         }
       ]
     },
@@ -608,6 +712,22 @@
         {
           "question_id": "OWN-1",
           "relevance_note": "Took ownership of failure even though process was followed --- led RCA and improvement effort"
+        },
+        {
+          "question_id": "OWN-7",
+          "relevance_note": "Demonstrated resilience through model deprecation incident recovery and process improvement"
+        },
+        {
+          "question_id": "OWN-8",
+          "relevance_note": "Model deprecation incident where fast-moving deployment missed compatibility checks"
+        },
+        {
+          "question_id": "ADP-2",
+          "relevance_note": "Adjusted approach after model deprecation broke production; rebuilt with resilience patterns"
+        },
+        {
+          "question_id": "ADP-13",
+          "relevance_note": "Recovered from model deprecation failure and built process improvements to prevent recurrence"
         }
       ]
     },
@@ -645,6 +765,10 @@
         {
           "question_id": "OWN-6",
           "relevance_note": "Bold risk: took on infra-boundary work without dedicated support to unblock team"
+        },
+        {
+          "question_id": "ADP-1",
+          "relevance_note": "Quickly learned cross-datacenter deployment patterns when stretching beyond comfort zone"
         }
       ]
     },
@@ -678,6 +802,14 @@
         {
           "question_id": "ADP-18",
           "relevance_note": "Learned from mistake: PRs should always be engineer-owned, improved collaboration process"
+        },
+        {
+          "question_id": "OWN-3",
+          "relevance_note": "Received difficult feedback from senior IC about credibility and handled it constructively"
+        },
+        {
+          "question_id": "ADP-17",
+          "relevance_note": "Senior IC feedback revealed growth area in credibility-building; adjusted approach accordingly"
         }
       ]
     },
@@ -790,6 +922,14 @@
         {
           "question_id": "PS-1",
           "relevance_note": "Difficult technical decision: seller-only vs. seller-listing cross-modeling, with non-obvious compliance and business implications"
+        },
+        {
+          "question_id": "IMP-12",
+          "relevance_note": "Seller risk modeling raised responsible innovation concerns about fairness in automated decisions"
+        },
+        {
+          "question_id": "IMP-13",
+          "relevance_note": "Escalated ethical concern about seller risk model fairness rather than shipping known-biased model"
         }
       ],
       "defense_qa": [
@@ -846,6 +986,22 @@
         {
           "question_id": "IMP-7",
           "relevance_note": "Future-proofing: designed interim solution aligned with long-term architecture so migration was incremental, not a rewrite"
+        },
+        {
+          "question_id": "INN-3",
+          "relevance_note": "Chose declarative Artifactory approach after evaluating multiple technology options"
+        },
+        {
+          "question_id": "INN-13",
+          "relevance_note": "Improved well-established but manual Artifactory config process with declarative PoC"
+        },
+        {
+          "question_id": "EXE-13",
+          "relevance_note": "Balanced immediate feature work with longer-term tech debt reduction through Artifactory PoC"
+        },
+        {
+          "question_id": "IMP-9",
+          "relevance_note": "Weighed short-term manual config against long-term declarative approach"
         }
       ],
       "defense_qa": [
@@ -902,6 +1058,10 @@
         {
           "question_id": "PS-5",
           "relevance_note": "Multiple viable options (custom prime hash vs standard hash vs MurmurHash) --- chose delegation framework over picking one directly"
+        },
+        {
+          "question_id": "LDR-10",
+          "relevance_note": "Researcher gained deep ownership and confidence through structured delegation of hashing decision"
         }
       ],
       "defense_qa": [
@@ -916,6 +1076,128 @@
         {
           "q": "What if the researcher had not found a better solution?",
           "a": "The acceptance framework was the safety net. If their choice failed uniformity or performance criteria, we would iterate --- not revert to my approach by default, but work together on meeting the bar. The framework made the decision reversible without undermining autonomy."
+        }
+      ]
+    },
+    {
+      "id": "EX-23",
+      "title": "Large-Scale Project with Tight Deadlines --- NYC C2C Policy Launch",
+      "source_project": "C2C Policy Launch --- NYC Hub",
+      "situation": "NYC hub's C2C business was declining for several consecutive weeks as competitors captured market share. VP demanded a test within 2 weeks and a policy launch proposal within 1 month. Project involved 30+ people across a large org.",
+      "task": "As project lead, needed to deliver a policy test and launch framework under extremely tight timeline, while maintaining daily updates and weekly VP meeting cadence.",
+      "action": "Phase 1: Inventoried all workstreams, identified critical path, ensured 30+ people did not block each other. Phase 2: After test launch, discovered control effectiveness below expectations. Team suspected logging issues (Kafka fluctuation causing data gaps). While fixing logging, continued digging deeper --- discovered upstream web request gateway team had silently fixed an incident by overwriting the control property, causing silent failure. Drove cross-team resolution. Phase 3: Found deeper structural issue --- multiple policies tested successfully independently but competed for top slots when launched simultaneously. Convinced VP to limit scope rather than combo-launch all policies.",
+      "result": "Project delivered within deadline, framework successfully launched. More importantly, helped team avoid a wrong direction --- blindly combo-launching policies whose effects would cancel each other out.",
+      "evidence_quotes": [
+        "VP demanded test within 2 weeks, launch proposal within 1 month, 30+ person project",
+        "Upstream gateway team silently fixed an incident by overwriting control property",
+        "Multiple policies competed for top slots when combo-launched"
+      ],
+      "principle_tags": [
+        "execution",
+        "problem_solving",
+        "ownership"
+      ],
+      "cross_references": [
+        {
+          "question_id": "EXE-5",
+          "relevance_note": "Managed 30+ person project under VP 2-week test deadline"
+        },
+        {
+          "question_id": "EXE-6",
+          "relevance_note": "Balanced VP urgency, upstream gateway team fix, and combo launch scope"
+        },
+        {
+          "question_id": "EXE-9",
+          "relevance_note": "Recovered from silent upstream overwrite causing test failure"
+        },
+        {
+          "question_id": "EXE-12",
+          "relevance_note": "Shifted priorities when combo launch structural problem discovered"
+        },
+        {
+          "question_id": "PS-4",
+          "relevance_note": "Broke down complex problem: logging vs gateway vs allocation"
+        },
+        {
+          "question_id": "OWN-2",
+          "relevance_note": "Went above and beyond to meet VP 2-week deadline"
+        },
+        {
+          "question_id": "OWN-4",
+          "relevance_note": "Took responsibility for 30+ person team performance and VP-level delivery"
+        },
+        {
+          "question_id": "EXE-7",
+          "relevance_note": "Handled delay caused by upstream gateway team silently overwriting control property"
+        },
+        {
+          "question_id": "EXE-10",
+          "relevance_note": "Managed 2-week test deadline + 1-month launch proposal + daily updates + weekly VP meetings"
+        },
+        {
+          "question_id": "EXE-14",
+          "relevance_note": "Maintained daily team updates and weekly VP cadence while managing 30+ person critical path"
+        },
+        {
+          "question_id": "COL-7",
+          "relevance_note": "Worked with 30+ people across technical teams and VP-level stakeholders"
+        },
+        {
+          "question_id": "COL-8",
+          "relevance_note": "Managed VP expectations on timeline and scope while coordinating with multiple technical teams"
+        },
+        {
+          "question_id": "COL-9",
+          "relevance_note": "Balanced competing priorities: VP urgency, gateway team fix, and combo launch scope tradeoffs"
+        },
+        {
+          "question_id": "ADP-3",
+          "relevance_note": "Requirements shifted when structural problem discovered mid-project, adapted scope accordingly"
+        },
+        {
+          "question_id": "PS-8",
+          "relevance_note": "High uncertainty project: unknown logging issues, silent upstream failures, untested policy interactions"
+        }
+      ]
+    },
+    {
+      "id": "EX-24",
+      "title": "Explaining Allocation Problem to VP --- C2C Policy Launch Communication",
+      "source_project": "C2C Policy Launch --- VP Communication",
+      "situation": "During debugging the C2C policy launch, discovered two levels of issues: upstream gateway silent overwrite (tactical) and ranking is fundamentally an allocation problem (strategic). Needed to communicate these findings at weekly VP meeting.",
+      "task": "VP saw several independent tests succeeding and naturally wanted to combo-launch them for maximum effect. Needed to explain why this intuition was wrong, using non-technical language to change VP decision.",
+      "action": "Communication strategy: conclusion first, then expand. Told VP three things: (1) we are currently overestimating the achievable adjustment effect, (2) we may be underestimating impact on default ranking, (3) this is not an execution problem but a structural one. Then explained in VP-accessible terms: each policy performs well independently because it monopolizes top slots, but when launched simultaneously they compete --- no free lunch. This is fundamentally an allocation problem, not simple addition. Recommended limiting scope to highest-ROI adjustments first.",
+      "result": "VP accepted the analysis and adjusted project direction. The allocation framing also became the team mental model for thinking about ranking strategy going forward.",
+      "evidence_quotes": [
+        "Conclusion first, then expand: overestimating effect, underestimating default ranking impact, structural not execution problem",
+        "Free-lunch analogy: each policy monopolizes top slots independently, but they compete when combined",
+        "VP accepted analysis and adjusted project direction"
+      ],
+      "principle_tags": [
+        "communication",
+        "collaboration",
+        "impact"
+      ],
+      "cross_references": [
+        {
+          "question_id": "COL-6",
+          "relevance_note": "Explained allocation problem (policies competing for top slots) to VP using free-lunch analogy"
+        },
+        {
+          "question_id": "COM-1",
+          "relevance_note": "Translated ranking allocation concept into non-technical terms for VP decision"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded VP to limit scope rather than combo-launch all policies"
+        },
+        {
+          "question_id": "PS-11",
+          "relevance_note": "Used data showing independent test results dont add up to justify scope change"
+        },
+        {
+          "question_id": "INN-7",
+          "relevance_note": "Reframed combo-launch as structural allocation problem rather than just an execution issue"
         }
       ]
     }
