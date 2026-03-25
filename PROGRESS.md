@@ -385,3 +385,10 @@
 - **Sanity check result**: JSON validated against InterviewQuestionCreate schema. All 15 entries pass: company=LinkedIn, valid question_type=coding, non-empty tags, difficulty in {easy,medium,hard}, interview_round=phone_screen.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-59 --status completed`
+
+## 2026-03-25 -- [T-P1-62] Bulk import LinkedIn seed data into DB
+- **What I did**: Created `scripts/import_linkedin_seed.py` to bulk import all LinkedIn seed JSON files into the `interview_questions` table. The script reads coding.json (15), ml_theory_and_coding.json (8), and ml_system_design.json (24) = 47 total questions. It validates required fields (question_text, company=LinkedIn), handles duplicates via dedup on question_text, and serializes tags as JSON. Also updated LinkedIn company entry with prep_notes summarizing phone screen format and set status=phone_screen.
+- **Deliverables**: MLInterviewPrep/scripts/import_linkedin_seed.py, updated data/mle_prep.db (47 LinkedIn questions + company prep_notes)
+- **Sanity check result**: All 47 questions imported with correct company, question_type distribution (21 ml_system_design, 15 coding, 4 ml_theory, 3 general_system_design, 2 ml_coding, 2 behavioral), non-empty tags, valid difficulties, interview_round=phone_screen. Zero duplicates. Idempotency verified (re-run skips all 47).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-62 --status completed`
