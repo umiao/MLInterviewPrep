@@ -368,9 +368,13 @@ function QuestionRow({
 function CoverageHeatmap({
   cells,
   categories,
+  onCategoryClick,
+  onExampleClick,
 }: {
   cells: CoverageCell[];
   categories: CategorySummary[];
+  onCategoryClick?: (categoryId: string) => void;
+  onExampleClick?: (exampleId: string) => void;
 }) {
   const exampleIds = [...new Set(cells.map((c) => c.example_id))];
   const exampleTitles = new Map(cells.map((c) => [c.example_id, c.example_title]));
@@ -402,8 +406,9 @@ function CoverageHeatmap({
             {categories.map((cat) => (
               <th
                 key={cat.category_id}
-                className="text-center text-gray-500 font-medium p-2 min-w-[90px]"
+                className={`text-center text-gray-500 font-medium p-2 min-w-[90px]${onCategoryClick ? " cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors" : ""}`}
                 title={`${categoryLabel(cat.category_id, cat.category_name)}: ${cat.covered_count}/${cat.question_count}`}
+                onClick={() => onCategoryClick?.(cat.category_id)}
               >
                 {categoryLabel(cat.category_id, cat.category_name)}
               </th>
@@ -413,7 +418,11 @@ function CoverageHeatmap({
         <tbody>
           {exampleIds.map((exId) => (
             <tr key={exId} className="border-t border-gray-100">
-              <td className="text-gray-700 p-2 max-w-[250px]" title={exampleTitles.get(exId)}>
+              <td
+                className={`text-gray-700 p-2 max-w-[250px]${onExampleClick ? " cursor-pointer hover:bg-blue-50 transition-colors" : ""}`}
+                title={exampleTitles.get(exId)}
+                onClick={() => onExampleClick?.(exId)}
+              >
                 <span className="font-mono text-gray-400 text-xs mr-1">{exId}</span>
                 <span className="text-sm">{(exampleTitles.get(exId) ?? "").slice(0, 40)}</span>
               </td>
@@ -422,8 +431,9 @@ function CoverageHeatmap({
                 return (
                   <td
                     key={cat.category_id}
-                    className={`text-center p-2 font-medium ${cellColor(count)} rounded`}
+                    className={`text-center p-2 font-medium ${cellColor(count)} rounded${count > 0 && onExampleClick ? " cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all" : ""}`}
                     title={`${exampleTitles.get(exId)} x ${categoryLabel(cat.category_id, cat.category_name)}: ${count}`}
+                    onClick={count > 0 ? () => onExampleClick?.(exId) : undefined}
                   >
                     {count > 0 ? count : ""}
                   </td>
@@ -612,7 +622,15 @@ export default function BehavioralQuestions() {
             Darker green = more coverage.
           </p>
           {coverageCells.length > 0 ? (
-            <CoverageHeatmap cells={coverageCells} categories={categories} />
+            <CoverageHeatmap
+              cells={coverageCells}
+              categories={categories}
+              onCategoryClick={(categoryId) => {
+                setSelectedCategory(categoryId);
+                setViewMode("examples");
+              }}
+              onExampleClick={handleExampleClick}
+            />
           ) : (
             <p className="text-gray-400 text-sm">Loading coverage data...</p>
           )}
