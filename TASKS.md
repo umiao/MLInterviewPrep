@@ -11,21 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: All hooks in helixos settings.json use bare `python` which resolves to the Windows Store stub (exit 49) on this machine. MLInterviewPrep already has the fix applied.
-
-Actions needed:
-1. Copy .claude/hooks/setup_python_env.sh from MLInterviewPrep to helixos (writes Anaconda to CLAUDE_ENV_FILE)
-2. Update helixos .claude/settings.json: replace all `python \"$CLAUDE_PROJECT_DIR/...\"` with `/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.../...\"` in ALL hook commands
-3. Add SessionStart hook entry: {\"type\": \"command\", \"command\": \"bash \\\"$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh\\\"\", \"timeout\": 10}
-
-Reference: MLInterviewPrep/.claude/settings.json (correct format) and MLInterviewPrep/.claude/hooks/setup_python_env.sh (source file to copy)
-
-Verification: After fix, run `/c/Anaconda/python.exe .claude/hooks/plan_mode.py status` to confirm hooks work.
-
 ### P2 -- Nice to Have
 
 #### T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions
@@ -52,21 +37,29 @@ Should be done AFTER [SYNC] helixos: Fix broken hooks task.
 - **Depends on**: None
 - **Description**: MLInterviewPrep has: (1) setup_python_env.sh SessionStart hook that writes Anaconda to CLAUDE_ENV_FILE, (2) /c/Anaconda/python.exe absolute paths in all settings.json hook commands. helixos and claude-code-project-template both use bare python in settings.json and have no setup_python_env.sh. Per LESSONS.md: Bash tool runs non-login shells, .bashrc not sourced, bare python resolves to Windows Store stub. Source: MLInterviewPrep/.claude/hooks/setup_python_env.sh and settings.json. Action: copy setup_python_env.sh to helixos and template, update settings.json hook commands to use absolute path.
 
-#### T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, test_check.py:10,21,48). Per LESSONS.md [2026-03-18]: lint cache causes false passes; fix was to remove cache so every Stop hook invocation runs fresh. test_check.py should run pytest unconditionally instead of using cache guard. Remove cache import and usage from test_check.py. Also verify hook_utils.py cache functions can be removed if no other callers.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
+
+#### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: All hooks in helixos settings.json use bare python which resolves to the Windows Store stub (exit 49) on this machine. MLInterviewPrep already has the fix applied.
+
+Actions needed:
+1. Copy .claude/hooks/setup_python_env.sh from MLInterviewPrep to helixos (writes Anaconda to CLAUDE_ENV_FILE)
+2. Update helixos .claude/settings.json: replace all python with /c/Anaconda/python.exe in ALL hook commands
+3. Add SessionStart hook entry for setup_python_env.sh
+
+BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ directory from MLInterviewPrep session. Must be done from a helixos session or manually.
 
 ## Completed Tasks
 
 > 175 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
+- [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
 - [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
 - [x] **2026-03-22** -- T-P2-156: Add full_page_text column to ForumPost + migration. ## Summary
 - [x] **2026-03-22** -- T-P2-155: Extract all page-1 posts (OP + replies) in forum extractor. ## Summary

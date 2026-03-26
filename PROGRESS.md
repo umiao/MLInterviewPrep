@@ -195,3 +195,9 @@
 - **Deliverables**: pyproject.toml updated with dependencies section
 - **Sanity check result**: `tomllib.load()` passes, ruff clean, 996/996 tests pass
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P2-188] Remove deprecated stop-cache from test_check.py
+- **What I did**: Removed check_stop_cache/write_stop_cache imports and usage from `.claude/hooks/test_check.py`. Per LESSONS.md, the lint cache caused false passes; the same risk applies to test cache. Tests now run unconditionally on every Stop hook invocation. Also marked T-P1-184 as blocked (requires writes to helixos .claude/hooks/ which is outside permitted working directory).
+- **Deliverables**: `.claude/hooks/test_check.py` updated (cache removed)
+- **Sanity check result**: Hook runs correctly with valid input, ruff clean, 996/996 tests pass
+- **Status**: [DONE]
