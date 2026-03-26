@@ -213,3 +213,9 @@
 - **Deliverables**: `src/frontend/src/pages/Problems.tsx` (loadAll logic for limit/offset/pagination)
 - **Sanity check result**: TypeScript compiles clean (tsc --noEmit passes)
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-193] Batch expand Blind75 problem notes - batch 1
+- **What I did**: Expanded notes for 14 Blind75 problems (LC 1, 3, 11, 15, 19, 20, 21, 33, 39, 48, 49, 53, 54, 55) with structured sections: 思路, 关键技巧, 核心代码 (Python code blocks), 注意点, 复杂度. Merged with existing notes (preserved as "Original notes" prefix). Written via sqlite3 update to data/mle_prep.db.
+- **Deliverables**: `scripts/expand_notes_batch1.py` (expansion script), `data/mle_prep.db` (14 problems updated)
+- **Sanity check result**: Verified DB reads back correctly with original notes preserved and all sections present
+- **Status**: [DONE]
