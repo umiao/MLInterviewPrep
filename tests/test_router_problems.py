@@ -265,6 +265,102 @@ def test_filters_and_together_no_match(test_client):
 
 
 # ===========================================================================
+# GET /api/problems -- search parameter
+# ===========================================================================
+
+def test_search_by_title(test_client):
+    """Search matches problem title (case-insensitive)."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=two+sum")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Two Sum"
+
+
+def test_search_by_title_partial(test_client):
+    """Search matches partial title."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=merge")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Merge Intervals"
+
+
+def test_search_by_pattern(test_client):
+    """Search matches pattern field."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=hash_map")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["pattern"] == "hash_map"
+
+
+def test_search_by_tags(test_client):
+    """Search matches tags (stored as JSON string)."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=hash-table")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Two Sum"
+
+
+def test_search_by_company_tags(test_client):
+    """Search matches company_tags (stored as JSON string)."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=amazon")
+    data = resp.json()
+    assert len(data) == 2
+    titles = {d["title"] for d in data}
+    assert titles == {"Binary Tree Max Path", "Sys Design Chat"}
+
+
+def test_search_by_notes(test_client):
+    """Search matches notes field."""
+    _seed_diverse_problems(test_client)
+    # Add notes to a problem
+    problems = test_client.get("/api/problems").json()
+    pid = problems[0]["id"]
+    test_client.put(f"/api/problems/{pid}", json={"notes": "Use defaultdict for counting"})
+    resp = test_client.get("/api/problems?search=defaultdict")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["id"] == pid
+
+
+def test_search_case_insensitive(test_client):
+    """Search is case-insensitive."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=TWO+SUM")
+    assert len(resp.json()) == 1
+
+
+def test_search_no_match(test_client):
+    """Search with no matches returns empty list."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=nonexistent_xyz")
+    assert resp.json() == []
+    assert resp.headers["X-Total-Count"] == "0"
+
+
+def test_search_combined_with_filter(test_client):
+    """Search combined with other filters ANDs together."""
+    _seed_diverse_problems(test_client)
+    # "google" appears in Two Sum (easy) and 3Sum (medium) and ML Feature Pipeline (medium)
+    resp = test_client.get("/api/problems?search=google&difficulty=easy")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Two Sum"
+
+
+def test_search_x_total_count(test_client):
+    """X-Total-Count reflects search-filtered total."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=tree&limit=1")
+    assert resp.headers["X-Total-Count"] == "1"
+    assert len(resp.json()) == 1
+
+
+# ===========================================================================
 # GET /api/problems -- X-Total-Count header
 # ===========================================================================
 

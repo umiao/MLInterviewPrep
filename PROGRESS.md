@@ -186,7 +186,7 @@
 - **Status**: [DONE]
 
 ## 2026-03-26 -- Ad-hoc: Add Uber phone screen to interview events
-- **What I did**: Added Uber phone screen with Meng Tang (2026-03-27 11:00 AM PT, 60 min, HackerRank) to interview_events table. Fixed past events (LinkedIn app deadline, Uber HR call, DoorDash technical chat) status from 'upcoming' to 'completed'. Launched autonomous_run.sh for T-P1-94 + T-P1-95.
+- **What I did**: Added Uber phone screen with Meng Tang (2026-04-01 11:00 AM PT, 60 min, HackerRank) to interview_events table. Fixed past events (LinkedIn app deadline, Uber HR call, DoorDash technical chat) status from 'upcoming' to 'completed'. Launched autonomous_run.sh for T-P1-94 + T-P1-95. Corrected date from Mar 27 to Apr 01.
 - **Deliverables**: interview_events row id=5, 3 past events status fixed
 - **Status**: [DONE]
 
@@ -200,4 +200,10 @@
 - **What I did**: Removed check_stop_cache/write_stop_cache imports and usage from `.claude/hooks/test_check.py`. Per LESSONS.md, the lint cache caused false passes; the same risk applies to test cache. Tests now run unconditionally on every Stop hook invocation. Also marked T-P1-184 as blocked (requires writes to helixos .claude/hooks/ which is outside permitted working directory).
 - **Deliverables**: `.claude/hooks/test_check.py` updated (cache removed)
 - **Sanity check result**: Hook runs correctly with valid input, ruff clean, 996/996 tests pass
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-190] Add backend search to GET /problems API
+- **What I did**: Added `search` query param to `GET /api/problems` that does server-side ILIKE across title, tags, pattern, company_tags, and notes. Updated frontend to send search param to API and removed client-side filter. Added search to pagination-reset filter key. Added 12 new tests covering title/pattern/tags/company/notes search, case insensitivity, no-match, combined filters, and X-Total-Count.
+- **Deliverables**: `src/backend/routers/problems.py` (search param + ILIKE filter), `src/frontend/src/pages/Problems.tsx` (server-side search), `tests/test_router_problems.py` (12 new tests)
+- **Sanity check result**: Ruff clean, 1006/1006 tests pass (140 in test_router_problems.py)
 - **Status**: [DONE]

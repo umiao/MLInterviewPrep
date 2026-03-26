@@ -221,7 +221,8 @@ export default function Problems() {
     company: filters.company,
     is_completed: filters.is_completed,
     category: filters.category,
-  }), [filters]);
+    search: search || undefined,
+  }), [filters, search]);
 
   const { data: problemsResult, isLoading: loading, error: queryError } = useQuery({
     queryKey: ["problems", params],
@@ -232,17 +233,8 @@ export default function Problems() {
   const totalCount = problemsResult?.totalCount ?? 0;
   const error = queryError ? queryError.message : null;
 
-  // Client-side text search across title/pattern/company_tags
-  const problems = useMemo(() => {
-    if (!search) return allProblems;
-    const lower = search.toLowerCase();
-    return allProblems.filter(
-      (p) =>
-        p.title.toLowerCase().includes(lower) ||
-        (p.pattern && p.pattern.toLowerCase().includes(lower)) ||
-        p.company_tags.some((c) => c.toLowerCase().includes(lower)),
-    );
-  }, [allProblems, search]);
+  // Search is now server-side; use allProblems directly
+  const problems = allProblems;
 
   // For Blind 75 tab: group by pattern with sort applied within groups
   const blind75ByPattern = useMemo(() => {
@@ -319,6 +311,7 @@ export default function Problems() {
     company,
     completed,
     category,
+    search,
   });
   const prevFilterKey = useRef(filterKey);
   useEffect(() => {

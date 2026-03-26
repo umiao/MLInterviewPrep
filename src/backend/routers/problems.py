@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import Integer, case, func
+from sqlalchemy import Integer, case, func, or_
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
@@ -146,6 +146,7 @@ def list_problems(
     company: str | None = None,
     is_completed: bool | None = None,
     category: str | None = None,
+    search: str | None = Query(default=None, description="Search across title, tags, pattern, company_tags, notes"),
     sort_by: Literal[
         "comfort_level", "last_attempted_at", "next_review_at", "created_at",
         "difficulty",
@@ -170,6 +171,17 @@ def list_problems(
         query = query.filter(Problem.is_completed == is_completed)
     if category:
         query = query.filter(Problem.category == category)
+    if search:
+        like_term = f"%{search}%"
+        query = query.filter(
+            or_(
+                Problem.title.ilike(like_term),
+                Problem.tags.ilike(like_term),
+                Problem.pattern.ilike(like_term),
+                Problem.company_tags.ilike(like_term),
+                Problem.notes.ilike(like_term),
+            )
+        )
 
     # Total count for pagination header
     total_count = query.count()

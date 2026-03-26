@@ -11,6 +11,42 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-191: Fix All tab: increase page size or show all when searching
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: All tab uses PAGE_SIZE=20 (Problems.tsx:29). Increase to 50/100 or set limit=200 when search is active. 159 problems total is safe to load at once. Files: src/frontend/src/pages/Problems.tsx (line 29 PAGE_SIZE, lines 183-211 filters memo).
+
+#### T-P1-193: Batch expand Blind75 problem notes - batch 1 (14 problems)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Expand notes for LC 1, 3, 11, 15, 19, 20, 21, 33, 39, 48, 49, 53, 54, 55. Each note needs: 思路, 关键技巧, 核心代码 (code block), 注意点, 复杂度. Merge with existing notes. Write to data/mle_prep.db via sqlite3.
+
+#### T-P1-194: Batch expand Blind75 problem notes - batch 2 (14 problems)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Expand notes for LC 56, 57, 62, 70, 73, 76, 79, 91, 98, 100, 102, 104, 105, 121. Each note needs: 思路, 关键技巧, 核心代码 (code block), 注意点, 复杂度. Merge with existing notes.
+
+#### T-P1-195: Batch expand Blind75 problem notes - batch 3 (14 problems)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Expand notes for LC 124, 125, 128, 133, 139, 141, 143, 152, 153, 190, 191, 198, 200, 206. Each note needs: 思路, 关键技巧, 核心代码 (code block), 注意点, 复杂度.
+
+#### T-P1-196: Batch expand Blind75 problem notes - batch 4 (14 problems)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Expand notes for LC 207, 208, 211, 213, 217, 226, 230, 235, 238, 242, 252, 253, 261, 268. Each note needs: 思路, 关键技巧, 核心代码 (code block), 注意点, 复杂度.
+
+#### T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心代码 (code block), 注意点, 复杂度.
+
 ### P2 -- Nice to Have
 
 #### T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions
@@ -37,6 +73,12 @@ Should be done AFTER [SYNC] helixos: Fix broken hooks task.
 - **Depends on**: None
 - **Description**: MLInterviewPrep has: (1) setup_python_env.sh SessionStart hook that writes Anaconda to CLAUDE_ENV_FILE, (2) /c/Anaconda/python.exe absolute paths in all settings.json hook commands. helixos and claude-code-project-template both use bare python in settings.json and have no setup_python_env.sh. Per LESSONS.md: Bash tool runs non-login shells, .bashrc not sourced, bare python resolves to Windows Store stub. Source: MLInterviewPrep/.claude/hooks/setup_python_env.sh and settings.json. Action: copy setup_python_env.sh to helixos and template, update settings.json hook commands to use absolute path.
 
+#### T-P2-192: Fix search persistence across tabs
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-190
+- **Description**: Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams. Files: src/frontend/src/pages/Problems.tsx. Depends on T-P1-190 (backend search).
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -60,6 +102,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-190: Fix search: add backend search + match tags/pattern/notes. Add search param to GET /problems API. Server-side ILIKE across title, tags, pattern, company_tags, notes. Frontend: sen
 - [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
 - [x] **2026-03-22** -- T-P2-156: Add full_page_text column to ForumPost + migration. ## Summary
 - [x] **2026-03-22** -- T-P2-155: Extract all page-1 posts (OP + replies) in forum extractor. ## Summary
