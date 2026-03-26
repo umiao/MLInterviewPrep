@@ -219,3 +219,9 @@
 - **Deliverables**: `scripts/expand_notes_batch1.py` (expansion script), `data/mle_prep.db` (14 problems updated)
 - **Sanity check result**: Verified DB reads back correctly with original notes preserved and all sections present
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-194] Batch expand Blind75 problem notes - batch 2
+- **What I did**: Expanded notes for 14 Blind75 problems (LC 56, 57, 62, 70, 73, 76, 79, 91, 98, 100, 102, 104, 105, 121) with structured sections: 思路, 关键技巧, 核心代码 (Python code blocks), 注意点, 复杂度. Merged with existing notes (preserved as "Original notes" prefix).
+- **Deliverables**: `scripts/expand_notes_batch2.py` (expansion script), `data/mle_prep.db` (14 problems updated)
+- **Sanity check result**: Verified DB reads back correctly with original notes preserved and all 5 sections present for all 14 problems
+- **Status**: [DONE]
