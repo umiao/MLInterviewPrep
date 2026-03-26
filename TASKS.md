@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心代码 (code block), 注意点, 复杂度.
-
 ### P2 -- Nice to Have
 
 #### T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions
@@ -72,6 +66,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems). Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心
 - [x] **2026-03-26** -- T-P1-196: Batch expand Blind75 problem notes - batch 4 (14 problems). Expand notes for LC 207, 208, 211, 213, 217, 226, 230, 235, 238, 242, 252, 253, 261, 268. Each note needs: 思路, 关键技巧, 核心代
 - [x] **2026-03-26** -- T-P1-195: Batch expand Blind75 problem notes - batch 3 (14 problems). Expand notes for LC 124, 125, 128, 133, 139, 141, 143, 152, 153, 190, 191, 198, 200, 206. Each note needs: 思路, 关键技巧, 核心代
 - [x] **2026-03-26** -- T-P1-194: Batch expand Blind75 problem notes - batch 2 (14 problems). Expand notes for LC 56, 57, 62, 70, 73, 76, 79, 91, 98, 100, 102, 104, 105, 121. Each note needs: 思路, 关键技巧, 核心代码 (code b
