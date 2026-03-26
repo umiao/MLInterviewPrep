@@ -20,7 +20,6 @@ from src.backend.schemas.behavioral import (
     BehavioralQuestionUpdate,
     CategorySummary,
     CoverageCell,
-    LinkedQuestionBrief,
     QuestionExampleLinkCreate,
     QuestionExampleLinkResponse,
 )

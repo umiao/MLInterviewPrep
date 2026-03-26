@@ -399,3 +399,10 @@
 - **Sanity check result**: 7/7 AC passed -- v14 migration applied (idempotent), 28/28 records updated in single transaction, backup runs before apply, --dry-run/--apply both work, JSON validated, frontend TypeScript check clean, 996 tests pass
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-65 --status completed`
+
+## 2026-03-26 -- [T-P1-70] Fix MLInterviewPrep ruff lint errors
+- **What I did**: Fixed all 9 ruff lint errors across 5 script files. Added `# noqa: E402` to 8 imports that must follow `sys.path.insert()` in scripts (content_llm_orchestration.py, content_module_arbitration.py, seed_behavioral.py, seed_system_designs.py). Removed unused `story_pattern` variable in update_improved_bq.py (F841).
+- **Deliverables**: `scripts/content_llm_orchestration.py`, `scripts/content_module_arbitration.py`, `scripts/seed_behavioral.py`, `scripts/seed_system_designs.py`, `scripts/update_improved_bq.py`
+- **Sanity check result**: `ruff check src/ tests/ scripts/` = 0 errors ("All checks passed!"), 996 tests pass
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-70 --status completed`

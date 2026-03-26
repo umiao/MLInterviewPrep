@@ -16,8 +16,8 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
-from src.backend.database import SessionLocal, init_db
-from src.backend.models.behavioral import (
+from src.backend.database import SessionLocal, init_db  # noqa: E402
+from src.backend.models.behavioral import (  # noqa: E402
     BehavioralExample,
     BehavioralQuestion,
     QuestionExampleLink,

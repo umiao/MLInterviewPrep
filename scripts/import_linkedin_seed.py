@@ -120,7 +120,7 @@ def import_questions() -> None:
         if linkedin:
             linkedin.prep_notes = LINKEDIN_PREP_NOTES
             linkedin.status = "phone_screen"
-            print(f"  Updated LinkedIn company prep_notes and status=phone_screen")
+            print("  Updated LinkedIn company prep_notes and status=phone_screen")
         else:
             # Create LinkedIn entry if missing
             linkedin = Company(
@@ -129,7 +129,7 @@ def import_questions() -> None:
                 prep_notes=LINKEDIN_PREP_NOTES,
             )
             db.add(linkedin)
-            print(f"  Created LinkedIn company entry")
+            print("  Created LinkedIn company entry")
 
         db.commit()
         print(f"\nTotal: {total_added} questions added, {total_skipped} skipped")

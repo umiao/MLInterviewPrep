@@ -14,8 +14,8 @@ _project_root = str(Path(__file__).resolve().parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
 
-from src.backend.database import SessionLocal, init_db
-from src.backend.models.system_design import SystemDesign
+from src.backend.database import SessionLocal, init_db  # noqa: E402
+from src.backend.models.system_design import SystemDesign  # noqa: E402
 
 SLUG = "llm-orchestration"
 

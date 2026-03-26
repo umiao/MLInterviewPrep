@@ -20,7 +20,6 @@ import re
 import sqlite3
 import subprocess
 import sys
-import textwrap
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -47,18 +46,6 @@ def parse_stories(md_path: Path) -> list[dict]:
         List of dicts, each containing example_id and updated fields.
     """
     text = md_path.read_text(encoding="utf-8")
-
-    # Split on story headers: ## STORY N: ... (EX-NN) or ### COL-N: ...
-    # Pattern matches both "## STORY N: Title (EX-NN)" and "### COL-N: Title"
-    story_pattern = re.compile(
-        r"^#{2,3}\s+"
-        r"(?:STORY\s+\d+:\s+.+?\((?P<ex_id>EX-\d+)\))"  # STORY N: Title (EX-NN)
-        r"|"
-        r"^#{2,3}\s+"
-        r"(?:(?:STORY\s+\d+:\s+.+?\(EX-\d+\s*/\s*Story\s+\w\))"  # STORY N: Title (EX-NN / Story X)
-        r")",
-        re.MULTILINE,
-    )
 
     stories = []
 

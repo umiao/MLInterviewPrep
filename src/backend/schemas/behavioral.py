@@ -3,7 +3,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # -- Question schemas --
 
 class BehavioralQuestionCreate(BaseModel):

@@ -13,9 +13,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from sqlalchemy import text  # noqa: E402
 
 from src.backend.database import SessionLocal, get_engine, init_db  # noqa: E402
+from src.backend.models.company import CompanyDocument  # noqa: E402
 from src.backend.models.reading import AudioCache, TTSSummary  # noqa: E402
 from src.backend.models.timeline import InterviewEvent  # noqa: E402
-from src.backend.models.company import CompanyDocument  # noqa: E402
 from src.backend.services.company_service import get_or_create_company  # noqa: E402
 
 PREP_NOTES_PATH = Path(

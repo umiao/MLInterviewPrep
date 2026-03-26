@@ -3,7 +3,6 @@
 Part of T-P1-49: Map remaining gap questions to existing stories.
 """
 import json
-import sys
 from pathlib import Path
 
 project_root = Path(__file__).resolve().parent.parent
