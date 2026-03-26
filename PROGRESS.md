@@ -413,3 +413,10 @@
 - **Sanity check result**: 31/31 content checks pass. 14 subsections, 70 table rows, 18 checklist items.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-81 --status completed`
+
+## 2026-03-26 -- [T-P1-83] Blog to Prep - DDIA Distributed Systems & Consensus (Ch16-17)
+- **What I did**: Created MLInterviewPrep/docs/prep_ddia_distributed_consensus.md from 2 DDIA blog notes (Ch16-17, ~649 lines total). Consolidated unreliable networks, Phi Accrual failure detector, clock synchronization (NTP), process pauses, fencing tokens, linearizability vs serializability, CAP theorem, causal consistency, Lamport timestamps, total order broadcast, 2PC/3PC/XA, fault-tolerant consensus (Raft/Paxos/ZAB), epoch numbering, and ZooKeeper coordination.
+- **Deliverables**: MLInterviewPrep/docs/prep_ddia_distributed_consensus.md (475 lines) with 6 sections. Framework node id=4 registered under system_design with status=review.
+- **Sanity check result**: 30/30 content checks pass. 20 checklist items, 84 table rows, 3 code blocks.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-83 --status completed`
