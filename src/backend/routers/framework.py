@@ -147,13 +147,20 @@ def _propagate_upward(node_id: int, db: Session) -> None:
         ).all()
         if children:
             # Progress: weighted average by importance
-            total_importance = sum(c.importance for c in children)
+            total_importance = sum(
+                (c.importance or 1.0) for c in children
+            )
             if total_importance > 0:
-                weighted = sum(c.progress_pct * c.importance for c in children)
+                weighted = sum(
+                    (c.progress_pct or 0.0) * (c.importance or 1.0)
+                    for c in children
+                )
                 parent.progress_pct = round(weighted / total_importance, 1)
             else:
                 parent.progress_pct = round(
-                    sum(c.progress_pct for c in children) / len(children), 1
+                    sum((c.progress_pct or 0.0) for c in children)
+                    / len(children),
+                    1,
                 )
 
             # Status: derive from children

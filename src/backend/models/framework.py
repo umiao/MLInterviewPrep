@@ -12,6 +12,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    text,
 )
 from sqlalchemy.orm import relationship
 
@@ -29,8 +30,8 @@ class FrameworkNode(Base):
     depth = Column(Integer, nullable=False, default=0)
     title = Column(Text, nullable=False)
     description = Column(Text, nullable=True)
-    importance = Column(Float, default=1.0)
-    priority = Column(String, default="P1")
+    importance = Column(Float, default=1.0, server_default=text("1.0"))
+    priority = Column(String, default="P1", server_default=text("'P1'"))
     estimated_hours = Column(Float, nullable=True)
     status = Column(
         String,
@@ -43,11 +44,13 @@ class FrameworkNode(Base):
         Float,
         CheckConstraint("progress_pct BETWEEN 0 AND 100"),
         default=0.0,
+        server_default=text("0.0"),
     )
     confidence_level = Column(
         Integer,
         CheckConstraint("confidence_level BETWEEN 0 AND 5"),
         default=0,
+        server_default=text("0"),
     )
     relevant_companies = Column(Text, nullable=True)  # JSON array
     started_at = Column(DateTime, nullable=True)

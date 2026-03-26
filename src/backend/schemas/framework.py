@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class FrameworkNodeUpdate(BaseModel):
@@ -44,6 +44,26 @@ class FrameworkNodeResponse(BaseModel):
     priority: str = "P1"
     estimated_hours: float | None = None
     children: list[FrameworkNodeResponse] = []
+
+    @field_validator("progress_pct", mode="before")
+    @classmethod
+    def _coalesce_progress(cls, v: float | None) -> float:
+        return v if v is not None else 0.0
+
+    @field_validator("confidence_level", mode="before")
+    @classmethod
+    def _coalesce_confidence(cls, v: int | None) -> int:
+        return v if v is not None else 0
+
+    @field_validator("importance", mode="before")
+    @classmethod
+    def _coalesce_importance(cls, v: float | None) -> float:
+        return v if v is not None else 1.0
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def _coalesce_priority(cls, v: str | None) -> str:
+        return v if v is not None else "P1"
 
     model_config = ConfigDict(from_attributes=True)
 
