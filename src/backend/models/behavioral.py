@@ -52,6 +52,9 @@ class BehavioralExample(Base):
     result = Column(Text, nullable=True)
     evidence_quotes = Column(Text, nullable=True)  # JSON array
     principle_tags = Column(Text, nullable=True)  # JSON array
+    risk_statement = Column(Text, nullable=True)
+    analogy = Column(Text, nullable=True)
+    tech_terms = Column(Text, nullable=True)  # JSON dict {"term": "definition"}
     created_at = Column(DateTime, default=datetime.utcnow)
 
     question_links = relationship(
@@ -83,6 +86,18 @@ class BehavioralExample(Base):
     def principle_tags_list(self, value: list[str]) -> None:
         """Set principle tags from Python list."""
         self.principle_tags = json.dumps(value, ensure_ascii=False)
+
+    @property
+    def tech_terms_dict(self) -> dict[str, str]:
+        """Return tech terms as Python dict."""
+        if not self.tech_terms:
+            return {}
+        return json.loads(self.tech_terms)
+
+    @tech_terms_dict.setter
+    def tech_terms_dict(self, value: dict[str, str]) -> None:
+        """Set tech terms from Python dict."""
+        self.tech_terms = json.dumps(value, ensure_ascii=False)
 
 
 class QuestionExampleLink(Base):

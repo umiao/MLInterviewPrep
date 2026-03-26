@@ -392,3 +392,10 @@
 - **Sanity check result**: All 47 questions imported with correct company, question_type distribution (21 ml_system_design, 15 coding, 4 ml_theory, 3 general_system_design, 2 ml_coding, 2 behavioral), non-empty tags, valid difficulties, interview_round=phone_screen. Zero duplicates. Idempotency verified (re-run skips all 47).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-62 --status completed`
+
+## 2026-03-26 -- [T-P1-65] Update behavioral_examples DB schema + import improved stories
+- **What I did**: Phase 1: Added migration v14 to `database.py` adding 3 new columns (risk_statement, analogy, tech_terms) to behavioral_examples. Updated ORM model, Pydantic schemas (Create/Update/Response), and router response builder to support the new fields. Phase 2: Created `scripts/update_improved_bq.py` that parses `docs/bq_improved_stories.md` and updates all 28 examples with improved situation/action/result text plus new risk_statement (28/28), analogy (15/28), and tech_terms JSON dict (12/28). Script runs backup first, supports --dry-run (default) and --apply modes, uses single transaction. Updated frontend `BehavioralQuestions.tsx` ExampleCard to display risk statement, analogy, and tech terms sections.
+- **Deliverables**: `src/backend/database.py` (migration v14), `src/backend/models/behavioral.py` (3 columns + tech_terms_dict property), `src/backend/schemas/behavioral.py` (3 fields in Create/Update/Response), `src/backend/routers/behavioral.py` (response builder + CRUD), `scripts/update_improved_bq.py` (new, ~300 lines), `src/frontend/src/pages/BehavioralQuestions.tsx` (3 new display sections)
+- **Sanity check result**: 7/7 AC passed -- v14 migration applied (idempotent), 28/28 records updated in single transaction, backup runs before apply, --dry-run/--apply both work, JSON validated, frontend TypeScript check clean, 996 tests pass
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-65 --status completed`

@@ -211,6 +211,9 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
         "result": ex.result,
         "evidence_quotes": ex.evidence_quotes_list,
         "principle_tags": ex.principle_tags_list,
+        "risk_statement": ex.risk_statement,
+        "analogy": ex.analogy,
+        "tech_terms": ex.tech_terms_dict,
         "created_at": ex.created_at,
         "linked_questions": linked_questions,
     }
@@ -298,6 +301,9 @@ def create_example(
         result=data.result,
         evidence_quotes=json.dumps(data.evidence_quotes, ensure_ascii=False),
         principle_tags=json.dumps(data.principle_tags, ensure_ascii=False),
+        risk_statement=data.risk_statement,
+        analogy=data.analogy,
+        tech_terms=json.dumps(data.tech_terms, ensure_ascii=False) if data.tech_terms else None,
     )
     db.add(ex)
     db.commit()
@@ -327,10 +333,10 @@ def update_example(
 
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        if key == "evidence_quotes":
-            ex.evidence_quotes = json.dumps(value, ensure_ascii=False)
-        elif key == "principle_tags":
-            ex.principle_tags = json.dumps(value, ensure_ascii=False)
+        if key in ("evidence_quotes", "principle_tags"):
+            setattr(ex, key, json.dumps(value, ensure_ascii=False))
+        elif key == "tech_terms":
+            ex.tech_terms = json.dumps(value, ensure_ascii=False) if value else None
         else:
             setattr(ex, key, value)
 

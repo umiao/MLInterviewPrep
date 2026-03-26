@@ -25,6 +25,9 @@ interface BehavioralExample {
   result: string | null;
   evidence_quotes: string[];
   principle_tags: string[];
+  risk_statement: string | null;
+  analogy: string | null;
+  tech_terms: Record<string, string>;
   linked_questions: LinkedQuestion[];
 }
 
@@ -219,6 +222,40 @@ function ExampleCard({
           <StarSection label="Task" content={example.task} />
           <StarSection label="Action" content={example.action} />
           <StarSection label="Result" content={example.result} />
+
+          {example.risk_statement && (
+            <div className="mb-2">
+              <span className="font-semibold text-red-600 text-xs uppercase tracking-wider">
+                Risk if not addressed
+              </span>
+              <p className="text-gray-600 text-sm mt-0.5">{example.risk_statement}</p>
+            </div>
+          )}
+
+          {example.analogy && (
+            <div className="mb-2">
+              <span className="font-semibold text-purple-600 text-xs uppercase tracking-wider">
+                Simple Analogy
+              </span>
+              <p className="text-gray-600 text-sm mt-0.5 italic">{example.analogy}</p>
+            </div>
+          )}
+
+          {Object.keys(example.tech_terms).length > 0 && (
+            <div className="mb-2">
+              <span className="font-semibold text-teal-700 text-xs uppercase tracking-wider">
+                Technical Terms
+              </span>
+              <dl className="mt-1 space-y-0.5">
+                {Object.entries(example.tech_terms).map(([term, def_]) => (
+                  <div key={term} className="text-sm">
+                    <dt className="inline font-medium text-teal-800">{term}</dt>
+                    <dd className="inline text-gray-600"> -- {def_}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          )}
 
           {example.evidence_quotes.length > 0 && (
             <div className="mt-3">

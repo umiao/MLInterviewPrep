@@ -60,6 +60,9 @@ class BehavioralExampleCreate(BaseModel):
     result: str | None = None
     evidence_quotes: list[str] = []
     principle_tags: list[str] = []
+    risk_statement: str | None = None
+    analogy: str | None = None
+    tech_terms: dict[str, str] = {}
 
 
 class BehavioralExampleUpdate(BaseModel):
@@ -73,6 +76,9 @@ class BehavioralExampleUpdate(BaseModel):
     result: str | None = None
     evidence_quotes: list[str] | None = None
     principle_tags: list[str] | None = None
+    risk_statement: str | None = None
+    analogy: str | None = None
+    tech_terms: dict[str, str] | None = None
 
 
 class LinkedQuestionBrief(BaseModel):
@@ -100,6 +106,9 @@ class BehavioralExampleResponse(BaseModel):
     result: str | None = None
     evidence_quotes: list[str] = []
     principle_tags: list[str] = []
+    risk_statement: str | None = None
+    analogy: str | None = None
+    tech_terms: dict[str, str] = {}
     created_at: datetime | None = None
     linked_questions: list[LinkedQuestionBrief] = []
 

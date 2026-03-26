@@ -376,6 +376,18 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "UPDATE problems SET priority = 2 WHERE priority IS NULL",
         ],
     ),
+    (
+        14,
+        "Add risk_statement, analogy, tech_terms columns to behavioral_examples",
+        [
+            "ADD_COLUMN_IF_MISSING:behavioral_examples:risk_statement:"
+            "ALTER TABLE behavioral_examples ADD COLUMN risk_statement TEXT",
+            "ADD_COLUMN_IF_MISSING:behavioral_examples:analogy:"
+            "ALTER TABLE behavioral_examples ADD COLUMN analogy TEXT",
+            "ADD_COLUMN_IF_MISSING:behavioral_examples:tech_terms:"
+            "ALTER TABLE behavioral_examples ADD COLUMN tech_terms TEXT",
+        ],
+    ),
 ]
 
 
