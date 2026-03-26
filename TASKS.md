@@ -40,6 +40,24 @@ helixos CLAUDE.md has the lesson in LESSONS.md (line 266) but not in Prohibited 
 
 Should be done AFTER [SYNC] helixos: Fix broken hooks task.
 
+#### T-P2-186: [SYNC] Propagate ruff version-drift lesson to helixos
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: MLInterviewPrep LESSONS.md has [2026-03-02] lesson about ruff version drift between local and CI (loose pin + separate install = silent drift). Tags: #ruff #ci #version-drift. Not yet in helixos LESSONS.md. Action: append the lesson to helixos/LESSONS.md with [PROPAGATED] tag.
+
+#### T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: MLInterviewPrep has: (1) setup_python_env.sh SessionStart hook that writes Anaconda to CLAUDE_ENV_FILE, (2) /c/Anaconda/python.exe absolute paths in all settings.json hook commands. helixos and claude-code-project-template both use bare python in settings.json and have no setup_python_env.sh. Per LESSONS.md: Bash tool runs non-login shells, .bashrc not sourced, bare python resolves to Windows Store stub. Source: MLInterviewPrep/.claude/hooks/setup_python_env.sh and settings.json. Action: copy setup_python_env.sh to helixos and template, update settings.json hook commands to use absolute path.
+
+#### T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, test_check.py:10,21,48). Per LESSONS.md [2026-03-18]: lint cache causes false passes; fix was to remove cache so every Stop hook invocation runs fresh. test_check.py should run pytest unconditionally instead of using cache guard. Remove cache import and usage from test_check.py. Also verify hook_utils.py cache functions can be removed if no other callers.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -48,6 +66,7 @@ Should be done AFTER [SYNC] helixos: Fix broken hooks task.
 
 > 175 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
 - [x] **2026-03-22** -- T-P2-156: Add full_page_text column to ForumPost + migration. ## Summary
 - [x] **2026-03-22** -- T-P2-155: Extract all page-1 posts (OP + replies) in forum extractor. ## Summary

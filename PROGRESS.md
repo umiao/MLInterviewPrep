@@ -143,3 +143,55 @@
 - **Sanity check result**: 29/30 content checks pass (only "data lake" missing -- minor single-sentence mention in source, not a core concept). 27 subsections, 67 table rows, 3 code blocks, 20 checklist items.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-84 --status completed`
+
+## 2026-03-26 -- Blog to Prep: LambdaMART/XGBoost LTR + Fix ResponseValidationError
+- **What I did**: (1) Created prep_learning_to_rank.md from LambdaMART_XGBoost_LTR blog post. Covers RankNet -> LambdaRank -> LambdaMART progression with full math, XGBoost rank:ndcg implementation, toy example (5-doc hand calculation), DoorDash phone screen scenario, 10 interview patterns, 12 questions. (2) Fixed ResponseValidationError bug: node id=192 had NULL values for progress_pct/confidence_level/importance/priority. Added Pydantic field_validators to coalesce None, added server_default to SQLAlchemy model, fixed _propagate_upward NULL arithmetic, patched existing DB row.
+- **Deliverables**: MLInterviewPrep/docs/prep_learning_to_rank.md (300 lines), fixes in schemas/framework.py, models/framework.py, routers/framework.py
+- **Sanity check result**: All 996 tests pass. 6 template sections present, 3 code blocks, 22 checklist items, 76 table rows. DB NULL row fixed.
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-88] Expand LTR prep doc with Q&A and detailed examples
+- **What I did**: Expanded prep_learning_to_rank.md from 300 to 548 lines. Added 12 detailed interview Q&As (RankNet->LambdaMART progression, NDCG non-differentiability, delta NDCG role, XGBoost adaptation, position bias, multi-stage ranking, pair sampling, convergence behavior). Added gradient computation walkthrough (5 steps with full derivations), comprehensive XGBoost LTR parameter reference (6 ranking-specific + 8 tree parameters with LTR-tuned values), expanded toy example with step-by-step NDCG/DCG/lambda calculations from original blog post. Updated framework node 114 (Learning to Rank) to status=review, progress=80%.
+- **Deliverables**: MLInterviewPrep/docs/prep_learning_to_rank.md (548 lines, 12 Q&A, 124 table rows)
+- **Sanity check result**: 12 Q&A entries present, all 6 template sections intact, 548 lines total.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-88 --status completed`
+
+## 2026-03-26 -- [T-P1-90] [T-P1-91] Sync LeetCode problem notes + fix DB issues
+- **What I did**: (1) Added notes for 4 LeetCode problems (LC 3229, 17, 149, 2502) based on user's solutions, matching existing Chinese note style with solution approach, key techniques, edge cases, complexity. (2) Fixed DB issues: set URLs for 3 new problems, fetched LeetCode descriptions via GraphQL API, marked Delivery Heatmap (id=156) and LC 17 as completed, synced LTR prep doc content (33,525 chars) to framework node 114's description field.
+- **Deliverables**: 4 problem notes in DB, 3 LeetCode descriptions fetched, 2 completion status fixes, LTR content synced to framework node
+- **Sanity check result**: All 5 problems verified: descriptions present (413-2719 chars), notes present (564-2484 chars), is_completed=1. Framework tree Pydantic validation passes.
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-92] Fix description format: plain text -> HTML
+- **What I did**: Scanned all 158 problems with descriptions. Found 3 (LC 3229, 149, 2502) stored as plain text instead of HTML. Re-fetched via LeetCode GraphQL as raw HTML. Updated feedback memory with correct convention: store `question.content` HTML as-is, never convert via `soup.get_text()`.
+- **Deliverables**: 3 descriptions re-fetched as HTML, feedback memory updated
+- **Sanity check result**: All 158 descriptions now contain HTML tags. Verified `<p>`, `<code>` present in re-fetched descriptions.
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-93] Add LC 981 Time Based Key-Value Store with notes
+- **What I did**: Updated LC 981 (already in DB as id=88) with detailed notes: code simplification (removed redundant mid recalculation), bisect alternative using chr(127) upper bound trick, edge cases, related problems (LC 729, 352, 1146). Fetched HTML description (2609 chars). Marked completed, comfort=3.
+- **Deliverables**: LC 981 notes (1648 chars) + HTML description in DB
+- **Sanity check result**: is_completed=1, description_source=leetcode, desc=2609 chars, notes=1648 chars
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-98] Scan and plan: problem notes audit + frontend fixes
+- **What I did**: Scanned all 159 problems. Found 70 with short notes (<200 chars, no code blocks), 73 with no notes. Identified 3 frontend bugs (search client-side only, All tab paginated at 20, search not shared across tabs). Created 4 tasks: T-P1-94 (backend search), T-P1-95 (All tab pagination), T-P2-96 (search persistence), T-P1-97 (batch expand 70 problem notes).
+- **Deliverables**: 4 tasks in task_db, audit data
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-99] Enrich task plans with implementation specs
+- **What I did**: Updated T-P1-94/95/96/97 with detailed implementation context: exact file paths, line numbers, code snippets, acceptance criteria. Set dependency T-P2-96 -> T-P1-94. Regenerated TASKS.md.
+- **Deliverables**: 4 enriched task descriptions in task_db
+- **Status**: [DONE]
+
+## 2026-03-26 -- Ad-hoc: Add Uber phone screen to interview events
+- **What I did**: Added Uber phone screen with Meng Tang (2026-03-27 11:00 AM PT, 60 min, HackerRank) to interview_events table. Fixed past events (LinkedIn app deadline, Uber HR call, DoorDash technical chat) status from 'upcoming' to 'completed'. Launched autonomous_run.sh for T-P1-94 + T-P1-95.
+- **Deliverables**: interview_events row id=5, 3 past events status fixed
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P2-189] Add [project].dependencies to pyproject.toml
+- **What I did**: Added `dependencies` list to `[project]` section in pyproject.toml with all 11 runtime deps from requirements.txt (fastapi, uvicorn, sqlalchemy, anthropic, pydantic, pydantic-settings, python-dotenv, python-multipart, httpx, python-docx, edge-tts). Also added missing pytest-asyncio and pyyaml to dev optional-dependencies. Validated TOML parsing and ran full test suite (996 passed).
+- **Deliverables**: pyproject.toml updated with dependencies section
+- **Sanity check result**: `tomllib.load()` passes, ruff clean, 996/996 tests pass
+- **Status**: [DONE]
