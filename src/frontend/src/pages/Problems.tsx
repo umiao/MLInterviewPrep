@@ -502,8 +502,6 @@ export default function Problems() {
           </button>
         </div>
       </div>
-      {renderSortBar()}
-
       {loading && <LoadingSpinner message="Loading problems..." />}
 
       {!loading && problems.length === 0 && (
@@ -634,9 +632,6 @@ export default function Problems() {
           </div>
         </div>
       )}
-
-      {/* Search + Sort controls */}
-      {renderSortBar()}
 
       {/* Error */}
       {error && (
@@ -817,6 +812,7 @@ export default function Problems() {
 
       {/* ---- Main Content ---- */}
       <div className="flex-1 min-w-0">
+        {renderSortBar()}
         <Tabs
           tabs={TABS}
           activeTab={activeTab}

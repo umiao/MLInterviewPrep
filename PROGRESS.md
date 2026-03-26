@@ -243,3 +243,9 @@
 - **Deliverables**: `scripts/expand_notes_batch5.py` (expansion script), `data/mle_prep.db` (14 problems updated)
 - **Sanity check result**: Verified DB reads back correctly with original notes preserved and all 6 sections present for all 14 problems
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P2-192] Fix search persistence across tabs
+- **What I did**: Moved `renderSortBar()` (search input + sort controls) above the `<Tabs>` component so it renders once and persists when switching between "All Problems" and "Blind Grind 75" tabs. Removed duplicate `renderSortBar()` calls from inside `renderBlind75Content()` and `renderAllProblemsContent()`.
+- **Deliverables**: `src/frontend/src/pages/Problems.tsx` (3 edits)
+- **Sanity check result**: TypeScript type check passes (`tsc --noEmit` clean). Search bar now renders above tabs so it stays visible during tab switches. Search URL param already persists via `useFilterParams`.
+- **Status**: [DONE]
