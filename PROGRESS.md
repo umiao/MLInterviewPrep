@@ -406,3 +406,10 @@
 - **Sanity check result**: `ruff check src/ tests/ scripts/` = 0 errors ("All checks passed!"), 996 tests pass
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-70 --status completed`
+
+## 2026-03-26 -- [T-P1-81] Blog to Prep - DDIA Fundamentals (Ch1-9)
+- **What I did**: Created MLInterviewPrep/docs/prep_ddia_fundamentals.md from 9 DDIA blog notes (Ch1-9, ~1159 lines total). Consolidated into one interview-ready reference covering three pillars (reliability/scalability/maintainability), data models (relational/document/graph), storage engines (LSM-tree vs B-tree with trade-offs table), OLTP vs OLAP (star schema, column storage, bitmap encoding), encoding formats (JSON/protobuf/Avro with compatibility rules), and communication patterns (REST/RPC/message passing/actor model).
+- **Deliverables**: MLInterviewPrep/docs/prep_ddia_fundamentals.md (352 lines) with 6 sections: Overview, Core Concepts (14 subsections), Implementation (2 Python decision helpers), Interview Patterns table + 10 questions, Comparisons (4 tables: data model, storage engine, encoding format, communication pattern), 8 Key Takeaways. Framework node id=2 registered under system_design path with status=review.
+- **Sanity check result**: 31/31 content checks pass. 14 subsections, 70 table rows, 18 checklist items.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-81 --status completed`
