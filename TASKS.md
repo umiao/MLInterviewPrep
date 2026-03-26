@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-191: Fix All tab: increase page size or show all when searching
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: All tab uses PAGE_SIZE=20 (Problems.tsx:29). Increase to 50/100 or set limit=200 when search is active. 159 problems total is safe to load at once. Files: src/frontend/src/pages/Problems.tsx (line 29 PAGE_SIZE, lines 183-211 filters memo).
-
 #### T-P1-193: Batch expand Blind75 problem notes - batch 1 (14 problems)
 - **Priority**: P1
 - **Complexity**: S
@@ -102,6 +96,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-191: Fix All tab: increase page size or show all when searching. All tab uses PAGE_SIZE=20 (Problems.tsx:29). Increase to 50/100 or set limit=200 when search is active. 159 problems tot
 - [x] **2026-03-26** -- T-P1-190: Fix search: add backend search + match tags/pattern/notes. Add search param to GET /problems API. Server-side ILIKE across title, tags, pattern, company_tags, notes. Frontend: sen
 - [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
 - [x] **2026-03-22** -- T-P2-156: Add full_page_text column to ForumPost + migration. ## Summary

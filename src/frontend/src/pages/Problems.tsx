@@ -179,6 +179,8 @@ export default function Problems() {
   });
 
   const isBlind75 = activeTab === "blind75";
+  // Load all results when searching or on Blind75 tab (159 problems total is safe)
+  const loadAll = isBlind75 || !!search;
 
   const filters: ProblemFilters = useMemo(
     () => ({
@@ -193,8 +195,8 @@ export default function Problems() {
       category,
       sort_by: sortBy,
       sort_order: sortOrder,
-      limit: isBlind75 ? 200 : PAGE_SIZE,
-      offset: isBlind75 ? 0 : page * PAGE_SIZE,
+      limit: loadAll ? 200 : PAGE_SIZE,
+      offset: loadAll ? 0 : page * PAGE_SIZE,
     }),
     [
       difficulty,
@@ -206,7 +208,7 @@ export default function Problems() {
       sortBy,
       sortOrder,
       page,
-      isBlind75,
+      loadAll,
     ],
   );
 
@@ -301,7 +303,8 @@ export default function Problems() {
     ].sort();
   }, [allProblemsData]);
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const effectivePageSize = loadAll ? 200 : PAGE_SIZE;
+  const totalPages = Math.max(1, Math.ceil(totalCount / effectivePageSize));
 
   // Reset to page 0 when filters change (not sort/page)
   const filterKey = JSON.stringify({

@@ -207,3 +207,9 @@
 - **Deliverables**: `src/backend/routers/problems.py` (search param + ILIKE filter), `src/frontend/src/pages/Problems.tsx` (server-side search), `tests/test_router_problems.py` (12 new tests)
 - **Sanity check result**: Ruff clean, 1006/1006 tests pass (140 in test_router_problems.py)
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-191] Fix All tab: load all results when searching
+- **What I did**: When search is active on the All tab, switched from PAGE_SIZE=20 to limit=200 so all matching results appear on one page. Added `loadAll` flag (true when searching or on Blind75 tab) to control limit/offset. Also updated totalPages calculation to use effective page size so pagination hides correctly when all results fit.
+- **Deliverables**: `src/frontend/src/pages/Problems.tsx` (loadAll logic for limit/offset/pagination)
+- **Sanity check result**: TypeScript compiles clean (tsc --noEmit passes)
+- **Status**: [DONE]
