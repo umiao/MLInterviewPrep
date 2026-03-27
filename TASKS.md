@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-228: Enable rehype-raw in MarkdownPreview
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, add to rehypePlugins=[rehypeRaw, rehypeKatex]. (3) No source guard for now -- all content is self-authored. If forum UGC becomes a concern later, add rehype-sanitize at that point. (4) Test: verify Adobe Day1 HTML diagram renders. AC: HTML diagrams visible. Math still works. Checkboxes still work.
-
 #### T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder
 - **Priority**: P0
 - **Complexity**: M
@@ -128,6 +122,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-228: Enable rehype-raw in MarkdownPreview. Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, ad
 - [x] **2026-03-27** -- T-P0-227: Minimal StudyNoteBuilder + FormulaBlock typed constraint. Minimal viable Builder with one typed block (FormulaBlock). Design: (1) FormulaBlock dataclass: latex:str, explanation:s
 - [x] **2026-03-27** -- T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards. Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, 
 - [x] **2026-03-27** -- T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories. Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story out

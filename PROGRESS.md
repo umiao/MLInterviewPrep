@@ -351,3 +351,9 @@
 - **Deliverables**: `scripts/study_note_builder.py` (builder module), `tests/test_study_note_builder.py` (25 tests)
 - **Sanity check result**: 25/25 tests pass. Ruff clean. FormulaBlock guarantees $$. Single-dollar in prose raises ValueError. Auto-bold works on first occurrence only. save_to_db idempotent. validate() detects single-dollar and missing header.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-228] Enable rehype-raw in MarkdownPreview
+- **What I did**: Installed rehype-raw package and added it to MarkdownPreview.tsx rehypePlugins array (before rehypeKatex). This enables raw HTML in markdown content to render as actual DOM elements instead of being stripped.
+- **Deliverables**: `src/frontend/src/components/ui/MarkdownPreview.tsx` (added rehype-raw import + plugin), `src/frontend/package.json` + `package-lock.json` (rehype-raw dependency)
+- **Sanity check result**: TypeScript compiles cleanly (tsc --noEmit). Vite production build succeeds. rehype-raw placed before rehypeKatex in plugin chain so HTML passes through before KaTeX processes math.
+- **Status**: [DONE]
