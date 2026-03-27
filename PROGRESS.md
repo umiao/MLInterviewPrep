@@ -279,3 +279,9 @@
 - **Deliverables**: `scripts/parse_staging_lc.py` (parser), `data/staging_lc_parsed.json` (1014 problems)
 - **Sanity check result**: 1014 unique problems, no duplicates, 208+806=1014, all have company_tags, frequency_rank 1-1014 preserved
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-202] Batch import parsed LC problems into DB with company tags
+- **What I did**: Wrote import script (scripts/import_staging_lc.py) that reads staging_lc_parsed.json and imports into mle_prep.db. For 144 existing problems: merged LinkedIn/Uber/Adobe company_tags, filled missing difficulty. For 870 new problems: inserted with leetcode_id, title, URL (generated from title slug), difficulty, category=algorithm, company_tags. Supports --dry-run flag.
+- **Deliverables**: `scripts/import_staging_lc.py` (import script)
+- **Sanity check result**: 1029 total problems in DB (158 pre-existing + 870 new + 1 null-id). All 1014 parsed problems have LinkedIn+Uber+Adobe tags. 0 duplicate leetcode_ids. 86 problems with notes preserved, 88 completed problems preserved. 15 pre-existing problems not in parsed file correctly retained without new tags.
+- **Status**: [DONE]

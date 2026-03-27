@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-202: Batch import parsed LC problems into DB with company tags
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-201
-- **Description**: Import parsed problems into mle_prep.db. All 1014 tagged with LinkedIn+Uber+Adobe. (1) Existing problems (~159): merge company tags, preserve data. (2) New problems (~855): insert with leetcode_id, title, url, company_tags, category=algorithm. (3) Preserve frequency_rank from file order. (4) Set difficulty from parsed data. AC: All 1014 in DB, each has company_tags with LinkedIn+Uber+Adobe, frequency order preserved, no duplicates, existing data intact.
-
 #### T-P1-203: Verify imported problems: counts, tags, frequency order
 - **Priority**: P1
 - **Complexity**: S
@@ -68,26 +62,11 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 ## Completed Tasks
 
-> 175 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-202: Batch import parsed LC problems into DB with company tags. Import parsed problems into mle_prep.db. All 1014 tagged with LinkedIn+Uber+Adobe. (1) Existing problems (~159): merge c
 - [x] **2026-03-26** -- T-P1-201: Parse staging LC file: extract problems for LinkedIn/Uber/Adobe. Parse 'LC to be added 题解.txt' (3613 lines, 1014 problems) from C:\Users\Shenghui Xu\Desktop\staging. All three companies
 - [x] **2026-03-26** -- T-P1-200: Add Adobe phone screen event to interview timeline. Add Adobe phone screen. Company=Adobe, event_type=phone_screen, week of March 30-April 3 2026 (exact time TBD). Steps: I
-- [x] **2026-03-26** -- T-P1-199: Fix Interview Questions table column alignment. Columns misaligned and squeezed on Questions page. Root cause: Questions.tsx table uses default table-layout:auto. Fix: 
-- [x] **2026-03-26** -- T-P1-198: Debug LinkedIn HR prep materials not showing in UI view. User reports LinkedIn HR call prep materials not visible in UI. Data EXISTS in DB: companies.prep_notes (448 chars), com
-- [x] **2026-03-26** -- T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems). Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心
-- [x] **2026-03-26** -- T-P1-196: Batch expand Blind75 problem notes - batch 4 (14 problems). Expand notes for LC 207, 208, 211, 213, 217, 226, 230, 235, 238, 242, 252, 253, 261, 268. Each note needs: 思路, 关键技巧, 核心代
-- [x] **2026-03-26** -- T-P1-195: Batch expand Blind75 problem notes - batch 3 (14 problems). Expand notes for LC 124, 125, 128, 133, 139, 141, 143, 152, 153, 190, 191, 198, 200, 206. Each note needs: 思路, 关键技巧, 核心代
-- [x] **2026-03-26** -- T-P1-194: Batch expand Blind75 problem notes - batch 2 (14 problems). Expand notes for LC 56, 57, 62, 70, 73, 76, 79, 91, 98, 100, 102, 104, 105, 121. Each note needs: 思路, 关键技巧, 核心代码 (code b
-- [x] **2026-03-26** -- T-P1-193: Batch expand Blind75 problem notes - batch 1 (14 problems). Expand notes for LC 1, 3, 11, 15, 19, 20, 21, 33, 39, 48, 49, 53, 54, 55. Each note needs: 思路, 关键技巧, 核心代码 (code block), 
-- [x] **2026-03-26** -- T-P1-191: Fix All tab: increase page size or show all when searching. All tab uses PAGE_SIZE=20 (Problems.tsx:29). Increase to 50/100 or set limit=200 when search is active. 159 problems tot
-- [x] **2026-03-26** -- T-P1-190: Fix search: add backend search + match tags/pattern/notes. Add search param to GET /problems API. Server-side ILIKE across title, tags, pattern, company_tags, notes. Frontend: sen
-- [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
-- [x] **2026-03-22** -- T-P2-156: Add full_page_text column to ForumPost + migration. ## Summary
-- [x] **2026-03-22** -- T-P2-155: Extract all page-1 posts (OP + replies) in forum extractor. ## Summary
-- [x] **2026-03-22** -- T-P2-112: SSE chunked audio streaming (if latency requires it). Only if full-MP3 generation latency becomes a UX problem for long content. SSE endpoint streaming base64 MP3 chunks with
-- [x] **2026-03-22** -- T-P1-183: Framework progress: sync progress_pct with checklist state. Framework progress sync: auto-propagate status + progress upward when children change.
-- [x] **2026-03-22** -- T-P1-182: Remove Review column from Problems table. Review column (next_review_at badge) adds no value currently: 0/155 problems have next_review_at set, no dedicated revie
-- [x] **2026-03-22** -- T-P1-181: Fetch missing problem descriptions (5 problems). 5 problems (id=151-155) missing description. Fetch via POST /api/problems/fetch-all-descriptions. LeetCode GraphQL first

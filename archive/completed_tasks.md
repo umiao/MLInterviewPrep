@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 175 completed tasks archived as of latest archival.
+> 191 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -283,3 +283,27 @@ Blind Grind75 tab only shows problems grouped by pattern. User wants an "All Pro
 Practice and Review buttons are in the table Actions column. User cannot see the problem description/details 
 - [x] **2026-03-22** -- T-P1-177: LeetCode: Add solution notes for 4 problems (K-Similar Strings, Longest Continuous Subarray, Russian Doll, Merge K Lists). ## Goal
 Update 4 LeetCode problems with user-provided solution notes. Find or create these problems in the DB, then set 
+- [x] **2026-03-22** -- T-P1-181: Fetch missing problem descriptions (5 problems). 5 problems (id=151-155) missing description. Fetch via POST /api/problems/fetch-all-descriptions. LeetCode GraphQL first
+- [x] **2026-03-22** -- T-P1-182: Remove Review column from Problems table. Review column (next_review_at badge) adds no value currently: 0/155 problems have next_review_at set, no dedicated revie
+- [x] **2026-03-22** -- T-P1-183: Framework progress: sync progress_pct with checklist state. Framework progress sync: auto-propagate status + progress upward when children change.
+
+ADOPTED REVIEW CHANGES (6 items)
+- [x] **2026-03-26** -- T-P1-190: Fix search: add backend search + match tags/pattern/notes. Add search param to GET /problems API. Server-side ILIKE across title, tags, pattern, company_tags, notes. Frontend: sen
+- [x] **2026-03-26** -- T-P1-191: Fix All tab: increase page size or show all when searching. All tab uses PAGE_SIZE=20 (Problems.tsx:29). Increase to 50/100 or set limit=200 when search is active. 159 problems tot
+- [x] **2026-03-26** -- T-P1-193: Batch expand Blind75 problem notes - batch 1 (14 problems). Expand notes for LC 1, 3, 11, 15, 19, 20, 21, 33, 39, 48, 49, 53, 54, 55. Each note needs: 思路, 关键技巧, 核心代码 (code block), 
+- [x] **2026-03-26** -- T-P1-194: Batch expand Blind75 problem notes - batch 2 (14 problems). Expand notes for LC 56, 57, 62, 70, 73, 76, 79, 91, 98, 100, 102, 104, 105, 121. Each note needs: 思路, 关键技巧, 核心代码 (code b
+- [x] **2026-03-26** -- T-P1-195: Batch expand Blind75 problem notes - batch 3 (14 problems). Expand notes for LC 124, 125, 128, 133, 139, 141, 143, 152, 153, 190, 191, 198, 200, 206. Each note needs: 思路, 关键技巧, 核心代
+- [x] **2026-03-26** -- T-P1-196: Batch expand Blind75 problem notes - batch 4 (14 problems). Expand notes for LC 207, 208, 211, 213, 217, 226, 230, 235, 238, 242, 252, 253, 261, 268. Each note needs: 思路, 关键技巧, 核心代
+- [x] **2026-03-26** -- T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems). Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心
+- [x] **2026-03-26** -- T-P1-198: Debug LinkedIn HR prep materials not showing in UI view. User reports LinkedIn HR call prep materials not visible in UI. Data EXISTS in DB: companies.prep_notes (448 chars), com
+- [x] **2026-03-26** -- T-P1-199: Fix Interview Questions table column alignment. Columns misaligned and squeezed on Questions page. Root cause: Questions.tsx table uses default table-layout:auto. Fix: 
+- [x] **2026-03-22** -- T-P2-112: SSE chunked audio streaming (if latency requires it). Only if full-MP3 generation latency becomes a UX problem for long content. SSE endpoint streaming base64 MP3 chunks with
+- [x] **2026-03-22** -- T-P2-155: Extract all page-1 posts (OP + replies) in forum extractor. ## Summary
+Modify extract_post_content() in forum_extractors.py to return all posts on page 1 (OP + all replies), not ju
+- [x] **2026-03-22** -- T-P2-156: Add full_page_text column to ForumPost + migration. ## Summary
+Add full_page_text Text column to ForumPost model and a schema migration.
+
+## Context
+Currently ForumPost.raw
+- [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
+Update fetch_single_post to store full_page_text from extractor. Update import_post_to_document to prefer ful
