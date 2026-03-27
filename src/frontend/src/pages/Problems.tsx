@@ -37,6 +37,7 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
 const TABS = [
   { key: "all", label: "All Problems" },
   { key: "blind75", label: "Blind Grind 75" },
+  { key: "companyFreq", label: "Company Freq" },
 ];
 
 // Stable schema for URL filter params (defined outside component to avoid re-creation)
@@ -179,23 +180,24 @@ export default function Problems() {
   });
 
   const isBlind75 = activeTab === "blind75";
-  // Load all results when searching or on Blind75 tab (159 problems total is safe)
-  const loadAll = isBlind75 || !!search;
+  const isCompanyFreq = activeTab === "companyFreq";
+  // Load all results when searching, on Blind75 tab, or Company Freq tab
+  const loadAll = isBlind75 || isCompanyFreq || !!search;
 
   const filters: ProblemFilters = useMemo(
     () => ({
       difficulty,
       pattern: pattern || undefined,
       source: isBlind75 ? "blind75" : source || undefined,
-      company: company || undefined,
+      company: isCompanyFreq ? (company || "LinkedIn") : (company || undefined),
       is_completed:
         completed === "all"
           ? undefined
           : completed === "yes",
       category,
-      sort_by: sortBy,
-      sort_order: sortOrder,
-      limit: loadAll ? 200 : PAGE_SIZE,
+      sort_by: isCompanyFreq ? "frequency_rank" as SortField : sortBy,
+      sort_order: isCompanyFreq ? "asc" as SortOrder : sortOrder,
+      limit: loadAll ? 1100 : PAGE_SIZE,
       offset: loadAll ? 0 : page * PAGE_SIZE,
     }),
     [
@@ -209,6 +211,8 @@ export default function Problems() {
       sortOrder,
       page,
       loadAll,
+      isBlind75,
+      isCompanyFreq,
     ],
   );
 
@@ -284,6 +288,14 @@ export default function Problems() {
       total: problems.length,
     };
   }, [problems, isBlind75]);
+
+  const companyFreqStats = useMemo(() => {
+    if (!isCompanyFreq) return { completed: 0, total: 0 };
+    return {
+      completed: problems.filter((p) => p.is_completed).length,
+      total: problems.length,
+    };
+  }, [problems, isCompanyFreq]);
 
   // Load all problems once to extract unique patterns for the dropdown
   const { data: allProblemsData } = useQuery({
@@ -561,6 +573,157 @@ export default function Problems() {
     </div>
   );
 
+  const COMPANY_FILTERS = ["LinkedIn", "Uber", "Adobe"] as const;
+  const activeCompany = company || "LinkedIn";
+
+  const renderCompanyFreqContent = () => (
+    <div className="space-y-4">
+      {/* Progress header */}
+      <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+        <h2 className="text-lg font-semibold text-purple-900 mb-2">
+          Company Frequency Progress
+        </h2>
+        <ProgressBar completed={companyFreqStats.completed} total={companyFreqStats.total} />
+      </div>
+
+      {/* Company filter buttons */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-medium text-gray-500 uppercase">Company:</span>
+        <div className="inline-flex rounded border border-gray-300 text-sm">
+          {COMPANY_FILTERS.map((c, i) => (
+            <button
+              key={c}
+              onClick={() => setCompany(c)}
+              className={`px-3 py-1 ${
+                activeCompany === c
+                  ? "bg-purple-600 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+              } ${i === 0 ? "rounded-l" : ""} ${
+                i === COMPANY_FILTERS.length - 1 ? "rounded-r" : ""
+              } ${i > 0 ? "border-l border-gray-300" : ""}`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+        <span className="text-xs text-gray-400 ml-2">
+          Sorted by interview frequency
+        </span>
+      </div>
+
+      {loading && <LoadingSpinner message="Loading problems..." />}
+
+      {!loading && problems.length === 0 && (
+        <EmptyState message="No company frequency problems found." />
+      )}
+
+      {/* Flat table sorted by frequency rank */}
+      {!loading && problems.length > 0 && (
+        <div className="overflow-x-auto rounded border border-gray-200">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
+              <tr>
+                <th className="px-3 py-2 w-14">Rank</th>
+                <th className="px-3 py-2 w-12">#</th>
+                <th className="px-3 py-2">Title</th>
+                <th className="px-3 py-2 w-24">Difficulty</th>
+                <th className="px-3 py-2 w-28">Pattern</th>
+                <th className="px-3 py-2 w-24">Comfort</th>
+                <th className="px-3 py-2 w-28">Notes</th>
+                <th className="px-3 py-2 w-20">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {problems.map((p) => (
+                <tr
+                  key={p.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
+                  <td className="px-3 py-2 text-gray-500 font-mono text-xs">
+                    {p.frequency_rank ?? "-"}
+                  </td>
+                  <td className="px-3 py-2 text-gray-400">
+                    {p.leetcode_id ?? "-"}
+                  </td>
+                  <td className="px-3 py-2">
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/problems/${p.id}`}
+                        className="text-blue-600 hover:underline font-medium truncate max-w-xs block"
+                        title="View description"
+                      >
+                        {p.title}
+                      </Link>
+                      {p.url && (
+                        <a
+                          href={p.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-400 hover:text-gray-600 shrink-0"
+                          title="Open on LeetCode"
+                        >
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                          </svg>
+                        </a>
+                      )}
+                      {p.is_completed && (
+                        <Badge variant="green">done</Badge>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-3 py-2">
+                    {p.difficulty && (
+                      <Badge
+                        variant={
+                          p.difficulty === "easy"
+                            ? "green"
+                            : p.difficulty === "medium"
+                              ? "yellow"
+                              : "red"
+                        }
+                        className="capitalize"
+                      >
+                        {p.difficulty}
+                      </Badge>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
+                  </td>
+                  <td className="px-3 py-2">
+                    <ComfortStars level={p.comfort_level} />
+                  </td>
+                  <td className="px-3 py-2">
+                    {p.notes ? (
+                      <Link
+                        to={`/problems/${p.id}`}
+                        className="text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded truncate max-w-[120px] block"
+                        title={p.notes}
+                      >
+                        {p.notes.slice(0, 40)}{p.notes.length > 40 ? "..." : ""}
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-gray-300">--</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <Link
+                      to={`/problems/${p.id}`}
+                      className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
+                    >
+                      View
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+
   const renderAllProblemsContent = () => (
     <>
       <div className="flex items-center justify-between mb-4">
@@ -761,8 +924,8 @@ export default function Problems() {
           </select>
         </fieldset>
 
-        {/* Source -- hidden in blind75 tab */}
-        {!isBlind75 && (
+        {/* Source -- hidden in blind75 and companyFreq tabs */}
+        {!isBlind75 && !isCompanyFreq && (
           <fieldset>
             <legend className="text-xs font-medium text-gray-500 mb-1">
               Source
@@ -777,19 +940,21 @@ export default function Problems() {
           </fieldset>
         )}
 
-        {/* Company */}
-        <fieldset>
-          <legend className="text-xs font-medium text-gray-500 mb-1">
-            Company
-          </legend>
-          <input
-            type="text"
-            value={company}
-            onChange={(e) => setCompany(e.target.value)}
-            placeholder="e.g. google"
-            className="w-full text-sm border border-gray-300 rounded px-2 py-1"
-          />
-        </fieldset>
+        {/* Company -- hidden in companyFreq tab (uses inline buttons) */}
+        {!isCompanyFreq && (
+          <fieldset>
+            <legend className="text-xs font-medium text-gray-500 mb-1">
+              Company
+            </legend>
+            <input
+              type="text"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              placeholder="e.g. google"
+              className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+            />
+          </fieldset>
+        )}
 
         {/* Completed */}
         <fieldset>
@@ -819,7 +984,11 @@ export default function Problems() {
           onTabChange={setActiveTab}
         >
           {(tab) => (
-            tab === "blind75" ? renderBlind75Content() : renderAllProblemsContent()
+            tab === "blind75"
+              ? renderBlind75Content()
+              : tab === "companyFreq"
+                ? renderCompanyFreqContent()
+                : renderAllProblemsContent()
           )}
         </Tabs>
       </div>

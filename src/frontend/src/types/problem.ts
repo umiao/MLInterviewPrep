@@ -20,6 +20,7 @@ export interface Problem {
   neetcode_slug: string | null;
   description_source: string | null;
   notes: string | null;
+  frequency_rank: number | null;
 }
 
 export type Difficulty = "easy" | "medium" | "hard";
@@ -29,7 +30,8 @@ export type SortField =
   | "last_attempted_at"
   | "next_review_at"
   | "created_at"
-  | "difficulty";
+  | "difficulty"
+  | "frequency_rank";
 export type SortOrder = "asc" | "desc";
 
 export type AttemptResult = "solved" | "hint" | "failed" | "timeout";

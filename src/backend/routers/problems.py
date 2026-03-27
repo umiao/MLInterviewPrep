@@ -52,6 +52,7 @@ def _problem_to_response(p: Problem) -> dict:
         "neetcode_slug": p.neetcode_slug,
         "description_source": p.description_source,
         "notes": p.notes,
+        "frequency_rank": p.frequency_rank,
     }
 
 
@@ -149,10 +150,10 @@ def list_problems(
     search: str | None = Query(default=None, description="Search across title, tags, pattern, company_tags, notes"),
     sort_by: Literal[
         "comfort_level", "last_attempted_at", "next_review_at", "created_at",
-        "difficulty",
+        "difficulty", "frequency_rank",
     ] = "created_at",
     sort_order: Literal["asc", "desc"] = "desc",
-    limit: int = Query(default=50, ge=1, le=200),
+    limit: int = Query(default=50, ge=1, le=1200),
     offset: int = Query(default=0, ge=0),
     db: Session = Depends(get_db),
 ) -> list[dict]:
@@ -199,6 +200,11 @@ def list_problems(
         )
         rank_order = difficulty_rank.asc() if sort_order == "asc" else difficulty_rank.desc()
         query = query.order_by(null_last.asc(), rank_order)
+    elif sort_by == "frequency_rank":
+        # Nulls last for frequency_rank
+        null_last = case((Problem.frequency_rank.is_(None), 1), else_=0)
+        freq_order = Problem.frequency_rank.asc() if sort_order == "asc" else Problem.frequency_rank.desc()
+        query = query.order_by(null_last.asc(), freq_order)
     else:
         sort_col = getattr(Problem, sort_by)
         order = sort_col.asc() if sort_order == "asc" else sort_col.desc()

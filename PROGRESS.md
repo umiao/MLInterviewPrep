@@ -297,3 +297,9 @@
 - **Deliverables**: `src/frontend/src/components/timeline/InterviewTimeline.tsx` (useCountdown hook + EventCard integration)
 - **Sanity check result**: TypeScript compiles cleanly (tsc --noEmit passes). Hook only runs for upcoming events (isPast=false guard preserved). Past events show no countdown. Format strictly HH:MM:SS with zero-padding.
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-205] Add Company Frequency tab to Problems page
+- **What I did**: Added "Company Freq" tab to Problems page showing 1014 LinkedIn/Uber/Adobe frequency-sorted problems. Backend: added `frequency_rank` column to Problem model, added it to sort_by options and API response, increased limit to 1200. Created migration script to populate frequency_rank from parsed JSON. Frontend: new tab with purple-themed progress bar, company filter buttons (LinkedIn/Uber/Adobe), flat table sorted by frequency rank with Rank column. Hid sidebar source/company filters when on this tab.
+- **Deliverables**: `src/backend/models/problem.py` (frequency_rank column), `src/backend/routers/problems.py` (sort + response), `src/backend/schemas/problem.py` (response field), `src/frontend/src/types/problem.ts` (type updates), `src/frontend/src/pages/Problems.tsx` (tab + render), `scripts/add_frequency_rank.py` (migration)
+- **Sanity check result**: TypeScript compiles cleanly. All 1006 tests pass. 1014 rows updated with frequency_rank (1-1014). Python ruff clean. Backend imports verified.
+- **Status**: [DONE]

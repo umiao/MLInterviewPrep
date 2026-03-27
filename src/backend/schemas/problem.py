@@ -72,6 +72,7 @@ class ProblemResponse(BaseModel):
     neetcode_slug: str | None = None
     description_source: str | None = None
     notes: str | None = None
+    frequency_rank: int | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
