@@ -51,7 +51,7 @@ export default function MarkdownPreview({
       prose-strong:text-gray-900
     ">
       <ReactMarkdown
-        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: false }]]}
+        remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
         rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
           input: ({ type, ...rest }) => {
