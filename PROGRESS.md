@@ -357,3 +357,10 @@
 - **Deliverables**: `src/frontend/src/components/ui/MarkdownPreview.tsx` (added rehype-raw import + plugin), `src/frontend/package.json` + `package-lock.json` (rehype-raw dependency)
 - **Sanity check result**: TypeScript compiles cleanly (tsc --noEmit). Vite production build succeeds. rehype-raw placed before rehypeKatex in plugin chain so HTML passes through before KaTeX processes math.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-229] Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder
+- **What I did**: Rewrote seed_adobe_day1_diffusion.py to use StudyNoteBuilder API instead of raw strings. Fixed Builder gap: added paired inline math ($...$) support to _check_single_dollars and validate (only orphan/unpaired $ flagged now). Added noise schedule ASCII diagram. Enhanced content with: Prerequisites (4 items), Term Registry (9 terms: DDPM, VAE, UNet, CFG, CLIP, latent space, noise schedule, epsilon-prediction, cross-attention), FormulaBlock for all 9 display math formulas, intuitive explanations before each formula, 2 HTML diagrams (pipeline + noise schedule), comparison tables, self-check checklist. Updated DB document id=5 (8676 -> 12183 chars). Added 3 new tests for inline math support.
+- **Deliverables**: `scripts/study_note_builder.py` (inline math support in _check_single_dollars + validate), `scripts/seed_adobe_day1_diffusion.py` (full Builder rewrite), `tests/test_study_note_builder.py` (3 new/updated tests: orphan dollar, paired inline math, validate paired math)
+- **Sanity check result**: 27/27 tests pass. 0 validation warnings. 17/17 content checks pass (header, title, prerequisites, 5 terms registered, FormulaBlock $$, HTML diagrams, checklist, quick reference, no orphan $, auto-bold, intuitions, inline math). TypeScript clean. Builder API validated -- works for full document generation.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-229 --status completed`

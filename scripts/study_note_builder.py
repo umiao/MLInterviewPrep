@@ -263,7 +263,8 @@ class StudyNoteBuilder:
     def _check_single_dollars(self, content: str) -> None:
         """Raise ValueError if orphan single-dollar signs are found.
 
-        Scans all prose blocks (skips code blocks and double-dollar blocks).
+        Scans all prose blocks (skips code blocks, double-dollar blocks,
+        and paired inline math ``$...$``).
         """
         # Remove code blocks
         no_code = re.sub(r"```[\s\S]*?```", "", content)
@@ -271,14 +272,16 @@ class StudyNoteBuilder:
         no_math = re.sub(r"\$\$[\s\S]*?\$\$", "", no_code)
         # Remove inline code
         no_inline_code = re.sub(r"`[^`]+`", "", no_math)
+        # Remove paired inline math ($...$) -- non-greedy, same-line only
+        no_inline_math = re.sub(r"\$[^$\n]+\$", "", no_inline_code)
 
-        matches = list(_SINGLE_DOLLAR_RE.finditer(no_inline_code))
+        matches = list(_SINGLE_DOLLAR_RE.finditer(no_inline_math))
         if matches:
             # Find context around first match
             pos = matches[0].start()
             start = max(0, pos - 30)
-            end = min(len(no_inline_code), pos + 30)
-            context = no_inline_code[start:end].replace("\n", "\\n")
+            end = min(len(no_inline_math), pos + 30)
+            context = no_inline_math[start:end].replace("\n", "\\n")
             raise ValueError(
                 f"Orphan single-dollar sign found ({len(matches)} total). "
                 f"Use FormulaBlock for math or $$ for display math. "
@@ -298,7 +301,9 @@ class StudyNoteBuilder:
         no_code = re.sub(r"```[\s\S]*?```", "", content)
         no_math = re.sub(r"\$\$[\s\S]*?\$\$", "", no_code)
         no_inline_code = re.sub(r"`[^`]+`", "", no_math)
-        singles = list(_SINGLE_DOLLAR_RE.finditer(no_inline_code))
+        # Remove paired inline math ($...$)
+        no_inline_math = re.sub(r"\$[^$\n]+\$", "", no_inline_code)
+        singles = list(_SINGLE_DOLLAR_RE.finditer(no_inline_math))
         if singles:
             warnings.append(
                 f"Found {len(singles)} orphan single-dollar sign(s). "

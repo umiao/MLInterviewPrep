@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-227, T-P0-228
-- **Description**: END-TO-END PILOT to validate Builder API before scaling. Take Adobe Day 1 doc (company_documents id=5, Diffusion Models) and rewrite using StudyNoteBuilder. This is the API stress test -- if Builder API proves inadequate, fix it here before touching 6 more docs. Pilot covers ALL enhancement goals: (1) Use Builder to generate content. (2) Add Prerequisites (basic probability, neural nets, VAE concept, convolutions). (3) Register all terms: DDPM, VAE, UNet, CFG, CLIP, latent space, noise schedule, epsilon-prediction, cross-attention. (4) Use FormulaBlock for all math (DDPM forward, reparameterization, training loss, CFG). (5) Add intuitive explanations before each formula. (6) HTML diagrams (pipeline, noise schedule). (7) Self-check checklist. (8) Verify output renders correctly with rehype-raw + double-dollar. OUTCOME: (a) If Builder API works -> proceed to scale. (b) If API needs changes -> fix Builder first, THEN scale. AC: Day 1 doc renders perfectly (math + HTML + terms bolded + prerequisites). Builder API validated.
-
 #### T-P0-230: Scale: Rewrite remaining 6 Adobe docs with validated Builder
 - **Priority**: P0
 - **Complexity**: L
@@ -122,6 +116,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder. END-TO-END PILOT to validate Builder API before scaling. Take Adobe Day 1 doc (company_documents id=5, Diffusion Models)
 - [x] **2026-03-27** -- T-P0-228: Enable rehype-raw in MarkdownPreview. Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, ad
 - [x] **2026-03-27** -- T-P0-227: Minimal StudyNoteBuilder + FormulaBlock typed constraint. Minimal viable Builder with one typed block (FormulaBlock). Design: (1) FormulaBlock dataclass: latex:str, explanation:s
 - [x] **2026-03-27** -- T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards. Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, 
