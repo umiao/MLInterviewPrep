@@ -9,6 +9,42 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry loss formula. (3) DPO loss formula with full derivation intuition. (4) DPO vs RLHF trade-off table. (5) LLM Distillation: KL divergence on logit distribution, temperature scaling, 70B->7B design. (6) Error corrections from user's previous misunderstandings. All formulas use 622. Checklist items for self-check.
+
+#### T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full replica + gradient AllReduce. (3) TP: intra-layer matrix split (attention heads + MLP column/row). (4) PP: inter-layer split + micro-batch pipeline + bubble. (5) FSDP/ZeRO Stage 1/2/3. (6) Selection guide: 13B model on A100 80GB example with memory estimation formula. (7) 3D parallelism. All formulas use 622. Checklist items.
+
+#### T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram of rotation. (2) vs Sinusoidal/Learned PE comparison table. (3) Long context methods: Position Interpolation, NTK-aware scaling, YaRN. (4) Video generation: temporal attention, 3D VAE, motion modules, Sora/DiT architecture. (5) Core challenges: temporal consistency, motion coherence, memory. All formulas use 622. Checklist items.
+
+#### T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table: GPTQ vs AWQ vs Weight-only INT4 vs W8A8. (3) Serving: Continuous Batching, Speculative Decoding, KV-Cache quantization, PagedAttention. (4) Project narrative mapping table: user's experience -> Adobe interview framing (operator fusion->FlashAttention, quantization->GPTQ/AWQ, HW optimization->KV-cache). All formulas use 440. Checklist.
+
+#### T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story outlines mapped to Adobe JD. (3) 13 high-frequency interview questions with structured answer outlines: Diffusion (Q1-4), Inference (Q5-7), Distributed (Q8-10), Alignment (Q11-12), System Design (Q13). (4) Interview speech templates (opening, handling unknowns, steering to strengths). (5) Common error correction quick-reference card.
+
+#### T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, Video) with checkbox items from Days 1-6. (2) HTML concept map showing connections between all topics. (3) Error correction quick-reference table (7 common misunderstandings). (4) Daily time allocation table. All formulas use 440.
+
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
@@ -37,6 +73,46 @@ Should be done AFTER [SYNC] helixos: Fix broken hooks task.
 - **Depends on**: None
 - **Description**: MLInterviewPrep has: (1) setup_python_env.sh SessionStart hook that writes Anaconda to CLAUDE_ENV_FILE, (2) /c/Anaconda/python.exe absolute paths in all settings.json hook commands. helixos and claude-code-project-template both use bare python in settings.json and have no setup_python_env.sh. Per LESSONS.md: Bash tool runs non-login shells, .bashrc not sourced, bare python resolves to Windows Store stub. Source: MLInterviewPrep/.claude/hooks/setup_python_env.sh and settings.json. Action: copy setup_python_env.sh to helixos and template, update settings.json hook commands to use absolute path.
 
+#### T-P2-206: [SYNC] Propagate 2 universal lessons to helixos LESSONS.md
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos/LESSONS.md is missing 2 universal lessons already in the template:
+1. [2026-03-02] Ruff version drift between local and CI (#ruff #ci) -- loose ruff pin causes CI-only failures; fix: pin ruff==X.Y.Z in requirements.txt.
+2. [2026-03-11] Task ID P = Phase anti-pattern went undetected (#task-naming #convention-drift) -- P should always mean priority, never phase/stage.
+
+Action: Append both entries (verbatim from template LESSONS.md) to helixos/LESSONS.md. Source: claude-code-project-template/LESSONS.md.
+
+#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos/.claude/hooks/test_check.py still imports and uses check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed the cache in T-P2-188 (commit abf6543), per the lesson that stop caches can produce false passes when files change between sessions.
+
+Action: Update helixos/.claude/hooks/test_check.py to match MLInterviewPrep version -- remove check_stop_cache/write_stop_cache import and usage. Run tests after to confirm hook still works.
+
+Source: MLInterviewPrep/.claude/hooks/test_check.py (current, cache-free version).
+
+#### T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: claude-code-project-template/.claude/hooks/test_check.py still uses check_stop_cache/write_stop_cache from hook_utils. The lesson [2026-03-18] established that stop caches cause false PASS results when files change between sessions. MLInterviewPrep already fixed this.
+
+Action: Update template/.claude/hooks/test_check.py to match MLInterviewPrep version -- remove cache import and usage. The template is the reference baseline, so it should have the best-known version of all hooks.
+
+Source: MLInterviewPrep/.claude/hooks/test_check.py.
+
+#### T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .claude/tasks.db is absent but TASKS.md has tasks, it warns the user to run task_db.py import. This is useful for fresh-clone scenarios.
+
+MLInterviewPrep/.claude/hooks/session_context.py is missing this warning block.
+
+Action: Port the db_missing_warning block from template to MLInterviewPrep session_context.py.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -58,6 +134,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-210: Adobe Prep Day1: Diffusion Models deep-dive note. Create comprehensive study note for Diffusion Models (Adobe's core tech). Content: (1) DDPM forward process with full ma
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t

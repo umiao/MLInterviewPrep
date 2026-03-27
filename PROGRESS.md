@@ -303,3 +303,9 @@
 - **Deliverables**: `src/backend/models/problem.py` (frequency_rank column), `src/backend/routers/problems.py` (sort + response), `src/backend/schemas/problem.py` (response field), `src/frontend/src/types/problem.ts` (type updates), `src/frontend/src/pages/Problems.tsx` (tab + render), `scripts/add_frequency_rank.py` (migration)
 - **Sanity check result**: TypeScript compiles cleanly. All 1006 tests pass. 1014 rows updated with frequency_rank (1-1014). Python ruff clean. Backend imports verified.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-210] Adobe Prep Day1: Diffusion Models deep-dive note
+- **What I did**: Created comprehensive Diffusion Models study note as CompanyDocument under Adobe (id=23). Content covers: (1) DDPM forward process with full math (reparameterization trick, alpha-bar closed form), (2) Reverse process (denoising network, MSE loss, sampling algorithm), (3) Latent Diffusion / Stable Diffusion pipeline with HTML concept diagram (Text->CLIP->Cross-Attention->UNet->VAE->Image), (4) CFG formula with guidance scale explanation, (5) Noise schedules (linear vs cosine comparison), (6) Advanced topics (DDIM, Score-based SDE). Includes 4 self-check questions and quick reference card.
+- **Deliverables**: `scripts/seed_adobe_day1_diffusion.py` (seed script, idempotent)
+- **Sanity check result**: Document inserted (id=5, 8676 chars). All 6 required sections present. HTML diagram renders. 4 checkbox self-check questions. Ruff clean. Idempotent re-run skips correctly.
+- **Status**: [DONE]
