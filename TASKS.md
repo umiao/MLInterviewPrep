@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table: GPTQ vs AWQ vs Weight-only INT4 vs W8A8. (3) Serving: Continuous Batching, Speculative Decoding, KV-Cache quantization, PagedAttention. (4) Project narrative mapping table: user's experience -> Adobe interview framing (operator fusion->FlashAttention, quantization->GPTQ/AWQ, HW optimization->KV-cache). All formulas use 440. Checklist.
-
 #### T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories
 - **Priority**: P0
 - **Complexity**: M
@@ -116,6 +110,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note. Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table:
 - [x] **2026-03-27** -- T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note. Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram
 - [x] **2026-03-27** -- T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note. Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full repli
 - [x] **2026-03-27** -- T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note. Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry 
