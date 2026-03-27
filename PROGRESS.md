@@ -399,3 +399,10 @@
 - **Sanity check result**: 0 validation warnings. Builder header present. 18 sections (Prerequisites, Key Terms, 6 content sections with subsections, Self-Check, Quick Reference). 25,610 chars (up from 25,315 -- added prerequisites, term registry, cross-references). 7 HTML diagrams, 13 terms, 40 math regions, cross-references verified.
 - **Status**: [PARTIAL] (4 of 6 docs rewritten; Days 6-7 remain)
 - **Request**: No task_db status change (task still in progress)
+
+## 2026-03-27 -- [T-P0-230] Rewrite Day 6 Mock Interview doc with StudyNoteBuilder (5/6)
+- **What I did**: Rewrote seed_adobe_day6_mock_interview.py from raw string format to StudyNoteBuilder API. Added: Prerequisites (5 items cross-referencing Days 1-5), Term Registry (14 terms: STAR-T, DDPM, DDIM, CFG, LDM, FlashAttention, GPTQ, AWQ, FSDP, DPO, RLHF, PPO, KV-cache, DiT), FormulaBlock for all display math (13 math regions: DDPM forward/jump/loss, CFG equation, FlashAttention IO complexity, speculative decoding acceptance/correction, PP bubble, FSDP memory, Bradley-Terry, RLHF objective, DPO loss, KL constraint), 23 HTML diagrams (STAR-T framework table, fill-in template, 3 project story outlines, 13 Q&A answer blocks, 4 speech templates, error correction table, quick reference card), 5 self-check questions with Day 1/2/3/5 cross-references, comparison of all 13 interview domains. Deleted old raw-string doc from DB, inserted Builder-generated version.
+- **Deliverables**: `scripts/seed_adobe_day6_mock_interview.py` (full Builder rewrite)
+- **Sanity check result**: 0 validation warnings. Builder header present. 33 sections (Prerequisites, Key Terms, 5 major content sections with subsections, Self-Check, Quick Reference). 45,631 chars (up from 41,619 -- added prerequisites, term registry, FormulaBlock math, cross-references). 23 HTML diagrams, 14 terms, 13 math regions, cross-references verified.
+- **Status**: [PARTIAL] (5 of 6 docs rewritten; Day 7 remains)
+- **Request**: No task_db status change (task still in progress)
