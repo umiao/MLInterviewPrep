@@ -321,3 +321,9 @@
 - **Deliverables**: `scripts/seed_adobe_day3_distributed.py` (seed script, idempotent)
 - **Sanity check result**: Document inserted (id=7, 17374 chars). All 8 required sections present. 12 HTML diagram blocks. 4 checkbox self-check questions. Ruff clean. Idempotent re-run skips correctly.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-213] Adobe Prep Day4: RoPE + long context + video generation note
+- **What I did**: Created comprehensive RoPE + Long Context + Video Generation study note as CompanyDocument under Adobe (id=23). Content covers: (1) Why PE matters (4 requirements), (2) RoPE: rotation matrix formulation, theta_i formula, proof that q_m*k_n depends only on m-n, efficient complex-number implementation, (3) PE comparison table (Sinusoidal vs Learned vs ALiBi vs RoPE), (4) Long context methods: Position Interpolation (linear scaling), NTK-aware scaling (base freq adjustment), YaRN (per-dimension PI/NTK + attention temp), summary table, (5) Video generation: 3D VAE (temporal+spatial compression), temporal attention, motion modules, Sora/DiT architecture with spacetime patches, challenges table (5 challenges), Adobe Firefly context, (6) 5 common misunderstandings with corrections. Includes 4 self-check questions and quick reference card.
+- **Deliverables**: `scripts/seed_adobe_day4_rope_video.py` (seed script, idempotent)
+- **Sanity check result**: Document inserted (id=8, 22549 chars). All 6 main sections present. 23 HTML div blocks. 4 checkbox self-check questions. All 10 required topics present (RoPE, theta_i, PI, NTK, YaRN, Video, DiT, temporal attention, 3D VAE, Firefly). Ruff clean. Idempotent re-run skips correctly.
+- **Status**: [DONE]

@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram of rotation. (2) vs Sinusoidal/Learned PE comparison table. (3) Long context methods: Position Interpolation, NTK-aware scaling, YaRN. (4) Video generation: temporal attention, 3D VAE, motion modules, Sora/DiT architecture. (5) Core challenges: temporal consistency, motion coherence, memory. All formulas use 622. Checklist items.
-
 #### T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note
 - **Priority**: P0
 - **Complexity**: M
@@ -122,6 +116,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note. Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram
 - [x] **2026-03-27** -- T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note. Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full repli
 - [x] **2026-03-27** -- T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note. Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry 
 - [x] **2026-03-27** -- T-P0-210: Adobe Prep Day1: Diffusion Models deep-dive note. Create comprehensive study note for Diffusion Models (Adobe's core tech). Content: (1) DDPM forward process with full ma
