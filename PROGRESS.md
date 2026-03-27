@@ -267,3 +267,9 @@
 - **Deliverables**: `src/frontend/src/pages/Questions.tsx` modified
 - **Sanity check result**: TypeScript compiles clean (tsc --noEmit passes with no errors)
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-200] Add Adobe phone screen event to interview timeline
+- **What I did**: Added Adobe phone screen event to the interview timeline. Created Adobe company entry (id=23, status=phone_screen) and interview event (id=6, event_type=phone_screen, scheduled_at=2026-03-30T09:00:00, status=upcoming). Description notes exact time TBD. Also updated seed_interview_events.py with the Adobe event for idempotent re-seeding.
+- **Deliverables**: `data/mle_prep.db` updated (new company + event), `scripts/seed_interview_events.py` modified
+- **Sanity check result**: Verified via SQL: Adobe phone screen appears in timeline sorted by date, Adobe company exists with status=phone_screen. All 6 events display correctly.
+- **Status**: [DONE]

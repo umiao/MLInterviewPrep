@@ -1,4 +1,4 @@
-"""Seed DoorDash and Uber interview events into the timeline.
+"""Seed interview events into the timeline.
 
 Idempotent: skips events that already exist (matched by company_name + scheduled_at).
 """
@@ -23,6 +23,15 @@ EVENTS = [
         "description": "HR screening call",
         "scheduled_at": "2026-03-23T11:10:00",
         "duration_minutes": 30,
+        "status": "upcoming",
+    },
+    {
+        "company_name": "Adobe",
+        "event_type": "phone_screen",
+        "title": "Phone Screen",
+        "description": "Adobe phone screen - exact time TBD, week of March 30 - April 3 2026",
+        "scheduled_at": "2026-03-30T09:00:00",
+        "duration_minutes": 60,
         "status": "upcoming",
     },
 ]
