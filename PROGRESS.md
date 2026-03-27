@@ -378,3 +378,10 @@
 - **Sanity check result**: 0 validation warnings. Builder header present. All sections present (Prerequisites, Key Terms, 6 content sections, Self-Check, Quick Reference). Zero orphan single-dollar signs. 17,852 chars (up from 13,286). HTML diagrams, comparison tables, cross-references all verified.
 - **Status**: [PARTIAL] (1 of 6 docs rewritten; Days 3-7 remain)
 - **Request**: No task_db status change (task still in progress)
+
+## 2026-03-27 -- [T-P0-230] Rewrite Day 3 Distributed Training doc with StudyNoteBuilder (2/6)
+- **What I did**: Rewrote seed_adobe_day3_distributed.py from raw string format to StudyNoteBuilder API. Added: Prerequisites (4 items incl. Day 2/Day 5 cross-references), Term Registry (12 terms: DP, TP, PP, FSDP, ZeRO, AllReduce, AllGather, ReduceScatter, NVLink, activation checkpointing, 3D parallelism, DDP), FormulaBlock for all display math (AllReduce average, AllReduce volume, column/row split matrices, partial sum, TP comm, naive bubble, micro-batch bubble, ZeRO Stage 3 volume, memory estimation, activation memory), 3 HTML diagrams (parallelism overview table, ZeRO stages memory table, 3D parallelism layout), comparison tables (PP variants, FSDP vs DDP, bandwidth ordering, real-world 3D examples), 5 error correction cards, 5 self-check questions with Day 5 cross-reference, quick reference card. Deleted old raw-string doc from DB, inserted Builder-generated version.
+- **Deliverables**: `scripts/seed_adobe_day3_distributed.py` (full Builder rewrite)
+- **Sanity check result**: 0 validation warnings. Builder header present. All 13 sections present (Prerequisites, Key Terms, 8 content sections, Self-Check, Quick Reference). 19,574 chars (up from 17,374). 3 HTML diagrams, 12 terms, cross-references verified.
+- **Status**: [PARTIAL] (2 of 6 docs rewritten; Days 4-7 remain)
+- **Request**: No task_db status change (task still in progress)
