@@ -291,3 +291,9 @@
 - **Deliverables**: `scripts/verify_lc_import.py` (verification script)
 - **Sanity check result**: All 5 checks pass. 1029 total problems, 1014 correctly tagged with LinkedIn+Uber+Adobe.
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-204] Add real-time HH:MM:SS countdown to dashboard timeline events
+- **What I did**: Replaced static countdown text (e.g. "in 3 days") with a live ticking HH:MM:SS countdown in InterviewTimeline.tsx. Created useCountdown hook using useState+useEffect+setInterval(1000ms). Removed old countdown() function. Added font-mono class for consistent digit width.
+- **Deliverables**: `src/frontend/src/components/timeline/InterviewTimeline.tsx` (useCountdown hook + EventCard integration)
+- **Sanity check result**: TypeScript compiles cleanly (tsc --noEmit passes). Hook only runs for upcoming events (isPast=false guard preserved). Past events show no countdown. Format strictly HH:MM:SS with zero-padding.
+- **Status**: [DONE]

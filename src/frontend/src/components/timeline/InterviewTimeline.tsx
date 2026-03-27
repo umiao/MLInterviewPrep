@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../utils/api";
 import type { InterviewEvent } from "../../types/timeline";
@@ -6,6 +7,28 @@ import type { EventType } from "../../types/timeline";
 import type { Company } from "../../types/company";
 import { countUnchecked } from "../../utils/markdown";
 import Skeleton from "../ui/Skeleton";
+
+/** Live countdown hook returning HH:MM:SS string. */
+function useCountdown(scheduledAt: string): string {
+  const compute = () => {
+    const diffMs = new Date(scheduledAt).getTime() - Date.now();
+    if (diffMs <= 0) return "00:00:00";
+    const totalSec = Math.floor(diffMs / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  };
+
+  const [display, setDisplay] = useState(compute);
+
+  useEffect(() => {
+    const id = setInterval(() => setDisplay(compute()), 1000);
+    return () => clearInterval(id);
+  }, [scheduledAt]);
+
+  return display;
+}
 
 /** Color of the left border based on urgency. */
 function urgencyColor(scheduledAt: string, isPast: boolean): string {
@@ -20,20 +43,6 @@ function urgencyColor(scheduledAt: string, isPast: boolean): string {
   return "border-l-blue-400";
 }
 
-/** Human-friendly countdown text. */
-function countdown(scheduledAt: string): string {
-  const now = new Date();
-  const d = new Date(scheduledAt);
-  const diffMs = d.getTime() - now.getTime();
-  if (diffMs < 0) return "Past";
-  const diffMins = Math.floor(diffMs / 60000);
-  if (diffMins < 60) return `in ${diffMins}m`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `in ${diffHours}h`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "Tomorrow";
-  return `in ${diffDays} days`;
-}
 
 function formatDateTime(iso: string): string {
   const d = new Date(iso);
@@ -184,6 +193,7 @@ function EventCard({
   onClick: () => void;
   onCompanyClick?: (companyName: string, companyId: number) => void;
 }) {
+  const countdownText = useCountdown(event.scheduled_at);
   const badgeColor = TYPE_BADGE_COLORS[event.event_type] ?? TYPE_BADGE_COLORS.other;
   const label = EVENT_TYPE_LABELS[event.event_type as EventType] ?? event.event_type;
   const uncheckedCount = company ? countUnchecked(company.prep_notes) : 0;
@@ -228,7 +238,7 @@ function EventCard({
           <span className="font-semibold text-sm text-gray-800">{event.company_name}</span>
         )}
         {!isPast && (
-          <span className="ml-auto text-xs text-gray-500">{countdown(event.scheduled_at)}</span>
+          <span className="ml-auto text-xs font-mono text-gray-500">{countdownText}</span>
         )}
       </div>
       <div className="flex items-center gap-2 text-xs text-gray-500">
