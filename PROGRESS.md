@@ -285,3 +285,9 @@
 - **Deliverables**: `scripts/import_staging_lc.py` (import script)
 - **Sanity check result**: 1029 total problems in DB (158 pre-existing + 870 new + 1 null-id). All 1014 parsed problems have LinkedIn+Uber+Adobe tags. 0 duplicate leetcode_ids. 86 problems with notes preserved, 88 completed problems preserved. 15 pre-existing problems not in parsed file correctly retained without new tags.
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-203] Verify imported problems: counts, tags, frequency order
+- **What I did**: Wrote verification script (scripts/verify_lc_import.py) with 5 checks: (1) company tag counts = 1014 each, (2) first/last 10 parsed problems match DB by leetcode_id and title, (3) data retention (86 notes, 88 completed, 15 untagged pre-existing), (4) no duplicate leetcode_ids (1028 distinct), (5) all 1028 URLs well-formed (1023 leetcode.com + 5 alternative sources).
+- **Deliverables**: `scripts/verify_lc_import.py` (verification script)
+- **Sanity check result**: All 5 checks pass. 1029 total problems, 1014 correctly tagged with LinkedIn+Uber+Adobe.
+- **Status**: [DONE]
