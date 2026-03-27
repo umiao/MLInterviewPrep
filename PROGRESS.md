@@ -406,3 +406,10 @@
 - **Sanity check result**: 0 validation warnings. Builder header present. 33 sections (Prerequisites, Key Terms, 5 major content sections with subsections, Self-Check, Quick Reference). 45,631 chars (up from 41,619 -- added prerequisites, term registry, FormulaBlock math, cross-references). 23 HTML diagrams, 14 terms, 13 math regions, cross-references verified.
 - **Status**: [PARTIAL] (5 of 6 docs rewritten; Day 7 remains)
 - **Request**: No task_db status change (task still in progress)
+
+## 2026-03-27 -- [T-P0-230] Rewrite Day 7 Review doc with StudyNoteBuilder (6/6)
+- **What I did**: Rewrote seed_adobe_day7_review.py from raw string format to StudyNoteBuilder API. Added: Prerequisites (6 items cross-referencing all Days 1-6), Term Registry (20 terms: DDPM, DDIM, CFG, LDM, RLHF, DPO, PPO, FSDP, TP, PP, RoPE, FlashAttention, GPTQ, AWQ, KV-cache, DiT, YaRN, STAR-T, SmoothQuant, PagedAttention), FormulaBlock for all display math (15 formula blocks: DDPM forward/loss, CFG, Bradley-Terry, DPO loss, KD loss, memory-per-param, FSDP memory, PP bubble, RoPE angle, PI scaling, NTK scaling, FlashAttention IO, KV-cache size, speculative decoding acceptance), 14 HTML diagrams (6 domain checklists, concept map with cross-topic connections table, 7 error correction cards, time allocation table, 5 formula cheat sheet tables, self-check questions, quick reference card), 5 self-check questions with Day 1-6 cross-references, checklist tracker. Deleted old raw-string doc from DB, inserted Builder-generated version.
+- **Deliverables**: `scripts/seed_adobe_day7_review.py` (full Builder rewrite)
+- **Sanity check result**: 0 validation warnings. Builder header present. 20 sections, 65 HTML blocks, 20 terms, 15 formula blocks, 9 cross-references, 41,436 chars. All content preserved from original.
+- **Status**: [DONE] (6 of 6 docs rewritten; T-P0-230 complete -- all 7 Adobe docs now use StudyNoteBuilder)
+- **Request**: `task_db.py update T-P0-230 --status completed`
