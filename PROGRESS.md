@@ -392,3 +392,10 @@
 - **Sanity check result**: 0 validation warnings. Builder header present. All 11 sections present (Prerequisites, Key Terms, 6 content sections, Self-Check, Quick Reference). 21,838 chars (down from 22,549 -- HTML diagrams preserved, raw-string overhead removed). 5 HTML diagrams, 11 terms, cross-references verified.
 - **Status**: [PARTIAL] (3 of 6 docs rewritten; Days 5-7 remain)
 - **Request**: No task_db status change (task still in progress)
+
+## 2026-03-27 -- [T-P0-230] Rewrite Day 5 Inference doc with StudyNoteBuilder (4/6)
+- **What I did**: Rewrote seed_adobe_day5_inference.py from raw string format to StudyNoteBuilder API. Added: Prerequisites (4 items incl. Day 1/Day 3/Day 4 cross-references), Term Registry (13 terms: FlashAttention, HBM, SRAM, GPTQ, AWQ, SmoothQuant, KV-cache, PagedAttention, vLLM, Continuous Batching, Speculative Decoding, OBS, TensorRT-LLM), FormulaBlock for all display math (standard attention, GPTQ Hessian compensation, SmoothQuant transformation, KV-cache memory formula), 7 HTML diagrams (GPU memory hierarchy, FlashAttention tiling, IO complexity, PagedAttention, continuous batching, speculative decoding, project mapping table), comparison tables (quantization methods 4-way, serving frameworks 4-way), 5 error correction cards, 5 self-check questions with Day 3/Day 4 cross-references, quick reference card. Deleted old raw-string doc from DB, inserted Builder-generated version.
+- **Deliverables**: `scripts/seed_adobe_day5_inference.py` (full Builder rewrite)
+- **Sanity check result**: 0 validation warnings. Builder header present. 18 sections (Prerequisites, Key Terms, 6 content sections with subsections, Self-Check, Quick Reference). 25,610 chars (up from 25,315 -- added prerequisites, term registry, cross-references). 7 HTML diagrams, 13 terms, 40 math regions, cross-references verified.
+- **Status**: [PARTIAL] (4 of 6 docs rewritten; Days 6-7 remain)
+- **Request**: No task_db status change (task still in progress)
