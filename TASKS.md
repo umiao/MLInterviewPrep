@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-201: Parse staging LC file: extract problems for LinkedIn/Uber/Adobe
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Parse 'LC to be added 题解.txt' (3613 lines, 1014 problems) from C:\Users\Shenghui Xu\Desktop\staging. All three companies mixed together - tag ALL with LinkedIn+Uber+Adobe. Steps: (1) Write parser to extract all problem entries (LC ID, title, frequency_rank). Handle 2 format zones: Zone1 (lines 1-334, 207 problems, no pct) and Zone2 (lines 337-3559, 807 problems, with pct+difficulty). (2) Output clean JSON with lc_id, title, difficulty, frequency_rank. AC: Parser produces clean JSON with 1014 entries, no duplicates.
-
 #### T-P1-202: Batch import parsed LC problems into DB with company tags
 - **Priority**: P1
 - **Complexity**: M
@@ -79,6 +73,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-201: Parse staging LC file: extract problems for LinkedIn/Uber/Adobe. Parse 'LC to be added 题解.txt' (3613 lines, 1014 problems) from C:\Users\Shenghui Xu\Desktop\staging. All three companies
 - [x] **2026-03-26** -- T-P1-200: Add Adobe phone screen event to interview timeline. Add Adobe phone screen. Company=Adobe, event_type=phone_screen, week of March 30-April 3 2026 (exact time TBD). Steps: I
 - [x] **2026-03-26** -- T-P1-199: Fix Interview Questions table column alignment. Columns misaligned and squeezed on Questions page. Root cause: Questions.tsx table uses default table-layout:auto. Fix: 
 - [x] **2026-03-26** -- T-P1-198: Debug LinkedIn HR prep materials not showing in UI view. User reports LinkedIn HR call prep materials not visible in UI. Data EXISTS in DB: companies.prep_notes (448 chars), com

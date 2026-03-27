@@ -273,3 +273,9 @@
 - **Deliverables**: `data/mle_prep.db` updated (new company + event), `scripts/seed_interview_events.py` modified
 - **Sanity check result**: Verified via SQL: Adobe phone screen appears in timeline sorted by date, Adobe company exists with status=phone_screen. All 6 events display correctly.
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-201] Parse staging LC file: extract problems for LinkedIn/Uber/Adobe
+- **What I did**: Wrote parser script (scripts/parse_staging_lc.py) to extract all LeetCode problems from staging file 'LC to be added'. Handles two format zones: Zone1 (lines 1-334, 208 problems, no difficulty) and Zone2 (lines 337-3561, 806 problems, with pct+difficulty). All tagged with LinkedIn+Uber+Adobe company tags.
+- **Deliverables**: `scripts/parse_staging_lc.py` (parser), `data/staging_lc_parsed.json` (1014 problems)
+- **Sanity check result**: 1014 unique problems, no duplicates, 208+806=1014, all have company_tags, frequency_rank 1-1014 preserved
+- **Status**: [DONE]
