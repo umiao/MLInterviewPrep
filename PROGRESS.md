@@ -339,3 +339,9 @@
 - **Deliverables**: `scripts/seed_adobe_day6_mock_interview.py` (seed script, idempotent)
 - **Sanity check result**: Document inserted (id=10, 41619 chars). All 5 main sections present. 76 HTML div blocks. 5 self-check questions. All 13 required topics present (STAR-T, DDPM, CFG, Latent Diffusion, FlashAttention, Speculative Decoding, GPTQ, AWQ, FSDP, DPO, RLHF, PagedAttention, RoPE). Ruff clean. Idempotent re-run skips correctly.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-216] Adobe Prep Day7: Review checklist + concept map + error cards
+- **What I did**: Created final review note as CompanyDocument under Adobe (id=23). Content covers: (1) Master review checklist with checkbox items across all 6 domains (Diffusion, Alignment/DPO, Distributed, RoPE/Video, Inference, Interview Skills) -- 48 total items with key verification points, (2) HTML concept map showing cross-topic connections (Diffusion->Video, Inference<->Distributed, RoPE->LongContext->FlashAttention, etc.) with 8 connection explanations, (3) 7 error correction cards for common misunderstandings (iterative denoising, DPO needs ref model, TP!=DP, RoPE is fixed, spec decode is lossless, FSDP!=PP, FlashAttention is IO not compute optimization), (4) Daily time allocation table: 290 study + 150 practice = 440 total minutes across 7 days, (5) Formula cheat sheet consolidating all key equations from 6 domains, (6) 5 cross-domain self-check questions, (7) Quick reference card.
+- **Deliverables**: `scripts/seed_adobe_day7_review.py` (seed script, idempotent)
+- **Sanity check result**: Document inserted (id=11, 35457 chars). All 7 sections present. 69 HTML div blocks. 6 domain checklists present. 7 error cards. All 13 key topics present (DDPM, CFG, DPO, RLHF, FSDP, RoPE, FlashAttention, PagedAttention, GPTQ, AWQ, STAR-T, Speculative, 440). 5 self-check questions. Ruff clean. Idempotent re-run skips correctly.
+- **Status**: [DONE]

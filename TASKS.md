@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, Video) with checkbox items from Days 1-6. (2) HTML concept map showing connections between all topics. (3) Error correction quick-reference table (7 common misunderstandings). (4) Daily time allocation table. All formulas use 440.
-
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
@@ -104,6 +98,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards. Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, 
 - [x] **2026-03-27** -- T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories. Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story out
 - [x] **2026-03-27** -- T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note. Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table:
 - [x] **2026-03-27** -- T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note. Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram
