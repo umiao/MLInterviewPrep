@@ -9,7 +9,37 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-228: Enable rehype-raw in MarkdownPreview
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, add to rehypePlugins=[rehypeRaw, rehypeKatex]. (3) No source guard for now -- all content is self-authored. If forum UGC becomes a concern later, add rehype-sanitize at that point. (4) Test: verify Adobe Day1 HTML diagram renders. AC: HTML diagrams visible. Math still works. Checkboxes still work.
+
+#### T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-227, T-P0-228
+- **Description**: END-TO-END PILOT to validate Builder API before scaling. Take Adobe Day 1 doc (company_documents id=5, Diffusion Models) and rewrite using StudyNoteBuilder. This is the API stress test -- if Builder API proves inadequate, fix it here before touching 6 more docs. Pilot covers ALL enhancement goals: (1) Use Builder to generate content. (2) Add Prerequisites (basic probability, neural nets, VAE concept, convolutions). (3) Register all terms: DDPM, VAE, UNet, CFG, CLIP, latent space, noise schedule, epsilon-prediction, cross-attention. (4) Use FormulaBlock for all math (DDPM forward, reparameterization, training loss, CFG). (5) Add intuitive explanations before each formula. (6) HTML diagrams (pipeline, noise schedule). (7) Self-check checklist. (8) Verify output renders correctly with rehype-raw + double-dollar. OUTCOME: (a) If Builder API works -> proceed to scale. (b) If API needs changes -> fix Builder first, THEN scale. AC: Day 1 doc renders perfectly (math + HTML + terms bolded + prerequisites). Builder API validated.
+
+#### T-P0-230: Scale: Rewrite remaining 6 Adobe docs with validated Builder
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-229
+- **Description**: After Day 1 pilot validates the Builder API, rewrite Days 2-7 (company_documents ids 6-11). For each doc: (1) Use StudyNoteBuilder (validated API from pilot). (2) Add Prerequisites section. (3) Register and bold-define all domain terms (see T-P0-224 old description for per-day term lists). (4) Use FormulaBlock for all math. (5) Add intuitive prose before formulas. (6) Cross-reference between docs where relevant (e.g. Day3 distributed -> Day5 inference memory). (7) Preserve all existing content value (questions, checklists, comparison tables). Execute serially: one doc per autonomous session (6 sessions). AC: All 7 docs (including Day 1 from pilot) pass Builder validation. All math renders. All terms defined. Prerequisites present.
+
+#### T-P0-232: Add Builder convention to CLAUDE.md + update memory
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-229
+- **Description**: After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note content as raw strings. Use StudyNoteBuilder from scripts/generate_study_note.py.' (2) CLAUDE.md Code Style: add 'Study Note Generation: use StudyNoteBuilder. FormulaBlock for math. Fail-fast on single-dollar.' (3) Update memory file feedback_math_formatting.md to reference Builder script. AC: Future autonomous sessions read CLAUDE.md and know to use Builder.
+
 ### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-231: Fix PrepNotesPage tab overflow: document dropdown
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(TabButton) with: (1) Keep [Notes] and [Forum Posts] as always-visible primary tabs. (2) Add a styled select element between them: 'Documents (N)' with options for each company_document. (3) onChange -> setActiveTab(doc:N). (4) When a doc is selected, show doc title as subtitle below the tab bar. (5) Style select to match TabButton appearance (same padding, colors, rounded corners). Max 3 items in tab bar = never overflows. AC: All documents accessible via dropdown. No overflow on any screen size.
 
 ### P2 -- Nice to Have
 
@@ -98,6 +128,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-227: Minimal StudyNoteBuilder + FormulaBlock typed constraint. Minimal viable Builder with one typed block (FormulaBlock). Design: (1) FormulaBlock dataclass: latex:str, explanation:s
 - [x] **2026-03-27** -- T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards. Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, 
 - [x] **2026-03-27** -- T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories. Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story out
 - [x] **2026-03-27** -- T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note. Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table:

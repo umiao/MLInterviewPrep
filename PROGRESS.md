@@ -345,3 +345,9 @@
 - **Deliverables**: `scripts/seed_adobe_day7_review.py` (seed script, idempotent)
 - **Sanity check result**: Document inserted (id=11, 35457 chars). All 7 sections present. 69 HTML div blocks. 6 domain checklists present. 7 error cards. All 13 key topics present (DDPM, CFG, DPO, RLHF, FSDP, RoPE, FlashAttention, PagedAttention, GPTQ, AWQ, STAR-T, Speculative, 440). 5 self-check questions. Ruff clean. Idempotent re-run skips correctly.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-227] Minimal StudyNoteBuilder + FormulaBlock typed constraint
+- **What I did**: Created `scripts/study_note_builder.py` with FormulaBlock dataclass (auto-wraps latex in $$) and StudyNoteBuilder class. Builder methods: set_title, add_prerequisites, add_term (glossary + auto-bold first occurrence), add_section (str | FormulaBlock blocks), add_diagram_html, add_comparison_table, add_interview_qa, add_checklist. build() pipeline: HTML comment header, Prerequisites, Key Terms glossary, sections, auto-bold terms in prose, fail-fast orphan single-dollar detection. validate() classmethod for scanning existing docs. save_to_db() with idempotent insert.
+- **Deliverables**: `scripts/study_note_builder.py` (builder module), `tests/test_study_note_builder.py` (25 tests)
+- **Sanity check result**: 25/25 tests pass. Ruff clean. FormulaBlock guarantees $$. Single-dollar in prose raises ValueError. Auto-bold works on first occurrence only. save_to_db idempotent. validate() detects single-dollar and missing header.
+- **Status**: [DONE]
