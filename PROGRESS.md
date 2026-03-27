@@ -371,3 +371,10 @@
 - **Sanity check result**: Both CLAUDE.md sections read correctly. Memory file created with proper frontmatter.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-232 --status completed`
+
+## 2026-03-27 -- [T-P0-230] Scale: Rewrite Day 2 RLHF/DPO with validated Builder (1/6)
+- **What I did**: Rewrote seed_adobe_day2_rlhf_dpo.py from raw string format to StudyNoteBuilder API. Added: Prerequisites (4 items incl. Day 1 cross-reference), Term Registry (9 terms: RLHF, DPO, SFT, PPO, Bradley-Terry, KL divergence, reward hacking, knowledge distillation, dark knowledge), FormulaBlock for all 9 display math formulas (SFT loss, BT model, RM loss, RLHF objective, PPO clip, reward-policy relation, DPO BT substitution, DPO loss, KD loss), 3 HTML diagrams (RLHF pipeline, DPO vs RLHF, distillation flow), comparison tables (11-dimension RLHF vs DPO, RLHF variants, DPO variants, distillation strategies, memory estimation, quality metrics), intuitive prose before each formula, 5 error correction cards, 5 self-check questions with Day 1 cross-reference, quick reference card. Deleted old raw-string doc from DB, inserted Builder-generated version.
+- **Deliverables**: `scripts/seed_adobe_day2_rlhf_dpo.py` (full Builder rewrite)
+- **Sanity check result**: 0 validation warnings. Builder header present. All sections present (Prerequisites, Key Terms, 6 content sections, Self-Check, Quick Reference). Zero orphan single-dollar signs. 17,852 chars (up from 13,286). HTML diagrams, comparison tables, cross-references all verified.
+- **Status**: [PARTIAL] (1 of 6 docs rewritten; Days 3-7 remain)
+- **Request**: No task_db status change (task still in progress)

@@ -5,15 +5,15 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-230: Scale: Rewrite remaining 6 Adobe docs with validated Builder
 - **Priority**: P0
 - **Complexity**: L
 - **Depends on**: T-P0-229
 - **Description**: After Day 1 pilot validates the Builder API, rewrite Days 2-7 (company_documents ids 6-11). For each doc: (1) Use StudyNoteBuilder (validated API from pilot). (2) Add Prerequisites section. (3) Register and bold-define all domain terms (see T-P0-224 old description for per-day term lists). (4) Use FormulaBlock for all math. (5) Add intuitive prose before formulas. (6) Cross-reference between docs where relevant (e.g. Day3 distributed -> Day5 inference memory). (7) Preserve all existing content value (questions, checklists, comparison tables). Execute serially: one doc per autonomous session (6 sessions). AC: All 7 docs (including Day 1 from pilot) pass Builder validation. All math renders. All terms defined. Prerequisites present.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 ### P1 -- Should Have (agentic intelligence)
 
