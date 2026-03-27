@@ -11,6 +11,36 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-199: Fix Interview Questions table column alignment
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Columns misaligned and squeezed on Questions page. Root cause: Questions.tsx table uses default table-layout:auto. Fix: (1) Add table-layout:fixed to table element. (2) Set explicit width on Question column. (3) Add matching w-* classes to tbody td. (4) Add overflow:hidden + text-overflow:ellipsis. Files: Questions.tsx lines 530-613. AC: All columns align between header and body. Consistent width. Long questions truncate.
+
+#### T-P1-200: Add Adobe phone screen event to interview timeline
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Add Adobe phone screen. Company=Adobe, event_type=phone_screen, week of March 30-April 3 2026 (exact time TBD). Steps: Insert event with placeholder date (2026-03-30T09:00:00), description noting time TBD. Backend auto-creates Adobe company. Set status=phone_screen. AC: Adobe phone screen visible in timeline as upcoming. Adobe company entry created.
+
+#### T-P1-201: Parse staging LC file: extract problems for LinkedIn/Uber/Adobe
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Parse 'LC to be added 题解.txt' (3613 lines, 1014 problems) from C:\Users\Shenghui Xu\Desktop\staging. All three companies mixed together - tag ALL with LinkedIn+Uber+Adobe. Steps: (1) Write parser to extract all problem entries (LC ID, title, frequency_rank). Handle 2 format zones: Zone1 (lines 1-334, 207 problems, no pct) and Zone2 (lines 337-3559, 807 problems, with pct+difficulty). (2) Output clean JSON with lc_id, title, difficulty, frequency_rank. AC: Parser produces clean JSON with 1014 entries, no duplicates.
+
+#### T-P1-202: Batch import parsed LC problems into DB with company tags
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-201
+- **Description**: Import parsed problems into mle_prep.db. All 1014 tagged with LinkedIn+Uber+Adobe. (1) Existing problems (~159): merge company tags, preserve data. (2) New problems (~855): insert with leetcode_id, title, url, company_tags, category=algorithm. (3) Preserve frequency_rank from file order. (4) Set difficulty from parsed data. AC: All 1014 in DB, each has company_tags with LinkedIn+Uber+Adobe, frequency order preserved, no duplicates, existing data intact.
+
+#### T-P1-203: Verify imported problems: counts, tags, frequency order
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-202
+- **Description**: Post-import verification. (1) Count problems per company tag matches 1014. (2) Spot-check first 10 and last 10 match original order. (3) Existing problems retained prior data (notes, completion, comfort). (4) No duplicate leetcode_ids. (5) All URLs valid. AC: Verification script passes all checks.
+
 ### P2 -- Nice to Have
 
 #### T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions
@@ -61,6 +91,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-198: Debug LinkedIn HR prep materials not showing in UI view. User reports LinkedIn HR call prep materials not visible in UI. Data EXISTS in DB: companies.prep_notes (448 chars), com
 - [x] **2026-03-26** -- T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems). Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心
 - [x] **2026-03-26** -- T-P1-196: Batch expand Blind75 problem notes - batch 4 (14 problems). Expand notes for LC 207, 208, 211, 213, 217, 226, 230, 235, 238, 242, 252, 253, 261, 268. Each note needs: 思路, 关键技巧, 核心代
 - [x] **2026-03-26** -- T-P1-195: Batch expand Blind75 problem notes - batch 3 (14 problems). Expand notes for LC 124, 125, 128, 133, 139, 141, 143, 152, 153, 190, 191, 198, 200, 206. Each note needs: 思路, 关键技巧, 核心代

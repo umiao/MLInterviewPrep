@@ -249,3 +249,15 @@
 - **Deliverables**: `src/frontend/src/pages/Problems.tsx` (3 edits)
 - **Sanity check result**: TypeScript type check passes (`tsc --noEmit` clean). Search bar now renders above tabs so it stays visible during tab switches. Search URL param already persists via `useFilterParams`.
 - **Status**: [DONE]
+
+## 2026-03-27 -- Ad-hoc: LC 124 notes update + task planning session
+- **What I did**: (1) Updated LC 124 (Binary Tree Maximum Path Sum) notes with user's solution, optimized to best version while preserving user's coding style (self.ans, class-based). Added 5 key pitfall notes + Adobe company tag. (2) Created 3 tasks for UI issues: T-P1-100 (LinkedIn HR prep visibility), T-P1-101 (Interview Questions column alignment), T-P1-102 (Adobe phone screen event). (3) Analyzed staging file (1014 LC problems, 3613 lines) for LinkedIn/Uber/Adobe import. Created 3 tasks: T-P1-103 (parse), T-P1-104 (batch import), T-P1-105 (verify).
+- **Deliverables**: `data/mle_prep.db` (LC 124 notes + Adobe tag updated), 6 new tasks in task_db
+- **Sanity check result**: LC 124 notes verified in DB (1442 chars), company_tags=["Adobe"]. Staging file analysis confirmed 1014 problems across 2 format zones. User confirmed companies are mixed (no zone-to-company mapping).
+- **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-198] Debug LinkedIn HR prep materials visibility
+- **What I did**: Investigated report that LinkedIn HR prep materials not showing in UI. Performed thorough code review of PrepNotesPage, ForumPostsTab, PrepNotesTab, Companies.tsx, backend API endpoints, and data layer. Verified all 4 API endpoints return correct data (companies/1, companies/1/documents, forum/seeds?company_id=1, questions?company=LinkedIn). Confirmed TypeScript compiles clean with no errors.
+- **Deliverables**: No code changes needed. Diagnosis: all data renders correctly. Root cause is UX discoverability (cause #1 from task spec). Navigation path: Dashboard "Prep Notes" card or Companies Kanban card -> /companies/1/prep -> PrepNotesPage with tabs: Notes (448 chars prep_notes) | 1point3acres interviews (doc) | Phone Screen Scheduling (doc) | Forum Posts (1 seed, 4300 links). interview_events (2) are in global Timeline only. interview_questions (47) are in Questions page with company filter.
+- **Sanity check result**: API endpoints tested via curl: GET /api/companies/1 returns prep_notes (448 chars), GET /api/companies/1/documents returns 2 docs, GET /api/forum/seeds?company_id=1 returns 1 seed, GET /api/questions?company=LinkedIn returns 47 questions. TypeScript clean (tsc --noEmit).
+- **Status**: [DONE]
