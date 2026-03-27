@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-199: Fix Interview Questions table column alignment
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Columns misaligned and squeezed on Questions page. Root cause: Questions.tsx table uses default table-layout:auto. Fix: (1) Add table-layout:fixed to table element. (2) Set explicit width on Question column. (3) Add matching w-* classes to tbody td. (4) Add overflow:hidden + text-overflow:ellipsis. Files: Questions.tsx lines 530-613. AC: All columns align between header and body. Consistent width. Long questions truncate.
-
 #### T-P1-200: Add Adobe phone screen event to interview timeline
 - **Priority**: P1
 - **Complexity**: S
@@ -91,6 +85,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
 - [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P1-199: Fix Interview Questions table column alignment. Columns misaligned and squeezed on Questions page. Root cause: Questions.tsx table uses default table-layout:auto. Fix: 
 - [x] **2026-03-26** -- T-P1-198: Debug LinkedIn HR prep materials not showing in UI view. User reports LinkedIn HR call prep materials not visible in UI. Data EXISTS in DB: companies.prep_notes (448 chars), com
 - [x] **2026-03-26** -- T-P1-197: Batch expand Blind75 problem notes - batch 5 (14 problems). Expand notes for LC 269, 271, 295, 297, 300, 322, 323, 338, 417, 424, 435, 572, 647, 1143. Each note needs: 思路, 关键技巧, 核心
 - [x] **2026-03-26** -- T-P1-196: Batch expand Blind75 problem notes - batch 4 (14 problems). Expand notes for LC 207, 208, 211, 213, 217, 226, 230, 235, 238, 242, 252, 253, 261, 268. Each note needs: 思路, 关键技巧, 核心代

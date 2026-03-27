@@ -527,7 +527,7 @@ export default function Questions() {
       {/* Table */}
       {!loading && (
         <div className="flex-1 overflow-auto border border-gray-200 rounded-lg">
-          <table className="w-full text-sm">
+          <table className="w-full text-sm table-fixed">
             <thead className="bg-gray-50 sticky top-0">
               <tr className="text-left text-xs font-medium text-gray-500 uppercase">
                 <th className="px-3 py-2 w-10">
@@ -570,7 +570,7 @@ export default function Questions() {
                     }`}
                   >
                     <td
-                      className="px-3 py-2"
+                      className="px-3 py-2 w-10"
                       onClick={(e) => e.stopPropagation()}
                     >
                       <input
@@ -580,26 +580,26 @@ export default function Questions() {
                         className="rounded border-gray-300"
                       />
                     </td>
-                    <td className="px-4 py-2 text-gray-400 text-xs">
+                    <td className="px-4 py-2 w-8 text-gray-400 text-xs">
                       {expandedId === q.id ? "v" : ">"}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 overflow-hidden text-ellipsis">
                       <span className="line-clamp-2">{q.question_text}</span>
                     </td>
-                    <td className="px-4 py-2 text-gray-600">
+                    <td className="px-4 py-2 w-32 text-gray-600 truncate">
                       {q.company ?? "-"}
                     </td>
-                    <td className="px-4 py-2 text-gray-600">
+                    <td className="px-4 py-2 w-28 text-gray-600 truncate">
                       {q.role ?? "-"}
                     </td>
-                    <td className="px-4 py-2">
+                    <td className="px-4 py-2 w-36">
                       <span
                         className={`text-xs px-2 py-0.5 rounded ${typeBadgeClass(q.question_type)}`}
                       >
                         {typeLabel(q.question_type)}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-center">
+                    <td className="px-4 py-2 w-24 text-center">
                       {q.is_reviewed ? (
                         <span className="text-green-600 text-xs font-medium">
                           Yes
@@ -608,7 +608,7 @@ export default function Questions() {
                         <span className="text-gray-400 text-xs">No</span>
                       )}
                     </td>
-                    <td className="px-4 py-2 text-center text-gray-500">
+                    <td className="px-4 py-2 w-20 text-center text-gray-500">
                       {q.year ?? "-"}
                     </td>
                   </tr>

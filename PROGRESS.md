@@ -261,3 +261,9 @@
 - **Deliverables**: No code changes needed. Diagnosis: all data renders correctly. Root cause is UX discoverability (cause #1 from task spec). Navigation path: Dashboard "Prep Notes" card or Companies Kanban card -> /companies/1/prep -> PrepNotesPage with tabs: Notes (448 chars prep_notes) | 1point3acres interviews (doc) | Phone Screen Scheduling (doc) | Forum Posts (1 seed, 4300 links). interview_events (2) are in global Timeline only. interview_questions (47) are in Questions page with company filter.
 - **Sanity check result**: API endpoints tested via curl: GET /api/companies/1 returns prep_notes (448 chars), GET /api/companies/1/documents returns 2 docs, GET /api/forum/seeds?company_id=1 returns 1 seed, GET /api/questions?company=LinkedIn returns 47 questions. TypeScript clean (tsc --noEmit).
 - **Status**: [DONE]
+
+## 2026-03-26 -- [T-P1-199] Fix Interview Questions table column alignment
+- **What I did**: Fixed Questions page table column misalignment. Added `table-fixed` to the table element for predictable column widths. Added matching width classes (w-10, w-8, w-32, w-28, w-36, w-24, w-20) to tbody `<td>` elements to match thead `<th>`. Added `overflow-hidden text-ellipsis` to the Question column and `truncate` to Company/Role columns for long text handling.
+- **Deliverables**: `src/frontend/src/pages/Questions.tsx` modified
+- **Sanity check result**: TypeScript compiles clean (tsc --noEmit passes with no errors)
+- **Status**: [DONE]
