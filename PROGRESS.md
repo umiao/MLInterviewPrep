@@ -309,3 +309,9 @@
 - **Deliverables**: `scripts/seed_adobe_day1_diffusion.py` (seed script, idempotent)
 - **Sanity check result**: Document inserted (id=5, 8676 chars). All 6 required sections present. HTML diagram renders. 4 checkbox self-check questions. Ruff clean. Idempotent re-run skips correctly.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-211] Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note
+- **What I did**: Created comprehensive RLHF/DPO + LLM Distillation study note as CompanyDocument under Adobe (id=23). Content covers: (1) RLHF 3-step pipeline (SFT -> Reward Model -> PPO) with HTML flow diagram, (2) Bradley-Terry preference model and RM loss, (3) PPO objective with KL penalty explanation, (4) DPO loss with full derivation intuition (closed-form optimal policy -> BT substitution -> Z(x) cancellation), (5) DPO vs RLHF comparison table (11 dimensions), (6) RLHF/DPO variants (RLAIF, GRPO, IPO, KTO, SimPO, ORPO), (7) LLM Distillation: KL divergence loss, temperature scaling, dark knowledge, 70B->7B design with memory estimation, (8) 5 common misunderstandings with corrections. Includes 4 self-check questions and quick reference card.
+- **Deliverables**: `scripts/seed_adobe_day2_rlhf_dpo.py` (seed script, idempotent)
+- **Sanity check result**: Document inserted (id=6, 13286 chars). All 6 required sections present. HTML diagram renders. 4 checkbox self-check questions. Ruff clean. Idempotent re-run skips correctly.
+- **Status**: [DONE]

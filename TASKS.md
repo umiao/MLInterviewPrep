@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry loss formula. (3) DPO loss formula with full derivation intuition. (4) DPO vs RLHF trade-off table. (5) LLM Distillation: KL divergence on logit distribution, temperature scaling, 70B->7B design. (6) Error corrections from user's previous misunderstandings. All formulas use 622. Checklist items for self-check.
-
 #### T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note
 - **Priority**: P0
 - **Complexity**: M
@@ -134,6 +128,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note. Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry 
 - [x] **2026-03-27** -- T-P0-210: Adobe Prep Day1: Diffusion Models deep-dive note. Create comprehensive study note for Diffusion Models (Adobe's core tech). Content: (1) DDPM forward process with full ma
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
 - [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
