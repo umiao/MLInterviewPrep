@@ -48,6 +48,10 @@
 - Use ruff for linting
 - Type checking: mypy
 - Test: pytest
+- **Study Note Generation**: Use `StudyNoteBuilder` from `scripts/study_note_builder.py`.
+  Use `FormulaBlock` for all display math. Builder validates structure (sections,
+  prerequisites, term registry, formula blocks) and catches orphan `$` signs.
+  Never write study note content as raw f-strings or string concatenation.
 - **Regression tests**: When fixing a bug, always add a regression test
 - **No emoji**: Never use emoji characters in code, docs, configs, or hook output.
   Use ASCII text tags (e.g., [DONE], [FAIL], [WARN]) instead.
@@ -79,6 +83,9 @@
   A PreToolUse hook blocks any Write/Edit targeting TASKS.md.
 - **Task IDs are auto-generated.** Never invent IDs manually.
   Use `task_db.py add --title "..." --priority P0` and the system assigns the next ID.
+- **Never write study note content as raw strings.** Use `StudyNoteBuilder` from
+  `scripts/study_note_builder.py`. Raw f-strings bypass validation (orphan `$`,
+  missing prerequisites, unregistered terms) and produce inconsistent formatting.
 - **For batch operations**: use `task_db.py batch --commands '[...]'` to wrap multiple
   commands atomically.
 

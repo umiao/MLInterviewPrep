@@ -364,3 +364,10 @@
 - **Sanity check result**: 27/27 tests pass. 0 validation warnings. 17/17 content checks pass (header, title, prerequisites, 5 terms registered, FormulaBlock $$, HTML diagrams, checklist, quick reference, no orphan $, auto-bold, intuitions, inline math). TypeScript clean. Builder API validated -- works for full document generation.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-229 --status completed`
+
+## 2026-03-27 -- [T-P0-232] Add Builder convention to CLAUDE.md + update memory
+- **What I did**: Codified StudyNoteBuilder convention in CLAUDE.md: (1) Code Style section: added "Study Note Generation" rule requiring StudyNoteBuilder + FormulaBlock for all study notes, (2) Prohibited Actions section: added "Never write study note content as raw strings" with explanation of what validation raw strings bypass. Created memory file feedback_study_note_builder.md with Builder usage rules and reference to canonical example. Updated MEMORY.md index.
+- **Deliverables**: `CLAUDE.md` (2 additions: Code Style + Prohibited Actions), `memory/feedback_study_note_builder.md` (new), `memory/MEMORY.md` (updated index)
+- **Sanity check result**: Both CLAUDE.md sections read correctly. Memory file created with proper frontmatter.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-232 --status completed`

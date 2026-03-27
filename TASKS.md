@@ -15,12 +15,6 @@
 - **Depends on**: T-P0-229
 - **Description**: After Day 1 pilot validates the Builder API, rewrite Days 2-7 (company_documents ids 6-11). For each doc: (1) Use StudyNoteBuilder (validated API from pilot). (2) Add Prerequisites section. (3) Register and bold-define all domain terms (see T-P0-224 old description for per-day term lists). (4) Use FormulaBlock for all math. (5) Add intuitive prose before formulas. (6) Cross-reference between docs where relevant (e.g. Day3 distributed -> Day5 inference memory). (7) Preserve all existing content value (questions, checklists, comparison tables). Execute serially: one doc per autonomous session (6 sessions). AC: All 7 docs (including Day 1 from pilot) pass Builder validation. All math renders. All terms defined. Prerequisites present.
 
-#### T-P0-232: Add Builder convention to CLAUDE.md + update memory
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-229
-- **Description**: After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note content as raw strings. Use StudyNoteBuilder from scripts/generate_study_note.py.' (2) CLAUDE.md Code Style: add 'Study Note Generation: use StudyNoteBuilder. FormulaBlock for math. Fail-fast on single-dollar.' (3) Update memory file feedback_math_formatting.md to reference Builder script. AC: Future autonomous sessions read CLAUDE.md and know to use Builder.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-231: Fix PrepNotesPage tab overflow: document dropdown
@@ -116,6 +110,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-232: Add Builder convention to CLAUDE.md + update memory. After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note cont
 - [x] **2026-03-27** -- T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder. END-TO-END PILOT to validate Builder API before scaling. Take Adobe Day 1 doc (company_documents id=5, Diffusion Models)
 - [x] **2026-03-27** -- T-P0-228: Enable rehype-raw in MarkdownPreview. Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, ad
 - [x] **2026-03-27** -- T-P0-227: Minimal StudyNoteBuilder + FormulaBlock typed constraint. Minimal viable Builder with one typed block (FormulaBlock). Design: (1) FormulaBlock dataclass: latex:str, explanation:s
