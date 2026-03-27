@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full replica + gradient AllReduce. (3) TP: intra-layer matrix split (attention heads + MLP column/row). (4) PP: inter-layer split + micro-batch pipeline + bubble. (5) FSDP/ZeRO Stage 1/2/3. (6) Selection guide: 13B model on A100 80GB example with memory estimation formula. (7) 3D parallelism. All formulas use 622. Checklist items.
-
 #### T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note
 - **Priority**: P0
 - **Complexity**: M
@@ -128,6 +122,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note. Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full repli
 - [x] **2026-03-27** -- T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note. Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry 
 - [x] **2026-03-27** -- T-P0-210: Adobe Prep Day1: Diffusion Models deep-dive note. Create comprehensive study note for Diffusion Models (Adobe's core tech). Content: (1) DDPM forward process with full ma
 - [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams

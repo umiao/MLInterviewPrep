@@ -315,3 +315,9 @@
 - **Deliverables**: `scripts/seed_adobe_day2_rlhf_dpo.py` (seed script, idempotent)
 - **Sanity check result**: Document inserted (id=6, 13286 chars). All 6 required sections present. HTML diagram renders. 4 checkbox self-check questions. Ruff clean. Idempotent re-run skips correctly.
 - **Status**: [DONE]
+
+## 2026-03-27 -- [T-P0-212] Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note
+- **What I did**: Created comprehensive Distributed Training study note as CompanyDocument under Adobe (id=23). Content covers: (1) Overview diagram with 4 parallelism strategies comparison table, (2) Data Parallelism: AllReduce, gradient bucketing, memory formula (16P per GPU), PyTorch DDP, (3) Tensor Parallelism: MLP column-row split, attention head split, communication pattern, intra-node only, (4) Pipeline Parallelism: naive bubble, micro-batch pipelining, bubble fraction formula, GPipe/1F1B variants, (5) FSDP/ZeRO Stages 1/2/3 with memory table and communication analysis, (6) Selection guide: 13B on 8xA100 worked example with memory estimation formula, (7) 3D parallelism: layout diagram, real-world examples (GPT-3, PaLM, Llama), (8) 5 common misunderstandings. Includes 4 self-check questions and quick reference card.
+- **Deliverables**: `scripts/seed_adobe_day3_distributed.py` (seed script, idempotent)
+- **Sanity check result**: Document inserted (id=7, 17374 chars). All 8 required sections present. 12 HTML diagram blocks. 4 checkbox self-check questions. Ruff clean. Idempotent re-run skips correctly.
+- **Status**: [DONE]
