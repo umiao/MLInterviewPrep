@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 191 completed tasks archived as of latest archival.
+> 207 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -307,3 +307,19 @@ Add full_page_text Text column to ForumPost model and a schema migration.
 Currently ForumPost.raw
 - [x] **2026-03-22** -- T-P2-157: Wire enriched extraction into service layer + import. ## Summary
 Update fetch_single_post to store full_page_text from extractor. Update import_post_to_document to prefer ful
+- [x] **2026-03-27** -- T-P0-210: Adobe Prep Day1: Diffusion Models deep-dive note. Create comprehensive study note for Diffusion Models (Adobe's core tech). Content: (1) DDPM forward process with full ma
+- [x] **2026-03-27** -- T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note. Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry 
+- [x] **2026-03-27** -- T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note. Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full repli
+- [x] **2026-03-27** -- T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note. Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram
+- [x] **2026-03-27** -- T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note. Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table:
+- [x] **2026-03-27** -- T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories. Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story out
+- [x] **2026-03-27** -- T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards. Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, 
+- [x] **2026-03-26** -- T-P1-200: Add Adobe phone screen event to interview timeline. Add Adobe phone screen. Company=Adobe, event_type=phone_screen, week of March 30-April 3 2026 (exact time TBD). Steps: I
+- [x] **2026-03-26** -- T-P1-201: Parse staging LC file: extract problems for LinkedIn/Uber/Adobe. Parse 'LC to be added 题解.txt' (3613 lines, 1014 problems) from C:\Users\Shenghui Xu\Desktop\staging. All three companies
+- [x] **2026-03-26** -- T-P1-202: Batch import parsed LC problems into DB with company tags. Import parsed problems into mle_prep.db. All 1014 tagged with LinkedIn+Uber+Adobe. (1) Existing problems (~159): merge c
+- [x] **2026-03-26** -- T-P1-203: Verify imported problems: counts, tags, frequency order. Post-import verification. (1) Count problems per company tag matches 1014. (2) Spot-check first 10 and last 10 match ori
+- [x] **2026-03-26** -- T-P1-204: Add real-time HH:MM:SS countdown to dashboard timeline events. Replace static countdown text (e.g. 'in 3 days') with a live ticking countdown in HH:MM:SS format. Only use hours:minute
+- [x] **2026-03-26** -- T-P1-205: Add Company Frequency tab to Problems page (like Blind 75). Add a new tab 'Company Freq' (or similar) to the Problems page, at the same level as 'All Problems' and 'Blind Grind 75'
+- [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
+- [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
+- [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams

@@ -149,30 +149,51 @@ export default function PrepNotesPage() {
           &larr; Companies
         </Link>
 
-        <div className="flex items-center gap-4">
-          <h1 className="text-lg font-semibold text-gray-800">
-            {company.name}
-          </h1>
-          <div className="flex gap-1 border border-gray-200 rounded p-0.5 overflow-x-auto">
+        <div className="flex flex-col items-center gap-1">
+          <div className="flex items-center gap-4">
+            <h1 className="text-lg font-semibold text-gray-800">
+              {company.name}
+            </h1>
+            <div className="flex gap-1 border border-gray-200 rounded p-0.5 items-center">
             <TabButton
               label="Notes"
               active={activeTab === "notes"}
               onClick={() => setActiveTab("notes")}
             />
-            {documents?.map((doc) => (
-              <TabButton
-                key={doc.id}
-                label={doc.title}
-                active={activeTab === `doc:${doc.id}`}
-                onClick={() => setActiveTab(`doc:${doc.id}`)}
-              />
-            ))}
+            {documents && documents.length > 0 && (
+              <select
+                value={activeDocId !== null ? activeTab : ""}
+                onChange={(e) => {
+                  if (e.target.value) setActiveTab(e.target.value as PageTab);
+                }}
+                className={`text-sm px-3 py-1 rounded border-0 cursor-pointer ${
+                  activeDocId !== null
+                    ? "bg-gray-100 text-gray-800 font-medium"
+                    : "text-gray-500 hover:bg-gray-50 bg-transparent"
+                }`}
+              >
+                <option value="" disabled>
+                  Documents ({documents.length})
+                </option>
+                {documents.map((doc) => (
+                  <option key={doc.id} value={`doc:${doc.id}`}>
+                    {doc.title}
+                  </option>
+                ))}
+              </select>
+            )}
             <TabButton
               label="Forum Posts"
               active={activeTab === "forum"}
               onClick={() => setActiveTab("forum")}
             />
+            </div>
           </div>
+          {activeDocId !== null && documents && (
+            <span className="text-xs text-gray-500">
+              {documents.find((d) => d.id === activeDocId)?.title}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-3">

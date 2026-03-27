@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-231: Fix PrepNotesPage tab overflow: document dropdown
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(TabButton) with: (1) Keep [Notes] and [Forum Posts] as always-visible primary tabs. (2) Add a styled select element between them: 'Documents (N)' with options for each company_document. (3) onChange -> setActiveTab(doc:N). (4) When a doc is selected, show doc title as subtitle below the tab bar. (5) Style select to match TabButton appearance (same padding, colors, rounded corners). Max 3 items in tab bar = never overflows. AC: All documents accessible via dropdown. No overflow on any screen size.
-
 ### P2 -- Nice to Have
 
 #### T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions
@@ -102,26 +96,11 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 ## Completed Tasks
 
-> 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
 - [x] **2026-03-27** -- T-P0-232: Add Builder convention to CLAUDE.md + update memory. After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note cont
 - [x] **2026-03-27** -- T-P0-230: Scale: Rewrite remaining 6 Adobe docs with validated Builder. After Day 1 pilot validates the Builder API, rewrite Days 2-7 (company_documents ids 6-11). For each doc: (1) Use StudyN
 - [x] **2026-03-27** -- T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder. END-TO-END PILOT to validate Builder API before scaling. Take Adobe Day 1 doc (company_documents id=5, Diffusion Models)
 - [x] **2026-03-27** -- T-P0-228: Enable rehype-raw in MarkdownPreview. Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, ad
 - [x] **2026-03-27** -- T-P0-227: Minimal StudyNoteBuilder + FormulaBlock typed constraint. Minimal viable Builder with one typed block (FormulaBlock). Design: (1) FormulaBlock dataclass: latex:str, explanation:s
-- [x] **2026-03-27** -- T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards. Create final review note: (1) Master checklist across all 6 domains (Diffusion, RLHF/DPO, Distributed, Inference, RoPE, 
-- [x] **2026-03-27** -- T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories. Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story out
-- [x] **2026-03-27** -- T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note. Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table:
-- [x] **2026-03-27** -- T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note. Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram
-- [x] **2026-03-27** -- T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note. Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full repli
-- [x] **2026-03-27** -- T-P0-211: Adobe Prep Day2: RLHF/DPO alignment + LLM distillation note. Create study note covering: (1) RLHF 3-step flow (SFT -> Reward Model -> PPO) with HTML flow diagram. (2) Bradley-Terry 
-- [x] **2026-03-27** -- T-P0-210: Adobe Prep Day1: Diffusion Models deep-dive note. Create comprehensive study note for Diffusion Models (Adobe's core tech). Content: (1) DDPM forward process with full ma
-- [x] **2026-03-26** -- T-P2-192: Fix search persistence across tabs. Move renderSortBar() above Tabs component so search bar is shared. Search URL param already persists via useFilterParams
-- [x] **2026-03-26** -- T-P2-189: [DEBT] MLInterviewPrep: Add [project].dependencies to pyproject.toml. pyproject.toml has no [project].dependencies section. All main app deps (fastapi==0.109.0, sqlalchemy==2.0.25, anthropic
-- [x] **2026-03-26** -- T-P2-188: [DEBT] MLInterviewPrep: Remove deprecated stop-cache from test_check.py. test_check.py imports and uses check_stop_cache/write_stop_cache from hook_utils.py (grep hits: hook_utils.py:129,157, t
-- [x] **2026-03-26** -- T-P1-205: Add Company Frequency tab to Problems page (like Blind 75). Add a new tab 'Company Freq' (or similar) to the Problems page, at the same level as 'All Problems' and 'Blind Grind 75'
-- [x] **2026-03-26** -- T-P1-204: Add real-time HH:MM:SS countdown to dashboard timeline events. Replace static countdown text (e.g. 'in 3 days') with a live ticking countdown in HH:MM:SS format. Only use hours:minute
-- [x] **2026-03-26** -- T-P1-203: Verify imported problems: counts, tags, frequency order. Post-import verification. (1) Count problems per company tag matches 1014. (2) Spot-check first 10 and last 10 match ori
-- [x] **2026-03-26** -- T-P1-202: Batch import parsed LC problems into DB with company tags. Import parsed problems into mle_prep.db. All 1014 tagged with LinkedIn+Uber+Adobe. (1) Existing problems (~159): merge c
-- [x] **2026-03-26** -- T-P1-201: Parse staging LC file: extract problems for LinkedIn/Uber/Adobe. Parse 'LC to be added 题解.txt' (3613 lines, 1014 problems) from C:\Users\Shenghui Xu\Desktop\staging. All three companies
-- [x] **2026-03-26** -- T-P1-200: Add Adobe phone screen event to interview timeline. Add Adobe phone screen. Company=Adobe, event_type=phone_screen, week of March 30-April 3 2026 (exact time TBD). Steps: I

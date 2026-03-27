@@ -413,3 +413,10 @@
 - **Sanity check result**: 0 validation warnings. Builder header present. 20 sections, 65 HTML blocks, 20 terms, 15 formula blocks, 9 cross-references, 41,436 chars. All content preserved from original.
 - **Status**: [DONE] (6 of 6 docs rewritten; T-P0-230 complete -- all 7 Adobe docs now use StudyNoteBuilder)
 - **Request**: `task_db.py update T-P0-230 --status completed`
+
+## 2026-03-27 -- [T-P1-231] Fix PrepNotesPage tab overflow: document dropdown
+- **What I did**: Replaced document tab buttons in PrepNotesPage.tsx with a `<select>` dropdown. Tab bar now has max 3 items: Notes, Documents (N) dropdown, Forum Posts. When a document is selected from the dropdown, its title appears as a subtitle below the tab bar. Dropdown styling matches TabButton appearance (same padding, colors, rounded corners). Highlight state applied when a doc is actively selected.
+- **Deliverables**: `src/frontend/src/pages/PrepNotesPage.tsx`
+- **Sanity check result**: TypeScript compiles with no errors (`npx tsc --noEmit` clean). Tab bar limited to 3 items max -- no overflow on any screen size.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-231 --status completed`
