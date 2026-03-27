@@ -385,3 +385,10 @@
 - **Sanity check result**: 0 validation warnings. Builder header present. All 13 sections present (Prerequisites, Key Terms, 8 content sections, Self-Check, Quick Reference). 19,574 chars (up from 17,374). 3 HTML diagrams, 12 terms, cross-references verified.
 - **Status**: [PARTIAL] (2 of 6 docs rewritten; Days 4-7 remain)
 - **Request**: No task_db status change (task still in progress)
+
+## 2026-03-27 -- [T-P0-230] Rewrite Day 4 RoPE + Video doc with StudyNoteBuilder (3/6)
+- **What I did**: Rewrote seed_adobe_day4_rope_video.py from raw string format to StudyNoteBuilder API. Added: Prerequisites (4 items incl. Day 1/Day 3 cross-references), Term Registry (11 terms: RoPE, PE, PI, NTK, YaRN, DiT, 3D VAE, KV-cache, temporal attention, ALiBi, AdaLN), FormulaBlock for all display math (theta_i base frequency, rotation matrix R_m, q/k rotation, dot-product relative proof, RoPE efficient implementation, PI position scaling, NTK base frequency, YaRN attention temperature), 5 HTML diagrams (RoPE rotation, YaRN dimension grouping, video diffusion architecture, DiT architecture, video challenges), comparison tables (PE methods 4-way, long context methods 4-way), 5 error correction cards, 5 self-check questions with Day 1 cross-reference + new Q5 (video token count calculation), quick reference card. Deleted old raw-string doc from DB, inserted Builder-generated version.
+- **Deliverables**: `scripts/seed_adobe_day4_rope_video.py` (full Builder rewrite)
+- **Sanity check result**: 0 validation warnings. Builder header present. All 11 sections present (Prerequisites, Key Terms, 6 content sections, Self-Check, Quick Reference). 21,838 chars (down from 22,549 -- HTML diagrams preserved, raw-string overhead removed). 5 HTML diagrams, 11 terms, cross-references verified.
+- **Status**: [PARTIAL] (3 of 6 docs rewritten; Days 5-7 remain)
+- **Request**: No task_db status change (task still in progress)
