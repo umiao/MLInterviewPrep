@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story outlines mapped to Adobe JD. (3) 13 high-frequency interview questions with structured answer outlines: Diffusion (Q1-4), Inference (Q5-7), Distributed (Q8-10), Alignment (Q11-12), System Design (Q13). (4) Interview speech templates (opening, handling unknowns, steering to strengths). (5) Common error correction quick-reference card.
-
 #### T-P0-216: Adobe Prep Day7: Review checklist + concept map + error cards
 - **Priority**: P0
 - **Complexity**: S
@@ -110,6 +104,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 191 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-27** -- T-P0-215: Adobe Prep Day6: Mock interview questions + STAR-T project stories. Create study note: (1) STAR-T framework (Situation/Task/Approach/Result/Transfer) with template. (2) 3 project story out
 - [x] **2026-03-27** -- T-P0-214: Adobe Prep Day5: Inference optimization + project narrative note. Create study note: (1) FlashAttention: tiled computation, SRAM vs HBM, IO complexity. (2) Quantization comparison table:
 - [x] **2026-03-27** -- T-P0-213: Adobe Prep Day4: RoPE + long context + video generation note. Create study note: (1) RoPE: rotation matrix formulation, theta_i formula, how q_m*k_n depends only on m-n. HTML diagram
 - [x] **2026-03-27** -- T-P0-212: Adobe Prep Day3: Distributed training (DP/TP/PP/FSDP) note. Create study note: (1) 4 parallelism strategies with HTML diagram showing how each splits model/data. (2) DP: full repli
