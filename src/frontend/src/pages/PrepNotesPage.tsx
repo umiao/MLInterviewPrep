@@ -274,37 +274,34 @@ export default function PrepNotesPage() {
       {/* Content area */}
       {activeTab === "notes" ? (
         <>
-          <div className="flex flex-1 min-h-0">
-            <div ref={scrollContainerRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
-              {mode === "edit" ? (
-                <textarea
-                  ref={textareaRef}
-                  value={notes}
-                  onChange={(e) => {
-                    setNotes(e.target.value);
-                    if (saveStatus === "saved" || saveStatus === "error") {
-                      setSaveStatus("idle");
-                    }
-                  }}
-                  className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
-                  placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
-                />
-              ) : (
-                <div className="prep-prose">
-                  {notes ? (
-                    <MarkdownPreview markdown={notes} />
-                  ) : (
-                    <p className="text-gray-400 italic">
-                      No prep notes yet. Switch to Edit mode to add some.
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Acronym sidebar for large notes */}
-            {mode === "preview" && notesLargeEnough && (
-              <DocTocSidebar scrollContainer={scrollContainer} />
+          {/* Fixed acronym sidebar for large notes */}
+          {mode === "preview" && notesLargeEnough && (
+            <DocTocSidebar scrollContainer={scrollContainer} />
+          )}
+          <div ref={scrollContainerRef} className={`flex-1 overflow-auto p-6 flex flex-col min-h-0 ${mode === "preview" && notesLargeEnough ? "has-acronym-sidebar" : ""}`}>
+            {mode === "edit" ? (
+              <textarea
+                ref={textareaRef}
+                value={notes}
+                onChange={(e) => {
+                  setNotes(e.target.value);
+                  if (saveStatus === "saved" || saveStatus === "error") {
+                    setSaveStatus("idle");
+                  }
+                }}
+                className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
+                placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
+              />
+            ) : (
+              <div className="prep-prose">
+                {notes ? (
+                  <MarkdownPreview markdown={notes} />
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No prep notes yet. Switch to Edit mode to add some.
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
@@ -431,9 +428,15 @@ function DocumentViewer({
     );
   }
 
+  const showSidebar = mode === "preview" && contentLargeEnough;
+
   return (
-    <div className="flex flex-1 min-h-0">
-      <div ref={scrollContainerRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
+    <>
+      {/* Fixed acronym sidebar for large documents */}
+      {showSidebar && (
+        <DocTocSidebar scrollContainer={scrollContainer} />
+      )}
+      <div ref={scrollContainerRef} className={`flex-1 overflow-auto p-6 flex flex-col min-h-0 ${showSidebar ? "has-acronym-sidebar" : ""}`}>
         {mode === "edit" ? (
           <textarea
             ref={textareaRef}
@@ -459,11 +462,6 @@ function DocumentViewer({
           </div>
         )}
       </div>
-
-      {/* Acronym sidebar for large documents */}
-      {mode === "preview" && contentLargeEnough && (
-        <DocTocSidebar scrollContainer={scrollContainer} />
-      )}
-    </div>
+    </>
   );
 }

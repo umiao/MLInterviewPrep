@@ -132,16 +132,21 @@ body {
 /* ---- Acronym Sidebar (always sticky) ---- */
 
 .acronym-sidebar {
+  position: fixed;
+  right: 0;
+  top: 3.5rem; /* below sticky header */
+  bottom: 0;
   width: 15rem;
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  align-self: flex-start;
-  max-height: 100vh;
   overflow-y: auto;
   border-left: 1px solid #e5e7eb;
   background-color: #f9fafb;
   padding: 0.75rem 0;
+  z-index: 5;
+}
+
+/* Push content left when sidebar is present */
+.has-acronym-sidebar {
+  padding-right: 15rem;
 }
 
 .acronym-sidebar-header {
