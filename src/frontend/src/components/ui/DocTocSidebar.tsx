@@ -107,15 +107,15 @@ function TopicGroup({
       >
         {group.topic}
       </button>
-      <div className="acronym-chips">
+      <div className="acronym-entries">
         {group.entries.map((entry) => (
           <button
             key={entry.abbr}
-            className="acronym-chip"
-            title={`${entry.abbr} — ${entry.full}`}
+            className="acronym-entry"
             onClick={() => onClickAcronym(entry.anchorId)}
           >
-            {entry.abbr}
+            <span className="acronym-abbr">{entry.abbr}</span>
+            <span className="acronym-full">{entry.full}</span>
           </button>
         ))}
       </div>
