@@ -434,3 +434,10 @@
 - **Sanity check result**: Document updated (19451 -> 27409 chars, +7958). All 3 new sections present (14, 15, 16). No blank lines between table rows. Comparison tables rendered. Self-Check and Quick Reference sections preserved in correct order after new content.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-234 --status completed`
+
+## 2026-03-27 -- [T-P0-235] Day1 Expansion C: Answer all checklist questions
+- **What I did**: Created seed_adobe_day1_expansion_c.py that answers all 10 existing Self-Check questions and adds 6 new checklist items for expanded content (sections 11-16). Each question gets a comprehensive 3-5 sentence blockquote answer in Chinese, referencing specific formulas from the note. New questions cover: PE comparison (4 methods), KV-Cache memory estimation, noise/x0/v-prediction variance analysis, VAE reparameterization trick, ControlNet training procedure, and industry product comparison.
+- **Deliverables**: `scripts/seed_adobe_day1_expansion_c.py` (expansion seed script)
+- **Sanity check result**: Document updated (27409 -> 35620 chars, +8211). 16 answers for 16 checklist items (10 original + 6 new). All answers in blockquote format. Self-Check and Quick Reference sections preserved. No blank lines between table rows.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-235 --status completed`

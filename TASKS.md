@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-235: Day1 Expansion C: Answer all checklist questions
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-233, T-P0-234
-- **Description**: After expansions A+B are done, answer ALL 10 existing checklist questions plus any new ones added by A+B. Format: keep the - [ ] checkbox, add > **Answer**: blockquote below each. Answers should be comprehensive (3-5 sentences each), reference specific formulas from the note, and be suitable as interview response drafts. Also add new checklist items for the expanded topics: PE comparison, KV-Cache memory estimation, noise vs x_0 prediction tradeoff, VAE reparameterization trick, ControlNet training procedure, industry comparison. Write in Chinese. AC: All questions answered in blockquote format. New questions added for expanded content.
-
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
@@ -105,6 +99,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
+- [x] **2026-03-27** -- T-P0-235: Day1 Expansion C: Answer all checklist questions. After expansions A+B are done, answer ALL 10 existing checklist questions plus any new ones added by A+B. Format: keep t
 - [x] **2026-03-27** -- T-P0-234: Day1 Expansion B: VAE details + ControlNet deep-dive + industry landscape. Expand Day 1 note with 3 more sections: (1) VAE deep-dive: encoder/decoder architecture, latent space regularization (KL
 - [x] **2026-03-27** -- T-P0-233: Day1 Expansion A: PE deep-dive + sinusoidal derivation + KV-Cache. Expand Day 1 note (doc id=18) with 3 new sections: (1) Positional Embedding deep-dive: absolute PE, sinusoidal PE deriva
 - [x] **2026-03-27** -- T-P0-232: Add Builder convention to CLAUDE.md + update memory. After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note cont
