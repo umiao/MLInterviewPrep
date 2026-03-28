@@ -448,3 +448,10 @@
 - **Sanity check result**: Document updated (17852 -> 14575 chars). 14 formula blocks, 5 checklist items with answers, 9 blockquote lines, 0 table blank-line issues, 0 emoji, 0 validation warnings.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-236 --status completed`
+
+## 2026-03-27 -- [T-P0-237] Rewrite Day 3 (Distributed Training) to Chinese
+- **What I did**: Created seed_adobe_day3_chinese.py that replaces the English Day 3 document (company_documents id=13, 19574 chars) with comprehensive Chinese version (13780 chars). Content sourced from user supplement file (笔记3更新.md, 385 lines). All 14 sections covered: 13B memory estimation (16P formula), HBM vs SRAM, 4-strategy panorama table, DP detail (AllReduce = ReduceScatter+AllGather, gradient bucketing, limitations), TP detail (column-row split, why column-first, attention head split, NVLink constraint), PP detail (bubble formula, micro-batch, GPipe/1F1B/Interleaved), FSDP/ZeRO Stages 1-3 (forward/backward workflow), 3D parallelism (TP*PP*DP with real configs: GPT-3/PaLM/Llama), activation checkpointing (sqrt(L) strategy), comm primitives, 5 misconceptions, decision tree, memory cards, 5 Q&As with answers. Used StudyNoteBuilder with 8 FormulaBlock instances.
+- **Deliverables**: `scripts/seed_adobe_day3_chinese.py` (seed script)
+- **Sanity check result**: Document updated (19574 -> 13780 chars). 8 formula blocks, 5 checklist items with answers, 8 blockquote lines, 0 table blank-line issues, 0 emoji, 0 validation warnings.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-237 --status completed`
