@@ -26,7 +26,7 @@ const CATEGORIES: { value: Category; label: string }[] = [
   { value: "ml_coding", label: "ML Coding" },
   { value: "system_design", label: "System Design" },
 ];
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   easy: "bg-green-100 text-green-700",
