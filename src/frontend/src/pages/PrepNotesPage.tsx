@@ -14,7 +14,6 @@ import {
   type CompanyDocument,
 } from "../hooks/useForumPosts";
 import type { Company } from "../types/company";
-import type { TocHeading } from "../utils/slugify";
 
 type ImportMode = "append" | "replace";
 /** "notes" = main prep_notes, "forum" = forum tab, "doc:N" = child document N */
@@ -38,8 +37,7 @@ export default function PrepNotesPage() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const captureScrollRef = useRef<(() => void) | null>(null);
 
-  // TOC state: headings + scrollContainer via useState (not ref.current)
-  const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
+  // scrollContainer via useState (not ref.current) for sidebar
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
 
   // Callback ref to capture scroll container element via useState
@@ -105,9 +103,6 @@ export default function PrepNotesPage() {
       ? Number(activeTab.slice(4))
       : null;
 
-  // Determine if current content is large enough for TOC
-  const showToc = mode === "preview" && tocHeadings.length > 0;
-
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -137,11 +132,6 @@ export default function PrepNotesPage() {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
-
-  // Clear TOC when switching tabs or modes
-  const handleHeadingsExtracted = useCallback((headings: TocHeading[]) => {
-    setTocHeadings(headings);
-  }, []);
 
   if (isLoading) {
     return (
@@ -302,10 +292,7 @@ export default function PrepNotesPage() {
               ) : (
                 <div className="prep-prose">
                   {notes ? (
-                    <MarkdownPreview
-                      markdown={notes}
-                      onHeadingsExtracted={notesLargeEnough ? handleHeadingsExtracted : undefined}
-                    />
+                    <MarkdownPreview markdown={notes} />
                   ) : (
                     <p className="text-gray-400 italic">
                       No prep notes yet. Switch to Edit mode to add some.
@@ -315,9 +302,9 @@ export default function PrepNotesPage() {
               )}
             </div>
 
-            {/* TOC sidebar for large notes */}
-            {showToc && notesLargeEnough && (
-              <DocTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
+            {/* Acronym sidebar for large notes */}
+            {mode === "preview" && notesLargeEnough && (
+              <DocTocSidebar scrollContainer={scrollContainer} />
             )}
           </div>
 
@@ -362,9 +349,6 @@ export default function PrepNotesPage() {
           companyId={companyId}
           docId={activeDocId}
           mode={mode}
-          onHeadingsExtracted={handleHeadingsExtracted}
-          tocHeadings={tocHeadings}
-          showToc={showToc}
         />
       ) : (
         <div className="flex-1 overflow-auto p-6 min-h-0">
@@ -406,16 +390,10 @@ function DocumentViewer({
   companyId,
   docId,
   mode,
-  onHeadingsExtracted,
-  tocHeadings,
-  showToc,
 }: {
   companyId: number;
   docId: number;
   mode: "edit" | "preview";
-  onHeadingsExtracted: (headings: TocHeading[]) => void;
-  tocHeadings: TocHeading[];
-  showToc: boolean;
 }) {
   const { data: doc, isLoading } = useQuery<CompanyDocument>({
     queryKey: ["companyDocument", companyId, docId],
@@ -472,10 +450,7 @@ function DocumentViewer({
         ) : (
           <div className="prep-prose">
             {content ? (
-              <MarkdownPreview
-                markdown={content}
-                onHeadingsExtracted={contentLargeEnough ? onHeadingsExtracted : undefined}
-              />
+              <MarkdownPreview markdown={content} />
             ) : (
               <p className="text-gray-400 italic">
                 Empty document. Switch to Edit mode to add content.
@@ -485,9 +460,9 @@ function DocumentViewer({
         )}
       </div>
 
-      {/* TOC sidebar for large documents */}
-      {showToc && contentLargeEnough && (
-        <DocTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
+      {/* Acronym sidebar for large documents */}
+      {mode === "preview" && contentLargeEnough && (
+        <DocTocSidebar scrollContainer={scrollContainer} />
       )}
     </div>
   );
