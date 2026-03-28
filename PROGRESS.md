@@ -420,3 +420,10 @@
 - **Sanity check result**: TypeScript compiles with no errors (`npx tsc --noEmit` clean). Tab bar limited to 3 items max -- no overflow on any screen size.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-231 --status completed`
+
+## 2026-03-27 -- [T-P0-233] Day1 Expansion A: PE deep-dive + sinusoidal derivation + KV-Cache
+- **What I did**: Created seed_adobe_day1_expansion_a.py that adds 3 new sections to the existing Day 1 document (id=18). Section 11: Positional Embedding deep-dive covering absolute PE, sinusoidal PE with full derivation (rotation matrix interpretation, proof that PE(pos+k) = linear transform of PE(pos) via trigonometric addition), relative PE (Shaw et al.), RoPE (rotation of Q/K vectors, relative position proof), 5-way comparison table (Learned/Sinusoidal/Shaw/RoPE/ALiBi). Section 12: KV-Cache mechanism covering why only K/V are cached (Q is per-token), memory formula (2 * n_layers * d_model * seq_len * dtype_bytes) with LLaMA-2 7B worked example, optimization techniques table (MQA/GQA/PagedAttention/Sliding Window/Quantized KV), Prefill vs Decode phase analysis. Section 13: Why predict noise not x_0, covering variance analysis (epsilon has constant variance, x_0 variance explodes), score matching equivalence, v-prediction as alternative, 3-way comparison table, conversion formulas between all three parameterizations.
+- **Deliverables**: `scripts/seed_adobe_day1_expansion_a.py` (expansion seed script)
+- **Sanity check result**: Document updated (12188 -> 19451 chars, +7263). All 3 new sections present (11, 12, 13). Display math formulas with $$. Comparison tables rendered. Self-Check and Quick Reference sections preserved in correct order after new content.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-233 --status completed`
