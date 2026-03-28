@@ -427,3 +427,10 @@
 - **Sanity check result**: Document updated (12188 -> 19451 chars, +7263). All 3 new sections present (11, 12, 13). Display math formulas with $$. Comparison tables rendered. Self-Check and Quick Reference sections preserved in correct order after new content.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-233 --status completed`
+
+## 2026-03-27 -- [T-P0-234] Day1 Expansion B: VAE details + ControlNet deep-dive + industry landscape
+- **What I did**: Created seed_adobe_day1_expansion_b.py that adds 3 new sections to the existing Day 1 document (id=18). Section 14: VAE deep-dive covering encoder/decoder architecture, KL divergence regularization (closed-form formula for two Gaussians), reparameterization trick (z=mu+sigma*epsilon for differentiable sampling), beta-VAE tradeoff, VAE vs VQ-VAE comparison table. Section 15: ControlNet expanded covering complete architecture (frozen UNet + trainable copy + zero conv), training procedure (600 GPU-hours vs 150K for SD from scratch), multi-ControlNet composition (weighted sum), ControlNet vs T2I-Adapter comparison table, IP-Adapter architecture (CLIP image encoder + decoupled cross-attention with separate K/V projections). Section 16: Industry landscape covering 9 major products table (SD, SDXL, SD3, Midjourney, DALL-E 3, Firefly, Imagen, Flux, Fooocus), UNet->DiT architecture evolution, 6 application domains, and interview Q&A.
+- **Deliverables**: `scripts/seed_adobe_day1_expansion_b.py` (expansion seed script)
+- **Sanity check result**: Document updated (19451 -> 27409 chars, +7958). All 3 new sections present (14, 15, 16). No blank lines between table rows. Comparison tables rendered. Self-Check and Quick Reference sections preserved in correct order after new content.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-234 --status completed`

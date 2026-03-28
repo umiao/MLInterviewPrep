@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-234: Day1 Expansion B: VAE details + ControlNet deep-dive + industry landscape
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Expand Day 1 note with 3 more sections: (1) VAE deep-dive: encoder/decoder architecture, latent space regularization (KL divergence to N(0,I)), reparameterization trick (z=mu+sigma*epsilon), reconstruction loss + KL loss balance (beta-VAE), why VAE latent space is smooth/interpolatable, VQ-VAE comparison. (2) ControlNet expanded: architecture diagram, training procedure (freeze original UNet, train copy+zero conv), multiple ControlNet composition, comparison with T2I-Adapter, IP-Adapter architecture detail (image encoder -> projection -> parallel cross-attn). (3) Industry landscape: Stable Diffusion (Stability AI, open source), Midjourney (proprietary, aesthetic focus), DALL-E 3 (OpenAI, ChatGPT integration), Adobe Firefly (enterprise, IP-safe training data), Fooocus (SD-based, simplified UI), Flux (Black Forest Labs). Architecture evolution: UNet -> DiT. Application domains: text-to-image, inpainting, outpainting, style transfer, video. Write in Chinese. AC: 3 sections added, industry table, all renders.
-
 #### T-P0-235: Day1 Expansion C: Answer all checklist questions
 - **Priority**: P0
 - **Complexity**: M
@@ -111,6 +105,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
+- [x] **2026-03-27** -- T-P0-234: Day1 Expansion B: VAE details + ControlNet deep-dive + industry landscape. Expand Day 1 note with 3 more sections: (1) VAE deep-dive: encoder/decoder architecture, latent space regularization (KL
 - [x] **2026-03-27** -- T-P0-233: Day1 Expansion A: PE deep-dive + sinusoidal derivation + KV-Cache. Expand Day 1 note (doc id=18) with 3 new sections: (1) Positional Embedding deep-dive: absolute PE, sinusoidal PE deriva
 - [x] **2026-03-27** -- T-P0-232: Add Builder convention to CLAUDE.md + update memory. After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note cont
 - [x] **2026-03-27** -- T-P0-230: Scale: Rewrite remaining 6 Adobe docs with validated Builder. After Day 1 pilot validates the Builder API, rewrite Days 2-7 (company_documents ids 6-11). For each doc: (1) Use StudyN
