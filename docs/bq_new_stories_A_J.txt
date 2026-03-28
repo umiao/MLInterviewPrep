@@ -20,10 +20,10 @@
 **Result:** Intern improved his goal updates significantly, showcased contributions effectively, and received a return offer. Also discussed academia vs. industry differences (depth-first vs. stakeholder-aligned, XFN-heavy work style).
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you mentored or coached someone
-2. ✅ Tell me about a time you gave someone difficult feedback
-3. ✅ Tell me about a time you helped someone improve their performance
-4. ✅ Tell me about a time you developed someone's skills / helped them grow
+1. [x] Tell me about a time you mentored or coached someone
+2. [x] Tell me about a time you gave someone difficult feedback
+3. [x] Tell me about a time you helped someone improve their performance
+4. [x] Tell me about a time you developed someone's skills / helped them grow
 
 ---
 
@@ -41,10 +41,10 @@
 **Result:** Interns successfully adapted to internal tech stack. The template and workflow became a reusable resource for the entire research team, improving alignment and collaboration across all researchers.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you helped someone grow / develop new skills
-2. ✅ Tell me about a time you built something that benefited the whole team
-3. ✅ Tell me about a time you identified a process problem and fixed it
-4. ✅ Tell me about a time you balanced someone's wellbeing with project needs
+1. [x] Tell me about a time you helped someone grow / develop new skills
+2. [x] Tell me about a time you built something that benefited the whole team
+3. [x] Tell me about a time you identified a process problem and fixed it
+4. [x] Tell me about a time you balanced someone's wellbeing with project needs
 
 ---
 
@@ -63,11 +63,11 @@
 **Result:** Manager agreed with the contribution-based position. The team established a lasting norm: check if someone made the single largest contribution; if not, rotate first authorship. This rule was applied going forward — no further authorship disputes arose for your subsequent designs and publications.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you resolved a conflict with a colleague
-2. ✅ Tell me about a time you had to navigate a difficult/sensitive conversation
-3. ✅ Tell me about a time you established a standard or norm for your team
-4. ✅ Tell me about a time you stood up for what you believed was right
-5. ✅ Tell me about a time you had to influence without authority
+1. [x] Tell me about a time you resolved a conflict with a colleague
+2. [x] Tell me about a time you had to navigate a difficult/sensitive conversation
+3. [x] Tell me about a time you established a standard or norm for your team
+4. [x] Tell me about a time you stood up for what you believed was right
+5. [x] Tell me about a time you had to influence without authority
 
 ---
 
@@ -91,14 +91,14 @@
 **Result:** Won across multiple relevance metrics + GMB win + increased user engagement. Project became production infrastructure adopted by ads and other teams to measure impact of their changes on user experience and relevance.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you dealt with ambiguity / unclear requirements
-2. ✅ Tell me about a time you had to make a decision with incomplete information
-3. ✅ Tell me about a time you innovated or found a creative solution
-4. ✅ Tell me about a time you simplified a complex problem
-5. ✅ Tell me about a time you influenced the direction of a project
-6. ✅ Tell me about a time you had to pivot or change approach
-7. ✅ Tell me about a time your work had broad organizational impact
-8. ✅ Tell me about a time you built something that scaled beyond your team
+1. [x] Tell me about a time you dealt with ambiguity / unclear requirements
+2. [x] Tell me about a time you had to make a decision with incomplete information
+3. [x] Tell me about a time you innovated or found a creative solution
+4. [x] Tell me about a time you simplified a complex problem
+5. [x] Tell me about a time you influenced the direction of a project
+6. [x] Tell me about a time you had to pivot or change approach
+7. [x] Tell me about a time your work had broad organizational impact
+8. [x] Tell me about a time you built something that scaled beyond your team
 
 ---
 
@@ -117,11 +117,11 @@
 **Result:** Spent a week on redeployment and RCA reports. Established new cross-team communication norms for model lifecycle management. Transformed a stressful incident into lasting process improvement.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you failed or made a mistake — how did you handle it?
-2. ✅ Tell me about a time you recovered from a setback
-3. ✅ Tell me about a time you improved a process after something went wrong
-4. ✅ Tell me about a time you dealt with a stressful situation
-5. ✅ Tell me about a time you had to take responsibility for something beyond your control
+1. [x] Tell me about a time you failed or made a mistake — how did you handle it?
+2. [x] Tell me about a time you recovered from a setback
+3. [x] Tell me about a time you improved a process after something went wrong
+4. [x] Tell me about a time you dealt with a stressful situation
+5. [x] Tell me about a time you had to take responsibility for something beyond your control
 
 ---
 
@@ -138,11 +138,11 @@
 **Result:** Could not fundamentally fix the static compilation issue at the time, but the experience and backend familiarity led to being invited to participate in the major "declarative artifactory" initiative — converting static compiled C++ resource/dependency/feature/model loading to dynamic, fundamentally eliminating this class of risk.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you took a risk and it didn't go as planned
-2. ✅ Tell me about a time you went beyond your job scope
-3. ✅ Tell me about a time you learned from a failure
-4. ✅ Tell me about a time you had to work with a team you weren't familiar with
-5. ✅ Tell me about a time you turned a setback into an opportunity
+1. [x] Tell me about a time you took a risk and it didn't go as planned
+2. [x] Tell me about a time you went beyond your job scope
+3. [x] Tell me about a time you learned from a failure
+4. [x] Tell me about a time you had to work with a team you weren't familiar with
+5. [x] Tell me about a time you turned a setback into an opportunity
 
 ---
 
@@ -160,10 +160,10 @@
 **Result:** Built mutual respect with the senior IC; became good professional friends. Both later became known in the org for rigorous checklist adherence, fast response times, and conscientious on-call work.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you received difficult or unexpected feedback
-2. ✅ Tell me about a time you had to handle criticism
-3. ✅ Tell me about a time you turned a negative relationship into a positive one
-4. ✅ Tell me about a time you improved your working process based on feedback
+1. [x] Tell me about a time you received difficult or unexpected feedback
+2. [x] Tell me about a time you had to handle criticism
+3. [x] Tell me about a time you turned a negative relationship into a positive one
+4. [x] Tell me about a time you improved your working process based on feedback
 
 ---
 
@@ -181,11 +181,11 @@
 **Result:** Leadership accepted the analysis; distributed training was deprioritized and removed from next quarter's roadmap. Reinforced lesson about historical tech debt, deep coupling, and that distributed ≠ always better (especially for tree models where parallelization bottlenecks are well-documented with no widely-adopted open-source solutions).
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you had to push back on a request from leadership
-2. ✅ Tell me about a time you managed competing priorities
-3. ✅ Tell me about a time you had to say no or re-scope a project
-4. ✅ Tell me about a time you managed up effectively
-5. ✅ Tell me about a time you prevented your team from overcommitting
+1. [x] Tell me about a time you had to push back on a request from leadership
+2. [x] Tell me about a time you managed competing priorities
+3. [x] Tell me about a time you had to say no or re-scope a project
+4. [x] Tell me about a time you managed up effectively
+5. [x] Tell me about a time you prevented your team from overcommitting
 
 ---
 
@@ -203,12 +203,12 @@
 **Result:** Project went from Hackweek → partial implementation in relevance team → full implementation in ranking team → framework reused across multiple verticals. Established methodology for ongoing monitoring.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you showed ownership beyond your role
-2. ✅ Tell me about a time you took a bold or unpopular decision
-3. ✅ Tell me about a time you persisted despite obstacles
-4. ✅ Tell me about a time you identified a customer problem no one was working on
-5. ✅ Tell me about a time you drove a project across multiple teams
-6. ✅ Tell me about a time you made a personal sacrifice for a project
+1. [x] Tell me about a time you showed ownership beyond your role
+2. [x] Tell me about a time you took a bold or unpopular decision
+3. [x] Tell me about a time you persisted despite obstacles
+4. [x] Tell me about a time you identified a customer problem no one was working on
+5. [x] Tell me about a time you drove a project across multiple teams
+6. [x] Tell me about a time you made a personal sacrifice for a project
 
 ---
 
@@ -225,10 +225,10 @@
 **Result:** PM acknowledged the problem's validity. Implemented time-based experiment design as a workable compromise for seller-side testing.
 
 **BQ Questions Covered:**
-1. ✅ Tell me about a time you explained a complex technical concept to a non-technical audience
-2. ✅ Tell me about a time you had to influence a decision through data/evidence
-3. ✅ Tell me about a time you found a creative compromise
-4. ✅ Tell me about a time you pushed back on a flawed plan
+1. [x] Tell me about a time you explained a complex technical concept to a non-technical audience
+2. [x] Tell me about a time you had to influence a decision through data/evidence
+3. [x] Tell me about a time you found a creative compromise
+4. [x] Tell me about a time you pushed back on a flawed plan
 
 ---
 
@@ -236,14 +236,14 @@
 ## PART 2: UPDATED COVERAGE ANALYSIS
 ## ============================================================
 
-### Leadership & People Development — WAS 1/11, NOW 8/11 ✅
+### Leadership & People Development — WAS 1/11, NOW 8/11 [x]
 | Question | Covered By |
 |----------|-----------|
 | Mentoring/coaching someone | Story A, B |
 | Giving difficult feedback | Story A |
 | Helping someone improve performance | Story A |
 | Developing someone's skills | Story B |
-| Delegating a key decision | ❌ STILL UNCOVERED |
+| Delegating a key decision | [UNCOVERED] STILL UNCOVERED |
 | Handling a performance issue | Story A |
 | Establishing team norms | Story C |
 | Building team culture | Story B (template for team) |
@@ -251,7 +251,7 @@
 | Influencing without authority | Story C, I |
 | Leading without formal title | Story I |
 
-### Adaptability & Resilience — WAS 4/20, NOW 14/20 ✅
+### Adaptability & Resilience — WAS 4/20, NOW 14/20 [x]
 | Question | Covered By |
 |----------|-----------|
 | Dealing with ambiguity | Story D |
@@ -270,7 +270,7 @@
 | Learning from failure | Story F |
 | Remaining uncovered: adapting to major strategy shift, working with incomplete team, handling rejection of your idea, recovering from public failure, dealing with constant change, ambiguity over extended period |
 
-### Execution & Project Management — WAS 3/14, NOW 8/14 ✅
+### Execution & Project Management — WAS 3/14, NOW 8/14 [x]
 | Question | Covered By |
 |----------|-----------|
 | Managing competing priorities | Story H |
@@ -280,7 +280,7 @@
 | Cross-team project delivery | Story I |
 | Remaining uncovered: meeting an impossible deadline, dependency on another team causing delay, detailed project planning/tracking, delivering under resource constraints, managing a project that was behind schedule, recovering a failing project |
 
-### Ownership — WAS 3/11, NOW 7/11 ✅
+### Ownership — WAS 3/11, NOW 7/11 [x]
 | Question | Covered By |
 |----------|-----------|
 | Going beyond job scope | Story F, I |
@@ -292,7 +292,7 @@
 | Taking a calculated risk | Story F |
 | Remaining uncovered: exceeding a deadline, handling your own performance feedback, taking ownership of a team failure, long-term thinking vs short-term pressure |
 
-### Communication — WAS 3/5, NOW 5/5 ✅
+### Communication — WAS 3/5, NOW 5/5 [x]
 | Question | Covered By |
 |----------|-----------|
 | Explaining technical concepts to non-technical audience | Story J |
@@ -301,7 +301,7 @@
 | Pushing back on flawed plan | Story J |
 | Difficult/sensitive conversation | Story C |
 
-### Collaboration — WAS 5/9, NOW 8/9 ✅
+### Collaboration — WAS 5/9, NOW 8/9 [x]
 | Question | Covered By |
 |----------|-----------|
 | Working with unfamiliar team | Story F |
