@@ -455,3 +455,10 @@
 - **Sanity check result**: Document updated (19574 -> 13780 chars). 8 formula blocks, 5 checklist items with answers, 8 blockquote lines, 0 table blank-line issues, 0 emoji, 0 validation warnings.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-237 --status completed`
+
+## 2026-03-28 -- [T-P2-209] Verify db-missing warning already present in session_context.py
+- **What I did**: Investigated T-P2-209 which asked to port db_missing_warning from template to MLInterviewPrep session_context.py. Found the feature already exists at lines 475-490 of MLInterviewPrep's session_context.py. The template actually does NOT have this block (grep confirmed 0 matches). Task description had the direction backwards. Marked as completed since the feature is already present.
+- **Deliverables**: No code changes needed
+- **Sanity check result**: Grep confirmed db_missing_warning exists in MLInterviewPrep (4 matches) and is absent from template (0 matches). All remaining tasks (T-P2-185/186/187/206/207/208) are SYNC tasks targeting helixos or template, blocked by cross-project file permissions.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-209 --status completed`

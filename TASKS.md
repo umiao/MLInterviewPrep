@@ -67,16 +67,6 @@ Action: Update template/.claude/hooks/test_check.py to match MLInterviewPrep ver
 
 Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
-#### T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .claude/tasks.db is absent but TASKS.md has tasks, it warns the user to run task_db.py import. This is useful for fresh-clone scenarios.
-
-MLInterviewPrep/.claude/hooks/session_context.py is missing this warning block.
-
-Action: Port the db_missing_warning block from template to MLInterviewPrep session_context.py.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -98,6 +88,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
 - [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
 - [x] **2026-03-27** -- T-P0-237: Rewrite Day 3 (Distributed Training) to Chinese with user supplement. Replace current English Day 3 doc (company_documents id=13, 19574 chars) with comprehensive Chinese version. Source: C:\
 - [x] **2026-03-27** -- T-P0-236: Rewrite Day 2 (RLHF/DPO/Distillation) to Chinese with user supplement. Replace current English Day 2 doc (company_documents id=12, 17852 chars) with comprehensive Chinese version. Source: C:\
