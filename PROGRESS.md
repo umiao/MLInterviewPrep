@@ -462,3 +462,10 @@
 - **Sanity check result**: Grep confirmed db_missing_warning exists in MLInterviewPrep (4 matches) and is absent from template (0 matches). All remaining tasks (T-P2-185/186/187/206/207/208) are SYNC tasks targeting helixos or template, blocked by cross-project file permissions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-209 --status completed`
+
+## 2026-03-28 -- [T-P2-185] Add no-bare-python rule to helixos CLAUDE.md Prohibited Actions
+- **What I did**: Added the "Never use bare python in hook commands or scripts" rule to both the shared template (blog_proj/shared/claude_md_shared.md) and re-synced helixos CLAUDE.md via sync.py. The rule warns about the Windows Store stub (exit 49) and directs to use /c/Anaconda/python.exe absolute path.
+- **Deliverables**: blog_proj/shared/claude_md_shared.md (added rule), helixos/CLAUDE.md (re-synced)
+- **Sanity check result**: Grep confirmed "bare.*python" appears at line 93 of helixos CLAUDE.md. Sync script ran successfully.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-185 --status completed`
