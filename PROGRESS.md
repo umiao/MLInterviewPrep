@@ -441,3 +441,10 @@
 - **Sanity check result**: Document updated (27409 -> 35620 chars, +8211). 16 answers for 16 checklist items (10 original + 6 new). All answers in blockquote format. Self-Check and Quick Reference sections preserved. No blank lines between table rows.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-235 --status completed`
+
+## 2026-03-27 -- [T-P0-236] Rewrite Day 2 (RLHF/DPO/Distillation) to Chinese
+- **What I did**: Created seed_adobe_day2_chinese.py that replaces the English Day 2 document (company_documents id=12, 17852 chars) with comprehensive Chinese version (14575 chars). Content sourced from user supplement file (笔记2更新.md, 507 lines). All 8 sections covered: RLHF 3-stage pipeline with full math (SFT/RM/PPO formulas), DPO 4-step derivation (Z(x) cancellation), PPO clip mechanism + 4-model GPU analysis, DPO vs RLHF multi-dimensional comparison table, variants (GRPO/RLAIF/KTO/SimPO/IPO/ORPO), LLM distillation (dark knowledge, temperature, T-squared correction, 70B->7B recipe with memory estimation), 5 error corrections table, 5 Q&As with blockquote answers, and formula cheat sheet. Used StudyNoteBuilder with 14 FormulaBlock instances for proper math rendering.
+- **Deliverables**: `scripts/seed_adobe_day2_chinese.py` (seed script)
+- **Sanity check result**: Document updated (17852 -> 14575 chars). 14 formula blocks, 5 checklist items with answers, 9 blockquote lines, 0 table blank-line issues, 0 emoji, 0 validation warnings.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-236 --status completed`
