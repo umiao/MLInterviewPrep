@@ -200,12 +200,17 @@ class StudyNoteBuilder:
             else:
                 parts.append(f"## {heading}")
                 parts.append("")
-                for block in blocks:
+                for idx, block in enumerate(blocks):
                     if isinstance(block, FormulaBlock):
                         parts.append(block.build())
                     else:
                         parts.append(block)
-                        parts.append("")
+                        # Don't add blank line between consecutive table rows
+                        is_table_row = isinstance(block, str) and block.strip().startswith("|")
+                        next_block = blocks[idx + 1] if idx + 1 < len(blocks) else None
+                        next_is_table = isinstance(next_block, str) and next_block.strip().startswith("|")
+                        if not (is_table_row and next_is_table):
+                            parts.append("")
 
         content = "\n".join(parts)
 
