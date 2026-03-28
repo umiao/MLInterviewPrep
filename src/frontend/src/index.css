@@ -105,6 +105,15 @@ body {
   font-weight: 600;
 }
 
+/* Fix bold (**) rendering inside markdown table cells.
+   Tailwind v4 prose resets can interfere with <strong> font-weight in tables. */
+.prose td strong,
+.prose th strong,
+.prep-prose td strong,
+.prep-prose th strong {
+  font-weight: 700;
+}
+
 .prep-prose hr {
   border: none;
   border-top: 1px solid #e5e7eb;
