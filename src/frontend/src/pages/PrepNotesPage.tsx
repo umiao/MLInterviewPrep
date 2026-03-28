@@ -7,16 +7,21 @@ import { useScrollRestore } from "../hooks/useScrollRestore";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
+import DocTocSidebar from "../components/ui/DocTocSidebar";
 import {
   useCompanyDocuments,
   useUpdateDocument,
   type CompanyDocument,
 } from "../hooks/useForumPosts";
 import type { Company } from "../types/company";
+import type { TocHeading } from "../utils/slugify";
 
 type ImportMode = "append" | "replace";
 /** "notes" = main prep_notes, "forum" = forum tab, "doc:N" = child document N */
 type PageTab = "notes" | "forum" | `doc:${number}`;
+
+/** Threshold: only show TOC sidebar for documents >= 20K chars */
+const TOC_MIN_CHARS = 20_000;
 
 /**
  * Full-screen prep notes page at /companies/:companyId/prep.
@@ -32,6 +37,17 @@ export default function PrepNotesPage() {
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const captureScrollRef = useRef<(() => void) | null>(null);
+
+  // TOC state: headings + scrollContainer via useState (not ref.current)
+  const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+
+  // Callback ref to capture scroll container element via useState
+  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    setScrollContainer(node);
+    // Also set the contentRef for scroll restore compatibility
+    (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+  }, []);
 
   const { data: company, isLoading } = useQuery<Company>({
     queryKey: ["companies", companyId],
@@ -89,6 +105,9 @@ export default function PrepNotesPage() {
       ? Number(activeTab.slice(4))
       : null;
 
+  // Determine if current content is large enough for TOC
+  const showToc = mode === "preview" && tocHeadings.length > 0;
+
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -119,6 +138,11 @@ export default function PrepNotesPage() {
     }
   }
 
+  // Clear TOC when switching tabs or modes
+  const handleHeadingsExtracted = useCallback((headings: TocHeading[]) => {
+    setTocHeadings(headings);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-400">
@@ -137,6 +161,9 @@ export default function PrepNotesPage() {
       </div>
     );
   }
+
+  // Should we show TOC for the notes tab?
+  const notesLargeEnough = (notes?.length ?? 0) >= TOC_MIN_CHARS;
 
   return (
     <div className="flex flex-col h-full">
@@ -257,30 +284,40 @@ export default function PrepNotesPage() {
       {/* Content area */}
       {activeTab === "notes" ? (
         <>
-          <div ref={contentRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
-            {mode === "edit" ? (
-              <textarea
-                ref={textareaRef}
-                value={notes}
-                onChange={(e) => {
-                  setNotes(e.target.value);
-                  if (saveStatus === "saved" || saveStatus === "error") {
-                    setSaveStatus("idle");
-                  }
-                }}
-                className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
-                placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
-              />
-            ) : (
-              <div className="prep-prose">
-                {notes ? (
-                  <MarkdownPreview markdown={notes} />
-                ) : (
-                  <p className="text-gray-400 italic">
-                    No prep notes yet. Switch to Edit mode to add some.
-                  </p>
-                )}
-              </div>
+          <div className="flex flex-1 min-h-0">
+            <div ref={scrollContainerRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
+              {mode === "edit" ? (
+                <textarea
+                  ref={textareaRef}
+                  value={notes}
+                  onChange={(e) => {
+                    setNotes(e.target.value);
+                    if (saveStatus === "saved" || saveStatus === "error") {
+                      setSaveStatus("idle");
+                    }
+                  }}
+                  className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
+                  placeholder="Write markdown prep notes here...&#10;&#10;- [ ] Review system design&#10;- [ ] Practice coding questions"
+                />
+              ) : (
+                <div className="prep-prose">
+                  {notes ? (
+                    <MarkdownPreview
+                      markdown={notes}
+                      onHeadingsExtracted={notesLargeEnough ? handleHeadingsExtracted : undefined}
+                    />
+                  ) : (
+                    <p className="text-gray-400 italic">
+                      No prep notes yet. Switch to Edit mode to add some.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* TOC sidebar for large notes */}
+            {showToc && notesLargeEnough && (
+              <DocTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
             )}
           </div>
 
@@ -321,7 +358,14 @@ export default function PrepNotesPage() {
           </div>
         </>
       ) : activeDocId !== null ? (
-        <DocumentViewer companyId={companyId} docId={activeDocId} mode={mode} switchMode={switchMode} />
+        <DocumentViewer
+          companyId={companyId}
+          docId={activeDocId}
+          mode={mode}
+          onHeadingsExtracted={handleHeadingsExtracted}
+          tocHeadings={tocHeadings}
+          showToc={showToc}
+        />
       ) : (
         <div className="flex-1 overflow-auto p-6 min-h-0">
           <ForumPostsTab companyId={companyId} />
@@ -362,12 +406,16 @@ function DocumentViewer({
   companyId,
   docId,
   mode,
-  switchMode,
+  onHeadingsExtracted,
+  tocHeadings,
+  showToc,
 }: {
   companyId: number;
   docId: number;
   mode: "edit" | "preview";
-  switchMode: (m: "edit" | "preview") => void;
+  onHeadingsExtracted: (headings: TocHeading[]) => void;
+  tocHeadings: TocHeading[];
+  showToc: boolean;
 }) {
   const { data: doc, isLoading } = useQuery<CompanyDocument>({
     queryKey: ["companyDocument", companyId, docId],
@@ -377,11 +425,18 @@ function DocumentViewer({
   });
   const updateDoc = useUpdateDocument(companyId);
   const [localContent, setLocalContent] = useState<string | null>(null);
+  const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
+    setScrollContainer(node);
+    (contentRef as React.MutableRefObject<HTMLDivElement | null>).current = node;
+  }, []);
+
   // Sync local state when doc loads or changes
   const content = localContent ?? doc?.content ?? "";
+  const contentLargeEnough = content.length >= TOC_MIN_CHARS;
 
   if (isLoading) {
     return (
@@ -399,30 +454,40 @@ function DocumentViewer({
   }
 
   return (
-    <div ref={contentRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
-      {mode === "edit" ? (
-        <textarea
-          ref={textareaRef}
-          value={content}
-          onChange={(e) => setLocalContent(e.target.value)}
-          onBlur={() => {
-            if (localContent !== null && localContent !== doc.content) {
-              updateDoc.mutate({ docId, content: localContent });
-            }
-          }}
-          className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
-          placeholder="Document content..."
-        />
-      ) : (
-        <div className="prep-prose">
-          {content ? (
-            <MarkdownPreview markdown={content} />
-          ) : (
-            <p className="text-gray-400 italic">
-              Empty document. Switch to Edit mode to add content.
-            </p>
-          )}
-        </div>
+    <div className="flex flex-1 min-h-0">
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto p-6 flex flex-col min-h-0">
+        {mode === "edit" ? (
+          <textarea
+            ref={textareaRef}
+            value={content}
+            onChange={(e) => setLocalContent(e.target.value)}
+            onBlur={() => {
+              if (localContent !== null && localContent !== doc.content) {
+                updateDoc.mutate({ docId, content: localContent });
+              }
+            }}
+            className="flex-1 min-h-0 w-full border border-gray-300 rounded px-4 py-3 text-base font-mono resize-none"
+            placeholder="Document content..."
+          />
+        ) : (
+          <div className="prep-prose">
+            {content ? (
+              <MarkdownPreview
+                markdown={content}
+                onHeadingsExtracted={contentLargeEnough ? onHeadingsExtracted : undefined}
+              />
+            ) : (
+              <p className="text-gray-400 italic">
+                Empty document. Switch to Edit mode to add content.
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* TOC sidebar for large documents */}
+      {showToc && contentLargeEnough && (
+        <DocTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
       )}
     </div>
   );

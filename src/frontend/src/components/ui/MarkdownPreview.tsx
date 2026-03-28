@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -6,10 +7,12 @@ import rehypeRaw from "rehype-raw";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
+import { slugify, type TocHeading } from "../../utils/slugify";
 
 interface MarkdownPreviewProps {
   markdown: string;
   onCheckboxClick?: (lineIndex: number) => void;
+  onHeadingsExtracted?: (headings: TocHeading[]) => void;
 }
 
 /** Green checkmark SVG (GitHub PR style). */
@@ -30,14 +33,56 @@ function UncheckedIcon() {
   );
 }
 
+/** Extract plain text from React children (strips nested elements). */
+function childrenToText(children: React.ReactNode): string {
+  if (typeof children === "string") return children;
+  if (typeof children === "number") return String(children);
+  if (Array.isArray(children)) return children.map(childrenToText).join("");
+  if (children && typeof children === "object" && "props" in children) {
+    const el = children as React.ReactElement<{ children?: React.ReactNode }>;
+    return childrenToText(el.props.children);
+  }
+  return "";
+}
+
 /**
  * Renders markdown with GFM support (tables, strikethrough, task lists)
  * and consistent checkbox icons (GitHub PR style).
+ *
+ * When onHeadingsExtracted is provided, emits heading metadata after render
+ * so a TOC sidebar can consume it (single data source pattern).
  */
 export default function MarkdownPreview({
   markdown,
   onCheckboxClick,
+  onHeadingsExtracted,
 }: MarkdownPreviewProps) {
+  const headingsRef = useRef<TocHeading[]>([]);
+  const prevJsonRef = useRef<string>("");
+
+  // After each render, emit collected headings if changed
+  useEffect(() => {
+    if (!onHeadingsExtracted) return;
+    const json = JSON.stringify(headingsRef.current);
+    if (json !== prevJsonRef.current) {
+      prevJsonRef.current = json;
+      onHeadingsExtracted(headingsRef.current);
+    }
+  });
+
+  // Reset headings collector before each render
+  headingsRef.current = [];
+
+  /** Factory for heading components that record heading info and add IDs. */
+  function HeadingWithId({ level, children, ...props }: { level: number; children?: React.ReactNode } & React.HTMLAttributes<HTMLHeadingElement>) {
+    const text = childrenToText(children);
+    const id = slugify(text);
+    headingsRef.current.push({ level, text, id });
+    if (level === 1) return <h1 id={id} {...props}>{children}</h1>;
+    if (level === 2) return <h2 id={id} {...props}>{children}</h2>;
+    return <h3 id={id} {...props}>{children}</h3>;
+  }
+
   return (
     <div className="prose prose-sm max-w-none
       prose-table:border-collapse prose-table:w-full
@@ -54,6 +99,9 @@ export default function MarkdownPreview({
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
         rehypePlugins={[rehypeRaw, rehypeKatex]}
         components={{
+          h1: ({ children, ...props }) => <HeadingWithId level={1} {...props}>{children}</HeadingWithId>,
+          h2: ({ children, ...props }) => <HeadingWithId level={2} {...props}>{children}</HeadingWithId>,
+          h3: ({ children, ...props }) => <HeadingWithId level={3} {...props}>{children}</HeadingWithId>,
           input: ({ type, ...rest }) => {
             // Suppress native checkboxes from remark-gfm; handled by li override
             if (type === "checkbox") return null;
