@@ -97,4 +97,16 @@ export const acronymRegistry: AcronymGroup[] = [
       { abbr: "BPE", full: "Byte Pair Encoding", anchorId: "a-transformer-基础" },
     ],
   },
+  {
+    topic: "Core Concepts (Day 8)",
+    topicAnchorId: "扩散模型与深度学习核心概念精要",
+    entries: [
+      { abbr: "UNet", full: "SD Denoising Backbone (860M)", anchorId: "一unet-在-stable-diffusion-中的角色与架构细节" },
+      { abbr: "MQA/GQA", full: "Multi/Grouped Query Attention", anchorId: "八mqa-与-gqa" },
+      { abbr: "V-Pred", full: "Velocity Prediction Parameterization", anchorId: "九v-prediction" },
+      { abbr: "LPIPS", full: "Learned Perceptual Image Patch Similarity", anchorId: "四stable-diffusion-的-vae极端侧重重建" },
+      { abbr: "PatchGAN", full: "Patch Discriminator for VAE", anchorId: "四stable-diffusion-的-vae极端侧重重建" },
+      { abbr: "Score/SDE", full: "Score Function + SDE Framework", anchorId: "七score-functionsde-与统一框架" },
+    ],
+  },
 ];
