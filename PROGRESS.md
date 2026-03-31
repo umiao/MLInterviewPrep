@@ -469,3 +469,17 @@
 - **Sanity check result**: Grep confirmed "bare.*python" appears at line 93 of helixos CLAUDE.md. Sync script ran successfully.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-185 --status completed`
+
+## 2026-03-31 -- [T-P1-147] ML Fundamentals Doc T5: Naive Bayes from scratch
+- **What I did**: Created comprehensive Naive Bayes from-scratch content (599 lines, 21.7K chars). Bayes' theorem foundation and derivation, conditional independence assumption ("Naive") with full justification (4 reasons why it works despite being wrong), parameter complexity comparison. Laplace Smoothing with Dirichlet prior interpretation and alpha analysis. Three variants: Gaussian NB (continuous features, var_smoothing), Multinomial NB (count features, text classification), Bernoulli NB (binary features, explicit absence modeling) with comparison table. Pure Python implementations of all 3 variants with log-space computation and log-sum-exp trick. sklearn verification for all 3 (Iris dataset + 20newsgroups text). Pros/cons analysis, NB vs LR (generative vs discriminative) comparison with Ng & Jordan reference, 5 interview Q&As, practical application guide.
+- **Deliverables**: `MLInterviewPrep/data/t5_naive_bayes.md`
+- **Sanity check result**: File is 599 lines, 21,709 bytes. Contains 7 Python code blocks (3 from-scratch + 3 sklearn + 1 log-sum-exp), 12 major sections, all required elements verified (Bayes theorem, Naive derivation, Laplace, Gaussian, Multinomial, Bernoulli, sklearn).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-147 --status completed`
+
+## 2026-03-31 -- [T-P1-148] ML Fundamentals Doc T6: Tree models comprehensive
+- **What I did**: Created comprehensive tree models from-scratch content (1143 lines, 41.5K chars). Decision Tree fundamentals with 3 impurity measures (Entropy, Gini, Classification Error) and full calculation example. ID3/C4.5/CART three-algorithm comparison with Information Gain, Gain Ratio, Gini derivations and complete "tennis" dataset worked example. Pruning: Pre-Pruning (5 sklearn params), Post-Pruning, CCP with cost-complexity objective derivation and sklearn code. Random Forest: core principle, Variance formula derivation showing Bagging reduces second term and Feature Subsampling reduces correlation (first term), OOB error. AdaBoost: complete algorithm derivation with epsilon/alpha/weight update formulas, exponential loss connection, Decision Stump implementation. GBDT: negative gradient (pseudo-residual) framework for arbitrary loss, Shrinkage analysis, 6 regularization methods. XGBoost/LightGBM/CatBoost comparison with second-order Taylor expansion. Pure Python implementations of Decision Tree, Random Forest, AdaBoost, GBDT with sklearn verification for all 4. 5 interview Q&As, application guide, comprehensive comparison table.
+- **Deliverables**: `MLInterviewPrep/data/t6_tree_models.md`
+- **Sanity check result**: File is 1143 lines, 41,485 bytes. Contains 9 Python code blocks (4 from-scratch implementations + 4 sklearn verifications + 1 CCP demo), 12 major sections. All required elements verified (ID3/C4.5/CART, Pruning, Random Forest, AdaBoost, GBDT, Shrinkage).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-148 --status completed`
