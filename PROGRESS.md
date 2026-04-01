@@ -248,3 +248,9 @@
 - **Sanity check result**: 22/22 custom problems seeded, 3 LC variants skipped. Re-run produces 0 updates (idempotent). All notes contain Python code blocks and complexity analysis.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-243 --status completed`
+## 2026-03-31 -- [T-P1-245] Create D&A prep document for Uber BPS
+- **What I did**: Committed `docs/uber_bps_design_architecture.md` (614 lines) created in a prior session. Document covers: 2 project showcases (Ranking-as-Allocation, LLM Eval Pipeline) with ASCII diagrams, end-to-end flows, and trade-off discussions; STAR-T trade-off framework; 5 Uber system design patterns (Driver Maps, Shopping Cart, Driver Queue, ETA, Food Ordering); common D&A follow-ups from 1p3a reports; communication tips; practice checklist.
+- **Deliverables**: `docs/uber_bps_design_architecture.md`
+- **Sanity check result**: All 4 task requirements met: (1) project showcases with diagrams, (2) trade-off discussions, (3) 5 Uber SD patterns, (4) 1p3a follow-ups. Document cross-references `uber_phone_screen_prep.md`.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-245 --status completed`
