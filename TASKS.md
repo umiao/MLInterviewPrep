@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-243: Uber BPS: Write solutions for custom non-LC interview problems
 - **Priority**: P0
 - **Complexity**: L
@@ -41,6 +37,10 @@ Problems with follow-ups:
 (23) Lock Combination BFS: find minimum steps to unlock. BFS on state space.
 (24) Non-overlapping Interval Triples: count groups of 3 intervals with no pairwise overlap.
 (25) City Graph BFS Sort: given city graph + start city, sort by distance (ties: smaller index first).
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 ### P1 -- Should Have (agentic intelligence)
 
