@@ -9,30 +9,30 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-252: Condense ML Fundamentals From-Scratch guide: deduplicate code, modular design
+#### T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion
 - **Priority**: P0
 - **Complexity**: L
-- **Depends on**: None
-- **Description**: The ML Fundamentals From-Scratch guide (Doc 27/28/29, 162K chars each; source files t1-t8, 199K total) has significant code duplication across topics. Condense by:
+- **Depends on**: T-P0-249
+- **Description**: Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to convert (all in docs/ and now also in company_documents DB):
 
-(1) IDENTIFY duplicative patterns: Multiple topics repeat similar code (loss functions, gradient computation, training loops, plotting). Audit all 8 source files (t1-t8) for repeated code blocks.
+1. uber_bps_lc_solutions.md (27KB) - LC题解
+2. uber_bps_custom_solutions.md (76KB) - 自定义题解
+3. uber_bps_pattern_cheatsheet.md (26KB) - 算法模式速查
+4. uber_bps_design_architecture.md (30KB) - D&A准备
+5. uber_bps_knn_ml_fundamentals.md (26KB) - KNN+ML基础
+6. uber_bps_mock_sets.md (13KB) - 模拟题组
+7. uber_phone_screen_prep.md (15KB) - 面试流程准备
 
-(2) DESIGN modular approach: Create a 'swappable components' structure where:
-- One canonical training loop shown in full (e.g., in t1_gradient_descent)
-- Other topics reference it and only show the DELTA (e.g., 'replace loss function with X')
-- Loss functions, activation functions, etc. shown in a compact comparison table rather than full implementations each time
-- Use collapsible/summary markers for optional deep-dive code
+Conversion rules:
+- Section headings: keep English preserved (e.g., '## BFS/DFS Problems')
+- Technical terms: keep English but always expand acronyms on first use in bold: **BFS (Breadth-First Search, 广度优先搜索)**
+- Code: keep all Python code as-is, translate surrounding explanations to Chinese
+- Problem statements: translate to Chinese, keep LC numbers and English problem names
+- Complexity analysis: keep O() notation, translate explanations
+- Follow-up questions: translate to Chinese
+- Acronyms to expand: BFS, DFS, DP, BS, UF, OOD, KNN, BST, BPS, D&A, LC, OA, SD, etc.
 
-(3) CONDENSE each file:
-- Keep the derivation/intuition (this is the valuable part)
-- Reduce full code implementations to: one complete example + diff-style snippets for variants
-- Target ~30-40% reduction in total chars while preserving all conceptual content
-- Ensure each topic still standalone-readable
-
-(4) REBUILD Doc 27/28/29 from condensed sources
-(5) Update company_documents in DB
-
-Focus on readability improvement, not just size reduction.
+After converting markdown files, update the corresponding company_documents in DB (company_id=5) with Chinese content.
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -124,6 +124,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5
 - [x] **2026-03-31** -- T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review. Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2
 - [x] **2026-03-31** -- T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document. Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-l
+- [x] **2026-03-31** -- T-P0-252: Condense ML Fundamentals From-Scratch guide: deduplicate code, modular design. The ML Fundamentals From-Scratch guide (Doc 27/28/29, 162K chars each; source files t1-t8, 199K total) has significant c
 - [x] **2026-03-31** -- T-P0-250: Organize LinkedIn prep notes into company_documents with problem solutions. Ensure LinkedIn prep materials are properly organized in company_documents (company_id=1). Currently has docs 21-27. Che
 - [x] **2026-03-31** -- T-P0-249: Import Uber BPS prep docs into company_documents for web UI access. Import all 7 Uber prep markdown docs (uber_bps_lc_solutions.md, uber_bps_custom_solutions.md, uber_bps_pattern_cheatshee
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A

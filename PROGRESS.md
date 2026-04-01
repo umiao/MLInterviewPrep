@@ -284,3 +284,10 @@
 - **Sanity check result**: All 9 documents verified with proper English titles. prep_notes updated from 1886 to 2736 chars with document index. All 16 key problems confirmed with notes. Total LinkedIn problems with notes increased from 109 to 125.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-250 --status completed`
+
+## 2026-03-31 -- [T-P0-252] Condense ML Fundamentals From-Scratch guide
+- **What I did**: Audited all 8 source files (t1-t8, 162K chars total) for code duplication. Identified 5 major duplication categories: mini-batch GD loops (t1/t2/t3), PyTorch training loops (t1/t2/t3), logistic regression L2 variant (t3), sklearn verification patterns (t5/t6), optimizer implementations (t8). Applied targeted condensation: removed duplicate logistic SGD from t1 (covered in t3), merged logistic_regression + logistic_regression_l2 into single function with lam parameter in t3, condensed 3 PyTorch implementations to config table referencing t1 canonical template, removed duplicate GLM section from t3 (identical to t2 Section 10), extracted optimizer template pattern in t8 with collapsible full implementations, consolidated sklearn verifications in t5/t6 to compact format.
+- **Deliverables**: `scripts/condense_ml_fundamentals.py` (new condensation script), 6 modified source files (t1/t2/t3/t5/t6/t8), `data/mle_prep.db` (docs 27/28/29 updated with condensed merged content)
+- **Sanity check result**: Source files reduced from 162,050 to 151,482 chars (6.5% reduction, 10.5K chars saved). All theory, derivations, and interview Q&A preserved. Key structural improvements: cross-topic references added, duplicate code eliminated, optimizer implementations shown as template + core update logic. DB docs 27/28/29 all updated to 151,774 chars (from 162,209).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-252 --status completed`
