@@ -5,33 +5,6 @@
 
 ## In Progress
 
-#### T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-241
-- **Description**: Write Python solutions with detailed explanations for each LC problem from Uber BPS interviews. CRITICAL: Include all follow-ups and variants reported in 1p3a interviews.
-
-Per-problem details:
-- LC 230 (Kth Smallest in BST): (a) iterative solution, (b) recursive solution, (c) VARIANT: kth LARGEST instead of smallest, (d) FOLLOW-UP: O(0) space solution -- Morris Traversal, (e) FOLLOW-UP: adding left_count/right_count to nodes, (f) flatten the tree approach. Complexity analysis for each.
-- LC 547 (Number of Provinces): standard Union Find + DFS approaches.
-- LC 337 (House Robber III): tree DP with rob/not-rob states.
-- LC 1020 (Number of Enclaves): BFS/DFS from border.
-- LC 994 (Rotting Oranges): multi-source BFS.
-- LC 23 (Merge k Sorted Lists): heap approach + divide-and-conquer.
-- LC 815 (Bus Routes): BFS on route graph.
-- LC 981 (Time Based KV Store): binary search on timestamps. FOLLOW-UPS: (a) handle 1M+ requests/sec, (b) thread safety, (c) amortized time complexity analysis.
-- LC 17 (Letter Combinations): backtracking. VARIANT: output all letter combos for a 10-digit phone number (same idea, larger scale).
-- LC 79 (Word Search): VARIANT: 8 directions (including diagonals), must go straight line (no turning). Simplifies to O(R*C*8*L) enumeration, no DFS/backtracking needed.
-- LC 987 (Vertical Order Traversal): BFS/DFS with column tracking.
-- LC 1197 (Min Knight Moves): BFS. VARIANT: board size is n (not infinite).
-- LC 1697 (Edge Length Limited Paths): offline queries + Union Find sort. VARIANT: edge weight >= k (reversed condition).
-- LC 2858 (Min Edge Reversal): re-rooting DP. NOTE: 1p3a reports say must self-construct edges, watch for 1-indexed.
-- LC 2791 (Palindrome Paths in Tree): bitmask XOR + DFS prefix counting. Full solution with detailed explanation of mask logic.
-- LC 2503 (Grid Queries): BFS/sort queries. VARIANT: terrain grid with limits array, start at (0,0), traverse cells < limit.
-- LC 549 (Binary Tree Longest Consecutive Sequence II): tree DP tracking increasing/decreasing.
-- LC 977 (Squares of Sorted Array): two-pointer approach.
-- LC 1696 reference (Jump Game VI): VARIANT: can jump +1 or +prime-ending-in-3 (3,13,23,...), maximize score. DP solution.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -179,6 +152,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A
+- [x] **2026-03-31** -- T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems. Write Python solutions with detailed explanations for each LC problem from Uber BPS interviews. CRITICAL: Include all fo
 - [x] **2026-03-31** -- T-P0-241: Uber BPS: Seed 1p3a interview problems into DB with solutions. Parse all Uber interview problems from staging/uber题目整理.txt into the mle_prep.db problems table.
 - [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
 - [x] **2026-03-28** -- T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions. MLInterviewPrep CLAUDE.md Prohibited Actions has this rule (lines 62-66):

@@ -511,3 +511,10 @@
 - **Sanity check result**: 19/19 LC verified OK. 27 custom problems (no duplicates). Interview event updated. 6 duplicates cleaned.
 - **Status**: [DONE]
 - **Request**: No task status change (T-P0-241 already completed)
+
+## 2026-03-31 -- [T-P0-242] Uber BPS: LC solutions for all 19 Uber-tagged problems
+- **What I did**: Created comprehensive solutions document covering all 19 LC problems from Uber BPS interviews. Each solution includes: approach explanation, clean Python code, time/space complexity analysis. CRITICAL follow-ups and variants included: LC 230 (6 approaches: iterative, recursive, kth largest, Morris O(1) space, augmented BST, flatten), LC 981 (3 follow-ups: 1M+ req/sec sharding, thread safety, amortized complexity), LC 17 (10-digit phone number variant with iterative approach), LC 79 (8-direction straight line variant), LC 1197 (finite board variant), LC 1697 (reversed edge weight >= k variant), LC 2858 (re-rooting DP with 1-indexed warning), LC 2791 (bitmask XOR palindrome path counting), LC 1696 (jump +prime ending in 3 variant with sieve). Solutions organized by pattern: tree (230, 337, 549, 987, 2858, 2791), graph/BFS (994, 1020, 815, 1197, 2503), union-find (547, 1697), binary search (981, 977), backtracking (17, 79), heap (23), DP (1696).
+- **Deliverables**: `docs/uber_bps_lc_solutions.md` (1017 lines, 27.2KB)
+- **Sanity check result**: 19/19 LC problems verified with solutions. 6 variants, 4+ follow-ups documented. All solutions include time/space complexity.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-242 --status completed`
