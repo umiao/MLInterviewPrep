@@ -1,4 +1,19 @@
-# Uber MLE -- BPS (Behavioral + Problem Solving，行为+问题解决) 面试准备材料
+"""
+Translate uber_phone_screen_prep.md to Chinese.
+Following chinese_conversion_spec.md rules.
+"""
+
+import sqlite3
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+
+DB_PATH = "data/mle_prep.db"
+DOC_ID = 3
+MD_PATH = "docs/uber_phone_screen_prep.md"
+
+CHINESE_CONTENT = r"""# Uber MLE -- BPS (Behavioral + Problem Solving，行为+问题解决) 面试准备材料
 
 > **阶段**：BPS 面试（在 Recruiter Screen 之后）
 >
@@ -307,3 +322,33 @@ BPS 编码在 HackerRank 上进行，需共享屏幕。
 - [ ] 准备安静环境 + 有线耳机
 - [ ] 准备好本文档 + 简历以便快速查阅
 - [ ] 水准备好，手机静音
+"""
+
+
+def main() -> None:
+    """Write Chinese content to markdown file and update DB."""
+    content = CHINESE_CONTENT.strip()
+
+    # Write markdown file
+    with open(MD_PATH, "w", encoding="utf-8") as f:
+        f.write(content + "\n")
+    print(f"[OK] Wrote {MD_PATH} ({len(content)} chars)")
+
+    # Update DB
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "UPDATE company_documents SET content = ? WHERE id = ?",
+        (content, DOC_ID),
+    )
+    conn.commit()
+
+    row = conn.execute(
+        "SELECT length(content) FROM company_documents WHERE id = ?",
+        (DOC_ID,),
+    ).fetchone()
+    print(f"[OK] Updated DB doc {DOC_ID} ({row[0]} chars)")
+    conn.close()
+
+
+if __name__ == "__main__":
+    main()

@@ -9,31 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-249
-- **Description**: Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to convert (all in docs/ and now also in company_documents DB):
-
-1. uber_bps_lc_solutions.md (27KB) - LC题解
-2. uber_bps_custom_solutions.md (76KB) - 自定义题解
-3. uber_bps_pattern_cheatsheet.md (26KB) - 算法模式速查
-4. uber_bps_design_architecture.md (30KB) - D&A准备
-5. uber_bps_knn_ml_fundamentals.md (26KB) - KNN+ML基础
-6. uber_bps_mock_sets.md (13KB) - 模拟题组
-7. uber_phone_screen_prep.md (15KB) - 面试流程准备
-
-Conversion rules:
-- Section headings: keep English preserved (e.g., '## BFS/DFS Problems')
-- Technical terms: keep English but always expand acronyms on first use in bold: **BFS (Breadth-First Search, 广度优先搜索)**
-- Code: keep all Python code as-is, translate surrounding explanations to Chinese
-- Problem statements: translate to Chinese, keep LC numbers and English problem names
-- Complexity analysis: keep O() notation, translate explanations
-- Follow-up questions: translate to Chinese
-- Acronyms to expand: BFS, DFS, DP, BS, UF, OOD, KNN, BST, BPS, D&A, LC, OA, SD, etc.
-
-After converting markdown files, update the corresponding company_documents in DB (company_id=5) with Chinese content.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access
@@ -119,6 +94,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 223 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-01** -- T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion. Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to conver
 - [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
 - [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co
 - [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5

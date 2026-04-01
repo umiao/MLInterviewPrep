@@ -1,4 +1,23 @@
-# Uber BPS -- Timed Mock Interview Problem Sets（限时模拟面试题组）
+"""
+Translate uber_bps_mock_sets.md to Chinese.
+Following chinese_conversion_spec.md rules:
+- Section headings: keep English
+- Technical terms: bold English (Chinese) on first use
+- Code: keep as-is, translate explanations
+- Acronyms expanded on first use
+"""
+
+import sqlite3
+import sys
+import io
+
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
+
+DB_PATH = "data/mle_prep.db"
+DOC_ID = 35
+MD_PATH = "docs/uber_bps_mock_sets.md"
+
+CHINESE_CONTENT = r"""# Uber BPS -- Timed Mock Interview Problem Sets（限时模拟面试题组）
 
 > 3组限时模拟题，模拟 **BPS (Behavioral + Problem Solving，行为+问题解决)** 面试中45分钟的编程部分。
 > 每组：1道 medium（20分钟）+ 1道 medium-hard（20分钟）+ follow-up（5分钟）。
@@ -324,3 +343,34 @@ Expected receipt:
 - **Follow-ups**：大声思考。先说关键洞察，不用写完整代码。
 
 > **黄金法则**：如果实现过程中卡住超过3分钟，退后一步重新审视方案。一个错误算法写得再完美也得0分。一个正确算法有小 bug 仍然得分不错。
+"""
+
+
+def main() -> None:
+    """Write Chinese content to markdown file and update DB."""
+    content = CHINESE_CONTENT.strip()
+
+    # Write markdown file
+    with open(MD_PATH, "w", encoding="utf-8") as f:
+        f.write(content + "\n")
+    print(f"[OK] Wrote {MD_PATH} ({len(content)} chars)")
+
+    # Update DB
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute(
+        "UPDATE company_documents SET content = ? WHERE id = ?",
+        (content, DOC_ID),
+    )
+    conn.commit()
+
+    # Verify
+    row = conn.execute(
+        "SELECT length(content) FROM company_documents WHERE id = ?",
+        (DOC_ID,),
+    ).fetchone()
+    print(f"[OK] Updated DB doc {DOC_ID} ({row[0]} chars)")
+    conn.close()
+
+
+if __name__ == "__main__":
+    main()

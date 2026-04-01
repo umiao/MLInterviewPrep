@@ -1,7 +1,6 @@
 # Uber BPS -- LC Problem Solutions
 
-> All solutions include: approach explanation, clean Python code, time/space complexity,
-> edge cases, and ALL follow-ups/variants reported in 1p3a interviews.
+> 所有题解均包含：解题思路、简洁 Python 代码、时间/空间复杂度、边界情况，以及 1point3acres 面经中报告的所有追问变体。
 >
 > Task: T-P0-242
 
@@ -9,9 +8,11 @@
 
 ## LC 230: Kth Smallest Element in a BST
 
-**Pattern**: Tree / Inorder Traversal
+**Pattern**: Tree / Inorder Traversal（树 / 中序遍历）
 
 ### (a) Iterative Inorder
+
+**中序遍历 (Inorder Traversal)** 在 **BST (Binary Search Tree，二叉搜索树)** 中会按升序访问所有节点，因此第 k 个访问到的节点即为第 k 小元素。迭代版本使用显式栈模拟递归。
 
 ```python
 def kthSmallest(root, k):
@@ -29,9 +30,11 @@ def kthSmallest(root, k):
             return node.val
         node = node.right
 ```
-**Time**: O(H + k) where H = tree height. **Space**: O(H) for stack.
+**Time**: O(H + k)，其中 H 为树高。**Space**: O(H)，栈空间。
 
 ### (b) Recursive Inorder
+
+递归版本使用列表作为可变闭包变量传递计数和结果，并在找到第 k 个元素后提前终止。
 
 ```python
 def kthSmallest(root, k):
@@ -52,11 +55,11 @@ def kthSmallest(root, k):
     inorder(root)
     return result[0]
 ```
-**Time**: O(H + k). **Space**: O(H) recursion stack.
+**Time**: O(H + k)。**Space**: O(H) 递归栈空间。
 
 ### (c) VARIANT: Kth Largest
 
-Reverse inorder (right -> root -> left):
+第 k 大变体使用反向中序遍历（右 -> 根 -> 左），将右子树优先访问：
 
 ```python
 def kthLargest(root, k):
@@ -76,6 +79,8 @@ def kthLargest(root, k):
 ```
 
 ### (d) FOLLOW-UP: O(1) Space -- Morris Traversal
+
+**Morris 遍历 (Morris Traversal)** 通过临时修改树的指针来实现 O(1) 空间的中序遍历，遍历结束后完整恢复树的结构。
 
 ```python
 def kthSmallest_morris(root, k):
@@ -105,11 +110,11 @@ def kthSmallest_morris(root, k):
                     return node.val
                 node = node.right
 ```
-**Time**: O(n). **Space**: O(1) -- temporarily modifies tree then restores.
+**Time**: O(n)。**Space**: O(1)——临时修改树后恢复原结构。
 
 ### (e) FOLLOW-UP: Augmented BST (left_count/right_count)
 
-If we can modify the tree structure, add `left_count` to each node:
+若可修改树结构，为每个节点添加 `left_count`（左子树节点数），可实现 O(H) 的查询：
 
 ```python
 def kthSmallest_augmented(root, k):
@@ -125,11 +130,11 @@ def kthSmallest_augmented(root, k):
             k -= left_count + 1
             node = node.right
 ```
-**Time**: O(H). **Space**: O(1). Requires O(n) preprocessing to compute subtree sizes.
+**Time**: O(H)。**Space**: O(1)。需要 O(n) 的预处理来计算子树大小。
 
 ### (f) FOLLOW-UP: Flatten the Tree
 
-Convert BST to sorted array via inorder, then index directly:
+将 BST 通过中序遍历展开为有序数组，再直接按下标查询：
 
 ```python
 def kthSmallest_flatten(root, k):
@@ -143,15 +148,17 @@ def kthSmallest_flatten(root, k):
     inorder(root)
     return vals[k - 1]
 ```
-**Time**: O(n) preprocessing, O(1) per query. **Space**: O(n).
+**Time**: O(n) 预处理，O(1) 单次查询。**Space**: O(n)。
 
 ---
 
 ## LC 547: Number of Provinces
 
-**Pattern**: Union Find / DFS
+**Pattern**: Union Find / DFS（并查集 / 深度优先搜索）
 
 ### Union Find
+
+**并查集 (Union Find，UF)** 使用路径压缩与按秩合并优化，将连通分量合并操作接近 O(1) 均摊时间。
 
 ```python
 def findCircleNum(isConnected):
@@ -183,9 +190,11 @@ def findCircleNum(isConnected):
 
     return len(set(find(i) for i in range(n)))
 ```
-**Time**: O(n^2 * alpha(n)). **Space**: O(n).
+**Time**: O(n^2 * alpha(n))，其中 alpha 为反阿克曼函数（实际近似常数）。**Space**: O(n)。
 
 ### DFS Alternative
+
+**DFS (Depth-First Search，深度优先搜索)** 替代方案：标记已访问节点，每次从未访问节点出发遍历即为一个新省份。
 
 ```python
 def findCircleNum_dfs(isConnected):
@@ -210,7 +219,9 @@ def findCircleNum_dfs(isConnected):
 
 ## LC 337: House Robber III
 
-**Pattern**: Tree DP
+**Pattern**: Tree DP（树上动态规划）
+
+**树形 DP (Tree DP，树上动态规划)** 的核心思路：每个节点返回两个状态的最优值——抢当前节点 vs 不抢当前节点，由此避免相邻节点被同时抢劫的非法情况。
 
 ```python
 def rob(root):
@@ -228,13 +239,15 @@ def rob(root):
 
     return max(dfs(root))
 ```
-**Time**: O(n). **Space**: O(H) recursion stack.
+**Time**: O(n)。**Space**: O(H) 递归栈空间。
 
 ---
 
 ## LC 1020: Number of Enclaves
 
-**Pattern**: BFS from Border
+**Pattern**: BFS from Border（从边界出发的广度优先搜索）
+
+**BFS (Breadth-First Search，广度优先搜索)** 策略：先将所有与边界相连的陆地格子标记为已访问（即可逃脱），剩余的陆地格子即为"飞地"（enclave）。
 
 ```python
 from collections import deque
@@ -263,13 +276,15 @@ def numEnclaves(grid):
     # Count remaining land cells (enclaves)
     return sum(grid[i][j] for i in range(m) for j in range(n))
 ```
-**Time**: O(m*n). **Space**: O(m*n) worst case for queue.
+**Time**: O(m*n)。**Space**: O(m*n) 队列最坏情况。
 
 ---
 
 ## LC 994: Rotting Oranges
 
-**Pattern**: Multi-source BFS
+**Pattern**: Multi-source BFS（多源广度优先搜索）
+
+多源 BFS 的关键：将所有初始腐烂橙子同时加入队列，模拟并行扩散过程。按轮次（分钟）扩展边界，每轮处理当前层所有节点。
 
 ```python
 from collections import deque
@@ -306,15 +321,17 @@ def orangesRotting(grid):
 
     return -1  # some fresh oranges unreachable
 ```
-**Time**: O(m*n). **Space**: O(m*n).
+**Time**: O(m*n)。**Space**: O(m*n)。
 
 ---
 
 ## LC 23: Merge K Sorted Lists
 
-**Pattern**: Heap
+**Pattern**: Heap（堆）
 
 ### Min-Heap Approach
+
+使用**最小堆 (Min-Heap，最小优先队列)** 维护 k 个链表的当前最小节点，每次弹出最小值后将其下一个节点压入堆中。
 
 ```python
 import heapq
@@ -338,9 +355,11 @@ def mergeKLists(lists):
 
     return dummy.next
 ```
-**Time**: O(N log k) where N = total nodes, k = number of lists. **Space**: O(k).
+**Time**: O(N log k)，其中 N 为所有节点总数，k 为链表数量。**Space**: O(k)。
 
 ### Divide and Conquer
+
+**分治法 (Divide and Conquer，分治)** 替代方案：每轮将链表两两配对合并，共 log k 轮，每轮合并总量为 O(N)。
 
 ```python
 def mergeKLists_dc(lists):
@@ -371,13 +390,15 @@ def mergeKLists_dc(lists):
         lists = merged
     return lists[0]
 ```
-**Time**: O(N log k). **Space**: O(1) extra (modifies in-place) + O(log k) recursion.
+**Time**: O(N log k)。**Space**: O(1) 额外空间（原地修改）+ O(log k) 递归栈。
 
 ---
 
 ## LC 815: Bus Routes
 
-**Pattern**: BFS on Route Graph
+**Pattern**: BFS on Route Graph（路线图上的广度优先搜索）
+
+将每条公交线路视为图中的一个节点，共享站点的线路之间有边相连。BFS 的层数即为乘坐的公交车数量。
 
 ```python
 from collections import defaultdict, deque
@@ -417,13 +438,15 @@ def numBusesToDestination(routes, source, target):
 
     return -1
 ```
-**Time**: O(sum of route lengths). **Space**: O(sum of route lengths).
+**Time**: O(所有线路长度之和)。**Space**: O(所有线路长度之和)。
 
 ---
 
 ## LC 981: Time Based Key-Value Store
 
-**Pattern**: Binary Search on Timestamps
+**Pattern**: Binary Search on Timestamps（在时间戳上的二分查找）
+
+**二分查找 (Binary Search，BS)** 应用：每个 key 对应一个按时间戳有序排列的列表（由 set 操作保证单调递增），get 时用 `bisect_right` 找到最大的满足 `timestamp <= 给定值` 的条目。
 
 ```python
 import bisect
@@ -447,21 +470,23 @@ class TimeMap:
             return ""
         return entries[idx][1]
 ```
-**Time**: set O(1), get O(log n). **Space**: O(n).
+**Time**: set O(1)，get O(log n)。**Space**: O(n)。
 
 ### Follow-ups
 
-**1M+ requests/sec**: Shard by key hash across multiple machines. Each shard handles a subset of keys. Use consistent hashing for even distribution.
+**每秒 100 万次以上请求**：按 key 哈希值分片到多台机器。每台机器负责一个 key 子集，使用**一致性哈希 (Consistent Hashing，一致哈希)** 实现均匀分布。
 
-**Thread safety**: Use read-write locks per key. Multiple readers can access simultaneously, writers get exclusive access. Or use lock-free data structures (CAS-based append-only list).
+**线程安全**：对每个 key 使用读写锁（多读单写）。多个读操作可并发，写操作独占访问。或使用基于 CAS 的无锁追加列表。
 
-**Amortized time complexity**: set is O(1) amortized (list append). get is O(log n) via binary search. If timestamps are always increasing (guaranteed by problem), the list is always sorted -- no extra sorting needed.
+**均摊时间复杂度**：set 的均摊时间为 O(1)（列表追加）。get 为 O(log n) 二分查找。题目保证时间戳单调递增，因此列表始终有序，无需额外排序。
 
 ---
 
 ## LC 17: Letter Combinations of a Phone Number
 
-**Pattern**: Backtracking
+**Pattern**: Backtracking（回溯）
+
+**回溯 (Backtracking)** 枚举所有可能的字母组合：对每个数字位，依次尝试对应的每个字母，递归到下一位，完成后撤销选择。
 
 ```python
 def letterCombinations(digits):
@@ -487,11 +512,11 @@ def letterCombinations(digits):
     backtrack(0, [])
     return result
 ```
-**Time**: O(4^n * n) where n = length of digits. **Space**: O(n) recursion depth.
+**Time**: O(4^n * n)，其中 n 为 digits 长度。**Space**: O(n) 递归深度。
 
 ### VARIANT: 10-digit Phone Number
 
-Same algorithm, but output is much larger (up to 4^10 = ~1M combinations). May need iterative approach or generator for memory efficiency:
+算法不变，但输出规模大幅增加（最多 4^10 ≈ 100 万种组合）。可改用迭代方式或生成器以节省内存：
 
 ```python
 def letterCombinations_iterative(digits):
@@ -510,9 +535,11 @@ def letterCombinations_iterative(digits):
 
 ## LC 79: Word Search
 
-**Pattern**: Backtracking / DFS
+**Pattern**: Backtracking / DFS（回溯 / 深度优先搜索）
 
 ### Standard DFS
+
+在网格中搜索单词：对每个起始格子运行 DFS，标记已访问格子（防止重复使用），找到匹配后恢复原值（回溯）。
 
 ```python
 def exist(board, word):
@@ -538,9 +565,11 @@ def exist(board, word):
                 return True
     return False
 ```
-**Time**: O(m*n*3^L) where L = word length. **Space**: O(L).
+**Time**: O(m*n*3^L)，其中 L 为单词长度（每步有 3 个方向可选，因为不能回头）。**Space**: O(L)。
 
 ### VARIANT: 8 Directions, Straight Line Only
+
+8 方向但必须走直线（不能转弯），无需回溯，直接枚举每个起点和方向即可：
 
 ```python
 def exist_8dir_straight(board, word):
@@ -568,13 +597,15 @@ def exist_8dir_straight(board, word):
                     return True
     return False
 ```
-**Time**: O(R*C*8*L). **Space**: O(1).
+**Time**: O(R*C*8*L)。**Space**: O(1)。
 
 ---
 
 ## LC 977: Squares of a Sorted Array
 
-**Pattern**: Two Pointers
+**Pattern**: Two Pointers（双指针）
+
+**双指针 (Two Pointers)** 从数组两端向中间移动：绝对值最大的元素在两端，因此每次取两端绝对值较大者的平方，从结果数组末尾向前填充。
 
 ```python
 def sortedSquares(nums):
@@ -595,13 +626,15 @@ def sortedSquares(nums):
 
     return result
 ```
-**Time**: O(n). **Space**: O(n) for result.
+**Time**: O(n)。**Space**: O(n) 存储结果。
 
 ---
 
 ## LC 987: Vertical Order Traversal of a Binary Tree
 
-**Pattern**: BFS/DFS with Column Tracking
+**Pattern**: BFS/DFS with Column Tracking（带列追踪的 BFS/DFS）
+
+BFS 遍历时记录每个节点的 (行, 列) 坐标，按列分组后对每列内元素先按行、再按值排序。
 
 ```python
 from collections import defaultdict, deque
@@ -630,13 +663,15 @@ def verticalTraversal(root):
 
     return result
 ```
-**Time**: O(n log n). **Space**: O(n).
+**Time**: O(n log n)。**Space**: O(n)。
 
 ---
 
 ## LC 1197: Minimum Knight Moves
 
-**Pattern**: BFS
+**Pattern**: BFS（广度优先搜索）
+
+利用棋盘的对称性将目标映射到第一象限（取绝对值），减少搜索空间。BFS 保证找到的第一条到达目标的路径即为最短路径。
 
 ```python
 from collections import deque
@@ -662,9 +697,11 @@ def minKnightMoves(x, y):
                 visited.add((nx, ny))
                 q.append((nx, ny, steps + 1))
 ```
-**Time**: O(|x|*|y|) worst case. **Space**: O(|x|*|y|).
+**Time**: O(|x|*|y|) 最坏情况。**Space**: O(|x|*|y|)。
 
 ### VARIANT: Finite Board Size n
+
+棋盘大小有限（n x n），BFS 时需检查边界条件，无路可达时返回 -1：
 
 ```python
 def minKnightMoves_finite(n, x, y):
@@ -690,7 +727,9 @@ def minKnightMoves_finite(n, x, y):
 
 ## LC 1697: Checking Existence of Edge Length Limited Paths
 
-**Pattern**: Offline Queries + Union Find
+**Pattern**: Offline Queries + Union Find（离线查询 + 并查集）
+
+**离线查询 (Offline Queries)** 技巧：将所有边和查询按权重/限制排序后一起处理。对每个查询，只将权重严格小于限制的边加入并查集，再判断两端点是否连通。
 
 ```python
 def distanceLimitedPathsExist(n, edgeList, queries):
@@ -733,11 +772,11 @@ def distanceLimitedPathsExist(n, edgeList, queries):
 
     return result
 ```
-**Time**: O((E + Q) log(E + Q) + (E + Q) * alpha(n)). **Space**: O(n + Q).
+**Time**: O((E + Q) log(E + Q) + (E + Q) * alpha(n))。**Space**: O(n + Q)。
 
 ### VARIANT: Edge Weight >= k
 
-Change the condition: instead of `weight < limit`, use `weight >= limit`. Sort edges descending and queries descending:
+变体要求路径上所有边权重均不小于 k。将边和查询按权重降序排列，逐步加入满足条件的边：
 
 ```python
 def pathsWithMinWeight(n, edgeList, queries):
@@ -766,7 +805,9 @@ def pathsWithMinWeight(n, edgeList, queries):
 
 ## LC 549: Binary Tree Longest Consecutive Sequence II
 
-**Pattern**: Tree DP
+**Pattern**: Tree DP（树上动态规划）
+
+每个节点向上汇报两个值：以该节点为端点的最长递增序列长度和最长递减序列长度。过该节点的最长连续路径 = 递增长度 + 递减长度 - 1（节点本身不重复计数）。
 
 ```python
 def longestConsecutive(root):
@@ -801,13 +842,15 @@ def longestConsecutive(root):
     dfs(root)
     return max_len[0]
 ```
-**Time**: O(n). **Space**: O(H).
+**Time**: O(n)。**Space**: O(H)。
 
 ---
 
 ## LC 2503: Maximum Number of Points From Grid Queries
 
-**Pattern**: BFS + Sort Queries
+**Pattern**: BFS + Sort Queries（BFS + 排序查询）
+
+将查询按限制值排序，用**最小堆 (Min-Heap)** 维护 BFS 边界。对每个查询，将所有值严格小于限制的可达格子扩展进入已统计点数中，实现增量计算。
 
 ```python
 import heapq
@@ -839,13 +882,15 @@ def maxPoints(grid, queries):
 
     return result
 ```
-**Time**: O(m*n*log(m*n) + Q*log(Q)). **Space**: O(m*n).
+**Time**: O(m*n*log(m*n) + Q*log(Q))。**Space**: O(m*n)。
 
 ---
 
 ## LC 2858: Minimum Edge Reversals So Every Node Is Reachable
 
-**Pattern**: Re-rooting DP
+**Pattern**: Re-rooting DP（换根动态规划）
+
+**换根 DP (Re-rooting DP)** 分两步：先以节点 0 为根做一次 DFS 得到 dp[0]，再通过第二次 DFS 将根从父节点"移动"到子节点，利用父节点的 dp 值 O(1) 推导子节点的 dp 值。
 
 ```python
 from collections import defaultdict
@@ -882,15 +927,17 @@ def minEdgeReversals(n, edges):
     reroot(0, -1)
     return dp
 ```
-**Time**: O(n). **Space**: O(n).
+**Time**: O(n)。**Space**: O(n)。
 
-**Note from 1p3a**: Must self-construct edges, watch for 1-indexed input. Return the node with minimum reversals or the full array depending on problem statement.
+**1point3acres 面经注意点**：需自行构建邻接表，注意输入可能是 1-indexed。根据题目要求，返回翻转次数最少的节点编号或整个 dp 数组。
 
 ---
 
 ## LC 2791: Count Paths That Can Form a Palindrome in a Tree
 
-**Pattern**: Bitmask XOR + DFS
+**Pattern**: Bitmask XOR + DFS（位掩码异或 + 深度优先搜索）
+
+**关键洞察**：路径 u->v 上的字符集等于从根到 u 的路径字符集 XOR 从根到 v 的路径字符集（公共前缀抵消）。路径可构成回文 = XOR 结果中最多有 1 个 bit 为 1（至多一个字符出现奇数次）。
 
 ```python
 from collections import defaultdict
@@ -929,15 +976,17 @@ def countPalindromePaths(parent, s):
     dfs(0)
     return count
 ```
-**Time**: O(26n). **Space**: O(n).
+**Time**: O(26n)。**Space**: O(n)。
 
-**Key insight**: Path u->v has characters from root->u XOR root->v. Palindrome-formable means at most 1 character has odd count, i.e., XOR result has at most 1 bit set.
+**关键洞察**：路径 u->v 上的字符来自 root->u 的前缀异或 root->v 的前缀。可构成回文意味着至多 1 个字符出现奇数次，即 XOR 结果至多有 1 个 bit 为 1。
 
 ---
 
 ## LC 1696: Jump Game VI
 
-**Pattern**: DP + Sliding Window Max (Deque)
+**Pattern**: DP + Sliding Window Max (Deque)（动态规划 + 单调双端队列滑动窗口最大值）
+
+**单调双端队列 (Monotonic Deque)** 维护大小为 k 的窗口内 dp 值的最大值：队列头部始终保存窗口内最大 dp 值的下标，新元素加入前从队尾弹出所有不大于它的元素。
 
 ```python
 from collections import deque
@@ -963,9 +1012,11 @@ def maxResult(nums, k):
 
     return dp[-1]
 ```
-**Time**: O(n). **Space**: O(k).
+**Time**: O(n)。**Space**: O(k)。
 
 ### VARIANT: Jump +1 or +Prime Ending in 3
+
+变体：每步可跳 +1 或 +任意以 3 结尾的素数（3, 13, 23, ...）。先用筛法预计算所有满足条件的素数，再做 DP：
 
 ```python
 def jumpGamePrime(arr):
@@ -996,22 +1047,24 @@ def jumpGamePrime(arr):
 
     return dp[-1] if dp[-1] != float('-inf') else -1
 ```
-**Time**: O(n * P) where P = number of primes ending in 3 up to n. **Space**: O(n).
+**Time**: O(n * P)，其中 P 为不超过 n 的以 3 结尾的素数个数。**Space**: O(n)。
 
 ---
 
 ## Edge Cases & General Tips
 
-### Common Edge Cases to Check
-- Empty input / single element
-- All elements the same
-- Already sorted / reverse sorted
-- Tree with only left or only right children
-- Graph with disconnected components
-- k = 0 or k = n
+### Common Edge Cases to Check（常见边界情况检查）
 
-### Complexity Analysis Checklist
-For every solution, state:
-1. Time complexity with explanation of dominant operation
-2. Space complexity distinguishing auxiliary from input space
-3. Best/worst case if they differ significantly
+- 空输入 / 单元素
+- 所有元素相同
+- 已有序 / 逆序排列
+- 树只有左子树或只有右子树
+- 图中存在不连通分量
+- k = 0 或 k = n
+
+### Complexity Analysis Checklist（复杂度分析清单）
+
+对每个题解，务必说明：
+1. 时间复杂度及主导操作的解释
+2. 空间复杂度，区分辅助空间与输入空间
+3. 若最好/最坏情况差异显著，分别说明

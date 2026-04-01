@@ -1,8 +1,8 @@
-# Uber BPS -- Custom (Non-LC) Problem Solutions
+# Uber BPS -- 自定义（非 LC）题目解题方案
 
-> Solutions for Uber-specific interview problems without standard LeetCode numbers.
-> Each includes: problem statement (reconstructed from 1p3a), approach, clean Python
-> code, time/space complexity, edge cases, and follow-ups.
+> Uber 面试专属题目的解答，这些题目没有对应的标准 LeetCode 编号。
+> 每题包含：题目描述（根据 1p3a 重构）、解题思路、简洁 Python 代码、
+> 时间/空间复杂度、边界情况及延伸问题。
 >
 > Task: T-P0-243
 
@@ -40,20 +40,19 @@
 
 ## 1. Purchase Optimization
 
-**Pattern**: Prefix Sum + Binary Search
+**Pattern**: **Prefix Sum（前缀和）** + **Binary Search（二分查找）**
 
 ### Problem Statement
 
-Given an array `prices` (sorted ascending) representing item prices and a list of
-queries `(pos, amount)`, for each query find the maximum number of items purchasable
-starting from index `pos` with budget `amount`.
+给定一个升序排列的价格数组 `prices`，以及一组查询 `(pos, amount)`，
+对于每个查询，求从索引 `pos` 开始、预算为 `amount` 时，最多能购买多少件商品。
 
 ### Approach
 
-1. Sort prices (if not already sorted).
-2. Build prefix sum array: `prefix[i] = prices[0] + prices[1] + ... + prices[i-1]`.
-3. For each query `(pos, amount)`: binary search for the largest `end` such that
-   `prefix[end] - prefix[pos] <= amount`.
+1. 对 prices 排序（若未排序）。
+2. 构建前缀和数组：`prefix[i] = prices[0] + prices[1] + ... + prices[i-1]`。
+3. 对于每个查询 `(pos, amount)`：二分查找最大的 `end`，使得
+   `prefix[end] - prefix[pos] <= amount`。
 
 ```python
 import bisect
@@ -86,36 +85,34 @@ def max_items_purchasable(
     return results
 ```
 
-**Time**: O(n log n) for sort + O(n) prefix sum + O(q log n) for queries.
-**Space**: O(n) for prefix array.
+**时间复杂度**：排序 O(n log n) + 构建前缀和 O(n) + 处理 q 个查询 O(q log n)。
+**空间复杂度**：O(n)，用于存储前缀和数组。
 
 ### Edge Cases
-- `amount` is 0 -> return 0
-- `pos` beyond array bounds -> return 0
-- Budget enough for all remaining items
+- `amount` 为 0 -> 返回 0
+- `pos` 超出数组范围 -> 返回 0
+- 预算足以购买所有剩余商品
 
 ### Follow-up: Unsorted Prices
 
-If prices are not given sorted, we must sort first. If queries need original indices,
-maintain an index mapping before sorting.
+若价格数组未排序，需先排序。若查询需要原始索引，排序前需维护一个索引映射。
 
 ---
 
 ## 2. Customer Revenue & Referral Tracking (OOD)
 
-**Pattern**: Object-Oriented Design / Tree Aggregation
+**Pattern**: **Object-Oriented Design（面向对象设计）** / **Tree Aggregation（树形聚合）**
 
 ### Problem Statement
 
-Design a system supporting:
-- `insertNewCustomer(revenue, referrerID)`: Add customer with given revenue, referred by referrerID. Revenue propagates up the referral tree.
-- `getLowestK(k, minTotalRevenue)`: Return k customers with lowest total revenue (direct + all referrals' revenue) that exceed minTotalRevenue.
+设计一个系统，支持以下操作：
+- `insertNewCustomer(revenue, referrerID)`：添加一位客户，其收入为 revenue，由 referrerID 推荐。收入沿推荐链向上传播。
+- `getLowestK(k, minTotalRevenue)`：返回总收入（直接收入 + 所有被推荐人收入之和）超过 minTotalRevenue 的 k 位总收入最低的客户。
 
 ### Approach
 
-Each customer stores direct revenue and a `total_revenue` (direct + subtree).
-On insert, propagate revenue upward through the referral chain. For `getLowestK`,
-maintain a sorted structure or scan and filter.
+每个客户记录直接收入和 `total_revenue`（直接 + 子树收入之和）。
+插入时，沿推荐链向上传播收入。对于 `getLowestK`，维护一个有序结构或过滤扫描。
 
 ```python
 import heapq
@@ -172,40 +169,38 @@ class ReferralSystem:
         return [cid for _, cid in smallest]
 ```
 
-**Time**:
-- `insert`: O(D) where D = depth of referral tree (propagation).
-- `getLowestK`: O(n log k) using heap selection.
+**时间复杂度**：
+- `insert`：O(D)，D 为推荐树的深度（收入向上传播）。
+- `getLowestK`：O(n log k)，使用堆选择。
 
-**Space**: O(n) for all customers.
+**空间复杂度**：O(n)，存储所有客户。
 
 ### Edge Cases
-- Customer with no referrer (root-level)
-- Deep referral chains (O(D) propagation)
-- k larger than qualifying customers
+- 无推荐人的客户（根节点）
+- 深度较大的推荐链（O(D) 传播）
+- k 大于满足条件的客户数量
 
 ### Follow-up: Efficient getLowestK
 
-For frequent queries, maintain a sorted container (e.g., SortedList from sortedcontainers)
-indexed by total_revenue. Update on insert: remove old entry, update, reinsert. This gives
-O(log n) per insert and O(k + log n) per query.
+若查询频繁，可维护一个按 total_revenue 索引的有序容器（如 sortedcontainers 的 SortedList）。
+插入时：删除旧条目、更新、重新插入，可实现插入 O(log n)、查询 O(k + log n)。
 
 ---
 
 ## 3. Uber Rider Connection Log (Union Find)
 
-**Pattern**: Union Find / Graph Connectivity
+**Pattern**: **Union Find（并查集）** / **Graph Connectivity（图连通性）**
 
 ### Problem Statement
 
-Given timestamped logs of the form `"<timestamp> A shared-ride-with B"`, find the
-earliest timestamp at which all riders are connected (directly or transitively).
+给定形如 `"<timestamp> A shared-ride-with B"` 的带时间戳日志，求所有乘客首次全部连通（直接或间接）的最早时间戳。
 
-**Follow-up**: Handle `"<timestamp> A blocked B"` events (disconnect two riders).
+**延伸问题**：处理 `"<timestamp> A blocked B"`（断开连接）事件。
 
 ### Approach -- Part 1: Union Find
 
-Process logs in chronological order. For each `shared-ride-with`, union the two riders.
-After each union, check if all riders are in one component.
+按时间顺序处理日志。对每条 `shared-ride-with` 记录，合并两位乘客。
+每次合并后检查所有乘客是否已在同一连通分量中。
 
 ```python
 from typing import List, Optional, Tuple
@@ -273,22 +268,20 @@ def earliest_full_connection(
     return None
 ```
 
-**Time**: O(E * alpha(N)) ~ O(E) where E = number of logs.
-**Space**: O(N) for UF structure.
+**时间复杂度**：O(E * alpha(N)) ≈ O(E)，E 为日志条数。
+**空间复杂度**：O(N)，用于并查集结构。
 
 ### Follow-up: Handling "block" Events (Deletions)
 
-Union-Find does NOT support deletions. Two approaches:
+并查集**不支持**删除操作。有两种方案：
 
-**Approach A: Offline -- Process in Reverse**
+**方案 A：离线处理——逆序**
 
-If we need the *latest* time all are connected, process events in reverse:
-blocks become unions, shared-rides become edges. But this changes the problem.
+若需要找所有人**最后一次**全部连通的时间，可逆序处理事件：断开变合并，共乘变边。但这改变了问题语义。
 
-**Approach B: Rebuild with BFS/DFS**
+**方案 B：使用 BFS/DFS 重建**
 
-For online processing with both connect and block events, maintain an adjacency
-list. After each event, run BFS/DFS to check connectivity.
+对于需要同时处理连接和断开事件的在线场景，维护邻接表。每次事件后运行 **BFS (Breadth-First Search，广度优先搜索)** 或 **DFS (Depth-First Search，深度优先搜索)** 检查连通性。
 
 ```python
 from collections import defaultdict, deque
@@ -339,33 +332,28 @@ def earliest_full_connection_with_blocks(
     return None
 ```
 
-**Time**: O(E * (V + E)) -- BFS after each event. For large inputs, optimize with
-link-cut trees or ETT (Euler Tour Trees) for O(log N) per operation.
-
-**Space**: O(V + E) for adjacency list.
+**时间复杂度**：O(E * (V + E))——每次事件后进行 BFS。对于大规模输入，可用 Link-Cut Tree 或 ETT（欧拉回路树）优化至 O(log N) 每次操作。
+**空间复杂度**：O(V + E)，用于邻接表。
 
 ### Edge Cases
-- Single rider (trivially connected)
-- Block event for non-existent connection (no-op)
-- Multiple connections between same pair
+- 只有一位乘客（天然连通）
+- 对不存在的连接执行 block 操作（无操作）
+- 同一对乘客之间有多条连接
 
 ---
 
 ## 4. Elevator Binary Search OA
 
-**Pattern**: Array Simulation / Binary Search
+**Pattern**: **Array Simulation（数组模拟）** / Binary Search
 
 ### Problem Statement
 
-Given an array where each element represents a move distance, starting at index `i`,
-you move to `i + arr[i]` (or `i - arr[i]` depending on rules). Find the minimum
-starting index such that the traversal never goes out of the left boundary (index < 0).
+给定一个数组，每个元素表示移动距离，从索引 `i` 出发，移动到 `i + arr[i]`（或根据规则移动到 `i - arr[i]`）。
+求最小的起始索引，使得遍历过程中永远不会越过左边界（索引 < 0）。
 
 ### Approach
 
-Simulate the path from each starting index. For efficiency, use memoization or
-binary search on the answer if the property is monotonic (larger starting index
-= more room to the left).
+从每个起始索引模拟路径。若该属性具有单调性（起始索引越大，左侧空间越多），可用记忆化或二分查找提升效率。
 
 ```python
 from typing import List
@@ -402,9 +390,9 @@ def min_starting_index(moves: List[int]) -> int:
     return result
 ```
 
-**Time**: O(n^2) worst case with linear scan + simulation.
-With binary search (if monotonic): O(n log n).
-**Space**: O(n) for visited set.
+**时间复杂度**：线性扫描 + 模拟，最坏情况 O(n^2)。
+若具有单调性，使用二分查找：O(n log n)。
+**空间复杂度**：O(n)，用于 visited 集合。
 
 ### Variant: Bidirectional Jumps with Array Values
 
@@ -428,20 +416,20 @@ def min_start_bidirectional(arr: List[int]) -> int:
 ```
 
 ### Edge Cases
-- Array of length 1
-- All elements are 0 (infinite loop at start)
-- Negative jumps causing immediate left-boundary violation
+- 数组长度为 1
+- 所有元素为 0（在起点形成无限循环）
+- 负数跳跃导致立即越过左边界
 
 ---
 
 ## 5. Server Throughput with Heap
 
-**Pattern**: Heap / Greedy Scheduling
+**Pattern**: **Heap（堆）** / **Greedy Scheduling（贪心调度）**
 
 ### Problem Statement
 
-Given `n` servers with processing times, and incoming requests, maximize throughput.
-Compare recursive vs heap-based solutions.
+给定 `n` 台服务器及其处理时间，以及传入的请求，最大化吞吐量。
+对比递归解法与基于堆的解法。
 
 ### Approach: Min-Heap for Earliest Available Server
 
@@ -482,8 +470,8 @@ def max_throughput_heap(
     return processed
 ```
 
-**Time**: O(R log S) where R = requests, S = servers.
-**Space**: O(S) for heap.
+**时间复杂度**：O(R log S)，R 为请求数，S 为服务器数。
+**空间复杂度**：O(S)，用于堆。
 
 ### Recursive Approach (for comparison)
 
@@ -518,27 +506,27 @@ def max_throughput_recursive(
     return best
 ```
 
-**Time**: O(S^R) exponential -- only for small inputs.
+**时间复杂度**：O(S^R) 指数级——仅适用于小规模输入。
 
 ### Edge Cases
-- All requests arrive simultaneously
-- Single server
-- Processing times exceeding gap between requests
+- 所有请求同时到达
+- 只有一台服务器
+- 处理时间超过请求间隔
 
 ---
 
 ## 6. Cart & Pricing Engine (OOD)
 
-**Pattern**: Object-Oriented Design / Strategy Pattern
+**Pattern**: **Object-Oriented Design（面向对象设计）** / **Strategy Pattern（策略模式）**
 
 ### Problem Statement
 
-Design classes for an Uber Eats cart system. Requirements:
-- Item customization (add-ons with extra cost)
-- Surge pricing multiplier
-- Membership discounts (Uber One)
-- Promo codes (flat or percentage)
-- Receipt breakdown output
+为 Uber Eats 购物车系统设计类。需求：
+- 商品定制（附加项及额外费用）
+- 高峰期价格倍增（Surge Pricing）
+- 会员折扣（Uber One）
+- 优惠码（固定金额或百分比）
+- 小票明细输出
 
 ### Design
 
@@ -721,34 +709,33 @@ cart.add_pricing_rule(
 print(cart.receipt())
 ```
 
-**Key Design Decisions**:
-- Strategy pattern for pricing rules: easy to add new rule types
-- Rules applied in order (surge -> discount -> promo)
-- `MenuItem.total_price` includes add-ons
-- Receipt shows full breakdown
+**关键设计决策**：
+- 策略模式用于定价规则：方便扩展新规则类型
+- 规则按顺序应用（高峰倍增 -> 折扣 -> 优惠码）
+- `MenuItem.total_price` 包含附加项费用
+- 小票展示完整明细
 
 ### Follow-up: Rule Ordering and Conflicts
 
-In production, define a `priority` field on rules. Sort by priority before applying.
-For mutual exclusion (e.g., only one promo code), validate at `add_pricing_rule`.
+生产环境中，为规则定义 `priority` 字段，应用前按优先级排序。
+对于互斥规则（如只能使用一个优惠码），在 `add_pricing_rule` 时进行校验。
 
 ---
 
 ## 7. Circular Array Shortest Jump
 
-**Pattern**: BFS on Circular Array
+**Pattern**: BFS on Circular Array（循环数组 BFS）
 
 ### Problem Statement
 
-Given a circular array of integers where `arr[i]` represents the jump distance
-at index `i`, find the shortest number of jumps from index A to index B.
-Jumps wrap around: from index `i`, you can go to `(i + arr[i]) % n` or
-`(i - arr[i]) % n`.
+给定一个循环整数数组，`arr[i]` 表示索引 `i` 处的跳跃距离，
+求从索引 A 到索引 B 的最少跳跃次数。
+跳跃支持循环绕回：从索引 `i` 出发，可以跳到 `(i + arr[i]) % n` 或 `(i - arr[i]) % n`。
 
 ### Approach
 
-BFS from source A. Each state is a position in the circular array. Since we
-want shortest path, BFS guarantees optimality.
+从源节点 A 开始 BFS。每个状态为循环数组中的一个位置。
+由于求最短路径，BFS 保证最优性。
 
 ```python
 from collections import deque
@@ -781,34 +768,34 @@ def shortest_jump(arr: List[int], start: int, end: int) -> int:
     return -1
 ```
 
-**Time**: O(n) -- each node visited at most once.
-**Space**: O(n) for visited array and queue.
+**时间复杂度**：O(n)——每个节点最多访问一次。
+**空间复杂度**：O(n)，用于 visited 数组和队列。
 
 ### Edge Cases
-- `start == end` -> 0 jumps
-- `arr[i] == 0` -> stuck at position i (no outgoing edges)
-- All elements same -> regular skip pattern
+- `start == end` -> 0 次跳跃
+- `arr[i] == 0` -> 卡在位置 i（无出边）
+- 所有元素相同 -> 规律性跳跃模式
 
 ---
 
 ## 8. Robot Distance in Grid
 
-**Pattern**: DP Precomputation / 4-Direction Obstacle Distance
+**Pattern**: **DP（动态规划）** Precomputation / 4-Direction Obstacle Distance
 
 ### Problem Statement
 
-Given a grid with:
-- `O` = robot
-- `E` = empty cell
-- `X` = obstacle
+给定一个网格，其中：
+- `O` = 机器人
+- `E` = 空格
+- `X` = 障碍物
 
-And a distance array `[left, top, bottom, right]` representing distances from the
-target robot to the nearest obstacle in each direction, find which robot matches.
+以及一个距离数组 `[left, top, bottom, right]`，表示目标机器人到各方向最近障碍物的距离，
+找出与之匹配的机器人。
 
 ### Approach
 
-Precompute distance-to-nearest-obstacle in all 4 directions for every cell using DP.
-Then for each robot cell, check if its 4 distances match the query.
+用 DP 预计算每个格子在四个方向上到最近障碍物的距离，
+然后遍历所有机器人格子，检查其四方向距离是否与查询匹配。
 
 ```python
 from typing import List, Optional, Tuple
@@ -895,40 +882,38 @@ def find_robot(
     return None
 ```
 
-**Time**: O(rows * cols) for precomputation + O(rows * cols) for search.
-**Space**: O(rows * cols) for 4 distance matrices.
+**时间复杂度**：预计算 O(rows * cols) + 查找 O(rows * cols)。
+**空间复杂度**：O(rows * cols)，用于四个方向的距离矩阵。
 
 ### Edge Cases
-- Robot at grid boundary (distance to obstacle = distance to wall)
-- Multiple robots with same distances (return first match or all)
-- No matching robot
+- 机器人在网格边界（到障碍物的距离等于到边界的距离）
+- 多个机器人具有相同的距离分布（返回第一个匹配或全部）
+- 没有匹配的机器人
 
 ### Note on Distance Definition
 
-The problem may define distance as cells to nearest obstacle OR to boundary
-(treating boundary as obstacle). Clarify with interviewer. The solution above
-treats the starting column/row edge as distance 0 (implicit wall).
+问题可能将"距离"定义为到最近障碍物的格数，或到边界的格数（将边界视为障碍物）。
+请与面试官确认。上述方案将起始列/行的边缘距离视为 0（隐式边界墙）。
 
 ---
 
 ## 9. Min Operations n to 0
 
-**Pattern**: Greedy / Non-Adjacent Form (NAF)
+**Pattern**: **Greedy（贪心）** / **NAF (Non-Adjacent Form，非相邻表示法)**
 
 ### Problem Statement
 
-Given integer `n`, reduce it to 0 using operations: `n += 2^i` or `n -= 2^i`
-for any non-negative integer `i`. Find the minimum number of operations.
+给定整数 `n`，使用操作 `n += 2^i` 或 `n -= 2^i`（i 为任意非负整数）将其减至 0。
+求最少操作次数。
 
 ### Approach
 
-This is equivalent to finding the Non-Adjacent Form (NAF) representation of `n`.
-Key insight: the minimum number of operations equals the number of non-zero digits
-in NAF. The greedy rule based on `n % 4`:
+等价于求 `n` 的 **NAF (Non-Adjacent Form，非相邻表示法)**。
+核心思路：最少操作次数等于 NAF 中非零数字的个数。基于 `n % 4` 的贪心规则：
 
-- If `n % 2 == 0`: divide by 2 (shift right), no operation needed
-- If `n % 4 == 1`: subtract 1 (one operation)
-- If `n % 4 == 3`: add 1 (one operation, creates a longer carry but fewer total ops)
+- 若 `n % 2 == 0`：除以 2（右移），无需操作
+- 若 `n % 4 == 1`：减 1（一次操作）
+- 若 `n % 4 == 3`：加 1（一次操作，产生更长的进位，但总操作次数更少）
 
 ```python
 def min_operations(n: int) -> int:
@@ -950,14 +935,13 @@ def min_operations(n: int) -> int:
     return ops
 ```
 
-**Time**: O(log n) -- each iteration at least halves n.
-**Space**: O(1).
+**时间复杂度**：O(log n)——每次迭代至少将 n 减半。
+**空间复杂度**：O(1)。
 
 ### Proof of Optimality
 
-The NAF (Non-Adjacent Form) of any integer has the fewest non-zero digits among
-all signed binary representations. The greedy rule `n%4==3 -> +1` avoids adjacent
-1-bits, which is exactly the NAF construction.
+NAF 在所有有符号二进制表示中，非零数字位数最少。
+贪心规则 `n%4==3 -> +1` 可避免相邻的 1 位，这正是 NAF 的构造方式。
 
 ### Alternative: Bit Counting
 
@@ -978,26 +962,25 @@ def min_operations_bit(n: int) -> int:
 ```
 
 ### Edge Cases
-- n = 0 -> 0 operations
-- n = 1 -> 1 operation (subtract 2^0)
-- n is a power of 2 -> 1 operation
-- Large n (works in O(log n))
+- n = 0 -> 0 次操作
+- n = 1 -> 1 次操作（减去 2^0）
+- n 是 2 的幂次 -> 1 次操作
+- 大数 n（在 O(log n) 内完成）
 
 ---
 
 ## 10. Shortest Subarray with k Distinct
 
-**Pattern**: Sliding Window + Counter
+**Pattern**: **Sliding Window（滑动窗口）** + Counter（计数器）
 
 ### Problem Statement
 
-Given an array `nums` and integer `k`, find the length of the shortest subarray
-containing at least `k` distinct elements. Return -1 if impossible.
+给定数组 `nums` 和整数 `k`，求包含至少 `k` 个不同元素的最短子数组长度。
+若不可能，返回 -1。
 
 ### Approach
 
-Classic sliding window with a frequency counter. Expand right until we have `k`
-distinct, then shrink left to minimize length.
+经典滑动窗口 + 频率计数器。向右扩展直到有 `k` 个不同元素，然后向左收缩以最小化长度。
 
 ```python
 from collections import defaultdict
@@ -1031,29 +1014,29 @@ def shortest_subarray_k_distinct(nums: List[int], k: int) -> int:
     return min_len if min_len <= n else -1
 ```
 
-**Time**: O(n) -- each element enters and leaves the window once.
-**Space**: O(k) for the counter.
+**时间复杂度**：O(n)——每个元素进出窗口各一次。
+**空间复杂度**：O(k)，用于计数器。
 
 ### Edge Cases
-- All elements are the same and k > 1 -> return -1
-- k = 1 -> return 1
-- Entire array has exactly k distinct -> return n (if no shorter subarray exists)
+- 所有元素相同且 k > 1 -> 返回 -1
+- k = 1 -> 返回 1
+- 整个数组恰好有 k 个不同元素 -> 返回 n（若无更短子数组）
 
 ---
 
 ## 11. Price Discount (Monotonic Stack)
 
-**Pattern**: Monotonic Stack / Next Smaller Element
+**Pattern**: **Monotonic Stack（单调栈）** / Next Smaller Element（下一个更小元素）
 
 ### Problem Statement
 
-For each item at index `i` with price `prices[i]`, find the first `j > i` such that
-`prices[j] <= prices[i]`. The discounted price at `i` is `prices[i] - prices[j]`.
-Output: total discounted sum and indices that were sold at original price (no j found).
+对于索引 `i` 处价格为 `prices[i]` 的商品，找到第一个 `j > i` 使得 `prices[j] <= prices[i]`。
+索引 `i` 处的折扣价为 `prices[i] - prices[j]`。
+输出：总折扣后的价格之和，以及以原价出售的商品索引（即找不到 j 的索引）。
 
 ### Approach
 
-Use a monotonic stack to find the "next smaller or equal" element for each index.
+使用单调栈查找每个索引的"下一个更小或等于"的元素。
 
 ```python
 from typing import List, Tuple
@@ -1086,8 +1069,8 @@ def price_discount(prices: List[int]) -> Tuple[int, List[int]]:
     return total, sorted(original_indices)
 ```
 
-**Time**: O(n) -- each element pushed and popped at most once.
-**Space**: O(n) for stack and discount array.
+**时间复杂度**：O(n)——每个元素最多入栈和出栈各一次。
+**空间复杂度**：O(n)，用于栈和折扣数组。
 
 ### Example
 
@@ -1099,26 +1082,24 @@ Original price indices: [3, 4]
 ```
 
 ### Edge Cases
-- All prices increasing -> every item discounted by next item
-- All prices decreasing -> only last item at original price
-- All same price -> each discounted by next, last at original
+- 所有价格递增 -> 每件商品都被下一件折扣
+- 所有价格递减 -> 只有最后一件以原价出售
+- 所有价格相同 -> 每件被下一件折扣，最后一件以原价出售
 
 ---
 
 ## 12. Balanced Permutation
 
-**Pattern**: Tracking Min/Max Positions
+**Pattern**: Tracking Min/Max Positions（追踪最小/最大位置）
 
 ### Problem Statement
 
-Given a permutation of `1..n`, for each `k` from `1` to `n`, check if there exists
-a contiguous subarray that forms a permutation of `1..k`.
+给定 `1..n` 的一个排列，对每个 `k`（从 1 到 n），检查是否存在一个连续子数组构成 `1..k` 的排列。
 
 ### Approach
 
-Track the position of each value. For a contiguous subarray to be a permutation of
-`1..k`, all values `1..k` must occupy a contiguous range of indices. Maintain
-`min_pos` and `max_pos` as we increase k. If `max_pos - min_pos + 1 == k`, then yes.
+记录每个值的位置。要使连续子数组构成 `1..k` 的排列，所有值 `1..k` 必须占据连续的索引范围。
+随着 k 增大，维护 `min_pos` 和 `max_pos`。若 `max_pos - min_pos + 1 == k`，则满足条件。
 
 ```python
 from typing import List
@@ -1152,40 +1133,39 @@ def balanced_permutation(perm: List[int]) -> List[bool]:
     return result
 ```
 
-**Time**: O(n).
-**Space**: O(n) for position array.
+**时间复杂度**：O(n)。
+**空间复杂度**：O(n)，用于位置数组。
 
 ### Proof
 
-For values `1..k` occupying positions with range `max_pos - min_pos + 1`:
-- If range == k, exactly k slots for k values, no gaps -> contiguous permutation.
-- If range > k, there are values outside `1..k` in between -> not a contiguous permutation.
+对于值 `1..k` 所占位置的范围 `max_pos - min_pos + 1`：
+- 若范围 == k，则 k 个槽位恰好存放 k 个值，无间隙 -> 连续排列。
+- 若范围 > k，则区间内存在不属于 `1..k` 的值 -> 非连续排列。
 
 ### Edge Cases
-- n = 1 -> always [True]
-- Sorted permutation [1,2,3,...,n] -> all True
-- Reverse sorted -> only k=1 and k=n are True
+- n = 1 -> 始终为 [True]
+- 有序排列 [1,2,3,...,n] -> 全为 True
+- 逆序排列 -> 仅 k=1 和 k=n 为 True
 
 ---
 
 ## 13. Elevator/Stairs Energy
 
-**Pattern**: Binary Search on Split Point
+**Pattern**: **Binary Search（二分查找）** on Split Point
 
 ### Problem Statement
 
-A person takes the first `mid` floors by elevator, then remaining floors by stairs.
-- Elevator: gains `e1` energy per floor, costs `t1` time per floor.
-- Stairs: consumes `e2` energy per floor, time per floor = `ceil(c / current_energy)`.
+一个人先乘电梯爬 `mid` 层，再走楼梯爬剩余楼层。
+- 电梯：每层增加 `e1` 能量，花费 `t1` 时间。
+- 楼梯：每层消耗 `e2` 能量，每层时间 = `ceil(c / 当前能量)`。
 
-Find the split point that minimizes total time (or minimizes time difference between
-two strategies).
+求使总时间最小（或使两种策略的时间差最小）的分割点。
 
 ### Approach
 
-Binary search on the split point `mid`. For each candidate, compute:
-1. Elevator time for floors 0..mid
-2. Stairs time for floors mid..total (energy-dependent)
+对分割点 `mid` 进行二分/线性搜索。对每个候选点计算：
+1. 电梯阶段（楼层 0..mid）的时间
+2. 楼梯阶段（楼层 mid..总层数，与能量相关）的时间
 
 ```python
 import math
@@ -1245,9 +1225,9 @@ def optimal_split(
     return best_split, best_time
 ```
 
-**Time**: O(n^2) with linear scan (n per evaluation * n candidates).
-With binary search on unimodal function: O(n log n).
-**Space**: O(1).
+**时间复杂度**：线性扫描 O(n^2)（每次评估 O(n)，共 n 个候选）。
+若时间函数为单峰（谷形），使用三分搜索：O(n log n)。
+**空间复杂度**：O(1)。
 
 ### Binary Search Optimization (if unimodal)
 
@@ -1290,22 +1270,22 @@ def optimal_split_binary(
 ```
 
 ### Edge Cases
-- 0 floors -> 0 time
-- Energy runs out during stairs -> need more elevator floors
-- All elevator or all stairs may be optimal
+- 0 层 -> 时间为 0
+- 楼梯阶段能量耗尽 -> 需要更多电梯楼层
+- 全程乘电梯或全程走楼梯可能是最优解
 
 ---
 
 ## 14. N-ary Tree 3-Part
 
-**Pattern**: Tree DFS / Path Finding
+**Pattern**: Tree DFS（树形深度优先搜索）/ Path Finding（路径查找）
 
 ### Problem Statement
 
-Given an N-ary tree, implement three operations:
-1. Sum all node values
-2. Find the maximum path value (root to leaf)
-3. Return the nodes on the maximum path
+给定一棵 N 叉树，实现三个操作：
+1. 求所有节点值之和
+2. 找出最大路径值（根到叶）
+3. 返回最大路径上的节点
 
 ### Solution
 
@@ -1357,8 +1337,8 @@ def max_path_nodes(root: Optional[NaryNode]) -> List[int]:
     return [root.val] + best_path
 ```
 
-**Time**: O(n) for each operation -- visit every node once.
-**Space**: O(h) recursion depth where h = tree height.
+**时间复杂度**：每个操作 O(n)——遍历每个节点一次。
+**空间复杂度**：O(h)，h 为树的高度（递归深度）。
 
 ### Optimization: Single Pass for All Three
 
@@ -1395,27 +1375,26 @@ def tree_analysis(
 ```
 
 ### Edge Cases
-- Empty tree (None root)
-- Single node (leaf is root)
-- All negative values
-- Multiple paths with equal max sum (return any)
+- 空树（root 为 None）
+- 单节点（叶节点即根节点）
+- 所有值为负数
+- 多条路径具有相同最大和（返回任意一条）
 
 ---
 
 ## 15. Max Throughput with Budget
 
-**Pattern**: Binary Search on Answer
+**Pattern**: **Binary Search on Answer（二分答案）**
 
 ### Problem Statement
 
-Given `n` services, each with `current_throughput[i]` and `scale_cost[i]` (cost per
-unit to increase throughput), and a budget `B`, find the maximum throughput achievable
-such that ALL services reach at least that level. The bottleneck is the minimum.
+给定 `n` 个服务，每个服务有 `current_throughput[i]` 和 `scale_cost[i]`（每单位吞吐量的扩容成本），
+以及预算 `B`。在所有服务都达到同一水平的前提下，求可实现的最大吞吐量（瓶颈为最小值）。
 
 ### Approach
 
-Binary search on target throughput `T`. For each candidate T, compute total cost to
-bring all services up to T. If cost <= budget, T is feasible.
+对目标吞吐量 `T` 进行二分查找。对每个候选 T，计算将所有服务提升至 T 的总成本。
+若成本 <= 预算，则 T 可行。
 
 ```python
 from typing import List
@@ -1453,18 +1432,18 @@ def max_throughput(
     return lo
 ```
 
-**Time**: O(n * log(max_throughput_range)).
-**Space**: O(1).
+**时间复杂度**：O(n * log(最大吞吐量范围))。
+**空间复杂度**：O(1)。
 
 ### Edge Cases
-- Budget = 0 -> answer is min(current)
-- All services at same throughput -> distribute budget evenly
-- One extremely expensive service (dominates budget)
-- Large budget -> upper bound calculation matters
+- 预算为 0 -> 答案为 min(current)
+- 所有服务吞吐量相同 -> 均匀分配预算
+- 某个服务扩容成本极高（主导预算分配）
+- 大预算 -> 上界计算很重要
 
 ### Follow-up: Fractional Throughput
 
-If throughput can be non-integer, use float binary search with epsilon tolerance:
+若吞吐量可为非整数，使用浮点数二分查找并设置 epsilon 容差：
 
 ```python
 def max_throughput_float(
@@ -1489,17 +1468,16 @@ def max_throughput_float(
 
 ## 16. Parking Lot (OOD)
 
-**Pattern**: Object-Oriented Design
+**Pattern**: **Object-Oriented Design（面向对象设计）**
 
 ### Problem Statement
 
-Design a parking lot system:
-- `park(vehicle)` - park a vehicle, return spot ID or -1
-- `unpark(spot_id)` - remove vehicle from spot
-- `check_car(license_plate)` - check if car is parked, return spot ID or -1
+设计一个停车场系统：
+- `park(vehicle)` - 停放一辆车，返回车位 ID 或 -1
+- `unpark(spot_id)` - 从车位移走车辆
+- `check_car(license_plate)` - 检查某辆车是否已停放，返回车位 ID 或 -1
 
-Constraints: Motorcycle spots only for motorcycles, regular spots for both
-motorcycles and cars.
+约束条件：摩托车位只能停摩托车，普通车位可停摩托车和轿车。
 
 ### Solution
 
@@ -1609,16 +1587,16 @@ class ParkingLot:
         return self.plate_to_spot.get(license_plate, -1)
 ```
 
-**Time**:
-- `park`: O(S) where S = total spots (linear scan for available spot).
-- `unpark`: O(1) direct spot access.
-- `check_car`: O(1) hash lookup.
+**时间复杂度**：
+- `park`：O(S)，S 为总车位数（线性扫描可用车位）。
+- `unpark`：O(1) 直接访问车位。
+- `check_car`：O(1) 哈希查找。
 
-**Space**: O(S + V) where V = parked vehicles.
+**空间复杂度**：O(S + V)，V 为已停放的车辆数。
 
 ### Follow-up: Optimize park() to O(1)
 
-Use separate free-spot queues (deque or set) per spot type:
+为每种车位类型维护独立的空闲车位队列（deque 或 set）：
 
 ```python
 from collections import deque
@@ -1678,26 +1656,25 @@ class ParkingLotOptimized:
 ```
 
 ### Edge Cases
-- Parking a car that's already parked (idempotent)
-- Unparking an empty spot
-- All spots full
+- 停放已在停车场的车（幂等操作）
+- 对空车位执行 unpark
+- 所有车位已满
 
 ---
 
 ## 17. Task Assignment to 2 People
 
-**Pattern**: Greedy / Sort by Difference
+**Pattern**: **Greedy（贪心）** / Sort by Difference（按差值排序）
 
 ### Problem Statement
 
-Given `n` tasks with `reward1[i]` (reward if person 1 does task i) and `reward2[i]`
-(reward if person 2 does task i), person 1 must do exactly `k` tasks, person 2 does
-the rest. Maximize total reward.
+给定 `n` 个任务，`reward1[i]`（人员 1 完成任务 i 的奖励）和 `reward2[i]`（人员 2 完成任务 i 的奖励）。
+人员 1 必须完成恰好 `k` 个任务，人员 2 完成其余任务。求最大总奖励。
 
 ### Approach
 
-For each task, compute the "advantage" of assigning to person 1: `diff[i] = reward1[i] - reward2[i]`.
-Sort by diff descending. Give top k tasks to person 1, rest to person 2.
+对每个任务，计算分配给人员 1 的"优势"：`diff[i] = reward1[i] - reward2[i]`。
+按 diff 降序排序，将前 k 个任务分配给人员 1，其余分配给人员 2。
 
 ```python
 from typing import List, Tuple
@@ -1727,38 +1704,38 @@ def max_reward(
     return total, sorted(person1_tasks)
 ```
 
-**Time**: O(n log n) for sorting.
-**Space**: O(n).
+**时间复杂度**：O(n log n)，用于排序。
+**空间复杂度**：O(n)。
 
 ### Proof of Correctness
 
-Start with all tasks assigned to person 2. Total = sum(reward2).
-Switching task i from person 2 to person 1 changes total by `reward1[i] - reward2[i]`.
-To maximize, pick the k tasks with the largest positive diff.
+初始时将所有任务分配给人员 2，总奖励 = sum(reward2)。
+将任务 i 从人员 2 切换到人员 1，总奖励变化量为 `reward1[i] - reward2[i]`。
+为最大化，选取 diff 最大的 k 个任务。
 
 ### Edge Cases
-- k = 0 -> all tasks to person 2
-- k = n -> all tasks to person 1
-- All diffs equal -> any k tasks work
-- Negative diffs for all -> still must assign k to person 1
+- k = 0 -> 所有任务分配给人员 2
+- k = n -> 所有任务分配给人员 1
+- 所有 diff 相等 -> 任意 k 个任务均可
+- 所有 diff 为负 -> 仍需分配 k 个任务给人员 1
 
 ---
 
 ## 18. Jump Game Prime-Ending Variant
 
-**Pattern**: DP / Sieve of Eratosthenes
+**Pattern**: **DP（动态规划）** / **Sieve of Eratosthenes（埃拉托斯特尼筛法）**
 
 ### Problem Statement
 
-Like LC 1696 (Jump Game VI), but from position `i` you can jump to `i+1` or `i+p`
-where `p` is a prime ending in digit 3 (3, 13, 23, 43, 53, 73, 83, ...).
-Find minimum cost to reach the last index.
+类似 LC 1696（Jump Game VI），但从位置 `i` 可以跳到 `i+1` 或 `i+p`，
+其中 `p` 是末位数字为 3 的质数（3, 13, 23, 43, 53, 73, 83, ...）。
+求到达最后一个索引的最小代价。
 
 ### Approach
 
-1. Precompute all primes up to `n` ending in 3 using Sieve of Eratosthenes.
-2. DP from left to right: `dp[i]` = min cost to reach index `i`.
-3. For each `i`, `dp[i] = min(dp[i-1], dp[i-p] for all valid primes p) + cost[i]`.
+1. 使用**埃拉托斯特尼筛法**预计算所有 <= n 的末位为 3 的质数。
+2. 从左到右做 DP：`dp[i]` = 到达索引 `i` 的最小代价。
+3. 对每个 `i`：`dp[i] = min(dp[i-1], dp[i-p] for all valid primes p) + cost[i]`。
 
 ```python
 from typing import List
@@ -1805,38 +1782,37 @@ def min_cost_jump(cost: List[int]) -> int:
     return dp[n - 1]
 ```
 
-**Time**: O(n * P) where P = number of primes ending in 3 up to n.
-For n=10000, P ~ 100 primes. So roughly O(100n).
-**Space**: O(n) for dp + O(n) for sieve.
+**时间复杂度**：O(n * P)，P 为 <= n 的末位为 3 的质数个数。
+n=10000 时，P 约为 100 个，实际约为 O(100n)。
+**空间复杂度**：O(n)（dp 数组）+ O(n)（筛法）。
 
 ### Optimization: Deque for Sliding Window Minimum
 
-If we want O(n) or O(n log n), use a segment tree or monotonic deque over the
-valid jump positions. But since P is small, the O(nP) approach is practical.
+若需要 O(n) 或 O(n log n)，可使用线段树或单调双端队列处理有效跳跃位置。
+但由于 P 较小，O(nP) 方案已足够实用。
 
 ### Edge Cases
-- n = 1 -> return cost[0]
-- All costs negative (maximize negative path)
-- Large n (sieve is O(n log log n), negligible)
+- n = 1 -> 返回 cost[0]
+- 所有代价为负（最大化负数路径）
+- 大 n（筛法为 O(n log log n)，可忽略不计）
 
 ---
 
 ## 19. Min Edge Reversal for Optimal Root
 
-**Pattern**: Re-rooting DP
+**Pattern**: **Re-rooting DP（换根 DP）**
 
 ### Problem Statement
 
-Given a directed tree with `n` nodes, choose a root such that the number of edges
-that must be reversed (to point away from root) is minimized. Return the minimum
-reversals and which node to root at.
+给定一棵有 `n` 个节点的有向树，选择一个根节点，使需要反转的边数（使所有边从根向外指）最少。
+返回最少反转次数及对应的根节点编号。
 
 ### Approach
 
-1. Build undirected adjacency list, tracking original direction.
-2. DFS from node 0: count reversals needed to make all edges point away from 0.
-3. Re-root: when moving root from parent to child, if edge parent->child exists
-   (forward), reversals += 1; if child->parent (backward), reversals -= 1.
+1. 构建无向邻接表，记录原始方向。
+2. 从节点 0 出发 DFS：统计以 0 为根时所需的反转次数。
+3. 换根：将根从父节点移至子节点时，若边为 parent->child（正向），反转次数 += 1；
+   若边为 child->parent（反向），反转次数 -= 1。
 
 ```python
 from collections import defaultdict
@@ -1900,25 +1876,23 @@ def min_reversals(n: int, edges: List[Tuple[int, int]]) -> Tuple[int, int]:
     return min_rev, optimal
 ```
 
-**Time**: O(n) -- two DFS passes.
-**Space**: O(n) for adjacency list and result array.
+**时间复杂度**：O(n)——两次 DFS。
+**空间复杂度**：O(n)，用于邻接表和结果数组。
 
 ### Key Insight
 
-When re-rooting from parent `p` to child `c`:
-- If original edge is `p -> c` (cost=0 from p's perspective): this edge was correct
-  when rooted at p, but wrong when rooted at c. So reversals += 1.
-- If original edge is `c -> p` (cost=1 from p's perspective): this was wrong at p
-  but correct at c. So reversals -= 1.
+将根从父节点 `p` 移至子节点 `c` 时：
+- 若原始边为 `p -> c`（从 p 出发 cost=0）：以 p 为根时方向正确，以 c 为根时方向相反，反转次数 += 1。
+- 若原始边为 `c -> p`（从 p 出发 cost=1）：以 p 为根时方向相反，以 c 为根时方向正确，反转次数 -= 1。
 
 ### Edge Cases
-- All edges point from 0 outward -> 0 reversals, root at 0
-- Star graph -> depends on edge directions
-- Linear chain -> root at one end
+- 所有边从节点 0 向外指 -> 0 次反转，以 0 为根
+- 星形图 -> 取决于边的方向
+- 线性链 -> 以一端为根
 
 ### Warning: 1-indexed Nodes
 
-If the problem uses 1-indexed nodes, adjust:
+若问题使用 1 索引节点，需调整：
 ```python
 visited = [False] * (n + 1)
 result = [0] * (n + 1)
@@ -1928,21 +1902,19 @@ result = [0] * (n + 1)
 
 ## 20. Palindrome Paths in Tree
 
-**Pattern**: Bitmask XOR DFS / Prefix on Tree
+**Pattern**: **Bitmask（位掩码）** XOR DFS / Prefix on Tree（树上前缀）
 
 ### Problem Statement
 
-Given a tree where each edge has a character label (a-z), count the number of paths
-between any two nodes such that the characters along the path can be rearranged to
-form a palindrome.
+给定一棵树，每条边标有一个字符（a-z），统计路径数量，使得路径上的字符可以重新排列成回文串。
 
 ### Approach
 
-A string can be rearranged into a palindrome if at most one character has an odd
-frequency. Represent character frequencies as a bitmask (bit i = parity of char i).
-A path is palindromic if its XOR bitmask is 0 or has exactly one bit set.
+若字符串可以重排成回文串，则至多有一个字符出现奇数次。
+用位掩码表示字符频率（第 i 位 = 字符 i 的频率奇偶性）。
+若路径的 XOR 位掩码为 0 或恰好一位为 1，则该路径为回文路径。
 
-Use DFS with prefix XOR from root. For path (u, v): `mask(u,v) = prefix[u] XOR prefix[v]`.
+从根节点出发用 DFS 维护前缀 XOR。路径 (u, v) 的掩码：`mask(u,v) = prefix[u] XOR prefix[v]`。
 
 ```python
 from collections import defaultdict
@@ -2001,35 +1973,32 @@ def count_palindrome_paths(
     return count
 ```
 
-**Time**: O(26n) = O(n).
-**Space**: O(n) for prefix array and mask counter.
+**时间复杂度**：O(26n) = O(n)。
+**空间复杂度**：O(n)，用于前缀数组和掩码计数器。
 
 ### Key Insight
 
-- XOR prefix from root gives the parity of each character on root-to-node path.
-- `prefix[u] XOR prefix[v]` cancels the common root-to-LCA portion, leaving
-  just the u-to-v path's character parities.
-- A palindrome needs XOR = 0 (all even) or exactly one bit set (one odd char).
+- 从根节点出发的前缀 XOR 表示根到节点路径上每个字符的频率奇偶性。
+- `prefix[u] XOR prefix[v]` 消除了公共的根到 LCA 部分，只保留 u 到 v 路径的字符频率奇偶性。
+- 回文串要求 XOR = 0（全为偶数）或恰好一位为 1（一个奇数字符）。
 
 ### Edge Cases
-- Single node (0 paths)
-- Linear tree (paths are subpaths)
-- All same character (all paths palindromic)
+- 单节点（0 条路径）
+- 线性树（路径为子路径）
+- 所有边标同一字符（所有路径均为回文路径）
 
 ---
 
 ## 21. Minesweeper Grid Generator
 
-**Pattern**: Random Placement / Code Quality
+**Pattern**: Random Placement（随机布局）/ Code Quality（代码质量）
 
 ### Problem Statement
 
-Generate an M x N minesweeper grid with exactly K mines placed randomly. Display
-the grid where each cell shows the mine count of adjacent cells (8 neighbors),
-or `*` for mines.
+生成一个 M x N 的扫雷网格，随机放置恰好 K 个地雷。
+显示网格时，每个格子显示相邻 8 格中地雷的数量，或用 `*` 表示地雷。
 
-**Follow-up**: Iteratively improve code quality -- remove unnecessary variables,
-simplify logic, reduce set usage.
+**延伸问题**：迭代改进代码质量——去除不必要的变量、简化逻辑、减少集合使用。
 
 ### Solution (Clean Version)
 
@@ -2087,18 +2056,18 @@ def print_grid(grid: List[List[str]]) -> None:
         print(" ".join(row))
 ```
 
-**Time**: O(M * N) to build grid (8 neighbors check is O(1) per cell).
-**Space**: O(M * N) for grid + O(K) for mine set.
+**时间复杂度**：O(M * N)（每格检查 8 个邻居，O(1)）。
+**空间复杂度**：O(M * N)（网格）+ O(K)（地雷集合）。
 
 ### Follow-up: Iterative Code Quality Improvement
 
-The interviewer pushes for progressively cleaner code:
+面试官会要求代码逐步变得更简洁：
 
-**V1 (Naive)**: Separate `is_mine` 2D array, explicit 8-direction list, many variables.
+**V1（初版）**：使用独立的 `is_mine` 二维数组，显式列出 8 个方向，变量较多。
 
-**V2 (Simplified)**: Inline mine check via set, generator expression for count.
+**V2（简化版）**：用集合内联地雷检查，生成器表达式计算计数。
 
-**V3 (Minimal)**:
+**V3（极简版）**：
 ```python
 def minesweeper(m: int, n: int, k: int) -> List[List[str]]:
     mines = set(random.sample(range(m * n), k))
@@ -2117,20 +2086,20 @@ def minesweeper(m: int, n: int, k: int) -> List[List[str]]:
 ```
 
 ### Edge Cases
-- 0 mines -> all zeros
-- All mines -> all asterisks
-- 1x1 grid with mine
+- 0 个地雷 -> 全为 0
+- 全为地雷 -> 全为星号
+- 1x1 网格且有一个地雷
 
 ---
 
 ## 22. 2D Grid Nearest Exit (BFS)
 
-**Pattern**: BFS / Shortest Path
+**Pattern**: **BFS（广度优先搜索）** / Shortest Path（最短路径）
 
 ### Problem Statement
 
-Given a 2D grid with walls and open cells, find the nearest exit (boundary cell
-that is open) from a starting position. The start itself is not considered an exit.
+给定一个二维网格，包含墙和空格，从起始位置找到最近的出口（开放的边界格子）。
+起始位置本身不算出口。
 
 ### Solution
 
@@ -2179,29 +2148,28 @@ def nearest_exit(
     return -1
 ```
 
-**Time**: O(M * N) -- visit each cell at most once.
-**Space**: O(M * N) for visited array and queue.
+**时间复杂度**：O(M * N)——每个格子最多访问一次。
+**空间复杂度**：O(M * N)，用于 visited 数组和队列。
 
 ### Edge Cases
-- Start is on boundary (must still move to a different exit)
-- No exit reachable (surrounded by walls)
-- Multiple exits at same distance
+- 起点在边界（仍需移动到另一个出口）
+- 没有可达的出口（被墙包围）
+- 多个出口距离相同
 
 ---
 
 ## 23. Lock Combination BFS
 
-**Pattern**: BFS on State Space
+**Pattern**: BFS on State Space（状态空间 BFS）
 
 ### Problem Statement
 
-A lock has `n` wheels, each with digits 0-9. Each move rotates one wheel up or down
-by 1. Given a target combination and a set of "deadend" combinations to avoid, find
-the minimum number of moves from "0000" to the target.
+一把锁有 `n` 个转盘，每个转盘有 0-9 十个数字。每次操作可将一个转盘向上或向下转动 1 位。
+给定目标组合和一组"死锁"组合（需要避免），求从"0000"到目标的最少操作次数。
 
 ### Solution
 
-This is essentially LC 752 (Open the Lock), commonly asked at Uber:
+这本质上是 LC 752（Open the Lock），Uber 常考：
 
 ```python
 from collections import deque
@@ -2246,8 +2214,8 @@ def min_moves_to_unlock(
     return -1
 ```
 
-**Time**: O(10^n * n) where n = number of wheels. For n=4: O(40000).
-**Space**: O(10^n) for visited set.
+**时间复杂度**：O(10^n * n)，n 为转盘数量。n=4 时：O(40000)。
+**空间复杂度**：O(10^n)，用于 visited 集合。
 
 ### Optimization: Bidirectional BFS
 
@@ -2294,26 +2262,24 @@ def min_moves_bidirectional(
 ```
 
 ### Edge Cases
-- "0000" is a deadend -> return -1
-- Target is "0000" -> return 0
-- No path exists -> return -1
+- "0000" 是死锁 -> 返回 -1
+- 目标为 "0000" -> 返回 0
+- 不存在路径 -> 返回 -1
 
 ---
 
 ## 24. Non-overlapping Interval Triples
 
-**Pattern**: Sorting + Greedy / DP
+**Pattern**: Sorting（排序）+ Greedy（贪心）/ **DP（动态规划）**
 
 ### Problem Statement
 
-Given a list of intervals `[start, end]`, count the number of groups of 3 intervals
-where no two intervals in the group overlap (pairwise non-overlapping).
+给定一组区间 `[start, end]`，统计三个区间构成的组合数量，使得组中任意两个区间互不重叠。
 
 ### Approach
 
-Sort intervals by end time. For each interval as the "middle" one, count how many
-intervals end before it starts (left candidates) and how many start after it ends
-(right candidates). The triple count with this middle is `left * right`.
+按结束时间排序区间。对于每个区间作为"中间"区间，统计在其开始之前结束的区间数（左侧候选）
+和在其结束之后开始的区间数（右侧候选）。以该区间为中间的三元组数 = `left * right`。
 
 ```python
 import bisect
@@ -2456,24 +2422,24 @@ def count_triples_optimal(intervals: List[Tuple[int, int]]) -> int:
     return total
 ```
 
-**Time**: O(n^2) for the prefix-sum approach, O(n log n) with Fenwick tree.
-**Space**: O(n).
+**时间复杂度**：前缀和方法 O(n^2)，使用 Fenwick 树（树状数组）可达 O(n log n)。
+**空间复杂度**：O(n)。
 
 ### Edge Cases
-- Fewer than 3 intervals -> 0
-- All intervals overlap -> 0
-- All intervals disjoint -> C(n, 3)
+- 少于 3 个区间 -> 0
+- 所有区间重叠 -> 0
+- 所有区间互不重叠 -> C(n, 3)
 
 ---
 
 ## 25. City Graph BFS Sort
 
-**Pattern**: BFS + Custom Sorting
+**Pattern**: BFS + Custom Sorting（BFS + 自定义排序）
 
 ### Problem Statement
 
-Given a city graph (undirected) and a start city, sort all cities by their distance
-from the start city. Ties broken by smaller city index first.
+给定一个城市图（无向）和起始城市，按城市到起始城市的距离对所有城市排序。
+距离相同时，城市编号较小的排在前面。
 
 ### Solution
 
@@ -2520,18 +2486,18 @@ def sort_cities_by_distance(
     return cities
 ```
 
-**Time**: O(V + E) for BFS + O(V log V) for sorting.
-**Space**: O(V + E).
+**时间复杂度**：O(V + E)（BFS）+ O(V log V)（排序）。
+**空间复杂度**：O(V + E)。
 
 ### Edge Cases
-- Disconnected graph (unreachable cities placed at end)
-- Start city is isolated
-- Complete graph (all at distance 1 except start)
-- Self-loops (should not affect BFS)
+- 不连通图（不可达城市排在末尾）
+- 起始城市孤立
+- 完全图（除起点外所有城市距离均为 1）
+- 自环（不影响 BFS）
 
 ### Follow-up: Weighted Graph
 
-Use Dijkstra instead of BFS for weighted edges:
+对于有权图，使用 **Dijkstra（迪杰斯特拉算法）** 代替 BFS：
 
 ```python
 import heapq

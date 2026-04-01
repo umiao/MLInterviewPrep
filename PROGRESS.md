@@ -291,3 +291,10 @@
 - **Sanity check result**: Source files reduced from 162,050 to 151,482 chars (6.5% reduction, 10.5K chars saved). All theory, derivations, and interview Q&A preserved. Key structural improvements: cross-topic references added, duplicate code eliminated, optimizer implementations shown as template + core update logic. DB docs 27/28/29 all updated to 151,774 chars (from 162,209).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-252 --status completed`
+
+## 2026-04-01 -- [T-P0-253] Convert Uber BPS prep docs to Chinese with acronym expansion
+- **What I did**: Translated all 7 Uber BPS prep documents to Chinese following chinese_conversion_spec.md rules. Applied consistent acronym expansion on first use (BFS, DFS, DP, UF, BST, OOD, KNN, etc. with full English name + Chinese explanation in bold). Kept all code blocks, section headings, and O() notation in English. Translated all prose, problem statements, follow-ups, tables, and checklists to Chinese. Updated both markdown files and corresponding company_documents DB entries (company_id=5).
+- **Deliverables**: 7 translated markdown files (uber_bps_mock_sets.md, uber_phone_screen_prep.md, uber_bps_knn_ml_fundamentals.md, uber_bps_pattern_cheatsheet.md, uber_bps_lc_solutions.md, uber_bps_design_architecture.md, uber_bps_custom_solutions.md), 3 translation scripts (translate_uber_bps_mock_sets.py, translate_uber_phone_screen.py, update_uber_docs_db.py), `data/mle_prep.db` (docs 3/30-35 updated with Chinese content)
+- **Sanity check result**: All 7 DB docs validated: Chinese characters present, no formulas inside code blocks. Total markdown size: 224KB (from 214KB original). DB doc sizes: Doc 3=9081, Doc 30=28186, Doc 31=67549, Doc 32=19447, Doc 33=20973, Doc 34=18114, Doc 35=7765 chars.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-253 --status completed`
