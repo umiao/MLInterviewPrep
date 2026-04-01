@@ -298,3 +298,10 @@
 - **Sanity check result**: All 7 DB docs validated: Chinese characters present, no formulas inside code blocks. Total markdown size: 224KB (from 214KB original). DB doc sizes: Doc 3=9081, Doc 30=28186, Doc 31=67549, Doc 32=19447, Doc 33=20973, Doc 34=18114, Doc 35=7765 chars.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-253 --status completed`
+
+## 2026-04-01 -- [T-P1-251] Add expandable inline notes to Company Freq tab
+- **What I did**: Added expandable inline notes preview to the Company Freq tab on the Problems page. Clicking a problem's notes preview now expands a full-width row below showing the complete solution notes rendered with MarkdownPreview. Added "Expand All Notes" / "Collapse All Notes" toggle button. Added notes count indicator (X/Y with notes) in the progress header. Verified all Uber (44 problems, 42 with notes), LinkedIn, and Adobe problems display notes properly.
+- **Deliverables**: `src/frontend/src/pages/Problems.tsx` (added MarkdownPreview import, expandedNotes state, toggleNotes callback, inline expanded note rows with React.Fragment, expand/collapse all button, notes count in header)
+- **Sanity check result**: TypeScript type-check passes (tsc --noEmit). Vite build succeeds. No new warnings.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-251 --status completed`

@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-249, T-P0-250
-- **Description**: On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to quickly see problem solutions. Currently solutions are stored in problems.notes field. Ensure: (1) Problem detail view shows notes with solution clearly, (2) Company Freq tab shows a visual indicator when a problem has solution notes, (3) Consider adding a 'Notes' column or expandable row to show solution preview. This makes it easy to review solutions while browsing company-specific problems. Also verify that the 19 Uber LC + 25 custom problems and LinkedIn problems all have their notes properly displayed.
-
 ### P2 -- Nice to Have
 
 #### T-P2-186: [SYNC] Propagate ruff version-drift lesson to helixos
@@ -94,6 +88,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 223 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-01** -- T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access. On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to qui
 - [x] **2026-04-01** -- T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion. Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to conver
 - [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
 - [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
@@ -8,6 +8,7 @@ import EmptyState from "../components/ui/EmptyState";
 import Pagination from "../components/ui/Pagination";
 import Badge from "../components/ui/Badge";
 import Tabs from "../components/ui/Tabs";
+import MarkdownPreview from "../components/ui/MarkdownPreview";
 import { useFilterParams } from "../hooks/useFilterParams";
 import type {
   Category,
@@ -28,11 +29,6 @@ const CATEGORIES: { value: Category; label: string }[] = [
 ];
 const PAGE_SIZE = 50;
 
-const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  easy: "bg-green-100 text-green-700",
-  medium: "bg-yellow-100 text-yellow-700",
-  hard: "bg-red-100 text-red-700",
-};
 
 const TABS = [
   { key: "all", label: "All Problems" },
@@ -164,6 +160,17 @@ export default function Problems() {
   // ---- modal state ----
   const [showAddModal, setShowAddModal] = useState(false);
 
+  // ---- expanded notes state for Company Freq tab ----
+  const [expandedNotes, setExpandedNotes] = useState<Set<number>>(new Set());
+  const toggleNotes = useCallback((id: number) => {
+    setExpandedNotes((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
   // ---- fetch all descriptions mutation ----
   const fetchAllMutation = useMutation({
     mutationFn: () => api.post<FetchAllResult>("/problems/fetch-all-descriptions"),
@@ -290,10 +297,11 @@ export default function Problems() {
   }, [problems, isBlind75]);
 
   const companyFreqStats = useMemo(() => {
-    if (!isCompanyFreq) return { completed: 0, total: 0 };
+    if (!isCompanyFreq) return { completed: 0, total: 0, withNotes: 0 };
     return {
       completed: problems.filter((p) => p.is_completed).length,
       total: problems.length,
+      withNotes: problems.filter((p) => p.notes).length,
     };
   }, [problems, isCompanyFreq]);
 
@@ -580,9 +588,14 @@ export default function Problems() {
     <div className="space-y-4">
       {/* Progress header */}
       <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-        <h2 className="text-lg font-semibold text-purple-900 mb-2">
-          Company Frequency Progress
-        </h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-lg font-semibold text-purple-900">
+            Company Frequency Progress
+          </h2>
+          <span className="text-sm text-purple-700">
+            {companyFreqStats.withNotes}/{companyFreqStats.total} with notes
+          </span>
+        </div>
         <ProgressBar completed={companyFreqStats.completed} total={companyFreqStats.total} />
       </div>
 
@@ -609,6 +622,20 @@ export default function Problems() {
         <span className="text-xs text-gray-400 ml-2">
           Sorted by interview frequency
         </span>
+        {companyFreqStats.withNotes > 0 && (
+          <button
+            onClick={() => {
+              if (expandedNotes.size > 0) {
+                setExpandedNotes(new Set());
+              } else {
+                setExpandedNotes(new Set(problems.filter((p) => p.notes).map((p) => p.id)));
+              }
+            }}
+            className="text-xs text-purple-600 hover:text-purple-800 ml-auto"
+          >
+            {expandedNotes.size > 0 ? "Collapse All Notes" : "Expand All Notes"}
+          </button>
+        )}
       </div>
 
       {loading && <LoadingSpinner message="Loading problems..." />}
@@ -635,87 +662,117 @@ export default function Problems() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {problems.map((p) => (
-                <tr
-                  key={p.id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="px-3 py-2 text-gray-500 font-mono text-xs">
-                    {p.frequency_rank ?? "-"}
-                  </td>
-                  <td className="px-3 py-2 text-gray-400">
-                    {p.leetcode_id ?? "-"}
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center gap-2">
-                      <Link
-                        to={`/problems/${p.id}`}
-                        className="text-blue-600 hover:underline font-medium truncate max-w-xs block"
-                        title="View description"
-                      >
-                        {p.title}
-                      </Link>
-                      {p.url && (
-                        <a
-                          href={p.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-400 hover:text-gray-600 shrink-0"
-                          title="Open on LeetCode"
+                <React.Fragment key={p.id}>
+                  <tr className="hover:bg-gray-50 transition-colors">
+                    <td className="px-3 py-2 text-gray-500 font-mono text-xs">
+                      {p.frequency_rank ?? "-"}
+                    </td>
+                    <td className="px-3 py-2 text-gray-400">
+                      {p.leetcode_id ?? "-"}
+                    </td>
+                    <td className="px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/problems/${p.id}`}
+                          className="text-blue-600 hover:underline font-medium truncate max-w-xs block"
+                          title="View description"
                         >
-                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
-                          </svg>
-                        </a>
+                          {p.title}
+                        </Link>
+                        {p.source?.includes("1point3acres") && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 shrink-0" title="Source: 1point3acres">
+                            1P3A
+                          </span>
+                        )}
+                        {p.url && (
+                          <a
+                            href={p.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-gray-400 hover:text-gray-600 shrink-0"
+                            title="Open on LeetCode"
+                          >
+                            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" />
+                            </svg>
+                          </a>
+                        )}
+                        {p.is_completed && (
+                          <Badge variant="green">done</Badge>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-3 py-2">
+                      {p.difficulty && (
+                        <Badge
+                          variant={
+                            p.difficulty === "easy"
+                              ? "green"
+                              : p.difficulty === "medium"
+                                ? "yellow"
+                                : "red"
+                          }
+                          className="capitalize"
+                        >
+                          {p.difficulty}
+                        </Badge>
                       )}
-                      {p.is_completed && (
-                        <Badge variant="green">done</Badge>
+                    </td>
+                    <td className="px-3 py-2">
+                      {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
+                    </td>
+                    <td className="px-3 py-2">
+                      <ComfortStars level={p.comfort_level} />
+                    </td>
+                    <td className="px-3 py-2">
+                      {p.notes ? (
+                        <button
+                          onClick={() => toggleNotes(p.id)}
+                          className={`text-xs px-1.5 py-0.5 rounded truncate max-w-[120px] block text-left ${
+                            expandedNotes.has(p.id)
+                              ? "text-amber-800 bg-amber-200 font-medium"
+                              : "text-amber-700 bg-amber-50 hover:bg-amber-100"
+                          }`}
+                          title={expandedNotes.has(p.id) ? "Collapse notes" : "Expand notes"}
+                        >
+                          {expandedNotes.has(p.id) ? "[-] Notes" : p.notes.slice(0, 40) + (p.notes.length > 40 ? "..." : "")}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-300">--</span>
                       )}
-                    </div>
-                  </td>
-                  <td className="px-3 py-2">
-                    {p.difficulty && (
-                      <Badge
-                        variant={
-                          p.difficulty === "easy"
-                            ? "green"
-                            : p.difficulty === "medium"
-                              ? "yellow"
-                              : "red"
-                        }
-                        className="capitalize"
-                      >
-                        {p.difficulty}
-                      </Badge>
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    {p.pattern && <Badge variant="blue">{p.pattern}</Badge>}
-                  </td>
-                  <td className="px-3 py-2">
-                    <ComfortStars level={p.comfort_level} />
-                  </td>
-                  <td className="px-3 py-2">
-                    {p.notes ? (
+                    </td>
+                    <td className="px-3 py-2">
                       <Link
                         to={`/problems/${p.id}`}
-                        className="text-xs text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded truncate max-w-[120px] block"
-                        title={p.notes}
+                        className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
                       >
-                        {p.notes.slice(0, 40)}{p.notes.length > 40 ? "..." : ""}
+                        View
                       </Link>
-                    ) : (
-                      <span className="text-xs text-gray-300">--</span>
-                    )}
-                  </td>
-                  <td className="px-3 py-2">
-                    <Link
-                      to={`/problems/${p.id}`}
-                      className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 inline-block"
-                    >
-                      View
-                    </Link>
-                  </td>
-                </tr>
+                    </td>
+                  </tr>
+                  {expandedNotes.has(p.id) && p.notes && (
+                    <tr>
+                      <td colSpan={8} className="px-0 py-0">
+                        <div className="bg-amber-50 border-t border-b border-amber-200 px-6 py-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-semibold text-amber-800">
+                              Solution Notes - {p.title}
+                            </span>
+                            <button
+                              onClick={() => toggleNotes(p.id)}
+                              className="text-xs text-amber-600 hover:text-amber-800"
+                            >
+                              Collapse
+                            </button>
+                          </div>
+                          <div className="prose prose-sm max-w-none">
+                            <MarkdownPreview markdown={p.notes} />
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
