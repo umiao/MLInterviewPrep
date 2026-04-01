@@ -67,12 +67,6 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - **Depends on**: None
 - **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
-#### T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from content seeding scripts (e.g., from T-P1-148 tree model content creation). Add `_temp*.json` (and possibly `_temp*.py`) patterns to MLInterviewPrep/.gitignore to prevent accidental commits of temp files.
-
 #### T-P2-248: Uber BPS: Create timed mock interview problem sets
 - **Priority**: P2
 - **Complexity**: S
@@ -100,6 +94,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co
 - [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5
 - [x] **2026-03-31** -- T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review. Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2
 - [x] **2026-03-31** -- T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document. Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-l

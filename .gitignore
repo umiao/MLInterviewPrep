@@ -54,6 +54,10 @@ htmlcov/
 ~$*
 *.tmp
 
+# Temp artifacts from content seeding scripts
+_temp*.json
+_temp*.py
+
 # Misc
 *.log
 /tmp

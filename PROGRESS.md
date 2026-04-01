@@ -260,3 +260,9 @@
 - **Sanity check result**: All 5 task requirements met: (1) KNN from scratch with distance metrics/k selection/weighted KNN, (2) classification vs regression, (3) KD-Tree/Ball Tree/LSH optimization, (4) interview Qs covering curse of dimensionality/feature scaling/categorical features, (5) ML fundamentals: bias-variance/overfitting/CV/metrics.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-246 --status completed`
+## 2026-03-31 -- [T-P2-240] Add _temp*.json pattern to .gitignore
+- **What I did**: Added `_temp*.json` and `_temp*.py` patterns to `.gitignore` to prevent accidental commits of temp artifacts from content seeding scripts.
+- **Deliverables**: `.gitignore` (updated)
+- **Sanity check result**: `_temp_docs.json` no longer appears in `git status` output after adding the pattern.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-240 --status completed`
