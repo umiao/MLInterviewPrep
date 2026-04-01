@@ -9,7 +9,19 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-250: Organize LinkedIn prep notes into company_documents with problem solutions
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-249
+- **Description**: Ensure LinkedIn prep materials are properly organized in company_documents (company_id=1). Currently has docs 21-27. Check if LinkedIn problems from Problems page have solutions in notes field (like Uber problems now do). If LinkedIn problems lack solution notes, add them. Key LinkedIn LC problems from 1p3a: check existing coverage and fill gaps. Also verify all docs have proper descriptive titles and are accessible in the Documents dropdown at /companies/1/prep. Goal: user can easily find all LinkedIn prep notes and problem solutions through the web UI, same experience as Uber.
+
 ### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-249, T-P0-250
+- **Description**: On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to quickly see problem solutions. Currently solutions are stored in problems.notes field. Ensure: (1) Problem detail view shows notes with solution clearly, (2) Company Freq tab shows a visual indicator when a problem has solution notes, (3) Consider adding a 'Notes' column or expandable row to show solution preview. This makes it easy to review solutions while browsing company-specific problems. Also verify that the 19 Uber LC + 25 custom problems and LinkedIn problems all have their notes properly displayed.
 
 ### P2 -- Nice to Have
 
@@ -93,4 +105,5 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5
 - [x] **2026-03-31** -- T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review. Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2
 - [x] **2026-03-31** -- T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document. Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-l
+- [x] **2026-03-31** -- T-P0-249: Import Uber BPS prep docs into company_documents for web UI access. Import all 7 Uber prep markdown docs (uber_bps_lc_solutions.md, uber_bps_custom_solutions.md, uber_bps_pattern_cheatshee
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A

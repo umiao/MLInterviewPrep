@@ -272,3 +272,9 @@
 - **Sanity check result**: All 3 sets contain correct problem pairings per task spec. Each has 1 medium (20 min) + 1 medium-hard (20 min) + follow-ups (5 min). Problems reference solutions in existing docs.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-248 --status completed`
+## 2026-03-31 -- [T-P0-249] Import Uber BPS prep docs into company_documents
+- **What I did**: Imported 8 Uber prep documents into company_documents table (company_id=5). Updated existing doc#3 (Phone Screen Prep, 2499 chars) with full uber_phone_screen_prep.md content (15,479 chars). Inserted 7 new docs: LC Solutions, Custom Solutions, Pattern Cheat Sheet, Design & Architecture, KNN & ML Fundamentals, Mock Interview Sets, HR Call Prep. Updated Uber prep_notes with document index header referencing all 9 documents.
+- **Deliverables**: `scripts/import_uber_bps_docs.py` (new), `data/mle_prep.db` (9 Uber docs, 398,963 total chars)
+- **Sanity check result**: All 9 documents verified in DB with correct titles, source_type=prep_doc, and content lengths matching source files. Prep_notes updated from 22,889 to 23,788 chars with reference index.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-249 --status completed`
