@@ -5,6 +5,12 @@
 
 ## In Progress
 
+#### T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-244
+- **Description**: Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-level diagrams, (2) Trade-off discussions - why tech X over Y, (3) SD patterns from Uber BPS: Driver Maps, Shopping Cart, Driver Queue, ETA, Food Ordering, (4) Common D&A follow-ups from 1p3a.
+
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -16,12 +22,6 @@
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: helixos/.claude/settings.json uses bare `python` for all hook commands (plan_mode_hook, block_dangerous, commit_msg_guard, secret_guard, tasks_md_guard, file_watch_warn, yaml_validate, lint_check, test_check, archive_check, session_context). Per CLAUDE.md Prohibited Actions: bare python resolves to Windows Store stub (exit code 49) and hooks silently fail. Fix: replace all `python "$CLAUDE_PROJECT_DIR/..."` with `/c/Anaconda/python.exe "$CLAUDE_PROJECT_DIR/..."`. Source: MLInterviewPrep settings.json (already fixed). Also add setup_python_env.sh as first SessionStart hook (bash "$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh") -- MLInterviewPrep has this, helixos does not. Copy setup_python_env.sh from MLInterviewPrep if not present.
-
-#### T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-244
-- **Description**: Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-level diagrams, (2) Trade-off discussions - why tech X over Y, (3) SD patterns from Uber BPS: Driver Maps, Shopping Cart, Driver Queue, ETA, Food Ordering, (4) Common D&A follow-ups from 1p3a.
 
 #### T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review
 - **Priority**: P1
