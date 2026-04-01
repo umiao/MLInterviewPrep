@@ -9,11 +9,30 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-250: Organize LinkedIn prep notes into company_documents with problem solutions
+#### T-P0-252: Condense ML Fundamentals From-Scratch guide: deduplicate code, modular design
 - **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-249
-- **Description**: Ensure LinkedIn prep materials are properly organized in company_documents (company_id=1). Currently has docs 21-27. Check if LinkedIn problems from Problems page have solutions in notes field (like Uber problems now do). If LinkedIn problems lack solution notes, add them. Key LinkedIn LC problems from 1p3a: check existing coverage and fill gaps. Also verify all docs have proper descriptive titles and are accessible in the Documents dropdown at /companies/1/prep. Goal: user can easily find all LinkedIn prep notes and problem solutions through the web UI, same experience as Uber.
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: The ML Fundamentals From-Scratch guide (Doc 27/28/29, 162K chars each; source files t1-t8, 199K total) has significant code duplication across topics. Condense by:
+
+(1) IDENTIFY duplicative patterns: Multiple topics repeat similar code (loss functions, gradient computation, training loops, plotting). Audit all 8 source files (t1-t8) for repeated code blocks.
+
+(2) DESIGN modular approach: Create a 'swappable components' structure where:
+- One canonical training loop shown in full (e.g., in t1_gradient_descent)
+- Other topics reference it and only show the DELTA (e.g., 'replace loss function with X')
+- Loss functions, activation functions, etc. shown in a compact comparison table rather than full implementations each time
+- Use collapsible/summary markers for optional deep-dive code
+
+(3) CONDENSE each file:
+- Keep the derivation/intuition (this is the valuable part)
+- Reduce full code implementations to: one complete example + diff-style snippets for variants
+- Target ~30-40% reduction in total chars while preserving all conceptual content
+- Ensure each topic still standalone-readable
+
+(4) REBUILD Doc 27/28/29 from condensed sources
+(5) Update company_documents in DB
+
+Focus on readability improvement, not just size reduction.
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -105,5 +124,6 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5
 - [x] **2026-03-31** -- T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review. Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2
 - [x] **2026-03-31** -- T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document. Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-l
+- [x] **2026-03-31** -- T-P0-250: Organize LinkedIn prep notes into company_documents with problem solutions. Ensure LinkedIn prep materials are properly organized in company_documents (company_id=1). Currently has docs 21-27. Che
 - [x] **2026-03-31** -- T-P0-249: Import Uber BPS prep docs into company_documents for web UI access. Import all 7 Uber prep markdown docs (uber_bps_lc_solutions.md, uber_bps_custom_solutions.md, uber_bps_pattern_cheatshee
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A

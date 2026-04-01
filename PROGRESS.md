@@ -278,3 +278,9 @@
 - **Sanity check result**: All 9 documents verified in DB with correct titles, source_type=prep_doc, and content lengths matching source files. Prep_notes updated from 22,889 to 23,788 chars with reference index.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-249 --status completed`
+## 2026-03-31 -- [T-P0-250] Organize LinkedIn prep notes into company_documents
+- **What I did**: Cleaned up 5 LinkedIn document titles (removed Chinese, made descriptive). Updated LinkedIn prep_notes (company_id=1) with document index header listing all 9 documents (matching Uber format). Added solution notes for 16 key LinkedIn problems that lacked them: LC 210, 380, 236, 314, 127, 176, 181, 366, 311, 362, 394, 1249, 528, 348, 227, 588. These cover the prep checklist problems and top-frequency Questions Index problems.
+- **Deliverables**: `scripts/organize_linkedin_docs.py` (new), `data/mle_prep.db` (9 LinkedIn docs with clean titles, 125 problems now have notes)
+- **Sanity check result**: All 9 documents verified with proper English titles. prep_notes updated from 1886 to 2736 chars with document index. All 16 key problems confirmed with notes. Total LinkedIn problems with notes increased from 109 to 125.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-250 --status completed`
