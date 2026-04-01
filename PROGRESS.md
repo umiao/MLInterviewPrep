@@ -518,3 +518,10 @@
 - **Sanity check result**: 19/19 LC problems verified with solutions in both doc and DB. Script is idempotent (re-run skips existing). 6 variants, 4+ follow-ups documented. All solutions include time/space complexity.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-242 --status completed`
+
+## 2026-03-31 -- [T-P0-243] Uber BPS: Solutions for all 25 custom non-LC interview problems
+- **What I did**: Created comprehensive solutions document covering all 25 custom (non-LeetCode) Uber BPS interview problems. Each solution includes: reconstructed problem statement, approach explanation, clean Python code, time/space complexity, edge cases, and follow-ups. Key problems with detailed follow-ups: (3) Rider Connection Log -- Union Find base + BFS rebuild for block events, (6) Cart & Pricing Engine OOD -- Strategy pattern with surge/membership/promo rules and receipt breakdown, (16) Parking Lot OOD -- O(1) optimized version with free-spot queues, (19) Re-rooting DP for edge reversal, (20) Palindrome paths with bitmask XOR. Problems organized by pattern: Binary Search (1,4,13,15), BFS/DFS (7,22,23,25), Union Find (3), DP (18,19,20), Greedy (9,17), Monotonic Stack (11), Sliding Window (10), Heap (5), OOD (2,6,16), Grid (8,21), Tree (14), Tracking (12). Summary table and pattern quick reference included.
+- **Deliverables**: `docs/uber_bps_custom_solutions.md` (2615 lines, 25 problems)
+- **Sanity check result**: 25/25 problems verified with solutions. All follow-ups from task spec covered. Summary table matches all problems. Pattern quick reference cross-references all 25.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-243 --status completed`

@@ -5,39 +5,6 @@
 
 ## In Progress
 
-#### T-P0-243: Uber BPS: Write solutions for custom non-LC interview problems
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-241
-- **Description**: Detailed solutions for Uber-specific interview problems without standard LC numbers. Each solution must include: problem statement (reconstructed from 1p3a), approach explanation, clean Python code, time/space complexity, edge cases, and ALL follow-ups.
-
-Problems with follow-ups:
-(1) Purchase Optimization: prefix sum + binary search. Given prices array and queries (pos, amount), find max items purchasable.
-(2) Customer Revenue & Referral Tracking: OOD design. insertNewCustomer(revenue, referrerID), getLowestK(k, minTotalRevenue). Revenue propagates up referral tree. Must handle tree aggregation efficiently.
-(3) Uber Rider Connection Log: Union Find. Parse timestamped logs 'A shared-ride-with B', find earliest time all riders connected. FOLLOW-UP: handle 'block' events (A blocked B) -- UF cannot handle deletions, must use BFS/DFS rebuild. Discuss both approaches.
-(4) Elevator Binary Search OA: array-based jump, each position has move distance. Find minimum starting index that never goes out of left boundary.
-(5) Server Throughput with Heap: OA problem, recursive vs heap solution comparison.
-(6) Cart & Pricing Engine OOD: Design classes for Uber Eats cart. Requirements: item customization (add-ons), surge pricing multiplier, membership discounts (Uber One), promo codes (flat/percentage), receipt breakdown output. Strategy pattern for pricing rules.
-(7) Circular Array Shortest Jump: given circular array with jump distances, find shortest path from index A to B. BFS approach.
-(8) Robot Distance in Grid: given grid with robots(O), empty(E), obstacles(X), and distance array [left,top,bottom,right], find robot matching distances. DP to precompute distances from each cell to nearest obstacle in 4 directions.
-(9) Min Operations n->0: greedy/NAF. Each op: n += or -= 2^i. Optimal: binary representation analysis, n%4==1 -> -1, n%4==3 -> +1.
-(10) Shortest Subarray with k Distinct: sliding window + counter. Standard two-pointer.
-(11) Price Discount: monotonic stack. For each i, find first j>i where prices[j]<=prices[i]. Output: total discounted sum + indices sold at original price.
-(12) Balanced Permutation: given permutation of 1..n, check for each k if subarray forming permutation of 1..k exists. Track min/max position as k increases.
-(13) Elevator/Stairs Energy: binary search on split point. First mid floors by elevator (gain energy e1, cost t1 each), remaining by stairs (consume e2, time=ceil(c/energy)). Minimize time difference.
-(14) N-ary Tree 3-part: (a) sum all node values, (b) find max path value, (c) return nodes on max path. Must define Node class.
-(15) Max Throughput with Budget: binary search on target throughput. Each service has current throughput and scale cost. All services must reach target (bottleneck = min). Check if total cost <= budget.
-(16) Parking Lot OOD: park/unpark/checkcar. Motorcycle spots only for motorcycles, regular spots for both. Class design.
-(17) Task Assignment to 2 People: n tasks, reward1[i]/reward2[i] per person, person 1 must do exactly k. Greedy: sort by diff(r1-r2), pick top k for person 1.
-(18) Jump Game Prime-Ending Variant (like LC 1696): jump +1 or +prime ending in 3. DP, precompute primes.
-(19) Min Edge Reversal to find optimal root (re-rooting DP): directed graph, choose root to minimize reversed edges. DFS from 0 + re-root formula.
-(20) Palindrome Paths in Tree (LC 2791 variant): bitmask XOR prefix on tree paths, count palindrome-formable paths using DFS + counter map.
-(21) Minesweeper Grid Generator: place N mines randomly on 2D grid. FOLLOW-UP: optimize code quality -- remove unnecessary set, reduce variables, simplify logic. Interviewer pushes for cleaner code iteratively.
-(22) 2D Grid Nearest Exit: BFS from starting point to find nearest boundary cell. Standard multi-source BFS.
-(23) Lock Combination BFS: find minimum steps to unlock. BFS on state space.
-(24) Non-overlapping Interval Triples: count groups of 3 intervals with no pairwise overlap.
-(25) City Graph BFS Sort: given city graph + start city, sort by distance (ties: smaller index first).
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -152,6 +119,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A
+- [x] **2026-03-31** -- T-P0-243: Uber BPS: Write solutions for custom non-LC interview problems. Detailed solutions for Uber-specific interview problems without standard LC numbers. Each solution must include: problem
 - [x] **2026-03-31** -- T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems. Write Python solutions with detailed explanations for each LC problem from Uber BPS interviews. CRITICAL: Include all fo
 - [x] **2026-03-31** -- T-P0-241: Uber BPS: Seed 1p3a interview problems into DB with solutions. Parse all Uber interview problems from staging/uber题目整理.txt into the mle_prep.db problems table.
 - [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
