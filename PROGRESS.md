@@ -525,3 +525,10 @@
 - **Sanity check result**: 25/25 problems verified with solutions. All follow-ups from task spec covered. Summary table matches all problems. Pattern quick reference cross-references all 25.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-243 --status completed`
+
+## 2026-03-31 -- [T-P1-247] Uber BPS: Problem pattern cheat sheet by algorithm
+- **What I did**: Created comprehensive pattern cheat sheet organizing all 44 Uber BPS problems (19 LC + 25 custom) by algorithm pattern. 14 pattern sections each with: recognition signals, code template, problem table with key insights and complexity, and practical tips. Includes full complexity summary tables for both LC and custom problems, plus a decision-tree flowchart for pattern recognition during interviews.
+- **Deliverables**: `docs/uber_bps_pattern_cheatsheet.md` (721 lines, 14 patterns, 44 problems)
+- **Sanity check result**: All 19 LC problems and 25 custom problems present in summary tables. Every problem appears in at least one pattern section. Decision tree covers all major pattern signals.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-247 --status completed`
