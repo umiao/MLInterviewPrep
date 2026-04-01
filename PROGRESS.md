@@ -497,3 +497,10 @@
 - **Sanity check result**: All 6 task requirements verified: (1) Updated BPS structure with recruiter timing, (2) D&A prep with project diagrams, (3) ML fundamentals + KNN section, (4) Problem categorization by 8 patterns with 30+ problems, (5) HackerRank tips section, (6) Time allocation table. Cross-reference from uber_hr_call_prep.md still works.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-244 --status completed`
+
+## 2026-03-31 -- [T-P0-241] Uber BPS: Seed 1p3a interview problems into DB
+- **What I did**: Created seed script to parse all Uber interview problems from staging/uber题目整理.txt into mle_prep.db. Step 1: Updated 18 existing LC problems (230, 547, 337, 1020, 977, 815, 981, 17, 23, 1197, 1697, 549, 987, 79, 994, 2503, 2858, 2791) with '1point3acres' source badge and [1p3a Uber] interview notes (variants, follow-ups, tips from 1p3a reports). Created LC 1696 (Jump Game VI) as new entry. Step 2: Created 25 custom non-LC problem entries with titles, descriptions, tags, patterns, and detailed notes preserving original Chinese context. Problems include: Purchase Optimization, Customer Revenue & Referral Tracking, Uber Rider Connection Log, Cart & Pricing Engine OOD, Parking Lot OOD, Driver Queue SD, and 19 more. Step 3: Updated Uber BPS interview event (#8) with problem pool reference (44 1p3a-sourced problems: 19 LC + 25 custom).
+- **Deliverables**: `scripts/seed_uber_1p3a_problems.py`, `data/mle_prep.db` (updated)
+- **Sanity check result**: 19/19 LC problems verified with Uber tag + 1p3a source + notes. 25 custom problems created. Interview event #8 updated with 44-problem reference. Script is idempotent (re-run skips existing entries).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-241 --status completed`

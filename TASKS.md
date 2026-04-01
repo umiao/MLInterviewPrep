@@ -9,24 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-241: Uber BPS: Seed 1p3a interview problems into DB with solutions
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Parse all Uber interview problems from staging/uber题目整理.txt into the mle_prep.db problems table.
-
-Step 1 - LeetCode problems (ensure in DB with Uber tag + 1p3a badge):
-LC 230, 547, 337, 1020, 977, 815, 981, 17, 23, 1197, 1697, 549, 987, 79, 994, 2503, 2858, 2791, 1696.
-For each: verify exists in DB, add 'Uber' to company_tags if missing, fetch description from leetcode.ca if empty, set 1p3a source badge, add interview notes (variant/follow-up info from staging file).
-
-Step 2 - Custom problems (create new entries):
-Create problem entries for ~25 non-LC problems with: title, description (from staging file), tags (algorithm pattern), company_tags=['Uber'], source='1p3a', notes with original Chinese context preserved.
-
-Step 3 - Interview event:
-Create/update interview_event for Uber BPS with scheduled date, link to HackerRank exercise, and problem list reference.
-
-Data sources: C:/Users/Shenghui Xu/Desktop/staging/uber题目整理.txt (raw 1p3a reports), recruiter email (attachment in Discord message).
-
 #### T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems
 - **Priority**: P0
 - **Complexity**: L
@@ -197,6 +179,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A
+- [x] **2026-03-31** -- T-P0-241: Uber BPS: Seed 1p3a interview problems into DB with solutions. Parse all Uber interview problems from staging/uber题目整理.txt into the mle_prep.db problems table.
 - [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
 - [x] **2026-03-28** -- T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions. MLInterviewPrep CLAUDE.md Prohibited Actions has this rule (lines 62-66):
 - [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
