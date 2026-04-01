@@ -483,3 +483,17 @@
 - **Sanity check result**: File is 1143 lines, 41,485 bytes. Contains 9 Python code blocks (4 from-scratch implementations + 4 sklearn verifications + 1 CCP demo), 12 major sections. All required elements verified (ID3/C4.5/CART, Pruning, Random Forest, AdaBoost, GBDT, Shrinkage).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-148 --status completed`
+
+## 2026-03-31 -- [T-P1-149] ML Fundamentals Doc T7: Weight Initialization from scratch
+- **What I did**: Created comprehensive weight initialization from-scratch content (731 lines, 27.2K chars). Variance propagation analysis framework with full derivation. Failed initialization analysis: zero init (symmetry problem), too-large init (variance explosion), too-small init (signal vanishing) with demo code. Xavier/Glorot: forward constraint, backward constraint, harmonic compromise derivation, normal and uniform forms, Sigmoid/Tanh applicability analysis. He/Kaiming: ReLU half-interval truncation proof via half-Gaussian integral, factor-2 compensation, fan_in/fan_out modes, Leaky ReLU adjustment formula. Other methods: Orthogonal (QR decomposition, RNN use case), LSUV (data-driven), Fixup (BN-free ResNets). Pure Python implementations of Xavier normal/uniform, He normal/uniform/leaky, Orthogonal init, and variance propagation verification experiment. LoRA initialization strategy (from Doc 17): zero B + random A, why no symmetry breaking issue. PyTorch API verification: all init functions, MLP with hooks for variance tracking, Conv2d fan calculation. 5 interview Q&As, practical lookup table (10 scenarios), formula summary table.
+- **Deliverables**: `MLInterviewPrep/data/t7_weight_initialization.md`
+- **Sanity check result**: File is 731 lines, 27,150 bytes. Contains 7 Python code blocks (4 from-scratch implementations + 1 variance experiment + 1 PyTorch verification + 1 zero-init demo), 12 major sections. All required elements verified (zero init, Xavier derivation, He derivation, Leaky ReLU, Orthogonal, LoRA, PyTorch API).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-149 --status completed`
+
+## 2026-03-31 -- [T-P0-244] Uber BPS: Update phone screen prep doc with BPS format
+- **What I did**: Rewrote docs/uber_phone_screen_prep.md from the old 2-round phone screen format to the recruiter-confirmed BPS (Behavioral + Problem Solving) format. Updated structure: 5min intro, 40-50min coding+D&A, 5min Q&A. Added 9 sections: BPS format overview, time allocation strategy, problem-solving approach, problem categorization by pattern (BFS/DFS 11 problems, UF 3, BS 5, DP 4, monotonic stack, sliding window, OOD 3, greedy/math 3), D&A prep with 2 project walkthroughs and diagram elements, ML fundamentals review (KNN deep-dive + 10 core concepts), HackerRank tips (before/during/gotchas), content area priority summary, and comprehensive BPS checklist. Incorporated 1p3a interview reports for pattern analysis and tips.
+- **Deliverables**: `docs/uber_phone_screen_prep.md` (309 lines, 15.5KB)
+- **Sanity check result**: All 6 task requirements verified: (1) Updated BPS structure with recruiter timing, (2) D&A prep with project diagrams, (3) ML fundamentals + KNN section, (4) Problem categorization by 8 patterns with 30+ problems, (5) HackerRank tips section, (6) Time allocation table. Cross-reference from uber_hr_call_prep.md still works.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-244 --status completed`

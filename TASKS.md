@@ -9,7 +9,109 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-241: Uber BPS: Seed 1p3a interview problems into DB with solutions
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Parse all Uber interview problems from staging/uber题目整理.txt into the mle_prep.db problems table.
+
+Step 1 - LeetCode problems (ensure in DB with Uber tag + 1p3a badge):
+LC 230, 547, 337, 1020, 977, 815, 981, 17, 23, 1197, 1697, 549, 987, 79, 994, 2503, 2858, 2791, 1696.
+For each: verify exists in DB, add 'Uber' to company_tags if missing, fetch description from leetcode.ca if empty, set 1p3a source badge, add interview notes (variant/follow-up info from staging file).
+
+Step 2 - Custom problems (create new entries):
+Create problem entries for ~25 non-LC problems with: title, description (from staging file), tags (algorithm pattern), company_tags=['Uber'], source='1p3a', notes with original Chinese context preserved.
+
+Step 3 - Interview event:
+Create/update interview_event for Uber BPS with scheduled date, link to HackerRank exercise, and problem list reference.
+
+Data sources: C:/Users/Shenghui Xu/Desktop/staging/uber题目整理.txt (raw 1p3a reports), recruiter email (attachment in Discord message).
+
+#### T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-241
+- **Description**: Write Python solutions with detailed explanations for each LC problem from Uber BPS interviews. CRITICAL: Include all follow-ups and variants reported in 1p3a interviews.
+
+Per-problem details:
+- LC 230 (Kth Smallest in BST): (a) iterative solution, (b) recursive solution, (c) VARIANT: kth LARGEST instead of smallest, (d) FOLLOW-UP: O(0) space solution -- Morris Traversal, (e) FOLLOW-UP: adding left_count/right_count to nodes, (f) flatten the tree approach. Complexity analysis for each.
+- LC 547 (Number of Provinces): standard Union Find + DFS approaches.
+- LC 337 (House Robber III): tree DP with rob/not-rob states.
+- LC 1020 (Number of Enclaves): BFS/DFS from border.
+- LC 994 (Rotting Oranges): multi-source BFS.
+- LC 23 (Merge k Sorted Lists): heap approach + divide-and-conquer.
+- LC 815 (Bus Routes): BFS on route graph.
+- LC 981 (Time Based KV Store): binary search on timestamps. FOLLOW-UPS: (a) handle 1M+ requests/sec, (b) thread safety, (c) amortized time complexity analysis.
+- LC 17 (Letter Combinations): backtracking. VARIANT: output all letter combos for a 10-digit phone number (same idea, larger scale).
+- LC 79 (Word Search): VARIANT: 8 directions (including diagonals), must go straight line (no turning). Simplifies to O(R*C*8*L) enumeration, no DFS/backtracking needed.
+- LC 987 (Vertical Order Traversal): BFS/DFS with column tracking.
+- LC 1197 (Min Knight Moves): BFS. VARIANT: board size is n (not infinite).
+- LC 1697 (Edge Length Limited Paths): offline queries + Union Find sort. VARIANT: edge weight >= k (reversed condition).
+- LC 2858 (Min Edge Reversal): re-rooting DP. NOTE: 1p3a reports say must self-construct edges, watch for 1-indexed.
+- LC 2791 (Palindrome Paths in Tree): bitmask XOR + DFS prefix counting. Full solution with detailed explanation of mask logic.
+- LC 2503 (Grid Queries): BFS/sort queries. VARIANT: terrain grid with limits array, start at (0,0), traverse cells < limit.
+- LC 549 (Binary Tree Longest Consecutive Sequence II): tree DP tracking increasing/decreasing.
+- LC 977 (Squares of Sorted Array): two-pointer approach.
+- LC 1696 reference (Jump Game VI): VARIANT: can jump +1 or +prime-ending-in-3 (3,13,23,...), maximize score. DP solution.
+
+#### T-P0-243: Uber BPS: Write solutions for custom non-LC interview problems
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-241
+- **Description**: Detailed solutions for Uber-specific interview problems without standard LC numbers. Each solution must include: problem statement (reconstructed from 1p3a), approach explanation, clean Python code, time/space complexity, edge cases, and ALL follow-ups.
+
+Problems with follow-ups:
+(1) Purchase Optimization: prefix sum + binary search. Given prices array and queries (pos, amount), find max items purchasable.
+(2) Customer Revenue & Referral Tracking: OOD design. insertNewCustomer(revenue, referrerID), getLowestK(k, minTotalRevenue). Revenue propagates up referral tree. Must handle tree aggregation efficiently.
+(3) Uber Rider Connection Log: Union Find. Parse timestamped logs 'A shared-ride-with B', find earliest time all riders connected. FOLLOW-UP: handle 'block' events (A blocked B) -- UF cannot handle deletions, must use BFS/DFS rebuild. Discuss both approaches.
+(4) Elevator Binary Search OA: array-based jump, each position has move distance. Find minimum starting index that never goes out of left boundary.
+(5) Server Throughput with Heap: OA problem, recursive vs heap solution comparison.
+(6) Cart & Pricing Engine OOD: Design classes for Uber Eats cart. Requirements: item customization (add-ons), surge pricing multiplier, membership discounts (Uber One), promo codes (flat/percentage), receipt breakdown output. Strategy pattern for pricing rules.
+(7) Circular Array Shortest Jump: given circular array with jump distances, find shortest path from index A to B. BFS approach.
+(8) Robot Distance in Grid: given grid with robots(O), empty(E), obstacles(X), and distance array [left,top,bottom,right], find robot matching distances. DP to precompute distances from each cell to nearest obstacle in 4 directions.
+(9) Min Operations n->0: greedy/NAF. Each op: n += or -= 2^i. Optimal: binary representation analysis, n%4==1 -> -1, n%4==3 -> +1.
+(10) Shortest Subarray with k Distinct: sliding window + counter. Standard two-pointer.
+(11) Price Discount: monotonic stack. For each i, find first j>i where prices[j]<=prices[i]. Output: total discounted sum + indices sold at original price.
+(12) Balanced Permutation: given permutation of 1..n, check for each k if subarray forming permutation of 1..k exists. Track min/max position as k increases.
+(13) Elevator/Stairs Energy: binary search on split point. First mid floors by elevator (gain energy e1, cost t1 each), remaining by stairs (consume e2, time=ceil(c/energy)). Minimize time difference.
+(14) N-ary Tree 3-part: (a) sum all node values, (b) find max path value, (c) return nodes on max path. Must define Node class.
+(15) Max Throughput with Budget: binary search on target throughput. Each service has current throughput and scale cost. All services must reach target (bottleneck = min). Check if total cost <= budget.
+(16) Parking Lot OOD: park/unpark/checkcar. Motorcycle spots only for motorcycles, regular spots for both. Class design.
+(17) Task Assignment to 2 People: n tasks, reward1[i]/reward2[i] per person, person 1 must do exactly k. Greedy: sort by diff(r1-r2), pick top k for person 1.
+(18) Jump Game Prime-Ending Variant (like LC 1696): jump +1 or +prime ending in 3. DP, precompute primes.
+(19) Min Edge Reversal to find optimal root (re-rooting DP): directed graph, choose root to minimize reversed edges. DFS from 0 + re-root formula.
+(20) Palindrome Paths in Tree (LC 2791 variant): bitmask XOR prefix on tree paths, count palindrome-formable paths using DFS + counter map.
+(21) Minesweeper Grid Generator: place N mines randomly on 2D grid. FOLLOW-UP: optimize code quality -- remove unnecessary set, reduce variables, simplify logic. Interviewer pushes for cleaner code iteratively.
+(22) 2D Grid Nearest Exit: BFS from starting point to find nearest boundary cell. Standard multi-source BFS.
+(23) Lock Combination BFS: find minimum steps to unlock. BFS on state space.
+(24) Non-overlapping Interval Triples: count groups of 3 intervals with no pairwise overlap.
+(25) City Graph BFS Sort: given city graph + start city, sort by distance (ties: smaller index first).
+
 ### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos/.claude/settings.json uses bare `python` for all hook commands (plan_mode_hook, block_dangerous, commit_msg_guard, secret_guard, tasks_md_guard, file_watch_warn, yaml_validate, lint_check, test_check, archive_check, session_context). Per CLAUDE.md Prohibited Actions: bare python resolves to Windows Store stub (exit code 49) and hooks silently fail. Fix: replace all `python "$CLAUDE_PROJECT_DIR/..."` with `/c/Anaconda/python.exe "$CLAUDE_PROJECT_DIR/..."`. Source: MLInterviewPrep settings.json (already fixed). Also add setup_python_env.sh as first SessionStart hook (bash "$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh") -- MLInterviewPrep has this, helixos does not. Copy setup_python_env.sh from MLInterviewPrep if not present.
+
+#### T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-244
+- **Description**: Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-level diagrams, (2) Trade-off discussions - why tech X over Y, (3) SD patterns from Uber BPS: Driver Maps, Shopping Cart, Driver Queue, ETA, Food Ordering, (4) Common D&A follow-ups from 1p3a.
+
+#### T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-244
+- **Description**: Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2) Classification vs regression, (3) Optimization - KD-tree, ball tree, LSH, (4) Interview Qs - curse of dimensionality, feature scaling, categorical, (5) ML fundamentals: bias-variance, overfitting, CV, metrics.
+
+#### T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-242, T-P0-243
+- **Description**: Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,547), Union Find (547,1697,rider,balls), Binary Search (977,purchase opt,elevator,throughput), DP (jump game,house robber,intervals), Monotonic Stack (price discount), Sliding Window (k-distinct), OOD (cart,parking,revenue), Greedy (min ops,task assign). Include complexity summary and pattern recognition tips.
 
 ### P2 -- Nice to Have
 
@@ -55,6 +157,24 @@ Action: Update template/.claude/hooks/test_check.py to match MLInterviewPrep ver
 
 Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
+#### T-P2-239: [SYNC] Propagate session_context.py improvements from MLInterviewPrep to helixos
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
+
+#### T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from content seeding scripts (e.g., from T-P1-148 tree model content creation). Add `_temp*.json` (and possibly `_temp*.py`) patterns to MLInterviewPrep/.gitignore to prevent accidental commits of temp files.
+
+#### T-P2-248: Uber BPS: Create timed mock interview problem sets
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P0-242, T-P0-243, T-P1-247
+- **Description**: 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider Connection UF. Set 2: LC 994 BFS + Purchase Optimization BS. Set 3: LC 547 graph + Cart Pricing OOD. Timing: 20min per problem, 5min follow-ups.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -76,6 +196,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 > 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A
 - [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
 - [x] **2026-03-28** -- T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions. MLInterviewPrep CLAUDE.md Prohibited Actions has this rule (lines 62-66):
 - [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
