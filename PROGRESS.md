@@ -254,3 +254,9 @@
 - **Sanity check result**: All 4 task requirements met: (1) project showcases with diagrams, (2) trade-off discussions, (3) 5 Uber SD patterns, (4) 1p3a follow-ups. Document cross-references `uber_phone_screen_prep.md`.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-245 --status completed`
+## 2026-03-31 -- [T-P1-246] KNN from-scratch + ML fundamentals review
+- **What I did**: Created `docs/uber_bps_knn_ml_fundamentals.md` (679 lines) covering KNN implementation from scratch with full Python class (classification + regression, 4 distance metrics, weighted voting), k selection strategies, optimization data structures (KD-Tree, Ball Tree, LSH), 6 KNN interview questions with answers, and ML fundamentals review (bias-variance, overfitting/regularization, cross-validation, evaluation metrics, feature engineering). Includes quick-fire Q&A cheat sheet for the ~5min ML segment.
+- **Deliverables**: `docs/uber_bps_knn_ml_fundamentals.md`
+- **Sanity check result**: All 5 task requirements met: (1) KNN from scratch with distance metrics/k selection/weighted KNN, (2) classification vs regression, (3) KD-Tree/Ball Tree/LSH optimization, (4) interview Qs covering curse of dimensionality/feature scaling/categorical features, (5) ML fundamentals: bias-variance/overfitting/CV/metrics.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-246 --status completed`
