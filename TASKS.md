@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos/.claude/settings.json uses bare `python` for all hook commands (plan_mode_hook, block_dangerous, commit_msg_guard, secret_guard, tasks_md_guard, file_watch_warn, yaml_validate, lint_check, test_check, archive_check, session_context). Per CLAUDE.md Prohibited Actions: bare python resolves to Windows Store stub (exit code 49) and hooks silently fail. Fix: replace all `python "$CLAUDE_PROJECT_DIR/..."` with `/c/Anaconda/python.exe "$CLAUDE_PROJECT_DIR/..."`. Source: MLInterviewPrep settings.json (already fixed). Also add setup_python_env.sh as first SessionStart hook (bash "$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh") -- MLInterviewPrep has this, helixos does not. Copy setup_python_env.sh from MLInterviewPrep if not present.
-
 ### P2 -- Nice to Have
 
 #### T-P2-186: [SYNC] Propagate ruff version-drift lesson to helixos
@@ -67,12 +61,6 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - **Depends on**: None
 - **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
-#### T-P2-248: Uber BPS: Create timed mock interview problem sets
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P0-242, T-P0-243, T-P1-247
-- **Description**: 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider Connection UF. Set 2: LC 994 BFS + Purchase Optimization BS. Set 3: LC 547 graph + Cart Pricing OOD. Timing: 20min per problem, 5min follow-ups.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -90,28 +78,19 @@ Actions needed:
 
 BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ directory from MLInterviewPrep session. Must be done from a helixos session or manually.
 
+#### T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos/.claude/settings.json uses bare `python` for all hook commands (plan_mode_hook, block_dangerous, commit_msg_guard, secret_guard, tasks_md_guard, file_watch_warn, yaml_validate, lint_check, test_check, archive_check, session_context). Per CLAUDE.md Prohibited Actions: bare python resolves to Windows Store stub (exit code 49) and hooks silently fail. Fix: replace all `python "$CLAUDE_PROJECT_DIR/..."` with `/c/Anaconda/python.exe "$CLAUDE_PROJECT_DIR/..."`. Source: MLInterviewPrep settings.json (already fixed). Also add setup_python_env.sh as first SessionStart hook (bash "$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh") -- MLInterviewPrep has this, helixos does not. Copy setup_python_env.sh from MLInterviewPrep if not present.
+
 ## Completed Tasks
 
-> 207 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 223 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
 - [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co
 - [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5
 - [x] **2026-03-31** -- T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review. Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2
 - [x] **2026-03-31** -- T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document. Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-l
 - [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A
-- [x] **2026-03-31** -- T-P0-243: Uber BPS: Write solutions for custom non-LC interview problems. Detailed solutions for Uber-specific interview problems without standard LC numbers. Each solution must include: problem
-- [x] **2026-03-31** -- T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems. Write Python solutions with detailed explanations for each LC problem from Uber BPS interviews. CRITICAL: Include all fo
-- [x] **2026-03-31** -- T-P0-241: Uber BPS: Seed 1p3a interview problems into DB with solutions. Parse all Uber interview problems from staging/uber题目整理.txt into the mle_prep.db problems table.
-- [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
-- [x] **2026-03-28** -- T-P2-185: [SYNC] helixos CLAUDE.md: Add no-bare-python rule to Prohibited Actions. MLInterviewPrep CLAUDE.md Prohibited Actions has this rule (lines 62-66):
-- [x] **2026-03-27** -- T-P1-231: Fix PrepNotesPage tab overflow: document dropdown. Replace document tab buttons with dropdown select in PrepNotesPage.tsx. Design: Lines 156-175, replace documents?.map(Ta
-- [x] **2026-03-27** -- T-P0-237: Rewrite Day 3 (Distributed Training) to Chinese with user supplement. Replace current English Day 3 doc (company_documents id=13, 19574 chars) with comprehensive Chinese version. Source: C:\
-- [x] **2026-03-27** -- T-P0-236: Rewrite Day 2 (RLHF/DPO/Distillation) to Chinese with user supplement. Replace current English Day 2 doc (company_documents id=12, 17852 chars) with comprehensive Chinese version. Source: C:\
-- [x] **2026-03-27** -- T-P0-235: Day1 Expansion C: Answer all checklist questions. After expansions A+B are done, answer ALL 10 existing checklist questions plus any new ones added by A+B. Format: keep t
-- [x] **2026-03-27** -- T-P0-234: Day1 Expansion B: VAE details + ControlNet deep-dive + industry landscape. Expand Day 1 note with 3 more sections: (1) VAE deep-dive: encoder/decoder architecture, latent space regularization (KL
-- [x] **2026-03-27** -- T-P0-233: Day1 Expansion A: PE deep-dive + sinusoidal derivation + KV-Cache. Expand Day 1 note (doc id=18) with 3 new sections: (1) Positional Embedding deep-dive: absolute PE, sinusoidal PE deriva
-- [x] **2026-03-27** -- T-P0-232: Add Builder convention to CLAUDE.md + update memory. After pilot validates Builder, codify the convention. (1) CLAUDE.md Prohibited Actions: add 'Never write study note cont
-- [x] **2026-03-27** -- T-P0-230: Scale: Rewrite remaining 6 Adobe docs with validated Builder. After Day 1 pilot validates the Builder API, rewrite Days 2-7 (company_documents ids 6-11). For each doc: (1) Use StudyN
-- [x] **2026-03-27** -- T-P0-229: Pilot: Rewrite Day 1 (Diffusion) end-to-end with Builder. END-TO-END PILOT to validate Builder API before scaling. Take Adobe Day 1 doc (company_documents id=5, Diffusion Models)
-- [x] **2026-03-27** -- T-P0-228: Enable rehype-raw in MarkdownPreview. Install rehype-raw and add to MarkdownPreview. (1) npm install rehype-raw. (2) MarkdownPreview.tsx: import rehypeRaw, ad
-- [x] **2026-03-27** -- T-P0-227: Minimal StudyNoteBuilder + FormulaBlock typed constraint. Minimal viable Builder with one typed block (FormulaBlock). Design: (1) FormulaBlock dataclass: latex:str, explanation:s

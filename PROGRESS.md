@@ -266,3 +266,9 @@
 - **Sanity check result**: `_temp_docs.json` no longer appears in `git status` output after adding the pattern.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-240 --status completed`
+## 2026-03-31 -- [T-P2-248] Create timed mock interview problem sets
+- **What I did**: Created `docs/uber_bps_mock_sets.md` with 3 timed mock BPS interview sets (45min each). Set 1: LC 230 variant + Rider Connection UF. Set 2: LC 994 BFS + Purchase Optimization BS. Set 3: LC 547 graph + Cart Pricing OOD. Each set includes problem statements, follow-ups, scoring rubrics, debrief checklists, and a practice schedule.
+- **Deliverables**: `docs/uber_bps_mock_sets.md` (new, 364 lines)
+- **Sanity check result**: All 3 sets contain correct problem pairings per task spec. Each has 1 medium (20 min) + 1 medium-hard (20 min) + follow-ups (5 min). Problems reference solutions in existing docs.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-248 --status completed`
