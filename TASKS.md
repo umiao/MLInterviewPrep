@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-242: Uber BPS: Create LC solutions for all Uber-tagged problems
 - **Priority**: P0
 - **Complexity**: L
@@ -35,6 +31,10 @@ Per-problem details:
 - LC 549 (Binary Tree Longest Consecutive Sequence II): tree DP tracking increasing/decreasing.
 - LC 977 (Squares of Sorted Array): two-pointer approach.
 - LC 1696 reference (Jump Game VI): VARIANT: can jump +1 or +prime-ending-in-3 (3,13,23,...), maximize score. DP solution.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 #### T-P0-243: Uber BPS: Write solutions for custom non-LC interview problems
 - **Priority**: P0

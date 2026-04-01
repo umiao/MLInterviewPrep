@@ -504,3 +504,10 @@
 - **Sanity check result**: 19/19 LC problems verified with Uber tag + 1p3a source + notes. 25 custom problems created. Interview event #8 updated with 44-problem reference. Script is idempotent (re-run skips existing entries).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-241 --status completed`
+
+## 2026-03-31 -- [T-P0-241] Supplement: Add missing custom problems + cleanup duplicates
+- **What I did**: Created additional seed script (seed_uber_bps_problems.py) that added 8 missing custom problems: Elevator Binary Search (OA), Server Throughput with Heap (OA), Cart & Pricing Engine (OOD), Min Operations n to 0 (NAF), Shortest Subarray with k Distinct Integers, N-ary Tree 3-Part Problem, Min Edge Reversal for Optimal Root (Re-rooting DP), Palindrome Paths in Tree (Bitmask XOR). Also updated interview event description. Cleaned up 6 near-duplicate entries caused by slight title differences between seed scripts. Re-verified all 19 LC problems have Uber tag + 1p3a source + interview notes.
+- **Deliverables**: `scripts/seed_uber_bps_problems.py`, `data/mle_prep.db` (updated: 27 custom + 19 LC = 46 total Uber BPS problems)
+- **Sanity check result**: 19/19 LC verified OK. 27 custom problems (no duplicates). Interview event updated. 6 duplicates cleaned.
+- **Status**: [DONE]
+- **Request**: No task status change (T-P0-241 already completed)
