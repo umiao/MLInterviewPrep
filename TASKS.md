@@ -11,6 +11,12 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CRITICAL: helixos settings.json uses bare python for ALL hook commands. On Windows, bare python resolves to the AppData Store stub (exit code 49), silently breaking all hooks. Fix: (1) Replace all bare python with /c/Anaconda/python.exe in settings.json. (2) Add setup_python_env.sh SessionStart hook (copy from MLInterviewPrep) to inject Anaconda into PATH for Bash tool calls via CLAUDE_ENV_FILE. CLAUDE.md already documents this prohibition (added 2026-03-21 via propagation) but the fix was never applied. This is the same root cause as MLInterviewPrep lesson [2026-03-20] #bash-tool #path.
+
 ### P2 -- Nice to Have
 
 #### T-P2-186: [SYNC] Propagate ruff version-drift lesson to helixos
@@ -61,6 +67,24 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - **Depends on**: None
 - **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
+#### T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: test_check.py imports check_stop_cache and write_stop_cache from hook_utils and uses them to skip re-running tests in the same session. These deprecated caching functions were removed from the hook architecture (LESSONS.md lesson [2026-03-18]: removed lint cache so every Stop hook runs fresh). The caching logic means test failures can be silently skipped if tests passed earlier in the same session. Fix: Remove the cache check/write calls from test_check.py so tests always run fresh on Stop. Keep check_stop_cache/write_stop_cache in hook_utils.py only if other hooks still use them.
+
+#### T-P2-256: [DEBT] MLInterviewPrep: Remove stale scripts/git-hooks/ path from CLAUDE.md
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CLAUDE.md File Structure section references scripts/git-hooks/ as a directory but only scripts/pre-commit exists (no git-hooks/ subdirectory). Also references scripts/setup-hooks.sh which does exist. Fix: Update the scripts/git-hooks/ bullet in CLAUDE.md to reflect actual layout. Also consider whether setup-hooks.sh installs the pre-commit hook and update the description accordingly.
+
+#### T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. These are dead code left over from the old stop-cache caching architecture. LESSONS.md [2026-03-18] documents that lint caching was removed so every Stop hook runs fresh. Remove these two functions and their docstrings from hook_utils.py. Add regression test confirming no hook imports them.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -89,6 +113,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 > 223 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-01** -- T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access. On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to qui
+- [x] **2026-04-01** -- T-P0-258: Fetch LC problem descriptions from leetcode.ca for all 891 missing problems. 891 of 1057 problems in mle_prep.db have no description. Create a script scripts/fetch_lc_descriptions.py that:
 - [x] **2026-04-01** -- T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion. Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to conver
 - [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
 - [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co

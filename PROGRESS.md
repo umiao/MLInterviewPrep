@@ -305,3 +305,10 @@
 - **Sanity check result**: TypeScript type-check passes (tsc --noEmit). Vite build succeeds. No new warnings.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-251 --status completed`
+
+## 2026-04-01 -- [T-P0-258] Fetch LC problem descriptions from leetcode.ca for all missing problems
+- **What I did**: Created `scripts/fetch_lc_descriptions.py` that queries mle_prep.db for problems with missing descriptions, fetches from leetcode.ca/all/N.html, parses HTML with custom HTMLParser to extract clean description text, and stores in DB with `description_source='leetcode.ca'`. Supports resume, rate limiting, progress logging, and --dry-run mode. Successfully fetched 605 descriptions (LC IDs 6-1857). Remaining 281 missing: 256 have LC ID > 1857 (not on leetcode.ca), 25 are custom problems without LC IDs.
+- **Deliverables**: `scripts/fetch_lc_descriptions.py` (new), `data/mle_prep.db` (613 total leetcode.ca descriptions, up from 3)
+- **Sanity check result**: 776/1057 problems (73.4%) now have descriptions. All 610 fetchable problems (LC ID <= 1857) covered. 0 errors, 0 404s during fetch. Ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-258 --status completed`
