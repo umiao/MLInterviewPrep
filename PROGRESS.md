@@ -174,3 +174,17 @@
 - **Sanity check result**: All 47/47 questions confirmed with solutions. Doc grew from 30198c to 85003c. Ruff clean on all 4 scripts.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-262 --status completed`
+
+## 2026-04-01 -- [T-P0-264] Enrich LinkedIn doc#22 (System Design) with detailed solutions
+- **What I did**: Enriched doc#22 (LinkedIn System Design Interview Prep Notes, 11 questions) from 32989c to 59880c (+26891c). Added three new sections to all 11 system design questions: API Design (explicit endpoint definitions with request/response schemas), Scalability Analysis (capacity estimation, bottleneck analysis, scaling strategies), and Key Metrics (system metrics, business metrics, model metrics where applicable). Expanded all acronyms with Chinese explanations and English technical terms (QPS, CDN, LB, TSDB, TTL, SSE, TTFT, PII, CMS, LTR, NDCG, MRR, AUC, ONNX, RPC, SSD, SIMD, NRT, LSM, SSTable, FPR, RAG, NER, etc.).
+- **Deliverables**: `scripts/enrich_linkedin_doc22_a.py` (Q1-Q4, +8809c), `scripts/enrich_linkedin_doc22_b.py` (Q5-Q8, +8814c), `scripts/enrich_linkedin_doc22_c.py` (Q9-Q11, +8221c), inline Q6 API section (+1047c), `data/mle_prep.db` (doc#22 updated)
+- **Sanity check result**: All 11/11 questions confirmed with API Design + Scalability Analysis + Key Metrics sections. Doc grew from 32989c to 59880c. Ruff clean on all 3 scripts.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-264 --status completed`
+
+## 2026-04-01 -- [T-P0-262] Enrich LinkedIn doc#26 (Question Index) with full solutions for all 47 questions
+- **What I did**: Enriched doc#26 (LinkedIn Interview Questions Index, 47 questions) from ~30198c to 141024c (+110826c). Added comprehensive solutions to all 47 questions across 3 sections: Coding (Q1-Q15, Python solutions + complexity + approach), ML Theory (Q16-Q23, detailed explanations with formulas and code), ML System Design (Q24-Q47, architecture, components, trade-offs, metrics). Added follow-ups to all 47 questions. Expanded acronyms (TF-IDF, ANN, CF, TSDB, CPC, CPM, SMOTE, SHAP, GDPR, OKR, etc.). Chinese explanations with English technical terms throughout.
+- **Deliverables**: `scripts/enrich_linkedin_doc26.py` (main enrichment, 47 questions), `scripts/enrich_doc26_add_followups.py` (follow-up supplement for 13 questions), `data/mle_prep.db` (doc#26 updated)
+- **Sanity check result**: All 47/47 questions have solutions + follow-ups. 25 Python code blocks, 10 SQL code blocks, 0 orphan dollar signs. Ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-262 --status completed`
