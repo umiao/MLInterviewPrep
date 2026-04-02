@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-265: LinkedIn: Enrich doc#24 (ML Fundamentals + Coding) with detailed solutions
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Doc#24 (LinkedIn ML Fundamentals + Coding, 33241c). Review all ML and coding questions and ensure each has: complete answer with formulas, Python code, practical examples, common follow-ups. Chinese explanations. Expand acronyms.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh
@@ -120,6 +114,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 - [x] **2026-04-01** -- T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access. On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to qui
 - [x] **2026-04-01** -- T-P0-266: LinkedIn: Write solution notes for top-50 frequency problems (batch 1). Write comprehensive solution notes for the top 50 LinkedIn problems by frequency that currently lack notes.
+- [x] **2026-04-01** -- T-P0-265: LinkedIn: Enrich doc#24 (ML Fundamentals + Coding) with detailed solutions. Doc#24 (LinkedIn ML Fundamentals + Coding, 33241c). Review all ML and coding questions and ensure each has: complete ans
 - [x] **2026-04-01** -- T-P0-264: LinkedIn: Enrich doc#22 (System Design) with detailed solutions. Doc#22 (LinkedIn System Design, 32989c). Review all system design questions and ensure each has: architecture diagram de
 - [x] **2026-04-01** -- T-P0-263: LinkedIn: Enrich doc#21 (Probability/Stats) with detailed solutions. Doc#21 (LinkedIn probability/statistics interview prep notes, 34594c). Review all probability and statistics questions a
 - [x] **2026-04-01** -- T-P0-262: LinkedIn: Enrich doc#26 (Question Index) with full solutions for all 47 questions. Doc#26 (LinkedIn Interview Questions Index, 30198c, 47 questions) currently has question descriptions but NO actual solu

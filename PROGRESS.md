@@ -188,3 +188,10 @@
 - **Sanity check result**: All 47/47 questions have solutions + follow-ups. 25 Python code blocks, 10 SQL code blocks, 0 orphan dollar signs. Ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-262 --status completed`
+
+## 2026-04-01 -- [T-P0-265] Enrich LinkedIn doc#24 (ML Fundamentals + Coding) with detailed solutions
+- **What I did**: Enriched doc#24 (LinkedIn ML Fundamentals + Coding, 12 topics) from 33241c to 49895c (+16654c). Added 12 Follow-up Q&A sections (one per topic) with detailed answers, Python code, and practical tables. Expanded 23 acronyms (ANN, BCE, GLM, MLE, GMM, EM, GBDT, SGD, BFS, DFS, NLL, OLS, SSE, OOB, SMOTE, MAE, BPR, CSR, LFU, MAP, SVM, RMSProp, LARS). Added code for: activation functions, softmax/CE, gradient clipping, dropout, Gini/entropy, MLE normal distribution, sparse binary search, LRU cache, cycle detection, critical service finder.
+- **Deliverables**: `scripts/enrich_linkedin_doc24.py` (main enrichment), `scripts/enrich_linkedin_doc24_fix.py` (fix for 3 sections with upstream replacement conflicts), `data/mle_prep.db` (doc#24 updated)
+- **Sanity check result**: 23/23 acronyms expanded, 0 orphan dollar lines, 38 code blocks (18 Python), 12 follow-up sections. Ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-265 --status completed`
