@@ -17,6 +17,7 @@ import FrameworkNotesPage from "./pages/FrameworkNotesPage";
 import SystemDesignList from "./pages/SystemDesignList";
 import SystemDesignDetail from "./pages/SystemDesignDetail";
 import BehavioralQuestions from "./pages/BehavioralQuestions";
+import QuickIndex from "./pages/QuickIndex";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -36,6 +37,7 @@ export default function App() {
             <Routes>
               <Route element={<Layout />}>
                 <Route index element={<Dashboard />} />
+                <Route path="quick-index" element={<QuickIndex />} />
                 <Route path="problems" element={<Problems />} />
                 <Route path="problems/:problemId" element={<ProblemDetailPage />} />
                 <Route path="framework" element={<Framework />} />

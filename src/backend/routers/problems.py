@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
-from sqlalchemy import Integer, case, func, or_
+from sqlalchemy import Integer, String, case, cast, func, or_
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
@@ -176,6 +176,7 @@ def list_problems(
         like_term = f"%{search}%"
         query = query.filter(
             or_(
+                cast(Problem.leetcode_id, String).ilike(like_term),
                 Problem.title.ilike(like_term),
                 Problem.tags.ilike(like_term),
                 Problem.pattern.ilike(like_term),
@@ -201,10 +202,11 @@ def list_problems(
         rank_order = difficulty_rank.asc() if sort_order == "asc" else difficulty_rank.desc()
         query = query.order_by(null_last.asc(), rank_order)
     elif sort_by == "frequency_rank":
-        # Nulls last for frequency_rank
+        # Priority first (1=highest, nulls last), then frequency_rank
+        priority_null_last = case((Problem.priority.is_(None), 99), else_=Problem.priority)
         null_last = case((Problem.frequency_rank.is_(None), 1), else_=0)
         freq_order = Problem.frequency_rank.asc() if sort_order == "asc" else Problem.frequency_rank.desc()
-        query = query.order_by(null_last.asc(), freq_order)
+        query = query.order_by(priority_null_last.asc(), null_last.asc(), freq_order)
     else:
         sort_col = getattr(Problem, sort_by)
         order = sort_col.asc() if sort_order == "asc" else sort_col.desc()

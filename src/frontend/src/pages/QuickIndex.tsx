@@ -1,0 +1,31 @@
+import { Link } from "react-router-dom";
+
+const problems = [
+  { dbId: 93, lcId: 146, title: "LRU Cache" },
+  { dbId: 179, lcId: 716, title: "Max Stack" },
+  { dbId: 182, lcId: 432, title: "All O`one Data Structure" },
+  { dbId: 99, lcId: 215, title: "Kth Largest Element in an Array" },
+  { dbId: 115, lcId: 127, title: "Word Ladder" },
+  { dbId: 510, lcId: 373, title: "Find K Pairs with Smallest Sums" },
+  { dbId: 29, lcId: 235, title: "Lowest Common Ancestor of a BST" },
+];
+
+export default function QuickIndex() {
+  return (
+    <div className="p-6 h-full">
+      <h1 className="text-2xl font-bold mb-6">Quick Index</h1>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {problems.map((p) => (
+          <Link
+            key={p.dbId}
+            to={`/problems/${p.dbId}`}
+            className="block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+          >
+            <span className="text-xs text-gray-400 font-mono">#{p.lcId}</span>
+            <div className="mt-1 font-medium text-gray-800">{p.title}</div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 
 const navItems = [
   { to: "/", label: "Dashboard" },
+  { to: "/quick-index", label: "Quick Index" },
   { to: "/problems", label: "LeetCode" },
   { to: "/framework", label: "Framework" },
   { to: "/system-design", label: "System Design" },
