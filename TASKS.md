@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-262: LinkedIn: Enrich doc#26 (Question Index) with full solutions for all 47 questions
 - **Priority**: P0
 - **Complexity**: L
@@ -23,11 +19,9 @@ Format: Chinese explanations, English technical terms with acronym expansion (li
 
 This is the core LinkedIn prep document -- analogous to Uber's LC Solutions + Custom Solutions docs combined.
 
-#### T-P0-263: LinkedIn: Enrich doc#21 (Probability/Stats) with detailed solutions
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Doc#21 (LinkedIn probability/statistics interview prep notes, 34594c). Review all probability and statistics questions and ensure each has: full derivation, Python simulation code where applicable, intuitive explanation in Chinese, common follow-ups. If answers are already present but incomplete, expand them. Acronyms must be expanded on first use.
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 #### T-P0-264: LinkedIn: Enrich doc#22 (System Design) with detailed solutions
 - **Priority**: P0
@@ -146,6 +140,7 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 
 - [x] **2026-04-01** -- T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access. On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to qui
 - [x] **2026-04-01** -- T-P0-266: LinkedIn: Write solution notes for top-50 frequency problems (batch 1). Write comprehensive solution notes for the top 50 LinkedIn problems by frequency that currently lack notes.
+- [x] **2026-04-01** -- T-P0-263: LinkedIn: Enrich doc#21 (Probability/Stats) with detailed solutions. Doc#21 (LinkedIn probability/statistics interview prep notes, 34594c). Review all probability and statistics questions a
 - [x] **2026-04-01** -- T-P0-258: Fetch LC problem descriptions from leetcode.ca for all 891 missing problems. 891 of 1057 problems in mle_prep.db have no description. Create a script scripts/fetch_lc_descriptions.py that:
 - [x] **2026-04-01** -- T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion. Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to conver
 - [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
