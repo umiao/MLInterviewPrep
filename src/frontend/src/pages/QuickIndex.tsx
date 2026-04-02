@@ -11,6 +11,7 @@ const problems: { dbId: number; lcId?: number; title: string }[] = [
   { dbId: 38, lcId: 212, title: "Word Search II" },
   { dbId: 48, lcId: 269, title: "Alien Dictionary" },
   { dbId: 10, lcId: 15, title: "3Sum" },
+  { dbId: 42, lcId: 200, title: "Number of Islands" },
   { dbId: 1064, title: "K-Means (K-Means++)" },
   { dbId: 1050, title: "Lock Combination BFS (Bidirectional)" },
   { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries" },
