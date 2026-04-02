@@ -63,7 +63,7 @@ class ProblemResponse(BaseModel):
     company_tags: list[str] = []
     priority: int | None = 2
     is_completed: bool = False
-    comfort_level: int = 0
+    comfort_level: int | None = 0
     created_at: datetime | None = None
     last_attempted_at: datetime | None = None
     next_review_at: datetime | None = None
