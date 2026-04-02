@@ -10,6 +10,7 @@ const problems = [
   { dbId: 29, lcId: 235, title: "Lowest Common Ancestor of a BST" },
   { dbId: 38, lcId: 212, title: "Word Search II" },
   { dbId: 48, lcId: 269, title: "Alien Dictionary" },
+  { dbId: 10, lcId: 15, title: "3Sum" },
 ];
 
 export default function QuickIndex() {
