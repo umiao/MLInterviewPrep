@@ -12,6 +12,10 @@ const problems: { dbId: number; lcId?: number; title: string }[] = [
   { dbId: 48, lcId: 269, title: "Alien Dictionary" },
   { dbId: 10, lcId: 15, title: "3Sum" },
   { dbId: 1064, title: "K-Means (K-Means++)" },
+  { dbId: 1050, title: "Lock Combination BFS (Bidirectional)" },
+  { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries" },
+  { dbId: 216, lcId: 2791, title: "Palindrome Paths in Tree" },
+  { dbId: 183, lcId: 2858, title: "Min Edge Reversals" },
 ];
 
 export default function QuickIndex() {
