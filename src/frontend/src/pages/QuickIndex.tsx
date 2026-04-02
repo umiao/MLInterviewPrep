@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const problems = [
+const problems: { dbId: number; lcId?: number; title: string }[] = [
   { dbId: 93, lcId: 146, title: "LRU Cache" },
   { dbId: 179, lcId: 716, title: "Max Stack" },
   { dbId: 182, lcId: 432, title: "All O`one Data Structure" },
@@ -11,6 +11,7 @@ const problems = [
   { dbId: 38, lcId: 212, title: "Word Search II" },
   { dbId: 48, lcId: 269, title: "Alien Dictionary" },
   { dbId: 10, lcId: 15, title: "3Sum" },
+  { dbId: 1064, title: "K-Means (K-Means++)" },
 ];
 
 export default function QuickIndex() {
@@ -24,7 +25,9 @@ export default function QuickIndex() {
             to={`/problems/${p.dbId}`}
             className="block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
           >
-            <span className="text-xs text-gray-400 font-mono">#{p.lcId}</span>
+            <span className="text-xs text-gray-400 font-mono">
+              {p.lcId ? `#${p.lcId}` : "Custom"}
+            </span>
             <div className="mt-1 font-medium text-gray-800">{p.title}</div>
           </Link>
         ))}
