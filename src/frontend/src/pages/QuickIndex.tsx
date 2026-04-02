@@ -21,7 +21,7 @@ const problems: { dbId: number; lcId?: number; title: string }[] = [
 
 export default function QuickIndex() {
   return (
-    <div className="p-6 h-full overflow-y-auto">
+    <div className="p-6 h-full overflow-y-scroll">
       <h1 className="text-2xl font-bold mb-6">Quick Index</h1>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {problems.map((p) => (
