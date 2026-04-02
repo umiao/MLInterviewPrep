@@ -312,3 +312,10 @@
 - **Sanity check result**: 776/1057 problems (73.4%) now have descriptions. All 610 fetchable problems (LC ID <= 1857) covered. 0 errors, 0 404s during fetch. Ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-258 --status completed`
+
+## 2026-04-01 -- [T-P0-259] Write solution notes for LinkedIn top-50 frequency problems (batch 1)
+- **What I did**: Created solution notes for all 50 LinkedIn problems by frequency that lacked notes (ranks 20-106). Each note includes Chinese approach explanation, clean Python code, key techniques, and time/space complexity. Notes range from 224c (trivial problems like Add Two Integers) to 1767c (complex problems like LFU Cache), averaging 774c. Covered diverse patterns: binary search, backtracking, monotonic stack, DP, greedy, data structure design, SQL, tree DFS, and more. Marked all 50 as is_completed=1.
+- **Deliverables**: `scripts/seed_linkedin_notes_batch1.py` (25 problems), `scripts/seed_linkedin_notes_batch1b.py` (25 problems), `data/mle_prep.db` (50 new solution notes)
+- **Sanity check result**: All 50/50 problems confirmed with notes in DB. Min 224c, max 1767c, avg 774c. All marked completed. Ruff clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-259 --status completed`
