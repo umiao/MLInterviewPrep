@@ -167,3 +167,10 @@
 - **Sanity check result**: 19 Python code blocks (was 12), 13 follow-up sections (was 0), all 9 acronym expansions verified present, no orphan dollar signs. Ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-263 --status completed`
+
+## 2026-04-01 -- [T-P0-262] Enrich LinkedIn doc#26 (Question Index) with full solutions for all 47 questions
+- **What I did**: Enriched doc#26 (LinkedIn Interview Questions Index, 47 questions across 3 categories) from 30198c to 85003c (+54805c). Added comprehensive solutions to all 47 questions: Coding Q1-Q15 (full Python code + approach + complexity), ML Theory Q16-Q23 (detailed explanations with formulas, code, practical examples), ML System Design Q24-Q47 (architecture, components, metrics, trade-offs). Chinese explanations with English technical terms and acronym expansion throughout (CDF, BFS, DFS, DAG, TSDB, BERT, NLP, ANN, LTR, NDCG, MRR, CPM, CPC, RICE, TAM/SAM/SOM, etc.).
+- **Deliverables**: `scripts/enrich_linkedin_doc26_a.py` (Q1-Q15, +14273c), `scripts/enrich_linkedin_doc26_b.py` (Q16-Q23, +9700c), `scripts/enrich_linkedin_doc26_c.py` (Q24-Q35, +14675c), `scripts/enrich_linkedin_doc26_d.py` (Q36-Q47, +16157c), `data/mle_prep.db` (doc#26 updated)
+- **Sanity check result**: All 47/47 questions confirmed with solutions. Doc grew from 30198c to 85003c. Ruff clean on all 4 scripts.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-262 --status completed`
