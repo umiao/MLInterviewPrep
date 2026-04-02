@@ -8,6 +8,7 @@ const problems = [
   { dbId: 115, lcId: 127, title: "Word Ladder" },
   { dbId: 510, lcId: 373, title: "Find K Pairs with Smallest Sums" },
   { dbId: 29, lcId: 235, title: "Lowest Common Ancestor of a BST" },
+  { dbId: 38, lcId: 212, title: "Word Search II" },
 ];
 
 export default function QuickIndex() {
