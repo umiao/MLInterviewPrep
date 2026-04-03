@@ -8,6 +8,8 @@ import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
 import DocTocSidebar from "../components/ui/DocTocSidebar";
+import DynamicTocSidebar from "../components/ui/DynamicTocSidebar";
+import type { TocHeading } from "../utils/slugify";
 import {
   useCompanyDocuments,
   useUpdateDocument,
@@ -20,7 +22,7 @@ type ImportMode = "append" | "replace";
 type PageTab = "notes" | "forum" | `doc:${number}`;
 
 /** Threshold: only show TOC sidebar for documents >= 20K chars */
-const TOC_MIN_CHARS = 20_000;
+const TOC_MIN_CHARS = 8_000;
 
 /**
  * Full-screen prep notes page at /companies/:companyId/prep.
@@ -39,6 +41,10 @@ export default function PrepNotesPage() {
 
   // scrollContainer via useState (not ref.current) for sidebar
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+
+  // Dynamic TOC headings (for non-Adobe companies)
+  const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
+  const isAdobe = companyId === 23;
 
   // Callback ref to capture scroll container element via useState
   const scrollContainerRef = useCallback((node: HTMLDivElement | null) => {
@@ -274,9 +280,11 @@ export default function PrepNotesPage() {
       {/* Content area */}
       {activeTab === "notes" ? (
         <>
-          {/* Fixed acronym sidebar for large notes */}
+          {/* TOC sidebar for large notes */}
           {mode === "preview" && notesLargeEnough && (
-            <DocTocSidebar scrollContainer={scrollContainer} />
+            isAdobe
+              ? <DocTocSidebar scrollContainer={scrollContainer} />
+              : <DynamicTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
           )}
           <div ref={scrollContainerRef} className={`flex-1 overflow-auto p-6 flex flex-col min-h-0 ${mode === "preview" && notesLargeEnough ? "has-acronym-sidebar" : ""}`}>
             {mode === "edit" ? (
@@ -295,7 +303,7 @@ export default function PrepNotesPage() {
             ) : (
               <div className="prep-prose">
                 {notes ? (
-                  <MarkdownPreview markdown={notes} />
+                  <MarkdownPreview markdown={notes} onHeadingsExtracted={!isAdobe ? setTocHeadings : undefined} />
                 ) : (
                   <p className="text-gray-400 italic">
                     No prep notes yet. Switch to Edit mode to add some.
@@ -401,6 +409,8 @@ function DocumentViewer({
   const updateDoc = useUpdateDocument(companyId);
   const [localContent, setLocalContent] = useState<string | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
+  const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
+  const isAdobe = companyId === 23;
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -432,9 +442,11 @@ function DocumentViewer({
 
   return (
     <>
-      {/* Fixed acronym sidebar for large documents */}
+      {/* TOC sidebar for large documents */}
       {showSidebar && (
-        <DocTocSidebar scrollContainer={scrollContainer} />
+        isAdobe
+          ? <DocTocSidebar scrollContainer={scrollContainer} />
+          : <DynamicTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
       )}
       <div ref={scrollContainerRef} className={`flex-1 overflow-auto p-6 flex flex-col min-h-0 ${showSidebar ? "has-acronym-sidebar" : ""}`}>
         {mode === "edit" ? (
@@ -453,7 +465,7 @@ function DocumentViewer({
         ) : (
           <div className="prep-prose">
             {content ? (
-              <MarkdownPreview markdown={content} />
+              <MarkdownPreview markdown={content} onHeadingsExtracted={!isAdobe ? setTocHeadings : undefined} />
             ) : (
               <p className="text-gray-400 italic">
                 Empty document. Switch to Edit mode to add content.
