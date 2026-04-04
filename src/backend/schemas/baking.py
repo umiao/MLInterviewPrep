@@ -1,6 +1,8 @@
 """Pydantic schemas for Baking Studio endpoints."""
 from __future__ import annotations
 
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -68,8 +70,8 @@ class RecipeResponse(BaseModel):
     notes: str | None
     is_preset: bool
     ingredients: list[IngredientResponse]
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class ScaleRequest(BaseModel):
