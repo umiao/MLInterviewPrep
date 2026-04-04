@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 
-const navItems = [
+const navItems: { to: string; label: string; separator?: boolean }[] = [
   { to: "/", label: "Dashboard" },
   { to: "/quick-index", label: "Quick Index" },
   { to: "/problems", label: "LeetCode" },
@@ -12,6 +12,7 @@ const navItems = [
   { to: "/radio", label: "Study Radio" },
   { to: "/analytics", label: "Analytics" },
   { to: "/settings", label: "Settings" },
+  { to: "/baking", label: "Baking Studio", separator: true },
 ];
 
 export default function Sidebar() {
@@ -22,20 +23,24 @@ export default function Sidebar() {
       </div>
       <nav className="flex flex-col gap-1 px-3">
         {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === "/"}
-            className={({ isActive }) =>
-              `px-3 py-2 rounded text-sm transition-colors ${
-                isActive
-                  ? "bg-gray-700 text-white font-medium"
-                  : "hover:bg-gray-800 hover:text-white"
-              }`
-            }
-          >
-            {item.label}
-          </NavLink>
+          <div key={item.to}>
+            {item.separator && (
+              <div className="border-t border-gray-700 mt-2 pt-2" />
+            )}
+            <NavLink
+              to={item.to}
+              end={item.to === "/"}
+              className={({ isActive }) =>
+                `px-3 py-2 rounded text-sm transition-colors block ${
+                  isActive
+                    ? "bg-gray-700 text-white font-medium"
+                    : "hover:bg-gray-800 hover:text-white"
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          </div>
         ))}
       </nav>
     </aside>

@@ -18,6 +18,7 @@ import SystemDesignList from "./pages/SystemDesignList";
 import SystemDesignDetail from "./pages/SystemDesignDetail";
 import BehavioralQuestions from "./pages/BehavioralQuestions";
 import QuickIndex from "./pages/QuickIndex";
+import BakingStudio from "./pages/BakingStudio";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +53,7 @@ export default function App() {
                 <Route path="radio" element={<StudyRadio />} />
                 <Route path="analytics" element={<Analytics />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="baking" element={<BakingStudio />} />
               </Route>
             </Routes>
           </BrowserRouter>
