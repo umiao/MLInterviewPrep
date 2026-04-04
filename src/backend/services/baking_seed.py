@@ -61,8 +61,8 @@ def _build_preset_recipes() -> list[BakingRecipe]:
 
     # 1. Basque Cheesecake (6-inch, complete)
     recipes.append(BakingRecipe(
-        name="Basque Cheesecake",
-        name_zh="巴斯克芝士蛋糕",
+        name="Pistachio Basque Cheesecake",
+        name_zh="开心果巴斯克",
         cake_type="basque",
         category="complete",
         size="6inch",
