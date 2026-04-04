@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
+import MarkdownPreview from "../components/ui/MarkdownPreview";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -141,12 +142,20 @@ function CategoryFilter({
 
 function StarSection({ label, content }: { label: string; content: string | null }) {
   if (!content) return null;
+  // Use MarkdownPreview if content contains markdown syntax, otherwise plain text
+  const hasMarkdown = /[*_\-#\[\]`|]/.test(content);
   return (
     <div className="mb-2">
       <span className="font-semibold text-blue-600 text-xs uppercase tracking-wider">
         {label}
       </span>
-      <p className="text-gray-600 text-sm mt-0.5">{content}</p>
+      {hasMarkdown ? (
+        <div className="mt-0.5 text-sm text-gray-600">
+          <MarkdownPreview markdown={content} />
+        </div>
+      ) : (
+        <p className="text-gray-600 text-sm mt-0.5">{content}</p>
+      )}
     </div>
   );
 }
@@ -228,7 +237,9 @@ function ExampleCard({
               <span className="font-semibold text-red-600 text-xs uppercase tracking-wider">
                 Risk if not addressed
               </span>
-              <p className="text-gray-600 text-sm mt-0.5">{example.risk_statement}</p>
+              <div className="text-gray-600 text-sm mt-0.5">
+                <MarkdownPreview markdown={example.risk_statement} />
+              </div>
             </div>
           )}
 
@@ -237,7 +248,9 @@ function ExampleCard({
               <span className="font-semibold text-purple-600 text-xs uppercase tracking-wider">
                 Simple Analogy
               </span>
-              <p className="text-gray-600 text-sm mt-0.5 italic">{example.analogy}</p>
+              <div className="text-gray-600 text-sm mt-0.5 italic">
+                <MarkdownPreview markdown={example.analogy} />
+              </div>
             </div>
           )}
 
