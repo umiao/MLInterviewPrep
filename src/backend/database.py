@@ -388,6 +388,49 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ALTER TABLE behavioral_examples ADD COLUMN tech_terms TEXT",
         ],
     ),
+    (
+        15,
+        "Create baking_recipes, baking_ingredients, baking_home_inventory tables",
+        [
+            "CREATE TABLE IF NOT EXISTS baking_recipes ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  name VARCHAR NOT NULL,"
+            "  name_zh VARCHAR,"
+            "  cake_type VARCHAR NOT NULL,"
+            "  category VARCHAR NOT NULL,"
+            "  size VARCHAR DEFAULT '6inch',"
+            "  format VARCHAR DEFAULT 'full',"
+            "  steps TEXT,"
+            "  notes TEXT,"
+            "  is_preset BOOLEAN DEFAULT 0,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE TABLE IF NOT EXISTS baking_ingredients ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  recipe_id INTEGER NOT NULL REFERENCES baking_recipes(id) ON DELETE CASCADE,"
+            "  name VARCHAR NOT NULL,"
+            "  name_zh VARCHAR,"
+            "  amount REAL NOT NULL,"
+            "  unit VARCHAR NOT NULL,"
+            "  group_name VARCHAR DEFAULT 'main',"
+            "  sort_order INTEGER DEFAULT 0,"
+            "  is_scalable BOOLEAN DEFAULT 1"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_baking_ingredients_recipe_id "
+            "ON baking_ingredients(recipe_id)",
+            "CREATE TABLE IF NOT EXISTS baking_home_inventory ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  name VARCHAR NOT NULL UNIQUE,"
+            "  name_zh VARCHAR,"
+            "  category VARCHAR DEFAULT 'decoration',"
+            "  in_stock BOOLEAN DEFAULT 1,"
+            "  amount REAL,"
+            "  unit VARCHAR,"
+            "  notes TEXT"
+            ")",
+        ],
+    ),
 ]
 
 

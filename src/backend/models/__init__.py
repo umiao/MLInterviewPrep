@@ -10,6 +10,7 @@ from src.backend.models.framework import FrameworkNode, StudyLog
 from src.backend.models.problem import Attempt, Problem, QASession
 from src.backend.models.reading import AudioCache, ReadingProgress, ReadingSession
 from src.backend.models.scraper import InterviewQuestion, ScrapedPage, SeedURL
+from src.backend.models.baking import BakingIngredient, BakingRecipe, HomeInventory
 from src.backend.models.system_design import SystemDesign
 from src.backend.models.timeline import InterviewEvent
 
@@ -35,4 +36,7 @@ __all__ = [
     "ForumPostLink",
     "ForumPost",
     "SystemDesign",
+    "BakingRecipe",
+    "BakingIngredient",
+    "HomeInventory",
 ]
