@@ -4,9 +4,13 @@ import type { RecipeFilters } from "../types/baking";
 import FilterBar from "../components/baking/FilterBar";
 import RecipeCard from "../components/baking/RecipeCard";
 import RecipeDetail from "../components/baking/RecipeDetail";
+import RecipeCombiner from "../components/baking/RecipeCombiner";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 
+type ViewMode = "browse" | "build";
+
 export default function BakingStudio() {
+  const [mode, setMode] = useState<ViewMode>("browse");
   const [filters, setFilters] = useState<RecipeFilters>({});
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
   const { data: recipes, isLoading, error } = useRecipes(filters);
@@ -33,6 +37,38 @@ export default function BakingStudio() {
         </button>
       </div>
 
+      {/* Mode toggle */}
+      <div className="flex gap-1 bg-gray-100 rounded-lg p-1 w-fit">
+        <button
+          type="button"
+          onClick={() => setMode("browse")}
+          className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            mode === "browse"
+              ? "bg-white text-amber-700 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          Browse Recipes
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode("build")}
+          className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
+            mode === "build"
+              ? "bg-white text-amber-700 shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          Build Your Own
+        </button>
+      </div>
+
+      {/* Build mode */}
+      {mode === "build" && <RecipeCombiner />}
+
+      {/* Browse mode */}
+      {mode === "browse" && (
+        <>
       {/* Filters */}
       <FilterBar filters={filters} onFilterChange={setFilters} />
 
@@ -95,6 +131,8 @@ export default function BakingStudio() {
             />
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );
