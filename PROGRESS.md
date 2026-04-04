@@ -229,3 +229,10 @@
 - **Sanity check result**: `npx tsc --noEmit` passes with zero errors. All API paths match backend routes. BAKING_KEYS exported and used consistently. Invalidation rules documented in comments.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-158 --status completed`
+
+## 2026-04-03 -- [T-P1-160] Baking Studio: Recipe detail & scaling calculator
+- **What I did**: Created RecipeDetail panel with IngredientTable (grouped by group_name, bilingual display) and ScalingCalculator (multi-size checkboxes for chiffon recipes that sum ingredients across sizes, anchor-based scaling with scale factor display). Updated BakingStudio.tsx with desktop side-panel and mobile overlay for recipe detail view. Click a card to open detail, click again or X to close.
+- **Deliverables**: `components/baking/IngredientTable.tsx` (new), `components/baking/ScalingCalculator.tsx` (new), `components/baking/RecipeDetail.tsx` (new), `pages/BakingStudio.tsx` (updated)
+- **Sanity check result**: TypeScript compiles cleanly (`npx tsc --noEmit` passes). All three new files created with correct imports from types/baking. ScalingCalculator uses SIZE_RATIOS matching backend (4inch: 0.44, 6inch: 1.0, 8inch: 1.78).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-160 --status completed`

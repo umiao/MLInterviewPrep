@@ -1,14 +1,24 @@
 import { useState } from "react";
-import { useRecipes } from "../hooks/useBaking";
+import { useRecipes, useDeleteRecipe } from "../hooks/useBaking";
 import type { RecipeFilters } from "../types/baking";
 import FilterBar from "../components/baking/FilterBar";
 import RecipeCard from "../components/baking/RecipeCard";
+import RecipeDetail from "../components/baking/RecipeDetail";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
 
 export default function BakingStudio() {
   const [filters, setFilters] = useState<RecipeFilters>({});
   const [selectedRecipeId, setSelectedRecipeId] = useState<number | null>(null);
   const { data: recipes, isLoading, error } = useRecipes(filters);
+  const deleteRecipe = useDeleteRecipe();
+
+  const selectedRecipe = recipes?.find((r) => r.id === selectedRecipeId) ?? null;
+
+  const handleDelete = (id: number) => {
+    deleteRecipe.mutate(id, {
+      onSuccess: () => setSelectedRecipeId(null),
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -39,14 +49,51 @@ export default function BakingStudio() {
           <p className="text-sm">Create your first recipe!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {recipes.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              onClick={() => setSelectedRecipeId(recipe.id)}
+        <div className="flex gap-6">
+          {/* Recipe grid */}
+          <div
+            className={`grid grid-cols-1 gap-4 ${
+              selectedRecipe
+                ? "md:grid-cols-1 lg:grid-cols-2 flex-1 min-w-0"
+                : "md:grid-cols-2 lg:grid-cols-3 w-full"
+            }`}
+          >
+            {recipes.map((recipe) => (
+              <RecipeCard
+                key={recipe.id}
+                recipe={recipe}
+                onClick={() =>
+                  setSelectedRecipeId(
+                    recipe.id === selectedRecipeId ? null : recipe.id
+                  )
+                }
+              />
+            ))}
+          </div>
+
+          {/* Detail panel */}
+          {selectedRecipe && (
+            <div className="hidden md:block w-96 shrink-0 sticky top-4 self-start">
+              <RecipeDetail
+                recipe={selectedRecipe}
+                onClose={() => setSelectedRecipeId(null)}
+                onDelete={handleDelete}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Mobile detail overlay */}
+      {selectedRecipe && (
+        <div className="md:hidden fixed inset-0 z-50 bg-black/40 flex items-end">
+          <div className="w-full max-h-[85vh] overflow-y-auto rounded-t-2xl">
+            <RecipeDetail
+              recipe={selectedRecipe}
+              onClose={() => setSelectedRecipeId(null)}
+              onDelete={handleDelete}
             />
-          ))}
+          </div>
         </div>
       )}
     </div>
