@@ -222,3 +222,10 @@
 - **Sanity check result**: Import OK, 10 routes registered, server starts cleanly, GET /api/baking/recipes and /api/baking/inventory return 200
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-156 --status completed`
+
+## 2026-04-03 -- [T-P1-158] Baking Studio: Frontend types & API layer
+- **What I did**: Created TypeScript types (baking.ts) mirroring backend Pydantic schemas, and React Query hooks (useBaking.ts) with BAKING_KEYS query key structure, 6 hooks (useRecipes, useRecipe, useCreateRecipe, useDeleteRecipe, useScaleRecipe, useInventory), and proper cache invalidation rules.
+- **Deliverables**: `src/frontend/src/types/baking.ts` (new), `src/frontend/src/hooks/useBaking.ts` (new)
+- **Sanity check result**: `npx tsc --noEmit` passes with zero errors. All API paths match backend routes. BAKING_KEYS exported and used consistently. Invalidation rules documented in comments.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-158 --status completed`
