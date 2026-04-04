@@ -78,6 +78,15 @@ async def lifespan(app: FastAPI):
 
             results = load_all_seeds(db)
             logger.info("Seed data loaded: %s", results)
+
+        # Seed baking data if table is empty
+        from src.backend.models.baking import BakingRecipe
+        from src.backend.services.baking_seed import seed_baking_data
+
+        baking_count = db.query(BakingRecipe).count()
+        if baking_count == 0:
+            baking_result = seed_baking_data(db)
+            logger.info("Baking seed data loaded: %s", baking_result)
     finally:
         db.close()
 
