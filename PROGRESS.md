@@ -195,3 +195,30 @@
 - **Sanity check result**: 23/23 acronyms expanded, 0 orphan dollar lines, 38 code blocks (18 Python), 12 follow-up sections. Ruff clean.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-265 --status completed`
+
+## 2026-04-01 -- [T-P2-256] Verify CLAUDE.md scripts/git-hooks/ reference (no change needed)
+- **What I did**: Investigated T-P2-256 which claimed CLAUDE.md references a nonexistent `scripts/git-hooks/` directory. Verified that `scripts/git-hooks/` exists and contains `pre-commit`, and `scripts/setup-hooks.sh` correctly installs from it. The CLAUDE.md File Structure section is already accurate.
+- **Deliverables**: None (no changes needed)
+- **Sanity check result**: `scripts/git-hooks/pre-commit` exists, `scripts/setup-hooks.sh` references `scripts/git-hooks/` correctly
+- **Status**: [DONE] - task description was based on incorrect information
+- **Request**: `task_db.py update T-P2-256 --status completed`
+
+## 2026-04-01 -- [T-P2-257] Remove unused stop cache functions from hook_utils.py (BLOCKED)
+- **What I did**: Confirmed `check_stop_cache` and `write_stop_cache` are dead code in `.claude/hooks/hook_utils.py` (only used in `shared/hooks/` template files, not active hooks). Attempted to remove them but edits to `.claude/hooks/hook_utils.py` are blocked by sensitive file permissions.
+- **Deliverables**: None (blocked)
+- **Status**: [BLOCKED] - sensitive file permissions prevent editing `.claude/hooks/hook_utils.py`
+- **Request**: `task_db.py update T-P2-257 --status blocked`
+
+## 2026-04-02 -- [T-P2-186, T-P2-206] Mark already-done sync tasks + triage remaining blocked tasks
+- **What I did**: Verified T-P2-186 (ruff version-drift lesson) and T-P2-206 (2 universal lessons) are already present in helixos LESSONS.md (items 8 and 18). Marked both as completed. Attempted T-P2-208 (template test_check.py) and T-P2-207 (helixos test_check.py) but all `.claude/hooks/` files across projects are blocked by sensitive file permissions. Marked T-P2-187, T-P2-207, T-P2-208, T-P2-239, T-P2-255 as blocked.
+- **Deliverables**: TASKS.md updated via task_db.py
+- **Sanity check result**: helixos LESSONS.md items 8 (ruff pin) and 18 (task ID grammar) match the propagated lessons
+- **Status**: [DONE] - no unblocked tasks remain
+- **Request**: All active tasks marked completed or blocked
+
+## 2026-04-03 -- [T-P1-156] Baking Studio: Backend API routes
+- **What I did**: Created FastAPI router with all 10 endpoints (CRUD recipes, scale, inventory, ingredients) and Pydantic schemas. Registered router in main.py. Defined SIZE_RATIOS constant.
+- **Deliverables**: `schemas/baking.py` (new), `routers/baking.py` (new), `main.py` (updated imports + router registration)
+- **Sanity check result**: Import OK, 10 routes registered, server starts cleanly, GET /api/baking/recipes and /api/baking/inventory return 200
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-156 --status completed`
