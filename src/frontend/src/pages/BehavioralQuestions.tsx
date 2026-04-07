@@ -475,10 +475,6 @@ export default function BehavioralQuestions() {
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
   const [drawerExampleId, setDrawerExampleId] = useState<string | null>(null);
 
-  const drawerExample = drawerExampleId
-    ? examples.find((e) => e.example_id === drawerExampleId) ?? null
-    : null;
-
   const handleExampleClick = (exampleId: string) => {
     setDrawerExampleId(exampleId);
   };
@@ -515,6 +511,10 @@ export default function BehavioralQuestions() {
     queryKey: ["behavioral-examples"],
     queryFn: () => api.get("/behavioral/examples"),
   });
+
+  const drawerExample = drawerExampleId
+    ? examples.find((e) => e.example_id === drawerExampleId) ?? null
+    : null;
 
   const { data: coverageCells = [] } = useQuery<CoverageCell[]>({
     queryKey: ["behavioral-coverage"],
