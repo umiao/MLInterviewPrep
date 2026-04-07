@@ -340,3 +340,17 @@
 - **Sanity check result**: TypeScript clean, 1033 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-269 --status completed` and `task_db.py update T-P1-270 --status completed`
+
+## 2026-04-07 -- [T-P1-271] Plan slide-over drawer for behavioral example detail
+- **What I did**: Task planning mode. Designed and planned slide-over drawer UX pattern for drill-down-and-return navigation in Behavioral page. Researched industry best practices (Material Design side sheets, Apple HIG inspector panels). Created T-P1-271 with detailed 4-step implementation plan. Incorporated user's review feedback: Portal (mandatory), stopPropagation (mandatory), scroll lock cleanup (mandatory), state=id with snapshot (compromise), pure CSS transitions (no framer-motion), skip focus trap and URL sync. Confirmed single task (no split needed).
+- **Deliverables**: T-P1-271 created with full implementation spec, review-incorporated design decisions, and 15 acceptance criteria
+- **Sanity check result**: Task spec reviewed and approved by user. TASKS.md regenerated.
+- **Status**: [DONE] (planning complete, awaiting user approval to execute)
+- **Request**: No status change (T-P1-271 remains active, pending execution approval)
+
+## 2026-04-07 -- [T-P1-271] Slide-over drawer for behavioral example detail
+- **What I did**: Implemented right-side slide-over drawer for drill-down-and-return navigation. (1) Created SlideOverPanel.tsx -- generic reusable component using createPortal, with Escape handler, scroll lock (saves/restores original overflow), stopPropagation, role="dialog" aria-modal="true". (2) Extracted BehavioralExample/LinkedQuestion types to types/behavioral.ts. (3) Created ExampleDrawerContent.tsx -- renders full STAR content with all sections (risk, analogy, tech_terms, evidence, linked_questions) without expand/collapse. (4) Rewired BehavioralQuestions.tsx -- handleExampleClick now opens drawer (setDrawerExampleId) instead of destructively switching viewMode/clearing filters. Removed old focusedExampleId state.
+- **Deliverables**: SlideOverPanel.tsx (new), ExampleDrawerContent.tsx (new), types/behavioral.ts (new), BehavioralQuestions.tsx (modified)
+- **Sanity check result**: TypeScript clean, 1033 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-271 --status completed`

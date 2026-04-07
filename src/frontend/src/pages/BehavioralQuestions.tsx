@@ -1,37 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import StoryMapView from "../components/behavioral/StoryMapView";
+import SlideOverPanel from "../components/ui/SlideOverPanel";
+import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent";
+import type { BehavioralExample } from "../types/behavioral";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
 /* ------------------------------------------------------------------ */
-
-interface LinkedQuestion {
-  id: number;
-  question_id: string;
-  text: string;
-  category_id: string;
-  relevance_note: string | null;
-}
-
-interface BehavioralExample {
-  id: number;
-  example_id: string;
-  title: string;
-  source_project: string | null;
-  situation: string | null;
-  task: string | null;
-  action: string | null;
-  result: string | null;
-  evidence_quotes: string[];
-  principle_tags: string[];
-  risk_statement: string | null;
-  analogy: string | null;
-  tech_terms: Record<string, string>;
-  linked_questions: LinkedQuestion[];
-}
 
 interface BehavioralQuestion {
   id: number;
@@ -170,37 +148,15 @@ function StarSection({ label, content }: { label: string; content: string | null
 
 function ExampleCard({
   example,
-  focused,
-  onClearFocus,
 }: {
   example: BehavioralExample;
-  focused?: boolean;
-  onClearFocus?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (focused) {
-      setExpanded(true);
-      // Small delay to let the DOM render before scrolling
-      const timer = setTimeout(() => {
-        cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [focused]);
 
   return (
     <div
-      ref={cardRef}
       id={`example-${example.example_id}`}
-      className={`bg-white rounded-xl p-5 mb-4 border-2 transition-all w-full ${
-        focused
-          ? "border-blue-500 shadow-lg ring-2 ring-blue-200"
-          : "border-gray-200 hover:border-blue-400 hover:shadow-md"
-      }`}
-      onAnimationEnd={onClearFocus}
+      className="bg-white rounded-xl p-5 mb-4 border-2 transition-all w-full border-gray-200 hover:border-blue-400 hover:shadow-md"
     >
       <div
         className="flex items-center justify-between cursor-pointer select-none"
@@ -517,14 +473,14 @@ export default function BehavioralQuestions() {
   const [viewMode, setViewMode] = useState<ViewMode>("questions");
   const [search, setSearch] = useState("");
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
-  const [focusedExampleId, setFocusedExampleId] = useState<string | null>(null);
+  const [drawerExampleId, setDrawerExampleId] = useState<string | null>(null);
+
+  const drawerExample = drawerExampleId
+    ? examples.find((e) => e.example_id === drawerExampleId) ?? null
+    : null;
 
   const handleExampleClick = (exampleId: string) => {
-    setFocusedExampleId(exampleId);
-    setViewMode("examples");
-    // Clear category filter so the focused example is visible
-    setSelectedCategory(null);
-    setSearch("");
+    setDrawerExampleId(exampleId);
   };
 
   const toggleQuestion = (id: number) => {
@@ -684,8 +640,6 @@ export default function BehavioralQuestions() {
               <ExampleCard
                 key={ex.id}
                 example={ex}
-                focused={focusedExampleId === ex.example_id}
-                onClearFocus={() => setFocusedExampleId(null)}
               />
             ))}
         </div>
@@ -719,6 +673,14 @@ export default function BehavioralQuestions() {
 
       {/* Story Map View */}
       {viewMode === "story-map" && <StoryMapView onExampleClick={handleExampleClick} />}
+
+      <SlideOverPanel
+        open={!!drawerExample}
+        onClose={() => setDrawerExampleId(null)}
+        title={drawerExample?.title ?? ""}
+      >
+        {drawerExample && <ExampleDrawerContent example={drawerExample} />}
+      </SlideOverPanel>
     </div>
   );
 }
