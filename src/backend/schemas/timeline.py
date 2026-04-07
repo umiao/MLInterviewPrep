@@ -1,22 +1,33 @@
-"""Pydantic schemas for InterviewEvent."""
-from datetime import UTC, datetime
+"""Pydantic schemas for InterviewEvent.
+
+Timezone convention: all datetimes are stored and returned as naive local time
+(Pacific Time). The frontend displays them via ``new Date()`` which interprets
+naive ISO strings as local time — matching the user's system timezone.
+"""
+from datetime import datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
-from pydantic.functional_serializers import PlainSerializer
+from pydantic.functional_validators import BeforeValidator
 
 
-def _ensure_utc_iso(v: datetime) -> str:
-    """Serialize datetime as UTC ISO-8601 with Z suffix.
+def _strip_tz(v: datetime | str) -> datetime:
+    """Strip timezone info so datetimes are stored as naive local time.
 
-    SQLite strips timezone info, so naive datetimes from the DB are assumed UTC.
+    Prevents accidental UTC conversion when a TZ-aware datetime is provided
+    (e.g. from ``Date.toISOString()`` which appends ``Z``).
     """
-    if v.tzinfo is None:
-        v = v.replace(tzinfo=UTC)
-    return v.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    if isinstance(v, str):
+        v = datetime.fromisoformat(v.replace("Z", "+00:00") if v.endswith("Z") else v)
+    if v.tzinfo is not None:
+        # Import here to keep module-level import light
+        from zoneinfo import ZoneInfo
+
+        v = v.astimezone(ZoneInfo("America/Los_Angeles")).replace(tzinfo=None)
+    return v
 
 
-UTCDatetime = Annotated[datetime, PlainSerializer(_ensure_utc_iso, return_type=str)]
+NaivePacific = Annotated[datetime, BeforeValidator(_strip_tz)]
 
 EVENT_TYPE = Literal[
     "hr_call",
@@ -41,7 +52,7 @@ class InterviewEventCreate(BaseModel):
     event_type: EVENT_TYPE
     title: str = Field(min_length=1)
     description: str | None = None
-    scheduled_at: datetime
+    scheduled_at: NaivePacific
     duration_minutes: int | None = None
     location: str | None = None
     status: EVENT_STATUS = "upcoming"
@@ -55,7 +66,7 @@ class InterviewEventUpdate(BaseModel):
     event_type: EVENT_TYPE | None = None
     title: str | None = Field(default=None, min_length=1)
     description: str | None = None
-    scheduled_at: datetime | None = None
+    scheduled_at: NaivePacific | None = None
     duration_minutes: int | None = None
     location: str | None = None
     status: EVENT_STATUS | None = None
@@ -70,10 +81,10 @@ class InterviewEventResponse(BaseModel):
     event_type: str
     title: str
     description: str | None = None
-    scheduled_at: UTCDatetime
+    scheduled_at: datetime
     duration_minutes: int | None = None
     location: str | None = None
     status: str = "upcoming"
-    created_at: UTCDatetime | None = None
+    created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

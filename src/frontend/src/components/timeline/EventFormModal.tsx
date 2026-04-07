@@ -100,7 +100,7 @@ export default function EventFormModal({ open, onClose, event }: Props) {
       company_name: companyName,
       event_type: eventType,
       title,
-      scheduled_at: new Date(scheduledAt).toISOString(),
+      scheduled_at: scheduledAt,
       status,
     };
     if (durationMinutes) body.duration_minutes = parseInt(durationMinutes, 10);

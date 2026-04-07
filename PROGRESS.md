@@ -320,9 +320,9 @@
 - **Status**: [DONE]
 - **Request**: No task to update (ad-hoc Discord requests)
 
-## 2026-04-07 -- Fix timeline event timezone display bug
-- **What I did**: Diagnosed and fixed a timezone serialization bug in the Interview Timeline. SQLite strips timezone info from stored datetimes, so the API returned naive datetimes without a Z suffix (e.g., `2026-04-08T16:00:00`). JS `new Date()` interprets these as local time, causing a 7-hour shift (PDT UTC-7). Added `UTCDatetime` custom Pydantic serializer in `schemas/timeline.py` that ensures all datetime responses include a `Z` suffix, treating naive datetimes from SQLite as UTC.
-- **Deliverables**: `src/backend/schemas/timeline.py` (added `_ensure_utc_iso` serializer + `UTCDatetime` annotated type, applied to `InterviewEventResponse.scheduled_at` and `created_at`)
-- **Sanity check result**: 1033 tests pass, manual verification confirms naive datetime `2026-04-08T16:00:00` serializes to `2026-04-08T16:00:00Z`.
+## 2026-04-07 -- Fix timeline event timezone display bug (two-pass fix)
+- **What I did**: (Pass 1 - wrong) Initially added UTC Z-suffix serializer, which broke all correctly-stored Pacific Time events. (Pass 2 - correct) Identified the real bug: only the frontend form's `new Date(val).toISOString()` was converting to UTC on submit; all other events were stored as naive Pacific Time and displayed correctly. Fix: (1) Replaced UTCDatetime with `NaivePacific` Pydantic BeforeValidator that strips TZ and converts TZ-aware inputs to America/Los_Angeles before storage. (2) Frontend form now sends naive datetime-local value directly instead of `.toISOString()`. (3) Fixed 2 Lyra events in DB (id=11: 16:00->09:00, id=12: 20:00->13:00). Added lesson to LESSONS.md.
+- **Deliverables**: `src/backend/schemas/timeline.py` (NaivePacific validator), `src/frontend/src/components/timeline/EventFormModal.tsx` (removed .toISOString()), `data/mle_prep.db` (2 rows fixed), `LESSONS.md` (timezone lesson)
+- **Sanity check result**: 1033 tests pass, TypeScript clean, manual verification confirms: naive input preserved as-is, UTC input converted to Pacific, response has no Z suffix. DB events 11/12 now show correct Pacific times.
 - **Status**: [DONE]
 - **Request**: No task to update (ad-hoc Discord request)
