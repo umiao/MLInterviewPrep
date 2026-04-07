@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
+import StoryMapView from "../components/behavioral/StoryMapView";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -108,13 +109,13 @@ function CategoryFilter({
   onSelect: (id: string | null) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
+    <div className="flex flex-wrap gap-2.5 mb-6">
       <button
         onClick={() => onSelect(null)}
-        className={`px-3 py-1.5 rounded text-sm transition-colors ${
+        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
           selected === null
-            ? "bg-blue-600 text-white"
-            : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200"
+            ? "bg-blue-600 text-white shadow-md"
+            : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
         }`}
       >
         All
@@ -124,14 +125,14 @@ function CategoryFilter({
           key={cat.category_id}
           onClick={() => onSelect(cat.category_id)}
           title={`${categoryLabel(cat.category_id, cat.category_name)}: ${cat.covered_count}/${cat.question_count} covered`}
-          className={`px-3 py-1.5 rounded text-sm transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
             selected === cat.category_id
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200"
+              ? "bg-blue-600 text-white shadow-md"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
           }`}
         >
           {categoryLabel(cat.category_id, cat.category_name)}
-          <span className="ml-1 text-xs opacity-70">
+          <span className="ml-1.5 text-xs font-bold opacity-80">
             ({cat.covered_count}/{cat.question_count})
           </span>
         </button>
@@ -140,21 +141,28 @@ function CategoryFilter({
   );
 }
 
+const STAR_COLORS: Record<string, { label: string; border: string }> = {
+  Situation: { label: "text-blue-700", border: "border-blue-300" },
+  Task: { label: "text-amber-700", border: "border-amber-300" },
+  Action: { label: "text-emerald-700", border: "border-emerald-300" },
+  Result: { label: "text-purple-700", border: "border-purple-300" },
+};
+
 function StarSection({ label, content }: { label: string; content: string | null }) {
   if (!content) return null;
-  // Use MarkdownPreview if content contains markdown syntax, otherwise plain text
   const hasMarkdown = /[*_\-#\[\]`|]/.test(content);
+  const colors = STAR_COLORS[label] ?? { label: "text-blue-700", border: "border-blue-300" };
   return (
-    <div className="mb-2">
-      <span className="font-semibold text-blue-600 text-xs uppercase tracking-wider">
+    <div className="mb-3">
+      <span className={`font-bold ${colors.label} text-sm uppercase tracking-wider`}>
         {label}
       </span>
       {hasMarkdown ? (
-        <div className="mt-0.5 text-sm text-gray-600">
+        <div className="mt-1 text-[15px] leading-relaxed text-gray-800">
           <MarkdownPreview markdown={content} />
         </div>
       ) : (
-        <p className="text-gray-600 text-sm mt-0.5">{content}</p>
+        <p className="text-gray-800 text-[15px] leading-relaxed mt-1">{content}</p>
       )}
     </div>
   );
@@ -187,10 +195,10 @@ function ExampleCard({
     <div
       ref={cardRef}
       id={`example-${example.example_id}`}
-      className={`bg-white rounded-lg p-4 mb-3 border transition-all ${
+      className={`bg-white rounded-xl p-5 mb-4 border-2 transition-all w-full ${
         focused
-          ? "border-blue-500 shadow-md ring-2 ring-blue-200"
-          : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
+          ? "border-blue-500 shadow-lg ring-2 ring-blue-200"
+          : "border-gray-200 hover:border-blue-400 hover:shadow-md"
       }`}
       onAnimationEnd={onClearFocus}
     >
@@ -199,13 +207,13 @@ function ExampleCard({
         onClick={() => setExpanded((prev) => !prev)}
       >
         <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-gray-400">{example.example_id}</span>
-            <h4 className="text-gray-800 font-medium text-sm">{example.title}</h4>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{example.example_id}</span>
+            <h4 className="text-gray-900 font-bold text-base">{example.title}</h4>
           </div>
           {example.source_project && (
-            <p className="text-xs text-gray-400 mt-0.5">
-              Source: {example.source_project}
+            <p className="text-sm text-gray-500 mt-1 ml-1">
+              Source: <span className="font-medium text-gray-700">{example.source_project}</span>
             </p>
           )}
         </div>
@@ -213,57 +221,57 @@ function ExampleCard({
           {example.principle_tags.map((tag) => (
             <span
               key={tag}
-              className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-600 border border-blue-100"
+              className="text-sm px-3 py-1 rounded-lg bg-blue-100 text-blue-800 font-semibold border border-blue-200"
               title={categoryLabel(tag)}
             >
               {categoryLabel(tag)}
             </span>
           ))}
-          <span className="text-gray-400 text-sm ml-2">
+          <span className="text-gray-500 text-base font-bold ml-3">
             {expanded ? "[-]" : "[+]"}
           </span>
         </div>
       </div>
 
       {expanded && (
-        <div className="mt-3 pl-3 border-l-2 border-blue-200">
+        <div className="mt-4 pl-4 border-l-3 border-blue-400" style={{ borderLeftWidth: '3px' }}>
           <StarSection label="Situation" content={example.situation} />
           <StarSection label="Task" content={example.task} />
           <StarSection label="Action" content={example.action} />
           <StarSection label="Result" content={example.result} />
 
           {example.risk_statement && (
-            <div className="mb-2">
-              <span className="font-semibold text-red-600 text-xs uppercase tracking-wider">
+            <div className="mb-3 bg-red-50 rounded-lg p-3 border border-red-200">
+              <span className="font-bold text-red-700 text-sm uppercase tracking-wider">
                 Risk if not addressed
               </span>
-              <div className="text-gray-600 text-sm mt-0.5">
+              <div className="text-red-900 text-[15px] mt-1 leading-relaxed">
                 <MarkdownPreview markdown={example.risk_statement} />
               </div>
             </div>
           )}
 
           {example.analogy && (
-            <div className="mb-2">
-              <span className="font-semibold text-purple-600 text-xs uppercase tracking-wider">
+            <div className="mb-3 bg-purple-50 rounded-lg p-3 border border-purple-200">
+              <span className="font-bold text-purple-700 text-sm uppercase tracking-wider">
                 Simple Analogy
               </span>
-              <div className="text-gray-600 text-sm mt-0.5 italic">
+              <div className="text-purple-900 text-[15px] mt-1 italic leading-relaxed">
                 <MarkdownPreview markdown={example.analogy} />
               </div>
             </div>
           )}
 
           {Object.keys(example.tech_terms).length > 0 && (
-            <div className="mb-2">
-              <span className="font-semibold text-teal-700 text-xs uppercase tracking-wider">
+            <div className="mb-3 bg-teal-50 rounded-lg p-3 border border-teal-200">
+              <span className="font-bold text-teal-800 text-sm uppercase tracking-wider">
                 Technical Terms
               </span>
-              <dl className="mt-1 space-y-0.5">
+              <dl className="mt-2 space-y-1">
                 {Object.entries(example.tech_terms).map(([term, def_]) => (
-                  <div key={term} className="text-sm">
-                    <dt className="inline font-medium text-teal-800">{term}</dt>
-                    <dd className="inline text-gray-600"> -- {def_}</dd>
+                  <div key={term} className="text-[15px]">
+                    <dt className="inline font-bold text-teal-900">{term}</dt>
+                    <dd className="inline text-gray-800"> -- {def_}</dd>
                   </div>
                 ))}
               </dl>
@@ -271,14 +279,15 @@ function ExampleCard({
           )}
 
           {example.evidence_quotes.length > 0 && (
-            <div className="mt-3">
-              <span className="font-semibold text-yellow-700 text-xs uppercase tracking-wider">
+            <div className="mt-4">
+              <span className="font-bold text-amber-800 text-sm uppercase tracking-wider">
                 Evidence
               </span>
               {example.evidence_quotes.map((q, i) => (
                 <blockquote
                   key={i}
-                  className="text-gray-500 text-xs italic border-l-2 border-yellow-400 pl-2 mt-1"
+                  className="text-gray-700 text-sm italic border-l-3 border-amber-400 pl-3 mt-2 leading-relaxed"
+                  style={{ borderLeftWidth: '3px' }}
                 >
                   {q}
                 </blockquote>
@@ -287,23 +296,23 @@ function ExampleCard({
           )}
 
           {example.linked_questions.length > 0 && (
-            <div className="mt-3">
-              <span className="font-semibold text-green-700 text-xs uppercase tracking-wider">
+            <div className="mt-4">
+              <span className="font-bold text-green-800 text-sm uppercase tracking-wider">
                 Cross-references ({example.linked_questions.length} questions)
               </span>
               {example.linked_questions.map((lq) => (
                 <div
                   key={lq.id}
-                  className="mt-1.5 bg-gray-50 rounded p-2 border border-gray-200"
+                  className="mt-2 bg-green-50 rounded-lg p-3 border border-green-200"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-gray-400">
+                    <span className="text-sm font-mono font-bold text-green-600">
                       {lq.question_id}
                     </span>
-                    <span className="text-xs text-gray-700">{lq.text}</span>
+                    <span className="text-sm text-gray-900 font-medium">{lq.text}</span>
                   </div>
                   {lq.relevance_note && (
-                    <blockquote className="text-xs text-green-600 mt-1 border-l-2 border-green-300 pl-2">
+                    <blockquote className="text-sm text-green-700 mt-1.5 border-l-3 border-green-400 pl-3 leading-relaxed" style={{ borderLeftWidth: '3px' }}>
                       {lq.relevance_note}
                     </blockquote>
                   )}
@@ -335,46 +344,46 @@ function QuestionRow({
   );
 
   return (
-    <div className="border-b border-gray-200 py-2">
+    <div className="border-b border-gray-200 py-3">
       <div
-        className="flex items-center justify-between cursor-pointer hover:bg-gray-50 px-3 py-1.5 rounded select-none"
+        className="flex items-center justify-between cursor-pointer hover:bg-blue-50 px-4 py-2.5 rounded-lg select-none transition-colors"
         onClick={onToggle}
       >
-        <div className="flex items-center gap-2 flex-1">
-          <span className="text-xs font-mono text-gray-400 w-14 shrink-0">
+        <div className="flex items-center gap-3 flex-1">
+          <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded w-16 shrink-0 text-center">
             {question.question_id}
           </span>
-          <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 shrink-0" title={categoryLabel(question.category_id, question.category_name)}>
+          <span className="text-sm px-2.5 py-1 rounded-lg bg-gray-200 text-gray-700 font-semibold shrink-0" title={categoryLabel(question.category_id, question.category_name)}>
             {categoryLabel(question.category_id, question.category_name)}
           </span>
-          <span className="text-sm text-gray-800">{question.text}</span>
+          <span className="text-[15px] text-gray-900 font-medium">{question.text}</span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           {question.example_count > 0 ? (
-            <span className="text-xs px-2 py-0.5 rounded bg-green-50 text-green-700 border border-green-200">
+            <span className="text-sm px-3 py-1 rounded-lg bg-green-100 text-green-800 font-bold border border-green-300">
               {question.example_count} example{question.example_count > 1 ? "s" : ""}
             </span>
           ) : (
-            <span className="text-xs px-2 py-0.5 rounded bg-red-50 text-red-600 border border-red-200">
+            <span className="text-sm px-3 py-1 rounded-lg bg-red-100 text-red-700 font-bold border border-red-300">
               no example
             </span>
           )}
-          <span className="text-gray-400 text-xs">
+          <span className="text-gray-500 text-sm font-bold">
             {expanded ? "[-]" : "[+]"}
           </span>
         </div>
       </div>
 
       {expanded && linkedExamples.length > 0 && (
-        <div className="ml-16 mt-2 mb-2">
+        <div className="ml-20 mt-3 mb-3">
           {linkedExamples.map((ex) => {
             const link = ex.linked_questions.find(
               (lq) => lq.question_id === question.question_id
             );
             return (
-              <div key={ex.id} className="bg-white rounded p-3 mb-2 border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-mono text-gray-400">
+              <div key={ex.id} className="bg-blue-50 rounded-lg p-4 mb-2.5 border border-blue-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-sm font-mono font-bold text-blue-500">
                     {ex.example_id}
                   </span>
                   <button
@@ -382,20 +391,20 @@ function QuestionRow({
                       e.stopPropagation();
                       onExampleClick(ex.example_id);
                     }}
-                    className="text-sm text-blue-600 font-medium hover:text-blue-800 hover:underline text-left"
+                    className="text-[15px] text-blue-700 font-bold hover:text-blue-900 hover:underline text-left"
                     title="View full STAR example"
                   >
                     {ex.title}
                   </button>
                 </div>
                 {link?.relevance_note && (
-                  <blockquote className="text-xs text-green-600 border-l-2 border-green-300 pl-2 mb-2">
+                  <blockquote className="text-sm text-green-700 border-l-3 border-green-400 pl-3 mb-2 leading-relaxed" style={{ borderLeftWidth: '3px' }}>
                     {link.relevance_note}
                   </blockquote>
                 )}
                 {ex.situation && (
-                  <p className="text-xs text-gray-500">
-                    <span className="text-blue-600 font-semibold">S:</span>{" "}
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    <span className="text-blue-700 font-bold">S:</span>{" "}
                     {ex.situation.slice(0, 200)}
                     {ex.situation.length > 200 ? "..." : ""}
                   </p>
@@ -407,7 +416,7 @@ function QuestionRow({
       )}
 
       {expanded && linkedExamples.length === 0 && (
-        <div className="ml-16 mt-2 mb-2 text-xs text-gray-400 italic">
+        <div className="ml-20 mt-3 mb-3 text-sm text-gray-500 italic">
           No examples linked to this question yet.
         </div>
       )}
@@ -448,15 +457,15 @@ function CoverageHeatmap({
   }
 
   return (
-    <div className="overflow-x-auto bg-white rounded-lg border border-gray-200 p-4">
-      <table className="text-sm w-full">
+    <div className="overflow-x-auto bg-white rounded-xl border-2 border-gray-200 p-5 shadow-sm">
+      <table className="text-base w-full">
         <thead>
           <tr>
-            <th className="text-left text-gray-500 font-medium p-2 min-w-[250px]">Example</th>
+            <th className="text-left text-gray-700 font-bold p-3 min-w-[280px]">Example</th>
             {categories.map((cat) => (
               <th
                 key={cat.category_id}
-                className={`text-center text-gray-500 font-medium p-2 min-w-[90px]${onCategoryClick ? " cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors" : ""}`}
+                className={`text-center text-gray-700 font-bold p-3 min-w-[100px]${onCategoryClick ? " cursor-pointer hover:text-blue-700 hover:bg-blue-50 transition-colors" : ""}`}
                 title={`${categoryLabel(cat.category_id, cat.category_name)}: ${cat.covered_count}/${cat.question_count}`}
                 onClick={() => onCategoryClick?.(cat.category_id)}
               >
@@ -467,21 +476,21 @@ function CoverageHeatmap({
         </thead>
         <tbody>
           {exampleIds.map((exId) => (
-            <tr key={exId} className="border-t border-gray-100">
+            <tr key={exId} className="border-t border-gray-200">
               <td
-                className={`text-gray-700 p-2 max-w-[250px]${onExampleClick ? " cursor-pointer hover:bg-blue-50 transition-colors" : ""}`}
+                className={`text-gray-800 p-3 max-w-[280px]${onExampleClick ? " cursor-pointer hover:bg-blue-50 transition-colors" : ""}`}
                 title={exampleTitles.get(exId)}
                 onClick={() => onExampleClick?.(exId)}
               >
-                <span className="font-mono text-gray-400 text-xs mr-1">{exId}</span>
-                <span className="text-sm">{(exampleTitles.get(exId) ?? "").slice(0, 40)}</span>
+                <span className="font-mono text-blue-500 font-bold text-sm mr-2">{exId}</span>
+                <span className="text-[15px] font-medium">{(exampleTitles.get(exId) ?? "").slice(0, 45)}</span>
               </td>
               {categories.map((cat) => {
                 const count = matrix.get(exId)?.get(cat.category_id) ?? 0;
                 return (
                   <td
                     key={cat.category_id}
-                    className={`text-center p-2 font-medium ${cellColor(count)} rounded${count > 0 && onExampleClick ? " cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all" : ""}`}
+                    className={`text-center p-3 font-bold text-base ${cellColor(count)} rounded-lg${count > 0 && onExampleClick ? " cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all" : ""}`}
                     title={`${exampleTitles.get(exId)} x ${categoryLabel(cat.category_id, cat.category_name)}: ${count}`}
                     onClick={count > 0 ? () => onExampleClick?.(exId) : undefined}
                   >
@@ -501,7 +510,7 @@ function CoverageHeatmap({
 /* Main Page                                                           */
 /* ------------------------------------------------------------------ */
 
-type ViewMode = "questions" | "examples" | "coverage";
+type ViewMode = "questions" | "examples" | "coverage" | "story-map";
 
 export default function BehavioralQuestions() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -565,60 +574,81 @@ export default function BehavioralQuestions() {
   const isLoading = loadingQ || loadingEx;
 
   return (
-    <div className="p-6 max-w-7xl">
+    <div className="p-6 w-full max-w-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Behavioral Questions</h1>
+          <h1 className="text-3xl font-extrabold text-gray-900">Behavioral Questions</h1>
           {gaps && (
-            <p className="text-sm text-gray-500 mt-1">
-              {gaps.total_questions} questions, {gaps.coverage_pct}% covered
+            <p className="text-base text-gray-600 mt-2">
+              <span className="font-bold text-gray-900">{gaps.total_questions}</span> questions,{" "}
+              <span className={`font-bold ${gaps.coverage_pct >= 70 ? "text-green-700" : gaps.coverage_pct >= 40 ? "text-amber-700" : "text-red-700"}`}>
+                {gaps.coverage_pct}%
+              </span> covered
               ({gaps.total_questions - gaps.uncovered_count} with examples)
             </p>
           )}
         </div>
         <div className="flex gap-2">
-          {(["questions", "examples", "coverage"] as ViewMode[]).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setViewMode(mode)}
-              className={`px-3 py-1.5 rounded text-sm capitalize transition-colors ${
-                viewMode === mode
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200"
-              }`}
-            >
-              {mode}
-            </button>
-          ))}
+          {(["questions", "examples", "coverage", "story-map"] as ViewMode[]).map((mode) => {
+            const label = mode === "story-map" ? "Story Map" : mode;
+            return (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
+                  viewMode === mode
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Category filter */}
-      <CategoryFilter
-        categories={categories}
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
-
-      {/* Search */}
-      {viewMode !== "coverage" && (
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search questions or examples..."
-          className="w-full mb-4 px-3 py-2 rounded bg-white border border-gray-200 text-gray-800 text-sm placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+      {viewMode !== "story-map" && (
+        <CategoryFilter
+          categories={categories}
+          selected={selectedCategory}
+          onSelect={setSelectedCategory}
         />
       )}
 
-      {isLoading && <p className="text-gray-400">Loading...</p>}
+      {/* Search */}
+      {viewMode !== "coverage" && viewMode !== "story-map" && (
+        <div className="relative mb-6">
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+            &#128269;
+          </span>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search questions or examples..."
+            className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border-2 border-gray-300 text-gray-900 text-base font-medium placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 shadow-sm transition-all"
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-lg font-bold"
+            >
+              x
+            </button>
+          )}
+        </div>
+      )}
+
+      {isLoading && <p className="text-gray-500 text-base font-medium">Loading...</p>}
 
       {/* Questions View */}
       {viewMode === "questions" && !isLoading && (
-        <div className="bg-white rounded-lg border border-gray-200">
+        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm">
           {questions.length === 0 ? (
-            <p className="text-gray-400 text-sm p-4">No questions found.</p>
+            <p className="text-gray-500 text-base p-6">No questions found.</p>
           ) : (
             questions.map((q) => (
               <QuestionRow
@@ -664,10 +694,10 @@ export default function BehavioralQuestions() {
       {/* Coverage Matrix View */}
       {viewMode === "coverage" && (
         <div>
-          <h2 className="text-lg font-semibold text-gray-800 mb-3">
+          <h2 className="text-xl font-bold text-gray-900 mb-3">
             Example-Principle Coverage Matrix
           </h2>
-          <p className="text-xs text-gray-500 mb-4">
+          <p className="text-sm text-gray-600 mb-5">
             Each cell shows how many questions in that category an example covers.
             Darker green = more coverage.
           </p>
@@ -686,6 +716,9 @@ export default function BehavioralQuestions() {
           )}
         </div>
       )}
+
+      {/* Story Map View */}
+      {viewMode === "story-map" && <StoryMapView onExampleClick={handleExampleClick} />}
     </div>
   );
 }

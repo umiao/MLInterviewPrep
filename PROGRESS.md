@@ -326,3 +326,17 @@
 - **Sanity check result**: 1033 tests pass, TypeScript clean, manual verification confirms: naive input preserved as-is, UTC input converted to Pacific, response has no Z suffix. DB events 11/12 now show correct Pacific times.
 - **Status**: [DONE]
 - **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-07 -- Plan StoryMap UI improvements (T-P1-269, T-P1-270)
+- **What I did**: Task planning mode. Created 2 tasks for Story Map behavioral section: (1) T-P1-269 -- fix expanded card losing background color (approved direction: always white bg + colored border for contrast). (2) T-P1-270 -- add hover link on card title to navigate to full STAR example (using existing handleExampleClick mechanism, splitting click targets). Launched autonomous_run.sh for execution.
+- **Deliverables**: T-P1-269 and T-P1-270 created in task_db with detailed ACs and implementation plans
+- **Sanity check result**: Tasks verified in TASKS.md, autonomous_run.sh launched (2 sessions)
+- **Status**: [DONE] (planning complete, execution delegated to autonomous_run.sh)
+- **Request**: No status change needed (tasks managed by autonomous executor)
+
+## 2026-04-07 -- [T-P1-269, T-P1-270] StoryMap card UX improvements
+- **What I did**: (1) T-P1-269: Changed ArcExampleCard to always use white background instead of switching to arc color on expand. Added border-2 + shadow-md on expand for visual depth. Cards now clearly contrast against the colored arc section background in both states. (2) T-P1-270: Added `onExampleClick` callback prop through StoryMapView -> ArcSection -> ArcExampleCard. Card title is now a clickable link (with hover underline + arrow icon) that navigates to the full STAR example in Examples view. Card body still expands/collapses on click. Added "View full example" link in expanded content area too. Wired up via existing `handleExampleClick` in BehavioralQuestions.tsx.
+- **Deliverables**: `StoryMapView.tsx` (card styling + link navigation), `BehavioralQuestions.tsx` (pass onExampleClick prop)
+- **Sanity check result**: TypeScript clean, 1033 tests pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-269 --status completed` and `task_db.py update T-P1-270 --status completed`
