@@ -236,3 +236,93 @@
 - **Sanity check result**: TypeScript compiles cleanly (`npx tsc --noEmit` passes). All three new files created with correct imports from types/baking. ScalingCalculator uses SIZE_RATIOS matching backend (4inch: 0.44, 6inch: 1.0, 8inch: 1.78).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-160 --status completed`
+
+## 2026-04-04 -- Behavioral page UI polish (font, contrast, full-width)
+- **What I did**: Overhauled BehavioralQuestions.tsx for better readability on white background. Increased font sizes across all views (title 2xl->3xl, body text sm->15px, IDs xs->sm). Removed max-w-7xl constraint for full-width layout. Added color-coded STAR section labels (S=blue, T=amber, A=emerald, R=purple). Wrapped risk/analogy/tech-terms in colored background boxes. Redesigned search bar with icon, clear button, rounded-xl, shadow. Increased button padding and badge sizes. Changed text colors from gray-400/500/600 to gray-700/800/900 for better contrast. Coverage % now color-coded (green/amber/red).
+- **Deliverables**: `pages/BehavioralQuestions.tsx` (updated)
+- **Sanity check result**: TypeScript clean. Playwright screenshots verified all 4 views: Questions (larger rows, bold badges), Examples (full-width cards, expanded STAR with colored sections), Coverage (bigger table, bold headers), Search (prominent bar with icon). All rendering correctly.
+- **Status**: [DONE]
+
+## 2026-04-04 -- BLOG-03 behavioral example expansion
+- **What I did**: Replaced generic BLOG-03 STAR content with user's detailed story about cross-org boundary defense with ads team. Updated title to "Cross-Org Boundary Defense via LLM Relevance Pipeline". Added risk_statement, analogy, tech_terms fields. Expanded cross-references from 3 to 10 linked questions (COL-3, COL-5, COL-9, COM-2, INN-4, INN-9, PS-2, IMP-4, EXE-1, OWN-11). Updated principle_tags to 7 tags including influence_without_authority, earn_trust, customer_obsession.
+- **Deliverables**: DB (mle_prep.db BLOG-03 row + 7 new links), bq_behavioral_examples.json, bq_clustered_questions.json, bq_improved_stories.md
+- **Sanity check result**: JSON validated, 1033 tests pass, DB verified with 10 cross-references.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-05 -- BLOG-04 behavioral example expansion
+- **What I did**: Replaced generic BLOG-04 (prediction market meetings) with user's detailed story about goal tracking reform -- diagnosing rename/rollover pattern, manager pushback, reframing goal-setting philosophy, securing Senior Director support. Updated title to "Goal Tracking Reform: Honest Metrics Over Cosmetic Delivery". Added risk_statement, analogy (hospital reclassifying patients), tech_terms. Expanded cross-references from 2 to 11 linked questions. Updated principle_tags to 9 tags.
+- **Deliverables**: DB (mle_prep.db BLOG-04 row + 9 new links), bq_behavioral_examples.json, bq_clustered_questions.json, bq_improved_stories.md
+- **Sanity check result**: JSON validated, 1033 tests pass, DB verified with 11 cross-references.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-05 -- Dashboard timeline fix + Google recruiter call
+- **What I did**: (1) Fixed InterviewTimeline.tsx past events being hard-capped at 5 -- added "Show all N past events" toggle so DoorDash and earlier events are accessible. (2) Updated 5 past events (Adobe x2, Uber BPS, Uber Nikat, LinkedIn Priya) from status "upcoming" to "completed". (3) Added Google Recruiter Call event on 2026-04-08 12:30PM (hr_call, 30min, linked to existing Google company).
+- **Deliverables**: InterviewTimeline.tsx (show-all toggle), mle_prep.db (5 status updates + 1 new event)
+- **Sanity check result**: TypeScript clean, 1033 tests pass, DB verified with 10 events (8 completed, 2 upcoming).
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-05 -- EX-01 behavioral example polish
+- **What I did**: Updated EX-01 with user's polished story. Cleaner framing ("silently failing half its users"), sharper root cause separation, added SIGIR publication mention, updated memory anchor quotes. Expanded cross-references from 11 to 16 (added PS-11, INN-8, INN-4, IMP-10, EXE-5). Updated principle_tags to 8 tags. Refreshed all relevance notes to match new story tone.
+- **Deliverables**: DB (mle_prep.db EX-01 row + 5 new links + updated notes), bq_behavioral_examples.json, bq_improved_stories.md
+- **Sanity check result**: JSON validated, 1033 tests pass, DB verified with 16 cross-references.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-05 -- EX-05 behavioral example expansion
+- **What I did**: Updated EX-05 with user's improved story featuring three-beat narrative structure (tried three paths, key insight about traffic distribution, silent failures in CI). Added detailed silent failure discovery (URL length 16K+, JSON field truncation). Updated analogy (sports car -> bicycle/truck -> toll gate). Expanded cross-references from 5 to 13 (added PS-1, PS-4, INN-5, INN-15, ADP-14, ADP-6, OWN-11, EXE-5). Updated principle_tags to 7.
+- **Deliverables**: DB (mle_prep.db EX-05 row + 8 new links), bq_behavioral_examples.json, bq_improved_stories.md
+- **Sanity check result**: JSON validated, 1033 tests pass, DB verified with 13 cross-references.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-05 -- Story Map page task planning (T-P1-267)
+- **What I did**: Analyzed all 29 behavioral examples grouped by source_project (25 distinct projects). Designed 6 major project arcs: (1) Search Diversity & Ranking Innovation (7 stories), (2) Relevance & Ad Quality (3), (3) LLM & New Technology (4), (4) Leadership & People (5), (5) Operations & Process (4), (6) Cross-Functional Impact (6). Created task T-P1-267 with 3-step implementation plan (data layer, frontend tab, Chinese narratives). Sent proposal to user via Discord for review.
+- **Deliverables**: Task T-P1-267 in tasks.db, TASKS.md regenerated, design proposal sent via Discord
+- **Sanity check result**: Task created successfully, arc groupings cover all 29 examples.
+- **Status**: [DONE] (planning only -- awaiting user review before implementation)
+- **Request**: No status change needed (task is in pending state awaiting review)
+
+## 2026-04-05 -- [T-P1-267] Story Map page implementation
+- **What I did**: Implemented Story Map (故事脉络) page as a new tab in BehavioralQuestions. Created bq_story_arcs.json with 6 project arcs, full Chinese narratives (前因后果), principle mappings per story, improvement suggestions per arc, and cross-arc connections. Added GET /api/behavioral/story-arcs endpoint that enriches static arc data with live DB metadata (title, link_count, tags). Built StoryMapView.tsx with: timeline visualization per arc, expandable story cards with principle badges, collapsible Chinese narrative sections, improvement notes, cross-arc connections panel, and principle legend.
+- **Deliverables**: docs/bq_story_arcs.json, src/backend/routers/behavioral.py (story-arcs endpoint), src/frontend/src/components/behavioral/StoryMapView.tsx, BehavioralQuestions.tsx (story-map tab)
+- **Sanity check result**: TypeScript clean, 1033 tests pass, all 29 examples verified present in DB and mapped to arcs.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-267 --status completed`
+
+## 2026-04-05 -- Story Map markdown rendering fix
+- **What I did**: Fixed narrative rendering in StoryMapView -- replaced plain paragraph text with MarkdownPreview component so **bold** markers render correctly.
+- **Deliverables**: StoryMapView.tsx (MarkdownPreview for narrative_zh)
+- **Sanity check result**: TypeScript clean.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc fix)
+
+## 2026-04-07 -- Lyra mental health + Uber onsite prep events
+- **What I did**: Created Lyra as a new company (id=25, mental health provider, not a job target). Added 3 events: (1) Apr 8 9:00AM Lyra follow-up with therapist Jacqueline, (2) Apr 13 1:00PM Lyra MD video session with Mary Miller for FMLA, (3) Apr 16 12:00PM Uber onsite prep meeting with recruiter. Both Lyra events include intake form reminders in description.
+- **Deliverables**: mle_prep.db (1 new company + 3 new events)
+- **Sanity check result**: DB verified with 5 upcoming events in correct chronological order.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+## 2026-04-07 -- [T-P0-268] Uber VO prep page
+- **What I did**: Created comprehensive Uber Virtual Onsite prep content. (1) Updated Uber company status to "onsite" with 4-round interview_stages JSON. (2) Created "Uber VO 完整准备指南" document (doc id=37) with 8 sections: VO概览, 通用面试技巧, Round 1-4 detailed prep, 重要链接汇总, 总体Checklist. All in Chinese with English terms preserved. Includes checklists for each round, BQ story recommendations mapped to Uber's 3 behavioral dimensions, system design framework (STEP 1-2-3-4), and resource links. (3) Appended VO Prep Checklist to main prep_notes.
+- **Deliverables**: mle_prep.db (Uber status/stages update, doc 37, prep_notes update). Uber now has 10 documents total.
+- **Sanity check result**: 1033 tests pass, DB verified with 10 Uber documents and onsite status.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-268 --status completed`
+
+## 2026-04-07 -- Pinterest and Poshmark event additions
+- **What I did**: Added two new companies and interview events via Discord requests. (1) Created Pinterest (id=29) with Phone Call with David on Apr 8 1:30PM (hr_call). (2) Created Poshmark (id=30) with Intro Call on Apr 9 11:00AM (hr_call). Dashboard now shows 7 upcoming events.
+- **Deliverables**: mle_prep.db (2 new companies + 2 new events)
+- **Sanity check result**: DB verified, both events confirmed in upcoming timeline.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord requests)
+
+## 2026-04-07 -- Fix timeline event timezone display bug
+- **What I did**: Diagnosed and fixed a timezone serialization bug in the Interview Timeline. SQLite strips timezone info from stored datetimes, so the API returned naive datetimes without a Z suffix (e.g., `2026-04-08T16:00:00`). JS `new Date()` interprets these as local time, causing a 7-hour shift (PDT UTC-7). Added `UTCDatetime` custom Pydantic serializer in `schemas/timeline.py` that ensures all datetime responses include a `Z` suffix, treating naive datetimes from SQLite as UTC.
+- **Deliverables**: `src/backend/schemas/timeline.py` (added `_ensure_utc_iso` serializer + `UTCDatetime` annotated type, applied to `InterviewEventResponse.scheduled_at` and `created_at`)
+- **Sanity check result**: 1033 tests pass, manual verification confirms naive datetime `2026-04-08T16:00:00` serializes to `2026-04-08T16:00:00Z`.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)

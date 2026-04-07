@@ -1,8 +1,22 @@
 """Pydantic schemas for InterviewEvent."""
-from datetime import datetime
-from typing import Literal
+from datetime import UTC, datetime
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+from pydantic.functional_serializers import PlainSerializer
+
+
+def _ensure_utc_iso(v: datetime) -> str:
+    """Serialize datetime as UTC ISO-8601 with Z suffix.
+
+    SQLite strips timezone info, so naive datetimes from the DB are assumed UTC.
+    """
+    if v.tzinfo is None:
+        v = v.replace(tzinfo=UTC)
+    return v.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+UTCDatetime = Annotated[datetime, PlainSerializer(_ensure_utc_iso, return_type=str)]
 
 EVENT_TYPE = Literal[
     "hr_call",
@@ -56,10 +70,10 @@ class InterviewEventResponse(BaseModel):
     event_type: str
     title: str
     description: str | None = None
-    scheduled_at: datetime
+    scheduled_at: UTCDatetime
     duration_minutes: int | None = None
     location: str | None = None
     status: str = "upcoming"
-    created_at: datetime | None = None
+    created_at: UTCDatetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
