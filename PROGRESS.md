@@ -330,3 +330,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 24,586 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-305 --status completed`
+
+## 2026-04-08 -- [T-P0-306] SD Prep: Design Facebook Live Comments
+- **What I did**: Created seed script `scripts/content_interview_live_comments.py` with all 8 sections in Chinese with English technical terms preserved. Covers Fan-out Tree architecture (3-level: Root -> Regional Relays -> Edge Nodes -> Clients) for distributing comments to 10M concurrent viewers, SSE over WebSocket for lightweight single-direction push, comment sampling (Reservoir Sampling variant, ~30 comments/s per viewer from 100K/s input), two-level pre-moderation (keyword Bloom Filter <1ms + ML batch GPU inference ~10ms), reaction aggregation (Redis INCRBY + 500ms window push), 500ms comment batching (reduces network from 100K/s to 2 pushes/s per client), at-most-once delivery (unlike Chat System), Cassandra async persistence (stream_id + time_bucket partitioning), capacity estimation (100M concurrent, 500K comments/s, 5000 Edge Nodes, 200 GB/s outbound, ~470K USD/mo -- 85% cheaper than Chat System). Created SystemDesign DB record with slug `interview-live-comments`, display_order=108. Added topic card with slug in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_live_comments.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 23,909 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-306 --status completed`

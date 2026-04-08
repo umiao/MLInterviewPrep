@@ -98,6 +98,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     tags: ["Distributed Systems", "Queue", "Dedup"],
   },
   {
+    title: "Design Facebook Live Comments",
+    slug: "interview-live-comments",
+    description:
+      "Real-time comment streaming for live video: Fan-out Tree for millions of concurrent viewers, comment sampling, SSE/WebSocket, pre-moderation pipeline, reaction aggregation.",
+    difficulty: "Hard",
+    tags: ["Fan-out", "SSE", "Real-time", "Moderation"],
+  },
+  {
     title: "Design a Search Autocomplete",
     description:
       "Typeahead suggestion: trie data structure, top-K frequent queries, real-time updates. Focus on latency requirements and data freshness.",
