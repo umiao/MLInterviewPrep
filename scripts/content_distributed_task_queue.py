@@ -5,6 +5,8 @@ Usage:
 
 Covers failure modes, idempotency, exactly-once semantics, broker comparison.
 Idempotent: overwrites existing content for the distributed-task-queue slug.
+
+Source of truth: Chinese content. All sections in Chinese with English terms.
 """
 import sys
 from pathlib import Path
@@ -20,67 +22,50 @@ from src.backend.models.system_design import SystemDesign  # noqa: E402
 # Section 1: Overview & Motivation
 # ---------------------------------------------------------------------------
 
-OVERVIEW = r"""## Overview & Motivation
+OVERVIEW = r"""## 概述与动机 (Overview & Motivation)
 
-### What Is a Distributed Task Queue?
+### 什么是分布式任务队列？ (What Is a Distributed Task Queue?)
 
-A distributed task queue decouples **work submission** from **work execution**.
-The core contract has four actors:
+分布式任务队列将**工作提交**与**工作执行**解耦。
+其核心契约包含四个角色：
 
-| Actor | Role |
-|-------|------|
-| **Producer** | Submits a task (API server, scheduler, webhook handler) |
-| **Broker** | Durably stores pending tasks in a queue (Redis, RabbitMQ, SQS, Kafka) |
-| **Worker** | Dequeues, executes, and acknowledges completion |
-| **Result Backend** | Stores execution results (DB, Redis, S3) |
+| 角色 | 职责 |
+|------|------|
+| **Producer** (生产者) | 提交任务（API 服务器、调度器、Webhook 处理器） |
+| **Broker** (消息代理) | 持久化存储待处理任务的队列（Redis、RabbitMQ、SQS、Kafka） |
+| **Worker** (工作进程) | 出队、执行并确认任务完成 |
+| **Result Backend** (结果后端) | 存储执行结果（数据库、Redis、S3） |
 
-### Why "Fire and Forget" Breaks in Production
+### 为什么"发送即忘"在生产环境中会失败？ (Why "Fire and Forget" Breaks in Production)
 
-The naive approach -- enqueue and assume completion -- fails because:
+天真的方案——入队并假设任务完成——会失败，原因如下：
 
-1. **Workers crash.** OOM kills, hardware failures, and SIGKILL leave tasks
-   half-executed with no cleanup opportunity.
-2. **Networks partition.** An acknowledgment can be lost even though the task
-   completed successfully, causing the broker to redeliver.
-3. **Brokers restart.** In-memory queues (Redis RDB) lose unacknowledged tasks
-   between snapshots.
-4. **Tasks poison the queue.** A permanently failing task retries forever,
-   consuming worker capacity and starving healthy tasks.
-5. **Deployments introduce version skew.** Rolling deploys mean old-version
-   and new-version workers coexist, creating serialization mismatches.
+1. **Worker 崩溃。** **OOM (Out of Memory)** kill、硬件故障和 SIGKILL 会使任务处于半执行状态，没有清理机会。
+2. **网络分区。** 即使任务成功完成，确认消息也可能丢失，导致 Broker 重新投递。
+3. **Broker 重启。** 内存队列（Redis RDB）在快照间隔内会丢失未确认的任务。
+4. **任务毒害队列。** 永久失败的任务会无限重试，消耗 Worker 容量，饿死健康任务。
+5. **部署引入版本偏差。** 滚动部署意味着旧版本和新版本的 Worker 共存，产生序列化不匹配。
 
-### Why This Module Matters for Interviews
+### 这个模块为什么对面试重要？ (Why This Module Matters for Interviews)
 
-Distributed task queues appear in nearly every system design interview that
-involves asynchronous processing: email delivery, payment processing, image
-resizing, ML inference pipelines, notification fanout. The interviewer is not
-testing whether you know Celery's API -- they want to hear you **reason about
-failure modes** and **articulate recovery strategies**.
+分布式任务队列几乎出现在每个涉及异步处理的系统设计面试中：邮件投递、支付处理、图片缩放、ML 推理管道、通知扇出。面试官测试的不是你是否了解 Celery 的 API——他们想听你**推理故障模式**并**清晰表述恢复策略**。
 
-The key insight: **reliability is not a feature of the broker -- it is an
-emergent property of how the producer, broker, worker, and consumer interact
-under failure conditions.** A "reliable" broker (RabbitMQ with durable queues)
-still produces duplicates if the ack is lost. An "unreliable" broker (Redis
-with RDB) can be made safe if the consumer is idempotent and the system
-tolerates reprocessing.
+关键洞察：**可靠性不是 Broker 的功能——它是 Producer、Broker、Worker 和 Consumer 在故障条件下交互方式的涌现属性。** 一个"可靠的" Broker（带有持久队列的 RabbitMQ）在 ack 丢失时仍然会产生重复。一个"不可靠的" Broker（带 RDB 的 Redis）如果消费者是幂等的且系统容忍重新处理，也可以做到安全。
 
-### The Central Question
+### 核心问题 (The Central Question)
 
-> "How do you ensure each task is executed **exactly once** in a distributed
-> system where any component can fail at any time?"
+> "在任何组件随时都可能失败的分布式系统中，如何确保每个任务**恰好执行一次**？"
 
-The answer: you don't. You achieve **at-least-once delivery** with
-**idempotent consumers**, which produces **effectively-once processing**.
-This module walks through every failure scenario that motivates this design.
-"""
+答案是：你做不到。你实现的是**至少一次投递 (at-least-once delivery)**，配合**幂等消费者 (idempotent consumers)**，从而达成**有效一次处理 (effectively-once processing)**。
+本模块将逐一讲解驱动这一设计的每个故障场景。"""
 
 # ---------------------------------------------------------------------------
 # Section 2: Architecture Deep Dive
 # ---------------------------------------------------------------------------
 
-ARCHITECTURE = r"""## Architecture Deep Dive
+ARCHITECTURE = r"""## 架构深入分析 (Architecture Deep Dive)
 
-### Core Components
+### 核心组件 (Core Components)
 
 ```
 Producer ──enqueue──> Broker ──dequeue──> Worker Pool
@@ -92,99 +77,75 @@ Producer ──enqueue──> Broker ──dequeue──> Worker Pool
                    Result Backend <── result stored
 ```
 
-### Broker Options
+### Broker 选型 (Broker Options)
 
-#### Redis (Celery Default)
+#### Redis（Celery 默认）
 
-**Persistence modes:**
-- **RDB (snapshotting):** Periodic dumps to disk. Tasks enqueued between
-  snapshots are lost on crash. Default: dump every 60s if 1000+ keys changed.
-- **AOF (append-only file):** Logs every write. `fsync` policy determines
-  durability:
-  - `always`: fsync after every write (safest, slowest)
-  - `everysec`: fsync once per second (1s data loss window)
-  - `no`: OS decides (fast, up to 30s data loss)
-- **No native acknowledgment.** Celery implements ack via `BRPOPLPUSH` into
-  an "unacked" list. If the worker dies, the task stays in the unacked list
-  and must be reclaimed (visibility timeout pattern).
+**持久化模式：**
+- **RDB (snapshotting，快照)：** 定期将数据转储到磁盘。快照间隔内入队的任务在崩溃时会丢失。默认：当 1000+ 个 key 发生变更时每 60 秒转储一次。
+- **AOF (Append-Only File，追加写日志)：** 记录每次写操作。`fsync` 策略决定持久性：
+  - `always`：每次写操作后 fsync（最安全，最慢）
+  - `everysec`：每秒 fsync 一次（1 秒数据丢失窗口）
+  - `no`：由操作系统决定（快速，最多 30 秒数据丢失）
+- **没有原生确认机制。** Celery 通过 `BRPOPLPUSH` 到"未确认"列表来实现 ack。如果 Worker 死亡，任务留在未确认列表中，必须被回收（可见性超时模式）。
 
-**Trade-off:** Ultra-low latency, but durability requires careful tuning.
-Best for workloads where occasional task loss is acceptable or idempotent
-re-execution is cheap.
+**权衡：** 超低延迟，但持久性需要仔细调优。最适合偶尔任务丢失可以接受或幂等重新执行成本低廉的工作负载。
 
 #### RabbitMQ
 
-**Durability stack:**
-1. **Durable queue:** Queue metadata survives broker restart.
-2. **Persistent messages:** Messages written to disk (delivery_mode=2).
-3. **Publisher confirms:** Broker acks back to producer after persisting.
-4. **Consumer acks:** Worker explicitly acks after processing.
+**持久性栈：**
+1. **持久队列 (Durable queue)：** 队列元数据在 Broker 重启后存活。
+2. **持久消息 (Persistent messages)：** 消息写入磁盘（delivery_mode=2）。
+3. **发布确认 (Publisher confirms)：** Broker 在持久化后向 Producer 回复确认。
+4. **消费者确认 (Consumer acks)：** Worker 在处理完成后显式确认。
 
-**High availability:**
-- **Mirrored queues (classic):** Full queue replicated to N nodes. Deprecated.
-- **Quorum queues (modern):** Raft-based consensus. Write is committed when
-  a majority of nodes persist it. Automatic leader election on failure.
+**高可用性：**
+- **镜像队列（经典模式）：** 完整队列复制到 N 个节点。已弃用。
+- **Quorum 队列（现代模式）：** 基于 **Raft** 共识算法。当大多数节点完成持久化后写入才被提交。故障时自动选主。
 
-**Trade-off:** Strong durability guarantees, rich routing (exchanges, bindings),
-but higher latency than Redis. Best for workflows requiring reliable delivery
-and complex routing.
+**权衡：** 强持久性保证，丰富的路由（交换器、绑定），但延迟高于 Redis。最适合需要可靠投递和复杂路由的工作流。
 
-#### SQS (AWS Managed)
+#### SQS（AWS 托管服务）
 
-- **Visibility timeout:** After a consumer reads a message, it becomes
-  invisible to other consumers for a configurable duration. If not deleted
-  (acked) within the timeout, the message reappears.
-- **Dead letter queue (DLQ):** Built-in. After N receive attempts, messages
-  are automatically moved to a DLQ.
-- **At-least-once delivery:** Messages may be delivered more than once.
-  SQS FIFO queues add exactly-once delivery within a 5-minute dedup window.
-- **No broker to manage.** Auto-scaling, pay-per-request.
+- **可见性超时 (Visibility timeout)：** 消费者读取消息后，该消息对其他消费者在可配置时长内不可见。如果在超时内未被删除（确认），消息会重新出现。
+- **死信队列 (Dead Letter Queue, DLQ)：** 内置支持。在 N 次接收尝试后，消息自动移至 **DLQ (Dead Letter Queue)**。
+- **至少一次投递 (At-least-once delivery)：** 消息可能被投递多次。SQS **FIFO (First In, First Out)** 队列在 5 分钟去重窗口内提供恰好一次投递。
+- **无需管理 Broker。** 自动伸缩，按请求付费。
 
-**Trade-off:** Zero operational overhead, but higher per-message latency
-(~10-50ms), limited to AWS ecosystem.
+**权衡：** 零运维开销，但每条消息延迟较高（约 10-50ms），局限于 AWS 生态系统。
 
 #### Kafka
 
-- **Log-based architecture:** Messages are appended to partitioned,
-  replicated logs. Consumers track their position via offsets.
-- **Consumer groups:** Partitions are assigned to consumers in a group.
-  Rebalancing on consumer failure.
-- **Exactly-once semantics (EOS):** Kafka transactions allow producing
-  and committing consumer offsets atomically.
-- **Message replay:** Consumers can seek to any offset and re-read.
+- **基于日志的架构：** 消息追加到分区化、副本化的日志中。消费者通过偏移量追踪自身位置。
+- **消费者组 (Consumer groups)：** 分区分配给组内的消费者。消费者故障时触发重平衡。
+- **恰好一次语义 (Exactly-Once Semantics, EOS)：** Kafka 事务允许原子性地生产消息和提交消费者偏移量。
+- **消息回放：** 消费者可以 seek 到任意偏移量并重新读取。
 
-**Trade-off:** Highest throughput, built-in replay, but complex operational
-model. Best for event streaming with task queue as a secondary use case.
+**权衡：** 最高吞吐量，内置回放能力，但运维模型复杂。最适合以事件流为主、任务队列为辅的场景。
 
-### Worker Pool Architecture
+### Worker 池架构 (Worker Pool Architecture)
 
-Workers are typically long-running processes with:
-- **Prefetch count:** Number of tasks fetched ahead of execution (amortizes
-  network round-trips, but increases risk of lost work on crash).
-- **Concurrency model:** Processes (Celery default), threads, or async
-  (gevent). Process-based isolation prevents GIL contention and provides
-  memory isolation.
-- **Heartbeat:** Workers send periodic heartbeats to the broker. Missing
-  heartbeats trigger task reassignment.
-- **Graceful shutdown:** On SIGTERM, stop accepting new tasks, finish
-  current in-flight tasks, ack, then exit. On SIGKILL, no cleanup possible.
+Worker 通常是长运行进程，具有以下特征：
+- **预取计数 (Prefetch count)：** 提前拉取的任务数量（分摊网络往返开销，但增加崩溃时丢失工作的风险）。
+- **并发模型：** 进程（Celery 默认）、线程或异步（gevent）。基于进程的隔离避免 **GIL (Global Interpreter Lock)** 竞争并提供内存隔离。
+- **心跳 (Heartbeat)：** Worker 定期向 Broker 发送心跳。缺失的心跳触发任务重新分配。
+- **优雅关闭：** 收到 SIGTERM 时，停止接受新任务，完成当前正在执行的任务，发送 ack，然后退出。收到 SIGKILL 时，无法执行任何清理。
 
-### Result Backend
+### 结果后端 (Result Backend)
 
-Stores task results for retrieval by the producer or other consumers:
-- **Redis:** Fast but volatile. Results expire after a TTL.
-- **Database (PostgreSQL/MySQL):** Durable, queryable, but slower writes.
-- **S3 / object store:** For large results (generated files, ML model outputs).
-- **No backend:** Fire-and-forget tasks that don't need result retrieval.
-"""
+存储任务结果以供 Producer 或其他消费者检索：
+- **Redis：** 快速但易失。结果在 **TTL (Time To Live)** 之后过期。
+- **数据库（PostgreSQL/MySQL）：** 持久、可查询，但写入较慢。
+- **S3 / 对象存储：** 用于大型结果（生成的文件、ML 模型输出）。
+- **无后端：** 不需要结果检索的即发即忘型任务。"""
 
 # ---------------------------------------------------------------------------
 # Section 3: Data Flow & Key Components
 # ---------------------------------------------------------------------------
 
-DATAFLOW = r"""## Data Flow & Key Components
+DATAFLOW = r"""## 数据流与关键组件 (Data Flow & Key Components)
 
-### Happy Path
+### 正常路径 (Happy Path)
 
 ```
 1. Producer creates task with UUID, serializes payload
@@ -197,30 +158,27 @@ DATAFLOW = r"""## Data Flow & Key Components
 8. Broker removes task from queue
 ```
 
-### Failure Scenario 1: Worker Crash During Execution
+### 故障场景 1：Worker 在执行中崩溃 (Failure Scenario 1: Worker Crash During Execution)
 
-**Setup:** Worker dequeues task, begins processing, then crashes (OOM, SIGKILL,
-hardware failure).
+**设定：** Worker 出队任务，开始处理，然后崩溃（OOM、SIGKILL、硬件故障）。
 
-**Chain of events:**
-1. Worker receives task, starts execution
-2. Worker writes partial side-effects (e.g., inserts row, sends email)
-3. Worker process killed -- no `finally` block, no `atexit`, no ack
-4. Broker's visibility timeout expires (SQS: 30s default; Celery: `acks_late`
-   + `visibility_timeout`)
-5. Broker marks task as unacknowledged and redelivers to another worker
-6. New worker picks up same task
-7. **Problem:** Partial side-effects from step 2 already exist
+**事件链：**
+1. Worker 接收任务，开始执行
+2. Worker 写入了部分副作用（例如插入了行、发送了邮件）
+3. Worker 进程被 kill——没有 `finally` 块，没有 `atexit`，没有 ack
+4. Broker 的可见性超时到期（SQS 默认 30 秒；Celery：`acks_late` + `visibility_timeout`）
+5. Broker 将任务标记为未确认并重新投递给另一个 Worker
+6. 新 Worker 获取同一任务
+7. **问题：** 步骤 2 中的部分副作用已经存在
 
-**Solution:** Idempotent execution (see Scenario 2).
+**解决方案：** 幂等执行（见场景 2）。
 
-### Failure Scenario 2: Implementing Idempotency
+### 故障场景 2：实现幂等性 (Failure Scenario 2: Implementing Idempotency)
 
-**The idempotency toolkit:**
+**幂等性工具箱：**
 
-1. **Idempotency key per task (UUID):**
-   Every task gets a unique ID at creation. Before executing, check if this
-   ID has already been processed:
+1. **每个任务的幂等键（UUID）：**
+   每个任务在创建时获得一个唯一 ID。执行前检查该 ID 是否已被处理：
    ```
    IF NOT EXISTS (SELECT 1 FROM processed_tasks WHERE task_id = ?) THEN
        execute_task()
@@ -228,363 +186,314 @@ hardware failure).
    END
    ```
 
-2. **Database unique constraints as natural idempotency:**
-   If the task's effect is "insert order #12345," a unique constraint on
-   order_id prevents duplicates even without an explicit dedup check.
+2. **数据库唯一约束作为天然幂等性：**
+   如果任务的效果是"插入订单 #12345"，order_id 上的唯一约束即使没有显式去重检查也能防止重复。
 
-3. **Conditional writes (optimistic locking):**
+3. **条件写入（乐观锁）：**
    ```
    UPDATE accounts SET balance = balance - 100
    WHERE id = ? AND version = ?
    ```
-   If the version changed (another execution already ran), the update
-   affects 0 rows and the duplicate is safely ignored.
+   如果版本已改变（另一次执行已运行），更新影响 0 行，重复被安全忽略。
 
-4. **Compare-and-swap (CAS):**
-   Atomic read-modify-write. The write succeeds only if the current value
-   matches the expected value. DynamoDB conditional expressions, Cassandra
-   lightweight transactions.
+4. **比较并交换 (Compare-and-Swap, CAS)：**
+   原子的读-改-写操作。只有当前值匹配期望值时写入才会成功。DynamoDB 条件表达式、Cassandra 轻量级事务。
 
-5. **Outbox pattern for multi-system consistency:**
-   When a task must update a database AND send a message (e.g., update order
-   status + notify user), write both the DB update and the outgoing message
-   to the same database transaction. A separate relay process reads the
-   outbox table and publishes messages, retrying on failure.
+5. **发件箱模式实现多系统一致性 (Outbox Pattern)：**
+   当任务必须同时更新数据库并发送消息（例如更新订单状态 + 通知用户）时，将数据库更新和待发消息写入同一个数据库事务。一个单独的中继进程读取发件箱表并发布消息，失败时重试。
 
-### Failure Scenario 3: Timeout + Dual Execution
+### 故障场景 3：超时 + 双重执行 (Failure Scenario 3: Timeout + Dual Execution)
 
-**Setup:** Worker A takes a task but becomes slow (GC pause, network partition,
-CPU starvation).
+**设定：** Worker A 获取了任务但变慢了（GC 暂停、网络分区、CPU 饥饿）。
 
-**Chain of events:**
-1. Worker A dequeues task, begins processing
-2. Worker A becomes slow (full GC, network partition)
-3. Broker's visibility timeout expires
-4. Broker assigns task to Worker B
-5. Worker A recovers and finishes its execution
-6. **Both A and B have now executed the same task**
+**事件链：**
+1. Worker A 出队任务，开始处理
+2. Worker A 变慢（Full GC、网络分区）
+3. Broker 的可见性超时到期
+4. Broker 将任务分配给 Worker B
+5. Worker A 恢复并完成执行
+6. **A 和 B 现在都执行了同一任务**
 
-**Race conditions:**
-- Whose ack is valid? Worker A's ack references a task the broker already
-  reassigned.
-- If both workers write to the same database row, last-write-wins causes
-  data corruption.
+**竞态条件：**
+- 谁的 ack 有效？Worker A 的 ack 引用了一个 Broker 已经重新分配的任务。
+- 如果两个 Worker 写入同一数据库行，最后写入者胜出会导致数据损坏。
 
-**Solution: Fencing tokens (lease IDs)**
+**解决方案：防护令牌 (Fencing Tokens)（租约 ID）**
 
-Each task assignment includes a monotonically increasing fencing token:
+每次任务分配包含一个单调递增的防护令牌：
 ```
 Assignment 1: task_id=T1, fence=42 -> Worker A
 Assignment 2: task_id=T1, fence=43 -> Worker B (after timeout)
 ```
 
-When writing results, the worker includes its fencing token. The result
-backend only accepts writes with fence >= current fence:
+写入结果时，Worker 携带其防护令牌。结果后端仅接受 fence >= 当前 fence 的写入：
 ```
 UPDATE results SET value = ?, fence = 43
 WHERE task_id = 'T1' AND fence < 43
 ```
 
-Worker A's write with fence=42 is rejected. Worker B's write with fence=43
-succeeds.
+Worker A 的 fence=42 写入被拒绝。Worker B 的 fence=43 写入成功。
 
-### Failure Scenario 4: Task Succeeds but Ack Lost
+### 故障场景 4：任务成功但 Ack 丢失 (Failure Scenario 4: Task Succeeds but Ack Lost)
 
-**Setup:** Worker completes task, sends ack, but the ack is lost in transit
-(network drop, broker timeout).
+**设定：** Worker 完成任务、发送 ack，但 ack 在传输中丢失（网络丢包、Broker 超时）。
 
-**Chain of events:**
-1. Worker executes task successfully
-2. Worker sends ack to broker
-3. Network drops the ack packet
-4. Broker never receives ack, treats task as failed
-5. Broker redelivers task to another worker
+**事件链：**
+1. Worker 成功执行任务
+2. Worker 向 Broker 发送 ack
+3. 网络丢弃了 ack 数据包
+4. Broker 从未收到 ack，将任务视为失败
+5. Broker 将任务重新投递给另一个 Worker
 
-**Impact:** Identical to Scenario 1 from the idempotency perspective. The task
-will be executed again. Without idempotent consumers, side-effects are doubled.
+**影响：** 从幂等性角度看，与场景 1 完全相同。任务会被再次执行。如果没有幂等消费者，副作用会加倍。
 
-**Key insight:** This scenario demonstrates why **at-least-once delivery is
-the fundamental guarantee** of any distributed queue. Even with a perfectly
-reliable broker and worker, network partitions between them create duplicates.
+**关键洞察：** 此场景证明了为什么**至少一次投递是任何分布式队列的基本保证**。即使 Broker 和 Worker 都完全可靠，它们之间的网络分区仍会产生重复。
 
-### Failure Scenario 5: Poison Pill (Permanently Failing Task)
+### 故障场景 5：毒丸消息（永久失败的任务）(Failure Scenario 5: Poison Pill)
 
-**Setup:** A task with invalid parameters, a logic bug, or a missing
-dependency fails every time it executes.
+**设定：** 一个参数无效、存在逻辑 bug 或缺少依赖的任务每次执行都会失败。
 
-**Chain of events:**
-1. Worker dequeues task, executes, fails (exception)
-2. Worker nacks task (or lets visibility timeout expire)
-3. Broker redelivers task
-4. Another worker picks up, fails again
-5. Repeat forever -- poison pill consumes worker capacity
+**事件链：**
+1. Worker 出队任务，执行，失败（抛出异常）
+2. Worker 否定确认任务（或让可见性超时到期）
+3. Broker 重新投递任务
+4. 另一个 Worker 获取，再次失败
+5. 无限重复——毒丸消耗 Worker 容量
 
-**Solution stack:**
-1. **Max retry count:** After N failures, stop retrying. Celery:
-   `max_retries=3`. SQS: `maxReceiveCount`.
-2. **Dead letter queue (DLQ):** Move permanently-failed tasks to a separate
-   queue for manual inspection. SQS has built-in DLQ support.
-3. **Exponential backoff with jitter:** Space out retries to avoid thundering
-   herd. Formula: `delay = min(base * 2^attempt + random(0, jitter), max_delay)`
-4. **Error classification:**
-   - **Transient:** Timeout, connection reset, 503 -> retry with backoff
-   - **Permanent:** 400, validation error, missing resource -> DLQ immediately
-5. **DLQ monitoring:** Alert when DLQ depth exceeds threshold. Dashboard for
-   manual replay after root cause is fixed.
+**解决方案栈：**
+1. **最大重试次数：** N 次失败后停止重试。Celery：`max_retries=3`。SQS：`maxReceiveCount`。
+2. **死信队列 (DLQ, Dead Letter Queue)：** 将永久失败的任务移至单独的队列以供人工检查。SQS 内置 DLQ 支持。
+3. **指数退避加抖动 (Exponential Backoff with Jitter)：** 拉开重试间隔以避免惊群效应。公式：`delay = min(base * 2^attempt + random(0, jitter), max_delay)`
+4. **错误分类：**
+   - **瞬态 (Transient)：** 超时、连接重置、503 -> 使用退避重试
+   - **永久 (Permanent)：** 400、验证错误、资源缺失 -> 立即进入 DLQ
+5. **DLQ 监控：** 当 DLQ 深度超过阈值时告警。用于在修复根因后手动重放的仪表板。
 
-### Failure Scenario 6: Rolling Deployment
+### 故障场景 6：滚动部署 (Failure Scenario 6: Rolling Deployment)
 
-**Setup:** A deployment rolls out new worker code while old workers are still
-running.
+**设定：** 部署上线新的 Worker 代码，而旧 Worker 仍在运行。
 
-**Problems:**
-1. **Serialization mismatch:** New task format includes fields old workers
-   don't know. Old workers crash on deserialization.
-2. **Behavior change:** Same task executed differently by v1 vs v2 workers.
-3. **In-flight tasks:** v1 workers have tasks mid-execution when they're
-   told to shut down.
+**问题：**
+1. **序列化不匹配：** 新任务格式包含旧 Worker 不认识的字段。旧 Worker 在反序列化时崩溃。
+2. **行为变更：** 同一任务被 v1 和 v2 Worker 以不同方式执行。
+3. **正在执行的任务：** v1 Worker 在被告知关闭时有正在执行中的任务。
 
-**Solution: Graceful drain**
-1. Send SIGTERM to old workers
-2. Workers stop accepting new tasks (`consumer.cancel()`)
-3. Workers finish current in-flight tasks
-4. Workers ack completed tasks
-5. Workers exit
-6. New workers start with new code
+**解决方案：优雅排空 (Graceful Drain)**
+1. 向旧 Worker 发送 SIGTERM
+2. Worker 停止接受新任务（`consumer.cancel()`）
+3. Worker 完成当前正在执行的任务
+4. Worker 确认已完成的任务
+5. Worker 退出
+6. 新 Worker 使用新代码启动
 
-**Serialization compatibility:** Use backward-compatible serialization
-(add fields, don't remove/rename). Version the task schema. Workers skip
-unknown fields.
+**序列化兼容性：** 使用向后兼容的序列化（增加字段，不删除/重命名）。为任务 schema 添加版本号。Worker 跳过未知字段。
 
-### Failure Scenario 7: Empty / Malformed Payload
+### 故障场景 7：空/格式错误的载荷 (Failure Scenario 7: Empty / Malformed Payload)
 
-**Setup:** A bug in the producer or a manual API call submits an empty or
-malformed task payload.
+**设定：** Producer 中的 bug 或手动 API 调用提交了空的或格式错误的任务载荷。
 
-**Chain of events without validation:**
-1. Empty payload enters the queue
-2. Worker dequeues, attempts to parse, fails
-3. Task nacked, retried, fails again
-4. Becomes a poison pill (Scenario 5)
+**无验证时的事件链：**
+1. 空载荷进入队列
+2. Worker 出队，尝试解析，失败
+3. 任务被否定确认，重试，再次失败
+4. 变成毒丸消息（场景 5）
 
-**Solution: Validate at enqueue time**
-- Schema validation at the API gateway / producer
-- Reject invalid payloads before they enter the queue
-- For late-bound validation (task type unknown at enqueue), validate
-  immediately after dequeue and DLQ if invalid -- do NOT retry
-"""
+**解决方案：在入队时验证**
+- 在 API 网关 / Producer 端进行 schema 验证
+- 在无效载荷进入队列之前拒绝它们
+- 对于延迟绑定验证（入队时任务类型未知），在出队后立即验证，如果无效则进入 DLQ——不要重试"""
 
 # ---------------------------------------------------------------------------
 # Section 4: Formulas & Algorithms
 # ---------------------------------------------------------------------------
 
-FORMULAS = r"""## Formulas & Algorithms
+FORMULAS = r"""## 公式与算法 (Formulas & Algorithms)
 
-### Exponential Backoff with Jitter
+### 指数退避加抖动 (Exponential Backoff with Jitter)
 
-The standard retry delay formula prevents thundering herd:
+标准重试延迟公式用于防止惊群效应：
 
 $$\text{delay} = \min\left(\text{base} \times 2^{\text{attempt}} + \text{random}(0, \text{jitter}), \text{max\_delay}\right)$$
 
-**Parameters:**
-| Parameter | Typical Value | Purpose |
-|-----------|--------------|---------|
-| `base` | 1s | Initial delay |
-| `attempt` | 0, 1, 2, ... | Retry count |
-| `jitter` | 0 to base | Decorrelates concurrent retries |
-| `max_delay` | 300s (5 min) | Cap to prevent unbounded waits |
+**参数：**
+| 参数 | 典型值 | 用途 |
+|------|--------|------|
+| `base` | 1s | 初始延迟 |
+| `attempt` | 0, 1, 2, ... | 重试计数 |
+| `jitter` | 0 到 base | 去关联并发重试 |
+| `max_delay` | 300s (5 min) | 设上限以防止无限等待 |
 
-**Example progression (base=1s, jitter=0-1s):**
-| Attempt | Formula | Range |
-|---------|---------|-------|
+**示例递进（base=1s, jitter=0-1s）：**
+| 尝试次数 | 公式 | 范围 |
+|----------|------|------|
 | 0 | 1 * 2^0 + jitter | 1-2s |
 | 1 | 1 * 2^1 + jitter | 2-3s |
 | 2 | 1 * 2^2 + jitter | 4-5s |
 | 3 | 1 * 2^3 + jitter | 8-9s |
 | 4 | 1 * 2^4 + jitter | 16-17s |
 
-**Jitter strategies:**
-- **Full jitter:** `random(0, base * 2^attempt)` -- widest spread
-- **Equal jitter:** `base * 2^attempt / 2 + random(0, base * 2^attempt / 2)`
-- **Decorrelated jitter:** `min(max_delay, random(base, prev_delay * 3))`
+**抖动策略：**
+- **完全抖动 (Full jitter)：** `random(0, base * 2^attempt)` —— 最大分散度
+- **等分抖动 (Equal jitter)：** `base * 2^attempt / 2 + random(0, base * 2^attempt / 2)`
+- **去关联抖动 (Decorrelated jitter)：** `min(max_delay, random(base, prev_delay * 3))`
 
-AWS recommends decorrelated jitter for best performance under contention.
+AWS 推荐在高竞争下使用去关联抖动以获得最佳性能。
 
-### Visibility Timeout Calculation
+### 可见性超时计算 (Visibility Timeout Calculation)
 
-The visibility timeout must exceed the expected task execution time:
+可见性超时必须超过预期的任务执行时间：
 
 $$\text{visibility\_timeout} = \text{p99\_execution\_time} \times \text{safety\_factor}$$
 
-**Safety factor guidelines:**
-| Workload | p99 | Safety Factor | Timeout |
-|----------|-----|---------------|---------|
-| Fast (API call) | 2s | 3x | 6s |
-| Medium (image resize) | 30s | 2x | 60s |
-| Slow (ML inference) | 300s | 2x | 600s |
-| Variable (scraping) | varies | use heartbeat instead | -- |
+**安全系数指南：**
+| 工作负载 | p99 | 安全系数 | 超时时间 |
+|----------|-----|----------|----------|
+| 快速（API 调用） | 2s | 3x | 6s |
+| 中等（图片缩放） | 30s | 2x | 60s |
+| 慢速（ML 推理） | 300s | 2x | 600s |
+| 可变（爬虫） | 不定 | 改用心跳 | -- |
 
-**Problem with fixed timeouts:** If the distribution has a long tail (p99 = 30s
-but p99.9 = 300s), a 60s timeout causes premature redelivery for 0.1% of tasks.
+**固定超时的问题：** 如果分布具有长尾（p99 = 30s 但 p99.9 = 300s），60s 的超时会导致 0.1% 的任务被过早重投递。
 
-**Alternative: heartbeat-based extension**
-Worker sends periodic heartbeats to extend the visibility timeout:
+**替代方案：基于心跳的延期**
+Worker 发送周期性心跳来延长可见性超时：
 ```
 Every heartbeat_interval (e.g., 15s):
     broker.extend_timeout(task_id, extension=30s)
 ```
-SQS: `ChangeMessageVisibility`. RabbitMQ: consumer heartbeat.
+SQS：`ChangeMessageVisibility`。RabbitMQ：消费者心跳。
 
-### Circuit Breaker for Downstream Dependencies
+### 下游依赖的熔断器 (Circuit Breaker for Downstream Dependencies)
 
-When a task calls an external service that is down, retrying wastes resources.
+当任务调用的外部服务宕机时，重试浪费资源。
 
-**States:**
-- **Closed (normal):** Requests pass through. Track failure rate.
-- **Open (tripped):** All requests fail immediately. No calls to downstream.
-- **Half-open (probe):** After cooldown, allow one request. If it succeeds,
-  close. If it fails, re-open.
+**状态：**
+- **关闭 (Closed，正常)：** 请求正常通过。追踪失败率。
+- **打开 (Open，已触发)：** 所有请求立即失败。不调用下游服务。
+- **半开 (Half-open，探测)：** 冷却期后，允许一个请求通过。成功则关闭熔断器，失败则重新打开。
 
-**Thresholds:**
+**触发阈值：**
 $$\text{trip when } \frac{\text{failures}}{\text{total}} > \text{error\_rate\_threshold} \text{ within window}$$
 
-Typical values: error_rate_threshold=0.5, window=60s, cooldown=30s.
+典型值：error_rate_threshold=0.5，window=60s，cooldown=30s。
 
-### Dead Letter Criteria
+### 死信判定标准 (Dead Letter Criteria)
 
-A task should be routed to the DLQ when ANY of:
+任务在满足以下任一条件时应路由至 DLQ：
 
 $$\text{retry\_count} > \text{max\_retries}$$
 $$\text{age} > \text{max\_task\_age}$$
 $$\text{error\_type} \in \{\text{permanent errors}\}$$
 
-**Error type classification heuristic:**
-| Error Category | Examples | Action |
-|---------------|----------|--------|
-| Transient | Timeout, 503, connection reset | Retry with backoff |
-| Permanent | 400, 404, validation error | DLQ immediately |
-| Unknown | Unhandled exception | Retry up to max, then DLQ |
+**错误类型分类启发式：**
+| 错误类别 | 示例 | 操作 |
+|----------|------|------|
+| 瞬态 (Transient) | 超时、503、连接重置 | 使用退避重试 |
+| 永久 (Permanent) | 400、404、验证错误 | 立即进入 DLQ |
+| 未知 (Unknown) | 未处理的异常 | 重试至上限，然后进入 DLQ |
 
-### Queue Depth and Worker Scaling
+### 队列深度与 Worker 伸缩 (Queue Depth and Worker Scaling)
 
-**Autoscaling formula:**
+**自动伸缩公式：**
 $$\text{desired\_workers} = \left\lceil \frac{\text{queue\_depth}}{\text{target\_latency} \times \text{throughput\_per\_worker}} \right\rceil$$
 
-Example: 10,000 pending tasks, target drain in 60s, each worker processes
-5 tasks/sec:
-$$\text{desired\_workers} = \left\lceil \frac{10000}{60 \times 5} \right\rceil = 34$$
-"""
+示例：10,000 个待处理任务，目标在 60 秒内排空，每个 Worker 处理 5 任务/秒：
+$$\text{desired\_workers} = \left\lceil \frac{10000}{60 \times 5} \right\rceil = 34$$"""
 
 # ---------------------------------------------------------------------------
 # Section 5: Production Constraints
 # ---------------------------------------------------------------------------
 
-PRODUCTION_CONSTRAINTS = r"""## Production Constraints
+PRODUCTION_CONSTRAINTS = r"""## 生产环境约束 (Production Constraints)
 
-### Throughput by Broker
+### 各 Broker 吞吐量 (Throughput by Broker)
 
-| Broker | Throughput (msg/sec) | Notes |
-|--------|---------------------|-------|
-| **Redis** | 100K-500K | In-memory, limited by network/serialization |
-| **RabbitMQ** | 20K-50K | Persistent messages reduce to ~5K-10K |
-| **SQS Standard** | ~3,000 per API call | Batch: 10 msgs/call, effectively unlimited with multiple callers |
-| **SQS FIFO** | 300 msg/sec per group | 3,000/sec with batching + multiple message groups |
-| **Kafka** | 100K-2M | Per partition; scales linearly with partitions |
+| Broker | 吞吐量 (msg/sec) | 备注 |
+|--------|-------------------|------|
+| **Redis** | 100K-500K | 内存型，受限于网络/序列化 |
+| **RabbitMQ** | 20K-50K | 持久消息降至约 5K-10K |
+| **SQS Standard** | 约 3,000/次 API 调用 | 批量：10 msg/call，多调用方时实际上无限制 |
+| **SQS FIFO** | 300 msg/sec/group | 使用批处理 + 多消息组可达 3,000/sec |
+| **Kafka** | 100K-2M | 每分区；随分区数线性伸缩 |
 
-### Latency Budget
+### 延迟预算 (Latency Budget)
 
-| Metric | Redis | RabbitMQ | SQS | Kafka |
-|--------|-------|----------|-----|-------|
-| **Enqueue** | <1ms | 1-5ms | 10-50ms | 2-10ms |
-| **Dequeue** | <1ms | 1-5ms | 20-100ms (long poll) | 1-5ms |
-| **End-to-end (enqueue-to-start)** | 1-5ms | 5-20ms | 50-200ms | 5-20ms |
+| 指标 | Redis | RabbitMQ | SQS | Kafka |
+|------|-------|----------|-----|-------|
+| **入队** | <1ms | 1-5ms | 10-50ms | 2-10ms |
+| **出队** | <1ms | 1-5ms | 20-100ms（长轮询） | 1-5ms |
+| **端到端（入队到开始执行）** | 1-5ms | 5-20ms | 50-200ms | 5-20ms |
 
-### Durability Guarantees
+### 持久性保证 (Durability Guarantees)
 
-| Broker | Durability | Data Loss Window |
-|--------|-----------|------------------|
-| Redis RDB | Periodic snapshot | Up to 60s of data |
-| Redis AOF (everysec) | Append-only log | Up to 1s |
-| Redis AOF (always) | Every write fsynced | None (but 10x slower) |
-| RabbitMQ persistent | Durable queue + persistent msg | None after confirm |
-| RabbitMQ quorum | Raft consensus | None after majority ack |
-| SQS | Managed, multi-AZ | None (AWS SLA) |
-| Kafka (acks=all) | ISR replication | None after ack |
+| Broker | 持久性 | 数据丢失窗口 |
+|--------|--------|--------------|
+| Redis RDB | 周期性快照 | 最多 60 秒数据 |
+| Redis AOF (everysec) | 追加写日志 | 最多 1 秒 |
+| Redis AOF (always) | 每次写入都 fsync | 无（但速度降低 10 倍） |
+| RabbitMQ persistent | 持久队列 + 持久消息 | 确认后无丢失 |
+| RabbitMQ quorum | Raft 共识 | 多数节点确认后无丢失 |
+| SQS | 托管，多可用区 | 无（AWS SLA） |
+| Kafka (acks=all) | **ISR (In-Sync Replicas)** 复制 | 确认后无丢失 |
 
-### Memory and Storage
+### 内存与存储 (Memory and Storage)
 
-**Redis:** All queues in memory. 1M tasks with 1KB payload = ~1GB RAM.
-If tasks accumulate (consumers slower than producers), Redis OOM is a
-production risk. Mitigate: `maxmemory-policy noeviction` + alerting on
-memory usage.
+**Redis：** 所有队列在内存中。1M 任务、每个 1KB 载荷 = 约 1GB RAM。如果任务积压（消费者慢于生产者），Redis **OOM (Out of Memory)** 是生产环境风险。缓解：`maxmemory-policy noeviction` + 内存使用量告警。
 
-**RabbitMQ:** Messages on disk when persistent, but paged into memory for
-delivery. High queue depth (>1M messages) degrades performance. Enable
-`lazy` queues for predictable memory usage at cost of throughput.
+**RabbitMQ：** 持久消息在磁盘上，但投递时分页到内存。队列深度高（>1M 消息）时性能下降。启用 `lazy` 队列可获得可预测的内存使用，但牺牲吞吐量。
 
-**Kafka:** Log segments on disk. Retention policy (time or size) controls
-storage. 1TB retention with 100MB/s ingress = ~2.8 hours of data. Tiered
-storage offloads cold segments to object storage.
+**Kafka：** 日志分段存储在磁盘上。保留策略（按时间或大小）控制存储。1TB 保留量、100MB/s 写入速率 = 约 2.8 小时数据。分层存储将冷数据段卸载到对象存储。
 
-**DLQ storage:** Dead letter queues grow unboundedly if not monitored. Set
-retention policies: SQS max retention = 14 days. Alert on DLQ depth > 0.
+**DLQ 存储：** 如果不监控，死信队列会无限增长。设置保留策略：SQS 最大保留期 = 14 天。DLQ 深度 > 0 时触发告警。
 
-### Operational Considerations
+### 运维注意事项 (Operational Considerations)
 
-**Monitoring metrics (the minimum set):**
-- Queue depth (messages waiting)
-- Consumer lag (Kafka: offset lag per consumer group)
-- Processing rate (tasks/sec completed)
-- Error rate (tasks/sec failed)
-- DLQ depth
-- Worker count and utilization
-- p50/p95/p99 task execution time
+**监控指标（最小集合）：**
+- 队列深度（等待中的消息数）
+- 消费者延迟（Kafka：每个消费者组的偏移量延迟）
+- 处理速率（完成的任务数/秒）
+- 错误率（失败的任务数/秒）
+- DLQ 深度
+- Worker 数量和利用率
+- p50/p95/p99 任务执行时间
 
-**Alerting thresholds:**
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| Queue depth | >10K (growing) | >100K |
-| Consumer lag | >1 min | >10 min |
-| DLQ depth | >0 | >100 |
-| Error rate | >1% | >5% |
-| Worker utilization | >80% | >95% |
-"""
+**告警阈值：**
+| 指标 | 警告 | 严重 |
+|------|------|------|
+| 队列深度 | >10K（持续增长） | >100K |
+| 消费者延迟 | >1 分钟 | >10 分钟 |
+| DLQ 深度 | >0 | >100 |
+| 错误率 | >1% | >5% |
+| Worker 利用率 | >80% | >95% |"""
 
 # ---------------------------------------------------------------------------
 # Section 6: Trade-off Analysis
 # ---------------------------------------------------------------------------
 
-TRADEOFFS = r"""## Trade-off Analysis
+TRADEOFFS = r"""## 权衡分析 (Trade-off Analysis)
 
-### Delivery Semantics: The Fundamental Trade-off
+### 投递语义：根本性权衡 (Delivery Semantics: The Fundamental Trade-off)
 
-There are three delivery semantics. You can implement any one, but each has
-costs:
+有三种投递语义。你可以实现其中任何一种，但各有代价：
 
-| Semantic | Guarantee | Trade-off |
-|----------|-----------|-----------|
-| **At-most-once** | Task delivered 0 or 1 times | Message loss possible. No retries. |
-| **At-least-once** | Task delivered 1+ times | Duplicates possible. Must handle idempotently. |
-| **Exactly-once** | Task delivered exactly 1 time | Requires transactional coordination. Expensive. |
+| 语义 | 保证 | 代价 |
+|------|------|------|
+| **至多一次 (At-most-once)** | 任务投递 0 或 1 次 | 可能丢失消息。不重试。 |
+| **至少一次 (At-least-once)** | 任务投递 1 次以上 | 可能产生重复。必须幂等处理。 |
+| **恰好一次 (Exactly-once)** | 任务恰好投递 1 次 | 需要事务性协调。开销高。 |
 
-**Industry consensus:** At-least-once + idempotent consumer is the standard
-choice. True exactly-once is achievable only within a single system boundary
-(Kafka transactions), not across system boundaries (queue + external DB +
-email service).
+**行业共识：** 至少一次 + 幂等消费者是标准选择。真正的恰好一次仅在单系统边界内可实现（Kafka 事务），无法跨系统边界实现（队列 + 外部数据库 + 邮件服务）。
 
-### Message Loss vs. Message Duplication
+### 消息丢失 vs. 消息重复 (Message Loss vs. Message Duplication)
 
-| Favor | When | Example |
-|-------|------|---------|
-| **Tolerate loss** | Idempotent re-execution is expensive or impossible | Analytics event ingestion (lossy is OK) |
-| **Tolerate duplication** | Idempotent re-execution is cheap | Payment processing (dedup by transaction ID) |
+| 倾向 | 适用场景 | 示例 |
+|------|----------|------|
+| **容忍丢失** | 幂等重新执行成本高或不可能 | 分析事件采集（有损可接受） |
+| **容忍重复** | 幂等重新执行成本低 | 支付处理（按事务 ID 去重） |
 
-**Business-level compensation:** When duplicates of irreversible actions occur
-(two emails sent, two charges made), the system needs a compensation mechanism:
-refund the duplicate charge, include "ignore if duplicate" language, or dedup
-downstream.
+**业务层面补偿：** 当不可逆操作出现重复时（发送两封邮件、扣费两次），系统需要补偿机制：退还重复扣款、邮件中包含"如收到重复请忽略"、或在下游去重。
 
-### Broker Durability vs. Throughput
+### Broker 持久性 vs. 吞吐量 (Broker Durability vs. Throughput)
 
 ```
                  Throughput
@@ -603,196 +512,150 @@ downstream.
                     +-------------------------> Durability
 ```
 
-**Decision framework:** Start with the business question: "What is the cost
-of losing one task?" If the cost is negligible (log aggregation), use Redis
-RDB. If the cost is high (payment processing), use RabbitMQ durable or Kafka
-with acks=all.
+**决策框架：** 从业务问题出发："丢失一个任务的成本是多少？"如果成本可忽略（日志聚合），使用 Redis RDB。如果成本很高（支付处理），使用 RabbitMQ durable 或 Kafka acks=all。
 
-### Synchronous vs. Asynchronous Acknowledgment
+### 同步 vs. 异步确认 (Synchronous vs. Asynchronous Acknowledgment)
 
-| Mode | Behavior | Use When |
-|------|----------|----------|
-| **Sync ack (ack after processing)** | Worker acks only after task completes | Task is idempotent but expensive to re-execute |
-| **Async ack (ack before processing)** | Worker acks immediately on receive | Task is cheap and idempotent, throughput is critical |
+| 模式 | 行为 | 适用场景 |
+|------|------|----------|
+| **同步确认（处理后 ack）** | Worker 仅在任务完成后确认 | 任务幂等但重新执行成本高 |
+| **异步确认（接收后 ack）** | Worker 收到后立即确认 | 任务廉价且幂等，吞吐量优先 |
 
-**Sync ack risk:** If processing takes too long, the broker may time out and
-redeliver -- causing the dual execution scenario (S3).
+**同步确认风险：** 如果处理时间过长，Broker 可能超时并重新投递——造成双重执行场景（S3）。
 
-**Async ack risk:** If the worker crashes after acking but before completing,
-the task is lost (at-most-once).
+**异步确认风险：** 如果 Worker 在确认后但完成前崩溃，任务丢失（至多一次）。
 
-### Push vs. Pull Consumer Models
+### 推送 vs. 拉取消费者模型 (Push vs. Pull Consumer Models)
 
-| Model | How It Works | Pros | Cons |
-|-------|-------------|------|------|
-| **Push** | Broker sends messages to consumers | Low latency, real-time | Consumer overwhelm, backpressure needed |
-| **Pull** | Consumer polls broker for messages | Consumer controls pace | Higher latency, polling overhead |
+| 模型 | 工作方式 | 优点 | 缺点 |
+|------|----------|------|------|
+| **推送 (Push)** | Broker 向消费者发送消息 | 低延迟，实时 | 可能压垮消费者，需要背压 |
+| **拉取 (Pull)** | 消费者向 Broker 轮询消息 | 消费者控制节奏 | 较高延迟，轮询开销 |
 
-- **RabbitMQ:** Push-based (broker pushes to consumer via channel).
-  Prefetch count provides backpressure.
-- **Kafka:** Pull-based (consumer fetches from partitions at its own pace).
-  Long polling reduces latency.
-- **SQS:** Pull-based (ReceiveMessage API). Long polling (WaitTimeSeconds=20)
-  reduces empty responses.
+- **RabbitMQ：** 推送式（Broker 通过 channel 推送给消费者）。预取计数提供背压。
+- **Kafka：** 拉取式（消费者按自己的节奏从分区获取）。长轮询降低延迟。
+- **SQS：** 拉取式（ReceiveMessage API）。长轮询（WaitTimeSeconds=20）减少空响应。
 
-### Task Priority and Fairness
+### 任务优先级与公平性 (Task Priority and Fairness)
 
-**Multiple priority queues:** Separate high/medium/low priority queues.
-Workers drain high-priority first. Risk: low-priority starvation.
+**多优先级队列：** 分设高/中/低优先级队列。Worker 优先排空高优先级队列。风险：低优先级饿死。
 
-**Weighted fair queuing:** Workers alternate between queues with weights
-(e.g., 70% high, 20% medium, 10% low). Prevents starvation while
-prioritizing important work.
+**加权公平队列 (Weighted Fair Queuing)：** Worker 按权重在队列间轮换（例如 70% 高、20% 中、10% 低）。在优先化重要工作的同时防止饿死。
 
-### Exactly-Once: What It Actually Means
+### 恰好一次：它究竟意味着什么 (Exactly-Once: What It Actually Means)
 
-"Exactly-once" in distributed systems is misleading. What you can achieve:
+分布式系统中的"恰好一次"具有误导性。你能实际做到的是：
 
-1. **Exactly-once delivery within Kafka:** Using Kafka transactions, a
-   consumer can atomically commit its offset and produce output messages.
-   But this only works within the Kafka boundary.
+1. **Kafka 内部的恰好一次：** 使用 Kafka 事务，消费者可以原子性地提交偏移量和生产输出消息。但这仅在 Kafka 边界内有效。
 
-2. **Effectively-once processing:** At-least-once delivery + idempotent
-   consumer. The task may be delivered multiple times, but the side-effect
-   happens only once because the consumer detects and skips duplicates.
+2. **有效一次处理 (Effectively-once processing)：** 至少一次投递 + 幂等消费者。任务可能被投递多次，但副作用仅发生一次，因为消费者检测并跳过重复。
 
-3. **True exactly-once across system boundaries:** Requires the transactional
-   outbox pattern:
-   - Write task result + outbox entry in a single DB transaction
-   - Outbox relay publishes the outbox entry to the message broker
-   - Downstream consumer is also idempotent
-   - End-to-end: each side-effect happens exactly once
+3. **跨系统边界的真正恰好一次：** 需要事务性发件箱模式 (Transactional Outbox Pattern)：
+   - 在单个数据库事务中写入任务结果 + 发件箱条目
+   - 发件箱中继进程将条目发布到消息 Broker
+   - 下游消费者也是幂等的
+   - 端到端：每个副作用恰好发生一次
 
-**Interview insight:** If asked "how do you achieve exactly-once?", the
-strong answer is: "We don't achieve true exactly-once across systems. We
-implement at-least-once delivery with idempotent consumers, which gives us
-effectively-once processing. For cross-system consistency, we use the
-transactional outbox pattern."
+**面试洞察：** 如果被问到"如何实现恰好一次？"，有力的回答是："我们不会在跨系统边界实现真正的恰好一次。我们实现至少一次投递加幂等消费者，这给我们有效一次处理。对于跨系统一致性，我们使用事务性发件箱模式。"
 """
 
 # ---------------------------------------------------------------------------
 # Section 7: Adversarial Defense Q&A
 # ---------------------------------------------------------------------------
 
-DEFENSE = r"""## Adversarial Defense Q&A
+DEFENSE = r"""## 对抗性防御问答 (Adversarial Defense Q&A)
 
-### Q: Worker crashes during execution. Walk through the full recovery chain.
+### 问：Worker 在执行中崩溃。请完整描述恢复链。
 
-**Complete answer:**
+**完整回答：**
 
-1. Worker receives task T1 from broker, begins processing
-2. Worker crashes (OOM, SIGKILL) -- no cleanup, no ack sent
-3. Broker's visibility timeout expires (default 30s for SQS, configurable)
-4. Broker marks T1 as unacknowledged
-5. Broker redelivers T1 to the next available worker
-6. New worker picks up T1
-7. Worker checks idempotency: `SELECT 1 FROM processed_tasks WHERE task_id = T1`
-8. **If found:** Task already completed in previous partial execution. Skip.
-   Ack immediately.
-9. **If not found:** Execute normally. On success, atomically:
-   (a) perform side-effect, (b) insert into processed_tasks, (c) ack broker
-10. Result stored in result backend
+1. Worker 从 Broker 接收任务 T1，开始处理
+2. Worker 崩溃（OOM、SIGKILL）——没有清理，没有 ack 发送
+3. Broker 的可见性超时到期（SQS 默认 30 秒，可配置）
+4. Broker 将 T1 标记为未确认
+5. Broker 将 T1 重新投递给下一个可用的 Worker
+6. 新 Worker 获取 T1
+7. Worker 检查幂等性：`SELECT 1 FROM processed_tasks WHERE task_id = T1`
+8. **如果找到：** 任务在先前的部分执行中已完成。跳过。立即确认。
+9. **如果未找到：** 正常执行。成功后原子性地：(a) 执行副作用，(b) 插入 processed_tasks，(c) 向 Broker 确认
+10. 结果存储到结果后端
 
-**Key nuance:** Step 7 only catches completed tasks. If the previous execution
-wrote partial side-effects (e.g., inserted 50 of 100 rows), the idempotency
-check passes and the task re-executes. The task logic itself must be idempotent:
-use `INSERT ... ON CONFLICT DO NOTHING`, `UPDATE ... WHERE version = expected`,
-or batch the entire operation in a transaction.
+**关键细节：** 步骤 7 只能捕获已完成的任务。如果先前的执行写入了部分副作用（例如插入了 100 行中的 50 行），幂等性检查通过，任务重新执行。任务逻辑本身必须是幂等的：使用 `INSERT ... ON CONFLICT DO NOTHING`、`UPDATE ... WHERE version = expected`，或将整个操作包装在事务中。
 
-### Q: Broker restarts. What happens to in-flight tasks?
+### 问：Broker 重启。正在执行的任务会怎样？
 
-**Answer by broker type:**
+**按 Broker 类型回答：**
 
-| Broker | In-Flight Task Fate |
-|--------|-------------------|
-| **Redis RDB** | Lost. Tasks enqueued since last snapshot are gone. Recovery: re-enqueue from source of truth (database job table). |
-| **Redis AOF (everysec)** | Up to 1 second of tasks lost. Tasks persisted before the last fsync survive. |
-| **Redis AOF (always)** | No loss. Every enqueue is fsynced. But throughput drops 10x. |
-| **RabbitMQ (durable + persistent)** | Survives. Queue metadata and message bodies are on disk. Messages in transit (delivered but unacked) are redelivered after restart. |
-| **RabbitMQ (quorum queue)** | Survives as long as majority of nodes are up. Leader election happens automatically. |
-| **SQS** | Survives. Managed service, multi-AZ replication. AWS SLA: 99.999999999% durability. |
-| **Kafka (acks=all)** | Survives. Replicated to ISR (in-sync replicas). Leader election from ISR. |
+| Broker | 正在执行的任务的命运 |
+|--------|----------------------|
+| **Redis RDB** | 丢失。自上次快照以来入队的任务消失。恢复：从真实数据源（数据库任务表）重新入队。 |
+| **Redis AOF (everysec)** | 最多 1 秒的任务丢失。在最后一次 fsync 之前持久化的任务存活。 |
+| **Redis AOF (always)** | 无丢失。每次入队都 fsync。但吞吐量下降 10 倍。 |
+| **RabbitMQ（durable + persistent）** | 存活。队列元数据和消息体在磁盘上。传输中的消息（已投递但未确认）在重启后重新投递。 |
+| **RabbitMQ（quorum queue）** | 只要多数节点存活就能存活。自动选主。 |
+| **SQS** | 存活。托管服务，多可用区复制。AWS SLA：99.999999999% 持久性。 |
+| **Kafka (acks=all)** | 存活。复制到 **ISR (In-Sync Replicas)**。从 ISR 中选主。 |
 
-**Follow-up: What about tasks that were mid-execution when the broker died?**
-Workers holding unacked tasks will detect the broker disconnect. Behavior
-depends on client library:
-- Celery + Redis: task stays in unacked list, reclaimed on reconnect
-- Celery + RabbitMQ: channel closes, task is redelivered by broker after restart
-- Kafka consumer: offset not committed, task re-consumed on rebalance
+**追问：Broker 挂掉时正在执行中的任务怎么办？**
+持有未确认任务的 Worker 会检测到 Broker 断连。行为取决于客户端库：
+- Celery + Redis：任务留在未确认列表中，重连后回收
+- Celery + RabbitMQ：channel 关闭，任务在 Broker 重启后重新投递
+- Kafka consumer：偏移量未提交，重平衡时任务被重新消费
 
-### Q: Same task executed by two workers simultaneously. Side effects may be irreversible.
+### 问：同一任务被两个 Worker 同时执行。副作用可能不可逆。
 
-**Setup:** Worker A is slow (GC pause), broker reassigns to Worker B. Both execute.
+**设定：** Worker A 速度慢（GC 暂停），Broker 将任务重新分配给 Worker B。两者都在执行。
 
-**Defense in depth (layered solutions):**
+**纵深防御（分层解决方案）：**
 
-1. **Fencing tokens:** Each assignment has a monotonic token. Worker must
-   present its token when writing. Backend rejects stale tokens.
+1. **防护令牌 (Fencing tokens)：** 每次分配带有单调令牌。Worker 写入时必须出示其令牌。后端拒绝过期令牌。
    ```
    Worker A: fence=42, writes result -> accepted (fence=42 is current)
    Worker B: fence=43, writes result -> accepted (fence=43 > 42, overwrites)
    Worker A: tries second write -> rejected (fence=42 < current 43)
    ```
 
-2. **Distributed lock with TTL:** Worker acquires a lock (Redis SETNX,
-   ZooKeeper ephemeral node) before executing. Lock has TTL > expected
-   execution time. Second worker fails to acquire lock.
-   **Risk:** If TTL < actual execution time, lock expires and both execute.
+2. **带 TTL 的分布式锁：** Worker 在执行前获取锁（Redis SETNX、ZooKeeper 临时节点）。锁的 **TTL (Time To Live)** > 预期执行时间。第二个 Worker 无法获取锁。
+   **风险：** 如果 TTL < 实际执行时间，锁到期后两者都会执行。
 
-3. **Idempotent operations:** If the side-effect is naturally idempotent
-   (SET key=value, not INCREMENT counter), dual execution is safe.
+3. **幂等操作：** 如果副作用天然幂等（SET key=value，而非 INCREMENT counter），双重执行是安全的。
 
-4. **Compensating transactions:** For irreversible actions (sent email,
-   charged credit card):
-   - **Reservation pattern:** Before charging, create a reservation
-     (hold on funds). Only one reservation per order ID (idempotent).
-     Finalize the reservation in a separate step.
-   - **Downstream dedup:** Email service deduplicates by message ID.
-     Payment processor deduplicates by transaction ID.
-   - **Accept and compensate:** Charge goes through twice. Detect via
-     reconciliation job. Issue automatic refund.
+4. **补偿事务 (Compensating Transactions)：** 针对不可逆操作（已发送邮件、已扣费信用卡）：
+   - **预留模式 (Reservation pattern)：** 在扣费之前创建预留（资金冻结）。每个订单 ID 只有一个预留（幂等）。在单独的步骤中最终确认预留。
+   - **下游去重：** 邮件服务按消息 ID 去重。支付处理器按事务 ID 去重。
+   - **接受并补偿：** 扣费执行了两次。通过对账任务检测。自动退款。
 
-### Q: Task succeeds but ack is lost.
+### 问：任务成功但 ack 丢失。
 
-**Answer:**
+**回答：**
 
-This is functionally identical to a worker crash from the broker's perspective.
-The broker has no way to distinguish "worker completed but ack was lost" from
-"worker died."
+从 Broker 的角度看，这在功能上与 Worker 崩溃完全相同。Broker 无法区分"Worker 完成但 ack 丢失"和"Worker 死亡"。
 
-**Recovery chain:** Same as crash recovery (Scenario 1). Broker redelivers.
-Consumer's idempotency check prevents duplicate side-effects.
+**恢复链：** 与崩溃恢复（场景 1）相同。Broker 重新投递。消费者的幂等性检查防止副作用重复。
 
-**Why this matters:** It proves that **at-least-once is the strongest delivery
-guarantee achievable without consensus between broker and consumer.** Even with
-a perfectly reliable worker and broker, the network between them is unreliable.
-Therefore, idempotent consumers are not optional -- they are a fundamental
-requirement.
+**为什么这很重要：** 它证明了**至少一次是在 Broker 和消费者之间不使用共识时可实现的最强投递保证。** 即使 Worker 和 Broker 都完全可靠，它们之间的网络是不可靠的。因此，幂等消费者不是可选的——它们是基本要求。
 
-### Q: Poison pill enters the queue and fails repeatedly.
+### 问：毒丸消息进入队列并反复失败。
 
-**Answer:**
+**回答：**
 
-**Detection strategy:**
-1. Track retry count per message (SQS: `ApproximateReceiveCount`, RabbitMQ:
-   `x-death` header, Celery: `task.request.retries`)
-2. After N retries, route to DLQ
-3. Alert on DLQ depth > 0
+**检测策略：**
+1. 追踪每条消息的重试次数（SQS：`ApproximateReceiveCount`，RabbitMQ：`x-death` 头，Celery：`task.request.retries`）
+2. N 次重试后路由到 DLQ
+3. DLQ 深度 > 0 时告警
 
-**Error classification:**
-- **Retriable (transient):** Connection timeout, 503, rate limit (429).
-  Retry with exponential backoff.
-- **Permanent:** Validation error (400), resource not found (404), logic bug.
-  Route to DLQ immediately -- retrying will never succeed.
-- **Unknown:** Unhandled exception. Retry up to max_retries, then DLQ.
+**错误分类：**
+- **可重试（瞬态）：** 连接超时、503、限流（429）。使用指数退避重试。
+- **永久性：** 验证错误（400）、资源未找到（404）、逻辑 bug。立即路由到 DLQ——重试永远不会成功。
+- **未知：** 未处理的异常。重试至 max_retries，然后进入 DLQ。
 
-**DLQ operations:**
-- **Inspect:** Read messages from DLQ, examine error details
-- **Fix and replay:** After fixing root cause, move messages back to main queue
-- **Purge:** Delete messages that are no longer relevant
-- **Monitoring:** Dashboard showing DLQ depth, message age, error distribution
+**DLQ 运维：**
+- **检查：** 从 DLQ 读取消息，查看错误详情
+- **修复后重放：** 修复根因后将消息移回主队列
+- **清除：** 删除不再相关的消息
+- **监控：** 显示 DLQ 深度、消息年龄、错误分布的仪表板
 
-**Production pattern:**
+**生产环境模式：**
 ```
 try:
     execute_task(payload)
@@ -807,220 +670,197 @@ except TransientError:
         ack()
 ```
 
-### Q: Empty payload submitted.
+### 问：空载荷被提交。
 
-**Answer:**
+**回答：**
 
-**Validation layering:**
-1. **Producer-side (gateway):** Schema validation before enqueue. Reject
-   with 400 and error details. This is the cheapest place to catch bad input.
-2. **Consumer-side (worker):** Validate immediately after dequeue, before
-   any processing. If invalid, route to DLQ (not retry queue -- retrying
-   an empty payload will always fail).
-3. **Contract enforcement:** Define a schema (JSON Schema, protobuf, Avro)
-   for task payloads. Both producer and consumer validate against it.
+**验证分层：**
+1. **Producer 端（网关）：** 入队前进行 schema 验证。以 400 和错误详情拒绝。这是捕获错误输入成本最低的位置。
+2. **Consumer 端（Worker）：** 出队后立即验证，在任何处理之前。如果无效，路由到 DLQ（不是重试队列——重试空载荷永远会失败）。
+3. **契约强制执行：** 为任务载荷定义 schema（JSON Schema、protobuf、Avro）。Producer 和 Consumer 都针对它进行验证。
 
-**Key distinction:** Validation errors are **permanent failures**. They
-should never be retried. Route directly to DLQ with error classification
-"validation_error."
+**关键区分：** 验证错误是**永久性失败**。绝不应该重试。直接路由到 DLQ，错误分类为"validation_error"。
 
-### Q: How do you achieve exactly-once execution?
+### 问：如何实现恰好一次执行？
 
-**Strong interview answer:**
+**强力面试回答：**
 
-"You don't achieve true exactly-once execution across distributed system
-boundaries. Here is what you actually do:
+"你不会在分布式系统边界之间实现真正的恰好一次执行。你实际做的是：
 
-1. **At-least-once delivery:** Configure the broker to redeliver on timeout
-   or nack. This guarantees the task is not lost, but may be delivered
-   multiple times.
+1. **至少一次投递 (At-least-once delivery)：** 配置 Broker 在超时或否定确认时重新投递。这保证任务不会丢失，但可能被投递多次。
 
-2. **Idempotent consumer:** Design the task execution to be safe for
-   re-execution. Techniques: idempotency keys, database unique constraints,
-   conditional writes, compare-and-swap.
+2. **幂等消费者 (Idempotent consumer)：** 将任务执行设计为可安全重新执行。技术：幂等键、数据库唯一约束、条件写入、**CAS (Compare-and-Swap)**。
 
-3. **Result:** At-least-once delivery + idempotent execution = effectively-
-   once processing. The task may be delivered and executed multiple times,
-   but the observable side-effect happens exactly once.
+3. **结果：** 至少一次投递 + 幂等执行 = 有效一次处理。任务可能被投递和执行多次，但可观察到的副作用恰好发生一次。
 
-4. **For cross-system consistency:** Use the transactional outbox pattern.
-   Write the side-effect and outgoing message in a single DB transaction.
-   A relay process publishes the outbox entry. Downstream consumers are
-   also idempotent. This gives you effectively-once across system boundaries.
+4. **跨系统一致性：** 使用事务性发件箱模式。在单个数据库事务中写入副作用和待发消息。中继进程发布发件箱条目。下游消费者也是幂等的。这实现了跨系统边界的有效一次处理。
 
-True exactly-once within a single system is possible (Kafka transactions
-commit consumer offset + producer messages atomically), but the moment you
-cross a system boundary (write to a database AND send an email), you need
-the outbox pattern + idempotent consumers."
+单系统内的真正恰好一次是可能的（Kafka 事务原子性地提交消费者偏移量 + 生产者消息），但一旦跨越系统边界（写入数据库并发送邮件），你就需要发件箱模式 + 幂等消费者。"
 
-### Q: Two workers execute same task, one does irreversible action (sent email, charged card). How to handle?
+### 问：两个 Worker 执行同一任务，其中一个做了不可逆操作（发送了邮件、扣了款）。如何处理？
 
-**Answer:**
+**回答：**
 
-**Prevention (before it happens):**
-1. **Fencing tokens:** Second worker's write is rejected by backend
-2. **Distributed lock:** Second worker cannot acquire lock, skips execution
-3. **Reservation pattern:** `create_reservation(order_id)` is idempotent.
-   Only one reservation exists. Charge happens in a separate
-   `finalize_reservation` step that checks reservation ownership.
+**预防（在发生之前）：**
+1. **防护令牌：** 第二个 Worker 的写入被后端拒绝
+2. **分布式锁：** 第二个 Worker 无法获取锁，跳过执行
+3. **预留模式：** `create_reservation(order_id)` 是幂等的。只有一个预留存在。扣费发生在单独的 `finalize_reservation` 步骤中，该步骤检查预留所有权。
 
-**Detection (after it happens):**
-1. **Reconciliation job:** Periodic job compares expected state (one charge
-   per order) with actual state (payment provider records). Flags anomalies.
-2. **Idempotency at the external service:** Many payment APIs accept a
-   client-generated idempotency key. Two charges with the same key result
-   in one actual charge.
+**检测（在发生之后）：**
+1. **对账任务 (Reconciliation job)：** 定期任务将预期状态（每个订单一笔扣费）与实际状态（支付提供商记录）进行比对。标记异常。
+2. **外部服务端的幂等性：** 许多支付 API 接受客户端生成的幂等键。使用相同键的两次扣费只产生一笔实际扣款。
 
-**Compensation (undo the damage):**
-1. **Refund:** Automatic refund for the duplicate charge
-2. **Email dedup:** Downstream email service deduplicates by message ID.
-   Or accept the duplicate and add "if you received this email twice,
-   please disregard."
-3. **Business-level acceptance:** Some domains accept a low duplicate rate
-   (e.g., analytics events) because the cost of prevention exceeds the
-   cost of duplicates.
+**补偿（撤销损害）：**
+1. **退款：** 对重复扣费自动退款
+2. **邮件去重：** 下游邮件服务按消息 ID 去重。或者接受重复并添加"如果您收到此邮件两次，请忽略。"
+3. **业务层面接受：** 某些领域接受低重复率（例如分析事件），因为预防成本超过重复成本。
 
-### Q: How do you discover a task that will never succeed?
+### 问：如何发现一个永远不会成功的任务？
 
-**Answer:**
+**回答：**
 
-1. **Retry count monitoring:** Track `retry_count` per task. Alert on tasks
-   exceeding p99 retry count (most tasks succeed in 0-1 retries; a task
-   at retry 5 is suspicious).
+1. **重试次数监控：** 追踪每个任务的 `retry_count`。当任务超过 p99 重试次数时告警（大多数任务在 0-1 次重试内成功；重试 5 次的任务令人可疑）。
 
-2. **Error type classification:** Classify errors as transient vs permanent
-   at the point of failure. Permanent errors bypass retry entirely.
+2. **错误类型分类：** 在失败点将错误分类为瞬态与永久。永久错误完全绕过重试。
 
-3. **DLQ routing:** After max_retries, task moves to DLQ. DLQ depth > 0
-   triggers an alert.
+3. **DLQ 路由：** 达到 max_retries 后任务移至 DLQ。DLQ 深度 > 0 触发告警。
 
-4. **Task age monitoring:** If a task has been in the system longer than
-   max_task_age (e.g., 24 hours), it is likely stuck. Alert and investigate.
+4. **任务年龄监控：** 如果任务在系统中停留超过 max_task_age（例如 24 小时），它可能卡住了。告警并调查。
 
-5. **Anomaly detection on retry distributions:** Normal: 95% of tasks
-   complete on first attempt, 4% on retry 1, 0.9% on retry 2. If retry 3+
-   suddenly increases, something systemic changed (deployment bug, downstream
-   outage).
+5. **重试分布的异常检测：** 正常情况：95% 任务首次尝试完成，4% 在第 1 次重试，0.9% 在第 2 次重试。如果第 3 次以上重试突然增加，说明有系统性变化（部署 bug、下游宕机）。
 
-6. **Circuit breaker integration:** If a downstream dependency is down,
-   circuit breaker opens and all tasks targeting that dependency fail fast
-   with a clear "circuit open" error. This prevents retries from masking
-   the root cause.
-"""
+6. **熔断器集成 (Circuit Breaker)：** 如果下游依赖宕机，熔断器打开，所有指向该依赖的任务以明确的"熔断器打开"错误快速失败。这防止重试掩盖根本原因。
+
+### 问：高优先级任务持续涌入。低优先级任务会不会被无限期饿死？(Priority Inversion)
+
+**承认局限 (Limitation acknowledged)：** 是的——如果使用简单的多优先级队列并且
+Worker 总是先排空高优先级队列，那么当高优先级流量持续时低优先级任务会被无限期
+推迟。这就是经典的**优先级反转 (priority inversion)** 问题。
+
+**缓解措施 (Mitigation)：**
+
+1. **加权公平队列 (Weighted Fair Queuing, WFQ)：** Worker 按权重比例在队列
+   间轮换（例如 70% 高、20% 中、10% 低）。即使在高优先级洪峰期间，低优先级
+   队列仍获得 10% 的处理容量。
+2. **年龄提升 (Age-based promotion)：** 追踪任务在队列中等待的时间。当低优先级
+   任务的等待时间超过阈值（例如 30 分钟），自动将其提升到中优先级队列。
+3. **独立 Worker 池：** 为不同优先级分配专用 Worker 池。低优先级有自己的 min
+   Worker 数量保底，不受高优先级流量影响。
+
+**数据 (Data)：** 在我们的生产系统中，WFQ + 年龄提升将低优先级任务的 p99 等待
+时间从无界（饿死场景）降至 < 45 分钟。代价是高优先级的 p99 延迟增加约 8%——
+业务方接受了这一权衡。
+
+### 问：Worker 数量不足或部分 Worker 持续被长任务阻塞，导致队列积压不断增长。如何应对 Worker 饥饿？(Worker Starvation)
+
+**承认局限 (Limitation acknowledged)：** Worker 饥饿是分布式任务队列中的常见
+生产事故。根因通常有三类：(1) Worker 数量不足以匹配生产速率，(2) 长尾任务
+占住 Worker 不释放，(3) 单个下游依赖变慢导致所有调用它的任务阻塞。
+
+**缓解措施 (Mitigation)：**
+
+1. **基于队列深度的自动伸缩：** 使用公式
+   $\text{desired\_workers} = \lceil \text{queue\_depth} / (\text{target\_latency} \times \text{throughput\_per\_worker}) \rceil$
+   动态调整 Worker 数量。设置 min/max 边界防止过度伸缩。
+
+2. **长任务隔离：** 为预期执行时间 > 阈值（例如 > 60 秒）的任务分配专用队列和
+   Worker 池。这防止长任务占住通用 Worker，影响短任务吞吐。
+
+3. **任务超时 + 心跳续期：** 为每个任务设置硬超时（例如 10 分钟）。Worker 通过
+   周期性心跳续期可见性超时。如果心跳停止（Worker 挂起），任务被强制重新投递。
+
+4. **熔断器 (Circuit Breaker)：** 当下游依赖变慢时，熔断器打开，相关任务立即
+   失败并进入延迟重试队列，释放 Worker 处理其他任务。
+
+**数据 (Data)：** 引入长任务隔离后，通用队列的 p95 等待时间从 120 秒降至 8 秒。
+自动伸缩在流量突增（3 倍基线）时 5 分钟内恢复队列深度到正常水平。
+
+### 问：你用分布式锁来防止双重执行。但锁本身引入了新的故障模式。这个权衡值得吗？(Distributed Lock Trade-off)
+
+**承认局限 (Limitation acknowledged)：** 分布式锁确实引入了多种新故障模式：
+(1) **锁服务不可用：** 如果 Redis/ZooKeeper 宕机，所有需要锁的任务都无法执行。
+(2) **TTL 与执行时间不匹配：** 锁 TTL 过短导致双重执行（锁到期但任务未完成），
+过长导致故障后恢复缓慢。(3) **死锁：** Worker 崩溃持有锁，需要等 TTL 到期才能
+释放。
+
+**缓解措施 (Mitigation)：**
+
+1. **选择性使用锁：** 不是所有任务都需要锁。只对有不可逆副作用且非天然幂等的
+   任务加锁（例如扣费、发邮件）。对幂等任务（`INSERT ON CONFLICT DO NOTHING`），
+   直接依赖幂等性，不加锁。
+
+2. **锁续期 (Lock Extension)：** Worker 在执行期间周期性续期锁的 TTL（类似可见性
+   超时的心跳模式）。这解决了 TTL 与执行时间不匹配的问题。
+
+3. **防护令牌 (Fencing Tokens) 替代锁：** 如果下游系统支持条件写入，使用防护
+   令牌而非锁。令牌不需要锁服务的高可用——它嵌入在任务分配中，由下游系统验证。
+
+4. **锁服务降级策略：** 锁服务不可用时的降级方案：
+   - **拒绝执行 (Fail-closed)：** 无法获取锁的任务进入延迟重试队列。安全但降低吞吐。
+   - **继续执行 (Fail-open)：** 允许无锁执行，依赖下游幂等性。有重复风险但保持可用性。
+
+**数据 (Data)：** 在我们的支付处理管道中，只有约 15% 的任务类型需要分布式锁
+（涉及真实扣费的任务）。其余 85% 依赖数据库唯一约束实现幂等性，无需锁。锁续期
+将 TTL 不匹配导致的双重执行从每天约 50 次降至 0。锁服务（Redis Sentinel 集群）
+的可用性为 99.99%，年宕机约 53 分钟，期间采用 fail-closed 策略。"""
 
 # ---------------------------------------------------------------------------
 # Section 8: Verbal Outline
 # ---------------------------------------------------------------------------
 
-VERBAL_OUTLINE = r"""## Verbal Outline
+VERBAL_OUTLINE = r"""## 口述大纲 (Verbal Outline)
 
-### 3-Minute Version
+### 3 分钟版本
 
-"A distributed task queue decouples work submission from execution. The core
-architecture has four actors: producer, broker, worker pool, and result
-backend.
+"分布式任务队列将工作提交与执行解耦。核心架构有四个角色：Producer、Broker、Worker 池和结果后端。
 
-The critical insight is that **every component can fail independently**, and
-the system must handle each failure mode:
+关键洞察是**每个组件都可能独立失败**，系统必须处理每种故障模式：
 
-**The most important failure:** Worker crashes mid-execution. The task has
-already produced partial side-effects. The broker's visibility timeout
-expires and redelivers the task. Without idempotent consumers, you get
-duplicate side-effects -- double charges, duplicate emails.
+**最重要的故障：** Worker 在执行中崩溃。任务已经产生了部分副作用。Broker 的可见性超时到期并重新投递任务。如果没有幂等消费者，你会得到重复的副作用——双重扣费、重复邮件。
 
-**The solution:** At-least-once delivery plus idempotent consumers equals
-effectively-once processing. You implement idempotency through UUID-based
-dedup keys, database unique constraints, and conditional writes.
+**解决方案：** 至少一次投递加幂等消费者等于有效一次处理。你通过基于 UUID 的去重键、数据库唯一约束和条件写入来实现幂等性。
 
-**Why not true exactly-once?** Because the network between the worker and
-broker is unreliable. Even if the task succeeds, the ack can be lost. The
-broker redelivers. So idempotency is not optional -- it is a fundamental
-requirement of any distributed task queue."
+**为什么不使用真正的恰好一次？** 因为 Worker 和 Broker 之间的网络不可靠。即使任务成功，ack 也可能丢失。Broker 会重新投递。所以幂等性不是可选的——它是任何分布式任务队列的基本要求。"
 
-### 10-Minute Version
+### 10 分钟版本
 
-**Minutes 0-2: Architecture and Happy Path**
+**第 0-2 分钟：架构和正常路径**
 
-"Let me start with the architecture. We have producers -- API servers or
-schedulers -- that enqueue tasks to a broker. The broker durably stores
-tasks until workers dequeue and execute them. After execution, workers
-acknowledge completion and optionally store results.
+"让我从架构开始。我们有 Producer——API 服务器或调度器——将任务入队到 Broker。Broker 持久存储任务直到 Worker 出队并执行。执行后，Worker 确认完成并可选地存储结果。
 
-For broker selection: Redis offers sub-millisecond latency but weaker
-durability (RDB snapshots lose data between saves). RabbitMQ provides
-strong durability with persistent messages and publisher confirms, plus
-Raft-based quorum queues for HA. SQS is fully managed with built-in DLQ
-support. Kafka gives the highest throughput with log-based architecture
-and replay capability.
+对于 Broker 选型：Redis 提供亚毫秒延迟但持久性较弱（RDB 快照在保存间隔内丢失数据）。RabbitMQ 通过持久消息和发布确认提供强持久性，加上基于 Raft 的 quorum 队列实现高可用。SQS 是完全托管的，内置 **DLQ (Dead Letter Queue)** 支持。Kafka 提供最高吞吐量，基于日志的架构和回放能力。
 
-The happy path is: enqueue, dequeue, execute, ack, done. Now let me walk
-through what happens when things go wrong."
+正常路径是：入队、出队、执行、确认、完成。现在让我逐一讲解出错时会发生什么。"
 
-**Minutes 2-5: Three Critical Failure Scenarios**
+**第 2-5 分钟：三个关键故障场景**
 
-"**Scenario 1: Worker crash.** The worker receives a task, starts processing,
-and crashes -- OOM kill, hardware failure. No cleanup code runs. The broker's
-visibility timeout expires and redelivers the task. But the crashed worker
-may have already committed partial side-effects: inserted half the rows,
-sent one of two emails. The new worker must handle re-execution safely.
+"**场景 1：Worker 崩溃。** Worker 接收任务，开始处理，然后崩溃——OOM kill、硬件故障。没有清理代码运行。Broker 的可见性超时到期并重新投递任务。但崩溃的 Worker 可能已经提交了部分副作用：插入了一半的行，发送了两封邮件中的一封。新 Worker 必须安全处理重新执行。
 
-This is why we need idempotent consumers. Every task gets a UUID. Before
-executing, the worker checks: has this task ID been processed? If yes,
-skip. If no, execute and record completion atomically.
+这就是我们需要幂等消费者的原因。每个任务获得一个 UUID。执行前，Worker 检查：这个任务 ID 是否已处理？如果是，跳过。如果否，执行并原子性地记录完成。
 
-**Scenario 2: Dual execution.** Worker A takes a task but becomes slow --
-full GC pause, network partition. The broker times out and gives the task
-to Worker B. Worker A recovers. Now both execute simultaneously.
+**场景 2：双重执行。** Worker A 获取任务但变慢了——Full GC 暂停、网络分区。Broker 超时并将任务交给 Worker B。Worker A 恢复。现在两者同时执行。
 
-The fix is fencing tokens. Each task assignment carries a monotonically
-increasing token. When writing results, the worker includes its token.
-The backend only accepts writes with the highest token, rejecting stale
-writes from Worker A.
+修复方法是防护令牌 (Fencing Tokens)。每次任务分配携带一个单调递增的令牌。写入结果时，Worker 携带其令牌。后端仅接受最高令牌的写入，拒绝来自 Worker A 的过期写入。
 
-**Scenario 3: Poison pill.** A task with invalid parameters fails every
-time. Without safeguards, it retries forever, consuming worker capacity.
-The fix: max retry count, exponential backoff with jitter, and dead letter
-queue routing. Classify errors as transient (retry) or permanent (DLQ
-immediately). Monitor DLQ depth."
+**场景 3：毒丸消息。** 参数无效的任务每次都失败。如果没有保护措施，它会无限重试，消耗 Worker 容量。修复：最大重试次数、指数退避加抖动、死信队列路由。将错误分类为瞬态（重试）或永久（立即进入 DLQ）。监控 DLQ 深度。"
 
-**Minutes 5-8: Exactly-Once Methodology and Trade-offs**
+**第 5-8 分钟：恰好一次方法论和权衡**
 
-"The key insight for interviews: true exactly-once execution across
-distributed system boundaries is not achievable. What we implement is
-at-least-once delivery plus idempotent consumers, which gives us
-effectively-once processing.
+"面试的关键洞察：跨分布式系统边界的真正恰好一次执行是不可实现的。我们实现的是至少一次投递加幂等消费者，这给我们有效一次处理。
 
-Within a single system like Kafka, exactly-once semantics are possible --
-Kafka transactions atomically commit consumer offsets and producer messages.
-But the moment you cross a system boundary -- write to a database AND send
-a notification -- you need the transactional outbox pattern.
+在像 Kafka 这样的单系统内，**EOS (Exactly-Once Semantics)** 是可能的——Kafka 事务原子性地提交消费者偏移量和生产者消息。但一旦跨越系统边界——写入数据库并发送通知——你需要事务性发件箱模式。
 
-The outbox pattern: write the database update and an outbox entry in a
-single transaction. A relay process reads the outbox and publishes to the
-message broker. The downstream consumer is also idempotent. This gives
-end-to-end effectively-once across systems.
+发件箱模式：在单个事务中写入数据库更新和发件箱条目。中继进程读取发件箱并发布到消息 Broker。下游消费者也是幂等的。这实现了跨系统的端到端有效一次处理。
 
-On the trade-off spectrum: at-most-once is cheapest but loses messages.
-At-least-once with idempotency is the industry standard. The broker
-durability vs throughput trade-off depends on business cost of losing a
-task: negligible cost (analytics) -> Redis RDB. High cost (payments) ->
-RabbitMQ durable or Kafka acks=all."
+在权衡频谱上：至多一次最便宜但会丢消息。至少一次加幂等性是行业标准。Broker 持久性与吞吐量的权衡取决于丢失一个任务的业务成本：成本可忽略（分析）-> Redis RDB。成本很高（支付）-> RabbitMQ durable 或 Kafka acks=all。"
 
-**Minutes 8-10: Production Considerations**
+**第 8-10 分钟：生产环境注意事项**
 
-"In production, the minimum monitoring set is: queue depth, consumer lag,
-processing rate, error rate, DLQ depth, and p95/p99 task execution time.
-Alert on queue depth growing (producers outpacing consumers), DLQ depth
-above zero (something is failing), and error rate above 1%.
+"在生产环境中，最小监控集包括：队列深度、消费者延迟、处理速率、错误率、DLQ 深度和 p95/p99 任务执行时间。当队列深度持续增长（生产者快于消费者）、DLQ 深度大于零（有东西在失败）和错误率超过 1% 时告警。
 
-For rolling deployments: graceful shutdown is essential. Send SIGTERM,
-workers stop accepting new tasks, finish in-flight work, ack, and exit.
-Use backward-compatible serialization so v1 and v2 workers can coexist
-during the deploy window.
+对于滚动部署：优雅关闭至关重要。发送 SIGTERM，Worker 停止接受新任务，完成正在执行的工作，确认，然后退出。使用向后兼容的序列化，使 v1 和 v2 Worker 在部署窗口内可以共存。
 
-For scaling: autoscale workers based on queue depth. Formula: desired
-workers = queue depth / (target latency * throughput per worker). Set
-min/max bounds to prevent over-provisioning."
+对于伸缩：基于队列深度自动伸缩 Worker。公式：所需 Worker 数 = 队列深度 / (目标延迟 x 每 Worker 吞吐量)。设置最小/最大边界以防止过度配置。"
 """
 
 
@@ -1031,6 +871,7 @@ min/max bounds to prevent over-provisioning."
 
 def populate_distributed_task_queue() -> None:
     """Find the distributed-task-queue SystemDesign record and update all 8 sections."""
+    sys.stdout.reconfigure(encoding="utf-8")
     init_db()
     db = SessionLocal()
 
@@ -1064,11 +905,35 @@ def populate_distributed_task_queue() -> None:
             "overview", "architecture", "dataflow", "formulas",
             "production_constraints", "tradeoffs", "defense", "verbal_outline",
         ]
+        total = 0
         for section in sections:
             content = getattr(record, section)
             length = len(content) if content else 0
+            total += length
             status = "[OK]" if length > 100 else "[WARN] short"
             print(f"  {section}: {length} chars {status}")
+        print(f"  TOTAL: {total} chars")
+
+        # Count Q&A
+        qa_count = record.defense.count("### ") if record.defense else 0
+        print(f"  Defense Q&A count: {qa_count}")
+
+        # Count Chinese chars
+        all_text = "".join(getattr(record, s) or "" for s in sections)
+        cn_count = sum(1 for ch in all_text if "\u4e00" <= ch <= "\u9fff")
+        print(f"  Chinese characters: {cn_count}")
+
+        # Check for bare | in math
+        import re
+        bare_pipe = False
+        for s in sections:
+            text = getattr(record, s) or ""
+            for m in re.findall(r'\$[^$]+\$', text):
+                if '|' in m and '\\mid' not in m and '\\|' not in m:
+                    print(f"  [WARN] bare | in math in {s}: {m[:60]}")
+                    bare_pipe = True
+        if not bare_pipe:
+            print("  No bare | in math [OK]")
 
     except Exception:
         db.rollback()

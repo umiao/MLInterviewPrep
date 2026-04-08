@@ -458,3 +458,10 @@
 - **Sanity check result**: 21,196 total chars (target >=20K), 11 display math, 7 Q&A, 3 failure modes (target 2+), tuning table present, cold-start documented, Kafka detail added, no bare | in math, 7,428 Chinese characters preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-281 --status completed`
+
+### 2026-04-08 -- [T-P1-282] Add Defense Q&A to distributed-task-queue
+- **What I did**: Added 3 new Defense Q&A to distributed-task-queue module: (1) Priority Inversion -- WFQ, age-based promotion, dedicated pools. (2) Worker Starvation -- autoscaling, long-task isolation, circuit breaker. (3) Distributed Lock Trade-off -- selective locking, lock extension, fencing tokens as alternative, fail-closed/fail-open degradation. Converted entire seed script from English to Chinese source of truth.
+- **Deliverables**: scripts/content_distributed_task_queue.py (Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 25,269 total chars, 12 Defense Q&A (9 existing + 3 new), 9,041 Chinese characters, no bare | in math, all existing content preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-282 --status completed`
