@@ -153,6 +153,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Medium",
     tags: ["Scraping", "Time-Series", "Alerts"],
   },
+  {
+    title: "Design an Online Judge (LeetCode)",
+    slug: "interview-online-judge",
+    description:
+      "Code sandbox (gVisor/Docker + cgroups + seccomp), queue-based submission pipeline (RabbitMQ), test case runner with early termination, judge verdicts state machine, MOSS plagiarism detection (Winnowing), multi-language runtime, contest leaderboard (Redis Sorted Set).",
+    difficulty: "Hard",
+    tags: ["Sandbox", "Queue", "Security"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {

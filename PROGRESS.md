@@ -379,3 +379,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 25,122 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-312 --status completed`
+
+## 2026-04-08 -- [T-P1-313] SD Prep: Design an Online Judge (LeetCode)
+- **What I did**: Created seed script `scripts/content_interview_online_judge.py` with all 8 sections in Chinese with English technical terms preserved. Covers code sandbox execution (gVisor + cgroups v2 + seccomp multi-layer defense), queue-based submission pipeline (RabbitMQ with priority queues), test case runner with early termination, judge verdict state machine (Pending->Compiling->Running->AC/WA/TLE/MLE/RE/CE), MOSS plagiarism detection (Winnowing fingerprint algorithm), multi-language runtime with per-language time/memory multipliers, contest leaderboard (Redis Sorted Set with ACM-ICPC penalty calculation). Capacity estimation: 5M users, 500K DAU, 1M submissions/day, 120 peak QPS, 1TB/year submission storage, 1200 peak concurrent Judge Workers (elastic 30-300 machines). Created SystemDesign DB record with slug `interview-online-judge`, display_order=115. Added topic card to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_online_judge.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 23,717 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-313 --status completed`
