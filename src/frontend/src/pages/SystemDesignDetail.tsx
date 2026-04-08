@@ -211,94 +211,104 @@ export default function SystemDesignDetail() {
         </div>
       </header>
 
-      {/* Sticky bookmark nav */}
-      <nav className="sticky top-[57px] z-10 border-b border-gray-200 px-6 py-2 bg-white shrink-0">
-        <div className="flex gap-1 overflow-x-auto">
-          {SECTIONS.map((section) => (
-            <button
-              key={section}
-              onClick={() => scrollToSection(section)}
-              className={`text-sm px-3 py-1 rounded whitespace-nowrap transition-colors ${
-                highlightedSection === section
-                  ? "bg-blue-100 text-blue-700 font-medium"
-                  : "text-gray-500 hover:bg-gray-50"
-              }`}
-            >
-              {SECTION_LABELS[section]}
-            </button>
-          ))}
-        </div>
-      </nav>
-
-      {/* Scrollable content area with all sections */}
+      {/* Scrollable content area with right-side TOC */}
       <div
         ref={scrollContainerRef}
         className="flex-1 overflow-auto min-h-0"
       >
-        <div className="max-w-4xl mx-auto px-6 py-6 space-y-10">
-          {SECTIONS.map((section) => (
-            <section
-              key={section}
-              ref={(el) => {
-                sectionRefs.current[section] = el;
-              }}
-              data-section={section}
-              className="scroll-mt-28"
-            >
-              {/* Section header */}
-              <div className="flex items-center gap-3 mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">
-                  {SECTION_LABELS[section]}
-                </h2>
-                {mode === "edit" && saveStatuses[section] === "saving" && (
-                  <span className="text-xs text-gray-400">Saving...</span>
-                )}
-                {mode === "edit" && saveStatuses[section] === "saved" && (
-                  <span className="text-xs text-green-600">Saved</span>
-                )}
-                {mode === "edit" && saveStatuses[section] === "error" && (
-                  <span className="text-xs text-red-600">
-                    Failed{" "}
-                    <button
-                      onClick={() => retrySection(section)}
-                      className="underline hover:text-red-800"
-                    >
-                      retry
-                    </button>
-                  </span>
-                )}
-              </div>
-
-              {/* Architecture diagram inline */}
-              {section === "architecture" && design.diagram_filename && (
-                <ImageLightbox
-                  src={`/static/system-designs/${design.diagram_filename}`}
-                  className="w-full max-h-96 object-contain mb-6 rounded border"
-                  alt={`${design.title} architecture diagram`}
-                />
-              )}
-
-              {/* Content: edit or preview */}
-              {mode === "edit" ? (
-                <textarea
-                  value={sectionContents[section]}
-                  onChange={(e) => updateSection(section, e.target.value)}
-                  className="w-full min-h-[200px] border border-gray-300 rounded px-4 py-3 text-base font-mono resize-y"
-                  placeholder={`Write ${SECTION_LABELS[section]} content here...`}
-                />
-              ) : (
-                <div className="prep-prose">
-                  {sectionContents[section] ? (
-                    <MarkdownPreview markdown={sectionContents[section]} />
-                  ) : (
-                    <p className="text-gray-400 italic">
-                      No content yet. Switch to Edit mode to add content.
-                    </p>
+        <div className="flex max-w-6xl mx-auto">
+          {/* Main content */}
+          <div className="flex-1 min-w-0 px-6 py-6 space-y-10">
+            {SECTIONS.map((section) => (
+              <section
+                key={section}
+                ref={(el) => {
+                  sectionRefs.current[section] = el;
+                }}
+                data-section={section}
+                className="scroll-mt-16"
+              >
+                {/* Section header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    {SECTION_LABELS[section]}
+                  </h2>
+                  {mode === "edit" && saveStatuses[section] === "saving" && (
+                    <span className="text-xs text-gray-400">Saving...</span>
+                  )}
+                  {mode === "edit" && saveStatuses[section] === "saved" && (
+                    <span className="text-xs text-green-600">Saved</span>
+                  )}
+                  {mode === "edit" && saveStatuses[section] === "error" && (
+                    <span className="text-xs text-red-600">
+                      Failed{" "}
+                      <button
+                        onClick={() => retrySection(section)}
+                        className="underline hover:text-red-800"
+                      >
+                        retry
+                      </button>
+                    </span>
                   )}
                 </div>
-              )}
-            </section>
-          ))}
+
+                {/* Architecture diagram inline */}
+                {section === "architecture" && design.diagram_filename && (
+                  <ImageLightbox
+                    src={`/static/system-designs/${design.diagram_filename}`}
+                    className="w-full max-h-96 object-contain mb-6 rounded border"
+                    alt={`${design.title} architecture diagram`}
+                  />
+                )}
+
+                {/* Content: edit or preview */}
+                {mode === "edit" ? (
+                  <textarea
+                    value={sectionContents[section]}
+                    onChange={(e) => updateSection(section, e.target.value)}
+                    className="w-full min-h-[200px] border border-gray-300 rounded px-4 py-3 text-base font-mono resize-y"
+                    placeholder={`Write ${SECTION_LABELS[section]} content here...`}
+                  />
+                ) : (
+                  <div className="prep-prose">
+                    {sectionContents[section] ? (
+                      <MarkdownPreview markdown={sectionContents[section]} />
+                    ) : (
+                      <p className="text-gray-400 italic">
+                        No content yet. Switch to Edit mode to add content.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </section>
+            ))}
+          </div>
+
+          {/* Right-side TOC sidebar -- hidden on small screens */}
+          <aside className="hidden lg:block w-52 shrink-0 py-6 pr-4">
+            <nav className="sticky top-4">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                Sections
+              </p>
+              <ul className="space-y-1">
+                {SECTIONS.map((section) => (
+                  <li key={section}>
+                    <button
+                      onClick={() => scrollToSection(section)}
+                      className={`block w-full text-left text-sm px-2 py-1 rounded transition-colors truncate ${
+                        highlightedSection === section
+                          ? "bg-blue-50 text-blue-700 font-medium"
+                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                      }`}
+                      title={SECTION_LABELS[section]}
+                    >
+                      {SECTION_LABELS[section]}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </aside>
         </div>
       </div>
     </div>

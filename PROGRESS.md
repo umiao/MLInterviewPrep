@@ -521,3 +521,10 @@
 - **Sanity check result**: Both PNGs generated successfully with non-zero size. Visual verification confirms clear, well-structured diagrams matching existing style conventions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-288 --status completed`
+
+## 2026-04-08 -- [T-P1-289] Replace top bookmark nav with persistent right-side TOC
+- **What I did**: Replaced the sticky horizontal bookmark nav bar in SystemDesignDetail.tsx with a persistent right-side TOC sidebar. The TOC uses a two-column flex layout (main content left, TOC right), highlights the current section via the existing IntersectionObserver, supports click-to-scroll, and is hidden on small screens (lg: breakpoint). Reduced scroll-mt from 28 to 16 since the bookmark nav no longer occupies vertical space.
+- **Deliverables**: src/frontend/src/pages/SystemDesignDetail.tsx
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-289 --status completed`
