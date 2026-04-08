@@ -13,20 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-318: SD Prep: Update landing page with all topics + category grouping
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
-
-1. Replace hardcoded INTERVIEW_TOPICS with dynamic DB fetch (display_order >= 100)
-2. Group by category: Core Infrastructure, Social & Real-time, Location & Geo, Search & Data, Storage & Media, Specialized
-3. Each card links to /system-design/{slug} (no Coming Soon)
-4. Difficulty badge + key tags per card
-5. TypeScript clean
-
-AC: All 20 topics shown as clickable cards, grouped by category, no Coming Soon, TypeScript clean
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -98,6 +84,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-08** -- T-P2-318: SD Prep: Update landing page with all topics + category grouping. After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
 - [x] **2026-04-08** -- T-P2-287: System design formula audit: all modules. CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chin
 - [x] **2026-04-08** -- T-P2-286: System design depth: ml-system-design-patterns expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py
 - [x] **2026-04-08** -- T-P2-285: System design depth: vibe-code-engineering restructure. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2

@@ -414,3 +414,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 24,637 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-317 --status completed`
+
+## 2026-04-08 -- [T-P2-318] SD Prep: Update landing page with all topics + category grouping
+- **What I did**: Refactored SystemDesignList.tsx Interview Prep tab to dynamically fetch topics from DB (display_order >= 100) instead of hardcoded array. Grouped 20 topics into 6 categories: Core Infrastructure (4), Social & Real-time (4), Location & Geo (2), Search & Data (4), Storage & Media (2), Specialized (4). Removed "Coming Soon" state -- all cards are now clickable. Kept difficulty badges and tags as client-side metadata map (TOPIC_META keyed by slug). Also fixed eBay tab to filter display_order < 100 so interview topics don't appear there.
+- **Deliverables**: `src/frontend/src/pages/SystemDesignList.tsx` (modified)
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 20 topics covered in TOPIC_META. Category grouping renders correctly.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-318 --status completed`
