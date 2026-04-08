@@ -296,6 +296,7 @@ FORMULAS = r"""## 公式与算法 (Formulas & Algorithms)
 
 **Token 分配公式**：对于 $N$ 个节点、每个节点 $V$ 个 vnodes：
 $$\text{Total tokens} = N \times V$$
+
 $$\text{Expected data per node} = \frac{\text{Total data}}{N}$$
 
 ### 复制因子与仲裁 (Replication Factor and Quorum)

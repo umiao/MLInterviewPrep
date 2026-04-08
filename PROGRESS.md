@@ -493,3 +493,10 @@
 - **Sanity check result**: 17,017 total chars (target >=14K), 10 display math (target 5+), 8 Q&A (target 4+), failure modes in every section, no bare | in math, 5,768 Chinese characters preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-286 --status completed`
+
+### 2026-04-08 -- [T-P2-287] System design formula audit: all modules
+- **What I did**: Audited all 8 system design modules for formula rendering safety. Found 3 real issues (consecutive $$ without blank lines): 1 in database-comparison/formulas, 2 in distributed-task-queue/formulas. Fixed in seed scripts and re-seeded only those 2 modules. No bare | in display math found. No multi-line $$ found. "Unbalanced $" flags were all false positives from currency symbols ($5K, $0.25) and code refs (`$lookup`). Created reusable audit script (scripts/audit_formulas.py). All 8 modules pass clean.
+- **Deliverables**: scripts/content_database_comparison.py (1 blank line added), scripts/content_distributed_task_queue.py (2 blank lines added), scripts/audit_formulas.py (new audit tool), data/mle_prep.db updated
+- **Sanity check result**: All 8 modules CLEAN. 0 bare | in display math, 0 multi-line $$, 0 consecutive $$ without blank lines. All Chinese preserved.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-287 --status completed`

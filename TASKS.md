@@ -13,18 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-287: System design formula audit: all modules
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P0-280, T-P0-281, T-P1-282, T-P1-283, T-P1-284
-- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chinese with English. (3) Formulas: \mid not |, single-line $$, blank lines between consecutive $$.
-
-Audit all 8 system design modules for formula rendering safety.
-
-STEPS: 1. For each of 8 modules, read content from DB. 2. Check every $ and $$ block for: bare | (should be \mid), multi-line $$ (single line), consecutive $$ without blank lines, unbalanced $. 3. If issues, fix ONLY in corresponding seed script (scripts/content_*.py). 4. Re-seed ONLY fixed modules. 5. Report findings.
-
-AC: All 8 scanned, All bare | -> \mid, All multi-line $$ collapsed, All consecutive $$ have blank lines, Seed scripts updated for fixed modules only, ALL Chinese preserved
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -96,6 +84,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 249 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-08** -- T-P2-287: System design formula audit: all modules. CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chin
 - [x] **2026-04-08** -- T-P2-286: System design depth: ml-system-design-patterns expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py
 - [x] **2026-04-08** -- T-P2-285: System design depth: vibe-code-engineering restructure. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2
 - [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.

@@ -382,7 +382,9 @@ $$\text{trip when } \frac{\text{failures}}{\text{total}} > \text{error\_rate\_th
 任务在满足以下任一条件时应路由至 DLQ：
 
 $$\text{retry\_count} > \text{max\_retries}$$
+
 $$\text{age} > \text{max\_task\_age}$$
+
 $$\text{error\_type} \in \{\text{permanent errors}\}$$
 
 **错误类型分类启发式：**
