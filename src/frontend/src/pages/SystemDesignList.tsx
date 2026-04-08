@@ -145,6 +145,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["Storage", "Sync", "Dedup"],
   },
+  {
+    title: "Design a Price Drop Tracker (CamelCamelCamel)",
+    slug: "interview-price-drop-tracker",
+    description:
+      "Scraping pipeline (proxy rotation, anti-scraping, golden tests), TimescaleDB price history (downsampling, continuous aggregates), event-driven alert evaluation (Kafka + rule engine + cooldown), Z-Score anomaly detection, dynamic scrape priority.",
+    difficulty: "Medium",
+    tags: ["Scraping", "Time-Series", "Alerts"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {

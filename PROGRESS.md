@@ -372,3 +372,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 26,794 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-311 --status completed`
+
+## 2026-04-08 -- [T-P1-312] SD Prep: Design a Price Drop Tracker (CamelCamelCamel)
+- **What I did**: Created seed script `scripts/content_interview_price_tracker.py` with all 8 sections in Chinese with English technical terms preserved. Covers scraping pipeline (proxy rotation with 10K+ IPs, anti-scraping countermeasures, golden tests for parser validation), TimescaleDB price history (hypertable with 7-day chunks, downsampling 90d raw + daily aggregates, continuous aggregates for OHLC), event-driven alert evaluation (Kafka price-update topic, rule engine with multiple conditions, 24h notification cooldown with breakthrough), Z-Score anomaly detection for suspicious price changes, dynamic scrape priority (weighted: watcher count x 0.5 + volatility x 0.3 + recency x 0.2). Capacity estimation: 10M users, 50M products, 300M scrapes/day, 10.4K peak QPS, 2 TB active storage, 200M active alerts, 5M notifications/day, ~2K USD/month proxy cost. Created SystemDesign DB record with slug `interview-price-drop-tracker`, display_order=114. Added topic card to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_price_tracker.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 25,122 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-312 --status completed`
