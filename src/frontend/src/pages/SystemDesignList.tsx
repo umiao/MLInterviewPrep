@@ -73,6 +73,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     tags: ["Geospatial", "WebSocket", "Real-time"],
   },
   {
+    title: "Design a Proximity Service (Yelp)",
+    slug: "interview-proximity-service",
+    description:
+      "Nearby search: Geohash vs QuadTree vs R-Tree, radius queries, business CRUD + filtering, multi-level caching for 99:1 read-heavy workload.",
+    difficulty: "Medium",
+    tags: ["Geospatial", "Caching", "Read-heavy"],
+  },
+  {
     title: "Design a Web Crawler",
     description:
       "Distributed web crawler: URL frontier, politeness, dedup, content extraction. Focus on scale, distributed coordination, and fault tolerance.",

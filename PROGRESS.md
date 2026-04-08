@@ -570,3 +570,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,246 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-301 --status completed`
+
+## 2026-04-08 -- [T-P0-302] SD Prep: Design a Proximity Service (Yelp)
+- **What I did**: Created seed script `scripts/content_interview_proximity_service.py` with all 8 sections in Chinese with English technical terms preserved. Covers Geohash spatial indexing (encode lat/lng to 1D string, B-Tree prefix queries), 9-cell neighbor search to handle boundary issues, Haversine distance for precise ranking, QuadTree vs Geohash comparison, multi-level caching (L1 Caffeine 30s + L2 Redis 5min + L3 MySQL replica) for 99:1 read-heavy workload, capacity estimation (200M businesses, 50M DAU, 5800 peak QPS), cache avalanche prevention (TTL jitter + mutex lock + warming), and density-adaptive multi-precision indexing. Created SystemDesign DB record with slug `interview-proximity-service`, display_order=104. Added new topic card with slug in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_proximity_service.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,752 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-302 --status completed`
