@@ -472,3 +472,10 @@
 - **Sanity check result**: 24,502 total chars (target >=24K), 11 display math, 6 Q&A, 3 failure modes, migration strategy present, iteration section present, no bare | in math, 7,463 Chinese characters preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-283 --status completed`
+
+### 2026-04-08 -- [T-P1-284] Expand pbe-pipeline system design to interview depth
+- **What I did**: Expanded pbe-pipeline from 12.5K to 18.2K chars. Added: (1) Schema evolution strategy with Confluent Schema Registry and compatibility checks. (2) Data quality monitoring section with anomaly detection (rolling Z-score), schema drift detection, value range validation, freshness SLAs. (3) Iteration & Evaluation section with 4-layer methodology (offline replay, shadow evaluation, interleaving, A/B) and hyperparameter tuning table (5 params). (4) 3 failure modes with root cause and fix (viewport event storm, IPW weight explosion, feature-label temporal misalignment). (5) 2 new Defense Q&A (Z-score limitations in non-stationary e-commerce, schema evolution stress test). (6) Data anomaly Z-score formula. Converted seed script from English to Chinese source of truth.
+- **Deliverables**: scripts/content_pbe_pipeline.py (Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 18,180 total chars (target >=16K), 7 display math, 6 Q&A (target 6+), 3 failure modes (target 2+), data quality monitoring present, schema evolution present, iteration section present, no bare | in math, 5,869 Chinese characters preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-284 --status completed`
