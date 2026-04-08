@@ -4,16 +4,11 @@ Provides:
 - UTF-8 stream initialization for Windows
 - Safe JSON parsing from stdin with diagnostics
 - Top-level exception wrapper for hook main() functions
-- Stop hook caching (skip re-run if no files changed)
 """
-import contextlib
-import hashlib
 import io
 import json
-import subprocess
 import sys
 from collections.abc import Callable
-from pathlib import Path
 from typing import Any
 
 
@@ -104,71 +99,6 @@ def safe_read_stdin(hook_name: str) -> dict[str, Any] | None:
 
     return parsed
 
-
-def _get_repo_fingerprint() -> str:
-    """Compute a fingerprint of the current repo state (staged + unstaged + untracked).
-
-    Uses `git status --porcelain` output hashed to a short hex string.
-    Returns empty string if git is unavailable or not in a repo.
-    """
-    try:
-        result = subprocess.run(
-            ["git", "status", "--porcelain"],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            timeout=10,
-        )
-        if result.returncode != 0:
-            return ""
-        return hashlib.sha256(result.stdout.encode("utf-8")).hexdigest()[:16]
-    except (subprocess.TimeoutExpired, FileNotFoundError, OSError):
-        return ""
-
-
-def check_stop_cache(cache_name: str) -> bool:
-    """Check if a stop hook can skip re-running based on cached results.
-
-    Args:
-        cache_name: Identifier for the cache file (e.g., "lint", "test").
-
-    Returns:
-        True if cache is valid (no files changed since last pass) -- caller should skip.
-        False if cache is stale or missing -- caller should run checks.
-    """
-    cache_dir = Path(__file__).resolve().parent.parent  # .claude/
-    cache_file = cache_dir / f"last_{cache_name}_pass"
-
-    if not cache_file.exists():
-        return False
-
-    try:
-        stored = cache_file.read_text(encoding="utf-8").strip()
-    except OSError:
-        return False
-
-    current = _get_repo_fingerprint()
-    if not current:
-        return False  # Can't determine state, run checks
-
-    return stored == current
-
-
-def write_stop_cache(cache_name: str) -> None:
-    """Record that a stop hook passed successfully.
-
-    Args:
-        cache_name: Identifier for the cache file (e.g., "lint", "test").
-    """
-    cache_dir = Path(__file__).resolve().parent.parent  # .claude/
-    cache_file = cache_dir / f"last_{cache_name}_pass"
-
-    fingerprint = _get_repo_fingerprint()
-    if not fingerprint:
-        return  # Can't determine state, don't cache
-
-    with contextlib.suppress(OSError):
-        cache_file.write_text(fingerprint, encoding="utf-8")
 
 
 def run_hook(hook_name: str, main_fn: Callable[[dict[str, Any]], None]) -> None:

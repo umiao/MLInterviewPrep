@@ -354,3 +354,72 @@
 - **Sanity check result**: TypeScript clean, 1033 tests pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-271 --status completed`
+
+## 2026-04-07 -- [T-P1-271] Fix TDZ runtime error in drawer wiring
+- **What I did**: Fixed "Cannot access 'examples' before initialization" error. The `drawerExample` derivation (line 478) referenced the `examples` const declared later (line 514) -- a JavaScript temporal dead zone (TDZ) error. Moved `drawerExample` after the `useQuery` that declares `examples`.
+- **Deliverables**: `BehavioralQuestions.tsx` (reordered variable declarations)
+- **Sanity check result**: TypeScript clean, 1033 tests pass, user confirmed error resolved.
+- **Status**: [DONE]
+- **Request**: No task change (bugfix within T-P1-271)
+
+## 2026-04-07 -- [T-P1-272] Plan system design Chinese translation
+- **What I did**: Task planning mode. Investigated all 8 system design modules in DB: all have 8/8 sections filled, totaling ~193K characters of English technical content. Created T-P1-272 with detailed translation rules (narrative to Chinese, preserve terms/acronyms with expansion, keep code blocks/formulas). Proposed 4-batch execution strategy by content volume. Sent analysis with 3 decision questions to user for review.
+- **Deliverables**: T-P1-272 created with translation rules, batch strategy, and scope analysis
+- **Sanity check result**: DB content verified (8 modules, character counts confirmed), TASKS.md regenerated.
+- **Status**: [DONE] (planning complete, awaiting user decisions on batch splitting and priority)
+- **Request**: No status change (T-P1-272 remains active, pending user response)
+
+## 2026-04-08 -- [T-P1-273~277] Translate all 8 system design modules to Chinese
+- **What I did**: Translated all 8 system design modules (64 sections total, ~193K chars English) to Chinese via 5 batch task-executor agents. Batch 1: modules 7+8 (24K). Batch 2: modules 1+2 (36K). Batch 3: modules 3+4 (55K). Batch 4+5 in parallel: modules 5 (36K) and 6 (41K). Rules: narrative in Chinese, technical terms preserved in English bold with expansion, code blocks/formulas untouched, section headers bilingual, titles/subtitles English.
+- **Deliverables**: data/mle_prep.db -- 64 section columns updated across 8 system_designs rows
+- **Sanity check result**: All 64 sections verified to contain Chinese content. Titles/subtitles unchanged. ALL PASS.
+- **Status**: [DONE]
+- **Request**: T-P1-273~277 all marked completed via task_db.py
+
+## 2026-04-08 -- Analyze module-arbitration content gaps for system design interview depth
+- **What I did**: Read all 8 sections of module-arbitration (~11K chars). Analyzed interview-readiness across three dimensions: (1) Thompson Sampling -- formula present but missing step-by-step decision process, conjugate prior reasoning, batched TS at 50K QPS, cold start priors. (2) Kafka pipeline -- only an arrow in dataflow diagram, missing event schema, consumer group topology, attribution windows, partitioning. (3) Tuning iteration -- no monitoring/drift detection/A/B framework narrative. Identified two logic-chain breaks in interview flow: "why TS" lacks theoretical backing, "how system evolves" missing entirely. Proposed ~7.5K chars of additions across formulas, architecture, dataflow, tradeoffs, defense sections.
+- **Deliverables**: Detailed expansion plan sent to user for review (3 themes, estimated sizes, placement locations)
+- **Sanity check result**: N/A (planning/analysis only, no code changes)
+- **Status**: [DONE] (awaiting user review before execution)
+- **Request**: No task change (planning discussion)
+
+### 2026-04-07 — [T-P1-163] Translate system design modules 7 and 8 to Chinese
+- **What I did**: Translated all 8 section columns (overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline) for both `vibe-code-engineering-patterns` (module 7) and `ml-system-design-patterns` (module 8) from English to Chinese. Applied translation rules: bilingual section headers, technical terms kept in English with bold+Chinese explanation on first use, acronyms expanded per section, code blocks preserved as-is, table headers translated, math/formulas kept, proper nouns in English. Title and subtitle kept in English.
+- **Deliverables**: 16 section columns updated in `data/mle_prep.db` table `system_designs`
+- **Sanity check result**: Verified Chinese content present in all sections, title/subtitle remain English, code blocks untranslated.
+- **Status**: [DONE]
+
+### 2026-04-08 — Expand module-arbitration system design depth (Thompson Sampling, Kafka, Iteration)
+- **What I did**: Expanded module-arbitration content across 5 sections to fill system design interview depth gaps. (1) **Formulas**: Added Beta-Bernoulli conjugate prior derivation, cold-start prior transfer algorithm (kNN module embedding), score fusion formula (TS + XGBoost with epsilon annealing), batched TS at scale (100ms batch period), LP solver specified as min-cost max-flow. (2) **Architecture**: Expanded HMAC acronym, added full Kafka stream pipeline (event schema with 10 fields, 3-stage processing topology, exactly-once semantics, backpressure handling). (3) **Data Flow**: Expanded feedback path with stream stages, added hourly-TS-vs-daily-model trade-off explanation. (4) **Trade-offs**: Added Iteration & Evaluation subsection (3-tier eval with IPS/DR formula, hyperparameter tuning table, 3 failure modes with fixes). (5) **Defense Q&A**: Added 2 new Q&As (position bias debiasing, feedback loop convergence prevention).
+- **Deliverables**: `scripts/content_module_arbitration.py` (updated), `data/mle_prep.db` (8 sections re-seeded, ~11K -> ~32K chars total)
+- **Sanity check result**: Seed script ran successfully, all 8 sections verified OK (>100 chars each). Thompson Sampling present in 6/8 sections, Kafka in 4/8, Iteration/Counterfactual in 2/8.
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+### 2026-04-08 -- Fix formula rendering + diagnose Chinese translation loss
+- **What I did**: (1) Diagnosed and fixed formula rendering breakage in module-arbitration: root cause was bare `|` (pipe) inside `$`/`$$` math blocks conflicting with remark-gfm table parser, plus multi-line `$$` blocks and consecutive `$$` without blank lines. Fixed all `|` to `\mid`, collapsed multi-line `$$` to single lines, added blank lines between consecutive `$$` blocks, split compound `$\alpha, \beta$` into separate `$` wrappers. (2) Diagnosed Chinese translation overwrite: `content_module_arbitration.py` has hardcoded English content, running it overwrote the Chinese translations in DB. Chinese is unrecoverable (DB not in git, WAL empty). Other 7 modules confirmed safe. (3) Proposed 2 tasks (formula verification + Chinese re-translation) and 2 lessons to user for review.
+- **Deliverables**: `scripts/content_module_arbitration.py` (formula fixes), `data/mle_prep.db` (re-seeded with fixed formulas)
+- **Sanity check result**: Seed script ran OK, all 8 sections verified. No bare `|` in any math block (verified via script). Awaiting user page refresh to confirm rendering.
+- **Status**: [PARTIAL] Formula fix done. Chinese re-translation pending user approval.
+- **Request**: No task to update (awaiting user confirmation to create translation task)
+
+### 2026-04-08 -- Module-arbitration Chinese translation + global system design audit
+- **What I did**: (1) Rewrote `content_module_arbitration.py` as Chinese version (preserving English terms, formulas, code blocks) with all expanded content (TS deep dive, Kafka pipeline, Iteration & Evaluation). Seed script is now the Chinese source of truth. (2) Audited all 8 system design modules for depth: checked char counts, formula counts, Defense Q&A counts, presence of key depth dimensions (cold-start, iteration, failure modes, Kafka detail, position bias). (3) Proposed 8-task improvement plan (Tasks A-H) prioritized by interview relevance, sent to user for review. Plan includes methodology extracted from module-arbitration deep-dive process.
+- **Deliverables**: `scripts/content_module_arbitration.py` (Chinese rewrite, 18.5K chars across 8 sections), `data/mle_prep.db` (re-seeded), detailed task plan sent via Discord
+- **Sanity check result**: Seed script ran OK, all 8 sections verified (Chinese chars present, formulas with `\mid`, bilingual headers). Global audit covered all 8 modules with depth markers.
+- **Status**: [DONE] Chinese translation complete. Task plan A-H awaiting user review before creating in task_db.
+- **Request**: No task_db update yet (tasks not yet approved by user)
+
+### 2026-04-08 -- Task planning for system design depth improvements + autonomous_run attempt
+- **What I did**: (1) Created 8 tasks (T-P0-164 through T-P2-171) via task_db.py for expanding all system design modules to interview-ready depth. Each task includes CRITICAL SAFETY RULES (never overwrite Chinese, seed script = source of truth, \mid not |). (2) Launched autonomous_run.sh with 8 sessions for MLInterviewPrep. Session 1 started but did not complete any task -- likely exceeded context/turn limits for L-size translation tasks. (3) Notified user via Discord and awaiting decision on next steps (split tasks, manual execution, or retry).
+- **Deliverables**: 8 tasks in tasks.db (T-P0-164 to T-P2-171), TASKS.md regenerated, autonomous_run.sh attempted
+- **Sanity check result**: All 8 tasks verified in DB with safety rules. autonomous_run.sh exited after 1 session with 0 tasks completed, 0 new git commits.
+- **Status**: [BLOCKED] Awaiting user decision on execution strategy for L-size tasks that exceed autonomous session limits.
+- **Request**: No task status change (tasks remain active pending user direction)
+
+### 2026-04-08 -- [T-P2-257] Remove unused check_stop_cache/write_stop_cache from hook_utils.py
+- **What I did**: Removed three dead functions from hook_utils.py: _get_repo_fingerprint(), check_stop_cache(), write_stop_cache(). Also removed now-unused imports (hashlib, subprocess, contextlib, Path) and updated module docstring. These were leftovers from the deprecated stop-cache architecture (LESSONS.md [2026-03-18]).
+- **Deliverables**: .claude/hooks/hook_utils.py (cleaned up)
+- **Sanity check result**: All 19 hook files import successfully after changes. No remaining references to removed functions.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-257 --status completed`

@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 223 completed tasks archived as of latest archival.
+> 249 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -343,3 +343,35 @@ Step 1 - LeetCode prob
 
   Never use bare `python` in hook commands or
 - [x] **2026-03-28** -- T-P2-209: [SYNC] Propagate template session_context db-missing warning to MLInterviewPrep. claude-code-project-template/.claude/hooks/session_context.py (lines 475-486) has a db_missing_warning feature: if .clau
+- [x] **2026-03-31** -- T-P0-244: Uber BPS: Update phone screen prep doc with BPS format. Update docs/uber_phone_screen_prep.md to reflect BPS format from recruiter: 5min intro, 40-50min coding+D&A, 5min Q&A. A
+- [x] **2026-03-31** -- T-P0-249: Import Uber BPS prep docs into company_documents for web UI access. Import all 7 Uber prep markdown docs (uber_bps_lc_solutions.md, uber_bps_custom_solutions.md, uber_bps_pattern_cheatshee
+- [x] **2026-03-31** -- T-P0-250: Organize LinkedIn prep notes into company_documents with problem solutions. Ensure LinkedIn prep materials are properly organized in company_documents (company_id=1). Currently has docs 21-27. Che
+- [x] **2026-03-31** -- T-P0-252: Condense ML Fundamentals From-Scratch guide: deduplicate code, modular design. The ML Fundamentals From-Scratch guide (Doc 27/28/29, 162K chars each; source files t1-t8, 199K total) has significant c
+- [x] **2026-04-01** -- T-P0-253: Convert Uber BPS prep docs to Chinese with acronym expansion. Convert all Uber BPS prep documents to Chinese following the project's chinese_conversion_spec.md rules. Files to conver
+- [x] **2026-04-01** -- T-P0-258: Fetch LC problem descriptions from leetcode.ca for all 891 missing problems. 891 of 1057 problems in mle_prep.db have no description. Create a script scripts/fetch_lc_descriptions.py that:
+
+1. Quer
+- [x] **2026-04-01** -- T-P0-262: LinkedIn: Enrich doc#26 (Question Index) with full solutions for all 47 questions. Doc#26 (LinkedIn Interview Questions Index, 30198c, 47 questions) currently has question descriptions but NO actual solu
+- [x] **2026-04-01** -- T-P0-263: LinkedIn: Enrich doc#21 (Probability/Stats) with detailed solutions. Doc#21 (LinkedIn probability/statistics interview prep notes, 34594c). Review all probability and statistics questions a
+- [x] **2026-04-01** -- T-P0-264: LinkedIn: Enrich doc#22 (System Design) with detailed solutions. Doc#22 (LinkedIn System Design, 32989c). Review all system design questions and ensure each has: architecture diagram de
+- [x] **2026-04-01** -- T-P0-265: LinkedIn: Enrich doc#24 (ML Fundamentals + Coding) with detailed solutions. Doc#24 (LinkedIn ML Fundamentals + Coding, 33241c). Review all ML and coding questions and ensure each has: complete ans
+- [x] **2026-04-01** -- T-P0-266: LinkedIn: Write solution notes for top-50 frequency problems (batch 1). Write comprehensive solution notes for the top 50 LinkedIn problems by frequency that currently lack notes.
+- [x] **2026-04-07** -- T-P0-268: Uber VO prep page: 4-round onsite preparation with Chinese content. ## 目标
+为Uber Virtual Onsite (VO) 创建专属面试准备页面。Uber VO包含4轮面试，每轮60分钟：
+1. **Coding: Algorithms & Data Structures** -- 通用算法题，考察
+- [x] **2026-03-31** -- T-P1-245: Uber BPS: Create D&A (Design and Architecture) prep document. Create docs/uber_bps_design_architecture.md: (1) Project showcase - Ranking-as-Allocation, LLM eval pipeline with high-l
+- [x] **2026-03-31** -- T-P1-246: Uber BPS: KNN from-scratch + ML fundamentals review. Recruiter explicitly mentions KNN. Create: (1) KNN from scratch Python - distance metrics, k selection, weighted KNN, (2
+- [x] **2026-03-31** -- T-P1-247: Uber BPS: Problem pattern cheat sheet by algorithm. Create docs/uber_bps_pattern_cheatsheet.md organizing problems by pattern: BFS/DFS (994,1020,1197,230,337,549,987,2791,5
+- [x] **2026-04-01** -- T-P1-251: Add company-filtered Notes tab to Problems page for quick solution access. On the Problems page, when filtering by company (e.g. Uber or LinkedIn in Company Freq tab), users should be able to qui
+- [x] **2026-04-04** -- T-P1-267: Story Map page: project arc narrative with Chinese dedup view. ## Goal
+Add a new tab 'Story Map' to BehavioralQuestions page, appearing to the right of Coverage. The page organizes al
+- [x] **2026-04-07** -- T-P1-269: StoryMap: fix expanded card losing arc background color. Bug: In StoryMapView.tsx ArcExampleCard, the card sits inside an ArcSection that already has colors.bg (e.g. bg-blue-50)
+- [x] **2026-04-07** -- T-P1-270: StoryMap: add hover link on card title to navigate to full example. Problem: Story Map cards only show truncated text (situation.slice(0,300) + '...' on line 119). There is no way to navig
+- [x] **2026-04-07** -- T-P1-271: Behavioral: Slide-over drawer for example detail (drill-down-and-return). Add a right-side slide-over drawer to the Behavioral page so users can view full STAR example content without leaving th
+- [x] **2026-04-07** -- T-P1-272: System Design: Translate 8 modules to Chinese (preserve terms + acronym expansion). Parent planning task -- split into T-P1-273 through T-P1-277 for execution
+- [x] **2026-04-02** -- T-P2-186: [SYNC] Propagate ruff version-drift lesson to helixos. MLInterviewPrep LESSONS.md has [2026-03-02] lesson about ruff version drift between local and CI (loose pin + separate i
+- [x] **2026-04-02** -- T-P2-206: [SYNC] Propagate 2 universal lessons to helixos LESSONS.md. helixos/LESSONS.md is missing 2 universal lessons already in the template:
+1. [2026-03-02] Ruff version drift between lo
+- [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co
+- [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
+- [x] **2026-04-01** -- T-P2-256: [DEBT] MLInterviewPrep: Remove stale scripts/git-hooks/ path from CLAUDE.md. CLAUDE.md File Structure section references scripts/git-hooks/ as a directory but only scripts/pre-commit exists (no git
