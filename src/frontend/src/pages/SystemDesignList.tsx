@@ -50,6 +50,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     tags: ["WebSocket", "Message Queue", "Presence"],
   },
   {
+    title: "Design a Real-time Game Leaderboard",
+    slug: "interview-game-leaderboard",
+    description:
+      "Redis Sorted Set leaderboard: ZADD/ZREVRANK/ZREVRANGE, Top-K, rank lookup, relative ranking, Kafka peak shaving, score-range sharding for 50M+ players, daily/weekly/season boards.",
+    difficulty: "Medium",
+    tags: ["Redis", "Sorted Set", "Real-time"],
+  },
+  {
     title: "Design a Key-Value Store",
     description:
       "Distributed KV store: consistent hashing, replication, conflict resolution. Focus on CAP trade-offs, partitioning strategy, and failure handling.",
