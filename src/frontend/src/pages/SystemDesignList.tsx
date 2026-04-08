@@ -121,6 +121,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["Streaming", "Probabilistic DS", "MapReduce"],
   },
+  {
+    title: "Design an Ad Click Aggregator",
+    slug: "interview-ad-click-aggregator",
+    description:
+      "Lambda Architecture for ad billing: Kafka + Flink exactly-once aggregation, two-level dedup (Bloom Filter + RocksDB), real-time fraud detection, ClickHouse OLAP, batch billing reconciliation.",
+    difficulty: "Hard",
+    tags: ["Streaming", "Exactly-Once", "Fraud Detection"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {

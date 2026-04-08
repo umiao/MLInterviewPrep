@@ -351,3 +351,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,499 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-308 --status completed`
+
+## 2026-04-08 -- [T-P1-309] SD Prep: Design an Ad Click Aggregator
+- **What I did**: Created seed script `scripts/content_interview_ad_click.py` with all 8 sections in Chinese with English technical terms preserved. Covers Lambda Architecture (real-time Flink path for analytics + batch Spark path for billing), exactly-once semantics (Kafka idempotent + Flink checkpoint + two-phase commit), two-level dedup (Bloom Filter 0.01% FPR + RocksDB exact Set), hybrid fraud detection (real-time rule engine + offline ML), watermark-based late event handling, ClickHouse OLAP for multi-dimensional queries, centralized aggregation with edge ingestion for multi-DC, graceful degradation (4 levels), capacity estimation (500M DAU, 10B daily impressions, 150M daily clicks, 350K peak QPS, 7GB Flink state, ~$50K/month). Created SystemDesign DB record with slug `interview-ad-click-aggregator`, display_order=111. Added slug to topic card in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_ad_click.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,177 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-309 --status completed`
