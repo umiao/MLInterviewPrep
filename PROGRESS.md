@@ -407,3 +407,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 24,271 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-316 --status completed`
+
+## 2026-04-08 -- [T-P1-317] SD Prep: Design a Distributed Cache
+- **What I did**: Created seed script `scripts/content_interview_distributed_cache.py` with all 8 sections in Chinese with English technical terms preserved. Covers consistent hashing with virtual nodes (150 VNodes/physical node), LRU/LFU/TinyLFU eviction policies, Cache-Aside vs Write-Through vs Write-Behind patterns, cache stampede prevention (Singleflight + probabilistic early refresh), hot key mitigation (L1 local cache + key replication), cache penetration defense (Bloom Filter + null caching), cache avalanche prevention (TTL jitter), CDC-driven invalidation pipeline (Debezium -> Kafka -> Invalidation Consumer), two-phase online migration for cluster resizing. Capacity estimation: 57K avg read QPS (173K peak), 5.7K avg write QPS (17K peak), 200 GB effective cache (300 GB with metadata), 10 nodes (5 Primary + 5 Replica). Created SystemDesign DB record with slug `interview-distributed-cache`, display_order=119. Added topic card to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_distributed_cache.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 24,637 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-317 --status completed`

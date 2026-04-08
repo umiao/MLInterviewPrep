@@ -178,6 +178,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["Real-time", "Concurrency", "WebSocket"],
   },
+  {
+    title: "Design a Distributed Cache",
+    slug: "interview-distributed-cache",
+    description:
+      "Consistent hashing with virtual nodes, LRU/LFU/TinyLFU eviction, cache-aside vs write-through vs write-behind, stampede prevention (singleflight), hot key mitigation (L1 + key replication), CDC-driven invalidation, Bloom Filter for penetration defense.",
+    difficulty: "Hard",
+    tags: ["Consistent Hashing", "Caching", "Distributed Systems"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {
