@@ -465,3 +465,10 @@
 - **Sanity check result**: 25,269 total chars, 12 Defense Q&A (9 existing + 3 new), 9,041 Chinese characters, no bare | in math, all existing content preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-282 --status completed`
+
+### 2026-04-08 -- [T-P1-283] Supplement database-comparison system design depth
+- **What I did**: Expanded database-comparison from 21.1K to 24.5K chars. Added: (1) Migration strategy section with 3 approaches (dual-write + shadow read, CDC streaming, stop-the-world). (2) Iteration & Evaluation section with 4-level methodology (benchmark, shadow traffic, canary, A/B) and key monitoring metrics (p99 trend, write amplification, Gini coefficient, capacity, Raft election frequency). (3) 3 failure modes with root cause and fix (split brain, compaction storm write stall, hot partition cascade). (4) Capacity planning formulas (storage, node count, throughput estimation). Converted seed script from English to Chinese source of truth.
+- **Deliverables**: scripts/content_database_comparison.py (Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 24,502 total chars (target >=24K), 11 display math, 6 Q&A, 3 failure modes, migration strategy present, iteration section present, no bare | in math, 7,463 Chinese characters preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-283 --status completed`
