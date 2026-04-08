@@ -19,6 +19,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from src.backend.config import get_settings
 from src.backend.database import init_db
+from src.backend.routers.baking import router as baking_router
 from src.backend.routers.behavioral import router as behavioral_router
 from src.backend.routers.companies import router as companies_router
 from src.backend.routers.forum import router as forum_router
@@ -28,7 +29,6 @@ from src.backend.routers.qa import router as qa_router
 from src.backend.routers.reading import router as reading_router
 from src.backend.routers.scraper import router as scraper_router
 from src.backend.routers.system_design import router as system_design_router
-from src.backend.routers.baking import router as baking_router
 from src.backend.routers.timeline import router as timeline_router
 
 logger = logging.getLogger(__name__)
