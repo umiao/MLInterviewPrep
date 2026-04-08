@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; width: 1600px; }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 8px; color: #1a1a2e; }
+  .subtitle { font-size: 14px; text-align: center; color: #555; margin-bottom: 20px; }
+
+  .main-layout { display: flex; gap: 16px; }
+  .col-a { width: 380px; flex-shrink: 0; }
+  .col-b { width: 420px; flex-shrink: 0; }
+  .col-c { flex: 1; }
+
+  .section-header {
+    font-size: 15px; font-weight: 700; padding: 6px 10px; border-radius: 4px 4px 0 0;
+    color: #fff; text-align: center;
+  }
+  .section-box {
+    border: 2px solid; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+  }
+
+  .sys-a { border-color: #2e86ab; }
+  .sys-a .section-header { background: #2e86ab; }
+  .sys-a-bg { background: #eef6fb; }
+
+  .sys-b { border-color: #6b5b95; }
+  .sys-b .section-header { background: #6b5b95; }
+  .sys-b-bg { background: #f3f0f7; }
+
+  .sys-c { border-color: #c0392b; }
+  .sys-c .section-header { background: #c0392b; }
+  .sys-c-bg { background: #fdf2f0; }
+
+  .box {
+    border: 1.5px solid #888; border-radius: 4px; padding: 8px 10px;
+    font-size: 13px; text-align: center; background: #fff; min-height: 40px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .box-blue { background: #d6eaf8; border-color: #5b9bd5; }
+  .box-green { background: #d4edda; border-color: #6b9e7a; }
+  .box-purple { background: #e8d5f5; border-color: #8e6baf; }
+  .box-yellow { background: #fff3cd; border-color: #c9a825; }
+  .box-orange { background: #fde2c8; border-color: #e07b39; }
+  .box-gray { background: #e9ecef; border-color: #999; }
+  .box-pink { background: #f8d7da; border-color: #c0616e; }
+  .box-red { background: #fadbd8; border-color: #c0392b; }
+  .box-teal { background: #d1f2eb; border-color: #1abc9c; }
+
+  .box-title { font-weight: 700; font-size: 13px; }
+  .box-sub { font-size: 11px; color: #555; margin-top: 2px; }
+  .box-detail { font-size: 10px; color: #666; margin-top: 3px; text-align: left; }
+
+  .arrow { text-align: center; color: #555; font-size: 20px; line-height: 20px; padding: 2px 0; }
+  .arrow-right { display: inline-block; color: #555; font-size: 18px; padding: 0 4px; }
+  .arrow-label { font-size: 11px; color: #666; font-style: italic; }
+
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .flex1 { flex: 1; }
+
+  .shared-box {
+    border: 2px dashed #27ae60; border-radius: 6px; padding: 10px;
+    margin-top: 12px; background: #f0faf4;
+  }
+  .shared-title { font-size: 14px; font-weight: 700; color: #27ae60; text-align: center; margin-bottom: 8px; }
+
+  .pattern-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pattern-tag {
+    border: 1.5px solid #27ae60; border-radius: 4px; padding: 5px 10px;
+    font-size: 12px; background: #d4edda; text-align: center; flex: 1; min-width: 140px;
+  }
+  .pattern-tag b { display: block; font-size: 12px; }
+  .pattern-tag span { font-size: 10px; color: #555; }
+</style>
+</head>
+<body>
+
+<h1>Vibe Code Engineering: Three Subsystems Architecture</h1>
+<p class="subtitle">Data Extraction Pipeline + Scraping Orchestration + Secret Detection -- Layered Decoupling with Shared Patterns</p>
+
+<div class="main-layout">
+  <!-- SUBSYSTEM A: Data Extraction Pipeline -->
+  <div class="col-a">
+    <div class="section-box sys-a sys-a-bg">
+      <div class="section-header">A: Data Extraction Pipeline</div>
+      <div style="padding: 8px 0;">
+
+        <div class="box box-blue" style="margin-bottom: 6px;">
+          <div class="box-title">Fixture Store</div>
+          <div class="box-sub">5-10 real pages for test-driven selectors</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-green" style="margin-bottom: 6px;">
+          <div class="box-title">Selector Engine</div>
+          <div class="box-sub">CSS / XPath, fixture-driven design</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-purple" style="margin-bottom: 6px;">
+          <div class="box-title">Extractor Layer</div>
+          <div class="box-detail">Always returns structured data (dict/list)<br>Zero-result = exception (never silent empty)</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-yellow" style="margin-bottom: 6px;">
+          <div class="box-title">Format Lock</div>
+          <div class="box-sub">Constant template serialization</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-gray" style="margin-bottom: 6px;">
+          <div class="box-title">Storage Layer</div>
+          <div class="box-sub">SQLite / PostgreSQL, unique index</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-teal">
+          <div class="box-title">Serving Layer</div>
+          <div class="box-sub">API / CLI consumption</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSYSTEM B: Scraping Orchestration -->
+  <div class="col-b">
+    <div class="section-box sys-b sys-b-bg">
+      <div class="section-header">B: Scraping Orchestration System</div>
+      <div style="padding: 8px 0;">
+
+        <div class="row">
+          <div class="box box-yellow flex1">
+            <div class="box-title">YAML Config</div>
+            <div class="box-sub">Declarative: seeds, selectors, targets</div>
+          </div>
+          <div class="box box-gray flex1">
+            <div class="box-title">DB State</div>
+            <div class="box-sub">Runtime: progress, timestamps</div>
+          </div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-purple" style="margin-bottom: 6px;">
+          <div class="box-title">CLI Orchestrator</div>
+          <div class="box-sub">fetch --limit N</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="row" style="align-items: stretch;">
+          <div class="box box-blue flex1">
+            <div class="box-title">Phase A: Discovery</div>
+            <div class="box-detail">Low frequency (daily)<br>Scan until K consecutive<br>pages with no new links<br>(adaptive stop)</div>
+          </div>
+          <div class="box box-green flex1">
+            <div class="box-title">Phase B: Materialization</div>
+            <div class="box-detail">High frequency (every 4h)<br>Content fetch + quality<br>validation + persistence</div>
+          </div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-orange" style="margin-bottom: 6px;">
+          <div class="box-title">flock (File Lock)</div>
+          <div class="box-sub">Prevents overlapping runs</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-red">
+          <div class="box-title">Auth Validator</div>
+          <div class="box-sub">Fail-fast within first 3 requests</div>
+        </div>
+
+        <div style="margin-top: 10px; padding: 6px 8px; border: 1.5px dashed #6b5b95; border-radius: 4px; background: #ece7f3;">
+          <div style="font-size: 11px; font-weight: 700; color: #6b5b95; text-align: center;">GitOps Principle</div>
+          <div style="font-size: 10px; color: #555; text-align: center; margin-top: 2px;">
+            YAML declares "what I want"<br>
+            DB tracks "current state"<br>
+            Runtime state only in DB, never in config
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBSYSTEM C: Secret Detection -->
+  <div class="col-c">
+    <div class="section-box sys-c sys-c-bg">
+      <div class="section-header">C: Secret Detection System (7-Layer Defense)</div>
+      <div style="padding: 8px 0;">
+
+        <div class="box box-gray" style="margin-bottom: 6px;">
+          <div class="box-title">Developer Commit</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="box box-green" style="margin-bottom: 4px;">
+          <div class="box-title">L1: Write-time Hook</div>
+          <div class="box-sub">Fastest feedback ~10ms</div>
+        </div>
+        <div class="arrow" style="font-size: 16px;">&#8595;</div>
+        <div class="box box-green" style="margin-bottom: 4px;">
+          <div class="box-title">L2: Pre-commit Hook</div>
+          <div class="box-sub">Second gate ~100ms</div>
+        </div>
+        <div class="arrow" style="font-size: 16px;">&#8595;</div>
+        <div class="box box-blue" style="margin-bottom: 4px;">
+          <div class="box-title">L3: Periodic Scan</div>
+          <div class="box-sub">Cron hourly sweep</div>
+        </div>
+        <div class="arrow" style="font-size: 16px;">&#8595;</div>
+        <div class="box box-blue" style="margin-bottom: 4px;">
+          <div class="box-title">L4: CI/CD Scan</div>
+          <div class="box-sub">Server-side enforced, cannot bypass</div>
+        </div>
+        <div class="arrow" style="font-size: 16px;">&#8595;</div>
+        <div class="box box-purple" style="margin-bottom: 4px;">
+          <div class="box-title">L5: History Scan</div>
+          <div class="box-sub">trufflehog for historical leaks</div>
+        </div>
+
+        <div class="arrow">&#8595;</div>
+
+        <div class="row" style="align-items: stretch;">
+          <div class="box box-orange flex1">
+            <div class="box-title">L6: Regex Core</div>
+            <div class="box-detail">Deterministic, known formats<br>High conf: block<br>Med conf: warn<br>Low conf: log</div>
+          </div>
+          <div class="box box-yellow flex1">
+            <div class="box-title">L7: AI Semantic</div>
+            <div class="box-detail">Non-deterministic, fail-open<br>Input: regex-sanitized content<br>Output: suspicious pattern flags</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 8px; padding: 6px 8px; border: 1.5px dashed #c0392b; border-radius: 4px; background: #fce4e4;">
+          <div style="font-size: 11px; font-weight: 700; color: #c0392b; text-align: center;">Shared Detection Module (SoT)</div>
+          <div style="font-size: 10px; color: #555; text-align: center; margin-top: 2px;">
+            Hook (realtime) and Scanner (batch)<br>
+            share core/detector.py -- no pattern drift
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Shared Patterns -->
+<div class="shared-box">
+  <div class="shared-title">Cross-System Shared Patterns</div>
+  <div class="pattern-row">
+    <div class="pattern-tag">
+      <b>Layered Decoupling</b>
+      <span>Extract/Store/Serve | Discover/Materialize | 7-Layer Defense</span>
+    </div>
+    <div class="pattern-tag">
+      <b>Single Source of Truth</b>
+      <span>Fixture-driven selectors | YAML config + DB state | Shared detector</span>
+    </div>
+    <div class="pattern-tag">
+      <b>Fail-Fast</b>
+      <span>Zero-result exception | Auth check in 3 reqs | High-conf block</span>
+    </div>
+    <div class="pattern-tag">
+      <b>Idempotency</b>
+      <span>DB unique index | flock + progress tracking | Safe re-scan</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; padding: 8px; width: 1600px; }
+  h1 { font-size: 22px; text-align: center; margin-bottom: 8px; color: #1a1a2e; }
+  .subtitle { font-size: 14px; text-align: center; color: #555; margin-bottom: 20px; }
+
+  .top-section { margin-bottom: 16px; }
+
+  .section-header {
+    font-size: 15px; font-weight: 700; padding: 6px 10px; border-radius: 4px 4px 0 0;
+    color: #fff; text-align: center;
+  }
+  .section-box {
+    border: 2px solid; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+  }
+
+  .template { border-color: #2e86ab; }
+  .template .section-header { background: #2e86ab; }
+  .template-bg { background: #eef6fb; }
+
+  .state { border-color: #6b5b95; }
+  .state .section-header { background: #6b5b95; }
+  .state-bg { background: #f3f0f7; }
+
+  .failure { border-color: #c0392b; }
+  .failure .section-header { background: #c0392b; }
+  .failure-bg { background: #fdf2f0; }
+
+  .box {
+    border: 1.5px solid #888; border-radius: 4px; padding: 8px 10px;
+    font-size: 13px; text-align: center; background: #fff; min-height: 40px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .box-blue { background: #d6eaf8; border-color: #5b9bd5; }
+  .box-green { background: #d4edda; border-color: #6b9e7a; }
+  .box-purple { background: #e8d5f5; border-color: #8e6baf; }
+  .box-yellow { background: #fff3cd; border-color: #c9a825; }
+  .box-orange { background: #fde2c8; border-color: #e07b39; }
+  .box-gray { background: #e9ecef; border-color: #999; }
+  .box-pink { background: #f8d7da; border-color: #c0616e; }
+  .box-teal { background: #d1f2eb; border-color: #1abc9c; }
+
+  .box-title { font-weight: 700; font-size: 13px; }
+  .box-sub { font-size: 11px; color: #555; margin-top: 2px; }
+  .box-detail { font-size: 10px; color: #666; margin-top: 3px; }
+
+  .arrow { text-align: center; color: #555; font-size: 20px; line-height: 20px; padding: 2px 0; }
+  .arrow-right { display: inline-block; color: #555; font-size: 18px; padding: 0 4px; }
+
+  .row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .row-stretch { display: flex; gap: 8px; align-items: stretch; margin-bottom: 6px; }
+  .col { display: flex; flex-direction: column; gap: 6px; }
+  .flex1 { flex: 1; }
+
+  .time-badge {
+    display: inline-block; font-size: 10px; color: #fff; background: #555;
+    border-radius: 3px; padding: 1px 5px; margin-left: 4px;
+  }
+
+  .signal-good { border-left: 3px solid #27ae60; }
+  .signal-bad { border-left: 3px solid #c0392b; }
+
+  .bottom-layout { display: flex; gap: 16px; }
+  .bottom-left { flex: 1; }
+  .bottom-right { width: 480px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<h1>ML System Design Patterns: Interview Answer Framework</h1>
+<p class="subtitle">6-Section Template + Priority-Driven State Machine + Failure Mode Analysis</p>
+
+<!-- 6-Section Template -->
+<div class="top-section">
+  <div class="section-box template template-bg">
+    <div class="section-header">Interview Answer: 6-Section Template (15-25 min)</div>
+    <div style="padding: 8px 0;">
+
+      <div class="row-stretch">
+        <div class="box box-blue flex1">
+          <div class="box-title">1. Overview <span class="time-badge">1-2m</span></div>
+          <div class="box-sub">Why this system exists</div>
+          <div class="box-detail">Business motivation before tech</div>
+        </div>
+        <div class="arrow-right">&#8594;</div>
+        <div class="box box-green flex1">
+          <div class="box-title">2. Architecture <span class="time-badge">3-5m</span></div>
+          <div class="box-sub">How it works</div>
+          <div class="box-detail">Components + clear responsibilities</div>
+        </div>
+        <div class="arrow-right">&#8594;</div>
+        <div class="box box-purple flex1">
+          <div class="box-title">3. Dataflow <span class="time-badge">2-3m</span></div>
+          <div class="box-sub">How data flows end-to-end</div>
+          <div class="box-detail">Include error/retry paths</div>
+        </div>
+        <div class="arrow-right">&#8594;</div>
+        <div class="box box-yellow flex1">
+          <div class="box-title">4. Formulas <span class="time-badge">2-3m</span></div>
+          <div class="box-sub">Core algorithms</div>
+          <div class="box-detail">Whiteboard-derivable, define symbols</div>
+        </div>
+        <div class="arrow-right">&#8594;</div>
+        <div class="box box-orange flex1">
+          <div class="box-title">5. Tradeoffs <span class="time-badge">3-5m</span></div>
+          <div class="box-sub">Why this over alternatives</div>
+          <div class="box-detail">Compare 2+ options quantitatively</div>
+        </div>
+        <div class="arrow-right">&#8594;</div>
+        <div class="box box-pink flex1">
+          <div class="box-title">6. Defense <span class="time-badge">5-10m</span></div>
+          <div class="box-sub">Under-pressure Q&A</div>
+          <div class="box-detail">L1/L2/L3 layered answers</div>
+        </div>
+      </div>
+
+      <!-- Signals row -->
+      <div style="margin-top: 10px;">
+        <div class="row-stretch">
+          <div class="box signal-good flex1" style="padding: 6px 8px;">
+            <div class="box-detail" style="font-size: 11px; color: #27ae60;">
+              <b>Key Signals:</b> Business motivation first | Clear component boundaries |
+              End-to-end data path with latency | Derivable formulas with symbol defs |
+              Quantitative comparison of alternatives | "Why not Y" + "When X breaks"
+            </div>
+          </div>
+        </div>
+        <div class="row-stretch" style="margin-top: 4px;">
+          <div class="box signal-bad flex1" style="padding: 6px 8px;">
+            <div class="box-detail" style="font-size: 11px; color: #c0392b;">
+              <b>Common Mistakes:</b> Jump to architecture without "why" | 10 components with 1 sentence each |
+              Only happy path, no error/retry | Formulas without variable meanings |
+              "I chose X because it's good" | Only prepared "why X" not "why not Y"
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="bottom-layout">
+  <!-- State Machine -->
+  <div class="bottom-left">
+    <div class="section-box state state-bg">
+      <div class="section-header">Priority-Driven State Machine (Status Derivation)</div>
+      <div style="padding: 8px 0;">
+
+        <div style="margin-bottom: 8px; font-size: 12px; color: #555; text-align: center;">
+          Parent status derived from children via priority chain (not combinatorial)
+        </div>
+
+        <div class="row-stretch" style="margin-bottom: 8px;">
+          <div class="box box-teal flex1">
+            <div class="box-title">ALL mastered</div>
+            <div class="arrow" style="font-size: 14px;">&#8595;</div>
+            <div class="box-sub">mastered</div>
+          </div>
+          <div class="box box-yellow flex1">
+            <div class="box-title">ANY in_progress</div>
+            <div class="arrow" style="font-size: 14px;">&#8595;</div>
+            <div class="box-sub">in_progress</div>
+          </div>
+          <div class="box box-purple flex1">
+            <div class="box-title">ANY review</div>
+            <div class="arrow" style="font-size: 14px;">&#8595;</div>
+            <div class="box-sub">review</div>
+          </div>
+          <div class="box box-gray flex1">
+            <div class="box-title">ALL not_started</div>
+            <div class="arrow" style="font-size: 14px;">&#8595;</div>
+            <div class="box-sub">not_started</div>
+          </div>
+          <div class="box box-orange flex1">
+            <div class="box-title">else</div>
+            <div class="arrow" style="font-size: 14px;">&#8595;</div>
+            <div class="box-sub">in_progress (fallback)</div>
+          </div>
+        </div>
+
+        <!-- Propagation -->
+        <div style="border: 1.5px solid #6b5b95; border-radius: 4px; padding: 8px; background: #fff; margin-bottom: 8px;">
+          <div style="font-size: 12px; font-weight: 700; color: #6b5b95; margin-bottom: 4px;">Upward Propagation</div>
+          <div class="row">
+            <div class="box box-blue flex1" style="min-height: 32px;">
+              <div class="box-title" style="font-size: 12px;">Child Status Change</div>
+            </div>
+            <div class="arrow-right">&#8594;</div>
+            <div class="box box-green flex1" style="min-height: 32px;">
+              <div class="box-title" style="font-size: 12px;">_derive_status()</div>
+              <div class="box-sub">weighted avg progress_pct</div>
+            </div>
+            <div class="arrow-right">&#8594;</div>
+            <div class="box box-purple flex1" style="min-height: 32px;">
+              <div class="box-title" style="font-size: 12px;">Parent Update</div>
+              <div class="box-sub">visited set prevents cycles</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Trigger Completeness -->
+        <div style="border: 1.5px dashed #e07b39; border-radius: 4px; padding: 8px; background: #fff8f0;">
+          <div style="font-size: 12px; font-weight: 700; color: #e07b39; margin-bottom: 4px;">Trigger Completeness Checklist</div>
+          <div class="row">
+            <div class="box box-yellow" style="flex: 1; min-height: 28px;">
+              <div style="font-size: 11px;">Status change</div>
+            </div>
+            <div class="box box-yellow" style="flex: 1; min-height: 28px;">
+              <div style="font-size: 11px;">Progress change</div>
+            </div>
+            <div class="box box-yellow" style="flex: 1; min-height: 28px;">
+              <div style="font-size: 11px;">Log creation</div>
+            </div>
+            <div class="box box-yellow" style="flex: 1; min-height: 28px;">
+              <div style="font-size: 11px;">Child add/remove</div>
+            </div>
+          </div>
+          <div style="font-size: 10px; color: #c0392b; text-align: center; margin-top: 4px;">
+            Missing any trigger = parent permanently stale
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Failure Modes -->
+  <div class="bottom-right">
+    <div class="section-box failure failure-bg">
+      <div class="section-header">Failure Modes & Fixes</div>
+      <div style="padding: 8px 0;">
+
+        <div class="box box-pink" style="margin-bottom: 8px;">
+          <div class="box-title">1. Missing Trigger</div>
+          <div class="box-detail" style="text-align: center;">
+            New "child remove" op added but forgot propagation<br>
+            -> Parent permanently shows stale status
+          </div>
+          <div style="margin-top: 4px; font-size: 11px; color: #27ae60; font-weight: 700;">
+            Fix: Maintain trigger checklist, check on every new op
+          </div>
+        </div>
+
+        <div class="box box-pink" style="margin-bottom: 8px;">
+          <div class="box-title">2. Combinatorial Explosion</div>
+          <div class="box-detail" style="text-align: center;">
+            State machine uses combinations instead of priority chain<br>
+            -> Edge cases grow exponentially with new states
+          </div>
+          <div style="margin-top: 4px; font-size: 11px; color: #27ae60; font-weight: 700;">
+            Fix: Always use priority chain; O(1) for new states
+          </div>
+        </div>
+
+        <div class="box box-pink" style="margin-bottom: 8px;">
+          <div class="box-title">3. Semantic Ambiguity</div>
+          <div class="box-detail" style="text-align: center;">
+            [mastered, review] has no clear meaning in combinations<br>
+            -> Inconsistent UI behavior across components
+          </div>
+          <div style="margin-top: 4px; font-size: 11px; color: #27ae60; font-weight: 700;">
+            Fix: Priority model eliminates ambiguity by design
+          </div>
+        </div>
+
+        <!-- Why priority > combinatorial -->
+        <div style="border: 1.5px solid #c0392b; border-radius: 4px; padding: 8px; background: #fff; margin-top: 4px;">
+          <div style="font-size: 12px; font-weight: 700; color: #c0392b; text-align: center; margin-bottom: 4px;">
+            Priority Chain vs Combinatorial
+          </div>
+          <div class="row-stretch">
+            <div class="box box-teal flex1" style="min-height: 28px;">
+              <div style="font-size: 11px;"><b>Priority:</b> O(1) per new state</div>
+              <div style="font-size: 10px; color: #555;">Insert into chain, done</div>
+            </div>
+            <div style="display: flex; align-items: center; font-size: 11px; color: #555; padding: 0 4px;">vs</div>
+            <div class="box box-pink flex1" style="min-height: 28px;">
+              <div style="font-size: 11px;"><b>Combinatorial:</b> O(2^n) edges</div>
+              <div style="font-size: 10px; color: #555;">Every pair needs a rule</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

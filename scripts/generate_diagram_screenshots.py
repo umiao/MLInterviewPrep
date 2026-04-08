@@ -20,6 +20,8 @@ DIAGRAMS = [
     "ranking_allocation",
     "database_comparison",
     "distributed_task_queue",
+    "vibe_code_engineering",
+    "ml_system_design_patterns",
 ]
 
 

@@ -11,28 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-288: Create HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Two system design modules (vibe-code-engineering-patterns, ml-system-design-patterns) have diagram_filename set in DB but no actual PNG or HTML files on disk. The other 6 modules have both HTML sources in src/frontend/public/static/system-designs/html/ and PNG screenshots.
-
-STEPS:
-1. Read existing HTML diagrams for reference style (e.g., module_arbitration.html, distributed_task_queue.html). They use inline CSS, boxes, arrows, color-coded sections.
-2. Read the architecture section of vibe-code-engineering-patterns and ml-system-design-patterns from DB to understand what to diagram.
-3. Create src/frontend/public/static/system-designs/html/vibe_code_engineering.html -- architecture diagram for the engineering tooling system design (data extraction pipeline, secret detection, scraping components).
-4. Create src/frontend/public/static/system-designs/html/ml_system_design_patterns.html -- architecture diagram for ML system design patterns (feature store, model serving, A/B testing, monitoring components).
-5. Add both new filenames to DIAGRAMS list in scripts/generate_diagram_screenshots.py.
-6. Run: python scripts/generate_diagram_screenshots.py to generate PNG screenshots.
-7. Verify PNG files exist at the expected paths and are non-zero size.
-
-AC:
-- [ ] vibe_code_engineering.html created with architecture diagram
-- [ ] ml_system_design_patterns.html created with architecture diagram
-- [ ] generate_diagram_screenshots.py updated with both new entries
-- [ ] PNG screenshots generated and exist on disk
-- [ ] Diagrams render correctly in HTML (open in browser to verify)
-
 #### T-P1-289: Replace top bookmark nav with persistent right-side TOC in SystemDesignDetail
 - **Priority**: P1
 - **Complexity**: M
@@ -145,6 +123,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
+- [x] **2026-04-08** -- T-P1-288: Create HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns. Two system design modules (vibe-code-engineering-patterns, ml-system-design-patterns) have diagram_filename set in DB bu
 - [x] **2026-04-08** -- T-P1-284: System design depth: pbe-pipeline expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_pbe_pipeline.py. (2) NEVER o
 - [x] **2026-04-08** -- T-P1-283: System design depth: database-comparison supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_database_comparison.py. (2) 
 - [x] **2026-04-08** -- T-P1-282: System design depth: distributed-task-queue add Defense Q&A. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_distributed_task_queue.py. (

@@ -514,3 +514,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit). Interview Prep tab shows 8 topics. eBay Projects tab preserves existing module cards with narrative. Existing /system-design/:slug routes unchanged.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-290 --status completed`
+
+### 2026-04-08 -- [T-P1-288] Create HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns
+- **What I did**: Created architecture diagrams for two system design modules that had diagram_filename set in DB but no actual files. (1) vibe_code_engineering.html -- three-column layout showing Data Extraction Pipeline, Scraping Orchestration System, and Secret Detection 7-Layer Defense, with shared cross-system patterns bar at bottom. (2) ml_system_design_patterns.html -- 6-section interview template with timing badges, priority-driven state machine architecture, and failure modes analysis. Updated generate_diagram_screenshots.py DIAGRAMS list. Generated PNG screenshots via Playwright.
+- **Deliverables**: src/frontend/public/static/system-designs/html/vibe_code_engineering.html, src/frontend/public/static/system-designs/html/ml_system_design_patterns.html, src/frontend/public/static/system-designs/vibe_code_engineering.png (109KB), src/frontend/public/static/system-designs/ml_system_design_patterns.png (109KB), scripts/generate_diagram_screenshots.py updated
+- **Sanity check result**: Both PNGs generated successfully with non-zero size. Visual verification confirms clear, well-structured diagrams matching existing style conventions.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-288 --status completed`
