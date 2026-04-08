@@ -337,3 +337,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 23,909 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-306 --status completed`
+
+## 2026-04-08 -- [T-P1-307] SD Prep: Design Search Autocomplete
+- **What I did**: Created seed script `scripts/content_interview_search_autocomplete.py` with all 8 sections in Chinese with English technical terms preserved. Covers Compressed Trie (Radix Tree) with pre-computed top-K per node for O(p) prefix lookup in <1ms, multi-level caching (Browser 60s -> CDN 5min 40% hit -> App Cache 15min 30% hit -> Trie Node), data collection pipeline (Kafka -> 5min aggregation -> Frequency Store -> 15min Trie rebuild via S3 snapshots), trending detection (10s Z-Score window, fast injection 30-60s), ranking formula (frequency 0.5 + freshness decay 0.2 + trend 0.2 + personalization 0.1), Trie sharding (4 shards x 3 replicas = 84GB total for 50M queries), client-side personalization blending (preserves CDN cacheability), capacity estimation (1B DAU, ~800K peak QPS, 84GB Trie, 1.2TB/day logs, ~$32K/month). Created SystemDesign DB record with slug `interview-search-autocomplete`, display_order=109. Added slug to topic card in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_search_autocomplete.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,412 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-307 --status completed`

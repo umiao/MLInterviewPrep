@@ -107,6 +107,7 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
   },
   {
     title: "Design a Search Autocomplete",
+    slug: "interview-search-autocomplete",
     description:
       "Typeahead suggestion: trie data structure, top-K frequent queries, real-time updates. Focus on latency requirements and data freshness.",
     difficulty: "Medium",
