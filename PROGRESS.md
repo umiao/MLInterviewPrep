@@ -549,3 +549,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 17,459 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-298 --status completed`
+
+## 2026-04-08 -- [T-P0-299] SD Prep: Design a Rate Limiter
+- **What I did**: Created seed script `scripts/content_interview_rate_limiter.py` with all 8 sections in Chinese with English technical terms preserved. Covers token bucket, sliding window counter, fixed window, sliding window log algorithms with code examples and comparison table. Includes Redis Lua script for atomic race-condition-free checking, multi-DC deployment strategies, and fail-open fault tolerance. Created SystemDesign DB record with slug `interview-rate-limiter`, display_order=101. Updated `SystemDesignList.tsx` to add slug link for Rate Limiter topic card.
+- **Deliverables**: `scripts/content_interview_rate_limiter.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,369 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-299 --status completed`

@@ -29,6 +29,7 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
   },
   {
     title: "Design a Rate Limiter",
+    slug: "interview-rate-limiter",
     description:
       "API gateway rate limiting: token bucket, sliding window, distributed counters. Focus on accuracy vs performance trade-offs and distributed coordination.",
     difficulty: "Medium",
