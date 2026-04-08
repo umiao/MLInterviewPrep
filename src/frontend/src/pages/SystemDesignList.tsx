@@ -92,6 +92,7 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
   },
   {
     title: "Design a Web Crawler",
+    slug: "interview-web-crawler",
     description:
       "Distributed web crawler: URL frontier, politeness, dedup, content extraction. Focus on scale, distributed coordination, and fault tolerance.",
     difficulty: "Medium",

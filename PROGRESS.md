@@ -393,3 +393,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,374 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-314 --status completed`
+
+## 2026-04-08 -- [T-P1-315] SD Prep: Design a Web Crawler
+- **What I did**: Created seed script `scripts/content_interview_web_crawler.py` with all 8 sections in Chinese with English technical terms preserved. Covers URL Frontier dual-layer design (priority queue + per-host queue), distributed crawling with consistent hashing and virtual nodes, Bloom Filter deduplication (10B URLs in 11.2 GB memory at 1% FPR), SimHash content dedup (Hamming distance <= 3), robots.txt politeness enforcement with per-domain token bucket rate limiting, multi-datacenter geographic crawling strategy, spider trap detection, and fault tolerance (RocksDB persistent Frontier + Kafka replay). Capacity estimation: 15B pages/month, ~5,800 avg QPS (17,400 peak), 4.6 Gbps bandwidth (13.8 peak), 300 TB/month storage, 35-63 crawler nodes. Created SystemDesign DB record with slug `interview-web-crawler`, display_order=117. Added topic card slug to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_web_crawler.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,744 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-315 --status completed`
