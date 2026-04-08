@@ -37,8 +37,9 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
   },
   {
     title: "Design a News Feed",
+    slug: "interview-news-feed",
     description:
-      "Social media feed generation: fan-out on write vs read, ranking, real-time updates. Focus on push/pull trade-offs and personalization pipeline.",
+      "Social media feed generation: fan-out on write vs read (hybrid model), celebrity problem, ML ranking (EdgeRank), media CDN, feed cache invalidation, cursor pagination.",
     difficulty: "Hard",
     tags: ["Fan-out", "Ranking", "Caching"],
   },

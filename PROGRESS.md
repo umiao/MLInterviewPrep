@@ -316,3 +316,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,481 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-303 --status completed`
+
+## 2026-04-08 -- [T-P0-304] SD Prep: Design a News Feed (Instagram)
+- **What I did**: Created seed script `scripts/content_interview_news_feed.py` with all 8 sections in Chinese with English technical terms preserved. Covers hybrid Fan-out strategy (Push for normal users, Pull for celebrities with 10K+ followers), ML ranking pipeline (EdgeRank + modern multi-objective DNN/GBDT), two-stage ranking (coarse 1000->200, fine 200->20), Redis Sorted Set feed cache, Kafka async fan-out, Snowflake ID generation, cursor-based pagination, celebrity optimization, multi-DC active-active with AP consistency, three-level graceful degradation (ML ranking -> chronological -> cached snapshot), capacity estimation (200M DAU, 115K QPS read, 3.6 TB Redis, 3.65 PB/yr media, ~206K USD/mo). Created SystemDesign DB record with slug `interview-news-feed`, display_order=106. Updated topic card with slug in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_news_feed.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,940 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-304 --status completed`
