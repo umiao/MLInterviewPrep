@@ -137,6 +137,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["CDN", "Video", "Transcoding"],
   },
+  {
+    title: "Design Dropbox/Google Drive",
+    slug: "interview-cloud-storage",
+    description:
+      "Block-level chunking (CDC/Rabin Fingerprint) + dedup + delta sync, conflict resolution (version vector + conflict copy), metadata DB (MySQL sharded), WebSocket sync notification, tiered storage optimization, offline editing.",
+    difficulty: "Hard",
+    tags: ["Storage", "Sync", "Dedup"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {

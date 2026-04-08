@@ -365,3 +365,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 25,264 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-310 --status completed`
+
+## 2026-04-08 -- [T-P1-311] SD Prep: Design Dropbox/Google Drive
+- **What I did**: Created seed script `scripts/content_interview_cloud_storage.py` with all 8 sections in Chinese with English technical terms preserved. Covers block-level chunking with CDC (Rabin Fingerprint, avg 4 MB chunks), delta sync (only upload changed chunks, 90%+ bandwidth savings), three-level dedup index (Bloom Filter 75 GB + Redis 200 GB + Cassandra), conflict detection via version number optimistic locking + conflict copy strategy (Dropbox model), WebSocket real-time sync notification with Long Polling fallback, tiered storage optimization (S3 Standard/IA/Glacier, 60% cost savings), version history with compaction (Time Machine-style gradual reduction, 87% storage savings), offline editing with local change queue + cursor-based reconciliation. Capacity estimation: 100M DAU, 500M users, 100B files, 35 PB storage (after dedup), 17K peak sync QPS, 52K chunk QPS, 856K metadata QPS, ~$1.5M/month. Created SystemDesign DB record with slug `interview-cloud-storage`, display_order=113. Added topic card to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_cloud_storage.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 26,794 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-311 --status completed`
