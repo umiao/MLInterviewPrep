@@ -11,6 +11,61 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-288: Create HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Two system design modules (vibe-code-engineering-patterns, ml-system-design-patterns) have diagram_filename set in DB but no actual PNG or HTML files on disk. The other 6 modules have both HTML sources in src/frontend/public/static/system-designs/html/ and PNG screenshots.
+
+STEPS:
+1. Read existing HTML diagrams for reference style (e.g., module_arbitration.html, distributed_task_queue.html). They use inline CSS, boxes, arrows, color-coded sections.
+2. Read the architecture section of vibe-code-engineering-patterns and ml-system-design-patterns from DB to understand what to diagram.
+3. Create src/frontend/public/static/system-designs/html/vibe_code_engineering.html -- architecture diagram for the engineering tooling system design (data extraction pipeline, secret detection, scraping components).
+4. Create src/frontend/public/static/system-designs/html/ml_system_design_patterns.html -- architecture diagram for ML system design patterns (feature store, model serving, A/B testing, monitoring components).
+5. Add both new filenames to DIAGRAMS list in scripts/generate_diagram_screenshots.py.
+6. Run: python scripts/generate_diagram_screenshots.py to generate PNG screenshots.
+7. Verify PNG files exist at the expected paths and are non-zero size.
+
+AC:
+- [ ] vibe_code_engineering.html created with architecture diagram
+- [ ] ml_system_design_patterns.html created with architecture diagram
+- [ ] generate_diagram_screenshots.py updated with both new entries
+- [ ] PNG screenshots generated and exist on disk
+- [ ] Diagrams render correctly in HTML (open in browser to verify)
+
+#### T-P1-289: Replace top bookmark nav with persistent right-side TOC in SystemDesignDetail
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: SystemDesignDetail.tsx currently uses a sticky top bookmark nav bar for section navigation. After clicking a section, the nav stays at the top and the user loses context of where they are in the document. The user wants a persistent right-side TOC sidebar like PrepNotesPage uses.
+
+REFERENCE IMPLEMENTATION: PrepNotesPage.tsx uses DynamicTocSidebar (src/frontend/src/components/ui/DynamicTocSidebar.tsx) which:
+- Shows on the right side of the content
+- Highlights the currently visible section via IntersectionObserver
+- Is always visible (sticky) while scrolling
+- Supports collapsible h1/h2 hierarchy
+
+CURRENT: SystemDesignDetail.tsx (line 215-231) has a sticky top nav bar with horizontal buttons for each section. It uses IntersectionObserver (line 76-113) and scrollToSection callback.
+
+STEPS:
+1. Read DynamicTocSidebar.tsx and PrepNotesPage.tsx to understand the right-side TOC pattern.
+2. Read SystemDesignDetail.tsx to understand current layout structure.
+3. Modify SystemDesignDetail.tsx:
+   a. Remove the sticky top bookmark nav (lines 215-231).
+   b. Change the content area to a two-column flex layout: main content (left, flex-1) + TOC sidebar (right, fixed width ~200px).
+   c. Either reuse DynamicTocSidebar or create a SystemDesignTocSidebar that uses the existing SECTIONS/SECTION_LABELS with the same sticky right-side pattern.
+   d. The TOC should highlight the currently visible section and support click-to-scroll.
+4. Verify: TypeScript compiles cleanly (npx tsc --noEmit).
+5. Manual check: the TOC stays visible while scrolling through long sections.
+
+AC:
+- [ ] Top bookmark nav removed
+- [ ] Right-side TOC sidebar added (persistent/sticky while scrolling)
+- [ ] Current section highlighted in TOC
+- [ ] Click TOC item scrolls to section
+- [ ] TypeScript compiles cleanly
+- [ ] Layout works on both desktop and mobile (TOC hidden on mobile or responsive)
+
 ### P2 -- Nice to Have
 
 ### P3 -- Stretch Goals
@@ -93,6 +148,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-08** -- T-P1-284: System design depth: pbe-pipeline expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_pbe_pipeline.py. (2) NEVER o
 - [x] **2026-04-08** -- T-P1-283: System design depth: database-comparison supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_database_comparison.py. (2) 
 - [x] **2026-04-08** -- T-P1-282: System design depth: distributed-task-queue add Defense Q&A. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_distributed_task_queue.py. (
+- [x] **2026-04-08** -- T-P0-290: Restructure System Design landing page with sub-sections (eBay Projects + Interview Prep). The current System Design landing page (SystemDesignList.tsx) only shows eBay project modules. The user needs it restruc
 - [x] **2026-04-08** -- T-P0-281: System design depth: ranking-allocation supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ranking_allocation.py. (2) N
 - [x] **2026-04-08** -- T-P0-280: System design depth: llm-orchestration expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_llm_orchestration.py. (2) NE
 - [x] **2026-04-07** -- T-P1-277: System Design Translation Batch 5: module 6 (41K chars). Translate module distributed-task-queue (41K) to Chinese. DB: data/mle_prep.db table system_designs slug=distributed-tas

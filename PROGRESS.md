@@ -500,3 +500,17 @@
 - **Sanity check result**: All 8 modules CLEAN. 0 bare | in display math, 0 multi-line $$, 0 consecutive $$ without blank lines. All Chinese preserved.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-287 --status completed`
+
+### 2026-04-08 -- System design depth tasks all completed + 3 new UI/UX tasks planned
+- **What I did**: (1) Verified all 8 system design depth tasks (T-P0-280 ~ T-P2-287) completed successfully via autonomous_run.sh (7 sessions, 7 commits). All modules now at interview-ready depth (14K-25K chars each, Chinese content, Defense Q&A, formulas audited). (2) Task planning mode: investigated 3 new issues per user request -- missing diagrams for 2 modules, poor section navigation UX, and need for System Design landing page restructure. Created 3 tasks: T-P1-288 (HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns), T-P1-289 (replace top bookmark nav with right-side TOC sidebar referencing DynamicTocSidebar), T-P0-290 (restructure landing page with Interview Prep + eBay Projects tabs).
+- **Deliverables**: 3 tasks in MLInterviewPrep tasks.db (T-P1-288, T-P1-289, T-P0-290), TASKS.md regenerated, task plan sent via Discord for review
+- **Sanity check result**: All 3 tasks created with detailed self-contained descriptions and AC. Verified existing diagram/TOC patterns in codebase for reference.
+- **Status**: [DONE] (task planning only -- awaiting user review before execution)
+- **Request**: No task status changes needed (tasks are active, pending user approval)
+
+### 2026-04-08 -- [T-P0-290] Restructure System Design landing page with sub-sections
+- **What I did**: Restructured SystemDesignList.tsx into a tabbed layout with two sections: (1) Interview Prep (default tab) -- 8 placeholder cards for common SD interview questions (URL Shortener, Rate Limiter, News Feed, Chat System, Key-Value Store, Notification System, Web Crawler, Search Autocomplete) with difficulty badges, topic tags, descriptions, and "Coming Soon" labels. (2) eBay Projects -- existing 8 modules with narrative blockquote moved under this tab. Used useSearchParams for tab state persistence via URL (?tab=ebay), so tab is preserved on back navigation. Added useState + import for tab switching.
+- **Deliverables**: src/frontend/src/pages/SystemDesignList.tsx (rewritten with tab layout)
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit). Interview Prep tab shows 8 topics. eBay Projects tab preserves existing module cards with narrative. Existing /system-design/:slug routes unchanged.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-290 --status completed`
