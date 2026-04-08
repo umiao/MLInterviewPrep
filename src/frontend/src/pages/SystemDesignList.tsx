@@ -129,6 +129,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["Streaming", "Exactly-Once", "Fraud Detection"],
   },
+  {
+    title: "Design YouTube/Netflix Video Streaming",
+    slug: "interview-video-streaming",
+    description:
+      "Upload + transcoding pipeline (DAG parallel GPU transcode), ABR adaptive bitrate (HLS/DASH), three-layer CDN caching (Edge 200+ POP -> Shield -> Origin S3), multi-CDN failover, viral video handling.",
+    difficulty: "Hard",
+    tags: ["CDN", "Video", "Transcoding"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {

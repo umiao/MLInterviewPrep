@@ -358,3 +358,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,177 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-309 --status completed`
+
+## 2026-04-08 -- [T-P1-310] SD Prep: Design YouTube/Netflix Video Streaming
+- **What I did**: Created seed script `scripts/content_interview_video_streaming.py` with all 8 sections in Chinese with English technical terms preserved. Covers upload + transcoding pipeline (DAG parallel GPU transcode via Temporal, video segmentation by GOP boundary, FFmpeg + NVENC), ABR adaptive bitrate streaming (HLS/DASH, BBA and MPC algorithms), three-layer CDN caching (L1 Edge 200+ POP -> L2 Shield with Request Coalescing -> L3 Origin S3), multi-CDN failover (CloudFront primary + Akamai fallback, DNS 30s switch), viral video handling (proactive CDN warm-up, JIT transcoding), mixed transcoding strategy (eager for popular creators, JIT for long-tail, saves 60% storage), view count service (Redis real-time + Cassandra persistent + T+1 batch calibration), content deduplication (Chromaprint audio + pHash video fingerprinting). Capacity estimation: 1B DAU, 5B daily views, 174K peak playback QPS, 10M CDN segment QPS, 700 Gbps CDN outbound, 3000 GPU workers, ~$80M/month. Created SystemDesign DB record with slug `interview-video-streaming`, display_order=112. Added slug to topic card in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_video_streaming.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 25,264 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-310 --status completed`
