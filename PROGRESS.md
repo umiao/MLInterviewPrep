@@ -486,3 +486,10 @@
 - **Sanity check result**: 17,459 total chars (target >=14K), 12 display math (target 3+), 5 Q&A (target 4+), 7 trade-off decisions (target 3+), 3 failure modes, no bare | in math, 5,568 Chinese characters preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-285 --status completed`
+
+### 2026-04-08 -- [T-P2-286] Expand ml-system-design-patterns to interview depth
+- **What I did**: Expanded ml-system-design-patterns from 8.5K to 17.0K chars. Added: (1) Business impact quantification table in overview (CTR, NDCG, latency, GMV ranges). (2) Per-section expansion strategy table in architecture with time allocation and common mistakes. (3) Narrative construction pipeline in dataflow with step-by-step process and decision quick-reference table. (4) Math formulations: NDCG/DCG, MAP, CTR lift confidence interval, feature store freshness SLA, progress aggregation formula. (5) Production constraints table with typical numbers for QPS/latency/data scale/candidate set/cost/fallback. (6) Latency budget allocation pattern with example breakdown. (7) Iteration & evaluation methodology: 3-layer evaluation strategy, hyperparameter tuning patterns, 3 failure modes per section. (8) 5 Defense Q&A (NDCG label reliability, feature store freshness failure, priority-chain limitations, A/B test acceleration, latency budget parallelization). (9) Updated verbal outlines with formula summaries.
+- **Deliverables**: scripts/content_ml_system_design_patterns.py (new seed script, Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 17,017 total chars (target >=14K), 10 display math (target 5+), 8 Q&A (target 4+), failure modes in every section, no bare | in math, 5,768 Chinese characters preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-286 --status completed`

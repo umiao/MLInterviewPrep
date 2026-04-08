@@ -13,20 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-286: System design depth: ml-system-design-patterns expansion
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py. (2) NEVER overwrite Chinese with English. (3) Read DB first. (4) Seed script = source of truth. (5) Formulas: \mid not |.
-
-Expand ml-system-design-patterns. Current: 8.4K chars, 0 formulas, 0 Q&A -- cheat sheet level.
-
-REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
-
-STEPS: 1. Read DB (slug=ml-system-design-patterns), dump all 8. 2. Create scripts/content_ml_system_design_patterns.py. 3. Expand each pattern (Chinese): Math formulations (NDCG, MAP, CTR lift CI, feature store freshness SLA), Concrete production examples, 4+ Defense Q&A, Failure modes per pattern, Iteration methodology. 4. Seed and verify.
-
-AC: 5+ display math, 4+ Q&A, Failure modes per pattern, Concrete production numbers, Seed = Chinese source of truth, No bare |, Total >= 14K
-
 #### T-P2-287: System design formula audit: all modules
 - **Priority**: P2
 - **Complexity**: S
@@ -110,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 249 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-08** -- T-P2-286: System design depth: ml-system-design-patterns expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py
 - [x] **2026-04-08** -- T-P2-285: System design depth: vibe-code-engineering restructure. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2
 - [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
