@@ -344,3 +344,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,412 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-307 --status completed`
+
+## 2026-04-08 -- [T-P1-308] SD Prep: Design Top-K Heavy Hitters
+- **What I did**: Created seed script `scripts/content_interview_top_k.py` with all 8 sections in Chinese with English technical terms preserved. Covers three-layer aggregation architecture (Local Counter 5s flush -> Kafka -> Flink partition by key -> Global Merger), Count-Min Sketch + Min-Heap combination (CMS 54KB for approximate counting, Min-Heap K=1000 for top-K tracking), Lambda Architecture (streaming 5s latency + hourly batch calibration via Kendall's tau), multi-time-window via CMS additivity (hierarchical time wheel 5s->1m->5m->1h->1d), Space-Saving algorithm comparison, Conservative Update optimization, multi-datacenter deployment with idempotent merge, graceful degradation (4 levels), capacity estimation (100M DAU, 5B daily events, 170K peak QPS, 25MB streaming memory, ~$5K/month). Created SystemDesign DB record with slug `interview-top-k-heavy-hitters`, display_order=110. Added slug to topic card in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_top_k.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,499 total chars. Chinese chars present in all sections. No bare `|` in math formulas (warnings are false positives from `$` in cost figures).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-308 --status completed`

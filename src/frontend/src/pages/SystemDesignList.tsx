@@ -113,6 +113,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Medium",
     tags: ["Trie", "Caching", "Ranking"],
   },
+  {
+    title: "Design Top-K Heavy Hitters",
+    slug: "interview-top-k-heavy-hitters",
+    description:
+      "Count-Min Sketch + Min-Heap streaming Top-K: three-layer aggregation (local -> partition -> global), Lambda Architecture with hourly batch calibration, multi-window CMS additivity.",
+    difficulty: "Hard",
+    tags: ["Streaming", "Probabilistic DS", "MapReduce"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {
