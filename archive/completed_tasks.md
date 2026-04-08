@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 249 completed tasks archived as of latest archival.
+> 270 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -375,3 +375,26 @@ Add a new tab 'Story Map' to BehavioralQuestions page, appearing to the right of
 - [x] **2026-03-31** -- T-P2-240: [DEBT] MLInterviewPrep: Add _temp*.json pattern to .gitignore. `_temp_docs.json` is untracked in MLInterviewPrep and not in .gitignore. These files appear to be temp artifacts from co
 - [x] **2026-03-31** -- T-P2-248: Uber BPS: Create timed mock interview problem sets. 3 mock BPS sets simulating 45min coding. Each: 1 medium + 1 medium/hard with follow-ups. Set 1: LC 230 variant + Rider C
 - [x] **2026-04-01** -- T-P2-256: [DEBT] MLInterviewPrep: Remove stale scripts/git-hooks/ path from CLAUDE.md. CLAUDE.md File Structure section references scripts/git-hooks/ as a directory but only scripts/pre-commit exists (no git
+- [x] **2026-04-08** -- T-P0-280: System design depth: llm-orchestration expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_llm_orchestration.py. (2) NE
+- [x] **2026-04-08** -- T-P0-281: System design depth: ranking-allocation supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ranking_allocation.py. (2) N
+- [x] **2026-04-08** -- T-P0-290: Restructure System Design landing page with sub-sections (eBay Projects + Interview Prep). The current System Design landing page (SystemDesignList.tsx) only shows eBay project modules. The user needs it restruc
+- [x] **2026-04-08** -- T-P0-291: SD Interview Prep Batch 1: URL Shortener, Rate Limiter, Notification System. CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserve
+- [x] **2026-04-08** -- T-P0-292: SD Interview Prep Batch 2: Ride-sharing (Uber), Proximity Service (Yelp), Real-time Leaderboard. CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserve
+- [x] **2026-04-08** -- T-P0-293: SD Interview Prep Batch 3: News Feed/Instagram, Chat System, Facebook Live Comments. CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserve
+- [x] **2026-04-07** -- T-P1-273: System Design Translation Batch 1: modules 7+8 (24K chars). Translate modules vibe-code-engineering-patterns (10K) and ml-system-design-patterns (14K) to Chinese. DB: data/mle_prep
+- [x] **2026-04-07** -- T-P1-274: System Design Translation Batch 2: modules 1+2 (36K chars). Translate modules module-arbitration (20K) and llm-orchestration (16K) to Chinese. DB: data/mle_prep.db table system_des
+- [x] **2026-04-07** -- T-P1-275: System Design Translation Batch 3: modules 3+4 (55K chars). Translate modules pbe-pipeline (21K) and ranking-allocation (34K) to Chinese. DB: data/mle_prep.db table system_designs.
+- [x] **2026-04-07** -- T-P1-276: System Design Translation Batch 4: module 5 (36K chars). Translate module database-comparison (36K) to Chinese. DB: data/mle_prep.db table system_designs slug=database-compariso
+- [x] **2026-04-07** -- T-P1-277: System Design Translation Batch 5: module 6 (41K chars). Translate module distributed-task-queue (41K) to Chinese. DB: data/mle_prep.db table system_designs slug=distributed-tas
+- [x] **2026-04-08** -- T-P1-282: System design depth: distributed-task-queue add Defense Q&A. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_distributed_task_queue.py. (
+- [x] **2026-04-08** -- T-P1-283: System design depth: database-comparison supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_database_comparison.py. (2) 
+- [x] **2026-04-08** -- T-P1-284: System design depth: pbe-pipeline expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_pbe_pipeline.py. (2) NEVER o
+- [x] **2026-04-08** -- T-P1-288: Create HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns. Two system design modules (vibe-code-engineering-patterns, ml-system-design-patterns) have diagram_filename set in DB bu
+- [x] **2026-04-08** -- T-P1-289: Replace top bookmark nav with persistent right-side TOC in SystemDesignDetail. SystemDesignDetail.tsx currently uses a sticky top bookmark nav bar for section navigation. After clicking a section, th
+- [x] **2026-04-08** -- T-P1-294: SD Interview Prep Batch 4: Search Autocomplete, Top-K Heavy Hitters, Ad Click Aggregator. CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserve
+- [x] **2026-04-08** -- T-P1-295: SD Interview Prep Batch 5: YouTube/Netflix, Dropbox/Google Drive, Price Drop Tracker. CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserve
+- [x] **2026-04-08** -- T-P1-296: SD Interview Prep Batch 6: Leetcode Judge, Ticketmaster, Web Crawler, Auction System, Distributed Cache. CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserve
+- [x] **2026-04-08** -- T-P1-297: SD Interview Prep: Update landing page with all 20 topics + category grouping. After all 6 content batches are done, update SystemDesignList.tsx to:
+
+1. Replace hardcoded INTERVIEW_TOPICS with dynami
+- [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 

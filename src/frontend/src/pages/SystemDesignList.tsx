@@ -12,6 +12,7 @@ const READING_ORDER =
 
 interface InterviewTopic {
   title: string;
+  slug?: string;
   description: string;
   difficulty: "Easy" | "Medium" | "Hard";
   tags: string[];
@@ -20,6 +21,7 @@ interface InterviewTopic {
 const INTERVIEW_TOPICS: InterviewTopic[] = [
   {
     title: "Design a URL Shortener",
+    slug: "interview-url-shortener",
     description:
       "TinyURL-style service: hash/encode long URLs, redirect, analytics, expiration. Focus on hashing strategy, collision handling, and read-heavy scaling.",
     difficulty: "Easy",
@@ -148,7 +150,12 @@ export default function SystemDesignList() {
             {INTERVIEW_TOPICS.map((topic) => (
               <div
                 key={topic.title}
-                className="bg-white rounded-lg border border-gray-200 px-4 py-3 opacity-80"
+                className={`bg-white rounded-lg border border-gray-200 px-4 py-3 ${topic.slug ? "cursor-pointer hover:border-blue-400 hover:shadow-md transition-all" : "opacity-80"}`}
+                onClick={
+                  topic.slug
+                    ? () => navigate(`/system-design/${topic.slug}`)
+                    : undefined
+                }
               >
                 <div className="flex items-center justify-between mb-1">
                   <h2 className="text-base font-semibold text-gray-800">
@@ -173,9 +180,11 @@ export default function SystemDesignList() {
                     </span>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-2 italic">
-                  Coming Soon
-                </p>
+                {!topic.slug && (
+                  <p className="text-xs text-gray-400 mt-2 italic">
+                    Coming Soon
+                  </p>
+                )}
               </div>
             ))}
           </div>

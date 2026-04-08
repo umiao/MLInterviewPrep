@@ -9,42 +9,2284 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-299: SD Prep: Design a Rate Limiter
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Rate Limiter (slug=interview-rate-limiter)
+Key concepts: Token bucket vs sliding window vs fixed window, distributed rate limiting with Redis, race conditions, rule engine, HTTP 429
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_rate_limiter.py with the seed script.
+3. Create SystemDesign record: slug='interview-rate-limiter', title='Design a Rate Limiter', display_order=101.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-rate-limiter.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-300: SD Prep: Design a Notification System
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Notification System (slug=interview-notification-system)
+Key concepts: Push (APNs/FCM) / SMS / Email, priority queue, template engine, retry with exponential backoff + DLQ, user preferences, rate limiting per user
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_notification.py with the seed script.
+3. Create SystemDesign record: slug='interview-notification-system', title='Design a Notification System', display_order=102.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-notification-system.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-301: SD Prep: Design a Ride-sharing System (Uber)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Ride-sharing System (Uber) (slug=interview-ride-sharing)
+Key concepts: CRITICAL FOR UBER INTERVIEW. Matching algorithm, surge pricing, real-time location (WebSocket, 3-5s), geospatial indexing (Geohash/S2/H3), ETA prediction, trip state machine, payment
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_ride_sharing.py with the seed script.
+3. Create SystemDesign record: slug='interview-ride-sharing', title='Design a Ride-sharing System (Uber)', display_order=103.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-ride-sharing.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-302: SD Prep: Design a Proximity Service (Yelp)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Proximity Service (Yelp) (slug=interview-proximity-service)
+Key concepts: Geohash vs QuadTree vs R-Tree, nearby search within radius, business CRUD + search, caching hot areas, read-heavy 99:1
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_proximity_service.py with the seed script.
+3. Create SystemDesign record: slug='interview-proximity-service', title='Design a Proximity Service (Yelp)', display_order=104.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-proximity-service.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-303: SD Prep: Design a Real-time Game Leaderboard
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Real-time Game Leaderboard (slug=interview-game-leaderboard)
+Key concepts: Redis Sorted Set (ZADD/ZRANK/ZRANGE), top-K, rank lookup, relative ranking, sharding for millions, daily/weekly/all-time
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_game_leaderboard.py with the seed script.
+3. Create SystemDesign record: slug='interview-game-leaderboard', title='Design a Real-time Game Leaderboard', display_order=105.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-game-leaderboard.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-304: SD Prep: Design a News Feed (Instagram)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a News Feed (Instagram) (slug=interview-news-feed)
+Key concepts: Fan-out on write vs read (hybrid), celebrity problem, ranking (EdgeRank), media CDN, feed cache invalidation, cursor pagination
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_news_feed.py with the seed script.
+3. Create SystemDesign record: slug='interview-news-feed', title='Design a News Feed (Instagram)', display_order=106.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-news-feed.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-305: SD Prep: Design a Chat System (Messenger/WhatsApp)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Chat System (Messenger/WhatsApp) (slug=interview-chat-system)
+Key concepts: WebSocket management, message delivery at-least-once + dedup, online presence heartbeat, group chat, message storage, E2E encryption, read receipts
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_chat_system.py with the seed script.
+3. Create SystemDesign record: slug='interview-chat-system', title='Design a Chat System (Messenger/WhatsApp)', display_order=107.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-chat-system.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P0-306: SD Prep: Design Facebook Live Comments
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design Facebook Live Comments (slug=interview-live-comments)
+Key concepts: Real-time streaming WebSocket/SSE, comment ordering, high write throughput 100K+/sec, moderation pipeline, millions concurrent viewers
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_live_comments.py with the seed script.
+3. Create SystemDesign record: slug='interview-live-comments', title='Design Facebook Live Comments', display_order=108.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-live-comments.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-289: Replace top bookmark nav with persistent right-side TOC in SystemDesignDetail
+#### T-P1-307: SD Prep: Design Search Autocomplete
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: None
-- **Description**: SystemDesignDetail.tsx currently uses a sticky top bookmark nav bar for section navigation. After clicking a section, the nav stays at the top and the user loses context of where they are in the document. The user wants a persistent right-side TOC sidebar like PrepNotesPage uses.
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
 
-REFERENCE IMPLEMENTATION: PrepNotesPage.tsx uses DynamicTocSidebar (src/frontend/src/components/ui/DynamicTocSidebar.tsx) which:
-- Shows on the right side of the content
-- Highlights the currently visible section via IntersectionObserver
-- Is always visible (sticky) while scrolling
-- Supports collapsible h1/h2 hierarchy
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
 
-CURRENT: SystemDesignDetail.tsx (line 215-231) has a sticky top nav bar with horizontal buttons for each section. It uses IntersectionObserver (line 76-113) and scrollToSection callback.
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design Search Autocomplete (slug=interview-search-autocomplete)
+Key concepts: Trie (compressed), top-K suggestions, data collection pipeline, ranking (frequency + personalization + trending), multi-level caching
 
 STEPS:
-1. Read DynamicTocSidebar.tsx and PrepNotesPage.tsx to understand the right-side TOC pattern.
-2. Read SystemDesignDetail.tsx to understand current layout structure.
-3. Modify SystemDesignDetail.tsx:
-   a. Remove the sticky top bookmark nav (lines 215-231).
-   b. Change the content area to a two-column flex layout: main content (left, flex-1) + TOC sidebar (right, fixed width ~200px).
-   c. Either reuse DynamicTocSidebar or create a SystemDesignTocSidebar that uses the existing SECTIONS/SECTION_LABELS with the same sticky right-side pattern.
-   d. The TOC should highlight the currently visible section and support click-to-scroll.
-4. Verify: TypeScript compiles cleanly (npx tsc --noEmit).
-5. Manual check: the TOC stays visible while scrolling through long sections.
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_search_autocomplete.py with the seed script.
+3. Create SystemDesign record: slug='interview-search-autocomplete', title='Design Search Autocomplete', display_order=109.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-search-autocomplete.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
 
 AC:
-- [ ] Top bookmark nav removed
-- [ ] Right-side TOC sidebar added (persistent/sticky while scrolling)
-- [ ] Current section highlighted in TOC
-- [ ] Click TOC item scrolls to section
-- [ ] TypeScript compiles cleanly
-- [ ] Layout works on both desktop and mobile (TOC hidden on mobile or responsive)
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-308: SD Prep: Design Top-K Heavy Hitters
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design Top-K Heavy Hitters (slug=interview-top-k-heavy-hitters)
+Key concepts: Count-Min Sketch, Space-Saving algorithm, MapReduce, streaming vs batch, approximate vs exact, multi-level aggregation
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_top_k.py with the seed script.
+3. Create SystemDesign record: slug='interview-top-k-heavy-hitters', title='Design Top-K Heavy Hitters', display_order=110.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-top-k-heavy-hitters.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-309: SD Prep: Design an Ad Click Aggregator
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design an Ad Click Aggregator (slug=interview-ad-click-aggregator)
+Key concepts: Kafka + Flink streaming, exactly-once counting, time-window aggregation, late events + watermarks, lambda architecture, click fraud detection
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_ad_click.py with the seed script.
+3. Create SystemDesign record: slug='interview-ad-click-aggregator', title='Design an Ad Click Aggregator', display_order=111.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-ad-click-aggregator.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-310: SD Prep: Design YouTube/Netflix Video Streaming
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design YouTube/Netflix Video Streaming (slug=interview-video-streaming)
+Key concepts: Upload + transcoding pipeline, adaptive bitrate HLS/DASH, CDN edge caching, metadata service, view counting, copyright detection
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_video_streaming.py with the seed script.
+3. Create SystemDesign record: slug='interview-video-streaming', title='Design YouTube/Netflix Video Streaming', display_order=112.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-video-streaming.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-311: SD Prep: Design Dropbox/Google Drive
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design Dropbox/Google Drive (slug=interview-cloud-storage)
+Key concepts: Block-level chunking + dedup + delta sync, conflict resolution, metadata DB, sync notification, storage optimization, offline editing
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_cloud_storage.py with the seed script.
+3. Create SystemDesign record: slug='interview-cloud-storage', title='Design Dropbox/Google Drive', display_order=113.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-cloud-storage.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-312: SD Prep: Design a Price Drop Tracker (CamelCamelCamel)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Price Drop Tracker (CamelCamelCamel) (slug=interview-price-drop-tracker)
+Key concepts: Scraping pipeline, price history time-series, alert system, anti-scraping, product matching/dedup, scale to millions of products
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_price_tracker.py with the seed script.
+3. Create SystemDesign record: slug='interview-price-drop-tracker', title='Design a Price Drop Tracker (CamelCamelCamel)', display_order=114.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-price-drop-tracker.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-313: SD Prep: Design an Online Judge (Leetcode)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design an Online Judge (Leetcode) (slug=interview-online-judge)
+Key concepts: Code sandbox (Docker/gVisor), queue-based submission, test case runner, judge verdicts, anti-cheat MOSS, multi-language runtime
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_online_judge.py with the seed script.
+3. Create SystemDesign record: slug='interview-online-judge', title='Design an Online Judge (Leetcode)', display_order=115.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-online-judge.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-314: SD Prep: Design Ticketmaster / Hotel Reservation
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design Ticketmaster / Hotel Reservation (slug=interview-ticket-reservation)
+Key concepts: Seat map inventory, distributed locking for concurrent booking, payment hold TTL, overbooking, waitlist, flash sale virtual queue, idempotency
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_ticket_reservation.py with the seed script.
+3. Create SystemDesign record: slug='interview-ticket-reservation', title='Design Ticketmaster / Hotel Reservation', display_order=116.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-ticket-reservation.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-315: SD Prep: Design a Web Crawler
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Web Crawler (slug=interview-web-crawler)
+Key concepts: URL frontier priority queue, distributed crawling consistent hashing, Bloom filter dedup (10B URLs ~1.2GB), robots.txt, 10K hacked machines variant = distributed hash map
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_web_crawler.py with the seed script.
+3. Create SystemDesign record: slug='interview-web-crawler', title='Design a Web Crawler', display_order=117.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-web-crawler.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-316: SD Prep: Design an Auction System (eBay)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design an Auction System (eBay) (slug=interview-auction-system)
+Key concepts: Real-time bidding WebSocket, bid ordering monotonic timestamps, auction state machine, sniping protection soft close, payment escrow, reserve price
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_auction_system.py with the seed script.
+3. Create SystemDesign record: slug='interview-auction-system', title='Design an Auction System (eBay)', display_order=118.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-auction-system.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
+
+#### T-P1-317: SD Prep: Design a Distributed Cache
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-use expansion (e.g., CDN (Content Delivery Network)), (2) API/code examples, (3) formulas, (4) proper nouns (Redis, Kafka, etc.). All discussion, explanation, analysis, Q&A dialogue should be fluent Chinese to ensure readability.
+
+CRITICAL SAFETY RULES: (1) NEVER run any eBay module seed script. (2) All content in Chinese with English terms preserved bold + first-use explanation. (3) Seed script = source of truth. (4) Formulas: use \mid not |, single-line $$ blocks, blank lines between $$. (5) Read scripts/content_module_arbitration.py as REFERENCE for Chinese style.
+
+STANDARD SYSTEM DESIGN INTERVIEW FLOW -- each section maps to a phase:
+
+=== SECTION: overview ===
+Phase 1: Requirements Clarification (5 min in interview)
+
+Structure the overview as:
+1. **Problem Statement**: 1-2 sentence description of what we are building
+2. **Functional Requirements (FR)**: 3-5 core features the system MUST support
+   - Example (URL Shortener): shorten URL, redirect, custom alias, expiration
+3. **Non-Functional Requirements (NFR)**:
+   - Availability target (99.9%? 99.99%?)
+   - Latency target (P99 < Xms for reads, < Yms for writes)
+   - Consistency model (strong? eventual? where does it matter?)
+   - Scalability target (DAU, QPS, storage growth rate)
+   - Durability (data loss tolerance)
+4. **Clarification Questions to Ask Interviewer** (5-8 questions with WHY):
+   Each question formatted as: "Q: [question] -- WHY: [what design decision this affects]"
+   Example: "Q: Do we need analytics on click counts? -- WHY: This determines whether we need a separate analytics pipeline or can piggyback on the redirect service"
+5. **Out of Scope**: Explicitly state what we are NOT designing (prevents scope creep)
+
+=== SECTION: architecture ===
+Phase 2: High-Level Design (10 min)
+- Component diagram (described in markdown, not image)
+- Core services and their responsibilities
+- Database choices with justification (SQL vs NoSQL vs both)
+- Communication patterns (sync REST, async message queue, WebSocket)
+- Data partitioning strategy if relevant
+
+=== SECTION: dataflow ===
+Phase 3: API Design + Data Flow (5 min)
+- REST API endpoints: method, path, request body, response, status codes
+- Core data models (key tables/collections with fields)
+- Read path: step-by-step from client request to response
+- Write path: step-by-step from client write to durable storage
+- Include async paths (queues, background jobs) if relevant
+
+=== SECTION: formulas ===
+Phase 4: Back-of-Envelope Estimation + Core Algorithms (5 min)
+MUST include a complete capacity estimation:
+- DAU -> QPS (read QPS, write QPS, peak multiplier 2-5x)
+- Storage: per-record size x records/day x retention period
+- Bandwidth: QPS x average response size
+- Memory (cache): hot data percentage x total data size
+- Example calculation with concrete numbers (not just formulas)
+Also include any core algorithm math (hashing, data structures, etc.)
+
+=== SECTION: production_constraints ===
+Phase 5: Deep Dive - Scale & Reliability (part of 25 min deep dive)
+- Concrete scale numbers (users, QPS, storage, servers)
+- Single point of failure analysis
+- Multi-datacenter / cross-region considerations:
+  - Active-active vs active-passive
+  - Data replication strategy (sync vs async)
+  - DNS-based routing / GeoDNS
+  - Conflict resolution for multi-master
+- High concurrency handling:
+  - Connection pooling
+  - Rate limiting
+  - Circuit breaker pattern
+  - Graceful degradation under load
+- Monitoring & alerting: key metrics to watch
+
+=== SECTION: tradeoffs ===
+Phase 6: Trade-off Discussion (10 min)
+- 3-5 key design decisions in table format:
+  | Decision | Option A | Option B | Our Choice & Why |
+- At least ONE decision about:
+  - Consistency vs availability (CAP theorem application)
+  - Cost vs performance
+  - Complexity vs simplicity
+- Include "what would change at 10x / 100x scale"
+
+=== SECTION: defense ===
+Interviewer Follow-up Q&A
+- 4-5 tough questions the interviewer might ask
+- Format: Q -> Acknowledge limitation -> Mitigation -> Data/evidence
+- Include at least one question about:
+  - Failure scenario ("What if X goes down?")
+  - Scale challenge ("What if traffic 10x overnight?")
+  - Data consistency ("What if two users do X simultaneously?")
+
+=== SECTION: verbal_outline ===
+1-Hour Interview Pacing Guide
+- 0-5 min: Requirements clarification (FR, NFR, clarifying questions)
+- 5-15 min: High-level architecture (draw components, justify DB choice)
+- 15-40 min: Deep dive (pick 2-3 most interesting components, go deep)
+- 40-50 min: Trade-offs and scaling discussion
+- 50-55 min: Wrap-up (what would you improve? monitoring? what did you skip?)
+- 55-60 min: Questions for interviewer
+Include a 3-minute elevator pitch version too.
+
+TOPIC: Design a Distributed Cache (slug=interview-distributed-cache)
+Key concepts: Consistent hashing virtual nodes, LRU/LFU/TTL eviction, cache-aside vs write-through vs write-behind, stampede prevention, hot key, invalidation
+
+STEPS:
+1. Read scripts/content_module_arbitration.py as REFERENCE.
+2. Create scripts/content_interview_distributed_cache.py with the seed script.
+3. Create SystemDesign record: slug='interview-distributed-cache', title='Design a Distributed Cache', display_order=119.
+4. Run seed script to populate all 8 sections.
+5. Update SystemDesignList.tsx INTERVIEW_TOPICS: change matching topic to link to /system-design/interview-distributed-cache.
+6. Verify: all 8 sections in DB, Chinese chars present, no bare | in math, TypeScript compiles.
+
+AC:
+- All 8 sections filled (Chinese, 10K+ chars)
+- Clarification Questions in overview (5-8 with reasoning)
+- Capacity estimation in formulas
+- 1h interview outline in verbal_outline
+- SystemDesignList.tsx updated
+- Seed script = source of truth
+- No bare | in math, TypeScript clean
 
 ### P2 -- Nice to Have
+
+#### T-P2-318: SD Prep: Update landing page with all topics + category grouping
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
+
+1. Replace hardcoded INTERVIEW_TOPICS with dynamic DB fetch (display_order >= 100)
+2. Group by category: Core Infrastructure, Social & Real-time, Location & Geo, Search & Data, Storage & Media, Specialized
+3. Each card links to /system-design/{slug} (no Coming Soon)
+4. Difficulty badge + key tags per card
+5. TypeScript clean
+
+AC: All 20 topics shown as clickable cards, grouped by category, no Coming Soon, TypeScript clean
 
 ### P3 -- Stretch Goals
 
@@ -115,23 +2357,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 249 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 270 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-08** -- T-P2-287: System design formula audit: all modules. CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chin
 - [x] **2026-04-08** -- T-P2-286: System design depth: ml-system-design-patterns expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py
 - [x] **2026-04-08** -- T-P2-285: System design depth: vibe-code-engineering restructure. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2
 - [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
-- [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
-- [x] **2026-04-08** -- T-P1-288: Create HTML diagrams + PNG screenshots for vibe-code-engineering and ml-system-design-patterns. Two system design modules (vibe-code-engineering-patterns, ml-system-design-patterns) have diagram_filename set in DB bu
-- [x] **2026-04-08** -- T-P1-284: System design depth: pbe-pipeline expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_pbe_pipeline.py. (2) NEVER o
-- [x] **2026-04-08** -- T-P1-283: System design depth: database-comparison supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_database_comparison.py. (2) 
-- [x] **2026-04-08** -- T-P1-282: System design depth: distributed-task-queue add Defense Q&A. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_distributed_task_queue.py. (
-- [x] **2026-04-08** -- T-P0-290: Restructure System Design landing page with sub-sections (eBay Projects + Interview Prep). The current System Design landing page (SystemDesignList.tsx) only shows eBay project modules. The user needs it restruc
-- [x] **2026-04-08** -- T-P0-281: System design depth: ranking-allocation supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ranking_allocation.py. (2) N
-- [x] **2026-04-08** -- T-P0-280: System design depth: llm-orchestration expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_llm_orchestration.py. (2) NE
-- [x] **2026-04-07** -- T-P1-277: System Design Translation Batch 5: module 6 (41K chars). Translate module distributed-task-queue (41K) to Chinese. DB: data/mle_prep.db table system_designs slug=distributed-tas
-- [x] **2026-04-07** -- T-P1-276: System Design Translation Batch 4: module 5 (36K chars). Translate module database-comparison (36K) to Chinese. DB: data/mle_prep.db table system_designs slug=database-compariso
-- [x] **2026-04-07** -- T-P1-275: System Design Translation Batch 3: modules 3+4 (55K chars). Translate modules pbe-pipeline (21K) and ranking-allocation (34K) to Chinese. DB: data/mle_prep.db table system_designs.
-- [x] **2026-04-07** -- T-P1-274: System Design Translation Batch 2: modules 1+2 (36K chars). Translate modules module-arbitration (20K) and llm-orchestration (16K) to Chinese. DB: data/mle_prep.db table system_des
-- [x] **2026-04-07** -- T-P1-273: System Design Translation Batch 1: modules 7+8 (24K chars). Translate modules vibe-code-engineering-patterns (10K) and ml-system-design-patterns (14K) to Chinese. DB: data/mle_prep
+- [x] **2026-04-08** -- T-P0-298: SD Prep: Design a URL Shortener. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us

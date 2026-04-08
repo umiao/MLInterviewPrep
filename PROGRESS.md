@@ -528,3 +528,24 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-289 --status completed`
+
+### 2026-04-08 -- Add Lyra Jacqueline session + verify 3 UI/UX tasks completed
+- **What I did**: (1) Added Lyra therapist session with Jacqueline on Apr 17 10:00 AM (event id=17) to dashboard. (2) Verified all 3 UI/UX tasks (T-P0-290, T-P1-288, T-P1-289) completed by autonomous_run.sh: landing page restructured with Interview Prep + eBay Projects tabs, HTML diagrams + PNGs generated for 2 modules, right-side TOC sidebar replaced top nav.
+- **Deliverables**: mle_prep.db (1 new event), 3 autonomous commits (1d95fc1, 7276ed9, + TOC commit)
+- **Sanity check result**: Event verified in upcoming list (9 upcoming events total). All 3 tasks confirmed completed (0 active tasks remaining).
+- **Status**: [DONE]
+- **Request**: No task to update (ad-hoc Discord request)
+
+### 2026-04-08 -- Task planning: 20 System Design Interview Prep topics in 7 tasks
+- **What I did**: Task planning mode. Analyzed user's list of 20 high-frequency system design interview topics (URL Shortener, Ride-sharing/Uber, Chat System, etc.). Designed 8-section content structure adapted for interview prep (Clarification Questions, Capacity Estimation, 1h Interview Outline). Consolidated overlapping topics (Instagram+News Feed, Web Crawler+10K machines variant). Split into 6 content batch tasks (3-5 topics each) + 1 landing page update task. Created T-P0-291 through T-P1-297 in MLInterviewPrep task_db with detailed self-contained descriptions and safety rules. Also noted Discord MCP channel lost allowlist during session.
+- **Deliverables**: 7 tasks in tasks.db (T-P0-291 ~ T-P1-297), TASKS.md regenerated, plan communicated to user for review
+- **Sanity check result**: All 7 tasks verified active with descriptions. T-P1-297 depends on all 6 content batches.
+- **Status**: [DONE] (task planning only -- awaiting user review before autonomous execution)
+- **Request**: No task status changes needed (tasks active, pending user approval)
+
+### 2026-04-08 -- [T-P0-298] SD Prep: Design a URL Shortener
+- **What I did**: Created seed script `scripts/content_interview_url_shortener.py` with all 8 sections (overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline) in Chinese with English technical terms preserved. Created SystemDesign DB record with slug `interview-url-shortener`. Updated `SystemDesignList.tsx` to add optional `slug` field to InterviewTopic interface and make cards with slugs clickable (navigating to `/system-design/{slug}`).
+- **Deliverables**: `scripts/content_interview_url_shortener.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 17,459 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-298 --status completed`
