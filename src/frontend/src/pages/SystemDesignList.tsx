@@ -58,6 +58,7 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
   },
   {
     title: "Design a Notification System",
+    slug: "interview-notification-system",
     description:
       "Multi-channel notifications: push, SMS, email. Priority queues, rate limiting per user, template rendering, delivery tracking and retry logic.",
     difficulty: "Medium",

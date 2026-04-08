@@ -556,3 +556,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,369 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-299 --status completed`
+
+## 2026-04-08 -- [T-P0-300] SD Prep: Design a Notification System
+- **What I did**: Created seed script `scripts/content_interview_notification.py` with all 8 sections in Chinese with English technical terms preserved. Covers multi-channel delivery (Push/SMS/Email), priority queue with weighted fair queuing (P0:P1:P2 = 8:4:1), template engine, user preferences with quiet hours, exponential backoff retry with DLQ, per-user rate limiting, and notification aggregation. Includes capacity estimation (5B/day, 30K peak QPS), multi-DC active-active deployment, channel fallback (Push fail -> SMS), and three-layer deduplication (idempotency key + consumer offset + template window). Created SystemDesign DB record with slug `interview-notification-system`, display_order=102. Updated `SystemDesignList.tsx` to add slug link for Notification System topic card.
+- **Deliverables**: `scripts/content_interview_notification.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 21,938 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-300 --status completed`
