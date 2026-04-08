@@ -45,6 +45,7 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
   },
   {
     title: "Design a Chat System",
+    slug: "interview-chat-system",
     description:
       "Real-time messaging: WebSocket connections, message delivery guarantees, group chat, online presence. Focus on connection management and message ordering.",
     difficulty: "Medium",

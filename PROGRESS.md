@@ -323,3 +323,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,940 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-304 --status completed`
+
+## 2026-04-08 -- [T-P0-305] SD Prep: Design a Chat System (Messenger/WhatsApp)
+- **What I did**: Created seed script `scripts/content_interview_chat_system.py` with all 8 sections in Chinese with English technical terms preserved. Covers WebSocket connection management (50K connections/server, Redis connection registry with TTL=90s heartbeat), message routing (Chat Service -> Redis lookup -> gRPC push to target Gateway), at-least-once delivery + client dedup (4-layer guarantee: instant push -> retry with exponential backoff -> offline queue -> periodic sync), group chat write-time fan-out (up to 500 members), online presence via Redis TTL heartbeat + lazy aggregation (90%+ traffic saving), Cassandra message store (partition by conversation_id), Snowflake ID generation, multi-DC active-active with AP consistency, 4-level graceful degradation, E2E encryption discussion (Signal Protocol: X3DH + Double Ratchet), capacity estimation (500M DAU, 100B messages/day, 100M concurrent WebSocket connections, 2000 Gateway servers, 11.5 TB/day Cassandra, ~3M USD/mo). Created SystemDesign DB record with slug `interview-chat-system`, display_order=107. Updated topic card with slug in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_chat_system.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 24,586 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-305 --status completed`
