@@ -13,6 +13,22 @@
 
 ### P2 -- Nice to Have
 
+#### T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
+
+Lesson summary: Content stored only in SQLite DB (not in git-tracked seed scripts) is vulnerable to overwrite. After creating/modifying DB content, the seed script must be updated to contain the authoritative version, or content must be exported to a git-tracked JSON/markdown backup file. A seed script that writes to DB must stay as source of truth; once DB content evolves past the seed, the seed becomes dangerous.
+
+Source: MLInterviewPrep/LESSONS.md#2026-04-08
+Target: claude-code-project-template/LESSONS.md (append as [PROPAGATED] entry)
+Tags to include: #data-loss #backup #sqlite #seed-script #propagated
+
+AC:
+1. Entry added to template LESSONS.md with [PROPAGATED] tag and source reference
+2. Wording generalized (remove MLInterviewPrep-specific translation context)
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -84,6 +100,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 249 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
 - [x] **2026-04-07** -- T-P1-277: System Design Translation Batch 5: module 6 (41K chars). Translate module distributed-task-queue (41K) to Chinese. DB: data/mle_prep.db table system_designs slug=distributed-tas
 - [x] **2026-04-07** -- T-P1-276: System Design Translation Batch 4: module 5 (36K chars). Translate module database-comparison (36K) to Chinese. DB: data/mle_prep.db table system_designs slug=database-compariso

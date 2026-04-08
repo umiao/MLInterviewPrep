@@ -423,3 +423,10 @@
 - **Sanity check result**: All 19 hook files import successfully after changes. No remaining references to removed functions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-257 --status completed`
+
+### 2026-04-08 -- [T-P2-278] Propagate SQLite naive-datetime timezone lesson to helixos
+- **What I did**: Propagated the [2026-04-07] SQLite naive datetime lesson from MLInterviewPrep/LESSONS.md to helixos/LESSONS.md. Adapted wording to helixos context (FastAPI/Pydantic/SQLAlchemy instead of generic). Added [PROPAGATED] tag with source reference.
+- **Deliverables**: helixos/LESSONS.md (appended entry)
+- **Sanity check result**: Verified entry present in helixos/LESSONS.md with correct tags and helixos-specific wording.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-278 --status completed`
