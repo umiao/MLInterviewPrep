@@ -9,25 +9,105 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-281: System design depth: ranking-allocation supplement
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ranking_allocation.py. (2) NEVER overwrite Chinese with English. (3) Read DB content FIRST, preserve existing Chinese. (4) Seed script = source of truth. (5) Formulas: \mid not |, single-line $$, blank lines between $$.
+
+Supplement ranking-allocation. Current: 17.4K chars, 10 display math, 7 Q&A -- strong but missing cold-start, Kafka detail, failure modes, tuning table.
+
+REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
+
+STEPS: 1. Read DB (slug=ranking-allocation), dump all 8 sections. 2. Find or create scripts/content_ranking_allocation.py, preserve existing Chinese. 3. Expand (Chinese): Diversity allotment cold-start, Kafka feedback detail, 2-3 failure modes, Hyperparameter tuning table, Iteration & Evaluation if missing. 4. Seed and verify.
+
+AC: Cold-start documented, Kafka detail added, 2+ failure modes, Tuning table, Seed script = Chinese source of truth, No bare | in math, Total >= 20K
+
 ### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-282: System design depth: distributed-task-queue add Defense Q&A
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_distributed_task_queue.py. (2) NEVER overwrite Chinese with English. (3) Read DB content FIRST, preserve ALL existing Chinese. (4) Seed script = source of truth. (5) Formulas: \mid not |.
+
+Add Defense Q&A to distributed-task-queue. Current: 22.9K chars, rich content, 0 Q&A.
+
+REFERENCE: Read scripts/content_module_arbitration.py DEFENSE section for format.
+
+STEPS: 1. Read DB (slug=distributed-task-queue), dump all 8 sections. 2. Find or create scripts/content_distributed_task_queue.py, preserve ALL existing Chinese. 3. Add 5 Defense Q&A (Chinese): Exactly-once delivery, Poison pill, Priority inversion, Worker starvation, Distributed lock trade-off. 4. Seed and verify all other sections unchanged.
+
+AC: 5 Q&A acknowledge-mitigate-data format, Chinese with English terms, ALL existing content preserved, Seed script = source of truth, No bare | in math
+
+#### T-P1-283: System design depth: database-comparison supplement
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_database_comparison.py. (2) NEVER overwrite Chinese with English. (3) Read DB first, preserve existing Chinese. (4) Seed script = source of truth. (5) Formulas: \mid not |.
+
+Supplement database-comparison. Current: 21.1K chars, 6 Q&A, missing iteration/evaluation and failure modes.
+
+REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
+
+STEPS: 1. Read DB (slug=database-comparison), dump all 8. 2. Find or create scripts/content_database_comparison.py, preserve Chinese. 3. Expand (Chinese): Migration strategy (dual-write, shadow, cutover), 3 failure modes (split brain, corruption, hot partition), Capacity planning, Iteration approach. 4. Seed and verify.
+
+AC: Migration strategy, 3 failure modes, Capacity planning, Seed script = Chinese source of truth, ALL existing preserved, No bare | in math, Total >= 24K
+
+#### T-P1-284: System design depth: pbe-pipeline expansion
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_pbe_pipeline.py. (2) NEVER overwrite Chinese with English. (3) Read DB first, preserve existing Chinese. (4) Seed script = source of truth. (5) Formulas: \mid not |.
+
+Expand pbe-pipeline. Current: 12.5K chars, 6 display math, 4 Q&A, missing iteration/evaluation, data quality monitoring, failure modes.
+
+REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
+
+STEPS: 1. Read DB (slug=pbe-pipeline), dump all 8. 2. Find or create scripts/content_pbe_pipeline.py, preserve Chinese. 3. Expand (Chinese): Data quality monitoring (anomaly detection, schema drift, freshness SLAs), Schema evolution strategy, Iteration & Evaluation, 2-3 failure modes, 2 more Defense Q&A. 4. Seed and verify.
+
+AC: Data quality monitoring, Schema evolution, Iteration subsection, 2+ failure modes, 6+ total Q&A, Seed = Chinese source of truth, ALL existing preserved, No bare |, Total >= 16K
 
 ### P2 -- Nice to Have
 
-#### T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template
+#### T-P2-285: System design depth: vibe-code-engineering restructure
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2) NEVER overwrite Chinese with English. (3) Read DB first. (4) Seed script = source of truth. (5) Formulas: \mid not |.
+
+Restructure vibe-code-engineering to sys design depth. Current: 6.2K chars, 0 formulas, 0 Q&A -- weakest module.
+
+REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
+
+STEPS: 1. Read DB (slug=vibe-code-engineering-patterns), dump all 8. 2. Create scripts/content_vibe_code_engineering.py. 3. Restructure as Engineering Tooling System Design (Chinese): Overview as sys design problem, Architecture component diagram, Formulas (precision/recall, throughput), Production Constraints with real numbers, 3+ Trade-off decisions, 4+ Defense Q&A, Verbal Outline 3-min and 10-min. 4. Seed and verify.
+
+AC: All 8 sections restructured, 3+ display math, 4+ Q&A, Trade-off table 3+ decisions, Seed = Chinese source of truth, No bare |, Total >= 14K
+
+#### T-P2-286: System design depth: ml-system-design-patterns expansion
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py. (2) NEVER overwrite Chinese with English. (3) Read DB first. (4) Seed script = source of truth. (5) Formulas: \mid not |.
+
+Expand ml-system-design-patterns. Current: 8.4K chars, 0 formulas, 0 Q&A -- cheat sheet level.
+
+REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
+
+STEPS: 1. Read DB (slug=ml-system-design-patterns), dump all 8. 2. Create scripts/content_ml_system_design_patterns.py. 3. Expand each pattern (Chinese): Math formulations (NDCG, MAP, CTR lift CI, feature store freshness SLA), Concrete production examples, 4+ Defense Q&A, Failure modes per pattern, Iteration methodology. 4. Seed and verify.
+
+AC: 5+ display math, 4+ Q&A, Failure modes per pattern, Concrete production numbers, Seed = Chinese source of truth, No bare |, Total >= 14K
+
+#### T-P2-287: System design formula audit: all modules
 - **Priority**: P2
 - **Complexity**: S
-- **Depends on**: None
-- **Description**: Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
+- **Depends on**: T-P0-280, T-P0-281, T-P1-282, T-P1-283, T-P1-284
+- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chinese with English. (3) Formulas: \mid not |, single-line $$, blank lines between consecutive $$.
 
-Lesson summary: Content stored only in SQLite DB (not in git-tracked seed scripts) is vulnerable to overwrite. After creating/modifying DB content, the seed script must be updated to contain the authoritative version, or content must be exported to a git-tracked JSON/markdown backup file. A seed script that writes to DB must stay as source of truth; once DB content evolves past the seed, the seed becomes dangerous.
+Audit all 8 system design modules for formula rendering safety.
 
-Source: MLInterviewPrep/LESSONS.md#2026-04-08
-Target: claude-code-project-template/LESSONS.md (append as [PROPAGATED] entry)
-Tags to include: #data-loss #backup #sqlite #seed-script #propagated
+STEPS: 1. For each of 8 modules, read content from DB. 2. Check every $ and $$ block for: bare | (should be \mid), multi-line $$ (single line), consecutive $$ without blank lines, unbalanced $. 3. If issues, fix ONLY in corresponding seed script (scripts/content_*.py). 4. Re-seed ONLY fixed modules. 5. Report findings.
 
-AC:
-1. Entry added to template LESSONS.md with [PROPAGATED] tag and source reference
-2. Wording generalized (remove MLInterviewPrep-specific translation context)
+AC: All 8 scanned, All bare | -> \mid, All multi-line $$ collapsed, All consecutive $$ have blank lines, Seed scripts updated for fixed modules only, ALL Chinese preserved
 
 ### P3 -- Stretch Goals
 
@@ -100,8 +180,10 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 249 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
+- [x] **2026-04-08** -- T-P0-280: System design depth: llm-orchestration expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_llm_orchestration.py. (2) NE
 - [x] **2026-04-07** -- T-P1-277: System Design Translation Batch 5: module 6 (41K chars). Translate module distributed-task-queue (41K) to Chinese. DB: data/mle_prep.db table system_designs slug=distributed-tas
 - [x] **2026-04-07** -- T-P1-276: System Design Translation Batch 4: module 5 (36K chars). Translate module database-comparison (36K) to Chinese. DB: data/mle_prep.db table system_designs slug=database-compariso
 - [x] **2026-04-07** -- T-P1-275: System Design Translation Batch 3: modules 3+4 (55K chars). Translate modules pbe-pipeline (21K) and ranking-allocation (34K) to Chinese. DB: data/mle_prep.db table system_designs.

@@ -430,3 +430,17 @@
 - **Sanity check result**: Verified entry present in helixos/LESSONS.md with correct tags and helixos-specific wording.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-278 --status completed`
+
+### 2026-04-08 -- Fix task DB location + re-create tasks in MLInterviewPrep
+- **What I did**: (1) Diagnosed why autonomous_run.sh completed T-P2-278 (lesson propagation) instead of our system design tasks: tasks were in root tasks.db but autonomous_run.sh uses MLInterviewPrep's tasks.db. (2) Re-created all 8 system design depth tasks (T-P0-280 ~ T-P2-287) in MLInterviewPrep's task_db with full safety rules (never overwrite Chinese, seed script = source of truth, \mid not |). (3) Marked T-P2-279 (sync task) as completed. (4) Launched autonomous_run.sh (max_session=1) targeting T-P0-280 (llm-orchestration expansion).
+- **Deliverables**: 8 tasks in MLInterviewPrep/.claude/tasks.db, TASKS.md regenerated, autonomous_run.sh running
+- **Sanity check result**: All 8 tasks verified active in MLInterviewPrep task_db with safety rules in descriptions. autonomous_run.sh launched targeting correct sub-project.
+- **Status**: [IN PROGRESS] autonomous_run.sh session 1 running for T-P0-280.
+- **Request**: No further task_db updates needed (tasks are active, autonomous session will update on completion)
+
+## 2026-04-08 -- [T-P0-280] Expand llm-orchestration system design to interview depth
+- **What I did**: Expanded llm-orchestration from 9.8K to 18.4K chars. Added: (1) Prompt engineering details (structured template, schema-constrained decoding via Outlines, field validation gate). (2) Proxy model distillation pipeline (teacher-student, quarterly full + monthly LoRA). (3) Distillation data flow with evaluation gate and canary deployment. (4) Artifact quality monitoring table. (5) Distillation loss formula and intent drift detection (KL divergence). (6) Latency-accuracy trade-off table (3B/7B/13B/70B/100B comparison). (7) Iteration & Evaluation section (4-layer eval, hyperparameter tuning table). (8) 3 failure modes with root cause and fix. (9) 2 new Defense Q&A (distillation staleness, schema-constrained decoding limits). Updated verbal outlines.
+- **Deliverables**: scripts/content_llm_orchestration.py (seed script, Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 18,407 total chars (target >=16K), 8 display math, 5 Q&A (target 4+), 3 failure modes (target 2+), iteration section present, no bare | in math, 5,182 Chinese characters preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-280 --status completed`
