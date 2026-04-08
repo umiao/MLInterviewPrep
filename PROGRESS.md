@@ -386,3 +386,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 23,717 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-313 --status completed`
+
+## 2026-04-08 -- [T-P1-314] SD Prep: Design Ticketmaster / Hotel Reservation
+- **What I did**: Created seed script `scripts/content_interview_ticket_reservation.py` with all 8 sections in Chinese with English technical terms preserved. Covers seat inventory with distributed locking (PostgreSQL `SELECT FOR UPDATE SKIP LOCKED`), payment hold TTL (Redis TTL + DB fallback scanner), virtual queue for flash sales (Redis Sorted Set, 5000 users/batch), overbooking probability model (hotel scenario with no-show rate), idempotent payment processing (triple-layer: client key + DB UNIQUE + gateway Idempotency-Key), waitlist notification, anti-scalper measures (Verified Fan + device fingerprint + purchase limits). Capacity estimation: 50M users, 2M DAU, 500K daily orders, 1M+ concurrent users during flash sale, 15K peak seat-selection QPS (after virtual queue), 511 GB/year storage. Created SystemDesign DB record with slug `interview-ticket-reservation`, display_order=116. Added topic card to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_ticket_reservation.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,374 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-314 --status completed`

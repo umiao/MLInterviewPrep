@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 270 completed tasks archived as of latest archival.
+> 286 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -398,3 +398,19 @@ Add a new tab 'Story Map' to BehavioralQuestions page, appearing to the right of
 
 1. Replace hardcoded INTERVIEW_TOPICS with dynami
 - [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
+- [x] **2026-04-08** -- T-P0-298: SD Prep: Design a URL Shortener. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-299: SD Prep: Design a Rate Limiter. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-300: SD Prep: Design a Notification System. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-301: SD Prep: Design a Ride-sharing System (Uber). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-302: SD Prep: Design a Proximity Service (Yelp). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-303: SD Prep: Design a Real-time Game Leaderboard. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-304: SD Prep: Design a News Feed (Instagram). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-305: SD Prep: Design a Chat System (Messenger/WhatsApp). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P0-306: SD Prep: Design Facebook Live Comments. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-307: SD Prep: Design Search Autocomplete. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-308: SD Prep: Design Top-K Heavy Hitters. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-309: SD Prep: Design an Ad Click Aggregator. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-310: SD Prep: Design YouTube/Netflix Video Streaming. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-311: SD Prep: Design Dropbox/Google Drive. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-312: SD Prep: Design a Price Drop Tracker (CamelCamelCamel). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-313: SD Prep: Design an Online Judge (Leetcode). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us

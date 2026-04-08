@@ -161,6 +161,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["Sandbox", "Queue", "Security"],
   },
+  {
+    title: "Design Ticketmaster / Hotel Reservation",
+    slug: "interview-ticket-reservation",
+    description:
+      "Seat inventory with distributed locking (SELECT FOR UPDATE SKIP LOCKED), payment hold TTL, virtual queue for flash sales, overbooking probability model, idempotent payment, waitlist notification.",
+    difficulty: "Hard",
+    tags: ["Concurrency", "Locking", "Queue"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {
