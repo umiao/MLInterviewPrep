@@ -479,3 +479,10 @@
 - **Sanity check result**: 18,180 total chars (target >=16K), 7 display math, 6 Q&A (target 6+), 3 failure modes (target 2+), data quality monitoring present, schema evolution present, iteration section present, no bare | in math, 5,869 Chinese characters preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-284 --status completed`
+
+### 2026-04-08 -- [T-P2-285] Restructure vibe-code-engineering to system design depth
+- **What I did**: Restructured vibe-code-engineering-patterns from 6.2K to 17.5K chars. Reframed from lesson summary into Engineering Tooling System Design covering three sub-systems: data extraction pipeline, scraping orchestration, and multi-layer secret detection. Added: (1) Architecture diagrams for all three sub-systems with cross-system pattern comparison table. (2) Detailed data flows for extraction, orchestration, and detection. (3) Formulas section with 12 display math blocks (selector coverage, precision/recall/F1, throughput/efficiency, adaptive pagination stop, confidence model, Shannon entropy, FPR/cost analysis). (4) Production constraints tables for all three sub-systems with concrete numbers. (5) 7 trade-off decisions in table + 2 detailed analyses (Fail-open vs Fail-closed, fixed vs adaptive pagination). (6) Iteration & evaluation section with methodology table and 3 failure modes. (7) 5 Defense Q&A (defense-in-depth justification, fixture sample size, AI fail-open blind spots, flock vs PID file, detection paradox value). (8) Verbal outlines 3-min and 10-min.
+- **Deliverables**: scripts/content_vibe_code_engineering.py (new seed script, Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 17,459 total chars (target >=14K), 12 display math (target 3+), 5 Q&A (target 4+), 7 trade-off decisions (target 3+), 3 failure modes, no bare | in math, 5,568 Chinese characters preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-285 --status completed`

@@ -13,20 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-285: System design depth: vibe-code-engineering restructure
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2) NEVER overwrite Chinese with English. (3) Read DB first. (4) Seed script = source of truth. (5) Formulas: \mid not |.
-
-Restructure vibe-code-engineering to sys design depth. Current: 6.2K chars, 0 formulas, 0 Q&A -- weakest module.
-
-REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
-
-STEPS: 1. Read DB (slug=vibe-code-engineering-patterns), dump all 8. 2. Create scripts/content_vibe_code_engineering.py. 3. Restructure as Engineering Tooling System Design (Chinese): Overview as sys design problem, Architecture component diagram, Formulas (precision/recall, throughput), Production Constraints with real numbers, 3+ Trade-off decisions, 4+ Defense Q&A, Verbal Outline 3-min and 10-min. 4. Seed and verify.
-
-AC: All 8 sections restructured, 3+ display math, 4+ Q&A, Trade-off table 3+ decisions, Seed = Chinese source of truth, No bare |, Total >= 14K
-
 #### T-P2-286: System design depth: ml-system-design-patterns expansion
 - **Priority**: P2
 - **Complexity**: L
@@ -124,6 +110,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 249 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-08** -- T-P2-285: System design depth: vibe-code-engineering restructure. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2
 - [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
