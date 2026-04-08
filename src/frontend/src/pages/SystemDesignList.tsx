@@ -170,6 +170,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     difficulty: "Hard",
     tags: ["Concurrency", "Locking", "Queue"],
   },
+  {
+    title: "Design an Auction System (eBay)",
+    slug: "interview-auction-system",
+    description:
+      "Real-time bidding via WebSocket, bid ordering with monotonic timestamps, auction state machine, sniping protection (soft close), proxy bidding engine, payment escrow, reserve price, hot auction isolation via Kafka serialization.",
+    difficulty: "Hard",
+    tags: ["Real-time", "Concurrency", "WebSocket"],
+  },
 ];
 
 const DIFFICULTY_COLORS: Record<InterviewTopic["difficulty"], string> = {

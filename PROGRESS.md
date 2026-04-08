@@ -400,3 +400,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 22,744 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-315 --status completed`
+
+## 2026-04-08 -- [T-P1-316] SD Prep: Design an Auction System (eBay)
+- **What I did**: Created seed script `scripts/content_interview_auction_system.py` with all 8 sections in Chinese with English technical terms preserved. Covers real-time bidding via WebSocket + Redis Pub/Sub, bid ordering with Snowflake monotonic timestamps, auction state machine (SCHEDULED->ACTIVE->ENDING->CLOSED->SETTLING->COMPLETED), proxy bidding engine, anti-sniping soft close mechanism (5-min window with max extension cap), hot auction isolation via Kafka serialization pipeline, payment escrow flow, Shill Bidding detection (rule engine + ML anomaly detection). Capacity estimation: 1.65K avg bid QPS (8.3K peak), 248K peak read QPS, 10.4 TB/year bid storage, 30 GB Redis, 20 WebSocket servers for 1M concurrent connections. Created SystemDesign DB record with slug `interview-auction-system`, display_order=118. Added topic card to `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_auction_system.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 24,271 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-316 --status completed`
