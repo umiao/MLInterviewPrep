@@ -65,6 +65,14 @@ const INTERVIEW_TOPICS: InterviewTopic[] = [
     tags: ["Message Queue", "Priority", "Multi-channel"],
   },
   {
+    title: "Design a Ride-sharing System (Uber)",
+    slug: "interview-ride-sharing",
+    description:
+      "Real-time driver matching, location tracking, surge pricing, trip lifecycle. Focus on geospatial indexing, high-throughput location updates, and supply-demand balancing.",
+    difficulty: "Hard",
+    tags: ["Geospatial", "WebSocket", "Real-time"],
+  },
+  {
     title: "Design a Web Crawler",
     description:
       "Distributed web crawler: URL frontier, politeness, dedup, content extraction. Focus on scale, distributed coordination, and fault tolerance.",

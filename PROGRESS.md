@@ -563,3 +563,10 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 21,938 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-300 --status completed`
+
+## 2026-04-08 -- [T-P0-301] SD Prep: Design a Ride-sharing System (Uber)
+- **What I did**: Created seed script `scripts/content_interview_ride_sharing.py` with all 8 sections in Chinese with English technical terms preserved. Covers real-time driver matching (Greedy + Batch Matching with Hungarian Algorithm), Redis Geospatial for location indexing (33K QPS writes from 1M active drivers), dynamic surge pricing per Geohash cell, WebSocket-based real-time communication, trip state machine lifecycle, ETA estimation (Haversine + Routing API + ML), and GPS signal handling (Kalman Filter + Map Matching). Includes capacity estimation (15M daily trips, 333K location update QPS), multi-city sharding, and distributed lock for preventing double-matching. Created SystemDesign DB record with slug `interview-ride-sharing`, display_order=103. Added new topic card with slug in `SystemDesignList.tsx`.
+- **Deliverables**: `scripts/content_interview_ride_sharing.py` (new), `src/frontend/src/pages/SystemDesignList.tsx` (modified), DB record populated
+- **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 8 sections in DB with 20,246 total chars. Chinese chars present in all sections. No bare `|` in math formulas.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-301 --status completed`
