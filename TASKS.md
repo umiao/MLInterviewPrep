@@ -9,20 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-281: System design depth: ranking-allocation supplement
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ranking_allocation.py. (2) NEVER overwrite Chinese with English. (3) Read DB content FIRST, preserve existing Chinese. (4) Seed script = source of truth. (5) Formulas: \mid not |, single-line $$, blank lines between $$.
-
-Supplement ranking-allocation. Current: 17.4K chars, 10 display math, 7 Q&A -- strong but missing cold-start, Kafka detail, failure modes, tuning table.
-
-REFERENCE: Read scripts/content_module_arbitration.py for depth standard.
-
-STEPS: 1. Read DB (slug=ranking-allocation), dump all 8 sections. 2. Find or create scripts/content_ranking_allocation.py, preserve existing Chinese. 3. Expand (Chinese): Diversity allotment cold-start, Kafka feedback detail, 2-3 failure modes, Hyperparameter tuning table, Iteration & Evaluation if missing. 4. Seed and verify.
-
-AC: Cold-start documented, Kafka detail added, 2+ failure modes, Tuning table, Seed script = Chinese source of truth, No bare | in math, Total >= 20K
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-282: System design depth: distributed-task-queue add Defense Q&A
@@ -183,6 +169,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
 - [x] **2026-04-08** -- T-P2-257: [DEBT] MLInterviewPrep: Remove unused check_stop_cache/write_stop_cache from hook_utils.py. hook_utils.py defines check_stop_cache() and write_stop_cache() (lines 129-170) but no hook file imports or calls them. 
+- [x] **2026-04-08** -- T-P0-281: System design depth: ranking-allocation supplement. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ranking_allocation.py. (2) N
 - [x] **2026-04-08** -- T-P0-280: System design depth: llm-orchestration expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_llm_orchestration.py. (2) NE
 - [x] **2026-04-07** -- T-P1-277: System Design Translation Batch 5: module 6 (41K chars). Translate module distributed-task-queue (41K) to Chinese. DB: data/mle_prep.db table system_designs slug=distributed-tas
 - [x] **2026-04-07** -- T-P1-276: System Design Translation Batch 4: module 5 (36K chars). Translate module database-comparison (36K) to Chinese. DB: data/mle_prep.db table system_designs slug=database-compariso

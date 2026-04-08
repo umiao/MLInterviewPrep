@@ -444,3 +444,17 @@
 - **Sanity check result**: 18,407 total chars (target >=16K), 8 display math, 5 Q&A (target 4+), 3 failure modes (target 2+), iteration section present, no bare | in math, 5,182 Chinese characters preserved
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-280 --status completed`
+
+### 2026-04-08 -- T-P0-280 completed + remaining 7 tasks launched
+- **What I did**: (1) Verified T-P0-280 (llm-orchestration expansion) completed successfully by autonomous session: 9.8K -> 18.4K chars, 8 display math, 5 Defense Q&A, 3 failure modes, iteration section, no bare | in math. Committed as c7a1f46. (2) Launched autonomous_run.sh (max_session=7) for remaining 7 tasks (T-P0-281 through T-P2-287). Each session will pick one task, complete it, commit, and exit.
+- **Deliverables**: T-P0-280 completed (scripts/content_llm_orchestration.py created, DB seeded), autonomous_run.sh running for 7 remaining tasks
+- **Sanity check result**: T-P0-280 verified: 18.4K chars, Chinese content present, 5 Q&A, commit confirmed in git log. 7 tasks remain active in MLInterviewPrep task_db.
+- **Status**: [IN PROGRESS] autonomous_run.sh executing remaining 7 tasks serially.
+- **Request**: T-P0-280 already marked completed by autonomous session. No manual update needed.
+
+### 2026-04-08 -- [T-P0-281] Expand ranking-allocation system design to interview depth
+- **What I did**: Expanded ranking-allocation from 17.4K to 21.2K chars. Added: (1) Kafka feedback pipeline section with topic design, event schema, and end-to-end latency table. (2) Cold-start budget initialization formula with 3-phase evolution strategy (pure inheritance -> exploration -> convergence). (3) 3 failure modes with root cause and fix (budget oscillation, constraint conflict deadlock, cold-start segment drift). (4) Hyperparameter tuning table (7 params: lambda, eta, n0, beta, sigma_j, gamma, seller cap). Updated verbal outlines to reference new content. Converted seed script from English to Chinese source of truth.
+- **Deliverables**: scripts/content_ranking_allocation.py (Chinese source of truth), data/mle_prep.db updated
+- **Sanity check result**: 21,196 total chars (target >=20K), 11 display math, 7 Q&A, 3 failure modes (target 2+), tuning table present, cold-start documented, Kafka detail added, no bare | in math, 7,428 Chinese characters preserved
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-281 --status completed`
