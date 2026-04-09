@@ -469,3 +469,9 @@
 - **Deliverables**: docs/doordash_ml_domain_fundamentals.md, scripts/seed_doordash_fundamentals.py, DB record id=44
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (18,058 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- [T-P1-330] DoorDash ML Domain: LLM+RecSys Frontiers + Cross-Vertical Transfer
+- **What I did**: Created comprehensive prep doc (21.8K chars) covering: (1) LLM+RecSys 4 integration paradigms: Feature Extractor, Scoring/Reranker, Conversational Agent, Generator with DoorDash examples. (2) Cross-Vertical Feature Generation: three-sided marketplace challenges, Hierarchical RAG architecture, FAN (Familiarity+Affordability+Novelty) framework with formulas. (3) Semantic ID + Generative Recommendation: RQ-VAE, TIGER/P5/GPT4Rec comparison, DoorDash hierarchical taxonomy design. (4) Frontier Methods: Diffusion models (DiffRec), Multi-Modal CLIP-based rec, Causal Inference (IPS/Doubly Robust/position bias), RL for Slate Optimization (contextual bandits, SlateQ). (5) Prompt-Based Recommendation: P5-style unified framework, In-Context Learning for cold-start. (6) LLM vs Traditional RecSys trade-off table. (7) 7 detailed Q&As: cross-vertical LLM enhancement, Semantic ID advantages, diffusion ROI, RL vs greedy ranking, LLM ROI evaluation framework, latency-aware deployment architecture, eBay-to-DoorDash experience mapping. (8) Summary cheatsheet with 12 topic rows.
+- **Deliverables**: docs/doordash_ml_domain_llm_frontier.md, scripts/seed_doordash_llm_frontier.py, DB record id=45
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (21,781 chars). Content verified.
+- **Status**: [DONE]

@@ -17,12 +17,6 @@
 - **Depends on**: None
 - **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
 
-#### T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelty. (2) Semantic ID, generative recommendation. (3) Broader LLM+RecSys: LLM as feature extractor/scoring/agent, prompt-based rec. (4) Frontiers: diffusion models for RecSys, multi-modal rec (CLIP), causal inference for RecSys, RL for slate optimization. (5) Q&A on ROI, latency, LLM vs traditional. Output: docs/doordash_ml_domain_llm_frontier.md
-
 #### T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates
 - **Priority**: P1
 - **Complexity**: M
@@ -132,6 +126,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
 - [x] **2026-04-09** -- T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A. Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR schedul
 - [x] **2026-04-09** -- T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing. Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic mat
 - [x] **2026-04-09** -- T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys. Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transfor
