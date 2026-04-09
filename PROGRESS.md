@@ -445,3 +445,9 @@
 - **Deliverables**: docs/doordash_ml_domain_retrieval.md, scripts/seed_doordash_retrieval.py, DB record id=40
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (16,599 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- [T-P0-326] DoorDash ML Domain: Ranking Models + Multi-Task Learning Deep Dive
+- **What I did**: Created comprehensive prep doc (19.5K chars) covering: (1) Deep ranking architectures: Wide&Deep, DeepFM, DCN/DCN-v2, xDeepFM, AutoInt with comparison table. (2) MTL: Shared-Bottom, MMoE, PLE, ESMM, progressive training, negative transfer detection/mitigation. (3) DoorDash Universal Ranker architecture reconstruction with feature categories. (4) LTR: Pointwise/Pairwise/Listwise, LambdaMART, Deep LTR (cross-ref prep_learning_to_rank.md). (5) Multi-objective optimization: scalarization, uncertainty weighting, GradNorm, Pareto/MGDA/PCGrad. (6) Advanced: calibration (Platt/isotonic/temperature), delayed feedback (FNW/DEFER), sample selection bias, position bias (PAL/IPW). (7) 10 detailed Q&As. Created seed script and seeded to company_documents (id=41).
+- **Deliverables**: docs/doordash_ml_domain_ranking.md, scripts/seed_doordash_ranking.py, DB record id=41
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (19,485 chars). Content verified.
+- **Status**: [DONE]

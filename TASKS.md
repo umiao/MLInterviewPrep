@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, PLE, ESMM, progressive training, gate mechanism, negative transfer. (3) DoorDash Universal Ranker reconstruction. (4) LTR: Pointwise/Pairwise/Listwise + LambdaMART/LambdaRank. (5) Multi-objective fusion: scalarization, Pareto, uncertainty weighting, GradNorm. (6) Advanced: calibration, delayed feedback, sample selection bias. (7) Q&A. Cross-ref prep_learning_to_rank.md. Output: docs/doordash_ml_domain_ranking.md
-
 #### T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys
 - **Priority**: P0
 - **Complexity**: M
@@ -156,6 +150,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive. Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, 
 - [x] **2026-04-09** -- T-P0-325: DoorDash ML Domain prep: RecSys architecture + Retrieval deep dive. Create comprehensive prep doc covering: (1) Multi-Stage RecSys Pipeline (Retrieval->PreRanking->Ranking->ReRanking) with
 - [x] **2026-04-08** -- T-P2-318: SD Prep: Update landing page with all topics + category grouping. After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
 - [x] **2026-04-08** -- T-P2-287: System design formula audit: all modules. CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chin
