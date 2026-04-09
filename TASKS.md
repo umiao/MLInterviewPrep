@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transformer/GRU), pretrained (BERT/CLIP), shared tables. (3) Attention in RecSys: DIN, DIEN, BST, AutoInt. (4) Sequence modeling: GRU4Rec, SASRec, BERT4Rec, CL4SRec. (5) GNN: GraphSAGE, GAT, PinSage, LightGCN. (6) Feature interaction: FM, FFM, FiBiNET. (7) Q&A. Output: docs/doordash_ml_domain_features_dl.md
-
 #### T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing
 - **Priority**: P0
 - **Complexity**: M
@@ -150,6 +144,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys. Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transfor
 - [x] **2026-04-09** -- T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive. Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, 
 - [x] **2026-04-09** -- T-P0-325: DoorDash ML Domain prep: RecSys architecture + Retrieval deep dive. Create comprehensive prep doc covering: (1) Multi-Stage RecSys Pipeline (Retrieval->PreRanking->Ranking->ReRanking) with
 - [x] **2026-04-08** -- T-P2-318: SD Prep: Update landing page with all topics + category grouping. After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:

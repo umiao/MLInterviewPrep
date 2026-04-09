@@ -451,3 +451,9 @@
 - **Deliverables**: docs/doordash_ml_domain_ranking.md, scripts/seed_doordash_ranking.py, DB record id=41
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (19,485 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- [T-P0-327] DoorDash ML Domain: Feature Engineering + DL Modules for RecSys
+- **What I did**: Created comprehensive prep doc (28K chars) covering: (1) Four feature categories with DoorDash mapping + supply/demand/real-time features. (2) Embedding techniques: ID, hashing trick (double hashing, signed hashing), sequence (mean pooling/GRU/Transformer), pretrained (BERT/CLIP), shared embedding tables. (3) Attention in RecSys: DIN (target attention), DIEN (interest evolution + AUGRU), BST (Transformer + target token), AutoInt (cross-ref ranking doc). (4) Sequence modeling: GRU4Rec, SASRec (causal Transformer), BERT4Rec (bidirectional), CL4SRec (contrastive learning). (5) GNN: GraphSAGE, GAT, PinSage (industrial 30B scale), LightGCN. (6) Feature interaction: FM, FFM, FiBiNET (SENET + bilinear). (7) DoorDash architecture synthesis diagram. (8) 10 detailed Q&As. Created seed script and seeded to company_documents (id=42).
+- **Deliverables**: docs/doordash_ml_domain_features_dl.md, scripts/seed_doordash_features_dl.py, DB record id=42
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (28,001 chars). Content verified.
+- **Status**: [DONE]
