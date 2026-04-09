@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic matching: DSSM -> ColBERT -> cross-encoder BERT. (3) DoorDash search evolution: LR+ES -> DNN. (4) Bias/debiasing: position bias (IPW, unbiased LTR, PAL), exposure bias, selection bias, popularity bias. (5) Exploration vs Exploitation: UCB, Thompson Sampling, contextual/neural bandits. (6) Diversity/fairness: MMR, DPP, fairness constraints. (7) Q&A. Output: docs/doordash_ml_domain_search.md
-
 #### T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A
 - **Priority**: P0
 - **Complexity**: M
@@ -144,6 +138,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing. Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic mat
 - [x] **2026-04-09** -- T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys. Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transfor
 - [x] **2026-04-09** -- T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive. Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, 
 - [x] **2026-04-09** -- T-P0-325: DoorDash ML Domain prep: RecSys architecture + Retrieval deep dive. Create comprehensive prep doc covering: (1) Multi-Stage RecSys Pipeline (Retrieval->PreRanking->Ranking->ReRanking) with

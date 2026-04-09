@@ -457,3 +457,9 @@
 - **Deliverables**: docs/doordash_ml_domain_features_dl.md, scripts/seed_doordash_features_dl.py, DB record id=42
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (28,001 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- [T-P0-328] DoorDash ML Domain: Search + Semantic Matching + Bias/Debiasing
+- **What I did**: Created comprehensive prep doc (23K chars) covering: (1) Query Understanding: intent classification, query rewriting (spell correction, expansion, relaxation), NER (BiLSTM-CRF/BERT), full pipeline diagram. (2) Semantic Matching evolution: BM25 -> DSSM (dual-tower) -> ColBERT (late interaction MaxSim) -> Cross-Encoder BERT, with comparison table and DoorDash stage mapping. (3) DoorDash Search Evolution: Phase 1 (LR+ES), Phase 2 (DNN + dual-tower + MTL), Phase 3 (cross-vertical unified search). (4) Bias/Debiasing: position bias (IPW, ULTR, PAL), exposure bias, selection bias (MNAR, DR estimator), popularity bias (calibration, causal debiasing), summary table. (5) Exploration vs Exploitation: epsilon-greedy, UCB, Thompson Sampling, contextual bandits (LinUCB), neural bandits, DoorDash exploration injection design. (6) Diversity/Fairness: MMR, DPP, fairness constraints, re-ranking pipeline. (7) Full DoorDash search architecture diagram. (8) 10 detailed Q&As. Created seed script and seeded to company_documents (id=43).
+- **Deliverables**: docs/doordash_ml_domain_search.md, scripts/seed_doordash_search.py, DB record id=43
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (23,091 chars). Content verified.
+- **Status**: [DONE]
