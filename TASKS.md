@@ -9,9 +9,81 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, PLE, ESMM, progressive training, gate mechanism, negative transfer. (3) DoorDash Universal Ranker reconstruction. (4) LTR: Pointwise/Pairwise/Listwise + LambdaMART/LambdaRank. (5) Multi-objective fusion: scalarization, Pareto, uncertainty weighting, GradNorm. (6) Advanced: calibration, delayed feedback, sample selection bias. (7) Q&A. Cross-ref prep_learning_to_rank.md. Output: docs/doordash_ml_domain_ranking.md
+
+#### T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transformer/GRU), pretrained (BERT/CLIP), shared tables. (3) Attention in RecSys: DIN, DIEN, BST, AutoInt. (4) Sequence modeling: GRU4Rec, SASRec, BERT4Rec, CL4SRec. (5) GNN: GraphSAGE, GAT, PinSage, LightGCN. (6) Feature interaction: FM, FFM, FiBiNET. (7) Q&A. Output: docs/doordash_ml_domain_features_dl.md
+
+#### T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic matching: DSSM -> ColBERT -> cross-encoder BERT. (3) DoorDash search evolution: LR+ES -> DNN. (4) Bias/debiasing: position bias (IPW, unbiased LTR, PAL), exposure bias, selection bias, popularity bias. (5) Exploration vs Exploitation: UCB, Thompson Sampling, contextual/neural bandits. (6) Diversity/fairness: MMR, DPP, fairness constraints. (7) Q&A. Output: docs/doordash_ml_domain_search.md
+
+#### T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR scheduling, gradient issues. (2) Regularization: L1/L2/Dropout/BN/LN. (3) Evaluation: AUC-ROC/PR-AUC/NDCG/MAP/precision@k, calibration, offline-online gap. (4) Loss functions: BCE/CE/focal/hinge/contrastive/triplet. (5) Overfitting. (6) Bias-variance. (7) Convex vs non-convex. (8) Quick-fire format: question + concise answer + follow-up. Output: docs/doordash_ml_domain_fundamentals.md
+
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
+
+#### T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelty. (2) Semantic ID, generative recommendation. (3) Broader LLM+RecSys: LLM as feature extractor/scoring/agent, prompt-based rec. (4) Frontiers: diffusion models for RecSys, multi-modal rec (CLIP), causal inference for RecSys, RL for slate optimization. (5) Q&A on ROI, latency, LLM vs traditional. Output: docs/doordash_ml_domain_llm_frontier.md
+
+#### T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-325, T-P0-326, T-P0-327, T-P0-328, T-P0-329, T-P1-330
+- **Description**: Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommender, spicy ramen search, cold-start merchant, multi-objective homepage, cross-vertical transfer). (2) Deep dive follow-up Q&A (7 themes). (3) Map eBay experience to DoorDash (Ranking-as-Allocation -> multi-objective, Diversity Ranking -> homepage, LLM Eval -> evaluation). (4) Clarifying question templates. (5) Sprint checklist. Output: docs/doordash_ml_domain_case_study.md
+
 ### P2 -- Nice to Have
+
+#### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos test_check.py still uses check_stop_cache/write_stop_cache which were deprecated per LESSONS.md 2026-03-18. Cache can produce false passes when files change between cache write and next session. MLInterviewPrep already removed this. Action: Remove cache imports and calls from test_check.py; clean up hook_utils.py if no other callers.
+
+#### T-P2-321: [SYNC] helixos: Propagate 3 new lessons from MLInterviewPrep 2026-04-08
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root - universal lesson for orchestration. (2) DB-only content must have recovery path - relevant to helixos SQLite data/. (3) Markdown math pipe conflicts with remark-gfm table parsing - helixos uses remark-gfm in MarkdownRenderer.tsx and ConversationView.tsx. Append all three with [PROPAGATED] tag to helixos/LESSONS.md.
+
+#### T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep.db and tasks.db but missed this one. Action: Add problems.db to MLInterviewPrep/.gitignore.
+
+#### T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. Add as optional-dependencies dev group in pyproject.toml to satisfy CLAUDE.md dependency sync rule.
+
+#### T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as optional-dependencies dev group in pyproject.toml to satisfy CLAUDE.md dependency sync rule.
 
 ### P3 -- Stretch Goals
 
@@ -84,6 +156,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P0-325: DoorDash ML Domain prep: RecSys architecture + Retrieval deep dive. Create comprehensive prep doc covering: (1) Multi-Stage RecSys Pipeline (Retrieval->PreRanking->Ranking->ReRanking) with
 - [x] **2026-04-08** -- T-P2-318: SD Prep: Update landing page with all topics + category grouping. After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
 - [x] **2026-04-08** -- T-P2-287: System design formula audit: all modules. CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chin
 - [x] **2026-04-08** -- T-P2-286: System design depth: ml-system-design-patterns expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py

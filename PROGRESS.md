@@ -421,3 +421,27 @@
 - **Sanity check result**: TypeScript compiles cleanly (npx tsc --noEmit, zero errors). All 20 topics covered in TOPIC_META. Category grouping renders correctly.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-318 --status completed`
+
+## 2026-04-08 -- Google Recruiter Call Notes Sync
+- **What I did**: Organized Google recruiter call notes from Discord into structured prep document. Created `docs/google_recruiter_call_prep.md` covering interview structure (Round 1 virtual: ML Domain 45min + G&L 45min; Round 2 onsite: Coding x2 45min each), key takeaways (ML paradigm iteration, data analysis, product insight, multi-team leadership, user-first mindset), self-intro draft, prep checklists, and cross-references to existing materials. Seeded document into DB as company_document #38. Updated Google company status from `applied` to `phone_screen`, set 5 interview stages, marked recruiter call event as completed.
+- **Deliverables**: `docs/google_recruiter_call_prep.md` (new), `scripts/seed_google_prep.py` (new), DB records updated (companies, company_documents, interview_events)
+- **Sanity check result**: Verified DB state -- Google status=phone_screen, 5 stages set (recruiter call completed), document #38 seeded (7516 chars), recruiter call event marked completed.
+- **Status**: [DONE]
+
+## 2026-04-09 -- Pinterest & DoorDash Interview Pipeline Updates
+- **What I did**: (1) Converted Google prep doc to Chinese (`docs/google_recruiter_call_prep.md`), re-seeded to DB. (2) Created Pinterest recruiter call prep doc in Chinese (`docs/pinterest_recruiter_call_prep.md`), seeded as company_document #39, updated Pinterest status from `applied` to `phone_screen`, set 7 interview stages, marked recruiter call event completed. Created `scripts/seed_pinterest_prep.py`. (3) Added DoorDash ML Domain Knowledge interview event (Apr 14, 9:00-10:00 AM PDT, interviewer Ajaykrishna Karthikeyan), updated DoorDash interview stages.
+- **Deliverables**: `docs/google_recruiter_call_prep.md` (updated to Chinese), `docs/pinterest_recruiter_call_prep.md` (new), `scripts/seed_pinterest_prep.py` (new), DB records updated for Google, Pinterest, DoorDash
+- **Sanity check result**: Verified all three companies in DB -- Google doc updated, Pinterest status=phone_screen with 7 stages and doc #39 (4636 chars), DoorDash interview event #18 added with correct datetime and stages.
+- **Status**: [DONE]
+
+## 2026-04-09 -- DoorDash ML Domain Prep Task Planning
+- **What I did**: Analyzed staging materials (`DoorDash_Search_RecSys_Interview_Prep.md`, 15K chars) and existing DB resources. Designed 7-task plan for comprehensive DoorDash ML Domain prep, expanding beyond the staging doc to include cutting-edge methods: generative retrieval (DSI/GENRE/TIGER), diffusion models for RecSys, multi-modal rec (CLIP), causal inference, RL slate optimization, CL4SRec, LightGCN, neural bandits, DCNv2, ESMM, PAL debiasing, etc. Recorded 7 tasks in task_db: T-P0-325 through T-P0-329 (5 P0 tasks) + T-P1-330, T-P1-331 (2 P1 tasks, T-P1-331 depends on all others). Regenerated TASKS.md.
+- **Deliverables**: 7 tasks in task_db (T-P0-325 to T-P1-331), TASKS.md regenerated
+- **Sanity check result**: All 7 tasks confirmed created with correct IDs, priorities, complexities, and dependencies. TASKS.md regenerated successfully.
+- **Status**: [DONE] -- awaiting user approval to start execution via autonomous_run.sh
+
+## 2026-04-09 -- [T-P0-325] DoorDash ML Domain: RecSys Architecture + Retrieval Deep Dive
+- **What I did**: Created comprehensive prep doc (16.6K chars) covering multi-stage RecSys pipeline, Two-Tower model deep dive (architecture, loss functions, negative sampling, ANN serving), beyond-Two-Tower methods (MIND, PinSage, LightGCN, DSI/GENRE/TIGER generative retrieval), cold-start embedding strategies, DoorDash-specific challenges (three-sided marketplace, geo-sparsity, cross-vertical retrieval, real-time constraints), and 10 detailed Q&As. Created seed script and seeded to company_documents (id=40).
+- **Deliverables**: docs/doordash_ml_domain_retrieval.md, scripts/seed_doordash_retrieval.py, DB record id=40
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (16,599 chars). Content verified.
+- **Status**: [DONE]
