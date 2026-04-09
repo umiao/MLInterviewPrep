@@ -17,12 +17,6 @@
 - **Depends on**: None
 - **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
 
-#### T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-325, T-P0-326, T-P0-327, T-P0-328, T-P0-329, T-P1-330
-- **Description**: Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommender, spicy ramen search, cold-start merchant, multi-objective homepage, cross-vertical transfer). (2) Deep dive follow-up Q&A (7 themes). (3) Map eBay experience to DoorDash (Ranking-as-Allocation -> multi-objective, Diversity Ranking -> homepage, LLM Eval -> evaluation). (4) Clarifying question templates. (5) Sprint checklist. Output: docs/doordash_ml_domain_case_study.md
-
 ### P2 -- Nice to Have
 
 #### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
@@ -126,6 +120,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
 - [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
 - [x] **2026-04-09** -- T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A. Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR schedul
 - [x] **2026-04-09** -- T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing. Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic mat

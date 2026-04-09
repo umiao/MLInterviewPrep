@@ -475,3 +475,9 @@
 - **Deliverables**: docs/doordash_ml_domain_llm_frontier.md, scripts/seed_doordash_llm_frontier.py, DB record id=45
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (21,781 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- [T-P1-331] DoorDash ML Domain: Case Study Mock Answers + SCOPE Templates
+- **What I did**: Created comprehensive case study prep doc (30.9K chars) covering: (1) SCOPE framework reference with time budgets. (2) 5 full case studies with SCOPE structure: Restaurant Recommender (4-stage pipeline, DCN-v2+MMoE), Spicy Ramen Search (hybrid retrieval, 2-pass ranking), Cold-Start Merchant (content-based warm-start, Thompson Sampling), Multi-Objective Homepage (scalarization+constraints, fairness bonus), Cross-Vertical Transfer (shared encoder, LLM feature bridge, FAN framework). (3) 7 deep dive follow-up Q&As: position bias, A/B testing, feature freshness, feedback loops, merchant fairness, surge handling, online vs batch learning. (4) eBay experience mapping with interview talking points for 3 parallels. (5) Clarifying question templates (4 categories). (6) Sprint checklist (Day -3 to Day). (7) Summary cheatsheet.
+- **Deliverables**: docs/doordash_ml_domain_case_study.md, scripts/seed_doordash_case_study.py, DB record id=46
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (30,917 chars). Content verified.
+- **Status**: [DONE]
