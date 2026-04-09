@@ -463,3 +463,9 @@
 - **Deliverables**: docs/doordash_ml_domain_search.md, scripts/seed_doordash_search.py, DB record id=43
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (23,091 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- [T-P0-329] DoorDash ML Domain: ML Fundamentals Rapid Review + Quick-Fire Q&A
+- **What I did**: Created comprehensive prep doc (18K chars) covering: (1) Optimization: SGD family comparison table (SGD/Momentum/Nesterov/Adagrad/RMSProp/Adam/AdamW/LAMB) with Adam formula details. (2) LR Scheduling: Step/Cosine/Warmup+Cosine/OneCycle/ReduceOnPlateau with warmup rationale. (3) Gradient Issues: vanishing/exploding/dead ReLU with solutions. (4) Regularization: L1/L2/ElasticNet with L1 sparsity explanation, Dropout variants, BN/LN/IN/GN/RMSNorm comparison. (5) Evaluation Metrics: Classification (AUC-ROC/PR-AUC/LogLoss), Ranking (NDCG/MAP/MRR), Calibration (ECE/Platt/Temperature), Offline-Online Gap analysis. (6) Loss Functions: Classification (BCE/CE/Focal/Hinge), Metric Learning (Contrastive/Triplet/InfoNCE), Ranking (BPR/ListNet/LambdaRank). (7) Overfitting/Underfitting diagnosis + Bias-Variance tradeoff. (8) Convex vs Non-Convex optimization. (9) Weight Initialization + Activation Functions. (10) Feature Engineering for DoorDash. (11) 10 detailed quick-fire Q&As with follow-ups. (12) Summary cheatsheet. Created seed script and seeded to company_documents (id=44).
+- **Deliverables**: docs/doordash_ml_domain_fundamentals.md, scripts/seed_doordash_fundamentals.py, DB record id=44
+- **Sanity check result**: 1033 tests pass. Doc seeded to DB (18,058 chars). Content verified.
+- **Status**: [DONE]

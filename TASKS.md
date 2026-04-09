@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR scheduling, gradient issues. (2) Regularization: L1/L2/Dropout/BN/LN. (3) Evaluation: AUC-ROC/PR-AUC/NDCG/MAP/precision@k, calibration, offline-online gap. (4) Loss functions: BCE/CE/focal/hinge/contrastive/triplet. (5) Overfitting. (6) Bias-variance. (7) Convex vs non-convex. (8) Quick-fire format: question + concise answer + follow-up. Output: docs/doordash_ml_domain_fundamentals.md
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
@@ -138,6 +132,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A. Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR schedul
 - [x] **2026-04-09** -- T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing. Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic mat
 - [x] **2026-04-09** -- T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys. Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transfor
 - [x] **2026-04-09** -- T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive. Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, 
