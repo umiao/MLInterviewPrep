@@ -115,6 +115,17 @@
   and config between the two.  Every delta is a finding.  Do NOT skip to
   output-format analysis or external doc research before completing this diff.
   Analysis of "why" comes AFTER identifying "what's different."
+- **Side-effect verification must go through the consumer, not the producer.**
+  After DB seed/insert, verify via API `curl` (the consumer), not via direct
+  `SELECT` (the producer).  INSERT success does not mean the data is visible
+  through the API layer -- ORM filters, serialization, and caching can all
+  hide rows.  The same principle applies to any write: verify the read path.
+- **Validation must use the production build path.** Use `npm run build`
+  (which runs `tsc -b && vite build`) for TypeScript checks, not
+  `tsc --noEmit`.  `tsc -b` enforces stricter project-reference and
+  declaration-emit rules that `tsc --noEmit` skips.  A file that passes
+  `--noEmit` can still fail the production build.  General rule: the
+  validation surface must be isomorphic to the production path.
 
 ### Task Planning Mode
 When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":

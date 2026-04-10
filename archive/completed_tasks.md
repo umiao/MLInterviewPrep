@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 286 completed tasks archived as of latest archival.
+> 302 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -414,3 +414,25 @@ Add a new tab 'Story Map' to BehavioralQuestions page, appearing to the right of
 - [x] **2026-04-08** -- T-P1-311: SD Prep: Design Dropbox/Google Drive. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
 - [x] **2026-04-08** -- T-P1-312: SD Prep: Design a Price Drop Tracker (CamelCamelCamel). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
 - [x] **2026-04-08** -- T-P1-313: SD Prep: Design an Online Judge (Leetcode). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-09** -- T-P0-325: DoorDash ML Domain prep: RecSys architecture + Retrieval deep dive. Create comprehensive prep doc covering: (1) Multi-Stage RecSys Pipeline (Retrieval->PreRanking->Ranking->ReRanking) with
+- [x] **2026-04-09** -- T-P0-326: DoorDash ML Domain prep: Ranking models + Multi-Task Learning deep dive. Create comprehensive prep doc: (1) Wide&Deep/DeepFM/DCN/DCNv2/xDeepFM/AutoInt comparison. (2) MTL: Shared-Bottom, MMoE, 
+- [x] **2026-04-09** -- T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys. Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transfor
+- [x] **2026-04-09** -- T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing. Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic mat
+- [x] **2026-04-09** -- T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A. Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR schedul
+- [x] **2026-04-09** -- T-P0-335: Stop hook: replace tsc --noEmit with npm run build. In .claude/hooks/test_check.py, replace the TypeScript check (tsc --noEmit) with 'npm run build' (which runs tsc -b && v
+- [x] **2026-04-08** -- T-P1-314: SD Prep: Design Ticketmaster / Hotel Reservation. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-315: SD Prep: Design a Web Crawler. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-316: SD Prep: Design an Auction System (eBay). LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P1-317: SD Prep: Design a Distributed Cache. LANGUAGE RULE: All narrative content MUST be in Chinese. Only preserve English for: (1) technical acronyms with first-us
+- [x] **2026-04-08** -- T-P2-278: [SYNC] Propagate SQLite naive-datetime timezone lesson to helixos. Propagate MLInterviewPrep LESSONS.md entry [2026-04-07] to helixos/LESSONS.md.
+
+Lesson summary: SQLite strips TZ info fr
+- [x] **2026-04-08** -- T-P2-279: [SYNC] Propagate DB-only content recovery lesson to template. Propagate MLInterviewPrep LESSONS.md entry [2026-04-08] to claude-code-project-template/LESSONS.md.
+
+Lesson summary: Con
+- [x] **2026-04-08** -- T-P2-285: System design depth: vibe-code-engineering restructure. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_vibe_code_engineering.py. (2
+- [x] **2026-04-08** -- T-P2-286: System design depth: ml-system-design-patterns expansion. CRITICAL SAFETY RULES: (1) NEVER run any other module seed script. Only run scripts/content_ml_system_design_patterns.py
+- [x] **2026-04-08** -- T-P2-287: System design formula audit: all modules. CRITICAL SAFETY RULES: (1) NEVER run any module seed script unless fixing that specific module. (2) NEVER overwrite Chin
+- [x] **2026-04-08** -- T-P2-318: SD Prep: Update landing page with all topics + category grouping. After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
+
+1. Replace hardcoded INTERVIEW_TOP
