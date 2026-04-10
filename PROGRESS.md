@@ -184,3 +184,9 @@
 - **Deliverables**: `scripts/smoke_check.py` (new), `tests/test_smoke_check.py` (new)
 - **Sanity check result**: 1040 tests pass (7 new). Script exits gracefully with code 2 when servers not running.
 - **Status**: [PARTIAL] Stop hook integration in test_check.py blocked by sensitive file permissions -- needs interactive session.
+
+## 2026-04-10 -- [T-P1-338] Smoke check: add screenshot archiving
+- **What I did**: Extended `scripts/smoke_check.py` with screenshot archiving: after DOM assertions pass for each page, saves a full-page screenshot to `data/visual_archive/{slug}_{timestamp}.png`. Added auto-cleanup to keep only last 10 screenshots per page slug. Helper functions: `_page_slug()` (path to filesystem slug), `_cleanup_old_screenshots()` (prune oldest beyond limit), `_save_screenshot()` (save + cleanup). The `run_page_checks()` now accepts an optional `archive_dir` parameter for testability. Added 9 new tests covering slug conversion, cleanup logic, and screenshot save/error handling.
+- **Deliverables**: `scripts/smoke_check.py` (modified), `tests/test_smoke_check.py` (modified)
+- **Sanity check result**: 1049 tests pass (9 new).
+- **Status**: [DONE]

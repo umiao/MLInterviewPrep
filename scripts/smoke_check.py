@@ -14,9 +14,14 @@ import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
 
 FRONTEND_URL = "http://localhost:5173"
 BACKEND_URL = "http://localhost:8100"
+
+VISUAL_ARCHIVE_DIR = Path(__file__).resolve().parent.parent / "data" / "visual_archive"
+MAX_SCREENSHOTS_PER_PAGE = 10
 
 # Page definitions: (path, assertions)
 # Each assertion is (selector, min_count, description)
@@ -138,13 +143,52 @@ def run_api_checks(report: SmokeReport) -> None:
             report.add(check_name, False, str(e))
 
 
-def run_page_checks(report: SmokeReport) -> None:
+def _page_slug(path: str) -> str:
+    """Convert a URL path to a filesystem-safe slug."""
+    if path == "/":
+        return "home"
+    return path.strip("/").replace("/", "_")
+
+
+def _cleanup_old_screenshots(slug: str, archive_dir: Path) -> None:
+    """Keep only the most recent MAX_SCREENSHOTS_PER_PAGE screenshots for a page."""
+    pattern = f"{slug}_*.png"
+    files = sorted(archive_dir.glob(pattern), key=lambda f: f.stat().st_mtime)
+    excess = len(files) - MAX_SCREENSHOTS_PER_PAGE
+    if excess > 0:
+        for f in files[:excess]:
+            f.unlink()
+
+
+def _save_screenshot(
+    page: object, path: str, archive_dir: Path
+) -> str | None:
+    """Save a screenshot of the current page. Returns the file path or None."""
+    archive_dir.mkdir(parents=True, exist_ok=True)
+    slug = _page_slug(path)
+    ts = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+    filepath = archive_dir / f"{slug}_{ts}.png"
+    try:
+        page.screenshot(path=str(filepath), full_page=True)  # type: ignore[union-attr]
+        _cleanup_old_screenshots(slug, archive_dir)
+        return str(filepath)
+    except Exception as e:
+        print(f"[SMOKE] screenshot failed for {path}: {e}", file=sys.stderr)
+        return None
+
+
+def run_page_checks(
+    report: SmokeReport, *, archive_dir: Path | None = None
+) -> None:
     """Run Playwright DOM assertion checks on key pages."""
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
         print("[SMOKE] playwright not installed, skipping page checks", file=sys.stderr)
         return
+
+    if archive_dir is None:
+        archive_dir = VISUAL_ARCHIVE_DIR
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -169,6 +213,11 @@ def run_page_checks(report: SmokeReport) -> None:
                         details.append(f"{desc}: found {count}, need >= {min_count}")
                     else:
                         details.append(f"{desc}: OK ({count})")
+
+                if all_ok:
+                    saved = _save_screenshot(page, path, archive_dir)
+                    if saved:
+                        details.append(f"screenshot: {saved}")
 
                 report.add(check_name, all_ok, "; ".join(details))
         finally:

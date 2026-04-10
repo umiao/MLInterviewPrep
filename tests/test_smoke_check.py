@@ -5,7 +5,7 @@ import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Thread
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -19,6 +19,9 @@ _spec.loader.exec_module(smoke_check)
 SmokeReport = smoke_check.SmokeReport
 check_server_alive = smoke_check.check_server_alive
 run_api_checks = smoke_check.run_api_checks
+_page_slug = smoke_check._page_slug
+_cleanup_old_screenshots = smoke_check._cleanup_old_screenshots
+_save_screenshot = smoke_check._save_screenshot
 
 
 class TestSmokeReport:
@@ -122,3 +125,71 @@ class TestRunAPIChecks:
             run_api_checks(report)
         assert report.all_passed is False
         assert len(report.failed) == 3
+
+
+class TestPageSlug:
+    """Tests for _page_slug helper."""
+
+    def test_root_path(self) -> None:
+        assert _page_slug("/") == "home"
+
+    def test_simple_path(self) -> None:
+        assert _page_slug("/baking") == "baking"
+
+    def test_nested_path(self) -> None:
+        assert _page_slug("/system-design") == "system-design"
+
+
+class TestCleanupOldScreenshots:
+    """Tests for screenshot cleanup logic."""
+
+    def test_keeps_max_screenshots(self, tmp_path: Path) -> None:
+        # Create 12 files with staggered mtimes
+        for i in range(12):
+            f = tmp_path / f"home_2026010{i:02d}_120000.png"
+            f.write_bytes(b"fake")
+        _cleanup_old_screenshots("home", tmp_path)
+        remaining = list(tmp_path.glob("home_*.png"))
+        assert len(remaining) == 10
+
+    def test_no_cleanup_when_under_limit(self, tmp_path: Path) -> None:
+        for i in range(5):
+            f = tmp_path / f"baking_2026010{i}_120000.png"
+            f.write_bytes(b"fake")
+        _cleanup_old_screenshots("baking", tmp_path)
+        remaining = list(tmp_path.glob("baking_*.png"))
+        assert len(remaining) == 5
+
+    def test_only_cleans_matching_slug(self, tmp_path: Path) -> None:
+        for i in range(12):
+            f = tmp_path / f"home_2026010{i:02d}_120000.png"
+            f.write_bytes(b"fake")
+        other = tmp_path / "baking_20260101_120000.png"
+        other.write_bytes(b"fake")
+        _cleanup_old_screenshots("home", tmp_path)
+        assert other.exists()
+
+
+class TestSaveScreenshot:
+    """Tests for _save_screenshot."""
+
+    def test_saves_png_file(self, tmp_path: Path) -> None:
+        mock_page = MagicMock()
+        mock_page.screenshot = MagicMock()
+        result = _save_screenshot(mock_page, "/baking", tmp_path)
+        assert result is not None
+        assert "baking_" in result
+        assert result.endswith(".png")
+        mock_page.screenshot.assert_called_once()
+
+    def test_creates_archive_dir(self, tmp_path: Path) -> None:
+        subdir = tmp_path / "nested" / "archive"
+        mock_page = MagicMock()
+        _save_screenshot(mock_page, "/", subdir)
+        assert subdir.exists()
+
+    def test_returns_none_on_error(self, tmp_path: Path) -> None:
+        mock_page = MagicMock()
+        mock_page.screenshot.side_effect = RuntimeError("browser crashed")
+        result = _save_screenshot(mock_page, "/", tmp_path)
+        assert result is None
