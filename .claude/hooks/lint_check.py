@@ -42,7 +42,7 @@ _CODE_EXTENSIONS = {
 }
 
 # Directories to skip
-_SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".ruff_cache", "data"}
+_SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".ruff_cache", "data", "dist"}
 
 
 def scan_emoji(root: str) -> tuple[list[str], list[str]]:
