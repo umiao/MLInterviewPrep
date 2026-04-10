@@ -2,7 +2,7 @@
 import importlib.util
 import json
 import sys
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from threading import Thread
 from unittest.mock import patch
