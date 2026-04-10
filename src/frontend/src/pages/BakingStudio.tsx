@@ -156,6 +156,7 @@ export default function BakingStudio() {
                 recipe={selectedRecipe}
                 onClose={() => setSelectedRecipeId(null)}
                 onDelete={handleDelete}
+                filterSizes={filters.sizes}
               />
             </div>
           )}
@@ -170,6 +171,7 @@ export default function BakingStudio() {
               recipe={selectedRecipe}
               onClose={() => setSelectedRecipeId(null)}
               onDelete={handleDelete}
+              filterSizes={filters.sizes}
             />
           </div>
         </div>

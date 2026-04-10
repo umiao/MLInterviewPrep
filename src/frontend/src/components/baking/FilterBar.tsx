@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import type { CakeType, CakeCategory, CakeSize, CakeFormat, RecipeFilters } from "../../types/baking";
+import type { CakeType, CakeSize, CakeFormat, RecipeFilters } from "../../types/baking";
 
 interface FilterBarProps {
   filters: RecipeFilters;
@@ -14,8 +14,7 @@ const CAKE_TYPES: { value: CakeType | "all"; label: string }[] = [
   { value: "cream_cake", label: "Cream Cake" },
 ];
 
-const SIZES: { value: CakeSize | "all"; label: string }[] = [
-  { value: "all", label: "All" },
+const SIZES: { value: CakeSize; label: string }[] = [
   { value: "4inch", label: "4-inch" },
   { value: "6inch", label: "6-inch" },
 ];
@@ -28,16 +27,36 @@ const FORMATS: { value: CakeFormat | "all"; label: string }[] = [
 
 export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
   const [localType, setLocalType] = useState<CakeType | "all">(filters.cake_type ?? "all");
-  const [localSize, setLocalSize] = useState<CakeSize | "all">(filters.size ?? "all");
+  const [selectedSizes, setSelectedSizes] = useState<Set<CakeSize>>(
+    () => new Set(filters.sizes ?? [])
+  );
   const [localFormat, setLocalFormat] = useState<CakeFormat | "all">(filters.format ?? "all");
 
   useEffect(() => {
     onFilterChange({
       cake_type: localType === "all" ? undefined : localType,
-      size: localSize === "all" ? undefined : localSize,
+      sizes: selectedSizes.size > 0 ? [...selectedSizes] : undefined,
       format: localFormat === "all" ? undefined : localFormat,
     });
-  }, [localType, localSize, localFormat]);
+  }, [localType, selectedSizes, localFormat]);
+
+  const handleSizeToggle = (size: CakeSize) => {
+    setSelectedSizes((prev) => {
+      const next = new Set(prev);
+      if (next.has(size)) {
+        next.delete(size);
+      } else {
+        next.add(size);
+      }
+      return next;
+    });
+  };
+
+  const handleAllSizes = () => {
+    setSelectedSizes(new Set());
+  };
+
+  const allSelected = selectedSizes.size === 0;
 
   return (
     <div className="space-y-3 rounded-xl bg-amber-50/50 p-4 border border-amber-100">
@@ -63,12 +82,22 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-amber-700 font-medium">Size:</span>
           <div className="flex rounded-lg overflow-hidden border border-amber-200">
+            <button
+              onClick={handleAllSizes}
+              className={`px-3 py-1 text-sm transition-colors ${
+                allSelected
+                  ? "bg-amber-600 text-white"
+                  : "bg-white text-amber-800 hover:bg-amber-50"
+              }`}
+            >
+              All
+            </button>
             {SIZES.map(({ value, label }) => (
               <button
                 key={value}
-                onClick={() => setLocalSize(value)}
+                onClick={() => handleSizeToggle(value)}
                 className={`px-3 py-1 text-sm transition-colors ${
-                  localSize === value
+                  selectedSizes.has(value)
                     ? "bg-amber-600 text-white"
                     : "bg-white text-amber-800 hover:bg-amber-50"
                 }`}
@@ -77,6 +106,11 @@ export default function FilterBar({ filters, onFilterChange }: FilterBarProps) {
               </button>
             ))}
           </div>
+          {selectedSizes.size > 1 && (
+            <span className="text-xs text-amber-600 font-medium">
+              Combined
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

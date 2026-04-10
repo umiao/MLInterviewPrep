@@ -69,6 +69,6 @@ export interface HomeInventoryItem {
 export interface RecipeFilters {
   cake_type?: CakeType;
   category?: CakeCategory;
-  size?: CakeSize;
+  sizes?: CakeSize[];
   format?: CakeFormat;
 }

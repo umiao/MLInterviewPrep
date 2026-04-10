@@ -4,6 +4,8 @@ import type { BakingRecipe, BakingIngredient, CakeSize } from "../../types/bakin
 interface ScalingCalculatorProps {
   recipe: BakingRecipe;
   onScaledAmounts: (amounts: Record<number, number>) => void;
+  /** Sizes selected in FilterBar -- when multiple, auto-enable multi-size summing */
+  filterSizes?: CakeSize[];
 }
 
 const SIZE_RATIOS: Record<string, number> = {
@@ -23,17 +25,30 @@ const AVAILABLE_SIZES: CakeSize[] = ["4inch", "6inch", "8inch"];
 export default function ScalingCalculator({
   recipe,
   onScaledAmounts,
+  filterSizes,
 }: ScalingCalculatorProps) {
-  const isChiffon = recipe.cake_type === "chiffon";
   const recipeSize = recipe.size;
+  const canMultiSize = recipeSize !== "universal";
 
-  // Multi-size checkboxes (chiffon only)
+  // Determine initial checked sizes from filterSizes or recipe defaults
   const [checkedSizes, setCheckedSizes] = useState<Set<CakeSize>>(() => {
-    if (isChiffon && recipeSize !== "universal") {
+    if (!canMultiSize) return new Set();
+    if (filterSizes && filterSizes.length > 1) {
+      return new Set(filterSizes.filter((s) => s in SIZE_RATIOS));
+    }
+    if (recipe.cake_type === "chiffon") {
       return new Set([recipeSize]);
     }
     return new Set();
   });
+
+  // Sync checkedSizes when filterSizes changes externally
+  useEffect(() => {
+    if (!canMultiSize) return;
+    if (filterSizes && filterSizes.length > 1) {
+      setCheckedSizes(new Set(filterSizes.filter((s) => s in SIZE_RATIOS)));
+    }
+  }, [filterSizes, canMultiSize]);
 
   // Anchor-based custom scaling
   const [anchorId, setAnchorId] = useState<number | null>(null);
@@ -41,7 +56,7 @@ export default function ScalingCalculator({
 
   // Compute scaled amounts from multi-size checkboxes
   const multiSizeAmounts = useMemo(() => {
-    if (!isChiffon || checkedSizes.size === 0) return null;
+    if (!canMultiSize || checkedSizes.size === 0) return null;
 
     const sourceRatio = SIZE_RATIOS[recipeSize] ?? 1.0;
     const amounts: Record<number, number> = {};
@@ -62,7 +77,7 @@ export default function ScalingCalculator({
       amounts[ing.id] = Math.round(total * 10) / 10;
     }
     return amounts;
-  }, [isChiffon, checkedSizes, recipe, recipeSize]);
+  }, [canMultiSize, checkedSizes, recipe, recipeSize]);
 
   // Compute anchor-based scaled amounts
   const anchorAmounts = useMemo(() => {
@@ -115,8 +130,8 @@ export default function ScalingCalculator({
 
   return (
     <div className="space-y-4">
-      {/* Multi-size checkboxes for chiffon */}
-      {isChiffon && recipeSize !== "universal" && (
+      {/* Multi-size checkboxes (all scalable recipe types) */}
+      {canMultiSize && (
         <div>
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
             Size Selection
@@ -220,8 +235,17 @@ export default function ScalingCalculator({
       {activeAmounts && (
         <button
           onClick={() => {
-            if (isChiffon && recipeSize !== "universal") {
-              setCheckedSizes(new Set([recipeSize]));
+            if (canMultiSize) {
+              // If filter has multiple sizes, reset to those
+              if (filterSizes && filterSizes.length > 1) {
+                setCheckedSizes(
+                  new Set(filterSizes.filter((s) => s in SIZE_RATIOS))
+                );
+              } else if (recipe.cake_type === "chiffon") {
+                setCheckedSizes(new Set([recipeSize]));
+              } else {
+                setCheckedSizes(new Set());
+              }
             } else {
               setCheckedSizes(new Set());
             }

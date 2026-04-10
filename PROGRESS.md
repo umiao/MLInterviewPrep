@@ -511,3 +511,9 @@
 - **Deliverables**: src/backend/services/baking_seed.py (recipes #10-12 + 4 inventory items)
 - **Sanity check result**: All 12 recipes load correctly, 1033 tests pass
 - **Status**: [DONE]
+
+## 2026-04-10 -- [T-P1-333] Baking Studio: multi-size select (4+6 inch) with ingredient summing
+- **What I did**: Changed FilterBar size selector from single-select to multi-toggle (checkbox-like). Clicking 4-inch and 6-inch independently toggles each; "All" clears selections. Updated RecipeFilters type (size -> sizes array), useBaking hook (client-side multi-size filtering), and extended ScalingCalculator's multi-size ingredient summing from chiffon-only to all recipe types. FilterBar selections flow through RecipeDetail to ScalingCalculator via filterSizes prop.
+- **Deliverables**: FilterBar.tsx, ScalingCalculator.tsx, RecipeDetail.tsx, BakingStudio.tsx, baking.ts (RecipeFilters), useBaking.ts
+- **Sanity check result**: TypeScript check clean, Vite build succeeds, 1033 tests pass
+- **Status**: [DONE]

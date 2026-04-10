@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import type { BakingRecipe } from "../../types/baking";
+import type { BakingRecipe, CakeSize } from "../../types/baking";
 import IngredientTable from "./IngredientTable";
 import ScalingCalculator from "./ScalingCalculator";
 
@@ -7,6 +7,7 @@ interface RecipeDetailProps {
   recipe: BakingRecipe;
   onClose: () => void;
   onDelete?: (id: number) => void;
+  filterSizes?: CakeSize[];
 }
 
 const CATEGORY_STYLES: Record<string, string> = {
@@ -27,6 +28,7 @@ export default function RecipeDetail({
   recipe,
   onClose,
   onDelete,
+  filterSizes,
 }: RecipeDetailProps) {
   const [scaledAmounts, setScaledAmounts] = useState<Record<number, number>>(
     {}
@@ -111,6 +113,7 @@ export default function RecipeDetail({
         <ScalingCalculator
           recipe={recipe}
           onScaledAmounts={handleScaledAmounts}
+          filterSizes={filterSizes}
         />
 
         {/* Ingredients */}

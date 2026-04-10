@@ -34,12 +34,26 @@ export function useRecipes(filters?: RecipeFilters) {
   const params = new URLSearchParams();
   if (filters?.cake_type) params.set("cake_type", filters.cake_type);
   if (filters?.category) params.set("category", filters.category);
-  if (filters?.size) params.set("size", filters.size);
+  // When a single size is selected, pass it to the API; when multiple are
+  // selected we fetch all and filter client-side so combined views work.
+  if (filters?.sizes?.length === 1) params.set("size", filters.sizes[0]);
   if (filters?.format) params.set("format", filters.format);
   const qs = params.toString();
   return useQuery<BakingRecipe[]>({
     queryKey: BAKING_KEYS.recipeList(filters ?? {}),
-    queryFn: () => api.get("/baking/recipes" + (qs ? "?" + qs : "")),
+    queryFn: async () => {
+      const recipes: BakingRecipe[] = await api.get(
+        "/baking/recipes" + (qs ? "?" + qs : "")
+      );
+      // Client-side multi-size filter
+      if (filters?.sizes && filters.sizes.length > 1) {
+        const sizeSet = new Set(filters.sizes);
+        return recipes.filter(
+          (r) => sizeSet.has(r.size) || r.size === "universal"
+        );
+      }
+      return recipes;
+    },
   });
 }
 
