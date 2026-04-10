@@ -178,3 +178,9 @@
 - **Deliverables**: `CLAUDE.md` updated (2 new rules in Verification Requirements), `PROGRESS.md` archived
 - **Sanity check result**: 1033 tests pass. CLAUDE.md rules are clear and actionable.
 - **Status**: [DONE]
+
+## 2026-04-10 -- [T-P0-336] Smoke check: DOM assertions + API verification script
+- **What I did**: Created `scripts/smoke_check.py` with (1) server liveness checks for localhost:5173 and localhost:8100, (2) Playwright-based DOM assertions for 4 key pages (/, /baking, /problems, /system-design) checking element existence and count lower bounds, (3) API verification for 3 endpoints (/api/baking/recipes >= 10, /api/problems >= 1, /api/system-design/topics >= 1) using urllib, (4) graceful skip (exit 2) when servers not running. Created `tests/test_smoke_check.py` with 7 tests including a mock HTTP server for API checks. Could not integrate into `test_check.py` Stop hook due to sensitive file permissions in autonomous mode -- script runs standalone.
+- **Deliverables**: `scripts/smoke_check.py` (new), `tests/test_smoke_check.py` (new)
+- **Sanity check result**: 1040 tests pass (7 new). Script exits gracefully with code 2 when servers not running.
+- **Status**: [PARTIAL] Stop hook integration in test_check.py blocked by sensitive file permissions -- needs interactive session.

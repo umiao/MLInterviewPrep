@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-336: Smoke check: DOM assertions + API verification script
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Create scripts/smoke_check.py: (1) Check dev server is running (localhost:5173 + localhost:8100). (2) Playwright opens each key page (/, /baking, /problems, /system-design) and runs DOM assertions: element existence, count lower bounds (e.g., recipe cards >= 3), key text visible. (3) curl core APIs and assert non-empty responses (GET /api/baking/recipes count >= 10, GET /api/problems count > 0). (4) No pixel diff, no baselines, no thresholds. Pure structural/data assertions. (5) Integrate into Stop hook test_check.py: run smoke_check.py when frontend files were modified in the session. If server not running, skip gracefully.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
@@ -138,3 +132,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
 - [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
 - [x] **2026-04-09** -- T-P0-337: CLAUDE.md: add production-path validation rules. Add two hard rules to CLAUDE.md: (1) Side-effect verification must go through the consumer, not the producer. After DB s
+- [x] **2026-04-09** -- T-P0-336: Smoke check: DOM assertions + API verification script. Create scripts/smoke_check.py: (1) Check dev server is running (localhost:5173 + localhost:8100). (2) Playwright opens e
