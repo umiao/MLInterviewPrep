@@ -517,3 +517,27 @@
 - **Deliverables**: FilterBar.tsx, ScalingCalculator.tsx, RecipeDetail.tsx, BakingStudio.tsx, baking.ts (RecipeFilters), useBaking.ts
 - **Sanity check result**: TypeScript check clean, Vite build succeeds, 1033 tests pass
 - **Status**: [DONE]
+
+## 2026-04-10 -- Baking Studio hotfixes: missing recipes + card compaction
+- **What I did**: (1) Inserted 3 new recipes directly into DB (coconut jelly #10, sago #11, mango cream #12) -- seed function was skipping because `if existing == 0` check blocked insertion when presets already existed. Added 4 new inventory items. (2) Fixed `seed_baking_data()` to check by name instead of count, so new presets are inserted alongside existing ones. (3) Further compacted RecipeCard to single-line layout: [size icon] [name + zh name inline] [ingredient count] [type badge], reduced padding to `px-2.5 py-1.5`, grid gap `gap-1.5`, section spacing `space-y-4`.
+- **Deliverables**: `RecipeCard.tsx` (compacted), `BakingStudio.tsx` (tighter spacing), `baking_seed.py` (fixed seed logic), DB updated with 3 recipes + 4 inventory items
+- **Sanity check result**: TypeScript clean, 1033 tests pass, DB verified with 12 recipes and 24 inventory items.
+- **Status**: [DONE]
+
+## 2026-04-10 -- Baking Studio: fix recipe visibility + build + Playwright verification
+- **What I did**: (1) Found recipes weren't visible because earlier DB insert didn't persist (WAL mode concurrent connection issue). Re-inserted 3 recipes (Coconut Milk Jelly #10, Sago #11, Mango Cream #12) + 4 inventory items, verified via API (12 recipes returned). (2) Fixed TypeScript build error -- `tsc -b` (strict mode in tsconfig.app.json) required explicit type annotation on `items.map((recipe: BakingRecipe))` that `tsc --noEmit` didn't catch. Rebuilt frontend dist/. (3) Used Playwright to take headless screenshot of Baking Studio page, verifying cards are compact single-line layout, category grouping works, and all 12 recipes visible.
+- **Deliverables**: `BakingStudio.tsx` (type fix), `dist/` rebuilt, DB verified with 12 recipes, Playwright screenshot at `data/baking_studio_screenshot.png`
+- **Sanity check result**: API returns 12 recipes, `npm run build` succeeds, Playwright screenshot confirms visual layout.
+- **Status**: [DONE]
+
+## 2026-04-10 -- Visual testing harness: RCA + revised plan + task recording
+- **What I did**: (1) Conducted root cause analysis of 4 Baking Studio failures -- identified unified root cause: "validating on a surface not isomorphic to the production path." (2) Designed initial visual testing harness (Playwright pixel diff), received reviewer feedback that it was over-engineered. (3) Revised plan per reviewer: dropped pixel diff/baseline/PostToolUse hooks (YAGNI), refocused on `npm run build` in Stop hook + DOM assertions + API curl smoke check. (4) Recorded 4 tasks: T-P0-335 (npm run build in Stop hook), T-P0-336 (smoke_check.py with DOM + API assertions), T-P0-337 (CLAUDE.md validation rules), T-P1-338 (screenshot archiving, no diff). (5) Updated LESSONS.md with unified production-path validation lesson.
+- **Deliverables**: 4 tasks in task_db (T-P0-335 to T-P1-338), LESSONS.md updated, TASKS.md regenerated
+- **Sanity check result**: All 4 tasks confirmed created. LESSONS.md entry verified.
+- **Status**: [DONE] -- awaiting user approval to execute P0 tasks
+
+## 2026-04-10 -- [T-P0-335] Stop hook: add npm run build to test_check.py
+- **What I did**: Added `run_frontend_build()` function to `.claude/hooks/test_check.py` that runs `npm run build` (which executes `tsc -b && vite build`) before allowing session exit. This ensures the Stop hook validates against the production build path, not just tests. Used `shutil.which("npm")` to resolve npm path on Windows (bare `npm` fails in subprocess but `npm.cmd` is found by `shutil.which`). Gracefully skips if npm or package.json not found.
+- **Deliverables**: `.claude/hooks/test_check.py` updated
+- **Sanity check result**: Ran hook directly via `/c/Anaconda/python.exe .claude/hooks/test_check.py` -- both frontend build and pytest passed, exit code 0. Also verified `npm run build` independently succeeds in src/frontend/.
+- **Status**: [DONE]

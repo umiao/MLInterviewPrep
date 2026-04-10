@@ -9,6 +9,18 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-336: Smoke check: DOM assertions + API verification script
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Create scripts/smoke_check.py: (1) Check dev server is running (localhost:5173 + localhost:8100). (2) Playwright opens each key page (/, /baking, /problems, /system-design) and runs DOM assertions: element existence, count lower bounds (e.g., recipe cards >= 3), key text visible. (3) curl core APIs and assert non-empty responses (GET /api/baking/recipes count >= 10, GET /api/problems count > 0). (4) No pixel diff, no baselines, no thresholds. Pure structural/data assertions. (5) Integrate into Stop hook test_check.py: run smoke_check.py when frontend files were modified in the session. If server not running, skip gracefully.
+
+#### T-P0-337: CLAUDE.md: add production-path validation rules
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Add two hard rules to CLAUDE.md: (1) Side-effect verification must go through the consumer, not the producer. After DB seed/insert, verify via API curl, not via direct DB SELECT. (2) Validation must use the production build path. Use 'npm run build' (not tsc --noEmit) for TypeScript checks. These encode the root lesson: verification must happen on a surface isomorphic to the production path.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
@@ -17,11 +29,11 @@
 - **Depends on**: None
 - **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
 
-#### T-P1-333: Baking Studio: multi-size select (4+6 inch) with ingredient summing
+#### T-P1-338: Smoke check: add screenshot archiving (no diff)
 - **Priority**: P1
-- **Complexity**: M
+- **Complexity**: S
 - **Depends on**: None
-- **Description**: Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes toggle-based (checkbox-like) -- clicking 4inch and 6inch independently toggles each, both can be active. When both selected, show combined view. (2) When both sizes selected, fetch/display recipes for both sizes and show a combined ingredient table that sums amounts across sizes. (3) Re-clicking a selected size deselects it. Selecting 'All' clears individual selections. (4) ScalingCalculator already supports multi-size checkboxes for chiffon -- extend this pattern to FilterBar browse mode for all recipe types. Files: FilterBar.tsx, BakingStudio.tsx, possibly RecipeDetail.tsx.
+- **Description**: Extend smoke_check.py to save a screenshot of each page to data/visual_archive/{page}_{timestamp}.png after DOM assertions pass. No pixel diff, no baselines. Screenshots are for human review when something looks wrong. Keep last 10 screenshots per page, auto-cleanup older ones.
 
 ### P2 -- Nice to Have
 
@@ -127,9 +139,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-09** -- T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream). Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 
+- [x] **2026-04-09** -- T-P1-333: Baking Studio: multi-size select (4+6 inch) with ingredient summing. Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes to
 - [x] **2026-04-09** -- T-P1-332: Baking Studio: compact RecipeCard UI + category grouping with captions. Redesign BakingStudio browse mode: (1) Compact RecipeCard -- reduce padding/size, make key info (name, name_zh) bold and
 - [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
 - [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
+- [x] **2026-04-09** -- T-P0-335: Stop hook: replace tsc --noEmit with npm run build. In .claude/hooks/test_check.py, replace the TypeScript check (tsc --noEmit) with 'npm run build' (which runs tsc -b && v
 - [x] **2026-04-09** -- T-P0-329: DoorDash ML Domain prep: ML fundamentals rapid review + quick-fire Q&A. Create prep doc for ML fundamentals interspersed during domain interview: (1) Optimization: SGD/Adam/AdaGrad, LR schedul
 - [x] **2026-04-09** -- T-P0-328: DoorDash ML Domain prep: Search + semantic matching + bias/debiasing. Create prep doc: (1) Query Understanding: intent classification, query rewriting, NER, query expansion. (2) Semantic mat
 - [x] **2026-04-09** -- T-P0-327: DoorDash ML Domain prep: Feature engineering + DL modules for RecSys. Create prep doc: (1) Four feature categories with DoorDash mapping. (2) Embedding: ID, hashing trick, sequence (Transfor
