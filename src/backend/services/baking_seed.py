@@ -31,6 +31,10 @@ INVENTORY_ITEMS: list[tuple[str, str, str]] = [
     ("black sesame paste", "黑芝麻酱", "staple"),
     ("sea salt", "海盐", "staple"),
     ("soy flour", "黄豆粉", "staple"),
+    ("coconut milk", "椰浆", "dairy"),
+    ("gelatin sheets", "吉利丁片", "staple"),
+    ("sago", "西米", "staple"),
+    ("mango jam", "芒果酱", "staple"),
 ]
 
 
@@ -297,6 +301,76 @@ def _build_preset_recipes() -> list[BakingRecipe]:
             _make_ingredient("sugar", "糖", 25, "g", "main", 2),
             _make_ingredient("sea salt", "海盐", 1.5, "g", "main", 3),
             _make_ingredient("soy flour", "黄豆粉", 20, "g", "main", 4),
+        ],
+    ))
+
+    # 10. Coconut Milk Jelly (universal, cream)
+    recipes.append(BakingRecipe(
+        name="Coconut Milk Jelly",
+        name_zh="椰奶冻",
+        cake_type="cream_cake",
+        category="cream",
+        size="universal",
+        format="full",
+        is_preset=True,
+        steps=[
+            "Soak gelatin sheets in cold water until soft",
+            "Heat coconut milk, heavy cream, milk, and sugar to 50C",
+            "Squeeze out excess water from gelatin, dissolve into warm mixture",
+            "Stir until fully dissolved, pour into molds",
+            "Refrigerate 3 hours or freeze 1 hour until set",
+        ],
+        ingredients=[
+            _make_ingredient("coconut milk", "椰浆", 60, "g", "main", 0),
+            _make_ingredient("heavy cream", "淡奶油", 40, "g", "main", 1),
+            _make_ingredient("milk", "牛奶", 120, "g", "main", 2),
+            _make_ingredient("sugar", "糖", 15, "g", "main", 3),
+            _make_ingredient("gelatin sheets", "吉利丁片", 10, "g", "main", 4),
+        ],
+    ))
+
+    # 11. Sago (universal, decoration)
+    recipes.append(BakingRecipe(
+        name="Sago",
+        name_zh="西米",
+        cake_type="cream_cake",
+        category="decoration",
+        size="universal",
+        format="full",
+        is_preset=True,
+        steps=[
+            "Bring a large pot of water to a rolling boil",
+            "Add sago, stir immediately to prevent sticking",
+            "Cook on low heat for 15 minutes, stirring occasionally",
+            "Turn off heat, cover and steep ~10 minutes",
+            "Check that sago is fully transparent with no hard white core",
+            "Rinse under cold water, drain and set aside",
+        ],
+        ingredients=[
+            _make_ingredient("sago", "西米", 100, "g", "main", 0),
+        ],
+    ))
+
+    # 12. Mango Cream (universal, cream)
+    recipes.append(BakingRecipe(
+        name="Mango Cream",
+        name_zh="芒果奶油",
+        cake_type="cream_cake",
+        category="cream",
+        size="universal",
+        format="full",
+        is_preset=True,
+        steps=[
+            "Chill bowl and whisk",
+            "Whip heavy cream with sugar to medium-stiff peaks",
+            "Fold in mango jam gently until evenly mixed",
+            "Optionally fold in grapefruit pulp for texture",
+            "Use immediately or refrigerate up to 2 hours",
+        ],
+        ingredients=[
+            _make_ingredient("heavy cream", "淡奶油", 350, "g", "main", 0),
+            _make_ingredient("sugar", "糖", 20, "g", "main", 1),
+            _make_ingredient("mango jam", "芒果酱", 150, "g", "main", 2),
         ],
     ))
 

@@ -23,12 +23,6 @@
 - **Depends on**: None
 - **Description**: Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes toggle-based (checkbox-like) -- clicking 4inch and 6inch independently toggles each, both can be active. When both selected, show combined view. (2) When both sizes selected, fetch/display recipes for both sizes and show a combined ingredient table that sums amounts across sizes. (3) Re-clicking a selected size deselects it. Selecting 'All' clears individual selections. (4) ScalingCalculator already supports multi-size checkboxes for chiffon -- extend this pattern to FilterBar browse mode for all recipe types. Files: FilterBar.tsx, BakingStudio.tsx, possibly RecipeDetail.tsx.
 
-#### T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 60g coconut milk, 40g heavy cream, 120g milk, 15g sugar, 10g gelatin sheets. Steps: soak gelatin, heat other ingredients to 50C, dissolve gelatin, refrigerate 3h or freeze 1h. (2) Sago (西米, cream_cake/decoration, universal): boil water, add sago on low heat 15min, cover and steep ~10min until fully transparent with no hard core. (3) Mango Cream (芒果奶油, cream_cake/cream, universal): 350g cream + 20g sugar whipped, fold in 150g mango jam, optionally add grapefruit pulp. Files: baking_seed.py, run seed or direct DB insert.
-
 ### P2 -- Nice to Have
 
 #### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
@@ -132,6 +126,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 286 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-09** -- T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream). Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 
 - [x] **2026-04-09** -- T-P1-332: Baking Studio: compact RecipeCard UI + category grouping with captions. Redesign BakingStudio browse mode: (1) Compact RecipeCard -- reduce padding/size, make key info (name, name_zh) bold and
 - [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
 - [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt

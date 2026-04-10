@@ -505,3 +505,9 @@
 - **Deliverables**: RecipeCard.tsx (compact layout), BakingStudio.tsx (category grouping with CATEGORY_SECTIONS + groupByCategory)
 - **Sanity check result**: TypeScript type check passes, Vite build succeeds
 - **Status**: [DONE]
+
+## 2026-04-10 -- [T-P1-334] Baking Studio: add 3 new recipes
+- **What I did**: Added 3 new preset recipes to baking_seed.py: Coconut Milk Jelly (cream, 5 ingredients), Sago (decoration, 1 ingredient), Mango Cream (cream, 3 ingredients). All cream_cake type, universal size. Added 4 new inventory items (coconut milk, gelatin sheets, sago, mango jam).
+- **Deliverables**: src/backend/services/baking_seed.py (recipes #10-12 + 4 inventory items)
+- **Sanity check result**: All 12 recipes load correctly, 1033 tests pass
+- **Status**: [DONE]
