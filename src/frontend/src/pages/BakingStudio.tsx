@@ -1,11 +1,33 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRecipes, useDeleteRecipe } from "../hooks/useBaking";
-import type { RecipeFilters } from "../types/baking";
+import type { BakingRecipe, CakeCategory, RecipeFilters } from "../types/baking";
 import FilterBar from "../components/baking/FilterBar";
 import RecipeCard from "../components/baking/RecipeCard";
 import RecipeDetail from "../components/baking/RecipeDetail";
 import RecipeCombiner from "../components/baking/RecipeCombiner";
 import LoadingSpinner from "../components/ui/LoadingSpinner";
+
+/** Category display order, labels, and captions for grouped browse view */
+const CATEGORY_SECTIONS: {
+  key: CakeCategory;
+  label: string;
+  caption: string;
+}[] = [
+  { key: "base", label: "Base", caption: "Chiffon cake bodies and sponge layers" },
+  { key: "cream", label: "Cream", caption: "Frosting, filling, and whipped cream options" },
+  { key: "decoration", label: "Decoration", caption: "Toppings, garnishes, and finishing touches" },
+  { key: "complete", label: "Complete", caption: "Ready-to-bake full recipes" },
+];
+
+function groupByCategory(recipes: BakingRecipe[]) {
+  const groups = new Map<CakeCategory, BakingRecipe[]>();
+  for (const r of recipes) {
+    const list = groups.get(r.category) ?? [];
+    list.push(r);
+    groups.set(r.category, list);
+  }
+  return groups;
+}
 
 type ViewMode = "browse" | "build";
 
@@ -17,6 +39,10 @@ export default function BakingStudio() {
   const deleteRecipe = useDeleteRecipe();
 
   const selectedRecipe = recipes?.find((r) => r.id === selectedRecipeId) ?? null;
+  const groupedRecipes = useMemo(
+    () => (recipes ? groupByCategory(recipes) : new Map()),
+    [recipes]
+  );
 
   const handleDelete = (id: number) => {
     deleteRecipe.mutate(id, {
@@ -86,25 +112,41 @@ export default function BakingStudio() {
         </div>
       ) : (
         <div className="flex gap-6">
-          {/* Recipe grid */}
-          <div
-            className={`grid grid-cols-1 gap-4 ${
-              selectedRecipe
-                ? "md:grid-cols-1 lg:grid-cols-2 flex-1 min-w-0"
-                : "md:grid-cols-2 lg:grid-cols-3 w-full"
-            }`}
-          >
-            {recipes.map((recipe) => (
-              <RecipeCard
-                key={recipe.id}
-                recipe={recipe}
-                onClick={() =>
-                  setSelectedRecipeId(
-                    recipe.id === selectedRecipeId ? null : recipe.id
-                  )
-                }
-              />
-            ))}
+          {/* Grouped recipe sections */}
+          <div className={`space-y-6 ${selectedRecipe ? "flex-1 min-w-0" : "w-full"}`}>
+            {CATEGORY_SECTIONS.map((section) => {
+              const items = groupedRecipes.get(section.key);
+              if (!items || items.length === 0) return null;
+              return (
+                <div key={section.key}>
+                  <div className="mb-2">
+                    <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+                      {section.label}
+                    </h2>
+                    <p className="text-xs text-gray-400">{section.caption}</p>
+                  </div>
+                  <div
+                    className={`grid grid-cols-1 gap-2 ${
+                      selectedRecipe
+                        ? "md:grid-cols-1 lg:grid-cols-2"
+                        : "md:grid-cols-2 lg:grid-cols-3"
+                    }`}
+                  >
+                    {items.map((recipe) => (
+                      <RecipeCard
+                        key={recipe.id}
+                        recipe={recipe}
+                        onClick={() =>
+                          setSelectedRecipeId(
+                            recipe.id === selectedRecipeId ? null : recipe.id
+                          )
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Detail panel */}

@@ -481,3 +481,27 @@
 - **Deliverables**: docs/doordash_ml_domain_case_study.md, scripts/seed_doordash_case_study.py, DB record id=46
 - **Sanity check result**: 1033 tests pass. Doc seeded to DB (30,917 chars). Content verified.
 - **Status**: [DONE]
+
+## 2026-04-09 -- LC 1834 Single-Threaded CPU solution update
+- **What I did**: Updated LeetCode problem 1834 (Single-Threaded CPU, id=554) with user's solution and detailed analysis. Added DoorDash to company_tags (now: LinkedIn, Uber, Adobe, DoorDash). Wrote notes covering: Heap + Simulation approach, O(n log n) complexity, SJF greedy pattern, edge cases (same arrival time, idle gaps, tie-breaking), related problems (LC 253/621/1882). Marked is_completed=1.
+- **Deliverables**: DB problem id=554 updated (notes 2.4K chars, company_tags, is_completed, last_attempted_at)
+- **Sanity check result**: Verified DB -- tags=["LinkedIn","Uber","Adobe","DoorDash"], is_completed=1, notes length=2415.
+- **Status**: [DONE]
+
+## 2026-04-09 -- Pinterest phone screen event added
+- **What I did**: Added Pinterest Technical Virtual Phone Interview event (Apr 16, 2:00-3:00 PM PDT, Sr. MLE Core Engineering) as interview_event #19. Updated Phone Screen stage status from "upcoming" to "scheduled".
+- **Deliverables**: DB interview_events #19, company stages updated
+- **Sanity check result**: INSERT confirmed (id=19), stage update confirmed.
+- **Status**: [DONE]
+
+## 2026-04-10 -- Baking Studio improvement task planning
+- **What I did**: Explored Baking Studio codebase (RecipeCard, BakingStudio, FilterBar, RecipeCombiner, ScalingCalculator, baking_seed.py) and planned 3 improvement tasks: T-P1-332 (compact RecipeCard UI + category grouping with captions), T-P1-333 (multi-size 4+6 inch toggle select with ingredient summing), T-P1-334 (add 3 new recipes: coconut jelly, sago, mango cream). All recorded in task_db, TASKS.md regenerated.
+- **Deliverables**: 3 tasks in task_db (T-P1-332 to T-P1-334), TASKS.md regenerated
+- **Sanity check result**: All 3 tasks confirmed created with correct IDs and descriptions.
+- **Status**: [DONE] -- awaiting user approval to execute
+
+## 2026-04-10 -- [T-P1-332] Baking Studio compact RecipeCard + category grouping
+- **What I did**: Redesigned RecipeCard to be compact (reduced padding, smaller text, single-row name+badge layout, truncated names). Added category grouping in BakingStudio browse mode -- recipes are now grouped under section headers (Base/Cream/Decoration/Complete) with descriptive captions. Removed unused category pill from cards since category is now shown via section headers. Maintained per-cake-type color themes.
+- **Deliverables**: RecipeCard.tsx (compact layout), BakingStudio.tsx (category grouping with CATEGORY_SECTIONS + groupByCategory)
+- **Sanity check result**: TypeScript type check passes, Vite build succeeds
+- **Status**: [DONE]
