@@ -1,5 +1,6 @@
 import type { BehavioralExample } from "../../types/behavioral";
 import MarkdownPreview from "../ui/MarkdownPreview";
+import DrawerLayout from "../ui/DrawerLayout";
 
 const STAR_COLORS: Record<string, { label: string; border: string }> = {
   Situation: { label: "text-blue-700", border: "border-blue-300" },
@@ -36,30 +37,74 @@ function StarSection({
   );
 }
 
-export default function ExampleDrawerContent({ example }: { example: BehavioralExample }) {
+function ExampleMetaPane({ example }: { example: BehavioralExample }) {
   const needsInput = example.title.startsWith("[NEEDS-INPUT]");
   return (
-    <div>
-      <div className="mb-5">
-        <div className="flex items-center gap-3 mb-1 flex-wrap">
-          <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">
+    <div className="space-y-4 text-sm">
+      <div>
+        <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Example</div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
             {example.example_id}
           </span>
-          <h3 className="text-xl font-bold text-gray-900">{example.title}</h3>
           {needsInput && (
-            <span
-              className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded"
-              title="This example is a placeholder awaiting user-authored content"
-            >
+            <span className="text-[11px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
               Needs Input
             </span>
           )}
         </div>
-        {example.source_project && (
-          <p className="text-sm text-gray-500 mt-1">
-            Source: <span className="font-medium text-gray-700">{example.source_project}</span>
-          </p>
-        )}
+      </div>
+
+      {example.source_project && (
+        <div>
+          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Source</div>
+          <div className="font-medium text-gray-800">{example.source_project}</div>
+        </div>
+      )}
+
+      {example.principle_tags.length > 0 && (
+        <div>
+          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Themes</div>
+          <div className="flex flex-wrap gap-1.5">
+            {example.principle_tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {example.linked_questions.length > 0 && (
+        <div>
+          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
+            Linked questions ({example.linked_questions.length})
+          </div>
+          <ul className="space-y-1.5">
+            {example.linked_questions.map((lq) => (
+              <li key={lq.id} className="leading-snug">
+                <span className="font-mono text-xs font-bold text-green-600 mr-1">
+                  {lq.question_id}
+                </span>
+                <span className="text-gray-800">{lq.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ExampleStarContent({ example }: { example: BehavioralExample }) {
+  const needsInput = example.title.startsWith("[NEEDS-INPUT]");
+  return (
+    <div>
+      <div className="mb-5">
+        <h3 className="text-xl font-bold text-gray-900 leading-snug">{example.title}</h3>
         {needsInput && (
           <div className="mt-3 bg-amber-50 border border-amber-300 rounded-lg p-3 text-sm text-amber-900">
             This is a placeholder slot reserved by the 2026-04-11 behavioral audit.
@@ -160,5 +205,14 @@ export default function ExampleDrawerContent({ example }: { example: BehavioralE
         </div>
       )}
     </div>
+  );
+}
+
+export default function ExampleDrawerContent({ example }: { example: BehavioralExample }) {
+  return (
+    <DrawerLayout
+      left={<ExampleMetaPane example={example} />}
+      right={<ExampleStarContent example={example} />}
+    />
   );
 }

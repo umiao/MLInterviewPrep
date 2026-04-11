@@ -11,88 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
-
-## Context
-SlideOverPanel.tsx:18 defaults to max-w-xl (576px). BehavioralQuestions.tsx:677 invokes
-it without a width prop, so the behavioral-example drawer is stuck at 576px on all
-monitors. On 1920px: ~30% viewport utilization; on 2560px: ~23%. User reports content
-"compressed into a small strip on the right" on wide screens.
-
-**Design constraint**: prose readability caps at ~75ch (~720px at 15px font). Naive
-"stretch drawer wider" produces unreadable walls of text. Correct fix is a two-column
-layout that spends extra pixels on metadata context, not on fatter prose.
-
-**Scope expansion (user-confirmed 2026-04-11)**: apply uniformly to the drawer family.
-Build a single DrawerLayout component as the source of truth; migrate SlideOverPanel's
-behavioral-example drawer AND PrepNotesModal AND any other long-form drawer found via
-grep audit. Future drawer styling changes then happen in exactly one place.
-
-## Design spec
-
-### Drawer container width breakpoints
-- base: max-w-xl (576px)
-- md: max-w-2xl (672px)
-- lg: max-w-4xl (896px)
-- xl: max-w-5xl (1024px)
-- 2xl: max-w-6xl (1152px)
-
-### DrawerLayout internal layout (new component)
-- Props: {left: ReactNode, right: ReactNode, variant?: 'two-column' | 'single-column', leftWidth?: string}
-- Default variant: two-column on >=lg, single-column below
-- Two-column: flex row, left pane sticky top-0 w-72 (288px), right pane flex-1 with inner `max-w-[680px]` prose cap
-- Single-column: stacked, left content first, then right content
-- Opt-out: pass variant='single-column' to force single layout (for short-form drawers where two-column looks silly)
-
-### Left pane contents
-- Behavioral example: question_id badge, category pill, theme pills, source_project, linked-question quick-jump list, prev/next example nav
-- Prep notes: company name, applied_at, status, "view in companies" link
-
-### Right pane contents
-- Long-form STAR sections (situation/task/action/result) OR markdown prep notes
-- Inner wrapper `<div className="max-w-[680px]">` enforces 75ch readability cap
-- Remaining pixels in the right pane beyond 680px are intentional whitespace -- do NOT stretch prose to fill
-
-## Scenario matrix
-| Viewport | Drawer width | Layout | Prose cap |
-|---|---|---|---|
-| <md | max-w-xl | single column | fills container |
-| md..lg | max-w-2xl | single column | fills container |
-| lg..xl | max-w-4xl | two column | 680px |
-| xl..2xl | max-w-5xl | two column | 680px |
-| >=2xl | max-w-6xl | two column | 680px |
-| Short content (e.g., 5-bullet prep notes) | Same breakpoint width | two column; right pane naturally short, no forced empty space | 680px |
-| Drawer explicitly opts out via variant='single-column' | Same breakpoint width | single column, full width up to breakpoint cap | 680px |
-| User resizes browser across breakpoint | Layout re-computes via CSS only (no JS resize hooks) | correct at new breakpoint | 680px |
-
-## Acceptance criteria
-- [ ] New `src/frontend/src/components/ui/DrawerLayout.tsx` with the API above
-- [ ] DrawerLayout is the ONLY place that encodes the two-column drawer pattern (single source of truth -- no duplicate flex/grid logic in consumer components)
-- [ ] SlideOverPanel.tsx accepts responsive width classes (not a single fixed max-w)
-- [ ] ExampleDrawerContent.tsx refactored to `<DrawerLayout left={<ExampleMetaPane/>} right={<ExampleStarContent/>} />`
-- [ ] PrepNotesModal.tsx refactored to use DrawerLayout
-- [ ] Prose `max-w-[680px]` enforced on all long-form text columns inside the right pane
-- [ ] Drawer family audit: grep all `SlideOverPanel` and `Modal` imports across `src/frontend/src/`; list every usage in the PR description with an "adopted / opted-out / N/A" decision column; every drawer with long-form content either adopts DrawerLayout or opts out with explicit justification
-- [ ] `npm run build` passes (tsc -b + vite build)
-- [ ] Existing Vitest tests pass; new tests for DrawerLayout cover two-column, single-column, sticky left pane, responsive collapse
-- [ ] Consumer audit: no existing drawer consumer renders incorrectly after refactor (visual check on dev server)
-
-## Manual smoke test (MUST run on dev server per CLAUDE.md -- not just tests)
-1. `scripts/dev.py` -> wait for "Application startup complete"
-2. On 1920px monitor: open BehavioralQuestions -> click any question -> example drawer opens in two-column layout; left pane sticky with meta; right pane shows STAR prose capped at readable width
-3. Resize browser narrower past lg breakpoint -> drawer collapses to single-column stack without layout break
-4. Open Dashboard -> click a company name on an event (e.g., Lyra) -> PrepNotesModal opens with the same responsive two-column behavior (left: company meta; right: markdown prep notes)
-5. On 2560px (or DevTools responsive emulation): drawer uses max-w-6xl (1152px) but prose still caps at 680px; extra ~180px is intentional whitespace, NOT stretched text
-6. Open a short-form drawer (or one explicitly opted out): renders single-column correctly
-7. Grep check: after refactor, search for `flex.*w-72` or two-column patterns in drawer-adjacent files -- only DrawerLayout.tsx should contain the implementation
-
-## Dependencies
-None (can interleave with Task 4).
-
 ### P2 -- Nice to Have
 
 #### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
@@ -238,6 +156,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family. # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
 - [x] **2026-04-11** -- T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page. # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
 - [x] **2026-04-11** -- T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples. # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
 - [x] **2026-04-11** -- T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership. # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership

@@ -10,12 +10,21 @@ interface SlideOverPanelProps {
   width?: string;
 }
 
+/**
+ * Default responsive max-width ladder for long-form drawers.
+ * The drawer widens at lg/xl/2xl breakpoints so wider monitors get more
+ * horizontal real estate. Prose width inside the drawer is capped
+ * separately by DrawerLayout (default 680px) to preserve readability.
+ */
+export const DRAWER_RESPONSIVE_WIDTH =
+  "max-w-xl md:max-w-2xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl";
+
 export default function SlideOverPanel({
   open,
   onClose,
   title,
   children,
-  width = "max-w-xl",
+  width = DRAWER_RESPONSIVE_WIDTH,
 }: SlideOverPanelProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
