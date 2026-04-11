@@ -72,6 +72,7 @@ class BehavioralExampleCreate(BaseModel):
     risk_statement: str | None = None
     analogy: str | None = None
     tech_terms: dict[str, str] = {}
+    cn_elevator_pitch: str | None = None
 
 
 class BehavioralExampleUpdate(BaseModel):
@@ -88,6 +89,7 @@ class BehavioralExampleUpdate(BaseModel):
     risk_statement: str | None = None
     analogy: str | None = None
     tech_terms: dict[str, str] | None = None
+    cn_elevator_pitch: str | None = None
 
 
 class LinkedQuestionBrief(BaseModel):
@@ -118,6 +120,7 @@ class BehavioralExampleResponse(BaseModel):
     risk_statement: str | None = None
     analogy: str | None = None
     tech_terms: dict[str, str] = {}
+    cn_elevator_pitch: str | None = None
     created_at: datetime | None = None
     linked_questions: list[LinkedQuestionBrief] = []
 

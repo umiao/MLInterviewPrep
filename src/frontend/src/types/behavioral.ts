@@ -20,6 +20,7 @@ export interface BehavioralExample {
   risk_statement: string | null;
   analogy: string | null;
   tech_terms: Record<string, string>;
+  cn_elevator_pitch?: string | null;
   linked_questions: LinkedQuestion[];
 }
 

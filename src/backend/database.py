@@ -459,6 +459,14 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             ")",
         ],
     ),
+    (
+        17,
+        "Add cn_elevator_pitch column to behavioral_examples",
+        [
+            "ADD_COLUMN_IF_MISSING:behavioral_examples:cn_elevator_pitch:"
+            "ALTER TABLE behavioral_examples ADD COLUMN cn_elevator_pitch TEXT",
+        ],
+    ),
 ]
 
 

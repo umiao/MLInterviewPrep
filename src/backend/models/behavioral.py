@@ -55,6 +55,7 @@ class BehavioralExample(Base):
     risk_statement = Column(Text, nullable=True)
     analogy = Column(Text, nullable=True)
     tech_terms = Column(Text, nullable=True)  # JSON dict {"term": "definition"}
+    cn_elevator_pitch = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     question_links = relationship(

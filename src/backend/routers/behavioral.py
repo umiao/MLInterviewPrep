@@ -327,6 +327,7 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
         "risk_statement": ex.risk_statement,
         "analogy": ex.analogy,
         "tech_terms": ex.tech_terms_dict,
+        "cn_elevator_pitch": ex.cn_elevator_pitch,
         "created_at": ex.created_at,
         "linked_questions": linked_questions,
     }

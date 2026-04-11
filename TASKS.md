@@ -11,7 +11,442 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-359: Behavioral API: fix /questions and /examples theme filter (returns all instead of filtered)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Fix /api/behavioral/questions and /api/behavioral/examples theme filter.
+
+ROOT CAUSE (already investigated):
+The code in src/backend/routers/behavioral.py lines 42-147 already includes correct theme-filter logic AND a theme_tags field in the response (added by commit 27a8d53 [T-P1-354]). However, the running uvicorn process on port 8100 is serving an OLDER cached version: GET /api/behavioral/questions returns rows WITHOUT a 'theme_tags' key, and ?theme=failure_setback returns all 115 rows. This means the backend has not been restarted since T-P1-354 was deployed. The PRIMARY fix is a uvicorn restart.
+
+The list_examples endpoint at lines 335-364 is a SEPARATE issue: it has no theme parameter at all, only principle_tag. This is a real code change.
+
+EXECUTION STEPS:
+
+1. Confirm root cause:
+   curl -s http://localhost:8100/api/behavioral/questions | python -c 'import json,sys; d=json.load(sys.stdin); print("has theme_tags:", "theme_tags" in d[0]); print("count:", len(d))'
+   Expected before fix: has theme_tags: False, count: 115
+
+2a. METHODOLOGY GUARD (REQUIRED — added per code review): before restarting, do NOT conclude stale-uvicorn from the symptom alone. Capture the running process's identity AND its loaded module path so you can verify the hypothesis after restart, instead of just declaring victory because the symptom went away.
+    - Find the PID: `lsof -i :8100` (Linux/macOS) or `netstat -ano | findstr :8100` (Windows). Record the PID.
+    - Confirm the process is the uvicorn we expect: `ps -p <PID> -o command=` (Linux) or `wmic process where ProcessId=<PID> get CommandLine` (Windows).
+    - Capture the routers/behavioral.py mtime AND a hash of its current contents on disk: `md5sum src/backend/routers/behavioral.py`.
+    - Note these in the commit message or PROGRESS entry as evidence.
+    - After restart, hit the endpoint and check that the response now includes the theme_tags key. If theme_tags now appears AND the on-disk md5 was the same before/after restart, you have proven the hypothesis (running module was older than the on-disk file). If theme_tags is still missing, the bug is in code and you must debug the join — do not write 'restart fixed it' as the resolution.
+
+2b. Restart the backend on port 8100:
+   - Find the PID: lsof -i :8100 (Linux) or netstat -ano | findstr :8100 (Windows)
+   - Kill the process gracefully
+   - Restart with the same command the user uses (likely scripts/run_server.py or uvicorn src.backend.main:app --port 8100; check user's process command before killing). Use background mode.
+
+3. Verify restart fixed /questions:
+   curl -s 'http://localhost:8100/api/behavioral/questions?theme=failure_setback' | python -c 'import json,sys; d=json.load(sys.stdin); print(len(d), "results"); print("first:", d[0]["question_id"] if d else "empty")'
+   Expected: ~15 results (the 15 questions tagged to failure_setback), and each item has a theme_tags key.
+
+   If the count is still 115 after restart, then the bug IS in code — debug routers/behavioral.py lines 68-103 (most likely cause: theme_rows query returning empty due to BehavioralTheme model not imported, or QuestionThemeTag join condition).
+
+4. Add theme parameter to list_examples (ALWAYS needed, regardless of step 3 result):
+   In src/backend/routers/behavioral.py at the existing list_examples function (around line 335-364):
+   - Add parameter: theme: str | None = Query(default=None), theme_mode: str = Query(default='or')
+   - After the existing principle_tag/search filters and BEFORE the .order_by, replicate the same theme-filter pattern from list_questions (lines 68-103) but join through ExampleThemeTag instead of QuestionThemeTag. The model is in src/backend/models/behavioral_theme.py — import ExampleThemeTag if not already imported.
+   - Update the docstring Args section to mention the new parameters.
+
+5. Add a regression test in tests/backend/routers/test_behavioral_themes.py (create file if missing) using the existing pytest fixtures (TestClient, in-memory DB or test fixture DB):
+   def test_questions_theme_filter_returns_only_tagged_rows(client, seeded_db):
+       resp = client.get('/api/behavioral/questions?theme=failure_setback')
+       data = resp.json()
+       assert all(any(t['slug']=='failure_setback' for t in q['theme_tags']) for q in data)
+       assert len(data) >= 1 and len(data) < 50  # not the full 115
+
+   def test_examples_theme_filter_returns_only_tagged_rows(client, seeded_db):
+       resp = client.get('/api/behavioral/examples?theme=failure_setback')
+       data = resp.json()
+       assert len(data) == 5
+       ids = {e['example_id'] for e in data}
+       assert 'EX-33B' in ids and 'EX-15' in ids
+
+6. Final consumer verification:
+   - curl -s 'http://localhost:8100/api/behavioral/questions?theme=failure_setback' returns ~15 rows
+   - curl -s 'http://localhost:8100/api/behavioral/examples?theme=failure_setback' returns exactly the 5 master stories (EX-15, EX-16, EX-17, EX-30, EX-33B)
+   - pytest tests/backend/routers/test_behavioral_themes.py passes
+
+ACCEPTANCE:
+- Both endpoints filter correctly on ?theme=<slug>.
+- Response of /questions includes theme_tags array.
+- Two pytest cases pinned and green.
+
+#### T-P1-360: QuickIndex: add section toggle bar (LC / ML coding / BQ)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Restructure src/frontend/src/pages/QuickIndex.tsx — add a top toggle bar so the user can show ONE of three sections at a time: LeetCode / ML coding / Behavioral Questions.
+
+EXECUTION STEPS:
+
+1. Split the existing hardcoded 'problems' array (lines 3-20) into TWO arrays at the top of the file:
+   - LC_PROBLEMS: items where lcId is defined
+   - ML_PROBLEMS: items where lcId is undefined (currently 'K-Means (K-Means++)' and 'Lock Combination BFS (Bidirectional)')
+
+2. Add a SECTION_TYPE union and useSearchParams hook to read/write ?section=lc|ml|bq:
+       import { useSearchParams } from 'react-router-dom';
+       const [params, setParams] = useSearchParams();
+       const section = (params.get('section') as 'lc'|'ml'|'bq') || 'lc';
+
+3. Render a top button row using existing Tailwind utility classes from this codebase (match the style of the existing rounded-lg border-gray-200 cards). Reference snippet (use template literal for the className with the active/inactive ternary):
+
+       <div className="flex gap-2 mb-6">
+         {(['lc','ml','bq'] as const).map(s => (
+           <button
+             key={s}
+             onClick={() => setParams({ section: s })}
+             className={
+               'px-4 py-2 rounded-lg border text-sm font-medium transition-all ' +
+               (section === s
+                 ? 'border-blue-500 bg-blue-50 text-blue-700'
+                 : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300')
+             }
+           >
+             {s === 'lc' ? 'LeetCode' : s === 'ml' ? 'ML Coding' : 'Behavioral'}
+           </button>
+         ))}
+       </div>
+
+   (String concatenation is used instead of a template literal so this description is robust to shell quoting; either form is acceptable in the actual code.)
+
+4. Render conditionally:
+   - section === 'lc'  ->  existing grid using LC_PROBLEMS
+   - section === 'ml'  ->  existing grid using ML_PROBLEMS
+   - section === 'bq'  ->  placeholder div with text 'Coming soon (filled in by T-P1-361)' — leave it intentionally empty here. Do NOT scope-creep into BQ rendering in this task.
+
+5. Default behavior: if no ?section= param, treat as 'lc'. Do not rewrite the URL until the user clicks a toggle.
+
+6. Manual smoke test (REQUIRED — npm run build is necessary but not sufficient):
+   - Restart vite (cd src/frontend && npm run dev, runs on 5173)
+   - Open http://localhost:5173/quick-index — verify default view = LeetCode grid (14 cards)
+   - Click 'ML Coding' — verify shows 2 cards (K-Means, Lock Combo BFS), URL updates to /quick-index?section=ml
+   - Click 'Behavioral' — verify shows the placeholder, URL updates to /quick-index?section=bq
+   - Refresh on /quick-index?section=ml — verify ML section is still selected
+   - Browser back from BQ -> ML -> LC -> works
+   - cd src/frontend && npm run build (which is tsc -b && vite build, per project rule) is clean
+
+ACCEPTANCE:
+- 3 toggle buttons render at top of QuickIndex.
+- Only one section visible at a time.
+- ?section= URL param round-trips (refresh + back button work).
+- Existing 16 problems split correctly: 14 LC + 2 ML.
+- BQ section placeholder explicitly says it is filled in by T-P1-361.
+- npm run build passes.
+
+#### T-P1-361: QuickIndex BQ section: render theme cards grouped by cluster
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-359
+- **Description**: Inside the BQ section of QuickIndex (placeholder added by T-P1-360), render the 15 behavioral_themes as cards grouped by semantic cluster family.
+
+DEPENDS ON: T-P1-359 (theme filter API fix) and T-P1-360 (BQ section placeholder).
+
+EXECUTION STEPS:
+
+1. Add a useQuery for the themes endpoint at the top of QuickIndex.tsx (when section==='bq'):
+
+       const { data: themes } = useQuery({
+         queryKey: ['behavioral-themes'],
+         queryFn: () => api.get('/api/behavioral/themes').then(r => r.data),
+         enabled: section === 'bq',
+         staleTime: Infinity,         // themes change rarely; never auto-refetch within a session
+         gcTime: 1000 * 60 * 60,      // keep cached for an hour even after unmount, so toggling sections doesn't trigger a refetch
+       });
+
+   The endpoint already exists at /api/behavioral/themes (see routers/behavioral.py list_themes around line 155). Each theme has: id, slug, label, description, display_order, question_count, example_count.
+
+2. Define the cluster-family grouping inline (one source of truth, do not split into a separate file unless 3+ pages need it):
+
+       const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [
+         { id: 'failure',    label: 'Failure & Ownership',    theme_slugs: ['failure_setback', 'ownership_accountability'] },
+         { id: 'conflict',   label: 'Conflict & Collaboration', theme_slugs: ['conflict_disagreement', 'collaboration_teamwork'] },
+         { id: 'decision',   label: 'Decision under Ambiguity', theme_slugs: ['prioritization_tradeoffs', 'ambiguity_uncertainty', 'scope_creep_ambiguous'] },
+         { id: 'execution',  label: 'Execution & Pressure',   theme_slugs: ['deadline_pressure', 'process_systems', 'oncall_prod_incident'] },
+         { id: 'leadership', label: 'Leadership & People',    theme_slugs: ['leadership_direction', 'mentoring_coaching'] },
+         { id: 'technical',  label: 'Technical Depth',         theme_slugs: ['technical_problem_solving', 'code_quality_tech_debt'] },
+         { id: 'data',       label: 'Data and Decisions',      theme_slugs: ['data_analysis'] },
+       ];
+
+   Verify all 15 theme slugs are covered exactly once. If a future theme is added without a family, render it under an 'Other' family at the bottom (do not crash).
+
+3. For each family, render a section: a small label + a flex/grid of theme cards. Each theme card:
+   - Theme label (large)
+   - 'N questions / M examples' subtitle
+   - Hover state matching the existing LC card style
+   - Wrapped in a Link to /behavioral/theme/<slug>?from=quick-index
+   - If question_count===0 AND example_count===0, dim the card (text-gray-400) — do not hide it.
+
+   Use grid-cols-2 md:grid-cols-3 lg:grid-cols-4 to match the LC grid feel. Family heading is text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2.
+
+4. Manual smoke test:
+   - Open /quick-index?section=bq — verify all 7 family headings appear in order
+   - Verify each family contains the expected theme cards
+   - Verify counts match what is in the DB (failure_setback should now show 5 examples, ~15 questions)
+   - Click failure_setback card — verify navigation to /behavioral/theme/failure_setback?from=quick-index (T-P1-362 wires up the destination page)
+   - Refresh — counts still load
+   - Verify dimmed card if any theme has 0 questions and 0 examples
+
+ACCEPTANCE:
+- All 15 themes render in 7 family groups.
+- Counts come from /api/behavioral/themes (not hardcoded).
+- Click navigation produces the correct URL with the from param.
+- The failure_setback card shows 5 examples after T-P1-358 + this task.
+- npm run build passes.
+
+#### T-P1-362: BQ theme detail page: example cards with Chinese pitch + STAR drawer
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-358, T-P1-359
+- **Description**: New page at route /behavioral/theme/:slug for the BQ theme detail view. Add the route in src/frontend/src/App.tsx and create the page component.
+
+DEPENDS ON: T-P1-358 (cn_elevator_pitch field), T-P1-359 (theme filter on /examples).
+
+EXECUTION STEPS:
+
+1. Add new route in App.tsx (right after the existing 'behavioral' route):
+       <Route path="behavioral/theme/:slug" element={<BehavioralThemePage />} />
+
+2. Create new file src/frontend/src/pages/BehavioralThemePage.tsx with the following structure:
+
+   - Read :slug via useParams<{slug: string}>().
+   - Read ?from= via useSearchParams (used by the back link).
+   - Three queries (or one combined query if you add /api/behavioral/themes/<slug>/detail later):
+       (a) themes: GET /api/behavioral/themes — find the matching theme by slug
+       (b) examples: GET /api/behavioral/examples?theme=<slug> — depends on T-P1-359 fix
+       (c) questions: GET /api/behavioral/questions?theme=<slug>
+   - Page header:
+       <header>
+         <Link to={returnUrl}>← Back</Link>  // returnUrl = '/quick-index?section=bq' if from==='quick-index', else '/quick-index?section=bq'
+         <h1>{theme.label}</h1>
+         <div>{theme.description}</div>
+         <div>{theme.question_count} questions · {theme.example_count} examples</div>
+       </header>
+   - Examples grid: render each example as a card with:
+       - example_id (small mono badge)
+       - title (English)
+       - cn_elevator_pitch — IF NULL, fall back to title in italic-gray. Split the pitch on the ' | ' separator to display key facts as bullet pills.
+       - onClick: setActiveExampleId(example.example_id)
+   - Questions list (smaller, below): plain bullet list of question texts with the question_id as a leading mono badge.
+
+3. Drawer (REVISED per code review — single fetch, no race condition):
+   - Use existing component src/frontend/src/components/ui/SlideOverPanel.tsx (already used by BehavioralQuestions).
+   - State: const [activeExample, setActiveExample] = useState<BehavioralExample | null>(null);
+     (Hold the FULL example object, not just the id.)
+   - When the user clicks an example card, call setActiveExample(example) — passing the already-loaded object from the examples list query. Do NOT issue a second fetch.
+   - The /api/behavioral/examples?theme=<slug> response already includes situation/task/action/result/evidence_quotes/principle_tags/risk_statement/analogy/tech_terms/linked_questions per BehavioralExampleResponse (src/backend/schemas/behavioral.py line 105+). Pass activeExample directly to ExampleDrawerContent — drawer becomes a pure render-from-props component, no useEffect / no loading state / no race condition possible.
+   - SlideOverPanel must dim background and close on outside click + Escape key (verify these props exist; if not, add them — needed for T-P2-363 path 1).
+   - CRITICAL: opening/closing the drawer must NOT change the URL. Use React state only. This way browser back from the theme page goes to /quick-index?section=bq, not back through every example the user opened.
+
+4. Empty state: if examples.length === 0, render a friendly message 'No master stories tagged to this theme yet.' Do not crash.
+
+5. Manual smoke test (run in browser, not just type-check):
+   - Navigate /quick-index?section=bq -> click 'Failure & Setback' -> URL becomes /behavioral/theme/failure_setback?from=quick-index
+   - Verify 5 example cards render: EX-15, EX-16, EX-17, EX-30, EX-33B, each showing the Chinese pitch from T-P1-358
+   - Click EX-33B card -> drawer opens with full STAR
+   - Press Escape -> drawer closes, URL unchanged, scroll position retained
+   - Click 'Back' link -> returns to /quick-index?section=bq (BQ section still visible)
+   - Browser back from theme page (without going through Back link) -> also returns to /quick-index?section=bq
+
+6. i18n / typography sub-step (REQUIRED — added per code review): the cn_elevator_pitch is mixed CN/EN content rendered alongside English UI chrome. The ' | KEY FACTS: ' split produces pills with both CN and EN tokens, which will font-fallback differently in the same line and cause vertical misalignment.
+   - Use a single CSS class for the pill that explicitly sets font-family with both English and CJK fallbacks in order: e.g. `font-family: 'Inter', 'Noto Sans CJK SC', system-ui, sans-serif;` (or whatever the project's existing CN-capable font stack is — check src/frontend/src/index.css first to reuse).
+   - Set explicit `line-height` and `vertical-align: baseline` on the pill so the CN glyphs and EN glyphs do not produce row-height jitter.
+   - Manual smoke test: render a card with a pitch containing both Chinese and 'KEY FACTS:' English in the same pill row — verify glyphs sit on the same baseline, no row-height jitter.
+
+ACCEPTANCE:
+- New route and page render for all 15 theme slugs.
+- 5 failure-cluster examples render with Chinese pitch and key facts.
+- Clicking an example card opens the slide-over drawer with full STAR — using the already-loaded example object, NO second API fetch.
+- Drawer state is local React state (does NOT touch URL).
+- Back link and browser back both return to /quick-index?section=bq.
+- CN/EN typography on the pitch pills is verified visually — no font-fallback jitter.
+- npm run build passes.
+
 ### P2 -- Nice to Have
+
+#### T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-361, T-P1-362
+- **Description**: Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> example drawer.
+
+DEPENDS ON: T-P1-361 and T-P1-362.
+
+PATHS THAT MUST WORK:
+
+1. QuickIndex(BQ) -> click theme card -> theme detail -> click example -> drawer opens -> close drawer -> still on theme detail page with scroll position preserved.
+2. theme detail -> click 'Back' link -> /quick-index?section=bq (BQ section still selected).
+3. Browser back button from theme detail -> /quick-index?section=bq (same as path 2).
+4. Deep link directly to /behavioral/theme/failure_setback?from=quick-index (no prior visit to QuickIndex) -> Back link still navigates to /quick-index?section=bq (graceful default for from-less case too).
+5. /quick-index?section=bq refresh -> BQ section still rendered (already covered by T-P1-360, re-verify).
+6. /quick-index?section=ml -> click any LC link (cross-section) -> navigate forward -> browser back -> /quick-index?section=ml (URL preserved, not reset to default).
+
+EXECUTION STEPS:
+
+1. Create the back-link hook at src/frontend/src/hooks/useReturnPath.ts:
+       import { useSearchParams } from 'react-router-dom';
+       export function useReturnPath(defaultPath: string): string {
+         const [params] = useSearchParams();
+         const from = params.get('from');
+         if (from === 'quick-index') return '/quick-index?section=bq';
+         return defaultPath;
+       }
+   Theme detail page uses this for its Back link.
+
+2. Real scroll position preservation (REVISED per code review — the previous 'capture into a ref' was a toy and would not survive a real navigation):
+
+   Create src/frontend/src/hooks/useScrollRestore.ts:
+
+       import { useEffect } from 'react';
+       import { useLocation } from 'react-router-dom';
+
+       const STORAGE_PREFIX = 'scroll:';
+
+       export function useScrollRestore(): void {
+         const location = useLocation();
+         // location.key is unique per history entry (react-router v6+); persisted across the same
+         // entry's lifetime even if component unmounts.
+         const storageKey = STORAGE_PREFIX + location.key;
+
+         // Save on unmount or before next route change
+         useEffect(() => {
+           const onScroll = () => {
+             sessionStorage.setItem(storageKey, String(window.scrollY));
+           };
+           window.addEventListener('scroll', onScroll, { passive: true });
+           return () => window.removeEventListener('scroll', onScroll);
+         }, [storageKey]);
+
+         // Restore on mount
+         useEffect(() => {
+           const stored = sessionStorage.getItem(storageKey);
+           if (stored !== null) {
+             // requestAnimationFrame so the page has rendered before we scroll
+             requestAnimationFrame(() => window.scrollTo(0, parseInt(stored, 10)));
+           }
+           // do NOT depend on storageKey for restore — only run once on mount
+           // eslint-disable-next-line react-hooks/exhaustive-deps
+         }, []);
+       }
+
+   Wire useScrollRestore() into the BehavioralThemePage component (top of component body) AND into QuickIndex (so the BQ section also restores after coming back from a theme detail page).
+
+   For drawer-open scroll preservation: the drawer is a slide-over overlay, so document scroll position is naturally preserved unless SlideOverPanel adds `body { overflow: hidden }` or similar. If it does, capture window.scrollY into a ref BEFORE the panel opens and restore it AFTER it closes. Verify in path 1 manual smoke test.
+
+3. Verify SlideOverPanel does NOT add a history entry. If it does (e.g., uses useNavigate), refactor to local state — this is the critical bug to prevent path 3 from getting stuck inside the drawer history.
+
+4. Manual smoke test ALL 6 paths in a real browser. For each path, write a one-line PASS/FAIL note in the PR description or commit message.
+
+5. Optional but recommended: add a Playwright e2e test under tests/frontend/e2e/behavioral_navigation.spec.ts covering paths 1-3 if the project already has Playwright set up. If not, do not add the framework in this task — flag as a future task.
+
+ACCEPTANCE:
+- All 6 paths verified manually with PASS notes.
+- Theme detail Back link works for both ?from=quick-index and the no-from case.
+- Drawer open/close does not pollute browser history.
+- Scroll position restored after drawer close.
+- npm run build passes.
+
+#### T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P1-358
+- **Description**: STRUCTURAL/MECHANICAL polish ONLY for the 4 remaining failure-cluster master stories. Brings them in line with the EX-33B presentation standard WITHOUT inventing new factual content, so an autonomous session can run this end-to-end with no human fact-check.
+
+FORBIDDEN in this task (deferred to a separate collaborative pass with the user):
+- Inventing new evidence_quotes
+- Inventing new analogies
+- Rewriting Action / Result narrative
+- Changing any factual claims (numbers, names, dates, project descriptions)
+
+PERMITTED in this task:
+- Adding entries to principle_tags (read-modify-write JSON, no removals)
+- Appending a NARRATION-RISK GUARD paragraph to risk_statement (using the templates below — copy verbatim, do NOT rewrite)
+- Appending a TEMPORAL POV PRINCIPLE paragraph to risk_statement, EX-16 only
+
+DELIVERABLE: a single idempotent script scripts/_polish_failure_cluster_structural.py modeled after scripts/_patch_ex33b_kpi.py. Each edit gated on a marker string ("NARRATION-RISK GUARD" / "TEMPORAL POV") so re-running does not duplicate.
+
+PER-STORY EXACT EDITS:
+
+================================================================================
+EX-15 (Model Deprecation Incident)
+================================================================================
+
+principle_tags: ensure JSON list contains the strings 'failure', 'humility', 'process_improvement_from_incident'. Use a read-modify-write pattern: load json, add missing, dump. Do NOT remove existing tags.
+
+risk_statement: idempotent-append (gate on the sentinel string '<!-- NRG-v1 -->' — if already present in risk_statement, skip. Use a specific sentinel rather than a substring of the human-readable header to avoid false-positive idempotency skips if the phrase 'NARRATION-RISK GUARD' appears in any future content):
+
+\n\n<!-- NRG-v1 --> NARRATION-RISK GUARD: This is a 'failure that became a process improvement' story. The risk in narration is that the cross-team-alignment-mechanism tail makes the failure itself feel small. STOP the story at the lesson ('I learned to surface informal stakeholder relationships before deprecating shared infrastructure'); only mention the cross-team mechanism if the interviewer asks 'what changed afterwards'.
+
+================================================================================
+EX-16 (Cross-Datacenter Deployment Incident)
+================================================================================
+
+principle_tags: ensure JSON list contains 'failure', 'humility', 'cross_boundary_failure'. Read-modify-write.
+
+risk_statement: idempotent-append (gate on the sentinel string '<!-- TPV-v1 -->' — if already present in risk_statement, skip. Use a specific sentinel rather than a substring of the human-readable header to avoid false positives):
+
+\n\n<!-- NRG-v1 --> <!-- TPV-v1 --> NARRATION-RISK GUARD + TEMPORAL POV: This story has a redemption tail (the declarative artifactory invitation) that risks the disguised-success trap. For pure-failure / mistake / 'what would you do differently' questions, STOP the story at the rollback and the new cross-team-reviewer policy. The artifactory invitation belongs to a separate framing of the same incident (a calculated-risk / paradigm-shift cut) and must NOT be appended to the failure narration. At the moment of the incident, before the artifactory invitation existed, this WAS a failure full stop — and that is the only POV the interviewer should hear when they asked a failure question.
+
+================================================================================
+EX-17 (Difficult Feedback from Senior IC)
+================================================================================
+
+principle_tags: ensure JSON list contains 'failure', 'humility'. Read-modify-write.
+
+risk_statement: idempotent-append (gate on the marker substring 'NARRATION-RISK GUARD'):
+
+\n\n<!-- NRG-v1 --> NARRATION-RISK GUARD: The temptation in this story is to lean on 'I built credibility back', which sounds like a redemption arc. The actual lesson is that I failed to push back on the manager-driven shortcut under pressure. Frame the lesson as 'I learned to gate-keep my own work even when my manager is the one cutting the corner', and let the credibility recovery be IMPLIED, not narrated.
+
+================================================================================
+EX-30 (Hash Capability Misdesign)
+================================================================================
+
+This is the gold-standard reference. Verify-only:
+- principle_tags MUST already contain 'failure'. If absent, add it (do not remove anything).
+- risk_statement MUST already contain a narration-risk note ('Use this story for failure-type questions; it does not have a success-tail to soften it.'). If the marker 'NARRATION-RISK GUARD' is also missing, append a one-line redirect to make grep-by-marker uniform across all 4 stories:
+  \n\n<!-- NRG-v1 --> NARRATION-RISK GUARD: See existing 'Use this story for failure-type questions...' clause above. This story is the cluster's gold standard and needs no additional guard.
+
+================================================================================
+VERIFICATION (script must run after the patches and exit non-zero if any check fails):
+
+For each of EX-15, EX-16, EX-17, EX-30:
+  - SELECT principle_tags FROM behavioral_examples WHERE example_id=...
+  - assert 'failure' in json.loads(principle_tags)
+  - SELECT risk_statement FROM behavioral_examples WHERE example_id=...
+  - assert '<!-- NRG-v1 -->' in risk_statement  # sentinel, not human-readable header
+For EX-16 specifically:
+  - assert '<!-- TPV-v1 -->' in risk_statement  # sentinel, not human-readable header
+
+After DB-level checks pass, verify via the API consumer path:
+  - curl -s http://localhost:8100/api/behavioral/examples/by-example-id/EX-15 | python -c 'import json,sys; d=json.load(sys.stdin); assert "failure" in d["principle_tags"]; assert '<!-- NRG-v1 -->' in d['risk_statement']'
+  - Repeat for EX-16, EX-17, EX-30.
+
+(Restart uvicorn first if T-P1-359 was not yet applied in this session.)
+
+================================================================================
+ACCEPTANCE:
+- All 4 stories have 'failure' principle_tag.
+- All 4 stories have the sentinel '<!-- NRG-v1 -->' in risk_statement (specific sentinel chosen to avoid false-positive idempotency skips on future content containing the human-readable phrase).
+- EX-16 specifically also has the sentinel '<!-- TPV-v1 -->' in risk_statement.
+- No new evidence_quotes / analogies / STAR-text rewrites were committed.
+- Re-running scripts/_polish_failure_cluster_structural.py is idempotent (no duplicated paragraphs, exits cleanly).
+- Commit message: '[T-P2-364] Failure cluster structural polish: tags + narration guards'.
+
+DOES NOT cover (deferred to a separate user-collaborative task — to be filed only if the user asks for it):
+- Adding new evidence_quotes to EX-15, EX-16, EX-17
+- Adding analogies
+- Rewriting Action sections to add realization beats
+- Adding cn_elevator_pitch refinements (handled by T-P1-358)
+
+#### T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, read the example record and verify it contains BOTH (a) a quantitative number in the Result section (e.g., '+1% GMB', '200M+', 'p99 latency dropped 30%') AND (b) a metric name and direction-of-change in the Action section. (a)+(b) together is the bar for a real data-driven story; either one alone is too easy to satisfy with hand-waving (per code-review tightening). (c) an A/B test reference and (d) a data-derived hypothesis are STRONG SUPPORTING evidence — if an example has (c) or (d) plus only one of (a)/(b), it can be marked NEEDS-NOTE rather than RECOMMEND-UNTAG. If an example has neither (a) nor (b), the technical depth narrative is unsupported -- either (i) the relevance_note on the technical_problem_solving theme tag must explain why this story still belongs to tech depth without numbers, OR (ii) untag from technical_problem_solving and document the untag reason. Generate a markdown audit report at docs/audits/tech_depth_data_driven_2026-04.md listing each of the 27 examples with PASS / NEEDS-NOTE / RECOMMEND-UNTAG verdicts. Do NOT auto-untag in this task -- collect findings for human review. AC: report file exists, all 27 examples accounted for, summary counts at the top.
 
 ### P3 -- Stretch Goals
 
@@ -101,6 +536,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
 - [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
 - [x] **2026-04-11** -- T-P2-321: [SYNC] helixos: Propagate 3 new lessons from MLInterviewPrep 2026-04-08. Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root
+- [x] **2026-04-11** -- T-P1-358: Behavioral: add cn_elevator_pitch column + seed 7 master story pitches. Add behavioral_examples.cn_elevator_pitch column + populate for the 7 polished master stories: EX-15, EX-16, EX-17, EX-3
 - [x] **2026-04-11** -- T-P1-357: Behavioral: populate EX-30 with Hash Misdesign + create EX-33 for MoE->Allocation. # Behavioral: populate EX-30 with Hash Misdesign + create EX-33 for MoE->Allocation paradigm shift
 - [x] **2026-04-11** -- T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family. # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
 - [x] **2026-04-11** -- T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page. # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page

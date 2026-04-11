@@ -1,0 +1,152 @@
+"""Seed cn_elevator_pitch for the 7 behavioral master stories.
+
+Idempotent: re-running overwrites with the same exact strings. Run this
+AFTER applying migration 17 (adds cn_elevator_pitch column). Includes a
+PRAGMA preflight that fails loudly if the column is missing, because
+SQLite will silently no-op UPDATEs against a non-existent column under
+some pragma configurations.
+"""
+
+from __future__ import annotations
+
+import sqlite3
+import sys
+from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
+
+PITCHES: dict[str, str] = {
+    "EX-15": (
+        "\u6309\u6d41\u7a0b\u4e0b\u7ebf\u65e7\u6a21\u578b\u5374\u89e6\u53d1\u672a\u6587\u6863\u5316"
+        "\u7684\u8de8\u56e2\u961f\u4f9d\u8d56\uff1b\u4ee5\u4e8b\u6545\u4e3a\u5951\u673a\u63a8\u52a8"
+        "\u8de8\u56e2\u961f\u5bf9\u9f50\u673a\u5236\u4e0e\u5206\u9636\u6bb5\u4e0b\u7ebf safety knob"
+        " | KEY FACTS: 1 \u5468\u4fee\u590d | VP/Senior Director \u8de8\u7ec4\u4f1a\u8bae"
+        " | \u8de8\u56e2\u961f\u5bf9\u9f50\u673a\u5236\u6210\u4e3a\u65b0\u89c4\u8303"
+        " | \u5206\u9636\u6bb5 deprecation safety knob"
+    ),
+    "EX-16": (
+        "\u4e3b\u52a8\u8de8\u8fb9\u754c\u505a\u5ef6\u8fdf\u4f18\u5316\u4f46\u672a\u5bf9\u9f50 infra"
+        " \u56e2\u961f\uff1bC++ \u9759\u6001\u7f16\u8bd1\"\u90e8\u843d\u77e5\u8bc6\"\u5bfc\u81f4"
+        "\u8de8\u6570\u636e\u4e2d\u5fc3\u4e0a\u7ebf panic\uff0c\u786e\u7acb\u5f3a\u5236"
+        " cross-team reviewer \u7b56\u7565"
+        " | KEY FACTS: \u8de8 DC error rate spike | \u7d27\u6025 rollback"
+        " | \u5f3a\u5236 cross-team reviewer \u7b56\u7565"
+        " | \u540e\u7eed\u88ab\u9080\u8bf7\u52a0\u5165 declarative artifactory \u5021\u8bae"
+        "\uff08\u6ce8\uff1a\u6b64 tail \u4ec5\u7528\u4e8e calculated-risk \u6846\u67b6"
+        "\uff0c\u4e0d\u5728 failure \u6846\u67b6\u4e2d\u63d0\u53ca\uff09"
+    ),
+    "EX-17": (
+        "\u6536\u5230 senior IC \u4e25\u5389\u53cd\u9988\"\u7f3a\u4e4f\u57fa\u672c\u5de5\u7a0b"
+        "\u7d20\u517b\"\uff1b\u4e0d push back \u800c\u5185\u5316\u6839\u56e0\u2014\u2014"
+        "\u538b\u529b\u4e0b\u672a\u963b\u6321 manager shortcut\u2014\u2014\u91cd\u5efa"
+        "\u4fe1\u8a89\u4e0e gate-keeping \u8d23\u4efb"
+        " | KEY FACTS: senior IC \u4e25\u5389\u53cd\u9988"
+        " | 'lacked basic engineering quality'"
+        " | over-promise \u6839\u56e0"
+        " | \u540e\u7eed gate-keeping \u8d23\u4efb"
+    ),
+    "EX-30": (
+        "\u9ad8\u901f PM \u5408\u4f5c\u671f\u4e0a\u7ebf\"\u6570\u5b66\u4f18\u96c5\"hash"
+        " \u672a\u8be2\u95ee\u4e0b\u6e38 consumer\uff1b\u81f4 2-3 \u4e2a\u4e0b\u6e38 DS"
+        " \u56e2\u961f\u6570\u5468\u5206\u6790\u65f6\u95f4\u635f\u5931\uff1b\u8de8\u56e2\u961f"
+        " rescue \u63d0\u6848\u88ab\u62d2\uff0c\u6700\u7ec8\u91c7\u7eb3 indexing \u56e2\u961f"
+        " prior art"
+        " | KEY FACTS: 2-3 \u4e2a\u4e0b\u6e38 DS/\u4ea7\u54c1\u56e2\u961f"
+        " | \u6570\u5468\u5206\u6790\u65f6\u95f4\u635f\u5931"
+        " | \u8de8\u56db\u56e2\u961f rescue \u63d0\u6848\u88ab\u62d2"
+        " | \u56de\u5f52 indexing \u56e2\u961f prior art"
+    ),
+    "EX-33B": (
+        "\u4f5c\u4e3a model believer \u5728 MoE \u4e0a\u5c42\u5c42\u8fed\u4ee3\u2014\u2014"
+        "\u4fee bias\u3001\u4fee router\u3001\u52a0\u6b63\u4ea4 expert\uff1b\u8017\u5c3d"
+        " ~80 GPU \u540e\u8ba4\u6e05 BI/GMB \u662f\u771f KPI\uff0cMRR \u662f self-fulfilling"
+        " proxy"
+        " | KEY FACTS: ~80 GPU \u8282\u70b9 | BI + GMB \u771f KPI | MRR \u4e0d\u662f KPI"
+        " | \u6280\u672f unblocked \u4f46 business unlaunchable"
+    ),
+    "EX-34": (
+        "\u5728 BBE \u9879\u76ee\u548c principal researcher disagree on seller-level"
+        " \u7edd\u5bf9\u98ce\u9669 policy\uff1b\u7528\u65b0\u5356\u5bb6/\u5c0f\u5356\u5bb6"
+        " false-positive \u6570\u636e + '\u7edd\u5bf9\u6807\u51c6\u662f lazy non-action"
+        " \u4f2a\u88c5'\u91cd\u65b0\u6846\u5b9a\u95ee\u9898\uff1b\u843d\u5730 listing-level"
+        " + cumulative seller escalation \u4e24\u5c42\u673a\u5236\uff0c\u5e76\u628a\u5bf9\u65b9"
+        "\u771f\u5b9e\u987e\u8651\uff08audit \u4e00\u81f4\u6027\uff09\u53d8\u6210\u673a\u5236"
+        "\u4fdd\u969c"
+        " | KEY FACTS: BBE \u98ce\u9669 enforcement \u7c92\u5ea6"
+        " | seller-level absolutism vs listing-level"
+        " | \u65b0\u5356\u5bb6/\u5c0f\u5356\u5bb6 false-positive \u6570\u636e"
+        " | listing-level + \u7d2f\u79ef\u5347\u7ea7"
+        " | absolutism smell test"
+    ),
+    "EX-09B": (
+        "\u5728 LLM \u5bf9\u8bdd\u641c\u7d22 design \u9636\u6bb5\u63d0\u51fa query rewrite"
+        " \u8def\u5f84\u4f1a\u8ba9\u7528\u6237\u539f\u59cb query \u6d41\u5165\u4e0b\u6e38"
+        " log/\u8bad\u7ec3\u6570\u636e\u7684 privacy \u98ce\u9669\uff1b\u4e0e team"
+        " \u5171\u540c develop proxy item \u751f\u6210\u8def\u5f84\uff0c\u8ba9\u539f\u59cb"
+        " query \u6c38\u4e0d\u6d41\u5165\u4e0b\u6e38\uff0c\u5e76\u628a privacy \u4f18\u52bf"
+        "\u5199\u5165 design doc"
+        " | KEY FACTS: query rewrite \u662f\u57fa\u4e8e query clustering/autocomplete"
+        " \u7684\u81ea\u7136\u5ef6\u4f38"
+        " | proxy item \u5b8c\u5168\u6d88\u9664 leakage\uff08eliminate not mitigate\uff09"
+        " | privacy benefit \u5199\u5165 design doc"
+        " | \u4e0e EX-09 \u662f\u540c project \u4e24\u4e2a\u72ec\u7acb cut"
+    ),
+}
+
+
+def main() -> None:
+    """Seed cn_elevator_pitch for the 7 master stories."""
+    if not DB_PATH.exists():
+        raise SystemExit(f"Database not found: {DB_PATH}")
+
+    conn = sqlite3.connect(str(DB_PATH))
+    try:
+        cols = {
+            row[1]
+            for row in conn.execute(
+                "PRAGMA table_info(behavioral_examples)"
+            ).fetchall()
+        }
+        if "cn_elevator_pitch" not in cols:
+            raise SystemExit(
+                "cn_elevator_pitch column missing --- run the migration in "
+                "src/backend/database.py (version 17) first"
+            )
+
+        updated = 0
+        missing: list[str] = []
+        for example_id, pitch in PITCHES.items():
+            cur = conn.execute(
+                "UPDATE behavioral_examples SET cn_elevator_pitch = ? "
+                "WHERE example_id = ?",
+                (pitch, example_id),
+            )
+            if cur.rowcount == 0:
+                missing.append(example_id)
+            else:
+                updated += 1
+        conn.commit()
+
+        if missing:
+            raise SystemExit(
+                f"[FAIL] Missing example rows (not updated): {missing}"
+            )
+
+        print(f"[DONE] Updated {updated}/7 master-story pitches")
+        for example_id in PITCHES:
+            row = conn.execute(
+                "SELECT substr(cn_elevator_pitch, 1, 40) "
+                "FROM behavioral_examples WHERE example_id = ?",
+                (example_id,),
+            ).fetchone()
+            preview = row[0] if row and row[0] else "<NULL>"
+            print(f"  {example_id}: {preview}")
+    finally:
+        conn.close()
+
+
+if __name__ == "__main__":
+    main()
