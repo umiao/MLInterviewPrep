@@ -16,20 +16,25 @@
   "examples": [
     {
       "id": "EX-01",
-      "title": "Hacker Week Self-Initiated Discovery of Intent Collapse",
+      "title": "Search Diversity: Intent Collapse Discovery",
       "source_project": "Diversity / Intent-Aware Ranking",
-      "situation": "During Hacker Week, I independently analyzed most-abandoned queries and discovered a systemic problem: for queries like 'pokemon', 90%+ results were TCG cards, but 50% of users actually wanted games/toys/figures. Similarly, 'calvin klein' collapsed to underwear + perfume, ignoring clothing/accessories/shoes. The LTR ranker was systematically collapsing multi-intent queries to the dominant intent.",
-      "task": "This project was never assigned — I needed to validate the problem, quantify the business impact, and build a working prototype to demonstrate a solution, all within one week of Hacker Week.",
-      "action": "I built a complete end-to-end pipeline in one week: data analysis (search activity log + purchase attribution), a diversity blending prototype, and initial experiment results. I verified through purchase data that pairwise LTR's independence assumption was causing page-level sub-optimality — optimizing each item independently led to homogeneous results that served only the dominant intent.",
-      "result": "Won Hacker Week award. The prototype demonstrated clear potential for GMB improvement. This self-initiated work ultimately grew into a multi-year project with 200M+ annualized impact across multiple verticals.",
+      "situation": "During Hacker Week, I discovered that our search ranking system was silently failing half its users. Multi-intent queries like 'pokemon' returned 90%+ trading cards, even though purchase data showed half the buyers actually wanted games, toys, or figures. Standard metrics looked healthy because the dominant-intent users were satisfied -- the problem was invisible.",
+      "task": "No one had assigned this. I had one week to validate the problem, pinpoint the root cause, and build a working prototype that proved it was fixable.",
+      "action": "Analyzed abandoned-query logs and found a systematic pattern: hundreds of high-volume queries suffered 'intent collapse' where one product type crowded out everything else. Diagnosed the root cause -- ranking model scored each item in isolation, no mechanism to reason about diversity across the full results page. Built an end-to-end diversity-blending prototype in one week -- data pipeline, blending algorithm, experiment framework -- validated with purchase data that it surfaced previously invisible user intents.",
+      "result": "This self-initiated project proved clear revenue improvement potential and grew into a multi-year initiative with 200M+ annualized impact across multiple product verticals. The core insight -- that item-level scoring creates page-level homogeneity -- fundamentally changed how the organization approached ranking optimization. Published as a full research paper at SIGIR.",
       "evidence_quotes": [
-        "pokemon → 结果几乎全是 TCG card，但用户实际购买 ~50% 是 games / toys / figures / 周边",
-        "项目从未被指派，完全由自己发现、推动、跨 team 落地"
+        "Standard metrics said everything was fine -- because they only measured the users who stayed",
+        "The problem was invisible because the happy users masked the missing ones"
       ],
       "principle_tags": [
         "ownership",
         "innovation",
-        "problem_solving"
+        "problem_solving",
+        "bias_for_action",
+        "dive_deep",
+        "deliver_results",
+        "think_big",
+        "influence_without_authority"
       ],
       "cross_references": [
         {
@@ -38,43 +43,63 @@
         },
         {
           "question_id": "INN-1",
-          "relevance_note": "Identified opportunity through independent data analysis of abandoned queries"
+          "relevance_note": "Identified a problem no one else saw -- standard metrics masked the failure"
         },
         {
           "question_id": "INN-2",
-          "relevance_note": "Entirely self-started project, from problem discovery to working prototype"
+          "relevance_note": "Entirely self-started project, from problem discovery to working prototype in one week"
         },
         {
           "question_id": "PS-15",
-          "relevance_note": "Identified intent collapse through data analysis of purchase vs. display distributions"
+          "relevance_note": "Identified intent collapse through data analysis -- purchase distributions vs display distributions revealed the gap"
         },
         {
           "question_id": "PS-2",
-          "relevance_note": "Creative solution: cheap intent-coverage proxy instead of expensive holistic ranking"
+          "relevance_note": "Creative solution: diversity-blending algorithm that surfaced invisible user intents without rewriting the ranker"
         },
         {
           "question_id": "IMP-2",
-          "relevance_note": "Story I enrichment: identified user experience problem (kids' book results dominated by Harry Potter, baby book series returning duplicates)"
+          "relevance_note": "Prioritized user experience: half of users on multi-intent queries were completely unserved"
         },
         {
           "question_id": "OWN-11",
-          "relevance_note": "Story I enrichment: took ownership of a challenging situation — initiated as personal Hackweek project, won award, persisted across team transfers"
+          "relevance_note": "Took ownership of a problem the organization did not know existed, grew it into 200M+ initiative"
         },
         {
           "question_id": "OWN-9",
-          "relevance_note": "Invested Hacker Week building diversity prototype with incomplete information about production viability"
+          "relevance_note": "Built prototype with incomplete information -- one week, no guarantee it would work or get funded"
         },
         {
           "question_id": "INN-9",
-          "relevance_note": "Creative solution: cheap intent-coverage proxy instead of expensive holistic ranking rewrite"
+          "relevance_note": "Creative solution to a complex problem: cheap intent-coverage proxy instead of expensive holistic ranking rewrite"
         },
         {
           "question_id": "INN-10",
-          "relevance_note": "Identified intent collapse as innovation area through abandoned query data analysis"
+          "relevance_note": "Identified intent collapse as innovation area by questioning why standard metrics looked healthy"
         },
         {
           "question_id": "ADP-20",
           "relevance_note": "Self-initiated Hacker Week project driven by curiosity about abandoned query patterns"
+        },
+        {
+          "question_id": "PS-11",
+          "relevance_note": "Used purchase data to prove the ranking system was failing -- display metrics said fine, purchase data said broken"
+        },
+        {
+          "question_id": "INN-8",
+          "relevance_note": "Challenged the status quo: questioned why healthy-looking metrics masked half the user base being unserved"
+        },
+        {
+          "question_id": "INN-4",
+          "relevance_note": "Innovative diversity-blending solution validated during Hacker Week, published at SIGIR"
+        },
+        {
+          "question_id": "IMP-10",
+          "relevance_note": "Long-term impact: grew from one-week prototype to multi-year 200M+ initiative that changed org-wide ranking approach"
+        },
+        {
+          "question_id": "EXE-5",
+          "relevance_note": "Delivered end-to-end prototype (data pipeline + algorithm + experiment framework) in one-week Hacker Week deadline"
         }
       ]
     },
@@ -135,9 +160,9 @@
       "id": "EX-03",
       "title": "Challenging Sale NDCG Proxy — First Principles Rethinking",
       "source_project": "Search Ranking Allocation Framework",
-      "situation": "The search ranking team was optimizing Sale NDCG as the primary objective — an industry-standard approach that seemed reasonable. However, I discovered it systematically prioritized low-price items because conversion rates for cheap items were higher, even though expensive items (e.g., $100 jewelry vs $5 accessories) generated far more marketplace value.",
+      "situation": "The search ranking team was optimizing Sale NDCG as the primary objective -- an industry-standard approach that seemed reasonable. However, I discovered it systematically prioritized low-price items because conversion rates for cheap items were higher, even though expensive items (e.g., \\$100 jewelry vs \\$5 accessories) generated far more marketplace value.",
       "task": "I needed to identify the correct optimization proxy and convince the team and stakeholders that the existing industry-standard approach was fundamentally flawed.",
-      "action": "I conducted analysis showing the proxy's unintended consequence: a $100 necklace with 5x higher conversion than a $5 item was still ranked lower because Sale NDCG ignored price. I proposed GMB (price x sale probability) as the correct proxy. I also discovered a calibration trap: group-level probabilities were well-calibrated, but individual scores were insensitive to item differences, causing price itself to dominate rankings. I designed a BM25-inspired price transformation with log scaling and per-tranche soft caps — chosen not for theoretical optimality but for sufficiency + interpretability + cost control.",
+      "action": "I conducted analysis showing the proxy's unintended consequence: a \\$100 necklace with 5x higher conversion than a \\$5 item was still ranked lower because Sale NDCG ignored price. I proposed GMB (price x sale probability) as the correct proxy. I also discovered a calibration trap: group-level probabilities were well-calibrated, but individual scores were insensitive to item differences, causing price itself to dominate rankings. I designed a BM25-inspired price transformation with log scaling and per-tranche soft caps -- chosen not for theoretical optimality but for sufficiency + interpretability + cost control.",
       "result": "Switching to GMB proxy fundamentally changed ranking behavior. Authenticated/high-quality listings saw significant GMB uplifts. The insight that 'proxy selection is the most underestimated ML decision' became a guiding principle for the team.",
       "evidence_quotes": [
         "Proxy 选择是 ML 项目里最被低估的决策",
@@ -211,41 +236,77 @@
     },
     {
       "id": "EX-05",
-      "title": "Latency Over-Investment Lesson — Deployability Before Model Design",
+      "title": "Relevance Filtering: Deployment Feasibility Under Latency Constraints",
       "source_project": "Relevance Filtering for Organic Search",
-      "situation": "As Tech Lead and sole MLE on the relevance filtering project, the team invested significant effort designing XGBoost models with thousands of trees targeting accuracy. When we finally confronted the production latency budget (<=1%), the full model had +10% latency overhead — completely unacceptable.",
-      "task": "I needed to find a model architecture that met the strict <=1% latency constraint while maintaining acceptable filtering accuracy.",
-      "action": "I explored three approaches: early exit (truncate at convergence depth ~600 trees), feature-pruned small model (top-importance features only), and cheap rejection model (lightweight model for high-confidence rejections, pass hard cases to full model). I chose early exit + cheap rejection as the primary approach — best fit for the relevance task's skewed class distribution where most items are clearly irrelevant.",
-      "result": "Met the <=1% latency target. GMB on null/low queries improved +4-6%. The key personal lesson: 'Deployability constraints must be defined before model design, not after.' I now map QPS x model complexity x serving infra into a feasibility sketch before any design work — this judgment separates launched systems from abandoned prototypes.",
+      "situation": "As tech lead and sole MLE on a relevance filtering project, my team spent two months building a high-accuracy XGBoost model with thousands of trees. At deployment time, we discovered the model added +10% latency overhead -- completely unacceptable against our <=1% budget.",
+      "task": "Find a model architecture that met the strict <=1% latency constraint while maintaining acceptable filtering accuracy -- and ensure it actually worked end-to-end in production.",
+      "action": "Tried three paths (early exit, feature-pruned, cheap rejection) -- two died. Key insight: 80%+ of candidate items were obviously irrelevant and didn't need the big model. Cheap rejection + early exit cut computation by an order of magnitude. Then hit a more insidious wall: silent CI failures where tests passed but results were wrong, caused by URL length exceeding 16K chars and JSON field truncation in downstream systems.",
+      "result": "Shipped meeting <=1% latency. GMB on null/low-intent queries improved +4-6%. Cheap rejection + early exit pattern reused for two other deployments. Silent failure lesson led to new team standard: end-to-end payload stress test before every launch.",
       "evidence_quotes": [
-        "Over-invested in deep models (thousands of trees) before confronting latency budgets — as sole MLE I should have set the deployment envelope first",
-        "Engineering deployability is the real constraint — fancy ideas fail when the underlying system relies on heavy caching or offline precomputation"
+        "The reframe wasn't 'how do we shrink the big model' -- it was 'most requests don't deserve the big model at all'",
+        "The real constraints aren't just model performance vs. complexity -- they're the coupling between the model and every system it touches"
       ],
       "principle_tags": [
-        "adaptability",
+        "ownership",
         "execution",
-        "problem_solving"
+        "problem_solving",
+        "dive_deep",
+        "deliver_results",
+        "adaptability",
+        "insist_on_highest_standards"
       ],
       "cross_references": [
         {
           "question_id": "ADP-5",
-          "relevance_note": "Made a mistake (over-investing in deep models) and learned to front-load deployability constraints"
+          "relevance_note": "Over-invested in deep models for two months before confronting latency -- learned to front-load deployability checks"
         },
         {
           "question_id": "ADP-15",
-          "relevance_note": "Biggest lesson from this project: define deployment envelope before model design"
+          "relevance_note": "Biggest lesson: define deployment envelope (latency, payload limits, system coupling) before model design"
         },
         {
           "question_id": "EXE-3",
-          "relevance_note": "Solved complex latency problem through multi-approach exploration (early exit + cheap rejection)"
+          "relevance_note": "Solved complex multi-layer problem: model latency + system-coupling silent failures (URL length, JSON field limits)"
         },
         {
           "question_id": "PS-10",
-          "relevance_note": "Tough trade-off: accuracy vs latency, chose pragmatic approach that met production constraints"
+          "relevance_note": "Trade-off: accuracy vs latency, chose cheap rejection + early exit based on traffic distribution analysis"
         },
         {
           "question_id": "OWN-8",
-          "relevance_note": "Over-invested in latency optimization before validating deployability --- moved fast, corrected course"
+          "relevance_note": "As sole MLE, identified and resolved both model-level and system-level blockers under deadline pressure"
+        },
+        {
+          "question_id": "PS-1",
+          "relevance_note": "Difficult technical decision: chose cheap rejection + early exit over three alternatives based on traffic distribution"
+        },
+        {
+          "question_id": "PS-4",
+          "relevance_note": "Broke down a complex deployment problem into three layers: model architecture, latency optimization, and system coupling"
+        },
+        {
+          "question_id": "INN-5",
+          "relevance_note": "Established end-to-end payload stress test as team standard after discovering silent failures"
+        },
+        {
+          "question_id": "INN-15",
+          "relevance_note": "Created best practice: payload stress test verifying data integrity at every downstream stage before launch"
+        },
+        {
+          "question_id": "ADP-14",
+          "relevance_note": "Significant roadblock (silent CI failures with no error signals) -- traced to URL length and JSON field truncation"
+        },
+        {
+          "question_id": "ADP-6",
+          "relevance_note": "Project started with ambiguity about what 'deployment feasibility' even meant -- expanded from model-layer to full system coupling"
+        },
+        {
+          "question_id": "OWN-11",
+          "relevance_note": "As sole MLE, took ownership of both the model problem and the system-coupling failures no one anticipated"
+        },
+        {
+          "question_id": "EXE-5",
+          "relevance_note": "Shipped under tight deadline with no fallback -- two months invested, <=1% latency budget, had to find a path"
         }
       ]
     },
@@ -1245,46 +1306,117 @@
     },
     {
       "id": "BLOG-03",
-      "title": "Cross-Functional LLM Ad Relevance Pipeline",
+      "title": "Cross-Org Boundary Defense via LLM Relevance Pipeline",
       "source": "blog_proj Teamwork Q3",
       "linked_question_id": "COL-3",
       "principle_tags": [
         "collaboration",
+        "influence_without_authority",
+        "earn_trust",
         "innovation",
-        "execution"
+        "execution",
+        "ownership",
+        "customer_obsession"
       ],
       "cross_references": [
         {
           "question_id": "COL-3",
-          "relevance_note": "Direct answer: collaborated with ads and DS teams on LLM-based relevance pipeline"
+          "relevance_note": "Direct answer: cross-functional collaboration with ads team -- held org boundary while building LLM pipeline that addressed their real need"
         },
         {
           "question_id": "COL-5",
-          "relevance_note": "Aligned ads team's pass-through rate goal with overall VP-level relevance objectives"
+          "relevance_note": "Aligned ads team by reframing conflict from policy access to interpretable signals -- both teams got what they needed"
+        },
+        {
+          "question_id": "COL-9",
+          "relevance_note": "Competing priorities: ads wanted tunable pass-through rate, relevance org mandated absolute quality thresholds"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded ads team to accept interpretable LLM signals instead of direct policy/model access"
         },
         {
           "question_id": "INN-4",
-          "relevance_note": "Innovative LLM-powered relevance judgment pipeline for rapid A/B testing"
+          "relevance_note": "Built LLM judgment pipeline producing 18K labels/day at \\$500 vs \\$0.30-0.80/label for human annotation"
+        },
+        {
+          "question_id": "INN-9",
+          "relevance_note": "Creative solution: turned a boundary conflict into a product -- interpretable relevance signals that satisfied both sides"
+        },
+        {
+          "question_id": "PS-2",
+          "relevance_note": "Solved the real problem (trust gap in model judgment) not the surface request (tune pass-through rate)"
+        },
+        {
+          "question_id": "IMP-4",
+          "relevance_note": "Pipeline became standard relevance signal across all search result sets, contributed to 1.5% GMB lift"
+        },
+        {
+          "question_id": "EXE-1",
+          "relevance_note": "Led pipeline from conflict diagnosis through Q2-Q3 build to cross-org launch across ads and organic results"
+        },
+        {
+          "question_id": "OWN-11",
+          "relevance_note": "Took ownership of a politically sensitive cross-org conflict and delivered a solution that protected org principles"
         }
       ]
     },
     {
       "id": "BLOG-04",
-      "title": "Team Communication via Prediction Market Meetings",
+      "title": "Goal Tracking Reform: Honest Metrics Over Cosmetic Delivery",
       "source": "blog_proj Teamwork Q4",
       "linked_question_id": "COL-4",
       "principle_tags": [
-        "collaboration",
-        "leadership"
+        "ownership",
+        "influence_without_authority",
+        "earn_trust",
+        "innovation",
+        "have_backbone",
+        "think_big",
+        "bias_for_action",
+        "dive_deep",
+        "deliver_results"
       ],
       "cross_references": [
         {
           "question_id": "COL-4",
-          "relevance_note": "Direct answer: introduced prediction market meetings and daily standups to improve communication"
+          "relevance_note": "Direct answer: reformed goal tracking and communication so metrics reflected reality instead of masking it"
         },
         {
-          "question_id": "INN-14",
-          "relevance_note": "Established new meeting format (prediction markets) that improved team productivity by 30%"
+          "question_id": "INN-5",
+          "relevance_note": "Improved an inefficient goal tracking process that was quietly rewarding failure via rename/rollover"
+        },
+        {
+          "question_id": "INN-8",
+          "relevance_note": "Questioned the traditional goal-setting approach and proposed locking scope + peer confidence estimates"
+        },
+        {
+          "question_id": "INN-7",
+          "relevance_note": "Thought strategically: reframed goal-setting philosophy from 'all tests succeed' to 'develop and test N features'"
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded manager and Senior Director to adopt new goal framework despite initial pushback"
+        },
+        {
+          "question_id": "ADP-4",
+          "relevance_note": "Adapted proposal mid-process after manager pushback -- reframed to preserve accountability without punishing exploration"
+        },
+        {
+          "question_id": "OWN-11",
+          "relevance_note": "Self-initiated reform of a broken system as a stakeholder, not waiting for someone else to fix it"
+        },
+        {
+          "question_id": "OWN-6",
+          "relevance_note": "Bold risk: knew short-term delivery rates would drop, bet that honest metrics would improve macro velocity"
+        },
+        {
+          "question_id": "IMP-10",
+          "relevance_note": "Long-term impact: framework adopted by other orgs under Search, eliminated disguised rollover goals"
+        },
+        {
+          "question_id": "LDR-3",
+          "relevance_note": "Tough call: pushed through reform knowing it would make numbers look worse before they got better"
         }
       ]
     }
