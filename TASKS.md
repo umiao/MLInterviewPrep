@@ -126,6 +126,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-10** -- T-P2-346: Seed LinkedIn/Google/Pinterest prep content. Add seed scripts for LinkedIn question index, LinkedIn problem notes insertion, Google prep content, Pinterest prep cont
 - [x] **2026-04-10** -- T-P2-345: LC problem updates: _update_*.py scripts (1055, 1055v2, 2128, 815, Uber final round, SD tasks). Idempotent one-off update scripts per the _update_*.py convention: LC 1055 Pinterest tag + Chinese note, LC 1055 cleanup
 - [x] **2026-04-10** -- T-P2-343: Problem model: tolerate legacy comma-separated tag strings. Add defensive try/except JSONDecodeError fallback in tags_list/company_tags_list/messages_list getters, fall back to com
+- [x] **2026-04-10** -- T-P1-350: Add California FTB tax call reminder to dashboard (2026-04-13). Insert a full-day interview_events row for Monday 2026-04-13: call California Franchise Tax Board to notify that the cor
 - [x] **2026-04-10** -- T-P1-344: Add Google and Pinterest recruiter call prep notes. Add docs/google_recruiter_call_prep.md and docs/pinterest_recruiter_call_prep.md with recruiter call preparation notes.
 - [x] **2026-04-10** -- T-P1-342: Baking Studio: per-recipe seed guard fix and UI polish. Replace all-or-nothing baking_seed guard with per-recipe existence check. Compact RecipeCard layout with size badge + in
 - [x] **2026-04-10** -- T-P1-341: Behavioral prep: refresh EX-01, COL-3, COL-4 stories. Rewrite EX-01 'Hacker Week' STAR story with richer content + principle tags. Rewrite COL-3/COL-4 answers with LLM-judgme
