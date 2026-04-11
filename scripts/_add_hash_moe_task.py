@@ -2,7 +2,7 @@
 
 The task description below is the full spec the autonomous runner will execute.
 STAR fields are intentionally English-only (per user directive 2026-04-11); the
-source bank at C:/Users/Shenghui Xu/Desktop/staging/充实素材_bq_story_bank_moe_allocation.md
+source bank at <staging>/bq_story_bank_moe_allocation.md
 has Chinese bridging commentary that does NOT enter the DB.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ DESC = """\
 # Behavioral: populate EX-30 with Hash Misdesign + create EX-33 for MoE->Allocation paradigm shift
 
 ## Context
-Source material: `C:/Users/Shenghui Xu/Desktop/staging/充实素材_bq_story_bank_moe_allocation.md`
+Source material: `<staging>/bq_story_bank_moe_allocation.md` (user's local staging area)
 The user wrote a comprehensive story bank covering one raw set of events
 (MoE failure -> Allocation paradigm shift) in four framings (A/B/C/D) plus
 a distinct pure-failure story (Version E: Hash Capability Misdesign).
