@@ -1,0 +1,255 @@
+{
+  "arcs": [
+    {
+      "arc_id": "arc-1",
+      "title_zh": "搜索多样性与排名创新 (核心主线)",
+      "title_en": "Search Diversity & Ranking Innovation",
+      "color": "blue",
+      "narrative_zh": "这是我职业生涯中最重要的一条主线，从一个Hacker Week的个人发现，成长为影响200M+年化GMB的多年项目。\n\n**起点 (EX-01)**：Hacker Week期间，我独立发现搜索排名系统在\"静默地失败\"——多意图查询(如\"pokemon\")90%以上的结果是交易卡，但购买数据显示一半用户实际上想要游戏、玩具或手办。标准指标看起来很健康，因为满意的主流用户掩盖了被忽视的那一半。我在一周内从发现到原型验证，证明了问题可以解决。\n\n**组织阻力 (EX-02)**：Hacker Week获奖后，项目却停滞了——我的经理认为团队的使命是相关性过滤，不是排名优化。没有实验slot，工作被视为超出范围。我没有继续在错误的组织边界内推进，而是主动转到Final Ranking团队，将问题重新定义为排名问题。\n\n**指标重定义 (EX-03)**：在新团队，我发现行业标准的Sale NDCG指标存在根本缺陷——它系统性地偏好低价商品，因为便宜商品的转化率更高。我提出GMB(价格x购买概率)作为正确的优化目标，并发现了更深层的校准陷阱。\n\n**stakeholder教育 (EX-04)**：多样性实验上线后，MRR指标下降而GMB和购买率上升，引发了利益相关者的警惕。我必须解释为什么一个\"变差\"的指标实际上意味着更好的结果。\n\n**平台化 (EX-06)**：我将多样性方案设计为可复用的allocation primitive，任何团队只需插入目标分布即可使用。关键架构决策：用统一的GMB bidding维度替代旧的LTR评分范式。最终跨多个垂直领域达成200M+年化影响。\n\n**实验严谨性 (EX-10)**：为了确保实验结果的可信度，我设计了去偏差的评估框架，发表于SIGIR。\n\n**线上风险管理 (EX-08)**：当module数量激增导致线上质量退化时，我将问题升级到VP层面，推动建立模块仲裁机制。",
+      "examples": [
+        {
+          "example_id": "EX-01",
+          "role_zh": "发现者：Hacker Week期间独立发现intent collapse问题，一周内完成从数据分析到原型验证的全链路",
+          "principles": ["bias_for_action", "dive_deep", "think_big", "ownership"]
+        },
+        {
+          "example_id": "EX-02",
+          "role_zh": "推动者：面对组织阻力主动转team，将问题重新定义为排名问题以获得ownership",
+          "principles": ["ownership", "have_backbone", "adaptability"]
+        },
+        {
+          "example_id": "EX-03",
+          "role_zh": "质疑者：从第一性原理挑战行业标准指标Sale NDCG，提出GMB作为正确代理目标",
+          "principles": ["dive_deep", "insist_on_highest_standards", "have_backbone"]
+        },
+        {
+          "example_id": "EX-04",
+          "role_zh": "教育者：向stakeholder解释为什么MRR下降反而说明系统在变好——指标悖论的沟通",
+          "principles": ["earn_trust", "influence_without_authority"]
+        },
+        {
+          "example_id": "EX-06",
+          "role_zh": "架构师：将一次性方案升级为可复用的allocation平台，跨垂直领域达成200M+影响",
+          "principles": ["think_big", "deliver_results", "innovation"]
+        },
+        {
+          "example_id": "EX-10",
+          "role_zh": "科学家：设计去偏差评估框架确保实验严谨性，成果发表于SIGIR顶会",
+          "principles": ["insist_on_highest_standards", "dive_deep"]
+        },
+        {
+          "example_id": "EX-08",
+          "role_zh": "守护者：module激增导致线上退化，升级VP推动建立仲裁机制",
+          "principles": ["ownership", "have_backbone", "deliver_results"]
+        }
+      ],
+      "improvement_notes": "这是你最强的故事线。建议：EX-04(MRR悖论)可以考虑合并到EX-03或EX-06中作为一个beat，因为单独讲偏薄。EX-10如果面试中时间紧可以作为EX-01的补充细节而非独立故事。"
+    },
+    {
+      "arc_id": "arc-2",
+      "title_zh": "相关性与广告质量 (质量守护线)",
+      "title_en": "Relevance & Ad Quality",
+      "color": "emerald",
+      "narrative_zh": "这条线的主题是\"在严格约束下保护质量标准\"——不管是延迟预算、数据偏差还是组织边界。\n\n**部署可行性 (EX-05)**：作为Tech Lead和唯一的MLE，团队花了两个月构建高精度XGBoost模型(数千棵树)，部署时才发现延迟超标10%，远超<=1%的预算。我探索了三条路径(early exit、特征裁剪、cheap rejection)，关键洞察是80%+的候选商品根本不需要大模型。更隐蔽的问题是：CI pipeline开始产生silent failure——测试通过但结果错误，根因是URL长度超限和JSON字段截断。这让我建立了一个新的团队标准：每次上线前必须做端到端payload压力测试。\n\n**数据偏差 (EX-07)**：我发现相关性数据集存在自我实现的预言(self-fulfilling prophecy)——模型只在已展示的商品上训练，永远无法学习到未展示商品的相关性。\n\n**跨组边界防御 (BLOG-03)**：2024年与广告团队合作，他们要求我们调整相关性通过率，这从根本上违反了我们的原则：相关性标准是绝对质量阈值，不是可调的旋钮。我没有简单地说No，而是深挖他们反复要求的真正原因——他们不信任模型的判断，需要可解释的相关性信号。我建了一个LLM判断pipeline，每天产出18K标注(成本~$500 vs 人工$0.30-0.80/条)，成为全组搜索结果的标准相关性信号。",
+      "examples": [
+        {
+          "example_id": "EX-05",
+          "role_zh": "工程师：在<=1%延迟预算下解决部署可行性问题，发现并修复silent failure",
+          "principles": ["dive_deep", "deliver_results", "ownership", "insist_on_highest_standards"]
+        },
+        {
+          "example_id": "EX-07",
+          "role_zh": "质疑者：发现数据集的self-fulfilling prophecy偏差，挑战看似正确的训练方法",
+          "principles": ["dive_deep", "have_backbone"]
+        },
+        {
+          "example_id": "BLOG-03",
+          "role_zh": "谈判者+建设者：守住组织边界的同时找到创造性解决方案，将冲突转化为产品",
+          "principles": ["earn_trust", "influence_without_authority", "customer_obsession", "innovation"]
+        }
+      ],
+      "improvement_notes": "EX-07目前内容较薄(只有3 tags, 5 links)，建议用你的改进稿模式重写——加入具体的偏差发现过程和解决方案。BLOG-03是这条线的亮点，叙事最完整。"
+    },
+    {
+      "arc_id": "arc-3",
+      "title_zh": "LLM与新技术探索 (技术创新线)",
+      "title_en": "LLM & New Technology",
+      "color": "purple",
+      "narrative_zh": "这条线展示了你如何在新技术浪潮中从模糊的mandate到落地可用的系统。\n\n**GenAI探索 (EX-14)**：2023年，团队收到模糊的\"用AI做点什么\"的指令。我没有追逐炒作，而是将LLM定位为pragmatic的判断工具(LLM-as-Judge)，专注于可落地的应用场景。\n\n**对话式搜索 (EX-09)**：搜索开始支持对话式查询时，传统的关键词匹配失效了。我发现了proxy item的突破口——用已知商品作为锚点来理解模糊的对话意图。\n\n**Brand Recall (BLOG-01 + BLOG-01B)**：这是一个影响力+技术深度的双面故事。Part A讲的是如何改变researcher-engineer的动态——研究员把模型扔过墙，认为工程就是部署服务。我通过反复对话和共同失败(量化压缩、hash lookup都失败了)，将对抗关系转变为协作关系。Part B讲的是技术深度——我发现评估方法本身有盲点，用GMV校准挑战了研究员认为已经完成的工作。",
+      "examples": [
+        {
+          "example_id": "EX-14",
+          "role_zh": "实用主义者：将模糊的GenAI mandate转化为可落地的LLM-as-Judge方案",
+          "principles": ["innovation", "deliver_results", "bias_for_action"]
+        },
+        {
+          "example_id": "EX-09",
+          "role_zh": "创新者：对话式搜索中发现proxy item突破口，解决传统方法失效的问题",
+          "principles": ["innovation", "dive_deep", "problem_solving"]
+        },
+        {
+          "example_id": "BLOG-01",
+          "role_zh": "影响者(Part A)：改变researcher-engineer的协作动态，从对抗到协作",
+          "principles": ["influence_without_authority", "earn_trust", "develop_others"]
+        },
+        {
+          "example_id": "BLOG-01B",
+          "role_zh": "挑战者(Part B)：发现评估盲点，用GMV校准挑战已\"完成\"的模型",
+          "principles": ["dive_deep", "insist_on_highest_standards", "have_backbone"]
+        }
+      ],
+      "improvement_notes": "EX-14和EX-09的内容可以更丰富——目前只有3 tags。建议参考你改进EX-01/EX-05的模式，加入beat结构和更具体的转折点。BLOG-01/01B是这条线的标杆。"
+    },
+    {
+      "arc_id": "arc-4",
+      "title_zh": "团队建设与人才培养 (领导力线)",
+      "title_en": "Leadership & People Development",
+      "color": "amber",
+      "narrative_zh": "这条线展示了你在people management和团队文化方面的能力——从mentoring个体到建立团队规范。\n\n**实习生mentoring (EX-11)**：一个实习生有over-promise的习惯，目标设定不切实际。我没有直接纠正，而是帮助他建立goal visibility的框架，让他自己看到承诺和交付之间的差距。\n\n**PhD上手 (EX-12)**：PhD实习生习惯了notebook环境，对production stack完全陌生。我设计了渐进式的onboarding路径，让他们在不失去研究者思维的同时掌握工程能力。\n\n**署名争议 (EX-13)**：跨研究员合作中出现了authorship dispute。我没有回避冲突，而是推动建立了明确的贡献认定规范，将个案解决转化为长期机制。\n\n**senior IC反馈 (EX-17)**：收到资深IC对我代码的尖锐反馈。我没有防御性地回应，而是将其作为建立credibility的机会——接受合理的批评，用改进的行动证明自己。\n\n**Code Review标准 (BLOG-02)**：团队的code review标准不统一，导致反复的review摩擦。我推动建立了共享的guidelines，将个人偏好转化为团队共识。",
+      "examples": [
+        {
+          "example_id": "EX-11",
+          "role_zh": "导师：帮助over-promise的实习生建立goal visibility框架",
+          "principles": ["develop_others", "earn_trust"]
+        },
+        {
+          "example_id": "EX-12",
+          "role_zh": "教练：设计PhD到production的渐进式onboarding路径",
+          "principles": ["develop_others", "deliver_results"]
+        },
+        {
+          "example_id": "EX-13",
+          "role_zh": "调解者：将authorship dispute转化为长期贡献认定规范",
+          "principles": ["earn_trust", "have_backbone", "build_mechanism"]
+        },
+        {
+          "example_id": "EX-17",
+          "role_zh": "学习者：接受senior IC的尖锐反馈，用行动建立credibility",
+          "principles": ["earn_trust", "learn_and_be_curious"]
+        },
+        {
+          "example_id": "BLOG-02",
+          "role_zh": "标准制定者：将code review的个人偏好转化为团队共享guidelines",
+          "principles": ["insist_on_highest_standards", "earn_trust"]
+        }
+      ],
+      "improvement_notes": "这条线的故事普遍较薄(多数只有2-3 tags, 5 links)。建议重点打磨EX-11和EX-13——它们的冲突点最有戏剧性。EX-12和BLOG-02可以考虑合并为一个\"团队规范建设\"的综合故事。EX-17如果能加入具体的反馈内容和你的改进措施会更有力。"
+    },
+    {
+      "arc_id": "arc-5",
+      "title_zh": "运营与流程改进 (韧性线)",
+      "title_en": "Operations & Process Improvement",
+      "color": "red",
+      "narrative_zh": "这条线展示了你在压力、意外和组织惯性面前的韧性和流程改进能力。\n\n**模型下线事故 (EX-15)**：一个已弃用的模型在没有proper deprecation流程的情况下被下线，导致线上问题。我不仅修复了当前问题，还推动建立了模型生命周期管理流程和deprecation alert机制。\n\n**跨DC部署 (EX-16)**：跨数据中心部署时遇到了unexpected的问题，需要跨出自己的comfort zone处理基础设施层面的issue。这个经历让我学会了在不确定性中快速学习新领域。\n\n**scope pushback (EX-18)**：分布式训练探索项目中，scope不断膨胀到不合理的程度。我push back了，明确了什么是合理的探索范围，保护了团队的focus。\n\n**目标追踪改革 (BLOG-04)**：发现团队的目标追踪系统在\"奖励失败\"——团队重命名未完成的目标、mid-cycle调整deliverable、rollover到下个周期。我诊断了root cause(jargon阻碍peer review、进度不映射原始承诺、\"交付\"只是换了个名字)，重新定义了goal-setting框架——高不确定性项目承诺\"开发并AB测试N个feature\"而非\"所有测试都成功\"。经理pushback后我redesign了方案，在Senior Director的office hour获得了top-down支持和no-blame policy。短期交付率下降——这恰恰证明系统在工作。",
+      "examples": [
+        {
+          "example_id": "EX-15",
+          "role_zh": "消防员+制度建设者：修复模型下线事故，建立deprecation流程和alert机制",
+          "principles": ["ownership", "deliver_results", "build_mechanism"]
+        },
+        {
+          "example_id": "EX-16",
+          "role_zh": "跨界学习者：跨DC部署中走出comfort zone，快速学习基础设施领域",
+          "principles": ["learn_and_be_curious", "bias_for_action"]
+        },
+        {
+          "example_id": "EX-18",
+          "role_zh": "守门人：push back不合理的scope膨胀，保护团队focus",
+          "principles": ["have_backbone", "ownership"]
+        },
+        {
+          "example_id": "BLOG-04",
+          "role_zh": "改革者：诊断目标追踪的系统性问题，重新定义goal-setting框架，推动文化变革",
+          "principles": ["ownership", "have_backbone", "think_big", "influence_without_authority", "earn_trust"]
+        }
+      ],
+      "improvement_notes": "BLOG-04是这条线的绝对亮点，叙事完整、冲突清晰。EX-15/16/18都比较薄——建议重点打磨EX-15(事故故事天然有戏剧性)。EX-16和EX-18可以合并为一个\"在不确定性中保护边界\"的综合故事。"
+    },
+    {
+      "arc_id": "arc-6",
+      "title_zh": "跨团队影响与沟通 (影响力线)",
+      "title_en": "Cross-Functional Impact & Communication",
+      "color": "cyan",
+      "narrative_zh": "这条线展示了你在跨团队协作、向上管理和ethical decision-making方面的能力。\n\n**PM沟通 (EX-19)**：向PM解释A/B test中的confounder问题——技术概念需要翻译成业务语言，让非技术stakeholder理解为什么实验结果不能直接采信。\n\n**公平性伦理 (EX-20)**：seller risk modeling中发现fairness问题——模型可能系统性地歧视某类卖家。我没有忽视这个问题，而是escalate到合适的层级，推动建立了ethical guardrails。\n\n**技术债平衡 (EX-21)**：在feature delivery压力下，我做了一个proof of concept来证明declarative配置可以替代手动流程——用最小成本验证方向，而不是在交付压力下做大规模重构。\n\n**delegation决策 (EX-22)**：实验平台的hashing算法需要改进，我需要决定是自己做还是delegate。选择了delegate并提供了清晰的guardrails。\n\n**C2C大规模上线 (EX-23)**：NYC C2C政策上线涉及多团队协调和紧迫的deadline。作为项目lead，我需要在时间压力下协调跨团队的依赖关系，确保按时交付。\n\n**VP汇报 (EX-24)**：向VP解释allocation问题——需要将复杂的技术问题简化为清晰的决策框架，让高层理解trade-off并做出informed decision。",
+      "examples": [
+        {
+          "example_id": "EX-19",
+          "role_zh": "翻译者：将A/B test confounder翻译成PM能理解的业务语言",
+          "principles": ["earn_trust", "influence_without_authority"]
+        },
+        {
+          "example_id": "EX-20",
+          "role_zh": "伦理守护者：发现seller risk model的fairness问题，escalate并推动guardrails",
+          "principles": ["have_backbone", "insist_on_highest_standards", "customer_obsession"]
+        },
+        {
+          "example_id": "EX-21",
+          "role_zh": "务实者：用最小POC验证技术债解决方向，平衡交付压力和长期健康",
+          "principles": ["bias_for_action", "think_big"]
+        },
+        {
+          "example_id": "EX-22",
+          "role_zh": "委派者：hashing算法的delegation决策——选择delegate + clear guardrails",
+          "principles": ["develop_others", "deliver_results"]
+        },
+        {
+          "example_id": "EX-23",
+          "role_zh": "协调者：紧迫deadline下协调多团队C2C政策上线",
+          "principles": ["deliver_results", "ownership", "bias_for_action"]
+        },
+        {
+          "example_id": "EX-24",
+          "role_zh": "沟通者：向VP简化allocation问题，提供清晰决策框架",
+          "principles": ["influence_without_authority", "earn_trust"]
+        }
+      ],
+      "improvement_notes": "这条线的故事数量最多但单个都偏薄(多数3 tags, 4-5 links)。建议策略：(1) EX-23和EX-24可以合并为一个完整的C2C launch故事(从执行到汇报)。(2) EX-19和EX-20可以合并为一个\"技术伦理+沟通\"的综合故事。(3) 重点打磨EX-20——fairness/ethics主题面试中越来越重要。"
+    }
+  ],
+  "cross_arc_connections": [
+    {
+      "from": "EX-06",
+      "to": "EX-23",
+      "note_zh": "allocation framework被C2C上线直接复用"
+    },
+    {
+      "from": "EX-01",
+      "to": "EX-10",
+      "note_zh": "intent collapse发现 -> 严谨实验验证 -> SIGIR发表"
+    },
+    {
+      "from": "EX-14",
+      "to": "BLOG-03",
+      "note_zh": "LLM探索经验直接应用于ads relevance pipeline"
+    },
+    {
+      "from": "EX-05",
+      "to": "EX-15",
+      "note_zh": "部署经验(silent failure教训) -> 模型生命周期管理"
+    },
+    {
+      "from": "BLOG-04",
+      "to": "EX-11",
+      "note_zh": "目标追踪改革理念应用于intern的goal visibility coaching"
+    }
+  ],
+  "principle_legend": {
+    "ownership": "主人翁精神",
+    "deliver_results": "交付结果",
+    "dive_deep": "深入细节",
+    "earn_trust": "赢得信任",
+    "have_backbone": "坚持立场",
+    "think_big": "格局思维",
+    "bias_for_action": "行动导向",
+    "influence_without_authority": "无授权影响力",
+    "insist_on_highest_standards": "坚持最高标准",
+    "customer_obsession": "客户至上",
+    "innovation": "创新",
+    "develop_others": "培养他人",
+    "learn_and_be_curious": "学习与好奇心",
+    "build_mechanism": "建立机制",
+    "problem_solving": "问题解决",
+    "adaptability": "适应力",
+    "execution": "执行力"
+  }
+}

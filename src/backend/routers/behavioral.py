@@ -1,5 +1,6 @@
 """Behavioral Questions API routes."""
 import json
+from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -582,3 +583,56 @@ def get_gaps(db: Session = Depends(get_db)) -> dict:
         ),
         "uncovered_by_category": by_category,
     }
+
+
+# ---------------------------------------------------------------------------
+#  Story Arcs (project narrative map)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/behavioral/story-arcs")
+def get_story_arcs(db: Session = Depends(get_db)) -> dict:
+    """Return story arc data with live example metadata from the database.
+
+    Merges static arc definitions from bq_story_arcs.json with live
+    example data (title, link count, principle tags) from the database.
+    """
+    docs_dir = Path(__file__).resolve().parent.parent.parent.parent / "docs"
+    arcs_path = docs_dir / "bq_story_arcs.json"
+
+    if not arcs_path.exists():
+        raise HTTPException(status_code=404, detail="Story arcs data not found")
+
+    with open(arcs_path, encoding="utf-8") as f:
+        arcs_data = json.load(f)
+
+    # Build lookup: example_id -> (title, link_count, principle_tags)
+    examples = db.query(BehavioralExample).all()
+    ex_map: dict[str, dict] = {}
+    for ex in examples:
+        link_count = (
+            db.query(func.count(QuestionExampleLink.id))
+            .filter(QuestionExampleLink.example_id == ex.id)
+            .scalar()
+        )
+        tags = json.loads(ex.principle_tags) if ex.principle_tags else []
+        ex_map[ex.example_id] = {
+            "title": ex.title,
+            "source_project": ex.source_project,
+            "situation": ex.situation,
+            "link_count": link_count,
+            "principle_tags": tags,
+        }
+
+    # Enrich arc examples with live data
+    for arc in arcs_data.get("arcs", []):
+        for ex_entry in arc.get("examples", []):
+            eid = ex_entry["example_id"]
+            live = ex_map.get(eid, {})
+            ex_entry["title"] = live.get("title", eid)
+            ex_entry["source_project"] = live.get("source_project")
+            ex_entry["situation"] = live.get("situation")
+            ex_entry["link_count"] = live.get("link_count", 0)
+            ex_entry["principle_tags_live"] = live.get("principle_tags", [])
+
+    return arcs_data
