@@ -64,6 +64,7 @@ _temp*.py
 
 # Runtime databases
 interview_prep.db
+problems.db
 
 # Claude worktrees
 .claude/worktrees/

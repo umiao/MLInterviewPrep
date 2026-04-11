@@ -25,12 +25,6 @@
 - **Depends on**: None
 - **Description**: Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root - universal lesson for orchestration. (2) DB-only content must have recovery path - relevant to helixos SQLite data/. (3) Markdown math pipe conflicts with remark-gfm table parsing - helixos uses remark-gfm in MarkdownRenderer.tsx and ConversationView.tsx. Append all three with [PROPAGATED] tag to helixos/LESSONS.md.
 
-#### T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep.db and tasks.db but missed this one. Action: Add problems.db to MLInterviewPrep/.gitignore.
-
 #### T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml
 - **Priority**: P2
 - **Complexity**: S
@@ -156,6 +150,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
 - [x] **2026-04-11** -- T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family. # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
 - [x] **2026-04-11** -- T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page. # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
 - [x] **2026-04-11** -- T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples. # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
