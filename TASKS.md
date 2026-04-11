@@ -25,42 +25,6 @@
 - **Depends on**: None
 - **Description**: 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as optional-dependencies dev group in pyproject.toml to satisfy CLAUDE.md dependency sync rule.
 
-#### T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-352
-- **Description**: # Behavioral: semantic relevance spot-check script for 10 random Q-example links
-
-## Context
-Audit 2026-04-11 confirmed valence matching is correct (failure Qs route to
-failure-ish examples) but flagged quantity-over-precision risk: some links may
-have low semantic specificity. Randomly sample 10 links and human-review each
-for semantic fit (not just valence).
-
-## Scenario matrix
-| Condition | Expected |
-|---|---|
-| Script run in review mode | Prints 10 pairs + reviewer checklist template |
-| Script run in apply mode on filled-in review file | DB reflects keep/drop/update-note decisions |
-| Re-running review mode with same seed | Selects the same 10 pairs (reproducible) |
-| Re-running review mode with different seed | Selects a different 10 (for follow-up audits) |
-
-## Acceptance criteria
-- [ ] scripts/audit_qe_link_relevance.py uses random.Random(seed) with seed defaulting to 20260411 for reproducibility
-- [ ] Review mode: for each of 10 random links, print question text, example title + 1-line situation + 1-line result, current relevance_note, and a markdown checklist line (keep / drop / update-note)
-- [ ] Apply mode: read a filled-in markdown file and apply the decisions (DROP removes the link row, UPDATE overwrites relevance_note, KEEP no-op)
-- [ ] Output report committed to docs/audits/qe_link_spotcheck_2026-04-11.md
-- [ ] Script tolerates resumption (if reviewer only filled in 5 of 10, skip unfilled)
-
-## Manual smoke test
-1. Run `python scripts/audit_qe_link_relevance.py --mode review`
-2. Fill decisions in docs/audits/qe_link_spotcheck_2026-04-11.md
-3. Run `python scripts/audit_qe_link_relevance.py --mode apply --file docs/audits/qe_link_spotcheck_2026-04-11.md`
-4. Verify via API consumer: `curl /api/behavioral/questions/<id>/examples` on a modified question shows updated relevance_notes (per CLAUDE.md rule "verify via consumer, not producer")
-
-## Dependencies
-Depends on Task 2 (after secondary links are added, the sampling pool reflects the final state of the corpus).
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -144,6 +108,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links. # Behavioral: semantic relevance spot-check script for 10 random Q-example links
 - [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
 - [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
 - [x] **2026-04-11** -- T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family. # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
