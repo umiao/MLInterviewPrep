@@ -1,141 +1,76 @@
-# Human Input: Failure-Story Placeholders (EX-30 / EX-31 / EX-32)
+# Human Input: Failure-Story Placeholders (historical — now resolved)
 
-## Why these slots exist
+## Status: RESOLVED 2026-04-11
 
-A behavioral-content audit on 2026-04-11 found that only 4 of 29 behavioral
-examples (EX-05, EX-08, EX-19, EX-20) contain genuine failure-and-learning
-content. All 15 failure-ask questions currently route into that same tiny pool,
-so a two-failure-question interview round forces the same story to be reused.
+This file is kept for history. The three slots it reserved have all been handled:
 
-To prevent that, three placeholder slots (EX-30, EX-31, EX-32) have been
-reserved in the database. They are tagged `principle_tags=failure,learning,
-needs_input`, display a distinct `[Needs Input]` badge in the UI, and render
-every empty STAR field as `(missing -- pending user input)`. The titles are
-prefixed with `[NEEDS-INPUT]` so they are easy to grep and easy for the user
-to spot.
+- **EX-30** — populated with the Hash Capability Misdesign pure-failure story
+  (source: `staging/充实素材_bq_story_bank_moe_allocation.md`, Version E).
+  Title: `Hash Capability Misdesign - Expert Frame Blind Spot`.
 
-**No invented stories.** This file only contains prompts -- the user fills the
-real content.
+- **EX-31** — **deleted** on 2026-04-11 after a coverage audit showed the
+  placeholder was redundant. Every failure-ask question that had been linked
+  to EX-31 (COL-1, COL-2, COM-5, ADP-19) already had at least one real
+  interpersonal/feedback example linked (BLOG-01, BLOG-02, EX-13, EX-17),
+  so dropping the empty slot did not reduce coverage.
 
-## Before you start
+- **EX-32** — **deleted** on 2026-04-11 for the same reason. The six
+  originally-linked questions (OWN-11, ADP-11, ADP-13, ADP-15, EXE-6, EXE-9)
+  all retained real-content examples (EX-01, EX-02, EX-05, EX-15, EX-18, EX-23,
+  EX-30, BLOG-03, BLOG-04) after the placeholder was removed.
 
-Pick three *distinct* failures from your real career -- one per theme. Do not
-double up (e.g. two technical miscalls), and do not recycle EX-05/08/19/20.
-If you catch yourself reaching for an existing example, you are about to
-waste a slot.
+## Why the original audit over-reserved
 
-Estimated effort: **20--30 minutes per slot** (60--90 min total), assuming you
-already know roughly which stories you want to tell.
+The 2026-04-11 T-P0-351 audit counted "4 of 29 examples with genuine failure
+content" (EX-05, EX-08, EX-19, EX-20) and reserved three placeholders to close
+the gap. That count undercounted interpersonal-failure and execution-setback
+examples already in the pool — specifically EX-02 (manager resistance),
+EX-13 (authorship dispute), EX-17 (difficult feedback), EX-18 (pushback on
+scope), EX-23 (tight-deadline recovery), BLOG-01 (researcher-engineer
+reframe), BLOG-02 (code review standards). After populating EX-30 (Hash
+Misdesign) and EX-33 (MoE -> Allocation paradigm), the coverage audit
+re-ran against the full real pool and every failure-ask question routed to
+at least one real example without needing the remaining placeholders.
 
-STAR word-count targets (used by the existing 4 real failure examples as a
-reference):
+## If you want to add more failure stories later
 
-- Situation: ~80-120 words
-- Task: ~50-80 words
-- Action: ~150-250 words (this is where depth lives)
-- Result: ~80-150 words (include the lesson + what you now do differently)
+The source story bank (`staging/充实素材_bq_story_bank_moe_allocation.md`,
+Section 8) lists three brainstorm directions for genuine new failure stories:
 
-## Slot specs
+1. A feature/model improvement that looked good offline but lost on online A/B
+   and got rolled back. Learning: an offline-online gap source.
+2. A technical direction you advocated for, pushed the team onto, and later
+   had to admit was the wrong direction. Learning: advocacy vs. evidence.
+3. A cross-team collaboration failure driven by underestimating stakeholder
+   complexity. Learning: stakeholder mapping.
 
-### EX-30 -- Technical miscall
+If you mine one of these, create a fresh `EX-34` / `EX-35` row rather than
+resurrecting the deleted `EX-31` / `EX-32` slots. The sequential-ID convention
+stays clean that way.
 
-Theme: wrong architecture, premature optimization, over-engineering, wrong
-abstraction, or a technical bet that didn't pay off.
+## Coverage snapshot after resolution (2026-04-11)
 
-Routed questions (user answers via this slot):
-OWN-1, OWN-8, ADP-5, ADP-18, EXE-2.
+All 15 failure-ask questions have at least one real-content example linked:
 
-Prompts -- answer each in plain prose, then merge into STAR:
+| Q | real examples linked |
+|---|---|
+| OWN-1  | EX-08, EX-15, EX-30 |
+| OWN-8  | EX-05, EX-15, EX-30 |
+| OWN-11 | EX-01, EX-02, EX-05, BLOG-03, BLOG-04 |
+| COL-1  | BLOG-01, EX-13 |
+| COL-2  | BLOG-02 |
+| COM-5  | EX-17 |
+| ADP-5  | EX-05, EX-15, EX-16, EX-30 |
+| ADP-11 | EX-15 |
+| ADP-13 | EX-08, EX-15 |
+| ADP-15 | EX-05, EX-16, EX-30 |
+| ADP-18 | EX-17, EX-30 |
+| ADP-19 | EX-17 |
+| EXE-2  | EX-09, EX-30 |
+| EXE-6  | EX-18, EX-23 |
+| EXE-9  | EX-23 |
 
-1. **What went wrong technically?**
-   What was the technical decision? What signal(s) should have warned you?
-   Why did the alternative not get chosen?
-2. **What was the concrete damage?**
-   Hours/weeks wasted, rework cost, downstream teams blocked, SLO breach,
-   compute cost, data quality regression -- be specific with numbers.
-3. **What did you do once you noticed?**
-   Detection moment -> mitigation -> rollback or rebuild -> stakeholder
-   comms -- chronological.
-4. **What did you learn?**
-   One *general* principle you now apply (not "I'll be more careful").
-5. **What would you do differently next time?**
-   A concrete checklist item or review step, not a sentiment.
-
-STAR reminder: Situation = context + tech stack, Task = what you owned,
-Action = YOUR decisions (use "I", not "we"), Result = metric + lesson.
-
-### EX-31 -- Interpersonal failure
-
-Theme: mishandled peer conflict, lost trust with a collaborator, botched
-feedback (giving or receiving), damaged a cross-team relationship, or
-mismanaged a disagreement.
-
-Routed questions:
-COL-1, COL-2, COM-5, ADP-19.
-
-Prompts:
-
-1. **What happened between you and the other person?**
-   Who was involved, what was the triggering interaction, what was each
-   party's position?
-2. **What did you do that made it worse (or fail to do that would have
-   helped)?**
-   This is the hard part. Be honest -- an interpersonal failure story with
-   no first-person fault is a story about someone else.
-3. **How did you repair it (or fail to)?**
-   Exact conversation, who initiated, what was said, what changed.
-4. **What did you learn about yourself?**
-   E.g. "I over-index on being right over being heard," "I avoid conflict
-   until it compounds," etc.
-5. **What would you do differently next time?**
-   A concrete first-move you now make in similar situations.
-
-STAR reminder: Situation = relationship + context, Task = your role in the
-collaboration, Action = how you engaged (or didn't), Result = state of the
-relationship now + durable lesson.
-
-### EX-32 -- Execution / delivery miss
-
-Theme: missed deadline with customer impact, shipped a regression, placed
-the wrong project bet, mis-scoped a commitment, or dropped a ball on a
-cross-team dependency.
-
-Routed questions:
-OWN-11, ADP-11, ADP-13, ADP-15, EXE-6, EXE-9.
-
-Prompts:
-
-1. **What was the commitment and who was counting on it?**
-   Ship date, audience (internal/customer), dependency chain.
-2. **Where did it go off the rails?**
-   Scope creep, underestimated work, a hidden blocker, a wrong planning
-   assumption -- diagnose the root cause, not the symptom.
-3. **What did you do when you realized the miss was coming?**
-   Early warning given? Re-scoping? Overtime? Cutting features?
-4. **What was the actual impact?**
-   Days slipped, features dropped, customer complaints, trust damage --
-   with specifics.
-5. **What did you change in how you plan / commit / escalate now?**
-   A durable process change, not "I work harder now."
-
-STAR reminder: Situation = project + stakes, Task = your accountability,
-Action = decisions you made under delivery pressure, Result = outcome +
-the concrete change you made to your working model.
-
-## Filling the slots
-
-When you are ready to fill a slot:
-
-```bash
-cd MLInterviewPrep
-python .claude/hooks/task_db.py add ... # not needed -- direct DB edit
-# Use: python scripts/_fill_failure_placeholder.py EX-30 path/to/draft.md
-# (or edit via the frontend once the CRUD form lands)
-```
-
-(The `_fill_failure_placeholder.py` helper is NOT part of T-P0-351 -- this
-task only seeds the slots + frontend fallback. A follow-up task can add the
-fill helper if the user wants it.)
-
-Remember to remove the `[NEEDS-INPUT] ` prefix from the title when you fill
-a slot -- that is what tells the UI to drop the amber `Needs Input` badge.
+Five of these (COL-2, COM-5, ADP-11, ADP-19, EXE-9) still have only a single
+link after the placeholder removal. That is a minor rotation-risk follow-up
+for a future task, not a blocker — every question still reaches real content
+on the first click.

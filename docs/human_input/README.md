@@ -7,13 +7,17 @@
 
 Pending:
 
-- **EX-30 / EX-31 / EX-32 -- 3 failure-story placeholders** -- details:
+_(none -- all open human-input slots have been resolved as of 2026-04-11)_
+
+Resolved:
+
+- **EX-30 / EX-31 / EX-32 failure-story placeholders** --
   [`EX-30-32_failure_placeholders.md`](./EX-30-32_failure_placeholders.md).
-  Seeded by `scripts/_seed_failure_placeholders.py` on 2026-04-11 as a
-  follow-up to T-P0-351. The DB rows exist with empty STAR fields tagged
-  `[NEEDS-INPUT]`; the user authors the real failure stories when ready.
-  Until then, the `[Needs Input]` badge renders in the BehavioralQuestions
-  UI and the STAR fields show "(missing -- pending user input)" fallbacks.
+  EX-30 was populated with the Hash Capability Misdesign pure-failure story
+  (T-P1-357). EX-31 and EX-32 were deleted after a coverage audit showed
+  every failure-ask question already had real-content examples linked
+  (EX-02, EX-13, EX-17, EX-18, EX-23, BLOG-01/02/03/04). The
+  `[Needs Input]` badge no longer renders in the BehavioralQuestions UI.
 
 ---
 
