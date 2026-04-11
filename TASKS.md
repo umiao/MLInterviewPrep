@@ -11,55 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-353
-- **Description**: # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
-
-## Context
-Frontend consumer of the theme backend (Task 3). Adds a secondary tag axis to question
-rows + new filter sidebar cross-cutting the existing category filter. URL-persisted
-state for shareable filter links.
-
-## Scenario matrix
-| Condition | Expected |
-|---|---|
-| No theme selected | Show all questions (category filter unchanged) |
-| 1 theme selected | Show only questions tagged with that theme |
-| >=2 themes + OR mode | Show questions matching ANY selected theme |
-| >=2 themes + AND mode | Show questions matching ALL selected themes |
-| Category filter AND theme filter both active | Intersection (AND between the two axes; user-controlled mode within themes) |
-| Theme with 0 matches (oncall_prod_incident) | Sidebar entry still shown with "(0)" count; clicking filters to empty state with "no questions yet" placeholder |
-| User clicks theme pill on a question row | That theme toggles in the sidebar (adds if absent, removes if present) |
-| URL has themes+mode query params on page load | State restored from URL |
-| Viewport < md | Sidebar collapses to bottom-sheet drawer |
-
-## Acceptance criteria
-- [ ] BehavioralQuestions.tsx renders theme pills under the existing category pill on each question row (max 5 visible, overflow "+N more" popover)
-- [ ] New ThemeFilterSidebar.tsx component lists 15 themes sorted by question_count desc, shows count, supports multi-select
-- [ ] AND/OR mode toggle in sidebar
-- [ ] URL state: ?themes=slug1,slug2&theme_mode=or round-trips correctly on refresh/share
-- [ ] Category filter + theme filter intersect (AND across axes)
-- [ ] Clicking a theme pill on a row toggles that theme in the sidebar
-- [ ] Mobile: sidebar becomes a bottom sheet below md breakpoint
-- [ ] Validation: `npm run build` (tsc -b + vite build) passes -- not just `tsc --noEmit`
-- [ ] Vitest tests: URL-param round trip, OR vs AND mode logic, click-to-toggle from row pill
-- [ ] Consumer audit: list every component consuming behavioral_questions response; each has a fallback for empty/missing theme_tags array so old cached data doesn't crash
-
-## Manual smoke test
-1. `scripts/dev.py` -> dev server up
-2. On 1920px monitor: navigate to BehavioralQuestions
-3. Select "Failure & Setback" in sidebar -> list narrows to ~10 items
-4. Toggle AND mode + also select "Leadership & Direction" -> list narrows further
-5. Refresh page -> both themes still selected, list still filtered (URL-persisted)
-6. Click a theme pill inside any question row -> that theme highlights/unhighlights in sidebar
-7. Resize to <768px -> sidebar collapses to bottom sheet; toggle still works
-8. Verify that clearing theme filter restores full list without touching category filter
-
-## Dependencies
-Depends on Task 3 (theme backend must exist for the sidebar to query /api/behavioral/themes).
-
 #### T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family
 - **Priority**: P1
 - **Complexity**: L
@@ -287,6 +238,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page. # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
 - [x] **2026-04-11** -- T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples. # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
 - [x] **2026-04-11** -- T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership. # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
 - [x] **2026-04-11** -- T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 [NEEDS-INPUT: 3 failure stories]. # Behavioral: seed 3 failure-story placeholders EX-30/31/32

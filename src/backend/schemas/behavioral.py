@@ -28,6 +28,15 @@ class BehavioralQuestionUpdate(BaseModel):
     company_target: str | None = None
 
 
+class QuestionThemeBrief(BaseModel):
+    """Compact theme entry embedded in question responses."""
+
+    slug: str
+    label: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class BehavioralQuestionResponse(BaseModel):
     """Schema for behavioral question API response."""
 
@@ -41,6 +50,7 @@ class BehavioralQuestionResponse(BaseModel):
     company_target: str | None = None
     created_at: datetime | None = None
     example_count: int = 0
+    theme_tags: list[QuestionThemeBrief] = []
 
     model_config = ConfigDict(from_attributes=True)
 

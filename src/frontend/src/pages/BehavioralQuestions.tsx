@@ -1,11 +1,19 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { api } from "../utils/api";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import StoryMapView from "../components/behavioral/StoryMapView";
 import SlideOverPanel from "../components/ui/SlideOverPanel";
 import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent";
-import type { BehavioralExample } from "../types/behavioral";
+import ThemeFilterSidebar from "../components/behavioral/ThemeFilterSidebar";
+import type {
+  BehavioralExample,
+  BehavioralThemeSummary,
+  ThemeMode,
+  ThemeTag,
+} from "../types/behavioral";
+import { toggleThemeInState } from "../utils/themeFilter";
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -19,6 +27,7 @@ interface BehavioralQuestion {
   category_name: string;
   original_category: string | null;
   example_count: number;
+  theme_tags?: ThemeTag[];
 }
 
 interface CategorySummary {
@@ -150,7 +159,7 @@ function StarSection({
       </div>
     );
   }
-  const hasMarkdown = /[*_\-#\[\]`|]/.test(content as string);
+  const hasMarkdown = /[*_\-#[\]`|]/.test(content as string);
   return (
     <div className="mb-3">
       <span className={`font-bold ${colors.label} text-sm uppercase tracking-wider`}>
@@ -325,24 +334,34 @@ function QuestionRow({
   expanded,
   onToggle,
   onExampleClick,
+  selectedThemes,
+  onThemePillClick,
 }: {
   question: BehavioralQuestion;
   examples: BehavioralExample[];
   expanded: boolean;
   onToggle: () => void;
   onExampleClick: (exampleId: string) => void;
+  selectedThemes: Set<string>;
+  onThemePillClick: (slug: string) => void;
 }) {
   const linkedExamples = examples.filter((ex) =>
     ex.linked_questions.some((lq) => lq.question_id === question.question_id)
   );
+  const themeTags = question.theme_tags ?? [];
+  const MAX_VISIBLE_THEMES = 5;
+  const visibleThemes = themeTags.slice(0, MAX_VISIBLE_THEMES);
+  const overflowThemes = themeTags.slice(MAX_VISIBLE_THEMES);
+  const [showOverflow, setShowOverflow] = useState(false);
 
   return (
     <div className="border-b border-gray-200 py-3">
       <div
-        className="flex items-center justify-between cursor-pointer hover:bg-blue-50 px-4 py-2.5 rounded-lg select-none transition-colors"
+        className="flex flex-col gap-1.5 cursor-pointer hover:bg-blue-50 px-4 py-2.5 rounded-lg select-none transition-colors"
         onClick={onToggle}
       >
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 flex-1 min-w-0">
           <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded w-16 shrink-0 text-center">
             {question.question_id}
           </span>
@@ -365,6 +384,76 @@ function QuestionRow({
             {expanded ? "[-]" : "[+]"}
           </span>
         </div>
+        </div>
+        {themeTags.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 ml-24">
+            {visibleThemes.map((t) => {
+              const isSelected = selectedThemes.has(t.slug);
+              return (
+                <button
+                  key={t.slug}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onThemePillClick(t.slug);
+                  }}
+                  aria-pressed={isSelected}
+                  title={`Toggle theme: ${t.label}`}
+                  className={`text-xs font-semibold px-2 py-0.5 rounded-full border transition-all ${
+                    isSelected
+                      ? "bg-blue-600 text-white border-blue-700"
+                      : "bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100"
+                  }`}
+                >
+                  {t.label}
+                </button>
+              );
+            })}
+            {overflowThemes.length > 0 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowOverflow((v) => !v);
+                  }}
+                  aria-expanded={showOverflow}
+                  className="text-xs font-bold px-2 py-0.5 rounded-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                >
+                  +{overflowThemes.length} more
+                </button>
+                {showOverflow && (
+                  <div
+                    className="absolute z-10 top-full left-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-2 flex flex-col gap-1 min-w-[180px]"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {overflowThemes.map((t) => {
+                      const isSelected = selectedThemes.has(t.slug);
+                      return (
+                        <button
+                          key={t.slug}
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onThemePillClick(t.slug);
+                          }}
+                          aria-pressed={isSelected}
+                          className={`text-left text-xs font-semibold px-2 py-1 rounded border transition-all ${
+                            isSelected
+                              ? "bg-blue-600 text-white border-blue-700"
+                              : "bg-purple-50 text-purple-800 border-purple-200 hover:bg-purple-100"
+                          }`}
+                        >
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {expanded && linkedExamples.length > 0 && (
@@ -524,6 +613,66 @@ export default function BehavioralQuestions() {
   const [search, setSearch] = useState("");
   const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
   const [drawerExampleId, setDrawerExampleId] = useState<string | null>(null);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+
+  // URL-persisted theme filter state
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedThemeSlugs = useMemo(() => {
+    const raw = searchParams.get("themes") ?? "";
+    return raw
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+  }, [searchParams]);
+  const themeMode: ThemeMode =
+    searchParams.get("theme_mode") === "and" ? "and" : "or";
+
+  const selectedThemeSet = useMemo(
+    () => new Set(selectedThemeSlugs),
+    [selectedThemeSlugs],
+  );
+
+  const applyThemeFilter = useCallback(
+    (slugs: string[], mode: ThemeMode) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (slugs.length > 0) {
+            next.set("themes", slugs.join(","));
+            next.set("theme_mode", mode);
+          } else {
+            next.delete("themes");
+            next.delete("theme_mode");
+          }
+          return next;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+
+  const handleToggleTheme = useCallback(
+    (slug: string) => {
+      const next = toggleThemeInState(
+        { themes: selectedThemeSlugs, mode: themeMode },
+        slug,
+      );
+      applyThemeFilter(next.themes, next.mode);
+    },
+    [selectedThemeSlugs, themeMode, applyThemeFilter],
+  );
+
+  const handleChangeMode = useCallback(
+    (mode: ThemeMode) => {
+      applyThemeFilter(selectedThemeSlugs, mode);
+    },
+    [selectedThemeSlugs, applyThemeFilter],
+  );
+
+  const handleClearThemes = useCallback(() => {
+    applyThemeFilter([], "or");
+  }, [applyThemeFilter]);
 
   const handleExampleClick = (exampleId: string) => {
     setDrawerExampleId(exampleId);
@@ -546,13 +695,22 @@ export default function BehavioralQuestions() {
     queryFn: () => api.get("/behavioral/categories"),
   });
 
+  const { data: themes = [] } = useQuery<BehavioralThemeSummary[]>({
+    queryKey: ["behavioral-themes"],
+    queryFn: () => api.get("/behavioral/themes"),
+  });
+
+  const themeQueryKey = selectedThemeSlugs.join(",");
   const { data: questions = [], isLoading: loadingQ } = useQuery<BehavioralQuestion[]>({
-    queryKey: ["behavioral-questions", selectedCategory, search],
+    queryKey: ["behavioral-questions", selectedCategory, search, themeQueryKey, themeMode],
     queryFn: () =>
       api.get("/behavioral/questions", {
         params: {
           ...(selectedCategory ? { category_id: selectedCategory } : {}),
           ...(search ? { search } : {}),
+          ...(selectedThemeSlugs.length > 0
+            ? { theme: themeQueryKey, theme_mode: themeMode }
+            : {}),
         },
       }),
   });
@@ -652,21 +810,55 @@ export default function BehavioralQuestions() {
 
       {/* Questions View */}
       {viewMode === "questions" && !isLoading && (
-        <div className="bg-white rounded-xl border-2 border-gray-200 shadow-sm">
-          {questions.length === 0 ? (
-            <p className="text-gray-500 text-base p-6">No questions found.</p>
-          ) : (
-            questions.map((q) => (
-              <QuestionRow
-                key={q.id}
-                question={q}
-                examples={examples}
-                expanded={expandedQuestions.has(q.id)}
-                onToggle={() => toggleQuestion(q.id)}
-                onExampleClick={handleExampleClick}
-              />
-            ))
-          )}
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          <div className="hidden md:block md:w-72 md:shrink-0 md:sticky md:top-6">
+            <ThemeFilterSidebar
+              themes={themes}
+              selectedSlugs={selectedThemeSlugs}
+              mode={themeMode}
+              onToggleTheme={handleToggleTheme}
+              onChangeMode={handleChangeMode}
+              onClear={handleClearThemes}
+            />
+          </div>
+          <div className="md:hidden mb-2">
+            <button
+              type="button"
+              onClick={() => setMobileFilterOpen(true)}
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white shadow-md"
+            >
+              Themes
+              {selectedThemeSlugs.length > 0 && (
+                <span className="ml-2 text-xs bg-white text-blue-700 rounded-full px-2 py-0.5">
+                  {selectedThemeSlugs.length}
+                </span>
+              )}
+            </button>
+          </div>
+          <div className="flex-1 min-w-0 bg-white rounded-xl border-2 border-gray-200 shadow-sm">
+            {questions.length === 0 ? (
+              selectedThemeSlugs.length > 0 ? (
+                <p className="text-gray-500 text-base p-6 italic">
+                  No questions matching the selected themes yet.
+                </p>
+              ) : (
+                <p className="text-gray-500 text-base p-6">No questions found.</p>
+              )
+            ) : (
+              questions.map((q) => (
+                <QuestionRow
+                  key={q.id}
+                  question={q}
+                  examples={examples}
+                  expanded={expandedQuestions.has(q.id)}
+                  onToggle={() => toggleQuestion(q.id)}
+                  onExampleClick={handleExampleClick}
+                  selectedThemes={selectedThemeSet}
+                  onThemePillClick={handleToggleTheme}
+                />
+              ))
+            )}
+          </div>
         </div>
       )}
 
@@ -731,6 +923,41 @@ export default function BehavioralQuestions() {
       >
         {drawerExample && <ExampleDrawerContent example={drawerExample} />}
       </SlideOverPanel>
+
+      {mobileFilterOpen && (
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Theme filter"
+        >
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileFilterOpen(false)}
+          />
+          <div className="absolute left-0 right-0 bottom-0 bg-white rounded-t-2xl shadow-xl max-h-[80vh] overflow-y-auto p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-base font-bold text-gray-900">Filter by theme</h3>
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(false)}
+                className="text-sm font-semibold text-gray-500 hover:text-gray-800"
+              >
+                Close
+              </button>
+            </div>
+            <ThemeFilterSidebar
+              themes={themes}
+              selectedSlugs={selectedThemeSlugs}
+              mode={themeMode}
+              onToggleTheme={handleToggleTheme}
+              onChangeMode={handleChangeMode}
+              onClear={handleClearThemes}
+              variant="sheet"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

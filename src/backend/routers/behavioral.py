@@ -104,6 +104,25 @@ def list_questions(
 
     questions = query.order_by(BehavioralQuestion.category_id, BehavioralQuestion.question_id).all()
 
+    # Batch-fetch theme tags for all questions in one query to avoid N+1.
+    q_ids = [q.id for q in questions]
+    theme_rows_by_q: dict[int, list[dict]] = {qid: [] for qid in q_ids}
+    if q_ids:
+        rows = (
+            db.query(
+                QuestionThemeTag.question_id,
+                BehavioralTheme.slug,
+                BehavioralTheme.label,
+                BehavioralTheme.display_order,
+            )
+            .join(BehavioralTheme, BehavioralTheme.id == QuestionThemeTag.theme_id)
+            .filter(QuestionThemeTag.question_id.in_(q_ids))
+            .order_by(BehavioralTheme.display_order, BehavioralTheme.slug)
+            .all()
+        )
+        for qid, slug, label, _order in rows:
+            theme_rows_by_q[qid].append({"slug": slug, "label": label})
+
     result = []
     for q in questions:
         link_count = (
@@ -123,6 +142,7 @@ def list_questions(
             "company_target": q.company_target,
             "created_at": q.created_at,
             "example_count": link_count,
+            "theme_tags": theme_rows_by_q.get(q.id, []),
         })
     return result
 

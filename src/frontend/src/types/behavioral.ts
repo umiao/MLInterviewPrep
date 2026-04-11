@@ -22,3 +22,20 @@ export interface BehavioralExample {
   tech_terms: Record<string, string>;
   linked_questions: LinkedQuestion[];
 }
+
+export interface ThemeTag {
+  slug: string;
+  label: string;
+}
+
+export interface BehavioralThemeSummary {
+  id: number;
+  slug: string;
+  label: string;
+  description: string | null;
+  display_order: number;
+  question_count: number;
+  example_count: number;
+}
+
+export type ThemeMode = "or" | "and";
