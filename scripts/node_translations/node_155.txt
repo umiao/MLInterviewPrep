@@ -1,0 +1,226 @@
+# LLM Evaluation & Benchmarks
+
+## Overview
+**LLM Evaluation（大语言模型评估）** 是衡量模型能力和质量的系统方法。随着 LLM 能力的快速提升，评估方法也在不断演进——从简单的 **Perplexity（困惑度）** 到多维度基准测试，再到基于人类或 AI 的对抗评估。
+
+在面试中，候选人需要理解主流基准测试的设计原理、局限性，以及如何设计合理的评估方案来衡量特定场景下的模型表现。
+
+## Core Concepts
+
+### Perplexity
+**Perplexity（困惑度）** 是语言模型最基础的评估指标，衡量模型对测试集的预测不确定性：
+
+$$\text{PPL} = \exp\left(-\frac{1}{N}\sum_{i=1}^{N} \log P(x_i | x_{<i})\right)$$
+
+困惑度越低表示模型对文本的预测越准确。直觉上，PPL 为 $k$ 意味着模型在预测下一个 token 时平均面临 $k$ 个等概率的选择。
+
+困惑度的局限性：
+- 不同分词器的困惑度不可直接比较（token 定义不同）
+- 低困惑度不等于生成质量好（模型可能只是擅长记忆训练分布）
+- 无法评估指令跟随、安全性等高级能力
+
+### MMLU
+**MMLU (Massive Multitask Language Understanding，大规模多任务语言理解)** 覆盖 57 个学科领域的多选题测试，包括：
+
+- **STEM**：数学、物理、计算机科学、工程
+- **人文**：历史、哲学、法律
+- **社会科学**：经济学、心理学、政治学
+- **其他**：医学、会计、专业执照考试
+
+评估方式通常为 5-shot，即在提示中提供 5 个示例后让模型回答。MMLU 的得分范围是 25%（随机猜测）到 100%。GPT-4 达到约 86%，而人类专家平均约 89%。
+
+### HumanEval
+**HumanEval** 是 OpenAI 提出的代码生成基准，包含 164 个编程题目。评估指标为 **pass@k**：
+
+$$\text{pass@k} = 1 - \frac{\binom{n-c}{k}}{\binom{n}{k}}$$
+
+其中 $n$ 是生成的代码样本总数，$c$ 是通过所有测试用例的样本数。pass@1 衡量一次生成即正确的概率，pass@10 允许模型生成 10 次取最好的。
+
+扩展基准：**MBPP (Mostly Basic Programming Problems)**、**SWE-bench**（真实 GitHub issue 修复）。
+
+### MT-Bench
+**MT-Bench（多轮对话基准）** 使用 GPT-4 作为评判，评估模型在 8 个能力维度上的多轮对话质量：
+
+- Writing（写作）、Roleplay（角色扮演）、Reasoning（推理）
+- Math（数学）、Coding（编程）、Extraction（信息提取）
+- STEM、Humanities（人文）
+
+评分从 1 到 10，采用 **Pairwise Comparison（成对比较）** 或 **Single Rating（单项评分）** 模式。MT-Bench 的优势是评估了指令跟随和对话能力，更接近真实使用场景。
+
+### Chatbot Arena (LMSYS)
+**Chatbot Arena（聊天机器人竞技场）** 采用 **Elo Rating（Elo评分系统）** 进行匿名对战：
+
+- 用户提交问题，两个匿名模型同时回答
+- 用户投票选择更好的回答
+- 基于投票结果更新 Elo 分数
+
+这是目前最受信赖的 LLM 排名系统，因为它：
+- 反映真实用户的偏好
+- 匿名避免了品牌偏见
+- 大量投票保证了统计可靠性
+
+### Contamination Issues
+**Data Contamination（数据污染）** 是 LLM 评估的核心挑战：
+
+- 基准测试数据可能出现在预训练语料中，导致分数虚高
+- 模型可能"见过"测试题目而非真正理解
+- 检测方法：**n-gram overlap analysis**、**membership inference**、在发布前保密的测试集上评估
+
+应对策略：
+- 使用 **Dynamic Benchmarks（动态基准）**：定期更新测试题目
+- **Private Test Sets（私密测试集）**：不公开测试数据
+- **Canary Strings（金丝雀字符串）**：在测试集中嵌入唯一标记，检测是否被抓取
+
+### Comprehensive Evaluation Framework
+现代 LLM 评估通常需要多维度评估框架：
+
+| 维度 | 指标 | 基准 |
+|------|------|------|
+| 知识 | 准确率 | MMLU, ARC |
+| 推理 | 准确率 | GSM8K, BBH |
+| 编码 | pass@k | HumanEval, MBPP |
+| 对话 | 人类/AI评分 | MT-Bench, Arena |
+| 安全 | 拒绝率/攻击成功率 | TruthfulQA, AdvBench |
+| 长文本 | 准确率 | RULER, InfiniteBench |
+
+### Evaluation Anti-patterns
+常见的评估误区：
+
+- **Cherry-picking（精选示例）**：只展示模型表现好的例子
+- **Benchmark Overfitting（基准过拟合）**：针对特定基准优化而非真实能力
+- **Single-metric Reliance（单指标依赖）**：仅看一个指标做决策
+- **Ignoring Variance（忽略方差）**：不报告多次运行的方差
+
+## Implementation
+
+```python
+# 使用 lm-evaluation-harness 进行评估
+# pip install lm-eval
+import lm_eval
+from math import comb
+
+results = lm_eval.simple_evaluate(
+    model="hf",
+    model_args="pretrained=meta-llama/Llama-2-7b-hf",
+    tasks=["mmlu", "hellaswag", "arc_challenge"],
+    num_fewshot=5,
+    batch_size=8,
+)
+
+# 自定义评估指标
+def compute_pass_at_k(n, c, k):
+    '''计算 pass@k 指标
+    n: 生成的总样本数
+    c: 通过测试的样本数
+    k: 采样次数
+    '''
+    if n - c < k:
+        return 1.0
+    return 1.0 - comb(n - c, k) / comb(n, k)
+
+# 示例: 生成 200 个样本，50 个通过
+print(f"pass@1 = {compute_pass_at_k(200, 50, 1):.3f}")
+print(f"pass@10 = {compute_pass_at_k(200, 50, 10):.3f}")
+```
+
+### MMLU in Detail
+MMLU 的 57 个科目细分：
+
+**STEM（25个科目）**：
+抽象代数、天文学、大学生物学、大学化学、大学计算机科学、大学数学、大学物理、计算机安全、概念物理、电气工程、初等数学、高中生物、高中化学、高中计算机科学、高中数学、高中物理、高中统计、机器学习、数学、营养学等
+
+**人文社科（32个科目）**：
+商业伦理、临床知识、大学医学、全球事实、人类老化、国际法、法理学、逻辑推理、管理学、营销学、医学遗传学、道德争议、道德场景、哲学、职业心理学、专业会计等
+
+### Benchmark Saturation
+**Benchmark Saturation（基准饱和）** 是评估领域的重要问题：
+
+- MMLU 上 GPT-4 已达 86%，接近人类专家水平
+- 需要更难的基准来区分前沿模型
+- **MMLU-Pro**：增加了更多困难题目和选项
+- **GPQA**：PhD 级别的科学问题
+- **FrontierMath**：研究级数学问题
+
+### LLM-as-Judge
+**LLM-as-Judge（LLM作为评判者）** 方法日益流行：
+
+- 使用 GPT-4 等强模型对生成结果进行评分
+- 优势：可扩展、一致性好、成本低于人类评估
+- 劣势：存在偏见（偏好更长的回答、偏好自身风格）、在特定领域可能不可靠
+
+评判框架设计要点：
+- **Position Bias Mitigation（位置偏见缓解）**：随机交换两个回答的顺序
+- **Rubric Design（评分标准设计）**：提供详细的评分标准
+- **Few-shot Examples（少样本示例）**：提供评分示例提高一致性
+- **Chain-of-Thought Scoring（链式思维评分）**：要求模型先分析再给分
+
+### Evaluation Pipeline Design
+设计企业级 LLM 评估流水线的关键组件：
+
+- **Automated Suite（自动化套件）**：标准基准的定期自动运行
+- **Human Evaluation（人类评估）**：关键场景的人工评估
+- **Safety Testing（安全测试）**：红队测试和对抗评估
+- **Domain-specific Evals（领域评估）**：针对特定业务场景的评估
+- **Regression Detection（回归检测）**：模型更新后的性能对比
+- **Cost-Quality Tradeoff（成本-质量权衡）**：不同模型的性价比分析
+
+### Safety and Robustness Evaluation
+LLM 安全性评估的关键维度：
+
+- **TruthfulQA**：测试模型是否会生成常见的错误信息
+- **BBQ (Bias Benchmark for QA)**：检测社会偏见
+- **AdvBench**：对抗攻击下的安全性
+- **Red Teaming（红队测试）**：系统性的对抗测试
+
+**Jailbreak（越狱）** 评估：
+- 测试模型是否能被诱导生成有害内容
+- 常见攻击方式：角色扮演、编码混淆、多轮渐进式引导
+- 评估指标：**Attack Success Rate (ASR，攻击成功率)**
+
+### Evaluation at Scale
+大规模评估的工程挑战：
+
+- **Parallel Evaluation（并行评估）**：使用多 GPU 并行运行评估
+- **Reproducibility（可复现性）**：固定随机种子、采样参数
+- **Cost Management（成本管理）**：智能调度评估任务
+- **Result Aggregation（结果汇总）**：跨多个基准的综合评分
+
+**Open LLM Leaderboard**（HuggingFace）提供了标准化的评估流水线，任何人都可以提交模型进行评估。
+
+### Custom Evaluation Design
+为特定业务场景设计评估的步骤：
+
+1. **定义评估维度**：与业务目标对齐（如准确性、时延、安全性）
+2. **构建测试集**：覆盖核心用例和边缘情况
+3. **设计评分标准**：明确的评分 rubric，减少主观性
+4. **选择评估方法**：自动指标 + 人类评估 + LLM-as-Judge 组合
+5. **建立基线**：使用现有最佳模型作为对照
+6. **持续监控**：在线环境中的持续评估和异常检测
+
+### Multi-Modal Evaluation
+随着多模态模型的发展，新的评估维度出现：
+
+- **MMBench**：综合多模态理解能力评估
+- **MathVista**：数学+视觉推理评估
+- **SEED-Bench**：多维度多模态评估
+- **OCRBench**：文字识别和理解能力评估
+
+多模态评估比纯文本评估更具挑战性，因为需要同时评估视觉理解、推理和语言生成能力。
+
+### Evaluation Metrics Deep Dive
+常用评估指标的详细解释：
+
+**Exact Match (EM，精确匹配)**：模型输出是否与标准答案完全一致。适用于有唯一正确答案的任务（如多选题）。
+
+**F1 Score**：在 token 级别计算精确率和召回率的调和平均。比 EM 更宽松，允许部分匹配。
+
+**BLEU/ROUGE**：机器翻译和摘要任务的传统指标，基于 n-gram 重叠。在 LLM 评估中逐渐被 LLM-as-Judge 替代。
+
+**Win Rate（胜率）**：在成对比较中模型胜出的比例。Chatbot Arena 和 MT-Bench 都使用这种方式。
+
+## Interview Tips
+- 理解不同评估指标的适用场景和局限性
+- 掌握数据污染问题的检测和应对方法
+- 能够为特定应用场景设计合理的评估方案
+- 了解 Chatbot Arena 的 Elo 评分机制
+- 能够解释 pass@k 指标的含义和计算方法

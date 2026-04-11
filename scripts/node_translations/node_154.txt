@@ -1,0 +1,197 @@
+# Parameter-Efficient Fine-Tuning (LoRA, QLoRA)
+
+## Overview
+**PEFT (Parameter-Efficient Fine-Tuning，参数高效微调)** 通过仅更新少量参数来适配大语言模型，避免了全参数微调的巨大成本。**LoRA (Low-Rank Adaptation，低秩适配)** 是最流行的 PEFT 方法，而 **QLoRA (Quantized LoRA，量化低秩适配)** 进一步结合量化技术，使得在消费级 GPU 上微调大模型成为可能。
+
+在面试中，PEFT 方法的原理、设计选择和实际应用是高频考点。理解 LoRA 的数学基础和工程实践，对于 LLM 微调任务至关重要。
+
+## Core Concepts
+
+### LoRA Core Idea
+LoRA 的核心假设是：微调过程中的权重更新矩阵 $\Delta W$ 具有低秩结构。因此可以将 $\Delta W$ 分解为两个小矩阵的乘积：
+
+$$W' = W + \Delta W = W + BA$$
+
+其中：
+- $W \in \mathbb{R}^{d \times k}$ 是冻结的原始权重
+- $B \in \mathbb{R}^{d \times r}$ 是下投影矩阵（初始化为零）
+- $A \in \mathbb{R}^{r \times k}$ 是上投影矩阵（随机初始化）
+- $r \ll \min(d, k)$ 是 **Rank（秩）**，通常 $r \in \{4, 8, 16, 32, 64\}$
+
+参数量从 $d \times k$ 降低到 $r \times (d + k)$。例如，对于 $d = k = 4096, r = 16$，参数量从 16.7M 降低到 131K（减少 99.2%）。
+
+训练时使用缩放因子 $\alpha$：
+
+$$h = Wx + \frac{\alpha}{r} BAx$$
+
+$\frac{\alpha}{r}$ 用于控制低秩更新的幅度。通常 $\alpha$ 设为 $r$ 的两倍（如 $r = 16, \alpha = 32$），这样缩放因子为 2。
+
+### Rank Selection
+秩 $r$ 的选择对性能和效率有重要影响：
+
+| Rank $r$ | 训练参数占比 | 性能 | 适用场景 |
+|----------|-------------|------|----------|
+| 4 | ~0.1% | 基础 | 简单分类任务 |
+| 8-16 | ~0.2-0.5% | 良好 | 大多数场景 |
+| 32-64 | ~1-2% | 接近全量 | 复杂生成任务 |
+| 128+ | ~3-5% | 约等于全量 | 追求最优性能 |
+
+经验法则：
+- 先用 $r = 16$ 作为基线
+- 如果性能不足，增加 $r$ 或扩展 LoRA 到更多模块
+- **Target Modules（目标模块）**：通常对 $W_Q, W_K, W_V, W_O$（注意力权重）应用 LoRA，有时也包括 FFN 权重
+
+### QLoRA
+**QLoRA（量化低秩适配）**（Dettmers et al., 2023）通过三项关键创新使得在单张 48GB GPU 上微调 65B 模型成为可能：
+
+**4-bit NormalFloat (NF4)**：一种信息理论最优的量化数据类型，假设权重服从正态分布。NF4 将权重量化为 4 位，相比标准 INT4 量化在精度上有显著提升。
+
+**Double Quantization（双重量化）**：对量化参数本身也进行量化，进一步节省内存。第一次量化将 FP32 权重变为 NF4，第二次量化将量化的缩放因子从 FP32 变为 FP8。
+
+**Paged Optimizers（分页优化器）**：利用 CUDA 统一内存在 CPU 和 GPU 之间分页，处理内存峰值。
+
+QLoRA 的内存节省：
+
+$$\text{Memory}_{\text{QLoRA}} \approx \frac{N}{2} \text{ bytes} + \text{LoRA params} \times 2 \text{ bytes}$$
+
+其中 $N$ 是总参数量。一个 70B 模型需要约 35GB（4-bit）+ LoRA 开销，可以在单张 80GB GPU 上运行。
+
+### Adapter Merging
+LoRA 训练完成后，可以将适配器权重合并回原始模型：
+
+$$W_{\text{merged}} = W + \frac{\alpha}{r} BA$$
+
+合并后的模型在推理时没有任何额外开销。还可以维护多个 LoRA 适配器用于不同任务，在推理时动态加载。
+
+多适配器管理策略：
+- **LoRA Serving（LoRA服务）**：一个基础模型 + 多个 LoRA 适配器，根据请求动态切换
+- **Adapter Composition（适配器组合）**：将多个 LoRA 的权重线性组合
+- **Task Arithmetic（任务算术）**：通过加减 LoRA 权重实现任务能力的组合和消除
+
+### Other PEFT Methods
+除 LoRA 外的其他参数高效方法：
+
+- **Prefix Tuning（前缀微调）**：在每层注意力的键值前添加可学习的前缀向量
+- **Prompt Tuning（提示微调）**：仅在输入嵌入前添加可学习的软提示
+- **IA3 (Infused Adapter by Inhibiting and Amplifying Inner Activations)**：通过可学习的缩放向量调节注意力和 FFN 的激活值，参数量比 LoRA 更少
+- **DoRA (Weight-Decomposed Low-Rank Adaptation)**：将权重分解为方向和大小，分别用 LoRA 和可学习标量调节
+
+## Implementation
+
+```python
+# LoRA 微调示例
+from peft import LoraConfig, get_peft_model, TaskType
+from transformers import AutoModelForCausalLM
+import torch
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf",
+    torch_dtype=torch.bfloat16,
+)
+
+# LoRA 配置
+lora_config = LoraConfig(
+    r=16,                          # 秩
+    lora_alpha=32,                 # 缩放因子
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                     "gate_proj", "up_proj", "down_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type=TaskType.CAUSAL_LM,
+)
+
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()
+# 输出: trainable params: 39.98M || all params: 6.78B || trainable%: 0.59%
+
+# QLoRA 配置
+from transformers import BitsAndBytesConfig
+
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_quant_type="nf4",      # NF4 量化类型
+    bnb_4bit_use_double_quant=True,  # 双重量化
+    bnb_4bit_compute_dtype=torch.bfloat16,
+)
+
+model_4bit = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-70b-hf",
+    quantization_config=bnb_config,
+    device_map="auto",
+)
+model_4bit = get_peft_model(model_4bit, lora_config)
+```
+
+### LoRA Mathematical Analysis
+LoRA 的工作原理可以从优化角度理解。微调实际上是在高维参数空间中寻找最优方向。研究表明，对于特定下游任务，这些更新方向通常集中在一个低维子空间中：
+
+$$\Delta W \in \mathbb{R}^{d \times k}, \quad \text{rank}(\Delta W) \ll \min(d, k)$$
+
+**Intrinsic Dimensionality（内在维度）** 的研究（Aghajanyan et al., 2021）发现，许多 NLP 任务的有效参数维度远小于模型的总参数数量，这为 LoRA 的低秩假设提供了理论支持。
+
+### LoRA vs Full Fine-tuning
+
+| 维度 | LoRA | 全量微调 |
+|------|------|----------|
+| 训练参数 | < 1% | 100% |
+| GPU 内存 | 低 | 高 |
+| 训练速度 | 较快 | 慢 |
+| 性能上限 | 接近全量 | 最优 |
+| 多任务支持 | 易于切换 | 需要多个副本 |
+| 灾难性遗忘 | 风险低 | 风险高 |
+
+### Advanced LoRA Techniques
+LoRA 的改进变体：
+
+- **LoRA+**：对 A 和 B 矩阵使用不同的学习率，通常 $\eta_B = \lambda \eta_A$，$\lambda \approx 16$
+- **rsLoRA (Rank-Stabilized LoRA)**：使用 $\frac{\alpha}{\sqrt{r}}$ 代替 $\frac{\alpha}{r}$ 作为缩放因子
+- **AdaLoRA**：自适应地分配不同层和模块的秩，重要的模块获得更高的秩
+- **LoRA-FA (Frozen A)**：冻结随机初始化的 A 矩阵，只训练 B 矩阵
+- **VeRA (Vector-based Random Matrix Adaptation)**：使用共享的随机矩阵 + 可学习的缩放向量
+
+### Production LoRA Deployment
+在生产环境中部署 LoRA 的策略：
+
+- **S-LoRA**：通过共享基础模型和并行化 LoRA 计算，同时服务数千个 LoRA 适配器
+- **LoRAX**：Predibase 的 LoRA 服务系统，支持动态加载
+- **Punica**：支持批量推理时的异构 LoRA 适配器
+
+### When to Use LoRA vs Full Fine-tuning
+选择 LoRA 还是全量微调的决策指南：
+
+**推荐使用 LoRA 的场景**：
+- GPU 资源有限（单张或少量 GPU）
+- 需要维护多个任务的适配器
+- 微调数据量较小（< 100K 样本）
+- 需要快速迭代和实验
+
+**推荐全量微调的场景**：
+- 充足的计算资源
+- 目标任务与预训练分布差异很大
+- 追求最优性能
+- 只需要一个最终模型
+
+### LoRA Initialization Strategies
+初始化策略对 LoRA 性能有影响：
+
+- **标准初始化**：$B = 0$（零初始化），$A \sim \mathcal{N}(0, \sigma^2)$（随机初始化）
+- **PiSSA**：使用 SVD 分解原始权重的主成分初始化 LoRA 矩阵
+- **OLoRA**：正交初始化，确保 A 和 B 的列/行正交
+
+零初始化 B 矩阵确保训练开始时 LoRA 不改变原始模型行为，这是一个重要的设计选择。
+
+### Memory Comparison
+不同微调方法的显存对比（7B 模型，BF16）：
+
+| 方法 | 模型权重 | 优化器 | 梯度 | 总计 |
+|------|---------|--------|------|------|
+| 全量微调 | 14 GB | 28 GB | 14 GB | ~56 GB |
+| LoRA (r=16) | 14 GB | 0.16 GB | 0.08 GB | ~14.3 GB |
+| QLoRA (4bit) | 3.5 GB | 0.16 GB | 0.08 GB | ~3.8 GB |
+
+## Interview Tips
+- 能够推导 LoRA 的参数量节省比例
+- 理解秩 $r$ 和缩放因子 $\alpha$ 的选择策略
+- 掌握 QLoRA 的三项创新（NF4、双重量化、分页优化器）
+- 能够比较 LoRA 与其他 PEFT 方法的优缺点
+- 了解多适配器管理和推理时的动态加载策略

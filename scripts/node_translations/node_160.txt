@@ -1,0 +1,224 @@
+# Chunking Strategies
+
+## Overview
+**Chunking（分块）** 是 **RAG (Retrieval-Augmented Generation，检索增强生成)** 系统中的关键预处理步骤，负责将长文档分割成适合检索和生成的文本片段。分块策略直接影响检索质量和生成效果——过大的块可能包含过多无关信息，过小的块可能丢失上下文。
+
+在面试中，候选人需要理解不同分块策略的原理、适用场景和权衡，以及如何根据具体需求设计最优的分块方案。
+
+## Core Concepts
+
+### Fixed-Size Chunking
+**Fixed-Size Chunking（固定大小分块）** 是最简单的策略，按字符数或 token 数分割：
+
+- **Chunk Size（块大小）**：通常 256-1024 token
+- **Overlap（重叠）**：相邻块之间重叠 10-20% 的内容，避免在分割处丢失上下文
+
+优点：实现简单、可预测、处理速度快
+缺点：可能在句子或段落中间断开，破坏语义完整性
+
+### Recursive Character Splitting
+**Recursive Character Splitting（递归字符分割）** 是 LangChain 默认的分块方法，按照语义层次递归分割：
+
+分割优先级：`\n\n`（段落） -> `\n`（行） -> `. `（句子） -> ` `（单词） -> ``（字符）
+
+算法：
+1. 尝试用最高优先级的分隔符分割文本
+2. 如果结果块大于目标大小，用下一级分隔符继续分割
+3. 重复直到所有块都小于目标大小
+4. 合并过小的相邻块
+
+这种方法在保持语义完整性和块大小控制之间取得了很好的平衡。
+
+### Semantic Chunking
+**Semantic Chunking（语义分块）** 基于文本语义相似度进行分割：
+
+1. 将文本分成基本单元（通常是句子）
+2. 为每个单元计算 **Embedding（嵌入向量）**
+3. 计算相邻单元之间的 **Cosine Similarity（余弦相似度）**
+4. 在相似度低于阈值的位置进行分割（表示话题转换）
+
+$$\text{similarity}(s_i, s_{i+1}) = \frac{e(s_i) \cdot e(s_{i+1})}{\|e(s_i)\| \cdot \|e(s_{i+1})\|}$$
+
+当 $\text{similarity}(s_i, s_{i+1}) < \tau$ 时，在 $s_i$ 和 $s_{i+1}$ 之间断开。
+
+优点：根据内容自适应分割，语义完整性最好
+缺点：需要额外的嵌入计算，速度较慢
+
+### Document-Specific Chunking
+针对不同文档类型的专用分块策略：
+
+- **Markdown/HTML**：按标题层级分割，保留文档结构
+- **Code（代码）**：按函数、类或方法分割，使用 **AST (Abstract Syntax Tree，抽象语法树)** 解析
+- **Table（表格）**：将表格作为整体保留，避免跨行或跨列分割
+- **PDF**：使用版面分析工具识别段落、表格和图片区域
+
+### Chunk Size vs Retrieval Quality Tradeoff
+块大小的选择涉及多个维度的权衡：
+
+| 块大小 | 检索精度 | 上下文完整性 | 嵌入质量 | 检索速度 |
+|--------|----------|-------------|----------|----------|
+| 小（128-256 token） | 高 | 低 | 好 | 快 |
+| 中（256-512 token） | 中 | 中 | 中 | 中 |
+| 大（512-1024 token） | 低 | 高 | 可能下降 | 慢 |
+
+经验指导：
+- **问答型 RAG**：较小的块（256-512 token），精确检索特定信息
+- **摘要型 RAG**：较大的块（512-1024 token），保留更多上下文
+- **代码 RAG**：按函数/类分割，大小自适应
+
+### Advanced Chunking Techniques
+
+**Parent-Child Chunking（父子分块）**：
+- 创建两层索引：大块（父）和小块（子）
+- 用小块进行精确检索，返回对应的大块保证上下文完整性
+- 兼顾检索精度和上下文完整性
+
+**Sentence Window（句子窗口）**：
+- 以句子为单位建立索引
+- 检索到目标句子后，返回周围的 $k$ 个句子作为上下文
+- 提供精确的检索粒度和灵活的上下文范围
+
+**Agentic Chunking（智能体分块）**：
+- 使用 LLM 判断每个句子是否属于当前块或应开始新块
+- 质量最好但成本最高
+- 适用于高价值文档的离线处理
+
+**Proposition-based Chunking（命题分块）**：
+- 将文档分解为独立的事实性命题
+- 每个命题是一个自包含的事实陈述
+- 提供最细粒度的检索单元
+
+### Evaluation of Chunking
+评估分块质量的方法：
+
+- **Retrieval Hit Rate（检索命中率）**：正确答案是否被检索到
+- **Context Relevancy（上下文相关性）**：检索到的块与问题的相关程度
+- **Answer Quality（回答质量）**：最终生成答案的质量
+- **A/B Testing（A/B测试）**：在实际场景中比较不同策略
+- **Chunk Boundary Quality（分块边界质量）**：块的起止是否在语义自然的位置
+
+## Implementation
+
+```python
+# 不同分块策略的实现
+from langchain.text_splitter import (
+    RecursiveCharacterTextSplitter,
+    TokenTextSplitter,
+)
+from sentence_transformers import SentenceTransformer
+import numpy as np
+
+# 1. 固定大小分块
+fixed_splitter = TokenTextSplitter(
+    chunk_size=512,
+    chunk_overlap=50,
+)
+chunks = fixed_splitter.split_text(document)
+
+# 2. 递归字符分割
+recursive_splitter = RecursiveCharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=50,
+    separators=["\n\n", "\n", ". ", " ", ""],
+)
+chunks = recursive_splitter.split_text(document)
+
+# 3. 语义分块
+def semantic_chunking(text, model_name="all-MiniLM-L6-v2", threshold=0.5):
+    '''基于语义相似度的分块'''
+    model = SentenceTransformer(model_name)
+    sentences = text.split(". ")
+    embeddings = model.encode(sentences)
+
+    chunks = []
+    current_chunk = [sentences[0]]
+
+    for i in range(1, len(sentences)):
+        sim = np.dot(embeddings[i-1], embeddings[i]) / (
+            np.linalg.norm(embeddings[i-1]) * np.linalg.norm(embeddings[i])
+        )
+        if sim < threshold:
+            chunks.append(". ".join(current_chunk))
+            current_chunk = [sentences[i]]
+        else:
+            current_chunk.append(sentences[i])
+
+    if current_chunk:
+        chunks.append(". ".join(current_chunk))
+    return chunks
+```
+
+### Chunk Overlap Strategy
+**Overlap（重叠）** 的设计对于避免信息丢失至关重要：
+
+- **Fixed Overlap（固定重叠）**：相邻块重叠固定数量的字符/token
+- **Sentence Boundary Overlap（句子边界重叠）**：在句子边界处重叠，确保完整句子在至少一个块中
+- **Overlap Size（重叠大小）** 的选择：
+  - 太小：可能在关键位置丢失上下文
+  - 太大：增加存储和计算成本，增加重复检索
+
+通常 overlap 设为 chunk size 的 10-20%。
+
+### Multi-Modal Chunking
+针对包含多种内容类型的文档的分块策略：
+
+- **文本+图片**：将图片的描述文本与图片关联，形成图文对块
+- **文本+表格**：将表格转换为文本描述或保持结构化格式
+- **文本+代码**：代码块保持完整，不在代码中间断开
+- **跨模态引用**：保持跨模态引用的完整性（如"如图1所示"与图1在同一块中）
+
+### Chunking Pipeline Optimization
+生产环境中的分块流水线优化：
+
+- **Parallel Processing（并行处理）**：多文档并行分块
+- **Caching（缓存）**：缓存分块结果避免重复处理
+- **Incremental Chunking（增量分块）**：文档更新时只重新分块变化部分
+- **Quality Monitoring（质量监控）**：监控分块质量指标（如块内语义一致性、块间信息重叠度）
+
+### Practical Recommendations
+基于不同应用场景的分块建议：
+
+| 应用场景 | 推荐策略 | 块大小 | 重叠 |
+|---------|---------|--------|------|
+| 通用问答 | 递归字符 | 500 | 50 |
+| 法律文档 | 按章节分割 | 1000 | 100 |
+| 代码文档 | 按函数/类 | 自适应 | 0 |
+| 学术论文 | 按段落 + 语义 | 300-500 | 50 |
+| 技术手册 | 按标题层级 | 500-800 | 80 |
+
+### Token-Level vs Character-Level Chunking
+分块粒度的选择：
+
+- **Character-level（字符级）**：简单但不考虑 token 边界
+- **Token-level（token级）**：使用与嵌入模型相同的分词器，更精确
+- **Word-level（词级）**：在词边界分割，避免断词
+
+推荐使用 token 级分块，因为嵌入模型对 token 数量敏感。同样的字符数在不同语言中可能对应差异很大的 token 数（如中文每个字符通常是 1-2 个 token）。
+
+### Chunking for Tables
+表格数据的特殊处理：
+
+- **Table Serialization（表格序列化）**：将表格转换为文本格式
+  - Markdown 格式：`| col1 | col2 |`
+  - CSV 格式：`col1, col2`
+  - 自然语言描述：将行转换为自然语言句子
+- **Table-Text Pairing（表文配对）**：将表格与其标题/描述配对
+- **Row-Level Chunking（行级分块）**：对于大表格，按行分块并保留列标题
+- **Table Understanding Models（表格理解模型）**：使用专用模型（如 Table-GPT）处理表格
+
+### End-to-End Chunking Optimization
+优化分块策略的系统方法：
+
+1. 从递归字符分割开始（chunk_size=500, overlap=50）
+2. 在目标查询集上评估检索质量
+3. 尝试不同的 chunk_size（256, 512, 1024）
+4. 评估语义分块是否带来显著提升
+5. 如果文档有明确结构，尝试结构化分块
+6. 最终方案通过 A/B 测试在生产环境验证
+
+## Interview Tips
+- 能够比较不同分块策略的优缺点及适用场景
+- 理解块大小与检索质量的权衡关系
+- 掌握 parent-child chunking 和 sentence window 等高级技术
+- 能够根据具体文档类型和应用场景推荐最优策略
+- 了解如何评估和优化分块方案

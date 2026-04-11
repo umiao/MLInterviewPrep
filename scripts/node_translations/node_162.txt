@@ -1,0 +1,222 @@
+# Vector Databases
+
+## Overview
+**Vector Databases（向量数据库）** 是存储和检索高维向量的专用系统，是 RAG 和语义搜索应用的核心基础设施。它们通过 **ANN (Approximate Nearest Neighbor，近似最近邻)** 算法实现亚线性时间的相似度搜索，在数百万到数十亿向量的规模上提供毫秒级的查询响应。
+
+在面试中，候选人需要理解主流索引算法的原理、不同向量数据库的架构差异，以及如何根据具体场景选择和优化。
+
+## Core Concepts
+
+### ANN Index Types
+精确最近邻搜索的复杂度为 $O(n \cdot d)$（$n$ 是向量数，$d$ 是维度），在大规模场景下不可行。**ANN** 算法通过牺牲少量准确度来换取数量级的速度提升。
+
+**IVF (Inverted File Index，倒排文件索引)**：
+- 使用 K-means 将向量空间划分为 $n_{\text{list}}$ 个 **Voronoi Cell（泰森多边形）**
+- 查询时只搜索距离最近的 $n_{\text{probe}}$ 个分区
+- 速度提升：约 $n_{\text{list}} / n_{\text{probe}}$ 倍
+- 适合中等规模数据集（百万级）
+
+**PQ (Product Quantization，乘积量化)**：
+- 将 $d$ 维向量分成 $m$ 个子向量
+- 每个子向量独立聚类为 $k$ 个中心（通常 $k = 256$，用 8 bit 编码）
+- 内存压缩比：$\frac{d \times 4}{m}$ 字节/向量
+
+$$\text{dist\_approx}(x, y) = \sum_{j=1}^{m} d(x^{(j)}, c_{q_j}^{(j)})$$
+
+PQ 常与 IVF 组合使用（**IVF-PQ**），先粗筛再精排。
+
+**HNSW (Hierarchical Navigable Small World，分层可导航小世界图)**：
+- 构建多层图结构，高层稀疏（长距离跳跃），底层密集（精确搜索）
+- 查询从最高层开始贪心搜索，逐层下降
+- 建图参数：$M$（每个节点的连接数）、$ef_{\text{construction}}$（建图时的搜索宽度）
+- 查询参数：$ef_{\text{search}}$（搜索时的候选集大小）
+
+HNSW 通常提供最好的查询质量（Recall > 95%），但内存占用较大。
+
+### Index Types Comparison
+
+| 索引类型 | 查询延迟 | 内存 | 构建时间 | 召回率 | 适用规模 |
+|---------|---------|------|---------|--------|---------|
+| Flat (暴力) | O(n) | 低 | O(n) | 100% | < 100K |
+| IVF | 中等 | 低 | 中等 | 85-95% | 100K-10M |
+| IVF-PQ | 快 | 很低 | 中等 | 80-90% | 1M-1B |
+| HNSW | 快 | 高 | 慢 | 95-99% | 100K-100M |
+| ScaNN | 很快 | 中等 | 中等 | 90-98% | 1M-1B |
+
+### FAISS
+**FAISS (Facebook AI Similarity Search)** 是 Meta 开发的向量搜索库，支持多种索引类型：
+
+核心特性：
+- GPU 加速：支持 GPU 上的暴力搜索和 IVF
+- 组合索引：如 `IVF4096,PQ64` 表示 4096 个分区 + 64 子向量 PQ
+- 量化方法：PQ、SQ（标量量化）、OPQ（优化PQ）
+- 适合嵌入式使用（作为库而非独立服务）
+
+### Milvus
+**Milvus** 是云原生的分布式向量数据库：
+
+- **架构**：存储计算分离，多副本支持
+- **索引**：支持 HNSW、IVF-FLAT、IVF-PQ、DiskANN
+- **特性**：标量过滤、混合搜索（向量+关键词）、分区/分片
+- **扩展性**：支持百亿级向量
+
+### Pinecone
+**Pinecone** 是全托管的向量数据库服务：
+
+- **无服务器（Serverless）**：按使用量计费
+- **Namespace（命名空间）**：逻辑隔离不同数据集
+- **Metadata Filtering（元数据过滤）**：支持与向量搜索结合的属性过滤
+- **适用场景**：快速上线、小中规模应用
+
+### Other Vector Databases
+其他值得关注的向量数据库：
+
+- **Qdrant**：Rust 编写，高性能，支持丰富的过滤条件
+- **Weaviate**：支持多模态（文本、图像），GraphQL API
+- **Chroma**：轻量级，适合本地开发和原型
+- **pgvector**：PostgreSQL 扩展，适合已有 PG 基础设施的团队
+
+### ANN Benchmark
+**ANN Benchmark** 是标准化的向量搜索性能评测：
+
+评测维度：
+- **Recall vs QPS（查询/秒）** 曲线：在相同召回率下比较吞吐量
+- **Build Time（构建时间）**：索引构建耗时
+- **Memory Usage（内存占用）**：运行时内存需求
+
+关键发现：
+- HNSW 在高召回率（> 95%）下通常最快
+- IVF-PQ 在内存受限场景下有优势
+- **DiskANN** 在磁盘-内存混合架构下表现优异
+
+### Vector Database Selection Guide
+
+| 需求 | 推荐方案 |
+|------|----------|
+| 简单原型 | FAISS + Flat/HNSW |
+| 中规模生产 | Milvus / Qdrant / Weaviate |
+| 全托管服务 | Pinecone / Zilliz Cloud |
+| 超大规模 | Milvus 分布式 / FAISS + DiskANN |
+| 混合搜索 | Milvus / Weaviate |
+| 极低延迟 | FAISS GPU / ScaNN |
+| 已有PG | pgvector |
+
+### Hybrid Search
+**Hybrid Search（混合搜索）** 结合稠密向量搜索和稀疏关键词搜索：
+
+$$\text{Score}_{\text{hybrid}} = \alpha \cdot \text{Score}_{\text{dense}} + (1 - \alpha) \cdot \text{Score}_{\text{sparse}}$$
+
+稠密检索擅长语义匹配，稀疏检索擅长精确关键词匹配。混合搜索在多数实际场景下优于单一方法。$\alpha$ 通常需要根据具体场景调优。
+
+### Distance Metrics
+向量数据库支持多种距离度量：
+
+- **Cosine Similarity（余弦相似度）**：归一化后等价于内积，最常用
+- **L2 (Euclidean，欧氏距离)**：适合未归一化的向量
+- **Inner Product（内积）**：适合某些特定模型的输出
+- **Hamming（汉明距离）**：适合二值哈希向量
+
+选择距离度量时应与嵌入模型的训练目标一致。
+
+## Implementation
+
+```python
+# FAISS 向量检索示例
+import faiss
+import numpy as np
+
+dim = 768
+n_vectors = 1_000_000
+
+# 创建不同类型的索引
+# 1. HNSW 索引（高召回率）
+index_hnsw = faiss.IndexHNSWFlat(dim, 32)  # M=32
+index_hnsw.hnsw.efConstruction = 200
+index_hnsw.hnsw.efSearch = 64
+
+# 2. IVF-PQ 索引（内存高效）
+quantizer = faiss.IndexFlatL2(dim)
+index_ivfpq = faiss.IndexIVFPQ(quantizer, dim, 4096, 64, 8)
+# 4096 个分区，64 个子量化器，每个 8 bit
+
+# 训练和添加向量
+vectors = np.random.randn(n_vectors, dim).astype('float32')
+faiss.normalize_L2(vectors)  # L2 归一化用于余弦相似度
+
+index_ivfpq.train(vectors[:100000])  # 用部分数据训练
+index_ivfpq.add(vectors)
+index_ivfpq.nprobe = 64  # 搜索 64 个分区
+
+# 搜索
+query = np.random.randn(1, dim).astype('float32')
+faiss.normalize_L2(query)
+distances, indices = index_ivfpq.search(query, k=10)
+print(f"Top-10 results: {indices[0]}")
+print(f"Distances: {distances[0]}")
+```
+
+### HNSW Parameter Tuning Guide
+HNSW 索引的关键参数调优：
+
+**建图参数**：
+- **M（连接数）**：每个节点的双向连接数。更大的 M 提高召回率但增加内存和构建时间。推荐 16-64
+- **efConstruction（构建搜索宽度）**：建图时的候选集大小。更大值提高索引质量。推荐 200-500
+
+**查询参数**：
+- **efSearch（查询搜索宽度）**：搜索时的候选集大小。更大值提高召回率但增加延迟。推荐 32-256
+
+$$\text{Memory per vector} \approx d \times 4 + M \times 2 \times (4 + 4) \text{ bytes}$$
+
+### Filtering in Vector Search
+向量搜索中的过滤（Filtered Search）是实际应用的常见需求：
+
+- **Pre-filtering（前置过滤）**：先过滤再搜索。精确但可能导致候选集太小
+- **Post-filtering（后置过滤）**：先搜索再过滤。可能返回不足 k 个结果
+- **In-filter（内置过滤）**：在搜索过程中同时过滤。最优但实现复杂
+
+不同向量数据库对过滤的支持程度不同：
+- Milvus、Qdrant 支持高效的内置过滤
+- FAISS 原生不支持过滤，需要外部实现
+
+### Data Lifecycle Management
+向量数据库的数据生命周期管理：
+
+- **Upsert（插入/更新）**：当源文档更新时，需要更新对应的向量
+- **Deletion（删除）**：支持按 ID 或按条件删除
+- **Compaction（压缩）**：清理被删除的向量，回收空间
+- **Backup/Restore（备份/恢复）**：定期备份索引和数据
+- **Versioning（版本管理）**：管理嵌入模型更新导致的向量版本差异
+
+### Cost Estimation
+向量数据库的成本估算：
+
+$$\text{Memory} = N \times (d \times 4 + \text{metadata\_size} + \text{index\_overhead})$$
+
+对于 1000 万条 768 维向量（HNSW, M=16）：
+- 向量存储：~30 GB
+- HNSW 索引：~5 GB
+- 元数据（假设100字节/条）：~1 GB
+- 总计：约 36 GB
+
+### Operational Considerations
+向量数据库运维的关键考虑：
+
+- **Index Rebuild（索引重建）**：当大量数据变更后可能需要重建索引
+- **Monitoring（监控）**：监控查询延迟、召回率、内存使用
+- **Sharding（分片）**：数据量超过单节点容量时进行分片
+- **Replication（副本）**：通过副本实现高可用和读扩展
+
+### Emerging Trends
+向量数据库领域的新趋势：
+
+- **Multi-vector Search（多向量搜索）**：支持 ColBERT 等保留多个向量的模型
+- **Streaming Indexing（流式索引）**：实时索引新数据，无需重建
+- **Hybrid Storage（混合存储）**：SSD + Memory 混合存储，支持更大规模
+- **GPU-accelerated Search（GPU加速搜索）**：利用 GPU 加速向量搜索
+
+## Interview Tips
+- 能够解释 IVF、PQ、HNSW 的工作原理
+- 理解 Recall-QPS 权衡及如何调参优化
+- 掌握不同向量数据库的架构差异和适用场景
+- 了解混合搜索的原理和实际效果
+- 能够根据数据规模和需求推荐合适的方案

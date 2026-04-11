@@ -1,0 +1,186 @@
+# Continuous Batching
+
+## Overview
+**Continuous Batching（连续批处理）** 是 LLM 推理服务系统的核心调度技术。与传统的 **Static Batching（静态批处理）** 不同——等所有请求完成后才开始新批次——连续批处理在 **Iteration Level（迭代级别）** 进行调度，允许已完成的请求立即释放资源，新请求随时加入。
+
+这一技术显著提升了 LLM 推理的吞吐量（通常 2-5 倍），是 vLLM、TensorRT-LLM 等现代服务系统的基础。理解连续批处理的原理和实现挑战是 LLM 系统设计面试的重点。
+
+## Core Concepts
+
+### Static vs Continuous Batching
+**Static Batching（静态批处理）** 的问题：
+
+假设一个批次中有 4 个请求，生成长度分别为 10, 50, 20, 100 token。静态批处理必须等最长的请求（100 token）完成后才能处理新请求。前 3 个请求完成后继续占用 GPU 资源，浪费了大量计算。
+
+**Continuous Batching（连续批处理）** 的解决方案：
+- 每生成一个 token 后检查是否有请求完成
+- 已完成的请求立即释放资源
+- 等待队列中的新请求立即加入当前批次
+- GPU 利用率始终保持在高水平
+
+### Prefill vs Decode Phases
+LLM 推理包含两个性质完全不同的阶段：
+
+**Prefill（预填充）阶段**：
+- 一次性处理输入 prompt 的所有 token
+- **Compute-bound（计算密集型）**：大量矩阵乘法
+- 计算量大但只执行一次
+- 生成第一个输出 token
+
+**Decode（解码）阶段**：
+- 每步生成一个新 token
+- **Memory-bound（内存密集型）**：主要瓶颈是 KV cache 的读取
+- 每步只处理一个 token，计算量小但需要读取大量 KV cache
+- 重复执行直到生成结束
+
+这两个阶段的计算特性差异带来了调度挑战：
+
+$$\text{Arithmetic Intensity}_{\text{prefill}} \gg \text{Arithmetic Intensity}_{\text{decode}}$$
+
+将 prefill 和 decode 混在一个批次中会导致 decode 请求的延迟显著增加（prefill 的大量计算阻塞了 decode）。
+
+### Iteration-Level Scheduling
+**Iteration-level Scheduling（迭代级调度）** 是连续批处理的核心机制：
+
+```
+Iteration 1: [Req1-decode, Req2-decode, Req3-prefill]
+Iteration 2: [Req1-decode, Req2-decode, Req3-decode, Req4-prefill]
+Iteration 3: [Req1-EOS,    Req2-decode, Req3-decode, Req4-decode]
+Iteration 4: [Req5-prefill, Req2-decode, Req3-decode, Req4-decode]
+```
+
+每次迭代后，调度器检查：
+- 哪些请求已完成（生成了 EOS token 或达到最大长度）
+- 是否有资源（GPU 内存、KV cache）容纳新请求
+- 新请求的 prefill 是否会影响当前 decode 请求的延迟 SLA
+
+### Preemption Strategies
+当 GPU 内存不足以容纳所有活跃请求时，需要 **Preemption（抢占）** 策略：
+
+- **Swapping（换出）**：将被抢占请求的 KV cache 从 GPU 转移到 CPU 内存，待有空间时换回
+- **Recomputation（重计算）**：丢弃被抢占请求的 KV cache，后续重新计算。如果 prefill 成本低于 swap I/O 成本，这可能更高效
+- **Priority-based（基于优先级）**：根据请求优先级、等待时间或已生成长度决定抢占顺序
+
+### Chunked Prefill
+**Chunked Prefill（分块预填充）** 将长 prompt 的 prefill 分成多个块执行：
+
+- 避免单个长 prefill 阻塞所有 decode 请求
+- 每个块大小可调（如 512 token），在 prefill 吞吐和 decode 延迟之间取得平衡
+- 分块的 prefill 可以与其他请求的 decode 交替执行
+
+### Disaggregated Prefill & Decode
+**Disaggregated Serving（解耦服务）** 将 prefill 和 decode 分配到不同的硬件上：
+
+- **Prefill 节点**：优化计算吞吐量，使用高算力 GPU
+- **Decode 节点**：优化内存带宽，使用高内存带宽配置
+- 通过高速网络传输 KV cache
+
+这种架构避免了 prefill 和 decode 之间的资源竞争，两个阶段都能获得最优的硬件配置。
+
+### Throughput Analysis
+连续批处理的吞吐量优势可以通过数学分析说明：
+
+$$\text{Throughput}_{\text{static}} = \frac{\text{batch\_size}}{\max_i(\text{gen\_len}_i) \times t_{\text{step}}}$$
+
+$$\text{Throughput}_{\text{continuous}} = \frac{\text{batch\_size}}{\text{avg}(\text{gen\_len}_i) \times t_{\text{step}}}$$
+
+当生成长度方差很大时（常见于对话场景），连续批处理的优势尤其明显。
+
+### Fairness and SLA
+在生产环境中，连续批处理还需要考虑公平性和 SLA：
+
+- **FCFS (First Come First Serve，先来先服务)**：最简单但可能导致短请求被长请求阻塞
+- **Priority Scheduling（优先级调度）**：付费用户优先，或根据请求类型设置优先级
+- **SLA-aware Scheduling（SLA感知调度）**：根据每个请求的 TTFT 和 TPOT 目标动态调整优先级
+
+## Implementation
+
+```python
+# 连续批处理调度器的简化实现
+from collections import deque
+from enum import Enum
+
+class RequestState(Enum):
+    WAITING = "waiting"
+    PREFILL = "prefill"
+    DECODE = "decode"
+    FINISHED = "finished"
+
+class Request:
+    def __init__(self, request_id, prompt_tokens, max_gen_len):
+        self.request_id = request_id
+        self.prompt_tokens = prompt_tokens
+        self.generated_tokens = []
+        self.max_gen_len = max_gen_len
+        self.state = RequestState.WAITING
+
+    def is_finished(self):
+        if len(self.generated_tokens) >= self.max_gen_len:
+            return True
+        if self.generated_tokens and self.generated_tokens[-1] == EOS_TOKEN:
+            return True
+        return False
+
+class ContinuousBatchScheduler:
+    def __init__(self, max_batch_size, max_kv_blocks):
+        self.max_batch_size = max_batch_size
+        self.max_kv_blocks = max_kv_blocks
+        self.running = []
+        self.waiting = deque()
+        self.used_kv_blocks = 0
+
+    def add_request(self, request):
+        self.waiting.append(request)
+
+    def schedule_iteration(self):
+        '''每次迭代的调度决策'''
+        # 1. 移除已完成的请求，释放 KV blocks
+        finished = [r for r in self.running if r.is_finished()]
+        for r in finished:
+            r.state = RequestState.FINISHED
+            self.used_kv_blocks -= self._kv_blocks_for(r)
+        self.running = [r for r in self.running if r.state != RequestState.FINISHED]
+
+        # 2. 尝试加入等待队列中的请求
+        while (self.waiting and
+               len(self.running) < self.max_batch_size and
+               self.used_kv_blocks < self.max_kv_blocks):
+            new_req = self.waiting.popleft()
+            new_req.state = RequestState.PREFILL
+            self.running.append(new_req)
+            self.used_kv_blocks += self._kv_blocks_for(new_req)
+
+        return self.running, finished
+```
+
+### Scheduling Algorithm Comparison
+
+| 调度算法 | 吞吐量 | 延迟公平性 | 实现复杂度 |
+|---------|--------|-----------|-----------|
+| Static Batching | 低 | 差 | 简单 |
+| Continuous Batching | 高 | 中等 | 中等 |
+| Chunked Prefill | 高 | 好 | 较复杂 |
+| Disaggregated | 最高 | 好 | 最复杂 |
+
+### Token Budget Management
+在实际部署中，需要管理每个请求的 token 预算：
+
+- **Max Input Tokens（最大输入token）**：限制 prompt 长度
+- **Max Output Tokens（最大输出token）**：限制生成长度
+- **Total Token Budget（总token预算）**：KV cache 的最大容量决定了总 token 预算
+
+$$\text{Max Concurrent Requests} = \frac{\text{Total KV Cache Memory}}{\text{Max Seq Len} \times \text{Per-token KV Size}}$$
+
+### Queue Management
+请求队列的管理策略：
+
+- **Admission Control（准入控制）**：当系统负载过高时拒绝新请求
+- **Request Prioritization（请求优先级）**：根据用户等级、请求类型设置优先级
+- **Timeout Handling（超时处理）**：超时请求自动取消并释放资源
+
+## Interview Tips
+- 能够清晰对比静态批处理和连续批处理的效率差异
+- 理解 prefill 和 decode 阶段的计算特性差异
+- 掌握抢占策略的权衡（swap vs recompute）
+- 能够解释 chunked prefill 如何平衡 TTFT 和 TPOT
+- 了解 disaggregated serving 架构的动机和实现

@@ -1,0 +1,186 @@
+# KV Cache & PagedAttention
+
+## Overview
+**KV Cache (Key-Value Cache，键值缓存)** 是自回归推理的核心优化，通过缓存已计算的 Key 和 Value 向量避免重复计算。**PagedAttention（分页注意力）** 将操作系统的虚拟内存管理思想引入 KV cache 管理，解决了内存碎片化问题。
+
+在 LLM 推理中，KV cache 通常占据 GPU 显存的主要部分。理解 KV cache 的内存计算和优化方法，是 LLM 服务系统设计面试的必考内容。
+
+## Core Concepts
+
+### KV Cache Mechanism
+在自回归生成中，每次生成新 token 时都需要对所有之前的 token 计算注意力。如果不缓存，每步都要重新计算所有 token 的 Key 和 Value，导致 $O(n^2)$ 的冗余计算。
+
+KV Cache 保存了每一层、每个注意力头的 Key 和 Value 张量。生成新 token 时，只需计算新 token 的 Q, K, V，然后将新的 K, V 追加到缓存中。
+
+### KV Cache Memory Calculation
+KV Cache 的内存占用公式：
+
+$$\text{Memory}_{\text{KV}} = 2 \times n_{\text{layers}} \times d_{\text{model}} \times \text{seq\_len} \times \text{batch} \times \text{bytes\_per\_element}$$
+
+因子 2 表示 Key 和 Value 各一份。以 LLaMA-2 70B 为例（$n_{\text{layers}} = 80$，$d_{\text{model}} = 8192$）：
+
+| 序列长度 | Batch Size | BF16 KV Cache 大小 |
+|----------|------------|-------------------|
+| 2048 | 1 | 5.2 GB |
+| 4096 | 1 | 10.5 GB |
+| 4096 | 8 | 83.9 GB |
+| 8192 | 16 | 335 GB |
+
+可以看到，长序列和大批量下 KV cache 很快成为瓶颈。对于 GQA 模型，KV cache 按 KV 头数（而非查询头数）计算，因此使用 GQA 的 LLaMA-2 70B（8 个 KV 头 vs 64 个查询头）将 KV cache 减少了 8 倍。
+
+### KV Cache Optimization Techniques
+除 PagedAttention 外的优化方法：
+
+- **Multi-Query Attention (MQA，多查询注意力)**：所有查询头共享一组 KV 头
+- **Grouped-Query Attention (GQA，分组查询注意力)**：MQA 和 MHA 之间的折中
+- **KV Cache Compression（KV缓存压缩）**：使用量化（FP16 变为 INT8/INT4）压缩缓存值
+- **Sliding Window（滑动窗口）**：只保留最近 $W$ 个 token 的 KV cache（Mistral）
+- **Token Pruning（Token剪枝）**：根据注意力分数丢弃不重要的 token
+
+### PagedAttention
+**PagedAttention（分页注意力）**（vLLM, Kwon et al., 2023）借鉴操作系统的 **Virtual Memory（虚拟内存）** 和 **Paging（分页）** 机制：
+
+传统的 KV cache 为每个请求预分配连续的最大长度内存，导致：
+- **Internal Fragmentation（内部碎片）**：实际序列远短于最大长度，浪费已分配的空间
+- **External Fragmentation（外部碎片）**：频繁的分配释放导致不连续的空闲空间
+
+PagedAttention 的解决方案：
+- 将 KV cache 分成固定大小的 **Block（块）**，每个 block 存储固定数量 token 的 KV 向量
+- 使用 **Block Table（块表）** 映射逻辑位置到物理 block（类似页表）
+- 按需分配：只在生成新 token 时分配新 block
+- 非连续存储：物理 block 不需要连续，通过块表间接寻址
+
+### Prefix Caching
+**Prefix Caching（前缀缓存）** 利用多个请求共享相同前缀的特点：
+
+- 系统提示（System Prompt）对所有请求相同
+- 同一轮对话中的上下文前缀相同
+- **Automatic Prefix Caching（自动前缀缓存）**：使用前缀的哈希值作为键，自动检测和复用共享前缀的 KV cache
+
+这可以显著减少 **TTFT (Time To First Token，首token延迟)**，因为共享前缀部分不需要重新计算。
+
+### Memory Efficiency Analysis
+PagedAttention 将 KV cache 的内存利用率从约 20-40% 提升到接近 100%：
+
+$$\text{Waste}_{\text{traditional}} = \text{max\_seq\_len} - \text{actual\_len} \quad \text{(per request)}$$
+
+$$\text{Waste}_{\text{paged}} \leq \text{block\_size} - 1 \quad \text{(per request)}$$
+
+例如，最大序列长度 2048，实际平均长度 512 时：
+- 传统方式浪费 75% 内存
+- PagedAttention 浪费 < 1%（block size = 16 时）
+
+### Copy-on-Write
+PagedAttention 还支持 **Copy-on-Write (COW，写时复制)** 机制：
+
+- 多个请求共享相同前缀时，共享物理 block（通过引用计数管理）
+- 只有当某个请求需要修改共享 block 时，才会创建副本
+- 这对 **Beam Search（束搜索）** 和 **Parallel Sampling（并行采样）** 尤其有效
+
+## Implementation
+
+```python
+# PagedAttention 核心数据结构
+from dataclasses import dataclass, field
+from typing import List
+import torch
+
+@dataclass
+class KVBlock:
+    '''KV cache 的物理块'''
+    block_id: int
+    num_tokens: int = 0      # 当前存储的 token 数
+    ref_count: int = 0       # 引用计数（用于 copy-on-write）
+
+class BlockAllocator:
+    '''块分配器 - 管理物理 KV cache 块'''
+    def __init__(self, num_blocks, block_size):
+        self.free_blocks = list(range(num_blocks))
+        self.block_size = block_size
+
+    def allocate(self) -> int:
+        if not self.free_blocks:
+            raise MemoryError("KV cache blocks exhausted")
+        return self.free_blocks.pop()
+
+    def free(self, block_id: int):
+        self.free_blocks.append(block_id)
+
+    @property
+    def num_free_blocks(self):
+        return len(self.free_blocks)
+
+class BlockTable:
+    '''块表 - 逻辑到物理的映射'''
+    def __init__(self):
+        self.table: List[int] = []  # 逻辑 block index -> 物理 block id
+
+    def append_block(self, physical_block_id: int):
+        self.table.append(physical_block_id)
+
+    def get_physical_block(self, logical_idx: int) -> int:
+        return self.table[logical_idx]
+```
+
+### Multi-Head KV Cache vs GQA KV Cache
+详细对比不同注意力变体的 KV cache 效率：
+
+对于一个 $n_h = 64$ 头、$d_h = 128$ 维的模型：
+
+| 注意力类型 | KV 头数 | 每层每token KV大小 (BF16) |
+|-----------|--------|--------------------------|
+| MHA | 64 | $2 \times 64 \times 128 \times 2 = 32$ KB |
+| GQA (g=8) | 8 | $2 \times 8 \times 128 \times 2 = 4$ KB |
+| MQA | 1 | $2 \times 1 \times 128 \times 2 = 0.5$ KB |
+
+GQA 在保持接近 MHA 质量的同时，将 KV cache 减少了 8 倍。
+
+### Flash Attention and KV Cache
+**Flash Attention** 与 KV Cache 的协同优化：
+
+- Flash Attention 减少了注意力计算的 HBM 访问量
+- 在 decode 阶段，Flash Attention 的 **Flash Decoding** 变体专门优化了单 token 注意力计算
+- 结合 PagedAttention，实现了非连续 KV cache 的高效注意力计算
+
+### KV Cache Quantization
+**KV Cache Quantization（KV缓存量化）** 通过降低缓存精度来减少内存占用：
+
+| 精度 | 每元素字节 | 内存节省 | 质量影响 |
+|------|-----------|---------|---------|
+| FP16/BF16 | 2 | 基准 | 无 |
+| FP8 | 1 | 2x | 极小 |
+| INT8 | 1 | 2x | 小 |
+| INT4 | 0.5 | 4x | 中等 |
+
+研究表明 KV cache 对量化的敏感度低于模型权重，因此可以使用更激进的量化策略。
+
+### Token Eviction Strategies
+当 KV cache 内存受限时，需要选择性地丢弃部分 token：
+
+- **H2O (Heavy Hitter Oracle)**：保留注意力分数最高的 token（"重要token"）和最近的 token
+- **Scissorhands**：基于注意力模式的 token 剪枝
+- **StreamingLLM**：仅保留初始 token（Attention Sink）和最近的滑动窗口
+
+$$\text{Retained tokens} = \text{Sink tokens} \cup \text{Recent window tokens}$$
+
+### Practical KV Cache Sizing
+实际部署中 KV cache 大小的规划：
+
+对于 LLaMA-2 7B（32层，32头，head_dim=128，GQA 关闭）：
+
+$$\text{KV per token} = 2 \times 32 \times 32 \times 128 \times 2 = 524,288 \text{ bytes} \approx 0.5 \text{ MB}$$
+
+| 配置 | 内存需求 | 可并发请求数 (24GB GPU余量 10GB) |
+|------|---------|-------------------------------|
+| seq=2048 | 1 GB/req | 10 |
+| seq=4096 | 2 GB/req | 5 |
+| seq=8192 | 4 GB/req | 2 |
+
+这个计算直接决定了服务系统的最大并发量和吞吐量。
+
+## Interview Tips
+- 能够推导 KV cache 的内存占用公式并计算具体场景
+- 理解 PagedAttention 与操作系统虚拟内存的类比
+- 掌握内部碎片和外部碎片的概念及 PagedAttention 如何解决
+- 了解 Prefix Caching 的工作原理及对 TTFT 的影响
+- 能够比较不同 KV cache 优化方法的适用场景

@@ -1,0 +1,194 @@
+# RLHF (Reinforcement Learning from Human Feedback)
+
+## Overview
+**RLHF (Reinforcement Learning from Human Feedback，基于人类反馈的强化学习)** 通过人类偏好信号将 LLM 的输出与人类价值观对齐。它超越了 SFT 的能力边界——SFT 教会模型"如何回答"，而 RLHF 教会模型"如何回答得更好"。RLHF 是 ChatGPT 成功的关键技术之一。
+
+近年来，**DPO (Direct Preference Optimization，直接偏好优化)** 作为 RLHF 的简化替代方案获得了广泛关注。理解 RLHF 和 DPO 的原理及权衡，是 LLM 面试的高频考点。
+
+## Core Concepts
+
+### RLHF Pipeline
+RLHF 的标准流水线包含三个阶段：
+
+**阶段 1：SFT** -> 在指令数据上微调基座模型，获得初始策略 $\pi_{\text{SFT}}$
+
+**阶段 2：Reward Model Training（奖励模型训练）** -> 使用人类偏好数据训练奖励模型 $R_\phi$
+
+**阶段 3：RL Optimization（强化学习优化）** -> 使用 PPO 优化策略模型，最大化奖励
+
+### Reward Model Training
+奖励模型学习人类的偏好。训练数据的格式为：给定一个提示 $x$，人类标注员对多个回答进行排序（通常是成对比较 $y_w \succ y_l$，即 $y_w$ 优于 $y_l$）。
+
+奖励模型的训练目标基于 **Bradley-Terry Model（Bradley-Terry模型）**：
+
+$$\mathcal{L}_{\text{RM}} = -\mathbb{E}_{(x, y_w, y_l)} \left[\log \sigma(R_\phi(x, y_w) - R_\phi(x, y_l))\right]$$
+
+其中 $\sigma$ 是 sigmoid 函数。这个损失函数鼓励奖励模型给 preferred（被偏好的）回答更高的分数。
+
+奖励模型的关键设计考虑：
+- 通常使用与策略模型相同大小或更小的模型
+- 需要高质量的人类标注数据（通常需要数万条偏好对）
+- **Inter-annotator Agreement（标注者一致性）** 对奖励模型质量至关重要
+
+### PPO Optimization
+**PPO (Proximal Policy Optimization，近端策略优化)** 是 RLHF 中最常用的 RL 算法。优化目标为：
+
+$$\max_{\pi_\theta} \mathbb{E}_{x \sim D, y \sim \pi_\theta(y|x)} \left[R_\phi(x, y) - \beta \cdot \text{KL}[\pi_\theta(y|x) \| \pi_{\text{ref}}(y|x)]\right]$$
+
+其中：
+- $R_\phi(x, y)$ 是奖励模型给出的分数
+- $\beta \cdot \text{KL}[\cdot]$ 是 **KL Penalty（KL 惩罚项）**，防止策略偏离 SFT 模型太远
+- $\pi_{\text{ref}}$ 通常是 SFT 模型的冻结副本
+
+PPO 的 clipped objective：
+
+$$L^{\text{CLIP}} = \mathbb{E}\left[\min\left(\frac{\pi_\theta}{\pi_{\text{old}}} A_t, \text{clip}\left(\frac{\pi_\theta}{\pi_{\text{old}}}, 1-\epsilon, 1+\epsilon\right) A_t\right)\right]$$
+
+其中 $A_t$ 是优势函数估计，$\epsilon$ 是裁剪范围（通常 0.2）。PPO 通过裁剪来限制每次更新的幅度，提高训练稳定性。
+
+### RLHF Challenges
+RLHF 的工程复杂度很高：
+- 需要同时维护 4 个模型：策略模型、参考模型、奖励模型、价值模型
+- **Reward Hacking（奖励攻击）**：策略模型可能找到"欺骗"奖励模型的方式，获得高奖励但人类评价差
+- 超参数敏感：$\beta$（KL 系数）的选择至关重要，太大则更新不足，太小则分布偏移严重
+- 训练不稳定：RL 训练本身就比监督学习更不稳定
+
+### DPO (Direct Preference Optimization)
+**DPO（直接偏好优化）**（Rafailov et al., 2023）绕过了显式的奖励模型和 RL 优化，直接从偏好数据中优化策略模型：
+
+$$\mathcal{L}_{\text{DPO}} = -\mathbb{E}_{(x, y_w, y_l)} \left[\log \sigma\left(\beta \log \frac{\pi_\theta(y_w|x)}{\pi_{\text{ref}}(y_w|x)} - \beta \log \frac{\pi_\theta(y_l|x)}{\pi_{\text{ref}}(y_l|x)}\right)\right]$$
+
+DPO 的核心洞见是：存在一个从最优策略到奖励函数的闭式映射。因此可以将 RL 问题转化为等价的监督学习问题。
+
+### RLHF vs DPO Comparison
+
+| 维度 | RLHF (PPO) | DPO |
+|------|-----------|-----|
+| 复杂度 | 高（4 个模型） | 低（2 个模型） |
+| 稳定性 | 较低 | 较高 |
+| 内存需求 | 高 | 较低 |
+| 在线学习 | 支持 | 不支持（离线） |
+| 奖励模型 | 需要显式训练 | 隐式学习 |
+| 大规模表现 | 通常更好 | 可能有分布偏移 |
+| 工程难度 | 高 | 低 |
+
+DPO 的主要局限是它是 **Offline（离线）** 方法——使用固定的偏好数据，无法像 PPO 那样在训练过程中探索新的回答并获取反馈。一些改进方案如 **Online DPO** 和 **IPO (Identity Preference Optimization)** 试图解决这些问题。
+
+### Beyond RLHF
+其他对齐方法：
+- **RLAIF (RL from AI Feedback，基于AI反馈的强化学习)**：用 AI 代替人类提供偏好标注
+- **Constitutional AI (CAI，宪法AI)**：模型自我改进，根据一组原则评价和修正自己的回答
+- **KTO (Kahneman-Tversky Optimization)**：不需要成对比较数据，只需标记回答为"好"或"差"
+- **ORPO (Odds Ratio Preference Optimization)**：将 SFT 和偏好对齐合并为单阶段训练
+- **SimPO (Simple Preference Optimization)**：去掉参考模型，使用序列长度归一化的隐式奖励
+
+## Implementation
+
+```python
+# DPO 训练示例
+from trl import DPOTrainer, DPOConfig
+
+# 偏好数据格式
+# {"prompt": "...", "chosen": "...", "rejected": "..."}
+
+dpo_config = DPOConfig(
+    beta=0.1,                    # KL 惩罚系数
+    learning_rate=5e-7,          # 较低的学习率
+    per_device_train_batch_size=4,
+    num_train_epochs=1,
+    bf16=True,
+    loss_type="sigmoid",         # 标准 DPO 损失
+)
+
+trainer = DPOTrainer(
+    model=model,
+    ref_model=ref_model,         # 冻结的 SFT 模型
+    train_dataset=preference_data,
+    tokenizer=tokenizer,
+    args=dpo_config,
+)
+trainer.train()
+```
+
+### Reward Model Architecture
+奖励模型的典型实现：
+
+- 基于预训练 LLM，将最后一层替换为单值输出头
+- 输入：prompt + response 的拼接
+- 输出：标量奖励值
+- 训练数据：人类标注的偏好对 $(x, y_w, y_l)$
+
+奖励模型的质量瓶颈：
+- 标注者之间的一致性通常仅 60-70%
+- 标注指南的设计直接影响模型行为
+- 大规模标注的成本很高（每个偏好对 $0.5-$2）
+
+### PPO Implementation Details
+RLHF 中 PPO 的实际实现涉及多个技术细节：
+
+- **GAE (Generalized Advantage Estimation，广义优势估计)**：使用 $\lambda$-return 估计优势函数
+- **Value Function（价值函数）**：通常与策略模型共享底层参数
+- **Mini-batch Training（小批量训练）**：每个 rollout 的数据可以训练多个 epoch
+- **Gradient Accumulation（梯度累积）**：有效增大批量大小
+
+$$A^{\text{GAE}}(\gamma, \lambda) = \sum_{t=0}^{T} (\gamma\lambda)^t \delta_t$$
+
+其中 $\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$ 是 TD 误差。
+
+### DPO Mathematical Derivation
+DPO 损失函数的推导关键步骤：
+
+1. 从 RLHF 的最优策略出发：$\pi^*(y|x) = \frac{1}{Z(x)} \pi_{\text{ref}}(y|x) \exp\left(\frac{1}{\beta} R(x, y)\right)$
+2. 求解奖励函数：$R(x, y) = \beta \log \frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)$
+3. 将其代入 Bradley-Terry 偏好模型
+4. 得到仅依赖于策略和参考模型的损失函数
+
+这种推导表明 DPO 本质上是在隐式地学习奖励函数，同时直接优化策略。
+
+### Alignment Tax
+**Alignment Tax（对齐税）** 指的是对齐训练对模型基础能力的潜在损害：
+
+- RLHF 可能降低模型在某些基准测试上的表现（如数学推理）
+- 对齐训练使模型倾向于生成更长、更详细的回答，但不一定更准确
+- **Safety-Helpfulness Tradeoff（安全性-有用性权衡）**：过度对齐的模型可能拒绝合理的请求
+
+实践中需要在对齐程度和基础能力之间取得平衡。
+
+### RLHF Training Pipeline Details
+完整的 RLHF 训练流程的工程实现：
+
+**数据准备**：
+- 收集 prompt 集合（可以从 SFT 训练数据中复用）
+- 为每个 prompt 生成多个回答（通常 4-8 个）
+- 人类标注员对回答进行成对比较排序
+
+**训练循环**（PPO 阶段）：
+1. 从 prompt 集合中采样
+2. 策略模型生成回答
+3. 奖励模型打分
+4. 计算 KL 惩罚：$\text{reward}' = R(x, y) - \beta \cdot \text{KL}$
+5. 使用 PPO 更新策略模型
+6. 定期更新参考模型（如每 N 步同步一次）
+
+### RLHF vs DPO Performance Analysis
+在实际应用中的性能对比：
+
+- **小规模模型**（7B-13B）：DPO 通常与 RLHF 表现接近，且工程成本低得多
+- **大规模模型**（70B+）：RLHF（PPO）在某些指标上优于 DPO，尤其是在需要在线探索的场景
+- **领域特定**：对于有明确奖励信号的任务（如代码正确性），RLHF 优势更明显
+- **迭代改进**：PPO 支持多轮迭代（生成->标注->训练），DPO 需要重新收集偏好数据
+
+### Practical Tips for Alignment Training
+对齐训练的实用建议：
+
+- 从 DPO 开始，如果效果不足再考虑 PPO
+- 数据质量 > 数据量 > 算法选择
+- KL 系数 $\beta$ 的选择通过小规模实验确定（通常 0.05-0.2）
+- 始终保留一个未对齐的基座模型作为对照
+
+## Interview Tips
+- 能够完整描述 RLHF 三阶段流水线
+- 理解 DPO 损失函数的推导直觉及其与 RLHF 的等价关系
+- 掌握 Reward Hacking 问题及 KL 惩罚的作用
+- 能够比较 RLHF 和 DPO 的优缺点及适用场景
+- 了解 RLAIF、Constitutional AI 等替代方案

@@ -1,0 +1,166 @@
+# GPT Family
+
+## Overview
+**GPT (Generative Pre-trained Transformer，生成式预训练变换器)** 系列开创了 **Decoder-only（纯解码器）** 自回归语言模型的范式。从 GPT-1 到 GPT-4，该系列不断验证了一个核心发现：通过扩展模型规模、数据量和计算资源，可以涌现出 **In-context Learning（上下文学习）**、**Chain-of-Thought Reasoning（链式思维推理）** 和 **Instruction Following（指令跟随）** 等能力。
+
+GPT 系列的发展历程不仅是大语言模型技术的缩影，更深刻地改变了自然语言处理的研究范式——从"预训练+微调"转向"预训练+提示"，再到"预训练+对齐"。理解 GPT 系列的演进脉络，对于准备 MLE 面试中的 LLM 相关问题至关重要。
+
+## Core Concepts
+
+### Autoregressive Language Modeling
+所有 GPT 模型都基于 **Autoregressive（自回归）** 的 **Next-token Prediction（下一词预测）** 范式进行训练。模型将文本视为 token 序列，每个 token 的生成仅依赖于之前的所有 token：
+
+$$P(x) = \prod_{t=1}^{n} P(x_t | x_{<t}; \theta)$$
+
+对应的训练目标是最小化负对数似然：
+
+$$\mathcal{L} = -\sum_{t=1}^{n} \log P(x_t | x_{<t}; \theta)$$
+
+其中 $\theta$ 为模型参数，$x_{<t}$ 表示位置 $t$ 之前的所有 token。这一目标函数的优雅之处在于：通过简单的下一词预测任务，模型被迫学习语言的语法结构、语义关系、世界知识和推理能力。
+
+自回归建模使用 **Causal Masking（因果遮蔽）** 确保每个位置只能关注之前的位置，防止信息泄漏。这与 BERT 等双向模型的 MLM 目标不同，自回归模型天然适合文本生成任务。
+
+### GPT Model Evolution
+
+| Model | Year | Params | Context | Key Innovation |
+|-------|------|--------|---------|----------------|
+| GPT-1 | 2018 | 117M | 512 | 预训练+微调范式 |
+| GPT-2 | 2019 | 1.5B | 1024 | 零样本任务迁移 |
+| GPT-3 | 2020 | 175B | 2048 | 上下文学习/少样本提示 |
+| GPT-4 | 2023 | ~1.8T (MoE) | 128K | 多模态/RLHF/指令跟随 |
+
+**GPT-1** 确立了"无监督预训练+有监督微调"的两阶段范式，使用 12 层 Transformer 解码器。**GPT-2** 将规模提升一个数量级，发现模型可以在不微调的情况下直接通过提示完成任务（零样本迁移）。**GPT-3** 实现了质的飞跃——175B 参数使模型涌现出 **In-context Learning（上下文学习）** 能力，仅通过几个示例就能完成新任务。**GPT-4** 采用 **MoE (Mixture of Experts，混合专家)** 架构，支持多模态输入，并通过 **RLHF (Reinforcement Learning from Human Feedback，基于人类反馈的强化学习)** 实现了更好的对齐。
+
+### In-Context Learning (ICL)
+**ICL（上下文学习）** 是 GPT-3 中发现的涌现能力。模型可以通过提示中提供的示例来完成任务，无需任何梯度更新：
+
+$$P(y|x, \text{examples}) \approx P(y | \text{demo}_1, \ldots, \text{demo}_k, x)$$
+
+其中 $\text{demo}_i = (x_i, y_i)$ 是输入-输出示例对。ICL 有三种模式：
+
+- **Zero-shot（零样本）**：仅提供任务描述，不给示例
+- **Few-shot（少样本）**：提供 $k$ 个输入-输出示例
+- **Chain-of-Thought（链式思维）**：示例中包含推理过程
+
+ICL 的机制仍有争议。一种理论认为预训练隐式地学习了一个"学习算法"，在推理时通过注意力机制实现梯度下降的近似。另一种观点认为 ICL 本质上是 **Task Location（任务定位）**——模型在预训练分布中找到与当前上下文最匹配的任务。
+
+### Scaling Laws
+**Scaling Laws（缩放定律）**（Kaplan et al., 2020）揭示了模型性能与计算资源之间的幂律关系：
+
+$$L(N) \approx \left(\frac{N_c}{N}\right)^{\alpha_N}, \quad L(D) \approx \left(\frac{D_c}{D}\right)^{\alpha_D}$$
+
+其中 $L$ 是损失，$N$ 是参数量，$D$ 是数据量，$N_c, D_c, \alpha_N, \alpha_D$ 是拟合常数。关键发现包括：
+
+- 损失随参数量和数据量平滑地呈幂律下降
+- 更大的模型具有更高的 **Sample Efficiency（样本效率）**
+- 在固定计算预算下，存在最优的参数量和数据量分配
+
+**Chinchilla Scaling（Chinchilla缩放定律）**（Hoffmann et al., 2022）修正了早期的发现，证明对于固定计算预算 $C$，应当均衡分配给模型大小和数据量：
+
+$$N_{\text{opt}} \propto C^{0.5}, \quad D_{\text{opt}} \propto C^{0.5}$$
+
+这意味着 GPT-3（175B 参数，300B tokens）实际上是"欠训练"的——以同等计算量训练的 Chinchilla（70B 参数，1.4T tokens）达到了相同甚至更好的性能。这一发现深刻影响了后续 LLM 的训练策略，LLaMA 等模型都采用了更多数据量的方案。
+
+### GPT Architecture Details
+GPT-2/3 的关键架构设计：
+
+- **Pre-norm（前置归一化）**：在注意力和 FFN 之前进行 LayerNorm，提升训练稳定性
+- **Learned Absolute Position Embeddings（学习的绝对位置编码）**：将位置信息作为可学习参数
+- **Dense Attention（密集注意力）**：所有头、全序列参与注意力计算
+- **BPE Tokenizer（字节对编码分词器）**：约 50K 词表
+- 无编码器、无交叉注意力——纯解码器结构
+
+GPT-4 可能使用了 **MoE** 架构，每次推理仅激活部分专家，在保持计算效率的同时拥有更大的总参数量。
+
+## Implementation
+
+```python
+# 使用 GPT 风格模型进行文本生成
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+model = AutoModelForCausalLM.from_pretrained("gpt2")
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+
+# In-context Learning 示例
+prompt = '''Classify the sentiment:
+Text: "Great movie!" -> Positive
+Text: "Terrible service" -> Negative
+Text: "The food was amazing" ->'''
+inputs = tokenizer(prompt, return_tensors="pt")
+output = model.generate(**inputs, max_new_tokens=5)
+print(tokenizer.decode(output[0], skip_special_tokens=True))
+```
+
+```python
+# 计算自回归模型的困惑度 (Perplexity)
+import torch
+import torch.nn.functional as F
+
+def compute_perplexity(model, tokenizer, text):
+    '''计算给定文本的困惑度'''
+    inputs = tokenizer(text, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model(**inputs, labels=inputs["input_ids"])
+    # 困惑度 = exp(平均交叉熵损失)
+    perplexity = torch.exp(outputs.loss)
+    return perplexity.item()
+```
+
+### Emergent Abilities
+**Emergent Abilities（涌现能力）** 是大规模语言模型中最令人兴奋的现象之一。当模型规模超过某个阈值时，突然表现出在小规模模型中完全不存在的能力：
+
+- **Arithmetic（算术）**：在约 13B 参数时开始能够进行简单算术运算
+- **Multi-step Reasoning（多步推理）**：在约 100B 参数时出现链式推理能力
+- **Code Generation（代码生成）**：在约 60B 参数时开始生成正确的代码
+
+涌现能力的存在是缩放定律的非线性延伸，也是持续增大模型规模的核心动力。但需要注意的是，也有研究者认为"涌现"可能只是评估指标选择的副产品——在连续指标上，性能提升实际上是渐进的。
+
+### Tokenization
+**BPE (Byte Pair Encoding，字节对编码)** 分词器是 GPT 系列的标准选择：
+
+1. 从字节级别开始，统计最频繁的相邻字节对
+2. 合并最频繁的对形成新的子词单元
+3. 重复直到达到目标词表大小
+
+GPT-2 使用约 50K 词表，GPT-4 使用约 100K 词表。更大的词表意味着：
+- 更高的文本压缩率（相同文本用更少 token 表示）
+- 更好的多语言支持
+- 但嵌入层参数量增加
+
+### GPT vs BERT Paradigm Comparison
+
+| 维度 | GPT（自回归） | BERT（双向） |
+|------|-------------|-------------|
+| 训练目标 | 下一词预测 | 遮蔽语言建模 |
+| 注意力 | 因果（单向） | 双向 |
+| 生成能力 | 自然支持 | 不自然 |
+| 理解能力 | 较弱（单向） | 较强（双向） |
+| 主要用途 | 文本生成/对话 | 文本分类/NER |
+| 缩放表现 | 优秀 | 一般 |
+
+随着 GPT-3 的成功，自回归范式已经成为主流。BERT 类模型仍在特定任务（如检索、分类）中有优势。
+
+### Attention Pattern Analysis
+GPT 系列中注意力模式的分析揭示了模型的工作机制：
+
+- **Induction Heads（归纳头）**：在 GPT-2 中发现的特殊注意力头，专门负责检测和延续序列模式。它们是 ICL 能力的关键组成部分
+- **Previous Token Heads（前一token头）**：总是关注前一个 token 的注意力头，用于基础的序列建模
+- **Positional Heads（位置头）**：关注特定相对位置的注意力头
+
+这些分析对理解和改进 LLM 有重要价值，也是 **Mechanistic Interpretability（机制可解释性）** 研究的基础。
+
+### GPT-4 Technical Speculation
+虽然 OpenAI 没有公开 GPT-4 的完整架构细节，但根据泄露信息和分析：
+
+- 可能使用 8x220B 的 MoE 架构（8 个专家，每个约 220B 参数）
+- 总参数约 1.8T，活跃参数约 220B
+- 使用 128K 上下文窗口
+- 训练成本估计超过 1 亿美元
+- 支持视觉输入（GPT-4V）
+
+## Interview Tips
+- 能够清晰描述 GPT-1 到 GPT-4 的演进逻辑和关键创新
+- 理解自回归建模与双向建模（BERT）的本质区别和适用场景
+- 掌握缩放定律和 Chinchilla 定律的核心结论
+- 能够解释 ICL 的工作机制及其与传统微调的对比
+- 了解 MoE 架构如何在效率和容量之间取得平衡

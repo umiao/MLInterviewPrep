@@ -1,0 +1,175 @@
+# Vision-Language Models (CLIP, LLaVA)
+
+## Overview
+**Vision-Language Models (VLMs，视觉-语言模型)** 是连接视觉和语言的多模态模型。**CLIP (Contrastive Language-Image Pre-training，对比语言-图像预训练)** 通过对比学习将图像和文本映射到同一语义空间，而 **LLaVA (Large Language and Vision Assistant，大型语言与视觉助手)** 等模型将视觉编码器与 LLM 结合，实现了对图像的理解和对话。
+
+在面试中，VLM 相关问题涵盖多模态对齐、架构设计和训练策略等方面。理解 CLIP 和 LLaVA 的核心原理对于多模态 AI 面试至关重要。
+
+## Core Concepts
+
+### CLIP Architecture
+**CLIP**（Radford et al., 2021）的核心思想是使用 **Contrastive Learning（对比学习）** 同时训练一个 **Image Encoder（图像编码器）** 和一个 **Text Encoder（文本编码器）**：
+
+$$\mathcal{L}_{\text{CLIP}} = -\frac{1}{N}\sum_{i=1}^{N}\left[\log\frac{e^{\text{sim}(f(I_i), g(T_i))/\tau}}{\sum_{j=1}^{N} e^{\text{sim}(f(I_i), g(T_j))/\tau}} + \log\frac{e^{\text{sim}(g(T_i), f(I_i))/\tau}}{\sum_{j=1}^{N} e^{\text{sim}(g(T_i), f(I_j))/\tau}}\right]$$
+
+其中：
+- $f(\cdot)$ 是图像编码器（**ViT (Vision Transformer，视觉变换器)** 或 ResNet）
+- $g(\cdot)$ 是文本编码器（Transformer）
+- $\text{sim}(\cdot, \cdot)$ 是余弦相似度
+- $\tau$ 是可学习的温度参数
+- $N$ 是批次大小（CLIP 使用 32K 的超大批次）
+
+CLIP 的训练数据包含 4 亿个从互联网收集的（图像，文本描述）对。损失函数是对称的 **InfoNCE Loss**——既鼓励图像找到对应文本，也鼓励文本找到对应图像。
+
+### CLIP Zero-shot Classification
+CLIP 最革命性的能力是 **Zero-shot Image Classification（零样本图像分类）**：
+
+1. 将类别名称转换为文本提示：`"a photo of a {class}"`
+2. 分别编码图像和所有类别文本
+3. 选择与图像最相似的文本对应的类别
+
+$$\text{class} = \arg\max_c \text{sim}(f(I), g(\text{"a photo of a "} + c))$$
+
+无需任何训练数据，CLIP 就能在 ImageNet 上达到 76.2% 的准确率（与有监督 ResNet-50 相当）。通过 **Prompt Engineering（提示工程）** 和 **Prompt Ensembling（提示集成）**（如使用多个模板取平均）可以进一步提升性能。
+
+### CLIP Applications
+CLIP 的通用视觉-语言对齐能力催生了大量应用：
+
+- **Image Search（图像搜索）**：用文本描述搜索图像
+- **Image-Text Matching（图像-文本匹配）**：判断图像和文本是否对应
+- **Visual Feature Extractor（视觉特征提取器）**：为下游模型提供视觉表示
+- **Content Moderation（内容审核）**：检测不当图像内容
+
+### LLaVA Architecture
+**LLaVA (Large Language and Vision Assistant，大型语言与视觉助手)**（Liu et al., 2023）的架构由三个组件组成：
+
+$$\text{LLaVA} = \text{Visual Encoder} + \text{Projection} + \text{LLM}$$
+
+1. **Visual Encoder（视觉编码器）**：使用预训练的 CLIP ViT-L/14 提取图像特征
+2. **Projection Layer（投影层）**：将视觉特征映射到 LLM 的输入空间
+   - LLaVA-1.0：简单的线性投影 $W \cdot v_{\text{image}}$
+   - LLaVA-1.5：两层 MLP 投影（效果更好）
+3. **LLM Backbone（LLM 骨干）**：接收视觉 token 和文本 token，生成回答
+
+输入序列格式：`[visual tokens] [text instruction] [response]`
+
+视觉 token 的数量取决于图像分辨率和 ViT 的 patch 大小。例如，224x224 图像 + 14x14 patch = 256 个视觉 token。LLaVA-1.5 使用 336x336 分辨率，产生 576 个视觉 token。
+
+### LLaVA Training Pipeline
+LLaVA 采用两阶段训练：
+
+**阶段 1：Pretraining（预训练对齐）**：
+- 冻结视觉编码器和 LLM，仅训练投影层
+- 使用 558K 图像-文本对（CC-Filtered）
+- 目标：学习视觉-语言对齐
+- 训练成本很低（仅训练投影层的少量参数）
+
+**阶段 2：Visual Instruction Tuning（视觉指令微调）**：
+- 冻结视觉编码器，训练投影层和 LLM
+- 使用 665K 多模态指令数据（GPT-4 生成）
+- 包含：详细描述、复杂推理、对话
+- 目标：学习跟随多模态指令
+
+### Flamingo
+**Flamingo**（Alayrac et al., 2022, DeepMind）的关键创新是 **Gated Cross-Attention（门控交叉注意力）** 层：
+
+- 在 LLM 的每几层之间插入交叉注意力层
+- 查询来自文本 token，键和值来自视觉 token
+- 使用 **Tanh Gating（tanh门控）** 控制视觉信息的注入强度（初始化为0，逐渐学习）
+- 支持 **Interleaved Image-Text（交错图像-文本）** 输入
+
+$$\text{Gated-XAttn}(x) = x + \tanh(\alpha) \cdot \text{CrossAttn}(x, v_{\text{image}})$$
+
+其中 $\alpha$ 初始化为 0，使得训练初期 LLM 行为不变，随着训练逐渐学习利用视觉信息。
+
+### Visual Grounding
+**Visual Grounding（视觉定位）** 将语言描述与图像中的具体区域对应：
+
+- **Referring Expression Comprehension（引用表达理解）**：给定描述，定位对应的图像区域
+- **Open-Vocabulary Detection（开放词汇检测）**：结合语言条件进行目标检测（如 **GLIP**、**Grounding DINO**）
+- **Bounding Box Prediction（边界框预测）**：VLM 输出格式如 `<box>x1, y1, x2, y2</box>`
+- **Segmentation（分割）**：**SAM (Segment Anything Model，分割一切模型)** 与语言结合实现文本引导的分割
+
+### SigLIP and Improvements
+**SigLIP (Sigmoid Loss for Language-Image Pre-training)** 改进了 CLIP 的损失函数：
+
+$$\mathcal{L}_{\text{SigLIP}} = -\frac{1}{N}\sum_{i,j} \log \sigma(y_{ij} \cdot z_i^T z_j - b)$$
+
+其中 $y_{ij} = 1$ 如果 $(i,j)$ 是正样本对，否则 $y_{ij} = -1$。
+
+SigLIP 的优势：
+- 不需要全局 softmax，支持更大批次和分布式训练
+- 训练更稳定
+- 在小批次下表现更好
+
+### VLM Comparison
+
+| 模型 | 视觉编码器 | LLM | 视觉-语言连接 | 训练数据 |
+|------|-----------|-----|-------------|---------|
+| LLaVA-1.5 | CLIP ViT-L | Vicuna-13B | MLP投影 | 1.2M |
+| Qwen-VL | ViT-bigG | Qwen-7B | 交叉注意力 | 1.4B |
+| InternVL | InternViT | InternLM | QLLaMA适配 | 多阶段 |
+| GPT-4V | 未公开 | GPT-4 | 未公开 | 未公开 |
+| Gemini | 原生多模态 | Gemini | 统一编码 | 未公开 |
+
+### VLM Challenges
+当前 VLM 面临的主要挑战：
+
+- **Hallucination（幻觉）**：模型可能描述图像中不存在的物体
+- **OCR Ability（文字识别能力）**：早期 VLM 的文字识别能力较弱
+- **High Resolution（高分辨率）**：处理高分辨率图像需要大量视觉 token
+- **Video Understanding（视频理解）**：将 VLM 扩展到视频仍面临挑战
+- **Spatial Reasoning（空间推理）**：理解物体之间的空间关系仍困难
+
+## Implementation
+
+```python
+# CLIP 零样本分类
+import torch
+from transformers import CLIPProcessor, CLIPModel
+from PIL import Image
+
+model = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
+processor = CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14")
+
+# 零样本分类
+image = Image.open("cat.jpg")
+candidate_labels = ["a photo of a cat", "a photo of a dog", "a photo of a car"]
+
+inputs = processor(
+    text=candidate_labels,
+    images=image,
+    return_tensors="pt",
+    padding=True
+)
+outputs = model(**inputs)
+
+# 计算图像-文本相似度
+logits = outputs.logits_per_image  # shape: [1, 3]
+probs = logits.softmax(dim=1)
+best_idx = probs.argmax().item()
+print(f"Classification: {candidate_labels[best_idx]}")
+print(f"Confidence: {probs[0][best_idx]:.3f}")
+
+# LLaVA 推理
+from transformers import LlavaForConditionalGeneration, AutoProcessor
+
+model = LlavaForConditionalGeneration.from_pretrained(
+    "llava-hf/llava-1.5-7b-hf",
+    torch_dtype=torch.float16,
+    device_map="auto",
+)
+processor = AutoProcessor.from_pretrained("llava-hf/llava-1.5-7b-hf")
+
+prompt = "<image>\nDescribe this image in detail."
+inputs = processor(prompt, image, return_tensors="pt").to("cuda")
+output = model.generate(**inputs, max_new_tokens=200)
+print(processor.decode(output[0], skip_special_tokens=True))
+```
+
+## Interview Tips
+- 理解 CLIP 对比学习的对称损失函数设计
+- 能够描述 LLaVA 的两阶段训练策略及其设计动机
+- 掌握不同 VLM 中视觉-语言连接方式的优缺点
+- 了解零样本分类的原理和提示工程技巧
+- 能够比较 CLIP、LLaVA 和 Flamingo 的架构差异

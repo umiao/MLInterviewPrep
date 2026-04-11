@@ -1,0 +1,210 @@
+# Embedding Models
+
+## Overview
+**Embedding Models（嵌入模型）** 将文本转换为稠密向量表示，是 RAG 系统中检索的基础。现代嵌入模型基于 **Sentence Transformers（句子变换器）** 框架，通过 **Contrastive Learning（对比学习）** 训练，使语义相似的文本在向量空间中距离更近。
+
+在面试中，候选人需要理解嵌入模型的训练方法、评估指标和实际部署中的优化技术。
+
+## Core Concepts
+
+### Sentence-Transformers Architecture
+**Sentence-Transformers** 基于 BERT/RoBERTa 等预训练编码器，通过以下步骤获得句子嵌入：
+
+1. 将句子通过 Transformer 编码器获得 token 级别的表示
+2. 使用 **Pooling Strategy（池化策略）** 将 token 表示聚合为单一向量：
+   - **[CLS] Pooling**：使用 [CLS] token 的表示
+   - **Mean Pooling（均值池化）**：对所有 token 表示求平均（通常效果最好）
+   - **Max Pooling（最大池化）**：对每个维度取最大值
+
+### Contrastive Loss
+嵌入模型的核心训练目标是 **Contrastive Loss（对比损失）**，也称为 **InfoNCE Loss**：
+
+$$\mathcal{L} = -\log \frac{e^{\text{sim}(z_i, z_j) / \tau}}{\sum_{k=1}^{2N} \mathbb{1}_{[k \neq i]} e^{\text{sim}(z_i, z_k) / \tau}}$$
+
+其中：
+- $z_i, z_j$ 是正样本对（语义相似的文本对）的嵌入
+- $\text{sim}(\cdot, \cdot)$ 是余弦相似度
+- $\tau$ 是 **Temperature（温度系数）**，控制分布的尖锐程度
+- $N$ 是批次中的正样本对数
+- 分母包含所有非 $i$ 的样本作为 **In-batch Negatives（批内负样本）**
+
+温度系数的作用：
+- $\tau$ 较小时，模型更关注区分难负样本
+- $\tau$ 较大时，梯度信号更均匀
+- 通常 $\tau \in [0.01, 0.1]$
+
+### Hard Negative Mining
+**Hard Negative Mining（困难负样本挖掘）** 对嵌入质量至关重要。高质量的负样本是那些表面相似但语义不同的文本对：
+
+- **In-batch Negatives（批内负样本）**：同一批次中的其他样本作为负样本
+- **BM25 Negatives**：用 BM25 检索的高分但不正确的文档
+- **Cross-encoder Reranking（交叉编码器重排序）**：用更强的模型识别困难负样本
+- **Self-mining（自挖掘）**：用当前模型检索得到的假阳性
+
+### Training Data Sources
+嵌入模型的训练数据来源：
+
+- **NLI (Natural Language Inference，自然语言推理)**：蕴含对作为正样本，矛盾对作为负样本
+- **Paraphrase（释义）** 数据：同义表达作为正样本
+- **Question-Answer（问答）** 数据：问题与答案作为正样本
+- **Web Search（网页搜索）** 数据：查询与点击文档作为正样本
+- **Synthetic Data（合成数据）**：使用 LLM 生成训练数据对
+
+### Matryoshka Representation Learning (MRL)
+**Matryoshka Representation Learning（套娃表示学习）**（Kusupati et al., 2022）训练出可以在不同维度截断使用的嵌入：
+
+$$\mathcal{L}_{\text{MRL}} = \sum_{d \in \{32, 64, 128, 256, 768\}} \mathcal{L}_{\text{contrastive}}(z[:d])$$
+
+训练时在多个维度上同时优化对比损失。使用时可以根据延迟和存储需求选择合适的维度：
+
+| 维度 | 相对质量 | 存储节省 |
+|------|----------|----------|
+| 768 | 100% | 基准 |
+| 256 | ~97% | 3x |
+| 128 | ~95% | 6x |
+| 64 | ~90% | 12x |
+
+这使得一个模型可以适应从高质量检索到资源受限的移动端等不同场景。
+
+### Late Interaction Models
+**Late Interaction（晚期交互）** 模型（如 **ColBERT**）保留 token 级别的表示，提供更细粒度的匹配：
+
+$$\text{Score}(q, d) = \sum_{i=1}^{|q|} \max_{j=1}^{|d|} q_i^T d_j$$
+
+每个查询 token 找到最相似的文档 token，然后求和。与单向量模型相比，ColBERT 在保持检索速度的同时提供了更好的匹配质量。
+
+### Bi-Encoder vs Cross-Encoder
+
+| 特性 | Bi-Encoder（双编码器） | Cross-Encoder（交叉编码器） |
+|------|----------------------|--------------------------|
+| 编码方式 | 查询和文档独立编码 | 查询和文档拼接后联合编码 |
+| 推理速度 | 快（可预计算文档嵌入） | 慢（每对都要重新编码） |
+| 匹配质量 | 较好 | 最好 |
+| 适用场景 | 初始检索（海量候选） | 重排序（少量候选） |
+
+实际系统通常采用两阶段架构：Bi-Encoder 快速检索 Top-100 -> Cross-Encoder 精排 Top-10。
+
+### Embedding Model Selection
+选择嵌入模型的关键考虑因素：
+
+- **MTEB (Massive Text Embedding Benchmark，大规模文本嵌入基准)** 排名
+- **维度**：更高维度通常更好，但增加存储和计算成本
+- **最大序列长度**：是否支持长文档
+- **多语言支持**：是否支持目标语言
+- **许可证**：商用是否需要付费
+
+常用模型：
+- **all-MiniLM-L6-v2**：轻量快速，384维，适合原型
+- **bge-large-en-v1.5**：高质量英文嵌入，1024维
+- **multilingual-e5-large**：多语言支持
+- **text-embedding-3-large (OpenAI)**：商用API，可变维度
+
+### Evaluation Metrics
+嵌入模型的评估指标：
+
+- **NDCG@k (Normalized Discounted Cumulative Gain)**：考虑排序位置的检索质量
+- **MRR (Mean Reciprocal Rank，平均倒数排名)**：第一个正确结果的排名倒数
+- **Recall@k**：Top-k 结果中包含正确答案的比例
+- **MAP (Mean Average Precision，平均精度均值)**：所有正确结果排名的平均精度
+
+## Implementation
+
+```python
+# 使用 Sentence-Transformers 进行嵌入
+from sentence_transformers import SentenceTransformer, losses, InputExample
+from torch.utils.data import DataLoader
+
+# 加载预训练嵌入模型
+model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# 编码文本
+sentences = ["This is a query", "This is a relevant document"]
+embeddings = model.encode(sentences, normalize_embeddings=True)
+
+# 计算余弦相似度
+similarity = embeddings[0] @ embeddings[1]
+
+# 微调嵌入模型
+train_examples = [
+    InputExample(texts=["query text", "positive document"], label=1.0),
+    InputExample(texts=["query text", "negative document"], label=0.0),
+]
+train_dataloader = DataLoader(train_examples, batch_size=32, shuffle=True)
+train_loss = losses.ContrastiveLoss(model)
+model.fit(
+    train_objectives=[(train_dataloader, train_loss)],
+    epochs=3,
+    warmup_steps=100,
+)
+
+# Matryoshka 嵌入的使用
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5")
+embeddings_full = model.encode(["example text"])         # 768 维
+embeddings_256 = embeddings_full[:, :256]                # 截断到 256 维
+```
+
+### Embedding Model Training Pipeline
+现代嵌入模型的训练通常分为多个阶段：
+
+**阶段 1：Pre-training（预训练）**
+- 在大规模文本对上进行对比学习预训练
+- 使用弱监督信号（如标题-正文、问题-回答）
+
+**阶段 2：Fine-tuning（微调）**
+- 在高质量标注数据上微调
+- 使用困难负样本提升区分能力
+
+**阶段 3：Instruction Tuning（指令微调）**（如 E5-instruct, GTE）
+- 使用自然语言指令描述检索任务
+- 使不同检索任务使用不同的指令前缀
+- 提升模型在多种检索场景下的泛化能力
+
+### Embedding Dimension vs Quality
+嵌入维度的选择涉及质量与效率的权衡：
+
+$$\text{Storage} = N \times d \times 4 \text{ bytes (FP32)}$$
+
+对于 100 万个文档：
+- 384 维：~1.5 GB
+- 768 维：~3 GB
+- 1536 维：~6 GB
+
+使用 Matryoshka 嵌入时可以动态调整维度，在不同场景下取得最优的质量-效率平衡。
+
+### Domain Adaptation
+将通用嵌入模型适配到特定领域：
+
+- **继续训练**：在领域数据上继续对比学习
+- **领域特定负样本**：使用领域内的困难负样本
+- **数据增强**：使用 LLM 生成领域相关的训练数据对
+- **评估**：在领域特定的测试集上评估，而非仅看通用基准
+
+### Cross-lingual Embeddings
+**Cross-lingual Embeddings（跨语言嵌入）** 将不同语言的文本映射到同一语义空间：
+
+- **Multilingual Pre-training（多语言预训练）**：在多种语言的数据上训练
+- **Translation Pair Training（翻译对训练）**：使用平行语料（翻译对）进行对齐
+- **Zero-shot Transfer（零样本迁移）**：在一种语言上训练，在其他语言上使用
+
+代表模型：
+- **multilingual-e5-large**：支持 100+ 种语言
+- **paraphrase-multilingual-MiniLM-L12-v2**：轻量级多语言模型
+
+### Embedding Compression
+降低嵌入存储和检索成本的技术：
+
+- **Product Quantization（乘积量化）**：将嵌入向量量化为紧凑表示
+- **Binary Quantization（二值量化）**：将浮点嵌入转换为二值向量，大幅减少存储（32x 压缩）
+- **Dimensionality Reduction（降维）**：PCA 或 Matryoshka 截断
+- **Scalar Quantization（标量量化）**：将 FP32 转换为 INT8
+
+$$\text{Binary} \approx \text{sign}(z), \quad \text{Hamming}(x, y) \propto \text{sim}(x, y)$$
+
+## Interview Tips
+- 理解对比损失的原理及温度系数的作用
+- 掌握困难负样本挖掘的方法和重要性
+- 能够比较 Bi-Encoder 和 Cross-Encoder 的适用场景
+- 了解 Matryoshka 表示学习如何实现维度自适应
+- 掌握嵌入模型评估指标（NDCG、MRR、Recall）

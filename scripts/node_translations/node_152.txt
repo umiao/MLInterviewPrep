@@ -1,0 +1,214 @@
+# Supervised Fine-Tuning (SFT)
+
+## Overview
+**SFT (Supervised Fine-Tuning，有监督微调)** 将预训练基座模型转化为能够跟随指令的对话助手。通过在精心策划的（指令，响应）数据对上进行训练，SFT 教会模型理解用户意图并生成有帮助、安全且格式正确的回答。
+
+SFT 是 LLM 对齐流水线的第一步（SFT -> RLHF/DPO），其质量直接影响后续对齐阶段的效果。在面试中，SFT 相关问题常涉及数据策略、训练技巧和过拟合防护。
+
+## Core Concepts
+
+### Instruction Tuning
+**Instruction Tuning（指令微调）** 是 SFT 的核心范式。训练数据格式为：
+
+```
+[System Prompt] + [User Instruction] + [Model Response]
+```
+
+关键设计决策包括：
+
+- **Loss Masking（损失遮蔽）**：仅在模型响应部分计算损失，而非用户指令部分。这确保模型学习"如何回答"而非"如何重复问题"
+- **Chat Template（对话模板）**：使用特殊 token 标记对话角色和轮次，如 `<|im_start|>user\n...<|im_end|>\n<|im_start|>assistant\n...`
+- **Multi-turn（多轮对话）**：训练数据应包含多轮对话，使模型学会维持上下文
+
+### Data Quality > Quantity
+SFT 的核心洞见是 **数据质量远比数量重要**：
+
+- **LIMA 论文**（Zhou et al., 2023）证明仅用 1000 条高质量数据就能训练出接近 GPT-4 水平的对话模型
+- **Alpaca 方法**：使用 GPT-4 生成 52K 条指令数据，成本低但质量参差不齐
+- **Vicuna 方法**：使用 ShareGPT 上的用户-GPT 对话数据（70K 条），质量较高因为经过了真实用户的筛选
+
+数据质量的关键维度：
+
+| 维度 | 说明 | 影响 |
+|------|------|------|
+| 正确性 | 答案是否事实正确 | 最关键 |
+| 信息量 | 回答是否详尽有深度 | 高 |
+| 格式多样性 | 是否覆盖多种输出格式 | 中 |
+| 任务多样性 | 是否覆盖广泛的任务类型 | 高 |
+| 难度分布 | 是否包含有挑战性的问题 | 中 |
+
+### Overfitting Prevention
+SFT 数据量通常较小（数千到数万条），极易过拟合。防护策略包括：
+
+- **Early Stopping（早停）**：通过验证集损失监控，在过拟合前停止训练。通常 SFT 只需要 1-3 个 epoch
+- **Low Learning Rate（低学习率）**：SFT 学习率通常比预训练低一个数量级，如 $2 \times 10^{-5}$
+- **Weight Decay（权重衰减）**：通常设为 0.01-0.1，防止权重过大
+- **Dropout（随机失活）**：部分工作表明在 SFT 阶段重新开启 dropout 可以缓解过拟合
+- **Data Augmentation（数据增强）**：通过改写指令、变换格式等方式扩充数据
+
+### SFT Training Objective
+SFT 的训练目标与预训练相同——最小化负对数似然，但仅在响应 token 上计算：
+
+$$\mathcal{L}_{\text{SFT}} = -\sum_{t \in \text{response}} \log P(x_t | x_{<t}; \theta)$$
+
+其中响应 token 的范围由特殊 token 标记确定。这一选择性损失计算的直觉是：模型应该学会根据指令生成高质量的回答，而不是学会预测指令本身。
+
+### NEFTune
+**NEFTune (Noisy Embedding Fine-Tuning，噪声嵌入微调)** 是一种简单有效的正则化技术，在训练时向输入嵌入中添加均匀噪声：
+
+$$\tilde{e} = e + \frac{\alpha}{\sqrt{Ld}} \cdot U(-1, 1)$$
+
+其中 $L$ 是序列长度，$d$ 是嵌入维度，$\alpha$ 是噪声强度（通常设为 5-15）。NEFTune 在多个基准测试上显著提升了 SFT 模型的性能，可能是因为它帮助模型避免了对训练数据表面模式的过度记忆。
+
+### Packing vs Padding
+为了高效利用 GPU 计算，训练数据需要进行批处理。两种主要策略：
+
+- **Padding（填充）**：将短序列填充到最大长度。简单但浪费计算
+- **Packing（打包）**：将多个短样本拼接成一个长序列，使用特殊分隔 token。需要使用注意力掩码确保不同样本之间不会相互关注
+
+### SFT Data Generation Pipeline
+高质量 SFT 数据的生成流程：
+
+1. **Seed Tasks（种子任务）**：手动编写少量高质量的指令-回答对
+2. **Self-instruct（自指令）**：使用 LLM 根据种子任务生成新的指令
+3. **Evol-Instruct（进化指令）**：通过增加复杂度、添加约束等方式进化指令
+4. **Quality Filtering（质量过滤）**：使用更强的模型或人类标注过滤低质量样本
+5. **Deduplication（去重）**：去除语义重复的样本
+
+## Implementation
+
+```python
+# SFT 训练的完整示例
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainingArguments
+from trl import SFTTrainer
+import torch
+
+model = AutoModelForCausalLM.from_pretrained(
+    "meta-llama/Llama-2-7b-hf",
+    torch_dtype=torch.bfloat16,
+)
+tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
+
+# 格式化指令数据
+def format_instruction(sample):
+    return f"### Instruction:\n{sample['instruction']}\n\n### Response:\n{sample['response']}"
+
+# 训练配置
+training_args = TrainingArguments(
+    output_dir="./sft-model",
+    num_train_epochs=3,
+    per_device_train_batch_size=4,
+    learning_rate=2e-5,
+    warmup_ratio=0.03,
+    weight_decay=0.01,
+    bf16=True,
+    logging_steps=10,
+)
+
+trainer = SFTTrainer(
+    model=model,
+    tokenizer=tokenizer,
+    train_dataset=dataset,
+    formatting_func=format_instruction,
+    max_seq_length=2048,
+    args=training_args,
+    neftune_noise_alpha=5,  # NEFTune 正则化
+)
+trainer.train()
+```
+
+### Chat Templates in Detail
+不同模型使用不同的对话模板格式，这对 SFT 至关重要：
+
+**ChatML（OpenAI格式）**：
+```
+<|im_start|>system
+You are a helpful assistant.
+<|im_end|>
+<|im_start|>user
+Hello!
+<|im_end|>
+<|im_start|>assistant
+Hi there! How can I help?
+<|im_end|>
+```
+
+**LLaMA-2 格式**：
+```
+[INST] <<SYS>>
+System prompt here
+<</SYS>>
+User message [/INST] Assistant response
+```
+
+模板的正确性直接影响模型的对话质量。模板不匹配会导致模型行为异常。
+
+### Data Curation Strategies
+高质量 SFT 数据的策划方法：
+
+- **Human-written（人工编写）**：质量最高但成本最大。适合核心能力的训练
+- **Distillation（蒸馏）**：使用更强的模型（如GPT-4）生成回答，然后用于训练较小模型
+- **Self-play（自对弈）**：让模型自己生成问题和回答，然后筛选高质量的
+- **Rejection Sampling（拒绝采样）**：生成多个回答，选择最好的
+
+### Training Hyperparameters
+SFT 的关键超参数设置（基于最佳实践）：
+
+| 超参数 | 典型值 | 说明 |
+|--------|--------|------|
+| 学习率 | $1 \times 10^{-5}$ 到 $5 \times 10^{-5}$ | 比预训练低一个数量级 |
+| Epochs | 1-3 | 更多可能过拟合 |
+| Batch Size | 64-128 | 根据GPU内存调整 |
+| Max Seq Length | 2048-4096 | 覆盖大多数对话长度 |
+| Warmup Ratio | 0.03-0.1 | 短warmup |
+| Weight Decay | 0.01-0.1 | 防止过拟合 |
+
+### SFT Quality Assurance
+SFT 数据和模型的质量保证流程：
+
+- **格式验证**：确保所有数据符合对话模板格式
+- **内容审核**：过滤有害、错误或低质量的回答
+- **多样性检查**：确保任务类型和难度的分布合理
+- **人工评估**：随机抽样进行人工质量评估
+- **A/B 测试**：对比不同数据集/配置训练的模型性能
+
+### Catastrophic Forgetting
+SFT 面临的一个重要风险是 **Catastrophic Forgetting（灾难性遗忘）**——模型在学习新的指令跟随能力时，可能会忘记预训练阶段学到的知识。缓解策略包括：
+
+- 使用极低学习率
+- 在 SFT 数据中混入少量预训练格式数据
+- 使用 LoRA 等参数高效方法避免全量更新
+
+### Instruction Following Dimensions
+SFT 需要教会模型的指令跟随维度：
+
+- **Format Following（格式跟随）**：按要求输出 JSON、Markdown、列表等格式
+- **Length Control（长度控制）**：按要求生成指定长度的内容
+- **Style Adaptation（风格适配）**：正式/口语、技术/通俗等风格切换
+- **Constraint Following（约束跟随）**：遵循"不要提及X"、"必须包含Y"等约束
+- **Role Playing（角色扮演）**：按系统提示中定义的角色行事
+
+### Self-Instruct Pipeline
+**Self-Instruct（自指令）**（Wang et al., 2023）是一种低成本的 SFT 数据生成方法：
+
+1. 从 175 个人工编写的种子任务开始
+2. 使用 LLM 生成新的指令
+3. 过滤与已有指令过于相似的指令
+4. 使用 LLM 为新指令生成回答
+5. 过滤低质量的指令-回答对
+
+这种方法大大降低了 SFT 数据的获取成本，但生成数据的质量取决于种子任务的质量和多样性。
+
+### Multi-task SFT
+**Multi-task SFT（多任务SFT）** 在多种任务上同时训练：
+
+- 混合不同类型的任务：问答、摘要、翻译、编程、数学、创意写作
+- 每种任务的数据量需要平衡——过多某类任务会导致其他能力退化
+- **Task Sampling（任务采样）**：通常对小任务过采样，大任务欠采样，平衡每步训练的任务分布
+
+## Interview Tips
+- 理解为什么 SFT 中数据质量比数量更重要，能够引用 LIMA 等论文
+- 掌握 Loss Masking 的原理和实现
+- 能够列举并解释常用的过拟合防护策略
+- 了解 Packing vs Padding 的权衡和实现细节
+- 能够描述 SFT 在 LLM 对齐流水线中的角色

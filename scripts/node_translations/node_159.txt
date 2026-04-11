@@ -1,0 +1,208 @@
+# Serving Systems (vLLM, TensorRT-LLM)
+
+## Overview
+**LLM Serving Systems（大语言模型服务系统）** 是将 LLM 部署到生产环境的关键基础设施。**vLLM** 通过 **PagedAttention（分页注意力）** 革新了内存管理，**TensorRT-LLM** 利用 NVIDIA 的深度编译优化实现了极致的推理性能，而 **Speculative Decoding（推测解码）** 等技术则从算法层面加速了生成速度。
+
+在面试中，候选人需要理解主流服务系统的架构设计、性能优化策略和部署权衡。
+
+## Core Concepts
+
+### vLLM Architecture
+**vLLM**（Kwon et al., 2023）的核心创新是 PagedAttention，其整体架构：
+
+- **Scheduler（调度器）**：实现连续批处理，管理请求生命周期
+- **Block Manager（块管理器）**：管理 KV cache 的物理块分配
+- **Worker（工作进程）**：执行模型推理，可跨多 GPU
+- **API Server（API服务器）**：提供 OpenAI 兼容的 HTTP 接口
+
+vLLM 的性能优势来源：
+1. PagedAttention 消除内存碎片，提升有效批量
+2. 连续批处理提升 GPU 利用率
+3. 前缀缓存避免重复计算
+4. Tensor Parallelism 支持大模型
+
+### TensorRT-LLM
+**TensorRT-LLM** 是 NVIDIA 的 LLM 推理引擎，结合了图编译优化和 LLM 特定的内核：
+
+- **Graph Compilation（图编译）**：将模型计算图编译为高度优化的 CUDA 内核
+- **Kernel Fusion（算子融合）**：将多个算子合并为单个 CUDA 内核，减少内存访问
+- **Custom Attention Kernels（自定义注意力内核）**：针对不同注意力模式（MHA/GQA/MQA）优化的 CUDA 实现
+- **In-flight Batching（在途批处理）**：TensorRT-LLM 对连续批处理的实现
+- **Quantization Support（量化支持）**：原生支持 FP8、INT4（AWQ/GPTQ）量化
+
+TensorRT-LLM 通常比 vLLM 有 20-50% 的推理速度优势，但灵活性较低，模型支持范围较窄。
+
+### Speculative Decoding
+**Speculative Decoding（推测解码）** 利用一个小型 **Draft Model（草稿模型）** 快速生成候选 token，然后由大型 **Target Model（目标模型）** 并行验证：
+
+1. 草稿模型自回归生成 $\gamma$ 个候选 token（快速但不够准确）
+2. 目标模型一次前向传播验证所有 $\gamma$ 个 token（并行验证）
+3. 接受前 $k$ 个匹配的 token，拒绝后续不匹配的
+
+接受概率的计算：
+
+$$P(\text{accept } t_i) = \min\left(1, \frac{p_{\text{target}}(t_i)}{p_{\text{draft}}(t_i)}\right)$$
+
+这确保了推测解码与纯目标模型解码生成 **完全相同的分布**——不会损失任何质量。
+
+速度提升：
+
+$$\text{Speedup} \approx \frac{\gamma + 1}{1 + \gamma \cdot c_{\text{draft}} / c_{\text{target}}}$$
+
+当草稿模型比目标模型小很多且接受率高时，可以获得 2-3 倍加速。
+
+### Speculative Decoding Variants
+- **Self-speculative（自推测）**：使用目标模型的部分层作为草稿模型，无需额外模型
+- **Medusa（美杜莎）**：在目标模型顶部添加多个预测头，同时预测多个未来 token
+- **Eagle**：使用特征级别的推测，预测特征向量而非 token
+- **Lookahead Decoding（前瞻解码）**：利用 Jacobi 迭代并行生成多个 token
+
+### Disaggregated Serving
+**Disaggregated Serving（解耦服务）** 将 prefill 和 decode 分离到不同的硬件池：
+
+| 阶段 | 特性 | 最优硬件 |
+|------|------|----------|
+| Prefill | 计算密集 | 高FLOPS GPU (H100 SXM) |
+| Decode | 内存密集 | 高带宽内存 (HBM3) |
+
+通过 **RDMA (Remote Direct Memory Access，远程直接内存访问)** 或 **NVLink** 在节点间传输 KV cache。这种架构的优势是每个阶段都能获得最优的资源配置，缺点是增加了系统复杂度和网络延迟。
+
+### Performance Metrics
+LLM 服务系统的关键性能指标：
+
+| 指标 | 定义 | 目标 |
+|------|------|------|
+| **TTFT** | 首 token 延迟 | < 500ms |
+| **TPOT** | 每 token 生成延迟 | < 50ms |
+| **Throughput** | 每秒生成 token 数 | 最大化 |
+| **P99 Latency** | 99分位延迟 | SLA 合规 |
+| **GPU Utilization** | GPU 利用率 | > 80% |
+
+### System Selection Guide
+
+| 场景 | 推荐系统 | 原因 |
+|------|----------|------|
+| 快速原型 | vLLM | 易用性好，模型支持广 |
+| 最大吞吐 | TensorRT-LLM | 编译优化，性能最佳 |
+| 边缘部署 | llama.cpp/Ollama | CPU 支持，资源占用小 |
+| 多模型服务 | vLLM + LoRA | LoRA 动态加载支持 |
+| 超长上下文 | vLLM | PagedAttention 内存效率 |
+
+### Cost Optimization
+生产环境中的成本优化策略：
+
+- **Right-sizing（合理配置）**：根据实际负载选择 GPU 型号和数量
+- **Spot Instances（竞价实例）**：对延迟不敏感的离线任务使用竞价实例
+- **Multi-tenant（多租户）**：多个模型共享 GPU 资源
+- **Caching（缓存）**：对重复查询缓存结果，避免重复推理
+- **Distillation（蒸馏）**：将大模型的能力蒸馏到小模型，降低推理成本
+
+## Implementation
+
+```python
+# vLLM 服务端部署
+from vllm import LLM, SamplingParams
+
+llm = LLM(
+    model="meta-llama/Llama-2-70b-chat-hf",
+    tensor_parallel_size=4,         # 4-GPU 张量并行
+    gpu_memory_utilization=0.9,     # 90% 显存利用率
+    max_model_len=4096,             # 最大序列长度
+    enable_prefix_caching=True,     # 前缀缓存
+)
+
+sampling_params = SamplingParams(
+    temperature=0.7,
+    top_p=0.95,
+    max_tokens=512,
+)
+
+# 批量推理
+outputs = llm.generate(prompts, sampling_params)
+
+# 使用 vLLM 的 OpenAI 兼容 API
+# python -m vllm.entrypoints.openai.api_server \
+#     --model meta-llama/Llama-2-70b-chat-hf \
+#     --tensor-parallel-size 4 \
+#     --api-key token-abc123
+```
+
+### SGLang
+**SGLang** 是另一个重要的 LLM 服务系统，专注于编程式的 LLM 交互：
+
+- **RadixAttention**：基于基数树的 KV cache 管理，自动检测和复用共享前缀
+- **Structured Generation（结构化生成）**：原生支持 JSON 模式、正则表达式约束
+- **Multi-call Optimization（多调用优化）**：自动优化多次 LLM 调用的执行顺序
+
+### Deployment Patterns
+LLM 部署的常见架构模式：
+
+**单模型单GPU**：最简单，适合 7B 以下模型
+**单模型多GPU（张量并行）**：适合 13B-70B 模型
+**多副本负载均衡**：水平扩展，提高吞吐量
+**模型网关**：统一入口，路由到不同模型
+
+### Latency Optimization Techniques
+降低推理延迟的技术栈：
+
+- **CUDA Graph（CUDA图）**：捕获和重放 GPU 操作序列，减少 CPU 开销
+- **Custom CUDA Kernels（自定义CUDA内核）**：针对特定操作编写优化内核
+- **Flash Attention**：减少 HBM 访问，提高注意力计算效率
+- **Compiler Optimization（编译器优化）**：使用 torch.compile 或 TensorRT 优化计算图
+
+### Model Parallelism Strategies for Serving
+大模型推理的并行策略：
+
+- **Tensor Parallelism（张量并行）**：在注意力和 FFN 层切分权重矩阵。通常在同一节点的 GPU 之间使用（需要高带宽通信）
+- **Pipeline Parallelism（流水线并行）**：将不同层分配到不同 GPU。适合跨节点部署
+- **Expert Parallelism（专家并行）**：MoE 模型中，将不同专家分配到不同 GPU
+
+推理时的并行策略选择：
+- 8-GPU 节点内：优先使用 TP（NVLink 带宽足够）
+- 跨节点：使用 PP（减少通信量）
+- MoE 模型：EP + TP 组合
+
+### Benchmarking LLM Serving
+LLM 服务系统的基准测试方法：
+
+- **ShareGPT Trace（ShareGPT 轨迹）**：使用真实的用户对话分布进行测试
+- **Synthetic Workload（合成负载）**：控制输入/输出长度分布
+- **Load Testing（负载测试）**：逐步增加请求率直到系统饱和
+
+关键测试场景：
+| 场景 | 输入长度 | 输出长度 | 关注指标 |
+|------|---------|---------|---------|
+| 短对话 | 100 | 50 | TPOT, QPS |
+| 长输入摘要 | 4000 | 200 | TTFT |
+| 代码生成 | 500 | 500 | 端到端延迟 |
+| RAG | 2000 | 300 | P99 延迟 |
+
+### Auto-scaling Strategies
+LLM 服务的自动扩缩容策略：
+
+- **基于 QPS**：请求率超过阈值时扩容
+- **基于队列长度**：等待队列过长时扩容
+- **基于 GPU 利用率**：GPU 利用率过高时扩容
+- **预测性扩容**：基于历史流量模式预测负载变化
+
+### Multi-Model Serving
+同时服务多个模型的架构：
+
+- **Model Router（模型路由器）**：根据请求类型将请求路由到不同模型
+- **Cascade（级联）**：先用小模型处理简单请求，复杂请求转发到大模型
+- **Shared Backbone（共享骨干）**：多个 LoRA 适配器共享一个基础模型
+
+### Monitoring and Observability
+LLM 服务的监控和可观测性：
+
+- **Request Metrics（请求指标）**：QPS、延迟分布（P50/P95/P99）、错误率
+- **GPU Metrics（GPU指标）**：利用率、显存使用、温度
+- **Model Metrics（模型指标）**：token 生成速率、KV cache 利用率
+- **Business Metrics（业务指标）**：用户满意度、会话完成率
+
+## Interview Tips
+- 能够比较 vLLM 和 TensorRT-LLM 的架构差异和适用场景
+- 理解推测解码的数学保证（生成分布不变）
+- 掌握 TTFT 和 TPOT 的定义及优化方向
+- 能够描述 disaggregated serving 的动机和实现方案
+- 了解如何根据具体需求选择合适的服务系统

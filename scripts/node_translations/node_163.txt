@@ -1,0 +1,210 @@
+# Advanced RAG Patterns
+
+## Overview
+**Advanced RAG（高级检索增强生成）** 在基础 RAG 的基础上引入了多种技术来提升检索质量和生成准确性。从 **Query Rewriting（查询改写）** 到 **Self-RAG（自检索增强生成）**，从 **HyDE（假设文档嵌入）** 到 **Multi-hop Reasoning（多跳推理）**，这些方法系统性地解决了基础 RAG 的局限性。
+
+在面试中，候选人需要展示对 RAG 系统全链路优化的深入理解，包括检索前优化、检索优化和检索后优化。
+
+## Core Concepts
+
+### RAG Pipeline Overview
+高级 RAG 在基础 RAG（查询->检索->生成）的基础上增加了多个优化环节：
+
+```
+Query -> [Pre-retrieval] -> [Retrieval] -> [Post-retrieval] -> Generation
+          查询改写            多路检索        重排序
+          查询扩展            混合搜索        压缩/过滤
+          HyDE               递归检索        上下文增强
+```
+
+### Query Rewriting
+**Query Rewriting（查询改写）** 优化用户查询以提高检索效果：
+
+- **LLM-based Rewriting（基于LLM的改写）**：使用 LLM 将口语化查询转换为更适合检索的形式
+- **Multi-query（多查询）**：将一个查询扩展为多个不同角度的子查询，分别检索后合并结果
+- **Step-back Prompting（后退提示）**：将具体问题抽象为更一般的问题，检索更全面的背景知识
+
+示例：
+- 原始查询："为什么我的代码运行这么慢？"
+- 改写后："Python 代码性能优化 常见性能瓶颈 profiling 方法"
+
+### HyDE (Hypothetical Document Embeddings)
+**HyDE（假设文档嵌入）** 利用 LLM 生成一个"假设的回答"，然后用这个回答的嵌入去检索真实文档：
+
+1. 用户提出问题 $q$
+2. LLM 生成假设回答 $d_{\text{hypo}}$（可能不准确但包含关键术语）
+3. 计算 $d_{\text{hypo}}$ 的嵌入向量
+4. 用该嵌入检索真实文档
+5. 用检索到的真实文档生成最终回答
+
+$$e_{\text{query}} = \text{Embed}(\text{LLM}(q))$$
+
+HyDE 的直觉是：假设回答与真实文档在语义空间中比原始查询更接近。这在"查询和文档之间存在语义鸿沟"的场景下特别有效。
+
+### Self-RAG
+**Self-RAG（自检索增强生成）**（Asai et al., 2023）训练模型在生成过程中自主决定是否需要检索、检索内容是否相关、以及生成的回答是否忠实于检索结果：
+
+模型生成特殊 token 来控制流程：
+- **[Retrieve]**：是否需要检索（Yes/No）
+- **[ISREL]**：检索到的文档是否与问题相关
+- **[ISSUP]**：生成的回答是否有检索文档支撑
+- **[ISUSE]**：回答是否有用
+
+这使得模型可以根据查询的难度动态调整策略——简单问题直接回答，复杂问题触发检索。
+
+### CRAG (Corrective RAG)
+**CRAG（纠错检索增强生成）** 在检索后增加一个评估-纠正步骤：
+
+1. 检索文档
+2. 使用轻量级评估器判断文档相关性：
+   - **Correct（正确）**：文档相关，直接使用
+   - **Incorrect（不正确）**：文档不相关，触发网页搜索获取更多信息
+   - **Ambiguous（模糊）**：部分相关，提取相关段落并补充检索
+3. 使用纠正后的上下文生成回答
+
+### Multi-hop Reasoning
+**Multi-hop Reasoning（多跳推理）** 处理需要多次检索才能回答的复杂问题：
+
+示例："获得图灵奖的人中，谁发明了最早的计算机编程语言？"
+- 第一跳：检索图灵奖获得者列表
+- 第二跳：检索各获奖者的贡献
+- 第三跳：确认最早的编程语言
+
+实现方法：
+- **Iterative Retrieval（迭代检索）**：每次检索后更新查询，循环检索
+- **Chain-of-Thought Retrieval（链式思维检索）**：让 LLM 分解问题，每步检索一部分信息
+- **Graph-based Retrieval（基于图的检索）**：构建知识图谱，沿关系边进行多跳检索
+- **IRCoT (Interleaving Retrieval with Chain-of-Thought)**：在推理链的每一步插入检索
+
+### RAG Fusion
+**RAG Fusion** 结合多个检索策略的结果：
+
+1. 将原始查询改写为多个变体
+2. 对每个变体独立检索
+3. 使用 **RRF (Reciprocal Rank Fusion，倒数排名融合)** 合并结果：
+
+$$\text{RRF}(d) = \sum_{i=1}^{n} \frac{1}{k + r_i(d)}$$
+
+其中 $r_i(d)$ 是文档 $d$ 在第 $i$ 个检索列表中的排名，$k$ 是平滑常数（通常 60）。
+
+### Reranking
+**Reranking（重排序）** 使用更精确的模型对初始检索结果进行重新排序：
+
+- **Cross-Encoder Reranking**：将查询和文档拼接后输入 BERT 类模型，获得更准确的相关性分数
+- **LLM-based Reranking**：使用 LLM 对文档相关性进行打分或排序
+- **Cohere Rerank API**：商用重排序服务
+- **BGE Reranker**：开源高性能重排序模型
+
+重排序通常在 Top-50 到 Top-100 的初始结果上运行，选出 Top-5 到 Top-10 的最相关文档。
+
+### Context Compression
+**Context Compression（上下文压缩）** 在将检索结果传给 LLM 之前进行精简：
+
+- **Extractive Compression（抽取式压缩）**：从检索到的文档中提取最相关的句子或段落
+- **LLM-based Compression（基于LLM的压缩）**：使用 LLM 总结检索结果，去除冗余信息
+- **Token-level Filtering（token级过滤）**：根据与查询的相关性过滤不重要的 token
+
+压缩可以减少 LLM 的输入长度，降低成本并可能提高回答质量（减少噪声干扰）。
+
+### RAG Evaluation
+RAG 系统的评估框架（如 **RAGAS**）涵盖多个维度：
+
+| 指标 | 定义 | 衡量内容 |
+|------|------|----------|
+| **Faithfulness（忠实度）** | 回答是否基于检索到的上下文 | 减少幻觉 |
+| **Answer Relevancy（回答相关性）** | 回答是否切题 | 回答质量 |
+| **Context Precision（上下文精度）** | 检索到的上下文中相关内容的比例 | 检索精度 |
+| **Context Recall（上下文召回）** | 需要的信息是否都被检索到 | 检索覆盖 |
+
+$$\text{Faithfulness} = \frac{\text{claims supported by context}}{\text{total claims in answer}}$$
+
+### RAG vs Long-Context LLM
+随着 LLM 上下文窗口的扩展（128K+），一个关键问题是：还需要 RAG 吗？
+
+| 维度 | RAG | 长上下文 LLM |
+|------|-----|-------------|
+| 成本 | 低（只检索相关部分） | 高（处理全部内容） |
+| 时效性 | 好（实时检索最新数据） | 差（知识截止日期） |
+| 精度 | 依赖检索质量 | 可能有"针中找针"问题 |
+| 可追溯性 | 好（可标注来源） | 差（难以定位来源） |
+
+实际中两者通常结合使用：RAG 检索相关片段，长上下文 LLM 处理检索结果。
+
+## Implementation
+
+```python
+# 高级 RAG 实现示例
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4")
+
+# 1. HyDE 实现
+def hyde_retrieve(query, retriever, llm):
+    '''使用 HyDE 进行检索'''
+    hyde_prompt = f"Please answer the following question (try even if unsure):\n{query}"
+    hypothetical_doc = llm.invoke(hyde_prompt).content
+    results = retriever.invoke(hypothetical_doc)
+    return results
+
+# 2. Multi-query 实现
+def multi_query_retrieve(query, retriever, llm, n_queries=3):
+    '''生成多个查询变体并合并检索结果'''
+    prompt = (
+        f"Rewrite the following question from {n_queries} different angles.\n"
+        f"Original: {query}\nOutput one query per line."
+    )
+    queries = llm.invoke(prompt).content.strip().split("\n")
+    all_docs = {}
+    for q in queries:
+        for doc in retriever.invoke(q):
+            doc_id = hash(doc.page_content)
+            if doc_id not in all_docs:
+                all_docs[doc_id] = doc
+    return list(all_docs.values())
+
+# 3. RRF 融合
+def reciprocal_rank_fusion(results_lists, k=60):
+    '''倒数排名融合'''
+    scores = {}
+    doc_map = {}
+    for results in results_lists:
+        for rank, doc in enumerate(results):
+            doc_id = hash(doc.page_content)
+            scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank + 1)
+            doc_map[doc_id] = doc
+    sorted_ids = sorted(scores, key=scores.get, reverse=True)
+    return [(doc_map[did], scores[did]) for did in sorted_ids]
+```
+
+### Agentic RAG
+**Agentic RAG（智能体RAG）** 使用 LLM 作为智能体来协调检索和生成过程：
+
+- **Tool Use（工具使用）**：LLM 可以调用不同的检索工具（向量搜索、关键词搜索、SQL 查询、API 调用）
+- **Planning（规划）**：LLM 制定检索计划，决定查询顺序和策略
+- **Reflection（反思）**：检查已检索的信息是否足够，决定是否需要更多检索
+
+这种方法最灵活但也最复杂，适合需要多种信息源的复杂问题。
+
+### Graph RAG
+**Graph RAG（图RAG）** 将知识图谱与 RAG 结合：
+
+- 从文档中抽取实体和关系构建知识图谱
+- 检索时同时查询向量索引和图索引
+- 通过图遍历发现多跳关系
+- Microsoft 的 GraphRAG 通过社区检测和层次摘要提升全局问题的回答质量
+
+### RAG Production Best Practices
+生产环境中 RAG 系统的最佳实践：
+
+- **Document Versioning（文档版本管理）**：跟踪文档更新，及时重新索引
+- **Feedback Loop（反馈循环）**：收集用户反馈，持续优化检索和生成
+- **Fallback Strategy（降级策略）**：检索失败时的降级方案（如直接用 LLM 回答）
+- **Citation（引用）**：在回答中标注信息来源，便于用户验证
+- **Guardrails（护栏）**：输出过滤，防止生成不当内容
+
+## Interview Tips
+- 能够完整描述 RAG 系统的全链路优化方案
+- 理解 HyDE 和 Self-RAG 的核心思想及适用场景
+- 掌握多跳推理的实现方法和挑战
+- 能够解释 RAGAS 评估框架的各个指标
+- 了解 RAG Fusion 和 RRF 的原理和实际效果
