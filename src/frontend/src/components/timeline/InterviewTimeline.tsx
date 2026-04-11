@@ -75,6 +75,7 @@ interface Props {
 }
 
 export default function InterviewTimeline({ onAddClick, onEditClick, onCompanyClick }: Props) {
+  const [showAllPast, setShowAllPast] = useState(false);
   const { data, isLoading, error } = useQuery<InterviewEvent[]>({
     queryKey: ["timeline", "events"],
     queryFn: () => api.get<InterviewEvent[]>("/timeline/events"),
@@ -120,6 +121,9 @@ export default function InterviewTimeline({ onAddClick, onEditClick, onCompanyCl
     .filter((e) => new Date(e.scheduled_at) < now || e.status === "cancelled")
     .sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
 
+  const PAST_PREVIEW = 5;
+  const pastToShow = showAllPast ? past : past.slice(0, PAST_PREVIEW);
+
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
@@ -162,7 +166,7 @@ export default function InterviewTimeline({ onAddClick, onEditClick, onCompanyCl
           {past.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs font-medium text-gray-400 uppercase">Past</p>
-              {past.slice(0, 5).map((e) => (
+              {pastToShow.map((e) => (
                 <EventCard
                   key={e.id}
                   event={e}
@@ -172,6 +176,15 @@ export default function InterviewTimeline({ onAddClick, onEditClick, onCompanyCl
                   onCompanyClick={onCompanyClick}
                 />
               ))}
+              {past.length > PAST_PREVIEW && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllPast((v) => !v)}
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium pt-1"
+                >
+                  {showAllPast ? "Show less" : `Show all ${past.length} past events`}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -238,7 +251,7 @@ function EventCard({
           <span className="font-semibold text-sm text-gray-800">{event.company_name}</span>
         )}
         {!isPast && (
-          <span className="ml-auto text-xs font-mono text-gray-500">{countdownText}</span>
+          <span className="ml-auto text-sm font-mono font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded">{countdownText}</span>
         )}
       </div>
       <div className="flex items-center gap-2 text-xs text-gray-500">

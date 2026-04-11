@@ -59,41 +59,39 @@ const DEFAULT_THEME = {
 
 export default function RecipeCard({ recipe, onClick }: RecipeCardProps) {
   const theme = CAKE_TYPE_THEMES[recipe.cake_type] ?? DEFAULT_THEME;
+  const sizeLabel = recipe.size === "universal" ? "U" : recipe.size.replace("inch", "\"");
 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left rounded-lg border shadow-sm px-3 py-2
-                  transition-all hover:shadow-md focus:outline-none
-                  focus:ring-2 focus:ring-offset-1 focus:ring-amber-400
+      className={`w-full text-left rounded-md border px-2.5 py-1.5
+                  transition-all hover:shadow-sm focus:outline-none
+                  focus:ring-1 focus:ring-amber-400
                   ${theme.card}`}
     >
-      {/* Top row: name + cake type badge */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
+        {/* Size badge */}
+        <span className={`inline-flex items-center justify-center w-6 h-6 rounded text-[10px] font-bold shrink-0 ${theme.iconBg}`}>
+          {sizeLabel}
+        </span>
+
+        {/* Name + Chinese name */}
         <div className="min-w-0 flex-1">
-          <h3 className={`font-bold text-sm leading-tight truncate ${theme.accent}`}>
+          <span className={`font-bold text-sm leading-none ${theme.accent}`}>
             {recipe.name}
-          </h3>
+          </span>
           {recipe.name_zh && (
-            <p className="text-xs font-medium text-gray-500 truncate">{recipe.name_zh}</p>
+            <span className="text-xs text-gray-400 ml-1.5">{recipe.name_zh}</span>
           )}
         </div>
+
+        {/* Ingredient count + type badge */}
+        <span className="text-[10px] text-gray-400 shrink-0">{recipe.ingredients.length}</span>
         <span
-          className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase shrink-0 ${theme.badge}`}
+          className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0 ${theme.badge}`}
         >
           {CAKE_TYPE_LABELS[recipe.cake_type] ?? recipe.cake_type}
         </span>
-      </div>
-
-      {/* Footer: size + ingredient count */}
-      <div className="flex items-center justify-between mt-1.5 text-[11px] text-gray-400">
-        <div className="flex items-center gap-1">
-          <span className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[9px] font-bold ${theme.iconBg}`}>
-            {recipe.size === "universal" ? "U" : recipe.size.replace("inch", "\"")}
-          </span>
-          <span>{recipe.size === "universal" ? "Universal" : recipe.size.replace("inch", "-inch")}</span>
-        </div>
-        <span>{recipe.ingredients.length} ingr.</span>
       </div>
     </button>
   );

@@ -113,7 +113,7 @@ export default function BakingStudio() {
       ) : (
         <div className="flex gap-6">
           {/* Grouped recipe sections */}
-          <div className={`space-y-6 ${selectedRecipe ? "flex-1 min-w-0" : "w-full"}`}>
+          <div className={`space-y-4 ${selectedRecipe ? "flex-1 min-w-0" : "w-full"}`}>
             {CATEGORY_SECTIONS.map((section) => {
               const items = groupedRecipes.get(section.key);
               if (!items || items.length === 0) return null;
@@ -126,13 +126,13 @@ export default function BakingStudio() {
                     <p className="text-xs text-gray-400">{section.caption}</p>
                   </div>
                   <div
-                    className={`grid grid-cols-1 gap-2 ${
+                    className={`grid grid-cols-1 gap-1.5 ${
                       selectedRecipe
                         ? "md:grid-cols-1 lg:grid-cols-2"
                         : "md:grid-cols-2 lg:grid-cols-3"
                     }`}
                   >
-                    {items.map((recipe) => (
+                    {items.map((recipe: BakingRecipe) => (
                       <RecipeCard
                         key={recipe.id}
                         recipe={recipe}

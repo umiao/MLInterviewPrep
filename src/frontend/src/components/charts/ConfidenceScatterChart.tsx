@@ -43,7 +43,8 @@ export default function ConfidenceScatterChart({ data }: ConfidenceScatterChartP
         />
         <Tooltip
           contentStyle={{ fontSize: 12, borderRadius: 8 }}
-          formatter={(value: number, name: string) => [value.toFixed(1), name]}
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+          formatter={((value: any, name: any) => [Number(value).toFixed(1), name]) as any}
           labelFormatter={(_label, payload) => {
             if (payload && payload.length > 0) {
               const point = payload[0].payload as ScatterPoint;

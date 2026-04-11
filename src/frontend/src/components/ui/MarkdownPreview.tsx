@@ -107,7 +107,7 @@ export default function MarkdownPreview({
             if (type === "checkbox") return null;
             return <input type={type} {...rest} />;
           },
-          code: ({ children, className, ...rest }) => {
+          code: ({ children, className, ref: _ref, ...rest }) => {
             const match = /language-(\w+)/.exec(className || "");
             const isBlock =
               match != null ||
@@ -115,10 +115,10 @@ export default function MarkdownPreview({
             if (isBlock) {
               return (
                 <SyntaxHighlighter
-                  style={oneDark}
+                  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+                  style={oneDark as any}
                   language={match?.[1] ?? "python"}
                   PreTag="div"
-                  {...rest}
                 >
                   {String(children).replace(/\n$/, "")}
                 </SyntaxHighlighter>

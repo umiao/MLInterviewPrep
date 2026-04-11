@@ -22,7 +22,7 @@ export default function ProblemDetailPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const toast = useToast();
-  const [notesOpen, setNotesOpen] = useState(false);
+  const [notesOpen, setNotesOpen] = useState(true);
   const [showPractice, setShowPractice] = useState(false);
   const [showReview, setShowReview] = useState(false);
 

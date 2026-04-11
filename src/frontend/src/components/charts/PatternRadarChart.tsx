@@ -33,10 +33,11 @@ export default function PatternRadarChart({ data }: PatternRadarChartProps) {
         <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={{ fontSize: 10 }} />
         <Tooltip
           contentStyle={{ fontSize: 12, borderRadius: 8 }}
-          formatter={(value: number, _name: string, props: { payload: { fullPattern: string; count: number } }) => [
-            `${value.toFixed(1)} / 5 (${props.payload.count} problems)`,
+          /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+          formatter={((value: any, _name: any, props: any) => [
+            `${Number(value).toFixed(1)} / 5 (${props.payload.count} problems)`,
             props.payload.fullPattern,
-          ]}
+          ]) as any}
         />
         <Radar
           name="Comfort"

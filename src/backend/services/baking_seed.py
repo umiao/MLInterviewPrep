@@ -388,22 +388,30 @@ def seed_baking_data(db: Session) -> dict[str, int]:
     """
     result = {"recipes": 0, "ingredients": 0, "inventory": 0}
 
-    # Seed recipes (skip if any preset recipes exist)
-    existing = db.query(BakingRecipe).filter(BakingRecipe.is_preset.is_(True)).count()
-    if existing == 0:
-        recipes = _build_preset_recipes()
-        for recipe in recipes:
+    # Seed recipes (insert any preset recipe not already in DB by name)
+    existing_names = {
+        r.name
+        for r in db.query(BakingRecipe.name)
+        .filter(BakingRecipe.is_preset.is_(True))
+        .all()
+    }
+    recipes = _build_preset_recipes()
+    for recipe in recipes:
+        if recipe.name not in existing_names:
             db.add(recipe)
             result["recipes"] += 1
             result["ingredients"] += len(recipe.ingredients)
+    if result["recipes"] > 0:
         db.flush()
         logger.info("Seeded %d preset recipes with %d ingredients",
                      result["recipes"], result["ingredients"])
 
-    # Seed home inventory (skip if any items exist)
-    inv_count = db.query(HomeInventory).count()
-    if inv_count == 0:
-        for name, name_zh, category in INVENTORY_ITEMS:
+    # Seed home inventory (insert any item not already in DB by name)
+    existing_inv = {
+        r.name for r in db.query(HomeInventory.name).all()
+    }
+    for name, name_zh, category in INVENTORY_ITEMS:
+        if name not in existing_inv:
             db.add(HomeInventory(
                 name=name,
                 name_zh=name_zh,
@@ -413,6 +421,7 @@ def seed_baking_data(db: Session) -> dict[str, int]:
                 unit=None,
             ))
             result["inventory"] += 1
+    if result["inventory"] > 0:
         db.flush()
         logger.info("Seeded %d home inventory items", result["inventory"])
 
