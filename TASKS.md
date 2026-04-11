@@ -13,23 +13,11 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos test_check.py still uses check_stop_cache/write_stop_cache which were deprecated per LESSONS.md 2026-03-18. Cache can produce false passes when files change between cache write and next session. MLInterviewPrep already removed this. Action: Remove cache imports and calls from test_check.py; clean up hook_utils.py if no other callers.
-
 #### T-P2-321: [SYNC] helixos: Propagate 3 new lessons from MLInterviewPrep 2026-04-08
 - **Priority**: P2
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root - universal lesson for orchestration. (2) DB-only content must have recovery path - relevant to helixos SQLite data/. (3) Markdown math pipe conflicts with remark-gfm table parsing - helixos uses remark-gfm in MarkdownRenderer.tsx and ConversationView.tsx. Append all three with [PROPAGATED] tag to helixos/LESSONS.md.
-
-#### T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. Add as optional-dependencies dev group in pyproject.toml to satisfy CLAUDE.md dependency sync rule.
 
 #### T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml
 - **Priority**: P2
@@ -146,10 +134,17 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - **Depends on**: None
 - **Description**: test_check.py imports check_stop_cache and write_stop_cache from hook_utils and uses them to skip re-running tests in the same session. These deprecated caching functions were removed from the hook architecture (LESSONS.md lesson [2026-03-18]: removed lint cache so every Stop hook runs fresh). The caching logic means test failures can be silently skipped if tests passed earlier in the same session. Fix: Remove the cache check/write calls from test_check.py so tests always run fresh on Stop. Keep check_stop_cache/write_stop_cache in hook_utils.py only if other hooks still use them.
 
+#### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos test_check.py still uses check_stop_cache/write_stop_cache which were deprecated per LESSONS.md 2026-03-18. Cache can produce false passes when files change between cache write and next session. MLInterviewPrep already removed this. Action: Remove cache imports and calls from test_check.py; clean up hook_utils.py if no other callers.
+
 ## Completed Tasks
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
 - [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
 - [x] **2026-04-11** -- T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family. # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
 - [x] **2026-04-11** -- T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page. # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page

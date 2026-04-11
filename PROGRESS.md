@@ -325,3 +325,17 @@
 - **Sanity check result**: `touch problems.db && git check-ignore -v problems.db` -> matches `.gitignore:67:problems.db`. File removed after verification. No other `.gitignore` entries needed.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-322 --status completed`
+
+## 2026-04-11 23:00 -- [T-P2-323] Debt: Sync dev deps from requirements.txt to pyproject.toml
+- **What I did**: Audited requirements.txt against pyproject.toml. Found all 17 packages already present: application deps in `[project] dependencies`, dev tools (pytest, pytest-asyncio, httpx, ruff, pyyaml) in `[project.optional-dependencies] dev`, and scraper tools (playwright, beautifulsoup4) in `[project.optional-dependencies] scraper`. Task description listed 6 "missing" packages but reflected stale state — sync is already complete. Versions also match across both files.
+- **Deliverables**: No code changes (task discovered already satisfied).
+- **Sanity check result**: Python diff script walked every requirement in requirements.txt and confirmed each package name appears in pyproject.toml. Output: `Missing from pyproject.toml: NONE`.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-323 --status completed`
+
+## 2026-04-11 23:00 -- [T-P2-320] Blocked: helixos stop-cache removal (cross-project write permission)
+- **What I did**: Attempted the MLInterviewPrep-side analogue fix on `helixos/.claude/hooks/test_check.py` (remove `check_stop_cache`/`write_stop_cache` imports and calls). Edit tool refused with "sensitive file" permission error — same cross-project `.claude/hooks/` write restriction that blocks T-P1-184. Marked task blocked so it surfaces when a helixos session runs next.
+- **Deliverables**: None (write blocked).
+- **Sanity check result**: Verified helixos test_check.py still contains the deprecated cache calls. Task status set to blocked in tasks.db.
+- **Status**: [BLOCKED] Cross-project `.claude/hooks/` writes disallowed from MLInterviewPrep session. Must be completed from a helixos session.
+- **Request**: `task_db.py update T-P2-320 --status blocked`
