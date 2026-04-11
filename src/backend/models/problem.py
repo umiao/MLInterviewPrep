@@ -73,7 +73,10 @@ class Problem(Base):
         """Return tags as Python list."""
         if not self.tags:
             return []
-        return json.loads(self.tags)
+        try:
+            return json.loads(self.tags)
+        except (json.JSONDecodeError, TypeError):
+            return [t.strip() for t in self.tags.split(",") if t.strip()]
 
     @tags_list.setter
     def tags_list(self, value: list[str]) -> None:
@@ -85,7 +88,10 @@ class Problem(Base):
         """Return company_tags as Python list."""
         if not self.company_tags:
             return []
-        return json.loads(self.company_tags)
+        try:
+            return json.loads(self.company_tags)
+        except (json.JSONDecodeError, TypeError):
+            return [t.strip() for t in self.company_tags.split(",") if t.strip()]
 
     @company_tags_list.setter
     def company_tags_list(self, value: list[str]) -> None:
@@ -139,7 +145,10 @@ class QASession(Base):
         """Return messages as Python list."""
         if not self.messages:
             return []
-        return json.loads(self.messages)
+        try:
+            return json.loads(self.messages)
+        except (json.JSONDecodeError, TypeError):
+            return []
 
     @messages_list.setter
     def messages_list(self, value: list[dict]) -> None:
