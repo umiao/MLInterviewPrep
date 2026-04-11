@@ -25,12 +25,12 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 
 - [ ] keep
 - [ ] drop
-- [ ] update-note
+- [x] update-note
 
 **Updated relevance_note** (fill only if update-note):
 
 ```text
-
+Biggest failure lesson: we over-built a thousands-of-trees XGBoost by implicitly pattern-matching on other teams' model-depth trend, without first checking whether our own problem shape justified it. Our traffic distribution showed 80%+ of requests did not need the big model at all -- cheap rejection + early exit replaced it. Meta-lesson: do not anchor architecture decisions to cross-team envy or adopted-tech imitation. Anchor to your own problem assumptions, data distributions, and application scenarios.
 ```
 
 ---
@@ -46,7 +46,7 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 
 **Decision** (mark exactly one):
 
-- [ ] keep
+- [x] keep
 - [ ] drop
 - [ ] update-note
 
@@ -69,7 +69,7 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 
 **Decision** (mark exactly one):
 
-- [ ] keep
+- [x] keep
 - [ ] drop
 - [ ] update-note
 
@@ -92,7 +92,7 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 
 **Decision** (mark exactly one):
 
-- [ ] keep
+- [x] keep
 - [ ] drop
 - [ ] update-note
 
@@ -185,7 +185,7 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 **Decision** (mark exactly one):
 
 - [ ] keep
-- [ ] drop
+- [x] drop
 - [ ] update-note
 
 **Updated relevance_note** (fill only if update-note):
@@ -207,7 +207,7 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 
 **Decision** (mark exactly one):
 
-- [ ] keep
+- [x] keep
 - [ ] drop
 - [ ] update-note
 
@@ -230,7 +230,7 @@ Do not edit or remove the `<!-- link_row_id: N -->` markers. They are the machin
 
 **Decision** (mark exactly one):
 
-- [ ] keep
+- [x] keep
 - [ ] drop
 - [ ] update-note
 
