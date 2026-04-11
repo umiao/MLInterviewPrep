@@ -106,3 +106,27 @@
 - **What went wrong / What I learned**: Jumped to "treat naive datetimes as UTC" fix without checking the existing data convention. ALL existing events (seeds, API-created) were stored as **naive Pacific Time** and displayed correctly. The real bug was only in the frontend form: `new Date(val).toISOString()` converted to UTC before POST, but the rest of the system expected local time. My first "fix" (adding `Z` suffix to all responses) broke every correctly-stored event by reinterpreting local times as UTC. Three distinct issues conflated into one wrong diagnosis: (1) frontend form converting to UTC on submit, (2) SQLite not preserving TZ info, (3) response serialization format. Only (1) was the actual bug.
 - **Fix / Correct approach**: (1) Check existing data in the DB before assuming a timezone convention. (2) Frontend: send naive datetime-local value directly, no `.toISOString()`. (3) Backend: add `NaivePacific` Pydantic validator that strips TZ info and converts TZ-aware inputs to Pacific before storage. (4) Fix corrupted DB rows. Key lesson: **"check what's in the database" before writing a timezone fix. The convention is in the data, not in the schema declaration.**
 - **Tags**: #timezone #sqlite #naive-datetime #frontend #data-convention #investigate-first
+
+### [2026-04-08] DB-only content must have a recovery path
+- **Context**: Ran `content_module_arbitration.py` (hardcoded English) which overwrote Chinese translations that existed only in SQLite DB
+- **What I learned**: Translated content stored only in DB with no git-tracked backup and no reproducible seed script is vulnerable to overwrite. The DB file (mle_prep.db) is not in git, so there's no version history to recover from.
+- **Fix / Correct approach**: After translating content, update the seed script to contain the translated version (Chinese), or export translated content to a git-tracked JSON/markdown backup file. Any seed script that writes to DB must be the source of truth -- if content evolves past the seed script, the script becomes dangerous.
+- **Tags**: #data-loss #backup #sqlite #translation #seed-script
+
+### [2026-04-08] Markdown math `|` conflicts with remark-gfm table parsing
+- **Context**: Formula rendering broke on system design page using remark-gfm + remark-math + rehype-katex
+- **What I learned**: `remark-gfm` parses `|` as table cell separators BEFORE `remark-math` processes `$`/`$$` blocks. A formula like `$P(\text{click}|m, q, u)$` gets its `|` eaten by the GFM table parser, breaking the math. Additionally: (1) multi-line `$$` blocks can fail, (2) consecutive `$$` blocks need blank lines between them.
+- **Fix / Correct approach**: Always use `\mid` instead of `|` for conditional probability notation in LaTeX when the renderer uses remark-gfm. Keep `$$` display math on single lines. Separate consecutive `$$` blocks with blank lines.
+- **Tags**: #markdown #katex #remark-gfm #formula #rendering
+
+### [2026-04-08] autonomous_run.sh uses sub-project task_db, not root
+- **Context**: Created 8 tasks in root .claude/tasks.db, launched autonomous_run.sh with MLInterviewPrep sub-project. Session picked up a different task (T-P2-278 from MLInterviewPrep's own tasks.db).
+- **What I learned**: When autonomous_run.sh runs with a sub-project directory (e.g., `autonomous_run.sh 8 MLInterviewPrep`), it uses `--cwd MLInterviewPrep/` which means the session reads MLInterviewPrep/.claude/tasks.db, NOT the root tasks.db. Tasks must be created in the correct sub-project's task_db for autonomous execution to pick them up.
+- **Fix / Correct approach**: Always create tasks in the sub-project's task_db when planning autonomous execution for that sub-project. Use `cd MLInterviewPrep && python .claude/hooks/task_db.py add ...` not `cd Gen_AI_Proj && python .claude/hooks/task_db.py add ...`.
+- **Tags**: #autonomous #task-db #sub-project #orchestration
+
+### [2026-04-10] Validation must happen on a surface isomorphic to the production path
+- **Context**: Baking Studio task delivered 4 failures in one session: (1) seed function skipped new recipes due to all-or-nothing guard, (2) SQLite WAL concurrent write silently lost data, (3) `tsc --noEmit` passed but `npm run build` (`tsc -b`, stricter) failed, (4) CSS changes never visually verified.
+- **What I learned**: All 4 are the same root cause: validating on a surface not isomorphic to the production path. INSERT success != API-visible data. `tsc --noEmit` != production build. "Compiles" != "looks right". The single rule: **verify through the consumer (API, browser, production build), never through the producer (DB insert, lenient compiler, code inspection).**
+- **Fix / Correct approach**: (1) After DB seed/insert, always verify via API `curl`, not `SELECT`. (2) Use `npm run build` (not `tsc --noEmit`) as TypeScript check -- matches production build. (3) For UI changes, run DOM assertions or take a screenshot via Playwright. (4) Side-effect verification must always go through the consumer path.
+- **Tags**: #validation #production-path #consumer-verification #visual-testing #seed #wal #typescript

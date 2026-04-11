@@ -120,6 +120,17 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 302 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for
+- [x] **2026-04-10** -- T-P3-348: Lint: apply ruff auto-fixes to seed/translate/fix scripts. Apply ruff auto-fixes to scripts: import reordering, removal of unused imports, f-string cleanup (no placeholders).
+- [x] **2026-04-10** -- T-P2-347: Pillar 3/6 translation and expansion scripts. Add translation + expansion scripts for the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130). Scripts generate/u
+- [x] **2026-04-10** -- T-P2-346: Seed LinkedIn/Google/Pinterest prep content. Add seed scripts for LinkedIn question index, LinkedIn problem notes insertion, Google prep content, Pinterest prep cont
+- [x] **2026-04-10** -- T-P2-345: LC problem updates: _update_*.py scripts (1055, 1055v2, 2128, 815, Uber final round, SD tasks). Idempotent one-off update scripts per the _update_*.py convention: LC 1055 Pinterest tag + Chinese note, LC 1055 cleanup
+- [x] **2026-04-10** -- T-P2-343: Problem model: tolerate legacy comma-separated tag strings. Add defensive try/except JSONDecodeError fallback in tags_list/company_tags_list/messages_list getters, fall back to com
+- [x] **2026-04-10** -- T-P1-344: Add Google and Pinterest recruiter call prep notes. Add docs/google_recruiter_call_prep.md and docs/pinterest_recruiter_call_prep.md with recruiter call preparation notes.
+- [x] **2026-04-10** -- T-P1-342: Baking Studio: per-recipe seed guard fix and UI polish. Replace all-or-nothing baking_seed guard with per-recipe existence check. Compact RecipeCard layout with size badge + in
+- [x] **2026-04-10** -- T-P1-341: Behavioral prep: refresh EX-01, COL-3, COL-4 stories. Rewrite EX-01 'Hacker Week' STAR story with richer content + principle tags. Rewrite COL-3/COL-4 answers with LLM-judgme
+- [x] **2026-04-10** -- T-P1-340: Behavioral: add story-arcs endpoint + arcs data. Add GET /behavioral/story-arcs endpoint loading docs/bq_story_arcs.json and enriching with live DB data. Add bq_story_ar
+- [x] **2026-04-10** -- T-P1-339: Translate content_module_arbitration.py to Chinese + add conversion spec. Translate scripts/content_module_arbitration.py English content to Chinese preserving English tech terms (bold + first-u
 - [x] **2026-04-09** -- T-P1-338: Smoke check: add screenshot archiving (no diff). Extend smoke_check.py to save a screenshot of each page to data/visual_archive/{page}_{timestamp}.png after DOM assertio
 - [x] **2026-04-09** -- T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream). Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 
 - [x] **2026-04-09** -- T-P1-333: Baking Studio: multi-size select (4+6 inch) with ingredient summing. Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes to

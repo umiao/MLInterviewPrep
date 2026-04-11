@@ -190,3 +190,33 @@
 - **Deliverables**: `scripts/smoke_check.py` (modified), `tests/test_smoke_check.py` (modified)
 - **Sanity check result**: 1049 tests pass (9 new).
 - **Status**: [DONE]
+
+## 2026-04-10 -- LC 1055: Pinterest tag + Chinese solution note
+- **What I did**: (1) Added "Pinterest" to `company_tags` on problem row 498 (leetcode_id 1055, Shortest Way to Form String) -- now ["LinkedIn","Uber","Adobe","Pinterest"]. (2) Wrote ~2.8k-char Chinese solution note following existing format sections (思路 / 关键技巧 / 核心代码 / 注意点 / 复杂度 / 另一种思路). Note preserves the user-provided greedy + binary-search Python code verbatim and briefly mentions the alternative `next[i][c]` preprocessing approach (position-0 -1 check for no-solution detection) without writing that implementation. (3) Marked `is_completed = 1` per feedback_problem_db_sync.md convention.
+- **Deliverables**: `data/mle_prep.db` row 498 updated; `scripts/_update_1055.py` idempotent one-off update script (follows existing `_update_*.py` pattern).
+- **Sanity check result**: Queried DB post-update -- company_tags contains Pinterest, notes length 2782, is_completed=1, UTF-8 Chinese characters read back correctly. URL + description already present (no fetch needed).
+- **Status**: [DONE]
+
+## 2026-04-10 -- LC 1055: code cleanup + DP alternative
+- **What I did**: Extended the solution note per user follow-up. (1) Cleaned up the original greedy+bisect code: removed unused `nSource`/`nTarget`, replaced hand-rolled binary search with `bisect.bisect_left` (original had dead `mid` computation after the `while` loop), collapsed two-pass preprocessing into single `defaultdict(list)` pass, hoisted the -1 check to an up-front `set(target) - set(source)` check, added inline comment on `return ans + 1` wrap semantics. (2) Wrote full DP alternative: `nxt[i][c]` table of size (n+1)x26, filled backwards — `nxt[n][*] = -1`, `nxt[i][c] = i if source[i] == c else nxt[i+1][c]` — giving O(1) per-char lookup in the main loop. Total O(26n + m) time, O(26n) space. (3) Replaced 核心代码 and 另一种思路 sections; notes length now 4781 chars.
+- **Deliverables**: `scripts/_update_1055_v2.py` (idempotent), `data/mle_prep.db` row 498 `notes` updated.
+- **Sanity check result**: Ran both implementations against 5 cases: `("abc","abcbc")=2`, `("abc","acdbc")=-1`, `("xyz","xzyxz")=3`, `("abc","abc")=1`, `("abc","aaa")=3`. All pass. Idempotent re-run prints `[SKIP] ... already up to date`.
+- **Status**: [DONE]
+
+## 2026-04-10 -- LC 2128: add problem + Chinese solution note (Google)
+- **What I did**: Inserted new problem row for LC 2128 "Remove All Ones With Row and Column Flips" (Premium, previously not in DB). Set URL, fetched description, tags=["Math","Bit Manipulation","Matrix","XOR","Greedy"], pattern="Math", is_completed=1, comfort_level=3. Wrote ~3.6k-char Chinese solution note with sections 思路 (GF(2) derivation: grid[i][j] = r_i XOR c_j, so every row must equal first row or its complement) / 关键技巧 / 核心代码 (user's base solution) / 注意点 / 复杂度 / 空间优化 (O(1) extra space: compare element-by-element against grid[0][j] or grid[0][j]^1 based on grid[i][0] vs grid[0][0]) / 另一种思路. Per user follow-up, added "Google" to company_tags (now ["LinkedIn","Uber","Adobe","Google"]) — user confirmed this is primarily a Google problem.
+- **Deliverables**: `data/mle_prep.db` new row id=1065, `scripts/_update_2128.py` idempotent update script.
+- **Sanity check result**: Ran both V1 (base) and V2 (O(1)-space) against 3 test cases: `[[0,1,0],[1,0,1],[0,1,0]]`=True, `[[1,1,0],[0,0,0],[0,0,0]]`=False, `[[0]]`=True — all pass. DB post-update: company_tags contains Google, notes length 3606, UTF-8 roundtrip verified.
+- **Status**: [DONE]
+
+## 2026-04-10 -- Record Uber final round schedule in dashboard
+- **What I did**: Inserted 4 Uber final-round interview events into `interview_events` table (rows 20-23, company_id=5, status=upcoming, all 60min, location=Zoom). Apr 27: Coding 2 (Bo Cui, 10-11am PDT, event_type=technical), Design & Architecture New Problem (Ke Chen, 1:30-2:30pm PDT, event_type=system_design), Collaboration & Leadership (Yifan Ma, 3:30-4:30pm PDT, event_type=behavioral). Apr 29: Coding 1 Algorithms & DS (Ali Shameli, 11am-12pm PDT, event_type=technical). All times stored as naive Pacific per project convention. Also saved `project_uber_final_round.md` memory entry to orient future MLInterviewPrep prep sessions toward this deadline.
+- **Deliverables**: `scripts/_add_uber_final_round.py` (idempotent insert), `data/mle_prep.db` rows 20-23, memory file `project_uber_final_round.md` + MEMORY.md index entry.
+- **Sanity check result**: Queried DB post-insert — all 4 rows present with correct event_type (matching `ck_event_type` constraint from `src/backend/models/timeline.py` EVENT_TYPES tuple) and status=upcoming. Re-ran script, all 4 rows skipped (idempotent).
+- **Status**: [DONE]
+
+## 2026-04-10 -- Cross-project unpushed-commit audit + safe push
+- **What I did**: Scanned all 8 git repos in the workspace for unpushed commits, ran `scripts/scan_secrets.py --all --json` + per-commit diff secret scan. Findings: 913 scanner hits, 0 real secrets in tracked files or unpushed diffs (all live credentials live in gitignored `.env`/`.secret`). 3 repos had ahead-only unpushed commits; 1 (blog_proj main) was diverged (1 ahead / 5 behind) and deliberately SKIPPED to avoid destroying 5 upstream commits. Pushed: MLInterviewPrep main (67 commits, a84eafd→943275f), helixos main (2 commits, a6530b4→4d5ee14), blog_proj blog-refactor (10 commits, 79b7a7e→e1003ad).
+- **Deliverables**: 3 successful `git push origin <branch>` operations (no --force). blog_proj main intentionally untouched.
+- **Sanity check result**: Post-push `git log @{u}..HEAD` = 0 for all 3 pushed branches. blog_proj main still reports 5 behind / 1 ahead (unchanged, as intended). No secret scanner findings in any pushed diff.
+- **Status**: [DONE]. Follow-up needed from user: decide how to reconcile blog_proj main divergence (merge/rebase the 5 upstream commits or intentionally force-push — requires judgment, not pre-authorized).
