@@ -8,8 +8,17 @@ const STAR_COLORS: Record<string, { label: string; border: string }> = {
   Result: { label: "text-purple-700", border: "border-purple-300" },
 };
 
-function StarSection({ label, content }: { label: string; content: string | null }) {
-  if (!content) return null;
+function StarSection({
+  label,
+  content,
+  needsInput,
+}: {
+  label: string;
+  content: string | null;
+  needsInput?: boolean;
+}) {
+  const isEmpty = !content || content.trim() === "";
+  if (isEmpty && !needsInput) return null;
   const colors = STAR_COLORS[label] ?? { label: "text-blue-700", border: "border-blue-300" };
   return (
     <div className="mb-4">
@@ -17,33 +26,55 @@ function StarSection({ label, content }: { label: string; content: string | null
         {label}
       </span>
       <div className="mt-1 text-[15px] leading-relaxed text-gray-800">
-        <MarkdownPreview markdown={content} />
+        {isEmpty ? (
+          <p className="italic text-gray-400">(missing -- pending user input)</p>
+        ) : (
+          <MarkdownPreview markdown={content as string} />
+        )}
       </div>
     </div>
   );
 }
 
 export default function ExampleDrawerContent({ example }: { example: BehavioralExample }) {
+  const needsInput = example.title.startsWith("[NEEDS-INPUT]");
   return (
     <div>
       <div className="mb-5">
-        <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center gap-3 mb-1 flex-wrap">
           <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">
             {example.example_id}
           </span>
           <h3 className="text-xl font-bold text-gray-900">{example.title}</h3>
+          {needsInput && (
+            <span
+              className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded"
+              title="This example is a placeholder awaiting user-authored content"
+            >
+              Needs Input
+            </span>
+          )}
         </div>
         {example.source_project && (
           <p className="text-sm text-gray-500 mt-1">
             Source: <span className="font-medium text-gray-700">{example.source_project}</span>
           </p>
         )}
+        {needsInput && (
+          <div className="mt-3 bg-amber-50 border border-amber-300 rounded-lg p-3 text-sm text-amber-900">
+            This is a placeholder slot reserved by the 2026-04-11 behavioral audit.
+            The STAR fields below will render as "(missing -- pending user input)"
+            until the user authors the real failure story. See
+            <span className="font-mono"> docs/human_input/EX-30-32_failure_placeholders.md</span>
+            {" "}for the per-slot prompt.
+          </div>
+        )}
       </div>
 
-      <StarSection label="Situation" content={example.situation} />
-      <StarSection label="Task" content={example.task} />
-      <StarSection label="Action" content={example.action} />
-      <StarSection label="Result" content={example.result} />
+      <StarSection label="Situation" content={example.situation} needsInput={needsInput} />
+      <StarSection label="Task" content={example.task} needsInput={needsInput} />
+      <StarSection label="Action" content={example.action} needsInput={needsInput} />
+      <StarSection label="Result" content={example.result} needsInput={needsInput} />
 
       {example.risk_statement && (
         <div className="mb-4 bg-red-50 rounded-lg p-3 border border-red-200">

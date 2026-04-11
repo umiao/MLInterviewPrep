@@ -251,6 +251,33 @@ def list_examples(
     return [_build_example_response(db, ex) for ex in examples]
 
 
+@router.get(
+    "/behavioral/examples/by-example-id/{example_id}",
+    response_model=BehavioralExampleResponse,
+)
+def get_example_by_example_id(
+    example_id: str,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Get a single behavioral example by its string example_id (e.g. "EX-30").
+
+    Args:
+        example_id: String example identifier (e.g. "EX-30").
+        db: Database session.
+
+    Returns:
+        Example with linked questions.
+    """
+    ex = (
+        db.query(BehavioralExample)
+        .filter(BehavioralExample.example_id == example_id)
+        .first()
+    )
+    if not ex:
+        raise HTTPException(status_code=404, detail="Example not found")
+    return _build_example_response(db, ex)
+
+
 @router.get("/behavioral/examples/{example_db_id}", response_model=BehavioralExampleResponse)
 def get_example(
     example_db_id: int,

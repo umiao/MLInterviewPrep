@@ -126,10 +126,31 @@ const STAR_COLORS: Record<string, { label: string; border: string }> = {
   Result: { label: "text-purple-700", border: "border-purple-300" },
 };
 
-function StarSection({ label, content }: { label: string; content: string | null }) {
-  if (!content) return null;
-  const hasMarkdown = /[*_\-#\[\]`|]/.test(content);
+function StarSection({
+  label,
+  content,
+  needsInput,
+}: {
+  label: string;
+  content: string | null;
+  needsInput?: boolean;
+}) {
+  const isEmpty = !content || content.trim() === "";
+  if (isEmpty && !needsInput) return null;
   const colors = STAR_COLORS[label] ?? { label: "text-blue-700", border: "border-blue-300" };
+  if (isEmpty) {
+    return (
+      <div className="mb-3">
+        <span className={`font-bold ${colors.label} text-sm uppercase tracking-wider`}>
+          {label}
+        </span>
+        <p className="text-gray-400 italic text-[15px] leading-relaxed mt-1">
+          (missing -- pending user input)
+        </p>
+      </div>
+    );
+  }
+  const hasMarkdown = /[*_\-#\[\]`|]/.test(content as string);
   return (
     <div className="mb-3">
       <span className={`font-bold ${colors.label} text-sm uppercase tracking-wider`}>
@@ -137,7 +158,7 @@ function StarSection({ label, content }: { label: string; content: string | null
       </span>
       {hasMarkdown ? (
         <div className="mt-1 text-[15px] leading-relaxed text-gray-800">
-          <MarkdownPreview markdown={content} />
+          <MarkdownPreview markdown={content as string} />
         </div>
       ) : (
         <p className="text-gray-800 text-[15px] leading-relaxed mt-1">{content}</p>
@@ -152,20 +173,30 @@ function ExampleCard({
   example: BehavioralExample;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const needsInput = example.title.startsWith("[NEEDS-INPUT]");
 
   return (
     <div
       id={`example-${example.example_id}`}
-      className="bg-white rounded-xl p-5 mb-4 border-2 transition-all w-full border-gray-200 hover:border-blue-400 hover:shadow-md"
+      className={`bg-white rounded-xl p-5 mb-4 border-2 transition-all w-full hover:shadow-md ${
+        needsInput
+          ? "border-amber-300 hover:border-amber-500 bg-amber-50/30"
+          : "border-gray-200 hover:border-blue-400"
+      }`}
     >
       <div
         className="flex items-center justify-between cursor-pointer select-none"
         onClick={() => setExpanded((prev) => !prev)}
       >
         <div className="flex-1">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{example.example_id}</span>
             <h4 className="text-gray-900 font-bold text-base">{example.title}</h4>
+            {needsInput && (
+              <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
+                Needs Input
+              </span>
+            )}
           </div>
           {example.source_project && (
             <p className="text-sm text-gray-500 mt-1 ml-1">
@@ -191,10 +222,16 @@ function ExampleCard({
 
       {expanded && (
         <div className="mt-4 pl-4 border-l-3 border-blue-400" style={{ borderLeftWidth: '3px' }}>
-          <StarSection label="Situation" content={example.situation} />
-          <StarSection label="Task" content={example.task} />
-          <StarSection label="Action" content={example.action} />
-          <StarSection label="Result" content={example.result} />
+          {needsInput && (
+            <div className="mb-3 bg-amber-50 border border-amber-300 rounded-lg p-3 text-sm text-amber-900">
+              Placeholder slot reserved by the 2026-04-11 behavioral audit. See
+              <span className="font-mono"> docs/human_input/EX-30-32_failure_placeholders.md</span>.
+            </div>
+          )}
+          <StarSection label="Situation" content={example.situation} needsInput={needsInput} />
+          <StarSection label="Task" content={example.task} needsInput={needsInput} />
+          <StarSection label="Action" content={example.action} needsInput={needsInput} />
+          <StarSection label="Result" content={example.result} needsInput={needsInput} />
 
           {example.risk_statement && (
             <div className="mb-3 bg-red-50 rounded-lg p-3 border border-red-200">
@@ -336,9 +373,17 @@ function QuestionRow({
             const link = ex.linked_questions.find(
               (lq) => lq.question_id === question.question_id
             );
+            const exNeedsInput = ex.title.startsWith("[NEEDS-INPUT]");
             return (
-              <div key={ex.id} className="bg-blue-50 rounded-lg p-4 mb-2.5 border border-blue-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-1.5">
+              <div
+                key={ex.id}
+                className={`rounded-lg p-4 mb-2.5 border shadow-sm ${
+                  exNeedsInput
+                    ? "bg-amber-50 border-amber-300"
+                    : "bg-blue-50 border-blue-200"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                   <span className="text-sm font-mono font-bold text-blue-500">
                     {ex.example_id}
                   </span>
@@ -352,6 +397,11 @@ function QuestionRow({
                   >
                     {ex.title}
                   </button>
+                  {exNeedsInput && (
+                    <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
+                      Needs Input
+                    </span>
+                  )}
                 </div>
                 {link?.relevance_note && (
                   <blockquote className="text-sm text-green-700 border-l-3 border-green-400 pl-3 mb-2 leading-relaxed" style={{ borderLeftWidth: '3px' }}>

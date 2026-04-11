@@ -9,52 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 with [NEEDS-INPUT] markers
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: # Behavioral: seed 3 failure-story placeholders EX-30/31/32
-
-## Context
-Audit on 2026-04-11 found only 4 of 29 behavioral_examples (EX-05, EX-08, EX-19, EX-20)
-contain genuine failure-learning content. All 15 failure-ask questions route to this
-tiny pool, so a two-failure-question interview round forces story reuse. Placeholders
-reserve three slots; real content is filled later by the user (no invented stories).
-
-## Placeholder slots
-- EX-30 Technical miscall (wrong architecture / premature optimization / over-engineering)
-- EX-31 Interpersonal failure (mishandled peer conflict / lost trust / botched feedback)
-- EX-32 Execution / delivery miss (missed deadline w/ customer impact / shipped regression / wrong project bet)
-
-## Scenario matrix
-| Condition | Expected |
-|---|---|
-| Placeholder title visible in example drawer | Rendered with distinct "needs-input" warning badge, NOT hidden |
-| STAR fields empty | Frontend renders "(missing -- pending user input)" fallback, NOT crash or raw empty strings |
-| User later fills the slot | Same row updated in place; `[NEEDS-INPUT]` prefix removed from title |
-| Placeholder linked to non-failure-ask Q | Must NOT happen -- only the 15 failure-ask Qs get the links |
-| Re-running the seed script | Idempotent: existing EX-30/31/32 not duplicated |
-
-## Acceptance criteria
-- [ ] behavioral_examples has 3 new rows with example_id in (EX-30, EX-31, EX-32)
-- [ ] Titles start with `[NEEDS-INPUT] Failure story:` + theme label
-- [ ] situation=task=action=result="" on all 3 placeholders
-- [ ] risk_statement non-empty, format: "Audit 2026-04-11 found 4/29 examples contain genuine failure content. Placeholder reserves a slot for <theme> failure story."
-- [ ] principle_tags = "failure,learning,needs_input"
-- [ ] All 15 failure-ask question_ids linked to >=1 placeholder via question_example_links.relevance_note='[PLACEHOLDER] pending user-authored failure story'. The 15 question_ids are: OWN-1, OWN-8, OWN-11, COL-1, COL-2, COM-5, ADP-5, ADP-11, ADP-13, ADP-15, ADP-18, ADP-19, EXE-2, EXE-6, EXE-9
-- [ ] docs/human_input/EX-30-32_failure_placeholders.md created with per-slot prompts: "What went wrong?" / "What did you do?" / "What did you learn?" / "What would you do differently?" + estimated word count + STAR reminder
-- [ ] TASKS.md projection shows `[NEEDS-INPUT: 3 failure stories]` marker on this task row
-- [ ] Consumer audit: ExampleDrawerContent.tsx handles empty STAR fields with "(missing -- pending)" fallback, not broken layout
-- [ ] scripts/_seed_failure_placeholders.py is idempotent (re-runnable without duplicates)
-
-## Manual smoke test
-1. `scripts/dev.py` -> wait for "Application startup complete"
-2. Open BehavioralQuestions page
-3. Navigate to ADP-15 ("biggest lesson from a failed project")
-4. Linked examples list shows EX-30/31/32 placeholders with warning badge visibly distinct from real examples
-5. Click a placeholder -> drawer opens, STAR sections render "(missing -- pending user input)" fallback, no crash
-6. Verify via API: `curl /api/behavioral/examples/EX-30` returns row with empty STAR fields and non-empty risk_statement
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
@@ -418,6 +372,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 302 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 [NEEDS-INPUT: 3 failure stories]. # Behavioral: seed 3 failure-story placeholders EX-30/31/32
 - [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for
 - [x] **2026-04-10** -- T-P3-348: Lint: apply ruff auto-fixes to seed/translate/fix scripts. Apply ruff auto-fixes to scripts: import reordering, removal of unused imports, f-string cleanup (no placeholders).
 - [x] **2026-04-10** -- T-P2-347: Pillar 3/6 translation and expansion scripts. Add translation + expansion scripts for the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130). Scripts generate/u
