@@ -9,7 +9,6 @@ Expansion C:
 Format: keeps the - [ ] checkbox, adds > **Answer**: blockquote below each.
 """
 
-import re
 import sqlite3
 import sys
 from pathlib import Path

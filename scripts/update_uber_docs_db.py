@@ -3,9 +3,9 @@ Update company_documents DB from translated markdown files.
 Maps each Uber BPS markdown file to its DB document ID.
 """
 
+import io
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
@@ -28,7 +28,7 @@ def main() -> None:
     conn = sqlite3.connect(DB_PATH)
 
     for md_path, doc_id in FILE_TO_DOC.items():
-        with open(md_path, "r", encoding="utf-8") as f:
+        with open(md_path, encoding="utf-8") as f:
             content = f.read().strip()
 
         conn.execute(

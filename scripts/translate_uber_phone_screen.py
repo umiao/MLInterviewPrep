@@ -3,9 +3,9 @@ Translate uber_phone_screen_prep.md to Chinese.
 Following chinese_conversion_spec.md rules.
 """
 
+import io
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

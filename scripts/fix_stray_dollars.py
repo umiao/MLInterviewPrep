@@ -1,9 +1,9 @@
 """Fix stray $...$ inside $$...$$ blocks in company_documents."""
 
+import io
 import re
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

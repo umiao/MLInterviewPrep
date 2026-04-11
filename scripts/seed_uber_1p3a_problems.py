@@ -11,7 +11,6 @@ Data source: C:/Users/Shenghui Xu/Desktop/staging/uber题目整理.txt
 
 import json
 import sqlite3
-import sys
 from datetime import datetime
 
 DB_PATH = "data/mle_prep.db"
@@ -577,9 +576,9 @@ def seed_lc_problems(conn: sqlite3.Connection) -> tuple[int, int]:
             ),
         )
         created += 1
-        print(f"  [NEW] LC 1696 - Jump Game VI created")
+        print("  [NEW] LC 1696 - Jump Game VI created")
     else:
-        print(f"  [SKIP] LC 1696 already exists")
+        print("  [SKIP] LC 1696 already exists")
 
     conn.commit()
     return updated, created

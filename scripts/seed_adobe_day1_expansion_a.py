@@ -10,7 +10,6 @@ existing document in mle_prep.db (id=18) by inserting before Self-Check.
 """
 
 import importlib.util
-import re
 import sqlite3
 import sys
 from pathlib import Path

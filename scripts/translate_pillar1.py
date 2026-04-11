@@ -1,6 +1,6 @@
 """Translate Pillar 1 (Coding & Algorithms) nodes 44-63 to Chinese."""
-import sqlite3
 import re
+import sqlite3
 
 DB_PATH = "MLInterviewPrep/data/mle_prep.db"
 

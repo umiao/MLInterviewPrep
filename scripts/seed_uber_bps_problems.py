@@ -718,9 +718,9 @@ def step1_update_lc_problems(conn: sqlite3.Connection) -> int:
             ),
         )
         updated += 1
-        print(f"  Created LC 1696 (Jump Game VI) with Uber tag + 1p3a source")
+        print("  Created LC 1696 (Jump Game VI) with Uber tag + 1p3a source")
     else:
-        print(f"  LC 1696 already exists, updating tags")
+        print("  LC 1696 already exists, updating tags")
         cur.execute("SELECT id, company_tags, source, notes FROM problems WHERE leetcode_id = 1696")
         row = cur.fetchone()
         new_ct = merge_company_tags(row["company_tags"], "Uber")

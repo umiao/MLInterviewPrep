@@ -3,10 +3,10 @@ Translate company_documents id=4 (DoorDash Project Deep Dive) to Chinese.
 Following chinese_conversion_spec.md rules.
 """
 
-import sqlite3
-import re
-import sys
 import io
+import re
+import sqlite3
+import sys
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
@@ -328,7 +328,6 @@ def main() -> None:
     print(f"New content length: {new_len}")
 
     # Validation checks
-    import re
 
     # Check 1: Has Chinese characters
     chinese_chars = len(re.findall(r"[\u4e00-\u9fff]", new_content))

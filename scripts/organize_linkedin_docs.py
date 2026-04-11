@@ -4,9 +4,9 @@
 2. Update prep_notes with document index header (like Uber)
 3. Add solution notes for key LinkedIn problems that lack them
 """
+import io
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

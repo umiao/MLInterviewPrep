@@ -4,10 +4,10 @@ Scans all company_documents for formulas trapped in code blocks and converts
 them to proper $$...$$ math blocks.
 """
 
+import io
 import re
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

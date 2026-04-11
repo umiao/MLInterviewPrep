@@ -1,7 +1,7 @@
 """Expand Pillar 1 nodes that are below 4K chars to meet the threshold."""
-import sqlite3
-import re
 import os
+import re
+import sqlite3
 
 DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        "data", "mle_prep.db")

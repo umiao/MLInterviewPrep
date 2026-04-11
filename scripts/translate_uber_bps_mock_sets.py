@@ -7,9 +7,9 @@ Following chinese_conversion_spec.md rules:
 - Acronyms expanded on first use
 """
 
+import io
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
