@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 302 completed tasks archived as of latest archival.
+> 318 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -436,3 +436,19 @@ Lesson summary: Con
 - [x] **2026-04-08** -- T-P2-318: SD Prep: Update landing page with all topics + category grouping. After all 20 content tasks are done, update SystemDesignList.tsx Interview Prep tab:
 
 1. Replace hardcoded INTERVIEW_TOP
+- [x] **2026-04-09** -- T-P0-336: Smoke check: DOM assertions + API verification script. Create scripts/smoke_check.py: (1) Check dev server is running (localhost:5173 + localhost:8100). (2) Playwright opens e
+- [x] **2026-04-09** -- T-P0-337: CLAUDE.md: add production-path validation rules. Add two hard rules to CLAUDE.md: (1) Side-effect verification must go through the consumer, not the producer. After DB s
+- [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
+- [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
+- [x] **2026-04-09** -- T-P1-332: Baking Studio: compact RecipeCard UI + category grouping with captions. Redesign BakingStudio browse mode: (1) Compact RecipeCard -- reduce padding/size, make key info (name, name_zh) bold and
+- [x] **2026-04-09** -- T-P1-333: Baking Studio: multi-size select (4+6 inch) with ingredient summing. Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes to
+- [x] **2026-04-09** -- T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream). Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 
+- [x] **2026-04-09** -- T-P1-338: Smoke check: add screenshot archiving (no diff). Extend smoke_check.py to save a screenshot of each page to data/visual_archive/{page}_{timestamp}.png after DOM assertio
+- [x] **2026-04-10** -- T-P1-339: Translate content_module_arbitration.py to Chinese + add conversion spec. Translate scripts/content_module_arbitration.py English content to Chinese preserving English tech terms (bold + first-u
+- [x] **2026-04-10** -- T-P1-340: Behavioral: add story-arcs endpoint + arcs data. Add GET /behavioral/story-arcs endpoint loading docs/bq_story_arcs.json and enriching with live DB data. Add bq_story_ar
+- [x] **2026-04-10** -- T-P1-341: Behavioral prep: refresh EX-01, COL-3, COL-4 stories. Rewrite EX-01 'Hacker Week' STAR story with richer content + principle tags. Rewrite COL-3/COL-4 answers with LLM-judgme
+- [x] **2026-04-10** -- T-P1-342: Baking Studio: per-recipe seed guard fix and UI polish. Replace all-or-nothing baking_seed guard with per-recipe existence check. Compact RecipeCard layout with size badge + in
+- [x] **2026-04-10** -- T-P1-344: Add Google and Pinterest recruiter call prep notes. Add docs/google_recruiter_call_prep.md and docs/pinterest_recruiter_call_prep.md with recruiter call preparation notes.
+- [x] **2026-04-10** -- T-P1-350: Add California FTB tax call reminder to dashboard (2026-04-13). Insert a full-day interview_events row for Monday 2026-04-13: call California Franchise Tax Board to notify that the cor
+- [x] **2026-04-10** -- T-P2-343: Problem model: tolerate legacy comma-separated tag strings. Add defensive try/except JSONDecodeError fallback in tags_list/company_tags_list/messages_list getters, fall back to com
+- [x] **2026-04-10** -- T-P2-345: LC problem updates: _update_*.py scripts (1055, 1055v2, 2128, 815, Uber final round, SD tasks). Idempotent one-off update scripts per the _update_*.py convention: LC 1055 Pinterest tag + Chinese note, LC 1055 cleanup

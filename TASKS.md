@@ -17,43 +17,6 @@
 - **Depends on**: None
 - **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
 
-#### T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
-
-## Context
-Audit 2026-04-11: 54% of questions (62/115) have only 1 link in question_example_links.
-The three smallest-avg categories are communication (5 Qs), collaboration (9 Qs),
-leadership (11 Qs) -- each averaging ~1.2 links per question. A single-linked question
-leaves no rotation option if that example was just used on a prior question.
-
-## Scenario matrix
-| Condition | Expected |
-|---|---|
-| Q in {communication, collaboration, leadership} AND link_count == 1 | Add 1 secondary link |
-| Q in {communication, collaboration, leadership} AND link_count >= 2 | Skip (already covered) |
-| Q in other categories AND link_count == 1 | Out of scope (deferred to future task) |
-| Existing links | Never modified or deleted (additive only) |
-| Re-running verification | Produces 0 single-link rows in target categories |
-
-## Acceptance criteria
-- [ ] Every question with `category_id IN ('communication','collaboration','leadership')` and link_count==1 now has link_count>=2
-- [ ] Each newly-created link has non-empty relevance_note (>=30 chars) explaining the semantic fit
-- [ ] No existing link row modified or deleted
-- [ ] scripts/verify_behavioral_links.py written; exits 0 and prints "0 remaining single-link rows in target categories"
-- [ ] Total new links added matches the expected count (compute before starting: SELECT questions with link_count==1 in target cats)
-- [ ] Each new link's example is semantically defensible (not just a random pad)
-
-## Manual smoke test
-1. `scripts/dev.py` -> dev server up
-2. Open BehavioralQuestions -> filter to Communication & Influence
-3. Open each of the 5 questions' example drawers
-4. Each shows >=2 examples, each with a non-empty relevance_note
-5. Repeat for Teamwork & Cross-Functional Collaboration (9 Qs) and Leadership & People Development (11 Qs)
-6. Run verification script and confirm it reports 0 remaining single-link rows in target categories
-
 #### T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples
 - **Priority**: P1
 - **Complexity**: M
@@ -370,26 +333,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 302 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership. # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
 - [x] **2026-04-11** -- T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 [NEEDS-INPUT: 3 failure stories]. # Behavioral: seed 3 failure-story placeholders EX-30/31/32
 - [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for
 - [x] **2026-04-10** -- T-P3-348: Lint: apply ruff auto-fixes to seed/translate/fix scripts. Apply ruff auto-fixes to scripts: import reordering, removal of unused imports, f-string cleanup (no placeholders).
 - [x] **2026-04-10** -- T-P2-347: Pillar 3/6 translation and expansion scripts. Add translation + expansion scripts for the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130). Scripts generate/u
 - [x] **2026-04-10** -- T-P2-346: Seed LinkedIn/Google/Pinterest prep content. Add seed scripts for LinkedIn question index, LinkedIn problem notes insertion, Google prep content, Pinterest prep cont
-- [x] **2026-04-10** -- T-P2-345: LC problem updates: _update_*.py scripts (1055, 1055v2, 2128, 815, Uber final round, SD tasks). Idempotent one-off update scripts per the _update_*.py convention: LC 1055 Pinterest tag + Chinese note, LC 1055 cleanup
-- [x] **2026-04-10** -- T-P2-343: Problem model: tolerate legacy comma-separated tag strings. Add defensive try/except JSONDecodeError fallback in tags_list/company_tags_list/messages_list getters, fall back to com
-- [x] **2026-04-10** -- T-P1-350: Add California FTB tax call reminder to dashboard (2026-04-13). Insert a full-day interview_events row for Monday 2026-04-13: call California Franchise Tax Board to notify that the cor
-- [x] **2026-04-10** -- T-P1-344: Add Google and Pinterest recruiter call prep notes. Add docs/google_recruiter_call_prep.md and docs/pinterest_recruiter_call_prep.md with recruiter call preparation notes.
-- [x] **2026-04-10** -- T-P1-342: Baking Studio: per-recipe seed guard fix and UI polish. Replace all-or-nothing baking_seed guard with per-recipe existence check. Compact RecipeCard layout with size badge + in
-- [x] **2026-04-10** -- T-P1-341: Behavioral prep: refresh EX-01, COL-3, COL-4 stories. Rewrite EX-01 'Hacker Week' STAR story with richer content + principle tags. Rewrite COL-3/COL-4 answers with LLM-judgme
-- [x] **2026-04-10** -- T-P1-340: Behavioral: add story-arcs endpoint + arcs data. Add GET /behavioral/story-arcs endpoint loading docs/bq_story_arcs.json and enriching with live DB data. Add bq_story_ar
-- [x] **2026-04-10** -- T-P1-339: Translate content_module_arbitration.py to Chinese + add conversion spec. Translate scripts/content_module_arbitration.py English content to Chinese preserving English tech terms (bold + first-u
-- [x] **2026-04-09** -- T-P1-338: Smoke check: add screenshot archiving (no diff). Extend smoke_check.py to save a screenshot of each page to data/visual_archive/{page}_{timestamp}.png after DOM assertio
-- [x] **2026-04-09** -- T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream). Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 
-- [x] **2026-04-09** -- T-P1-333: Baking Studio: multi-size select (4+6 inch) with ingredient summing. Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes to
-- [x] **2026-04-09** -- T-P1-332: Baking Studio: compact RecipeCard UI + category grouping with captions. Redesign BakingStudio browse mode: (1) Compact RecipeCard -- reduce padding/size, make key info (name, name_zh) bold and
-- [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
-- [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
-- [x] **2026-04-09** -- T-P0-337: CLAUDE.md: add production-path validation rules. Add two hard rules to CLAUDE.md: (1) Side-effect verification must go through the consumer, not the producer. After DB s
-- [x] **2026-04-09** -- T-P0-336: Smoke check: DOM assertions + API verification script. Create scripts/smoke_check.py: (1) Check dev server is running (localhost:5173 + localhost:8100). (2) Playwright opens e
