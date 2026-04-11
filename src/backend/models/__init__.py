@@ -5,6 +5,11 @@ from src.backend.models.behavioral import (
     BehavioralQuestion,
     QuestionExampleLink,
 )
+from src.backend.models.behavioral_theme import (
+    BehavioralTheme,
+    ExampleThemeTag,
+    QuestionThemeTag,
+)
 from src.backend.models.company import Company, CompanyTopicWeight
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.models.framework import FrameworkNode, StudyLog
@@ -18,6 +23,9 @@ __all__ = [
     "BehavioralQuestion",
     "BehavioralExample",
     "QuestionExampleLink",
+    "BehavioralTheme",
+    "QuestionThemeTag",
+    "ExampleThemeTag",
     "Problem",
     "Attempt",
     "QASession",

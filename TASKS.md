@@ -11,60 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
-
-#### T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
-
-## Context
-Audit 2026-04-11 proposed 15 themes cross-cutting the existing 9 category taxonomy.
-Themes are: technical_problem_solving, collaboration_teamwork, leadership_direction,
-process_systems, failure_setback, prioritization_tradeoffs, ownership_accountability,
-data_analysis, conflict_disagreement, deadline_pressure, mentoring_coaching,
-scope_creep_ambiguous, code_quality_tech_debt, ambiguity_uncertainty,
-oncall_prod_incident (intentionally empty -- future human-input target).
-
-## Scenario matrix
-| Condition | Expected |
-|---|---|
-| Question text matches >=1 theme keyword rule | Insert row(s) in question_theme_tags |
-| Question text matches 0 keyword rules | Log as unclassified; script emits a "needs-human-review" list |
-| Example STAR+principle_tags matches >=1 rule | Insert row(s) in example_theme_tags |
-| Example matches 0 rules | Log as unclassified |
-| Re-run seed script on already-tagged DB | Idempotent: no duplicate rows, existing tags preserved |
-| Theme with 0 matches (oncall_prod_incident) | Row still in behavioral_themes table; API returns count=0 |
-| API called with unknown theme slug | 400 Bad Request |
-| API called with valid slugs in AND mode | Returns intersection |
-| API called with valid slugs in OR mode | Returns union |
-
-## Acceptance criteria
-- [ ] New tables: behavioral_themes(id, slug UNIQUE, label, description, display_order); question_theme_tags(question_id FK, theme_id FK, composite PK); example_theme_tags(example_id FK, theme_id FK, composite PK). ON DELETE CASCADE from behavioral_questions and behavioral_examples.
-- [ ] Schema migration follows whatever mechanism src/backend/models/ already uses (investigate first; do NOT invent a new one)
-- [ ] SQLAlchemy models in src/backend/models/behavioral_theme.py; pydantic schemas in src/backend/schemas/behavioral_theme.py
-- [ ] behavioral_themes seeded with exactly 15 rows; slug snake_case, label Title Case, display_order matches frequency rank from audit
-- [ ] question_theme_tags: >=110 of 115 questions tagged (<=5% unclassified)
-- [ ] example_theme_tags: 29 of 29 examples tagged with >=1 theme
-- [ ] Backend: GET /api/behavioral/themes returns list of {slug, label, question_count, example_count}
-- [ ] Backend: GET /api/behavioral/questions?theme=slug1,slug2&theme_mode=or|and filters correctly; unknown slug -> 400
-- [ ] scripts/seed_behavioral_themes.py is idempotent (re-runnable)
-- [ ] tests/test_behavioral_themes.py covers: seed, filter by single theme, filter by multi-theme OR, filter by multi-theme AND, re-run idempotency, cascade delete
-
-## Manual smoke test (cross-boundary: verify via API consumer, not raw SELECT per CLAUDE.md)
-1. `scripts/dev.py` -> backend up
-2. `curl /api/behavioral/themes` -> 15 themes with counts. failure_setback count ~10, oncall_prod_incident count 0
-3. `curl /api/behavioral/questions?theme=failure_setback` -> exactly the ~10 questions tagged with that theme
-4. `curl /api/behavioral/questions?theme=failure_setback,leadership_direction&theme_mode=and` -> intersection (smaller set)
-5. `curl /api/behavioral/questions?theme=failure_setback,leadership_direction&theme_mode=or` -> union (larger set)
-6. `curl /api/behavioral/questions?theme=not_a_theme` -> 400
-7. Re-run `python scripts/seed_behavioral_themes.py` -> reports no changes (idempotent)
-
 #### T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page
 - **Priority**: P1
 - **Complexity**: M
@@ -293,6 +239,12 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - **Depends on**: None
 - **Description**: CRITICAL: helixos settings.json uses bare python for ALL hook commands. On Windows, bare python resolves to the AppData Store stub (exit code 49), silently breaking all hooks. Fix: (1) Replace all bare python with /c/Anaconda/python.exe in settings.json. (2) Add setup_python_env.sh SessionStart hook (copy from MLInterviewPrep) to inject Anaconda into PATH for Bash tool calls via CLAUDE_ENV_FILE. CLAUDE.md already documents this prohibition (added 2026-03-21 via propagation) but the fix was never applied. This is the same root cause as MLInterviewPrep lesson [2026-03-20] #bash-tool #path.
 
+#### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
+
 #### T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template
 - **Priority**: P2
 - **Complexity**: S
@@ -335,6 +287,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples. # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
 - [x] **2026-04-11** -- T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership. # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
 - [x] **2026-04-11** -- T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 [NEEDS-INPUT: 3 failure stories]. # Behavioral: seed 3 failure-story placeholders EX-30/31/32
 - [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for

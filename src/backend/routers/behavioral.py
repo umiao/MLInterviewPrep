@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from src.backend.database import get_db
@@ -11,6 +11,11 @@ from src.backend.models.behavioral import (
     BehavioralExample,
     BehavioralQuestion,
     QuestionExampleLink,
+)
+from src.backend.models.behavioral_theme import (
+    BehavioralTheme,
+    ExampleThemeTag,
+    QuestionThemeTag,
 )
 from src.backend.schemas.behavioral import (
     BehavioralExampleCreate,
@@ -24,6 +29,7 @@ from src.backend.schemas.behavioral import (
     QuestionExampleLinkCreate,
     QuestionExampleLinkResponse,
 )
+from src.backend.schemas.behavioral_theme import BehavioralThemeResponse
 
 router = APIRouter()
 
@@ -37,6 +43,8 @@ router = APIRouter()
 def list_questions(
     category_id: str | None = Query(default=None),
     search: str | None = Query(default=None),
+    theme: str | None = Query(default=None),
+    theme_mode: str = Query(default="or"),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     """List behavioral questions with optional filters.
@@ -44,6 +52,8 @@ def list_questions(
     Args:
         category_id: Filter by category.
         search: Search in question text.
+        theme: Comma-separated theme slug list.
+        theme_mode: "or" (union) or "and" (intersection) for multi-theme filter.
         db: Database session.
 
     Returns:
@@ -54,6 +64,43 @@ def list_questions(
         query = query.filter(BehavioralQuestion.category_id == category_id)
     if search:
         query = query.filter(BehavioralQuestion.text.ilike(f"%{search}%"))
+
+    if theme:
+        if theme_mode not in ("or", "and"):
+            raise HTTPException(
+                status_code=400,
+                detail="theme_mode must be 'or' or 'and'",
+            )
+        slugs = [s.strip() for s in theme.split(",") if s.strip()]
+        if not slugs:
+            raise HTTPException(status_code=400, detail="empty theme filter")
+        theme_rows = (
+            db.query(BehavioralTheme).filter(BehavioralTheme.slug.in_(slugs)).all()
+        )
+        found_slugs = {t.slug for t in theme_rows}
+        unknown = [s for s in slugs if s not in found_slugs]
+        if unknown:
+            raise HTTPException(
+                status_code=400,
+                detail=f"unknown theme slug(s): {','.join(unknown)}",
+            )
+        theme_ids = [t.id for t in theme_rows]
+        if theme_mode == "or":
+            query = query.join(
+                QuestionThemeTag,
+                QuestionThemeTag.question_id == BehavioralQuestion.id,
+            ).filter(QuestionThemeTag.theme_id.in_(theme_ids)).distinct()
+        else:  # and
+            matching_ids = (
+                select(QuestionThemeTag.question_id)
+                .where(QuestionThemeTag.theme_id.in_(theme_ids))
+                .group_by(QuestionThemeTag.question_id)
+                .having(
+                    func.count(func.distinct(QuestionThemeTag.theme_id))
+                    == len(theme_ids)
+                )
+            )
+            query = query.filter(BehavioralQuestion.id.in_(matching_ids))
 
     questions = query.order_by(BehavioralQuestion.category_id, BehavioralQuestion.question_id).all()
 
@@ -76,6 +123,52 @@ def list_questions(
             "company_target": q.company_target,
             "created_at": q.created_at,
             "example_count": link_count,
+        })
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Themes
+# ---------------------------------------------------------------------------
+
+
+@router.get("/behavioral/themes", response_model=list[BehavioralThemeResponse])
+def list_themes(db: Session = Depends(get_db)) -> list[dict]:
+    """Return all behavioral themes with question/example counts.
+
+    Args:
+        db: Database session.
+
+    Returns:
+        List of theme summaries ordered by display_order.
+    """
+    themes = (
+        db.query(BehavioralTheme)
+        .order_by(BehavioralTheme.display_order, BehavioralTheme.slug)
+        .all()
+    )
+    result = []
+    for t in themes:
+        q_count = (
+            db.query(func.count(QuestionThemeTag.question_id))
+            .filter(QuestionThemeTag.theme_id == t.id)
+            .scalar()
+            or 0
+        )
+        ex_count = (
+            db.query(func.count(ExampleThemeTag.example_id))
+            .filter(ExampleThemeTag.theme_id == t.id)
+            .scalar()
+            or 0
+        )
+        result.append({
+            "id": t.id,
+            "slug": t.slug,
+            "label": t.label,
+            "description": t.description,
+            "display_order": t.display_order,
+            "question_count": q_count,
+            "example_count": ex_count,
         })
     return result
 

@@ -389,6 +389,34 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
         ],
     ),
     (
+        16,
+        "Create behavioral_themes, question_theme_tags, example_theme_tags tables",
+        [
+            "CREATE TABLE IF NOT EXISTS behavioral_themes ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  slug VARCHAR NOT NULL UNIQUE,"
+            "  label VARCHAR NOT NULL,"
+            "  description TEXT,"
+            "  display_order INTEGER NOT NULL DEFAULT 0,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE TABLE IF NOT EXISTS question_theme_tags ("
+            "  question_id INTEGER NOT NULL REFERENCES behavioral_questions(id) ON DELETE CASCADE,"
+            "  theme_id INTEGER NOT NULL REFERENCES behavioral_themes(id) ON DELETE CASCADE,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  PRIMARY KEY (question_id, theme_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_qtt_theme_id ON question_theme_tags(theme_id)",
+            "CREATE TABLE IF NOT EXISTS example_theme_tags ("
+            "  example_id INTEGER NOT NULL REFERENCES behavioral_examples(id) ON DELETE CASCADE,"
+            "  theme_id INTEGER NOT NULL REFERENCES behavioral_themes(id) ON DELETE CASCADE,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  PRIMARY KEY (example_id, theme_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_ett_theme_id ON example_theme_tags(theme_id)",
+        ],
+    ),
+    (
         15,
         "Create baking_recipes, baking_ingredients, baking_home_inventory tables",
         [
