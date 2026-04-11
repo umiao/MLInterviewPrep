@@ -1,19 +1,26 @@
-# Task Backlog
+"""One-off: add the 6 behavioral-review tasks approved on 2026-04-11.
 
-<!-- Auto-generated from .claude/tasks.db. Do not edit directly. -->
-<!-- Use: python .claude/hooks/task_db.py --help -->
+Runs `task_db.py batch` with all 6 tasks + 2 inter-task depends in a single
+atomic transaction. Uses $LAST to chain the last added id into the next
+task's depends-on where needed.
 
-## In Progress
+Task numbering strategy: real category slugs and real example_id format (EX-NN
+sequential) were queried from the DB first, then interpolated into the specs.
+See PROGRESS.md entry 2026-04-11 for the upstream research summary.
+"""
+from __future__ import annotations
 
-## Active Tasks
+import json
+import subprocess
+import sys
+from pathlib import Path
 
-### P0 -- Must Have (core functionality)
+ROOT = Path(__file__).resolve().parents[1]
+TASK_DB = ROOT / ".claude" / "hooks" / "task_db.py"
 
-#### T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 with [NEEDS-INPUT] markers
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: # Behavioral: seed 3 failure-story placeholders EX-30/31/32
+
+T1_DESC = """\
+# Behavioral: seed 3 failure-story placeholders EX-30/31/32
 
 ## Context
 Audit on 2026-04-11 found only 4 of 29 behavioral_examples (EX-05, EX-08, EX-19, EX-20)
@@ -54,20 +61,11 @@ reserve three slots; real content is filled later by the user (no invented stori
 4. Linked examples list shows EX-30/31/32 placeholders with warning badge visibly distinct from real examples
 5. Click a placeholder -> drawer opens, STAR sections render "(missing -- pending user input)" fallback, no crash
 6. Verify via API: `curl /api/behavioral/examples/EX-30` returns row with empty STAR fields and non-empty risk_statement
+"""
 
-### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
-
-#### T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
+T2_DESC = """\
+# Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
 
 ## Context
 Audit 2026-04-11: 54% of questions (62/115) have only 1 link in question_example_links.
@@ -99,12 +97,11 @@ leaves no rotation option if that example was just used on a prior question.
 4. Each shows >=2 examples, each with a non-empty relevance_note
 5. Repeat for Teamwork & Cross-Functional Collaboration (9 Qs) and Leadership & People Development (11 Qs)
 6. Run verification script and confirm it reports 0 remaining single-link rows in target categories
+"""
 
-#### T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
+
+T3_DESC = """\
+# Behavioral: 15-theme vocabulary, tag tables, keyword backfill
 
 ## Context
 Audit 2026-04-11 proposed 15 themes cross-cutting the existing 9 category taxonomy.
@@ -147,12 +144,11 @@ oncall_prod_incident (intentionally empty -- future human-input target).
 5. `curl /api/behavioral/questions?theme=failure_setback,leadership_direction&theme_mode=or` -> union (larger set)
 6. `curl /api/behavioral/questions?theme=not_a_theme` -> 400
 7. Re-run `python scripts/seed_behavioral_themes.py` -> reports no changes (idempotent)
+"""
 
-#### T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-353
-- **Description**: # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
+
+T4_DESC = """\
+# Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
 
 ## Context
 Frontend consumer of the theme backend (Task 3). Adds a secondary tag axis to question
@@ -196,12 +192,11 @@ state for shareable filter links.
 
 ## Dependencies
 Depends on Task 3 (theme backend must exist for the sidebar to query /api/behavioral/themes).
+"""
 
-#### T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
+
+T5_DESC = """\
+# Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
 
 ## Context
 SlideOverPanel.tsx:18 defaults to max-w-xl (576px). BehavioralQuestions.tsx:677 invokes
@@ -278,44 +273,11 @@ grep audit. Future drawer styling changes then happen in exactly one place.
 
 ## Dependencies
 None (can interleave with Task 4).
+"""
 
-### P2 -- Nice to Have
 
-#### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos test_check.py still uses check_stop_cache/write_stop_cache which were deprecated per LESSONS.md 2026-03-18. Cache can produce false passes when files change between cache write and next session. MLInterviewPrep already removed this. Action: Remove cache imports and calls from test_check.py; clean up hook_utils.py if no other callers.
-
-#### T-P2-321: [SYNC] helixos: Propagate 3 new lessons from MLInterviewPrep 2026-04-08
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root - universal lesson for orchestration. (2) DB-only content must have recovery path - relevant to helixos SQLite data/. (3) Markdown math pipe conflicts with remark-gfm table parsing - helixos uses remark-gfm in MarkdownRenderer.tsx and ConversationView.tsx. Append all three with [PROPAGATED] tag to helixos/LESSONS.md.
-
-#### T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep.db and tasks.db but missed this one. Action: Add problems.db to MLInterviewPrep/.gitignore.
-
-#### T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. Add as optional-dependencies dev group in pyproject.toml to satisfy CLAUDE.md dependency sync rule.
-
-#### T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as optional-dependencies dev group in pyproject.toml to satisfy CLAUDE.md dependency sync rule.
-
-#### T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-352
-- **Description**: # Behavioral: semantic relevance spot-check script for 10 random Q-example links
+T6_DESC = """\
+# Behavioral: semantic relevance spot-check script for 10 random Q-example links
 
 ## Context
 Audit 2026-04-11 confirmed valence matching is correct (failure Qs route to
@@ -346,95 +308,103 @@ for semantic fit (not just valence).
 
 ## Dependencies
 Depends on Task 2 (after secondary links are added, the sampling pool reflects the final state of the corpus).
+"""
 
-### P3 -- Stretch Goals
 
-## Blocked
+COMMANDS = [
+    {
+        "cmd": "add",
+        "title": "Behavioral: seed 3 failure-story placeholders EX-30/31/32 with [NEEDS-INPUT] markers",
+        "priority": "P0",
+        "complexity": "S",
+        "description": T1_DESC,
+    },
+    {
+        "cmd": "add",
+        "title": "Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership",
+        "priority": "P1",
+        "complexity": "S",
+        "description": T2_DESC,
+    },
+    {
+        "cmd": "add",
+        "title": "Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples",
+        "priority": "P1",
+        "complexity": "M",
+        "description": T3_DESC,
+    },
+    {
+        "cmd": "add",
+        "title": "Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page",
+        "priority": "P1",
+        "complexity": "M",
+        "description": T4_DESC,
+    },
+    {
+        "cmd": "add",
+        "title": "Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family",
+        "priority": "P1",
+        "complexity": "L",
+        "description": T5_DESC,
+    },
+    {
+        "cmd": "add",
+        "title": "Behavioral: semantic relevance spot-check script for 10 random Q-example links",
+        "priority": "P2",
+        "complexity": "S",
+        "description": T6_DESC,
+    },
+]
 
-#### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: All hooks in helixos settings.json use bare python which resolves to the Windows Store stub (exit 49) on this machine. MLInterviewPrep already has the fix applied.
 
-Actions needed:
-1. Copy .claude/hooks/setup_python_env.sh from MLInterviewPrep to helixos (writes Anaconda to CLAUDE_ENV_FILE)
-2. Update helixos .claude/settings.json: replace all python with /c/Anaconda/python.exe in ALL hook commands
-3. Add SessionStart hook entry for setup_python_env.sh
+def main() -> None:
+    # Step 1: batch-add all 6 tasks (no dependencies yet -- $LAST is only
+    # resolved for `id`/`on` fields in batch, not `depends_on`).
+    payload = json.dumps(COMMANDS, ensure_ascii=False)
+    result = subprocess.run(
+        [sys.executable, str(TASK_DB), "batch", "--commands", payload],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    print("STDOUT:", result.stdout)
+    if result.stderr:
+        print("STDERR:", result.stderr)
+    result.check_returncode()
 
-BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ directory from MLInterviewPrep session. Must be done from a helixos session or manually.
+    parsed = json.loads(result.stdout)
+    if not parsed.get("ok"):
+        raise RuntimeError(f"Batch add failed: {parsed}")
 
-#### T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos/.claude/settings.json uses bare `python` for all hook commands (plan_mode_hook, block_dangerous, commit_msg_guard, secret_guard, tasks_md_guard, file_watch_warn, yaml_validate, lint_check, test_check, archive_check, session_context). Per CLAUDE.md Prohibited Actions: bare python resolves to Windows Store stub (exit code 49) and hooks silently fail. Fix: replace all `python "$CLAUDE_PROJECT_DIR/..."` with `/c/Anaconda/python.exe "$CLAUDE_PROJECT_DIR/..."`. Source: MLInterviewPrep settings.json (already fixed). Also add setup_python_env.sh as first SessionStart hook (bash "$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh") -- MLInterviewPrep has this, helixos does not. Copy setup_python_env.sh from MLInterviewPrep if not present.
+    ids = [r["id"] for r in parsed["results"]]
+    assert len(ids) == 6, f"expected 6 task ids, got {ids}"
+    t1, t2, t3, t4, t5, t6 = ids
+    print(f"Added: T1={t1} T2={t2} T3={t3} T4={t4} T5={t5} T6={t6}")
 
-#### T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: CRITICAL: helixos settings.json uses bare python for ALL hook commands. On Windows, bare python resolves to the AppData Store stub (exit code 49), silently breaking all hooks. Fix: (1) Replace all bare python with /c/Anaconda/python.exe in settings.json. (2) Add setup_python_env.sh SessionStart hook (copy from MLInterviewPrep) to inject Anaconda into PATH for Bash tool calls via CLAUDE_ENV_FILE. CLAUDE.md already documents this prohibition (added 2026-03-21 via propagation) but the fix was never applied. This is the same root cause as MLInterviewPrep lesson [2026-03-20] #bash-tool #path.
+    # Step 2: add the two cross-task dependencies as a second batch call.
+    dep_payload = json.dumps(
+        [
+            {"cmd": "depend", "id": t4, "on": t3},
+            {"cmd": "depend", "id": t6, "on": t2},
+        ]
+    )
+    dep_result = subprocess.run(
+        [sys.executable, str(TASK_DB), "batch", "--commands", dep_payload],
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+    )
+    print("DEP STDOUT:", dep_result.stdout)
+    if dep_result.stderr:
+        print("DEP STDERR:", dep_result.stderr)
+    dep_result.check_returncode()
 
-#### T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: MLInterviewPrep has: (1) setup_python_env.sh SessionStart hook that writes Anaconda to CLAUDE_ENV_FILE, (2) /c/Anaconda/python.exe absolute paths in all settings.json hook commands. helixos and claude-code-project-template both use bare python in settings.json and have no setup_python_env.sh. Per LESSONS.md: Bash tool runs non-login shells, .bashrc not sourced, bare python resolves to Windows Store stub. Source: MLInterviewPrep/.claude/hooks/setup_python_env.sh and settings.json. Action: copy setup_python_env.sh to helixos and template, update settings.json hook commands to use absolute path.
+    dep_parsed = json.loads(dep_result.stdout)
+    if not dep_parsed.get("ok"):
+        raise RuntimeError(f"Dependency batch failed: {dep_parsed}")
 
-#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos/.claude/hooks/test_check.py still imports and uses check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed the cache in T-P2-188 (commit abf6543), per the lesson that stop caches can produce false passes when files change between sessions.
+    print(f"[OK] Dependencies: {t4} depends on {t3}, {t6} depends on {t2}")
 
-Action: Update helixos/.claude/hooks/test_check.py to match MLInterviewPrep version -- remove check_stop_cache/write_stop_cache import and usage. Run tests after to confirm hook still works.
 
-Source: MLInterviewPrep/.claude/hooks/test_check.py (current, cache-free version).
-
-#### T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: claude-code-project-template/.claude/hooks/test_check.py still uses check_stop_cache/write_stop_cache from hook_utils. The lesson [2026-03-18] established that stop caches cause false PASS results when files change between sessions. MLInterviewPrep already fixed this.
-
-Action: Update template/.claude/hooks/test_check.py to match MLInterviewPrep version -- remove cache import and usage. The template is the reference baseline, so it should have the best-known version of all hooks.
-
-Source: MLInterviewPrep/.claude/hooks/test_check.py.
-
-#### T-P2-239: [SYNC] Propagate session_context.py improvements from MLInterviewPrep to helixos
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
-
-#### T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: test_check.py imports check_stop_cache and write_stop_cache from hook_utils and uses them to skip re-running tests in the same session. These deprecated caching functions were removed from the hook architecture (LESSONS.md lesson [2026-03-18]: removed lint cache so every Stop hook runs fresh). The caching logic means test failures can be silently skipped if tests passed earlier in the same session. Fix: Remove the cache check/write calls from test_check.py so tests always run fresh on Stop. Keep check_stop_cache/write_stop_cache in hook_utils.py only if other hooks still use them.
-
-## Completed Tasks
-
-> 302 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
-
-- [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for
-- [x] **2026-04-10** -- T-P3-348: Lint: apply ruff auto-fixes to seed/translate/fix scripts. Apply ruff auto-fixes to scripts: import reordering, removal of unused imports, f-string cleanup (no placeholders).
-- [x] **2026-04-10** -- T-P2-347: Pillar 3/6 translation and expansion scripts. Add translation + expansion scripts for the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130). Scripts generate/u
-- [x] **2026-04-10** -- T-P2-346: Seed LinkedIn/Google/Pinterest prep content. Add seed scripts for LinkedIn question index, LinkedIn problem notes insertion, Google prep content, Pinterest prep cont
-- [x] **2026-04-10** -- T-P2-345: LC problem updates: _update_*.py scripts (1055, 1055v2, 2128, 815, Uber final round, SD tasks). Idempotent one-off update scripts per the _update_*.py convention: LC 1055 Pinterest tag + Chinese note, LC 1055 cleanup
-- [x] **2026-04-10** -- T-P2-343: Problem model: tolerate legacy comma-separated tag strings. Add defensive try/except JSONDecodeError fallback in tags_list/company_tags_list/messages_list getters, fall back to com
-- [x] **2026-04-10** -- T-P1-350: Add California FTB tax call reminder to dashboard (2026-04-13). Insert a full-day interview_events row for Monday 2026-04-13: call California Franchise Tax Board to notify that the cor
-- [x] **2026-04-10** -- T-P1-344: Add Google and Pinterest recruiter call prep notes. Add docs/google_recruiter_call_prep.md and docs/pinterest_recruiter_call_prep.md with recruiter call preparation notes.
-- [x] **2026-04-10** -- T-P1-342: Baking Studio: per-recipe seed guard fix and UI polish. Replace all-or-nothing baking_seed guard with per-recipe existence check. Compact RecipeCard layout with size badge + in
-- [x] **2026-04-10** -- T-P1-341: Behavioral prep: refresh EX-01, COL-3, COL-4 stories. Rewrite EX-01 'Hacker Week' STAR story with richer content + principle tags. Rewrite COL-3/COL-4 answers with LLM-judgme
-- [x] **2026-04-10** -- T-P1-340: Behavioral: add story-arcs endpoint + arcs data. Add GET /behavioral/story-arcs endpoint loading docs/bq_story_arcs.json and enriching with live DB data. Add bq_story_ar
-- [x] **2026-04-10** -- T-P1-339: Translate content_module_arbitration.py to Chinese + add conversion spec. Translate scripts/content_module_arbitration.py English content to Chinese preserving English tech terms (bold + first-u
-- [x] **2026-04-09** -- T-P1-338: Smoke check: add screenshot archiving (no diff). Extend smoke_check.py to save a screenshot of each page to data/visual_archive/{page}_{timestamp}.png after DOM assertio
-- [x] **2026-04-09** -- T-P1-334: Baking Studio: add 3 new recipes (coconut jelly, sago, mango cream). Add 3 new preset recipes to baking_seed.py and seed into DB: (1) Coconut Milk Jelly (椰奶冻, cream_cake/cream, universal): 
-- [x] **2026-04-09** -- T-P1-333: Baking Studio: multi-size select (4+6 inch) with ingredient summing. Allow simultaneous selection of 4-inch and 6-inch in FilterBar/ScalingCalculator: (1) FilterBar size selector becomes to
-- [x] **2026-04-09** -- T-P1-332: Baking Studio: compact RecipeCard UI + category grouping with captions. Redesign BakingStudio browse mode: (1) Compact RecipeCard -- reduce padding/size, make key info (name, name_zh) bold and
-- [x] **2026-04-09** -- T-P1-331: DoorDash ML Domain prep: Case study mock answers + SCOPE templates. Create prep doc with interview-ready answers: (1) 5 classic case studies with full SCOPE framework (restaurant recommend
-- [x] **2026-04-09** -- T-P1-330: DoorDash ML Domain prep: LLM+RecSys frontiers + cross-vertical transfer. Create prep doc: (1) DoorDash LLM+RecSys: cross-vertical feature gen, Hierarchical RAG, Familiarity+Affordability+Novelt
-- [x] **2026-04-09** -- T-P0-337: CLAUDE.md: add production-path validation rules. Add two hard rules to CLAUDE.md: (1) Side-effect verification must go through the consumer, not the producer. After DB s
-- [x] **2026-04-09** -- T-P0-336: Smoke check: DOM assertions + API verification script. Create scripts/smoke_check.py: (1) Check dev server is running (localhost:5173 + localhost:8100). (2) Playwright opens e
+if __name__ == "__main__":
+    main()
