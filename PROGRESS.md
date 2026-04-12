@@ -534,3 +534,10 @@
 - **Sanity check result**: Script ran clean; verified stored length = 6418 via sqlite SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-370 --status completed
+
+## 2026-04-12 -- [T-P1-371] Translate LC 2402 notes to Chinese
+- **What I did**: Translated LC 2402 (Meeting Rooms III) notes to Chinese following the bilingual convention: code blocks, heap/tuple/tiebreak/duration and algorithm terms stay in English; prose in Chinese. Covers two-heap simulation pattern, canonical solution, code review, subtle traps, complexity, pattern recognition.
+- **Deliverables**: scripts/_translate_2402_notes.py; data/mle_prep.db (problems.notes for leetcode_id=2402, 3829 chars).
+- **Sanity check result**: Script ran clean; verified stored length = 3829 via sqlite SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-371 --status completed
