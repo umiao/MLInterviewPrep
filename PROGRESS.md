@@ -590,3 +590,10 @@
 - **Sanity check result**: Notes length 5604 chars; sqlite update confirmed.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-378 --status completed
+
+## 2026-04-12 19:05 -- [T-P1-379] Refresh Pinterest LC index doc
+- **What I did**: Updated scripts/_create_pinterest_lc_index_doc.py to mark LC 410/43/642/1723 as "Written" in the Notes column and bumped progress line to "14/14 notes written" with Chinese-translation annotation. Re-ran script to refresh company_documents doc id=47.
+- **Deliverables**: scripts/_create_pinterest_lc_index_doc.py; data/mle_prep.db (company_documents id=47).
+- **Sanity check result**: Script reported [UPDATE] doc id=47 refreshed (6723 chars); verified progress line updated via SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P2-379 --status completed
