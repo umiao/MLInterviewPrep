@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-367: BQ Quick Index: generate cn_elevator_pitch batch 2 (EX-10 to EX-33, 13 examples)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-366
-- **Description**: Generate high-quality Chinese elevator pitch summaries for remaining 13 examples missing cn_elevator_pitch. Format: '{summary} | KEY FACTS: {fact1}|{fact2}|...' Style: technical Chinese mixed with English terms matching existing pitches. Examples: EX-10, EX-11, EX-12, EX-13, EX-14, EX-18, EX-19, EX-20, EX-21, EX-22, EX-23, EX-24, EX-33. Steps: (1) Start backend server. (2) For each example, GET STAR content. (3) Distill into one-sentence Chinese summary + 3-5 key facts. (4) PUT /behavioral/examples/{db_id} with cn_elevator_pitch. (5) Verify all 13 show pitch via API. (6) Final check: all 34 examples now have cn_elevator_pitch. AC: All 34 examples return non-null cn_elevator_pitch. Quick Index BQ cards all display Chinese summaries.
-
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
@@ -109,4 +103,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-11** -- T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as 
 - [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
 - [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
+- [x] **2026-04-11** -- T-P0-367: BQ Quick Index: generate cn_elevator_pitch batch 2 (EX-10 to EX-33, 13 examples). Generate high-quality Chinese elevator pitch summaries for remaining 13 examples missing cn_elevator_pitch. Format: '{su
 - [x] **2026-04-11** -- T-P0-366: BQ Quick Index: generate cn_elevator_pitch batch 1 (BLOG-01 to EX-09, 14 examples). Generate high-quality Chinese elevator pitch summaries for 14 examples missing cn_elevator_pitch. Format: '{summary} | K

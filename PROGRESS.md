@@ -408,3 +408,10 @@
 - **Sanity check result**: (1) All 14 PUT requests returned matching cn_elevator_pitch. (2) Verification pass confirmed 14/14 have non-null pitch. (3) Total count: 21/34 examples now have cn_elevator_pitch (was 7, added 14). Remaining 13 are batch 2 (T-P0-367).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-366 --status completed`
+
+## 2026-04-12 -- [T-P0-367] BQ Quick Index: generate cn_elevator_pitch batch 2
+- **What I did**: Generated and PUT cn_elevator_pitch for remaining 13 examples (EX-10, EX-11, EX-12, EX-13, EX-14, EX-18, EX-19, EX-20, EX-21, EX-22, EX-23, EX-24, EX-33). Each pitch follows the established format: Chinese summary with English technical terms + KEY FACTS section. Content distilled from each example's STAR fields.
+- **Deliverables**: scripts/_batch2_cn_pitches.py (update script), 13 examples now have cn_elevator_pitch in database.
+- **Sanity check result**: (1) All 13 PUT requests returned matching cn_elevator_pitch. (2) Final verification: 34/34 examples now have cn_elevator_pitch. (3) Zero missing pitches remain.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-367 --status completed`
