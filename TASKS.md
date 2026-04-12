@@ -11,74 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-362: BQ theme detail page: example cards with Chinese pitch + STAR drawer
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-358, T-P1-359
-- **Description**: New page at route /behavioral/theme/:slug for the BQ theme detail view. Add the route in src/frontend/src/App.tsx and create the page component.
-
-DEPENDS ON: T-P1-358 (cn_elevator_pitch field), T-P1-359 (theme filter on /examples).
-
-EXECUTION STEPS:
-
-1. Add new route in App.tsx (right after the existing 'behavioral' route):
-       <Route path="behavioral/theme/:slug" element={<BehavioralThemePage />} />
-
-2. Create new file src/frontend/src/pages/BehavioralThemePage.tsx with the following structure:
-
-   - Read :slug via useParams<{slug: string}>().
-   - Read ?from= via useSearchParams (used by the back link).
-   - Three queries (or one combined query if you add /api/behavioral/themes/<slug>/detail later):
-       (a) themes: GET /api/behavioral/themes — find the matching theme by slug
-       (b) examples: GET /api/behavioral/examples?theme=<slug> — depends on T-P1-359 fix
-       (c) questions: GET /api/behavioral/questions?theme=<slug>
-   - Page header:
-       <header>
-         <Link to={returnUrl}>← Back</Link>  // returnUrl = '/quick-index?section=bq' if from==='quick-index', else '/quick-index?section=bq'
-         <h1>{theme.label}</h1>
-         <div>{theme.description}</div>
-         <div>{theme.question_count} questions · {theme.example_count} examples</div>
-       </header>
-   - Examples grid: render each example as a card with:
-       - example_id (small mono badge)
-       - title (English)
-       - cn_elevator_pitch — IF NULL, fall back to title in italic-gray. Split the pitch on the ' | ' separator to display key facts as bullet pills.
-       - onClick: setActiveExampleId(example.example_id)
-   - Questions list (smaller, below): plain bullet list of question texts with the question_id as a leading mono badge.
-
-3. Drawer (REVISED per code review — single fetch, no race condition):
-   - Use existing component src/frontend/src/components/ui/SlideOverPanel.tsx (already used by BehavioralQuestions).
-   - State: const [activeExample, setActiveExample] = useState<BehavioralExample | null>(null);
-     (Hold the FULL example object, not just the id.)
-   - When the user clicks an example card, call setActiveExample(example) — passing the already-loaded object from the examples list query. Do NOT issue a second fetch.
-   - The /api/behavioral/examples?theme=<slug> response already includes situation/task/action/result/evidence_quotes/principle_tags/risk_statement/analogy/tech_terms/linked_questions per BehavioralExampleResponse (src/backend/schemas/behavioral.py line 105+). Pass activeExample directly to ExampleDrawerContent — drawer becomes a pure render-from-props component, no useEffect / no loading state / no race condition possible.
-   - SlideOverPanel must dim background and close on outside click + Escape key (verify these props exist; if not, add them — needed for T-P2-363 path 1).
-   - CRITICAL: opening/closing the drawer must NOT change the URL. Use React state only. This way browser back from the theme page goes to /quick-index?section=bq, not back through every example the user opened.
-
-4. Empty state: if examples.length === 0, render a friendly message 'No master stories tagged to this theme yet.' Do not crash.
-
-5. Manual smoke test (run in browser, not just type-check):
-   - Navigate /quick-index?section=bq -> click 'Failure & Setback' -> URL becomes /behavioral/theme/failure_setback?from=quick-index
-   - Verify 5 example cards render: EX-15, EX-16, EX-17, EX-30, EX-33B, each showing the Chinese pitch from T-P1-358
-   - Click EX-33B card -> drawer opens with full STAR
-   - Press Escape -> drawer closes, URL unchanged, scroll position retained
-   - Click 'Back' link -> returns to /quick-index?section=bq (BQ section still visible)
-   - Browser back from theme page (without going through Back link) -> also returns to /quick-index?section=bq
-
-6. i18n / typography sub-step (REQUIRED — added per code review): the cn_elevator_pitch is mixed CN/EN content rendered alongside English UI chrome. The ' | KEY FACTS: ' split produces pills with both CN and EN tokens, which will font-fallback differently in the same line and cause vertical misalignment.
-   - Use a single CSS class for the pill that explicitly sets font-family with both English and CJK fallbacks in order: e.g. `font-family: 'Inter', 'Noto Sans CJK SC', system-ui, sans-serif;` (or whatever the project's existing CN-capable font stack is — check src/frontend/src/index.css first to reuse).
-   - Set explicit `line-height` and `vertical-align: baseline` on the pill so the CN glyphs and EN glyphs do not produce row-height jitter.
-   - Manual smoke test: render a card with a pitch containing both Chinese and 'KEY FACTS:' English in the same pill row — verify glyphs sit on the same baseline, no row-height jitter.
-
-ACCEPTANCE:
-- New route and page render for all 15 theme slugs.
-- 5 failure-cluster examples render with Chinese pitch and key facts.
-- Clicking an example card opens the slide-over drawer with full STAR — using the already-loaded example object, NO second API fetch.
-- Drawer state is local React state (does NOT touch URL).
-- Back link and browser back both return to /quick-index?section=bq.
-- CN/EN typography on the pitch pills is verified visually — no font-fallback jitter.
-- npm run build passes.
-
 ### P2 -- Nice to Have
 
 #### T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer
@@ -349,6 +281,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
 - [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
 - [x] **2026-04-11** -- T-P2-321: [SYNC] helixos: Propagate 3 new lessons from MLInterviewPrep 2026-04-08. Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root
+- [x] **2026-04-11** -- T-P1-362: BQ theme detail page: example cards with Chinese pitch + STAR drawer. New page at route /behavioral/theme/:slug for the BQ theme detail view. Add the route in src/frontend/src/App.tsx and cr
 - [x] **2026-04-11** -- T-P1-361: QuickIndex BQ section: render theme cards grouped by cluster. Inside the BQ section of QuickIndex (placeholder added by T-P1-360), render the 15 behavioral_themes as cards grouped by
 - [x] **2026-04-11** -- T-P1-360: QuickIndex: add section toggle bar (LC / ML coding / BQ). Restructure src/frontend/src/pages/QuickIndex.tsx — add a top toggle bar so the user can show ONE of three sections at a
 - [x] **2026-04-11** -- T-P1-359: Behavioral API: fix /questions and /examples theme filter (returns all instead of filtered). Fix /api/behavioral/questions and /api/behavioral/examples theme filter.

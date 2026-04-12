@@ -17,6 +17,7 @@ import FrameworkNotesPage from "./pages/FrameworkNotesPage";
 import SystemDesignList from "./pages/SystemDesignList";
 import SystemDesignDetail from "./pages/SystemDesignDetail";
 import BehavioralQuestions from "./pages/BehavioralQuestions";
+import BehavioralThemePage from "./pages/BehavioralThemePage";
 import QuickIndex from "./pages/QuickIndex";
 import BakingStudio from "./pages/BakingStudio";
 
@@ -47,6 +48,7 @@ export default function App() {
                 <Route path="system-design" element={<SystemDesignList />} />
                 <Route path="system-design/:slug" element={<SystemDesignDetail />} />
                 <Route path="behavioral" element={<BehavioralQuestions />} />
+                <Route path="behavioral/theme/:slug" element={<BehavioralThemePage />} />
                 <Route path="questions" element={<Questions />} />
                 <Route path="companies" element={<Companies />} />
                 <Route path="companies/:companyId/prep" element={<PrepNotesPage />} />

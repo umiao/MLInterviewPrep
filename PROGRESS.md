@@ -481,3 +481,10 @@
 - **Sanity check result**: (1) npm run build (tsc -b + vite build) passes clean. (2) Dev server on localhost:5173 serves /quick-index?section=bq with 200. (3) API at localhost:8100/api/behavioral/themes returns all 15 themes with correct counts. (4) Full pytest suite: 1063 passed in 54.74s, zero regressions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-361 --status completed`
+
+## 2026-04-11 -- [T-P1-362] BQ theme detail page: example cards with Chinese pitch + STAR drawer
+- **What I did**: Created new page component BehavioralThemePage.tsx at route /behavioral/theme/:slug. Page fetches theme metadata, examples (filtered by theme slug), and questions from existing API endpoints. Renders example cards showing example_id badge, title, and cn_elevator_pitch split into summary + KEY FACTS pills. Clicking a card opens SlideOverPanel with full ExampleDrawerContent (STAR sections) using the already-loaded example object (no second fetch). Questions rendered as a bulleted list below. Added CSS for CN/EN pitch pill typography with explicit font-family and line-height to prevent baseline jitter. Back link returns to /quick-index?section=bq.
+- **Deliverables**: src/frontend/src/pages/BehavioralThemePage.tsx (new), src/frontend/src/App.tsx (route added), src/frontend/src/index.css (bq-pitch-text/bq-pitch-pill styles)
+- **Sanity check result**: (1) npm run build passes clean. (2) All 15 theme slugs return 200 from dev server. (3) failure_setback API returns 5 examples (EX-15/16/17/30/33B) all with cn_elevator_pitch. (4) Full pytest suite: 1063 passed, zero regressions.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-362 --status completed`

@@ -267,3 +267,20 @@ body {
     display: none;
   }
 }
+
+/* ---- BQ Theme Page: CN/EN pitch typography ---- */
+
+.bq-pitch-text {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    sans-serif;
+  line-height: 1.6;
+}
+
+.bq-pitch-pill {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+    "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    sans-serif;
+  line-height: 1.5;
+  vertical-align: baseline;
+}
