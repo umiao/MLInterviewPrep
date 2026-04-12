@@ -474,3 +474,10 @@
 - **Sanity check result**: (1) npm run build (tsc -b + vite build) passes clean. (2) Dev server on localhost:5173 serves /quick-index with 200. (3) Full pytest suite: 1063 passed in 34.02s, zero regressions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-360 --status completed`
+
+## 2026-04-11 -- [T-P1-361] QuickIndex BQ section: render theme cards grouped by cluster
+- **What I did**: Replaced the BQ placeholder in QuickIndex.tsx with a full theme-card grid. Added a useQuery call to /api/behavioral/themes (enabled only when section==='bq', staleTime Infinity). Defined CLUSTER_FAMILIES inline with 7 semantic groups covering all 15 theme slugs. Each family renders a heading + grid of ThemeCard components showing label and "N questions / M examples" counts from the API. Cards link to /behavioral/theme/<slug>?from=quick-index. Themes with 0 questions and 0 examples are dimmed. Unknown themes (not in any family) fall into an "Other" group.
+- **Deliverables**: src/frontend/src/pages/QuickIndex.tsx (rewritten BQ section: useQuery, CLUSTER_FAMILIES, ThemeCard component)
+- **Sanity check result**: (1) npm run build (tsc -b + vite build) passes clean. (2) Dev server on localhost:5173 serves /quick-index?section=bq with 200. (3) API at localhost:8100/api/behavioral/themes returns all 15 themes with correct counts. (4) Full pytest suite: 1063 passed in 54.74s, zero regressions.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-361 --status completed`

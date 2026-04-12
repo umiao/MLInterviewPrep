@@ -1,4 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "../utils/api";
+import type { BehavioralThemeSummary } from "../types/behavioral";
 
 const LC_PROBLEMS: { dbId: number; lcId: number; title: string }[] = [
   { dbId: 93, lcId: 146, title: "LRU Cache" },
@@ -22,6 +25,18 @@ const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1050, title: "Lock Combination BFS (Bidirectional)" },
 ];
 
+const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [
+  { id: "failure", label: "Failure & Ownership", theme_slugs: ["failure_setback", "ownership_accountability"] },
+  { id: "conflict", label: "Conflict & Collaboration", theme_slugs: ["conflict_disagreement", "collaboration_teamwork"] },
+  { id: "decision", label: "Decision under Ambiguity", theme_slugs: ["prioritization_tradeoffs", "ambiguity_uncertainty", "scope_creep_ambiguous"] },
+  { id: "execution", label: "Execution & Pressure", theme_slugs: ["deadline_pressure", "process_systems", "oncall_prod_incident"] },
+  { id: "leadership", label: "Leadership & People", theme_slugs: ["leadership_direction", "mentoring_coaching"] },
+  { id: "technical", label: "Technical Depth", theme_slugs: ["technical_problem_solving", "code_quality_tech_debt"] },
+  { id: "data", label: "Data and Decisions", theme_slugs: ["data_analysis"] },
+];
+
+const ALL_KNOWN_SLUGS = new Set(CLUSTER_FAMILIES.flatMap((f) => f.theme_slugs));
+
 type SectionType = "lc" | "ml" | "bq";
 
 export default function QuickIndex() {
@@ -29,6 +44,20 @@ export default function QuickIndex() {
   const raw = params.get("section");
   const section: SectionType =
     raw === "lc" || raw === "ml" || raw === "bq" ? raw : "lc";
+
+  const { data: themes } = useQuery({
+    queryKey: ["behavioral-themes"],
+    queryFn: () => api.get<BehavioralThemeSummary[]>("/behavioral/themes"),
+    enabled: section === "bq",
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60,
+  });
+
+  const themeBySlug = new Map(
+    (themes ?? []).map((t) => [t.slug, t]),
+  );
+
+  const otherThemes = (themes ?? []).filter((t) => !ALL_KNOWN_SLUGS.has(t.slug));
 
   return (
     <div className="p-6 h-full overflow-y-scroll">
@@ -84,10 +113,61 @@ export default function QuickIndex() {
       )}
 
       {section === "bq" && (
-        <div className="p-8 text-center text-gray-500 border border-dashed border-gray-300 rounded-lg">
-          Coming soon (filled in by T-P1-361)
+        <div className="space-y-8">
+          {CLUSTER_FAMILIES.map((family) => {
+            const familyThemes = family.theme_slugs
+              .map((slug) => themeBySlug.get(slug))
+              .filter((t): t is BehavioralThemeSummary => t !== undefined);
+            if (familyThemes.length === 0) return null;
+            return (
+              <div key={family.id}>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                  {family.label}
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {familyThemes.map((theme) => (
+                    <ThemeCard key={theme.slug} theme={theme} />
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          {otherThemes.length > 0 && (
+            <div>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                Other
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {otherThemes.map((theme) => (
+                  <ThemeCard key={theme.slug} theme={theme} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
+  );
+}
+
+function ThemeCard({ theme }: { theme: BehavioralThemeSummary }) {
+  const dimmed = theme.question_count === 0 && theme.example_count === 0;
+  return (
+    <Link
+      to={`/behavioral/theme/${theme.slug}?from=quick-index`}
+      className={
+        "block p-4 rounded-lg border transition-all bg-white " +
+        (dimmed
+          ? "border-gray-100 text-gray-400"
+          : "border-gray-200 hover:border-blue-400 hover:shadow-md")
+      }
+    >
+      <div className={"font-medium " + (dimmed ? "text-gray-400" : "text-gray-800")}>
+        {theme.label}
+      </div>
+      <div className={"mt-1 text-xs " + (dimmed ? "text-gray-300" : "text-gray-500")}>
+        {theme.question_count} questions / {theme.example_count} examples
+      </div>
+    </Link>
   );
 }
