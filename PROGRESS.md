@@ -387,3 +387,10 @@
 - **Sanity check result**: (1) Script ran successfully, all patches applied. (2) Re-run confirmed idempotent (all skips, no duplicates). (3) DB verification: all 4 examples have 'failure' tag and NRG sentinel; EX-16 also has TPV sentinel. (4) API consumer verification: all 4 examples verified via localhost:8100/api/behavioral/examples/by-example-id/. (5) Full pytest suite: 1063 passed, zero regressions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-364 --status completed`
+
+## 2026-04-11 -- [T-P2-365] Behavioral audit: technical_problem_solving data-driven evidence
+- **What I did**: Audited all 28 examples tagged with `technical_problem_solving` theme for explicit data-driven evidence. Checked each example's Action and Result sections against four criteria: (a) quantitative number in Result, (b) metric name + direction in Action, (c) A/B test reference, (d) data-derived hypothesis. Generated comprehensive audit report with PASS/NEEDS-NOTE/RECOMMEND-UNTAG verdicts.
+- **Deliverables**: `docs/audits/tech_depth_data_driven_2026-04.md` (new audit report)
+- **Sanity check result**: (1) All 28 examples accounted for (task estimated 27). (2) Summary counts: 8 PASS, 13 NEEDS-NOTE, 7 RECOMMEND-UNTAG. (3) Full pytest suite: 1063 passed, zero regressions. (4) No DB modifications (audit-only task).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-365 --status completed`
