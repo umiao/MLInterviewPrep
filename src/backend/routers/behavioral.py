@@ -337,6 +337,8 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
 def list_examples(
     principle_tag: str | None = Query(default=None),
     search: str | None = Query(default=None),
+    theme: str | None = Query(default=None),
+    theme_mode: str = Query(default="or"),
     db: Session = Depends(get_db),
 ) -> list[dict]:
     """List behavioral examples with optional filters.
@@ -344,6 +346,8 @@ def list_examples(
     Args:
         principle_tag: Filter by principle tag.
         search: Search in title or STAR fields.
+        theme: Comma-separated theme slug list.
+        theme_mode: "or" (union) or "and" (intersection) for multi-theme filter.
         db: Database session.
 
     Returns:
@@ -360,6 +364,43 @@ def list_examples(
             | BehavioralExample.situation.ilike(f"%{search}%")
             | BehavioralExample.action.ilike(f"%{search}%")
         )
+
+    if theme:
+        if theme_mode not in ("or", "and"):
+            raise HTTPException(
+                status_code=400,
+                detail="theme_mode must be 'or' or 'and'",
+            )
+        slugs = [s.strip() for s in theme.split(",") if s.strip()]
+        if not slugs:
+            raise HTTPException(status_code=400, detail="empty theme filter")
+        theme_rows = (
+            db.query(BehavioralTheme).filter(BehavioralTheme.slug.in_(slugs)).all()
+        )
+        found_slugs = {t.slug for t in theme_rows}
+        unknown = [s for s in slugs if s not in found_slugs]
+        if unknown:
+            raise HTTPException(
+                status_code=400,
+                detail=f"unknown theme slug(s): {','.join(unknown)}",
+            )
+        theme_ids = [t.id for t in theme_rows]
+        if theme_mode == "or":
+            query = query.join(
+                ExampleThemeTag,
+                ExampleThemeTag.example_id == BehavioralExample.id,
+            ).filter(ExampleThemeTag.theme_id.in_(theme_ids)).distinct()
+        else:  # and
+            matching_ids = (
+                select(ExampleThemeTag.example_id)
+                .where(ExampleThemeTag.theme_id.in_(theme_ids))
+                .group_by(ExampleThemeTag.example_id)
+                .having(
+                    func.count(func.distinct(ExampleThemeTag.theme_id))
+                    == len(theme_ids)
+                )
+            )
+            query = query.filter(BehavioralExample.id.in_(matching_ids))
 
     examples = query.order_by(BehavioralExample.example_id).all()
     return [_build_example_response(db, ex) for ex in examples]

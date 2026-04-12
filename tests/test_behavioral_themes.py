@@ -204,6 +204,57 @@ def test_cascade_delete_removes_tags_when_theme_deleted(
     assert ex_remaining == []
 
 
+def test_questions_response_includes_theme_tags(test_client, seeded_behavioral):
+    """Each question row must carry a theme_tags array (T-P1-354 / T-P1-359)."""
+    resp = test_client.get("/api/behavioral/questions")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data, "expected at least one question in response"
+    for q in data:
+        assert "theme_tags" in q
+        assert isinstance(q["theme_tags"], list)
+    # Q-BOTH-1 should have both failure + leadership tags.
+    both = next(q for q in data if q["question_id"] == "Q-BOTH-1")
+    slugs = {t["slug"] for t in both["theme_tags"]}
+    assert slugs == {"failure_setback", "leadership_direction"}
+
+
+def test_filter_examples_by_single_theme(test_client, seeded_behavioral):
+    """GET /examples?theme=<slug> returns only tagged examples (T-P1-359)."""
+    resp = test_client.get("/api/behavioral/examples?theme=failure_setback")
+    assert resp.status_code == 200
+    data = resp.json()
+    ids = {e["example_id"] for e in data}
+    assert ids == {"EX-T1"}
+
+
+def test_filter_examples_multi_theme_or(test_client, seeded_behavioral):
+    """OR mode over example themes returns union."""
+    resp = test_client.get(
+        "/api/behavioral/examples?theme=failure_setback,leadership_direction"
+        "&theme_mode=or"
+    )
+    assert resp.status_code == 200
+    ids = {e["example_id"] for e in resp.json()}
+    assert ids == {"EX-T1", "EX-T2"}
+
+
+def test_filter_examples_unknown_theme_returns_400(test_client, seeded_behavioral):
+    """Unknown slug on /examples -> 400 Bad Request."""
+    resp = test_client.get("/api/behavioral/examples?theme=not_a_theme")
+    assert resp.status_code == 400
+
+
+def test_filter_examples_invalid_theme_mode_returns_400(
+    test_client, seeded_behavioral
+):
+    """theme_mode must be 'or' or 'and' on /examples."""
+    resp = test_client.get(
+        "/api/behavioral/examples?theme=failure_setback&theme_mode=xor"
+    )
+    assert resp.status_code == 400
+
+
 def test_seed_script_matcher_idempotent(db_session, seeded_behavioral):
     """Inserting duplicate (question_id, theme_id) pairs should not create dupes.
 
