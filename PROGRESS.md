@@ -520,3 +520,10 @@
 - **Sanity check result**: Script ran clean; verified stored length = 2167 via sqlite SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-368 --status completed
+
+## 2026-04-12 -- [T-P1-369] Translate LC 465 notes to Chinese
+- **What I did**: Translated LC 465 (Optimal Account Balancing) solution notes to Chinese following the same bilingual convention as LC 332: algorithm names, code, complexity notation, and technical terms (bitmask, submask, DP state, partition, swap argument) kept in English; prose in Chinese.
+- **Deliverables**: scripts/_update_465_notes.py; data/mle_prep.db (problems.notes for leetcode_id=465, 5375 chars).
+- **Sanity check result**: Script ran clean; verified stored length = 5375 via sqlite SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-369 --status completed

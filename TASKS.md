@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-369: [Pinterest/CN] Translate LC 465 notes to Chinese (Optimal Account Balancing)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Translate existing English notes (9898 chars) to Chinese. Includes two approaches (Bitmask DP + naive DFS), Full-Transfer Optimality lemma, and submask enumeration addendum. Keep code, algorithm names, complexity, and key terms (bitmask, submask, DP state) in English where natural. Explanation text in Chinese.
-
 #### T-P1-370: [Pinterest/CN] Translate LC 282 notes to Chinese (Expression Add Operators)
 - **Priority**: P1
 - **Complexity**: M
@@ -162,6 +156,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-12** -- T-P1-369: [Pinterest/CN] Translate LC 465 notes to Chinese (Optimal Account Balancing). Translate existing English notes (9898 chars) to Chinese. Includes two approaches (Bitmask DP + naive DFS), Full-Transfe
 - [x] **2026-04-12** -- T-P1-368: [Pinterest/CN] Translate LC 332 notes to Chinese (Reconstruct Itinerary). Translate existing English notes (2977 chars) to Chinese. Keep code blocks, algorithm names (Hierholzer, Eulerian Path),
 - [x] **2026-04-11** -- T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence. Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, re
 - [x] **2026-04-11** -- T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30. STRUCTURAL/MECHANICAL polish ONLY for the 4 remaining failure-cluster master stories. Brings them in line with the EX-33
