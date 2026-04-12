@@ -415,3 +415,108 @@
 - **Sanity check result**: (1) All 13 PUT requests returned matching cn_elevator_pitch. (2) Final verification: 34/34 examples now have cn_elevator_pitch. (3) Zero missing pitches remain.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-367 --status completed`
+
+## 2026-04-12 -- Post-auto-run: verification + process cleanup
+- **What I did**: (1) Verified autonomous_run.sh completed both T-P0-366 and T-P0-367 successfully (34/34 cn_elevator_pitch populated, 2 commits landed). (2) Cleaned up stale processes left by autonomous sessions: killed 1 orphaned claude process, 3 duplicate uvicorn backends (ports 8200, 8210, 8100), 3 old PowerShell sessions, and several stale bash shells from earlier sessions and Apr 10. Kept current session, frontend dev server (npm run dev), and original backend (uvicorn :8765).
+- **Deliverables**: No code changes. Process cleanup only.
+- **Sanity check result**: (1) 34/34 examples confirmed with cn_elevator_pitch via DB query. (2) git log shows commits a123658 (batch 1) and 8bbd236 (batch 2). (3) Process list reduced from ~25 to ~5 active processes.
+- **Status**: [DONE]
+- **Request**: No task_db update -- tasks already marked completed by autonomous sessions
+
+## 2026-04-13 -- Autonomous session: no unblocked tasks
+- **What I did**: Evaluated TASKS.md for highest-priority unblocked task. All 10 remaining tasks are blocked [SYNC] tasks requiring writes to helixos/ or claude-code-project-template/ directories, which cannot be done from an MLInterviewPrep session due to file permission constraints.
+- **Deliverables**: None. Read-only evaluation only.
+- **Sanity check result**: Confirmed all 10 tasks have BLOCKED status and [SYNC] tag. No P0/P1/P2 unblocked tasks exist.
+- **Status**: [DONE] -- no actionable work available
+- **Request**: No task_db update -- no task was worked on. session_state.json all_done=true remains correct.
+
+## 2026-04-11 -- [behavioral] Deepen EX-15 and EX-16 with user-provided incident analysis framework
+- **What I did**: User provided a detailed framework for the cross-DC static compilation incident (EX-16) and clarifying details (preprod not prod, force-merge rollback, Head of Engineering RCA, science team factor migration). Deepened both EX-15 and EX-16 in bq_behavioral_examples.json and bq_improved_stories.md with three key improvements: (1) Upgraded root cause framing from personal ("didn't ask the right person") to architectural ("deployment model assumes loose DC coupling, but static compilation creates implicit strong coupling -- an undocumented mismatch"). (2) Added concrete details: preprod containment, Head of Engineering RCA presentation, systematic follow-up cleanup of additional implicit coupling instances, science team factor/model migration to declarative artifactory. (3) Established cross-reference thread between EX-15 and EX-16 around shared core lesson: "the most dangerous dependencies are the undocumented implicit ones." Updated arc-5 improvement_notes in bq_story_arcs.json to reflect that EX-15/16 are no longer "thin." User chose blended A+B framing: acknowledge failure/setback but emphasize clear root cause judgment and proactive response.
+- **Deliverables**: docs/bq_behavioral_examples.json (EX-15 and EX-16 STAR fields rewritten), docs/bq_improved_stories.md (Story 15 and Story 16 rewritten), docs/bq_story_arcs.json (arc-5 improvement_notes updated).
+- **Sanity check result**: Both JSON files pass json.load() validation. All three files edited consistently with the same thematic changes.
+- **Status**: [DONE]
+- **Request**: No task_db update -- this is collaborative interactive work on behavioral prep content, not a backlog task.
+
+## 2026-04-12 -- Add Pinterest must-do LC problem list (14 problems)
+- **What I did**: Added 14 Pinterest must-do LeetCode problems to the DB. Tagged 11 existing problems with "Pinterest" company tag, created 2 new problems (LC 1110 Delete Nodes And Return Forest, LC 1723 Find Minimum Time to Finish All Jobs), 1 was already tagged. Added full problem table to docs/pinterest_recruiter_call_prep.md. Created idempotent seed script.
+- **Deliverables**: scripts/seed_pinterest_lc_problems.py (new), docs/pinterest_recruiter_call_prep.md (updated with LC list table), data/mle_prep.db (14 problems tagged)
+- **Sanity check result**: Verified all 14 problems present in DB with Pinterest tag via direct SQL query. 6/14 already completed, 8 remaining.
+- **Status**: [DONE]
+- **Request**: No task_db update -- ad-hoc user request, not a backlog task.
+
+## 2026-04-12 -- LC 332 Reconstruct Itinerary: solution analysis and notes
+- **What I did**: Analyzed user's LC 332 solution, identified it as Hierholzer's Algorithm for Eulerian Path. Wrote comprehensive problem notes covering: algorithm explanation, why post-order matters, code review (naming, build pattern, state management, dead code removal), complexity analysis, edge cases, and interview pattern recognition. Updated DB notes with Pinterest prep doc drawer link. Replied on Discord with full analysis in Chinese.
+- **Deliverables**: data/mle_prep.db (LC 332 notes field updated, 2977 chars)
+- **Sanity check result**: Verified notes saved in DB via SELECT query, confirmed content starts with correct header and link.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching via Discord, not a backlog task.
+
+## 2026-04-12 -- LC 465 Optimal Account Balancing: bitmask DP notes + correctness proof
+- **What I did**: Wrote comprehensive notes for LC 465 into DB. Covered: core reformulation (min transactions = n - max zero-sum partitions), polished bitmask DP code with review of user's code, naive DFS alternative, and detailed correctness proof addressing user's question about why "opposite signs only" and "j > i" are sufficient. Key lemma: Full-Transfer Optimality. Replied on Discord in Chinese with full analysis.
+- **Deliverables**: data/mle_prep.db (LC 465 notes updated, 7565 chars), scripts/_update_465_notes.py (one-shot writer)
+- **Sanity check result**: DB update confirmed via script output; Discord reply sent (2 parts).
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching via Discord, not a backlog task.
+
+## 2026-04-12 -- LC 465 addendum: submask enumeration trick (O(3^n) vs O(4^n))
+- **What I did**: Appended a section to LC 465 notes explaining why `sub = (sub-1) & mask` is O(3^n) via the `Σ C(n,k) 2^k = 3^n` identity, while `for sub in range(mask+1)` degrades to O(4^n). Covered why the naive version still produces correct answers (guards + XOR-not-containment argument + max-doesn't-inflate lemma), numerical comparison at n=12/16, and the intuition for `(sub-1) & mask` as "decrement in popcount-bit subspace." Replied on Discord summarizing the findings.
+- **Deliverables**: data/mle_prep.db (LC 465 notes extended: 7565 -> 9898 chars)
+- **Sanity check result**: Script output confirms notes extension; Discord reply sent.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching, not a backlog task.
+
+## 2026-04-12 -- LC 282 Expression Add Operators: brute-force + `prev` trick notes
+- **What I did**: Wrote comprehensive LC 282 notes into DB. Covered: (A) cleaned-up version of user's custom myEval brute-force (push/pop vs list-copy, no debug print, concise leading-zero check); (B) polished `prev` trick version with two optimizations over user's code -- `break` instead of `continue` on leading zeros (prunes entire longer-slice branch), and push/pop on shared `expr` list instead of O(n^2) string concatenation. Explained why eval is inappropriate (security optics, perf, interview expectation, env portability), worked example of the `prev` invariant, related-problem list.
+- **Deliverables**: data/mle_prep.db (LC 282 notes: 8433 chars), scripts/_update_282_notes.py (one-shot writer)
+- **Sanity check result**: Script confirms DB update; Discord reply sent.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching, not a backlog task.
+
+## 2026-04-12 -- LC 2402 Meeting Rooms III: two-heap simulation notes
+- **What I did**: Wrote LC 2402 notes into DB. User's solution was correct and near-canonical; focused on the two-heap pattern (free + busy), cosmetic cleanups (`count` naming, `list.index(max(...))` idiom), and the 4 subtle traps (`<=` vs `<`, tuple tiebreak, delay formula uses duration not end, don't re-sort). Added pattern recognition notes pointing to LC 253, 1882, 1834 as related.
+- **Deliverables**: data/mle_prep.db (LC 2402 notes: 5257 chars), scripts/_update_2402_notes.py
+- **Sanity check result**: DB write confirmed; Discord reply sent.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching.
+
+## 2026-04-12 -- LC 1110 Delete Nodes And Return Forest: DFS + is_root flag notes
+- **What I did**: Wrote LC 1110 notes. User's post-order solution was correct but clunky (4 sites of set lookup per node, special-case check for original root after traversal). Presented canonical `dfs(node, is_root)` pattern: carry ancestor-deleted state DOWN via parameter, signal unlinking UP via return value. Added general design principle "carry state down vs handle on way up" and cross-refs to LC 814, 669, 1325.
+- **Deliverables**: data/mle_prep.db (LC 1110 notes: 5361 chars), scripts/_update_1110_notes.py
+- **Sanity check result**: DB write confirmed; Discord reply sent.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching.
+
+## 2026-04-12 -- Pinterest LC review+index company document
+- **What I did**: User clarified they wanted a dedicated Pinterest-company review/index doc (accessible at /companies/29/prep), distinct from per-problem notes and the existing recruiter call prep doc. Created new company_documents entry (id=47, source_type=prep_doc) with: Quick Status table for all 14 problems, Pattern Clusters (Graph/Eulerian, Backtracking, DP Subsets, Heap Simulation, String Arithmetic), Core Patterns Cheat Sheet compressing 5 already-written algorithm templates, Common Traps cross-refs, and a Daily Review Template. Script is idempotent (update-by-title).
+- **Deliverables**: data/mle_prep.db (company_documents id=47, 6239 chars), scripts/_create_pinterest_lc_index_doc.py
+- **Sanity check result**: Verified via SQL SELECT that doc exists for company_id=29. Backend on :8000 not running so API consumer check skipped; frontend on :5173 up.
+- **Status**: [DONE]
+- **Request**: No task_db update -- ad-hoc user request.
+
+## 2026-04-12 -- Clickable `lc://N` links + ProblemDrawer for company prep docs
+- **What I did**: Implemented end-to-end feature: clicking an LC problem reference in a company prep doc opens a right-side drawer with the problem description + solution notes. Backend: added `GET /api/problems/by-lc/{lc_id}` route (registered BEFORE `/problems/{problem_id}` to avoid path shadowing). Frontend: (1) new `ProblemDrawer.tsx` component using existing `SlideOverPanel` primitive, with difficulty/pattern/completed badges and markdown-rendered description+notes; (2) extended `MarkdownPreview` with `onLcLinkClick?` prop and an `a` component override -- `href="lc://N"` renders as button invoking handler, everything else behaves as external anchor; (3) wired `lcDrawerId` state into `DocumentViewer` in `PrepNotesPage.tsx`. Updated Pinterest LC index doc (id=47) to use `lc://N` syntax throughout Quick Status table and Pattern Clusters.
+- **Deliverables**: src/backend/routers/problems.py (new route), src/frontend/src/components/problems/ProblemDrawer.tsx (new), src/frontend/src/components/ui/MarkdownPreview.tsx (prop + a override), src/frontend/src/pages/PrepNotesPage.tsx (state + render), data/mle_prep.db (doc 47 content updated to 6647 chars), scripts/_create_pinterest_lc_index_doc.py (updated)
+- **Sanity check result**: `npx tsc --noEmit` -> 0 errors. Route ordering confirmed via router.routes introspection (`/problems/by-lc/{lc_id}` before `/problems/{problem_id}`). DB query tested directly: LC 332 -> id=148 with 2977-char notes; LC 99999 -> None (404 path). No full browser E2E because backend not running.
+- **Status**: [DONE] -- pending user's browser-side smoke test when backend is started.
+- **Request**: No task_db update -- ad-hoc user feature request.
+
+## 2026-04-12 -- Audit + batch plan: Chinese LC notes, missing descriptions, missing notes
+- **What I did**: User requested (via Discord) that LC notes should be in Chinese by default (except technical terms) and that missing problem descriptions need to be fetched. Used task planning mode (not execution). (1) Audited all 14 Pinterest problems: found 5 pure-English notes, 3 mixed, 2 already Chinese, 4 with no notes; separately 3 problems missing descriptions. (2) Created 12 tasks via task_db.py batch: T-P1-368..372 (translate 5 EN notes to CN), T-P2-373 (polish 3 mixed notes), T-P1-374 (fetch 3 missing descriptions), T-P1-375..378 (write 4 new notes in Chinese: LC 410/43/642/1723), T-P2-379 (refresh Pinterest index doc after everything). Added dependencies T-P2-379 -> {368,374,377,378}. (3) Saved feedback_lc_notes_chinese.md memory: Chinese prose + English for code/algorithm-names/complexity notation, with explicit do/don't list.
+- **Deliverables**: .claude/tasks.db (12 new tasks), TASKS.md (regenerated), ~/.claude/.../memory/feedback_lc_notes_chinese.md, MEMORY.md updated
+- **Sanity check result**: task_db.py batch returned all 12 task IDs cleanly; depend commands succeeded; project regenerated TASKS.md.
+- **Status**: [DONE] -- planning phase. Execution pending user direction (autonomous_run.sh vs manual selection).
+- **Request**: No single-task update; 12 P1/P2 tasks now in backlog awaiting execution.
+
+## 2026-04-12 -- Clarification: preserve inline English terms where natural
+- **What I did**: User clarified that the Chinese-notes rule should not aggressively replace English terms -- when an English word reads naturally inline (greedy, partition, state, sliding window, etc.) and translating would be awkward, keep it English. Updated feedback_lc_notes_chinese.md memory accordingly. Told user to launch autonomous via their proven PowerShell path (autonomous_run.ps1) and listed the expected task execution order.
+- **Deliverables**: ~/.claude/.../memory/feedback_lc_notes_chinese.md (clarification added)
+- **Sanity check result**: Memory file updated; Discord instructions sent.
+- **Status**: [DONE]
+- **Request**: No task_db update.
+
+## 2026-04-12 -- [T-P1-368] Translate LC 332 notes to Chinese
+- **What I did**: Translated LC 332 (Reconstruct Itinerary / Hierholzer's Algorithm) solution notes from English to Chinese. Existing DB notes had a missing code block and stripped backticks in the review table; rewrote with a canonical Hierholzer Python solution and dropped the broken review table. Kept algorithm names, code, complexity notation, and technical terms (heap, post-order, DFS, dead-end, Eulerian Path, Hamiltonian Path) in English per feedback_lc_notes_chinese.md.
+- **Deliverables**: scripts/_update_332_notes.py; data/mle_prep.db (problems.notes for leetcode_id=332, 2167 chars).
+- **Sanity check result**: Script ran clean; verified stored length = 2167 via sqlite SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-368 --status completed

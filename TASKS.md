@@ -11,7 +11,73 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-369: [Pinterest/CN] Translate LC 465 notes to Chinese (Optimal Account Balancing)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Translate existing English notes (9898 chars) to Chinese. Includes two approaches (Bitmask DP + naive DFS), Full-Transfer Optimality lemma, and submask enumeration addendum. Keep code, algorithm names, complexity, and key terms (bitmask, submask, DP state) in English where natural. Explanation text in Chinese.
+
+#### T-P1-370: [Pinterest/CN] Translate LC 282 notes to Chinese (Expression Add Operators)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Translate existing English notes (8433 chars) to Chinese. Covers Version A (brute-force + custom myEval), Version B (prev trick), why-not-eval argument, prev invariant worked example. Keep code blocks unchanged.
+
+#### T-P1-371: [Pinterest/CN] Translate LC 2402 notes to Chinese (Meeting Rooms III)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Translate existing English notes (5257 chars) to Chinese. Two-heap simulation pattern. Keep code and complexity notation.
+
+#### T-P1-372: [Pinterest/CN] Translate LC 1110 notes to Chinese (Delete Nodes And Return Forest)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Translate existing English notes (5361 chars) to Chinese. is_root flag + carry-state-down-vs-post-order principle. Keep code.
+
+#### T-P1-374: [Pinterest/desc] Fetch missing problem descriptions: LC 2402, 1110, 1723
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Three Pinterest problems have empty description field. Use the existing fetch-description endpoint or leetcode.ca scraper (per reference_leetcode_ca memory). Affected: LC 2402 Meeting Rooms III, LC 1110 Delete Nodes And Return Forest, LC 1723 Find Minimum Time to Finish All Jobs. Verify via drawer on /companies/29/prep after.
+
+#### T-P1-375: [Pinterest/notes] Write LC 410 solution notes (Split Array Largest Sum)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest must-do; no notes yet. Cover: binary-search-on-answer approach (monotonic feasibility check), DP on (i,k) alternative, code review pattern, complexity, related LC 1011/1760. Write in Chinese.
+
+#### T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, leading-zero trim, why not use int() or BigInteger. Write in Chinese.
+
+#### T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machine, # terminator handling. Write in Chinese.
+
+#### T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs desc, skip duplicate workers), bitmask-DP alternative. Write in Chinese.
+
 ### P2 -- Nice to Have
+
+#### T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Three existing notes are MIX (ratios 0.11-0.29). Rewrite the English prose sections to Chinese, keep code blocks and tech terms. Affects: LC 311 Sparse Matrix Multiplication (1714 chars), LC 815 Bus Routes (2766 chars), LC 1244 Design A Leaderboard (742 chars).
+
+#### T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-368, T-P1-374, T-P1-377, T-P1-378
+- **Description**: After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index company document (company_id=29, doc id=47) so Status/Notes columns reflect new state. Script: scripts/_create_pinterest_lc_index_doc.py
 
 ### P3 -- Stretch Goals
 
@@ -96,6 +162,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-12** -- T-P1-368: [Pinterest/CN] Translate LC 332 notes to Chinese (Reconstruct Itinerary). Translate existing English notes (2977 chars) to Chinese. Keep code blocks, algorithm names (Hierholzer, Eulerian Path),
 - [x] **2026-04-11** -- T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence. Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, re
 - [x] **2026-04-11** -- T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30. STRUCTURAL/MECHANICAL polish ONLY for the 4 remaining failure-cluster master stories. Brings them in line with the EX-33
 - [x] **2026-04-11** -- T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer. Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> ex
