@@ -488,3 +488,10 @@
 - **Sanity check result**: (1) npm run build passes clean. (2) All 15 theme slugs return 200 from dev server. (3) failure_setback API returns 5 examples (EX-15/16/17/30/33B) all with cn_elevator_pitch. (4) Full pytest suite: 1063 passed, zero regressions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-362 --status completed`
+
+## 2026-04-11 -- [T-P2-363] BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer
+- **What I did**: Created useReturnPath hook (reads ?from= param, returns correct QuickIndex URL with section preserved) and useRouteScrollRestore hook (saves/restores window.scrollY via sessionStorage keyed by location.key). Wired both hooks into BehavioralThemePage; wired scroll restore into QuickIndex. Removed redundant inline back-link logic from BehavioralThemePage. Verified SlideOverPanel does not add history entries (uses local state only) and preserves scroll (body overflow:hidden does not reset scrollTop).
+- **Deliverables**: src/frontend/src/hooks/useReturnPath.ts (new), src/frontend/src/hooks/useRouteScrollRestore.ts (new), src/frontend/src/pages/BehavioralThemePage.tsx (refactored), src/frontend/src/pages/QuickIndex.tsx (scroll restore added)
+- **Sanity check result**: (1) npm run build passes clean. (2) All routes return 200 (quick-index?section=bq, theme pages with/without ?from). (3) Full pytest suite: 1063 passed, zero regressions. (4) Path verification: P1 drawer open/close preserves scroll (body overflow:hidden, no scrollTop reset). P2 Back link goes to /quick-index?section=bq. P3 Browser back works (Link push, not replace). P4 Deep link without ?from defaults to /quick-index?section=bq. P5 URL section param persists on refresh. P6 setParams pushes history entries preserving section on back.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-363 --status completed`

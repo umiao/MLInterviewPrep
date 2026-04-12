@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import type { BehavioralThemeSummary } from "../types/behavioral";
+import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 
 const LC_PROBLEMS: { dbId: number; lcId: number; title: string }[] = [
   { dbId: 93, lcId: 146, title: "LRU Cache" },
@@ -40,6 +41,7 @@ const ALL_KNOWN_SLUGS = new Set(CLUSTER_FAMILIES.flatMap((f) => f.theme_slugs));
 type SectionType = "lc" | "ml" | "bq";
 
 export default function QuickIndex() {
+  useRouteScrollRestore();
   const [params, setParams] = useSearchParams();
   const raw = params.get("section");
   const section: SectionType =

@@ -13,88 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-361, T-P1-362
-- **Description**: Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> example drawer.
-
-DEPENDS ON: T-P1-361 and T-P1-362.
-
-PATHS THAT MUST WORK:
-
-1. QuickIndex(BQ) -> click theme card -> theme detail -> click example -> drawer opens -> close drawer -> still on theme detail page with scroll position preserved.
-2. theme detail -> click 'Back' link -> /quick-index?section=bq (BQ section still selected).
-3. Browser back button from theme detail -> /quick-index?section=bq (same as path 2).
-4. Deep link directly to /behavioral/theme/failure_setback?from=quick-index (no prior visit to QuickIndex) -> Back link still navigates to /quick-index?section=bq (graceful default for from-less case too).
-5. /quick-index?section=bq refresh -> BQ section still rendered (already covered by T-P1-360, re-verify).
-6. /quick-index?section=ml -> click any LC link (cross-section) -> navigate forward -> browser back -> /quick-index?section=ml (URL preserved, not reset to default).
-
-EXECUTION STEPS:
-
-1. Create the back-link hook at src/frontend/src/hooks/useReturnPath.ts:
-       import { useSearchParams } from 'react-router-dom';
-       export function useReturnPath(defaultPath: string): string {
-         const [params] = useSearchParams();
-         const from = params.get('from');
-         if (from === 'quick-index') return '/quick-index?section=bq';
-         return defaultPath;
-       }
-   Theme detail page uses this for its Back link.
-
-2. Real scroll position preservation (REVISED per code review — the previous 'capture into a ref' was a toy and would not survive a real navigation):
-
-   Create src/frontend/src/hooks/useScrollRestore.ts:
-
-       import { useEffect } from 'react';
-       import { useLocation } from 'react-router-dom';
-
-       const STORAGE_PREFIX = 'scroll:';
-
-       export function useScrollRestore(): void {
-         const location = useLocation();
-         // location.key is unique per history entry (react-router v6+); persisted across the same
-         // entry's lifetime even if component unmounts.
-         const storageKey = STORAGE_PREFIX + location.key;
-
-         // Save on unmount or before next route change
-         useEffect(() => {
-           const onScroll = () => {
-             sessionStorage.setItem(storageKey, String(window.scrollY));
-           };
-           window.addEventListener('scroll', onScroll, { passive: true });
-           return () => window.removeEventListener('scroll', onScroll);
-         }, [storageKey]);
-
-         // Restore on mount
-         useEffect(() => {
-           const stored = sessionStorage.getItem(storageKey);
-           if (stored !== null) {
-             // requestAnimationFrame so the page has rendered before we scroll
-             requestAnimationFrame(() => window.scrollTo(0, parseInt(stored, 10)));
-           }
-           // do NOT depend on storageKey for restore — only run once on mount
-           // eslint-disable-next-line react-hooks/exhaustive-deps
-         }, []);
-       }
-
-   Wire useScrollRestore() into the BehavioralThemePage component (top of component body) AND into QuickIndex (so the BQ section also restores after coming back from a theme detail page).
-
-   For drawer-open scroll preservation: the drawer is a slide-over overlay, so document scroll position is naturally preserved unless SlideOverPanel adds `body { overflow: hidden }` or similar. If it does, capture window.scrollY into a ref BEFORE the panel opens and restore it AFTER it closes. Verify in path 1 manual smoke test.
-
-3. Verify SlideOverPanel does NOT add a history entry. If it does (e.g., uses useNavigate), refactor to local state — this is the critical bug to prevent path 3 from getting stuck inside the drawer history.
-
-4. Manual smoke test ALL 6 paths in a real browser. For each path, write a one-line PASS/FAIL note in the PR description or commit message.
-
-5. Optional but recommended: add a Playwright e2e test under tests/frontend/e2e/behavioral_navigation.spec.ts covering paths 1-3 if the project already has Playwright set up. If not, do not add the framework in this task — flag as a future task.
-
-ACCEPTANCE:
-- All 6 paths verified manually with PASS notes.
-- Theme detail Back link works for both ?from=quick-index and the no-from case.
-- Drawer open/close does not pollute browser history.
-- Scroll position restored after drawer close.
-- npm run build passes.
-
 #### T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30
 - **Priority**: P2
 - **Complexity**: M
@@ -276,6 +194,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 318 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer. Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> ex
 - [x] **2026-04-11** -- T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links. # Behavioral: semantic relevance spot-check script for 10 random Q-example links
 - [x] **2026-04-11** -- T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as 
 - [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 

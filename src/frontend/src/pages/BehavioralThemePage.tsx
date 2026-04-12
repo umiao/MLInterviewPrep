@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import type {
@@ -8,6 +8,8 @@ import type {
 } from "../types/behavioral";
 import SlideOverPanel from "../components/ui/SlideOverPanel";
 import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent";
+import { useReturnPath } from "../hooks/useReturnPath";
+import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 
 interface BehavioralQuestion {
   id: number;
@@ -21,10 +23,8 @@ interface BehavioralQuestion {
 
 export default function BehavioralThemePage() {
   const { slug } = useParams<{ slug: string }>();
-  const [searchParams] = useSearchParams();
-  const from = searchParams.get("from");
-  const returnUrl =
-    from === "quick-index" ? "/quick-index?section=bq" : "/quick-index?section=bq";
+  const returnUrl = useReturnPath("/quick-index?section=bq");
+  useRouteScrollRestore();
 
   const [activeExample, setActiveExample] = useState<BehavioralExample | null>(
     null,
