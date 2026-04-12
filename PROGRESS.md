@@ -576,3 +576,10 @@
 - **Sanity check result**: Notes length 3020 chars; sqlite SELECT confirms stored content begins with correct header.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-376 --status completed
+
+## 2026-04-12 18:15 -- [T-P1-377] Write LC 642 solution notes (Design Search Autocomplete System)
+- **What I did**: Wrote Chinese solution notes for LC 642 covering Trie + node-level `counts` dict (推荐), alternatives (Trie + leaf count DFS, HashMap linear scan), streaming `input(c)` with `cur`+`buf`+`dead` pointer maintenance, `'#'` reset semantics, Top-3 `(-hot, sentence)` sort rule, code review pitfalls (new-sentence hot=1, `+=` across shared nodes, space-in-sentence ordering, `__slots__` memory), recognition template, and related family LC 208/211/677/1268/212. Stored via scripts/_update_642_notes.py into problems.notes.
+- **Deliverables**: scripts/_update_642_notes.py; data/mle_prep.db (problems.notes for leetcode_id=642).
+- **Sanity check result**: Notes length 4711 chars; sqlite SELECT confirms stored content begins with correct header.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-377 --status completed
