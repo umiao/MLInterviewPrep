@@ -394,3 +394,17 @@
 - **Sanity check result**: (1) All 28 examples accounted for (task estimated 27). (2) Summary counts: 8 PASS, 13 NEEDS-NOTE, 7 RECOMMEND-UNTAG. (3) Full pytest suite: 1063 passed, zero regressions. (4) No DB modifications (audit-only task).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-365 --status completed`
+
+## 2026-04-12 -- BQ Quick Index UX audit and task planning
+- **What I did**: Investigated two user-reported issues on the BQ Quick Index page: (1) Chinese/English inconsistency in example cards (27/34 missing cn_elevator_pitch), (2) lack of text formatting. User clarified scope: only need cn_elevator_pitch for all 27 missing examples, keep mixed CN+EN-term style, no STAR formatting changes. Created 2 tasks: T-P0-366 (batch 1, 14 examples BLOG-01~EX-09) and T-P0-367 (batch 2, 13 examples EX-10~EX-33, depends on 366). Sent full scoping to Discord for review.
+- **Deliverables**: T-P0-366 and T-P0-367 created in task_db with full description/AC. TASKS.md regenerated.
+- **Sanity check result**: (1) Verified 27 examples missing cn_elevator_pitch via DB query. (2) Confirmed PUT /behavioral/examples/{id} API supports cn_elevator_pitch updates. (3) Both tasks visible in task_db with correct dependency chain.
+- **Status**: [PARTIAL] -- tasks created, awaiting user confirmation to launch autonomous_run.sh
+- **Request**: No status update yet -- tasks are active, pending execution approval
+
+## 2026-04-12 -- [T-P0-366] BQ Quick Index: generate cn_elevator_pitch batch 1
+- **What I did**: Generated and PUT cn_elevator_pitch for 14 examples (BLOG-01, BLOG-01B, BLOG-02, BLOG-03, BLOG-04, EX-01 through EX-09). Each pitch follows the established format: Chinese summary with English technical terms + KEY FACTS section. Content distilled from each example's STAR fields. Used PUT /behavioral/examples/{db_id} API for all updates.
+- **Deliverables**: scripts/_batch1_cn_pitches.py (update script), 14 examples now have cn_elevator_pitch in database.
+- **Sanity check result**: (1) All 14 PUT requests returned matching cn_elevator_pitch. (2) Verification pass confirmed 14/14 have non-null pitch. (3) Total count: 21/34 examples now have cn_elevator_pitch (was 7, added 14). Remaining 13 are batch 2 (T-P0-367).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-366 --status completed`

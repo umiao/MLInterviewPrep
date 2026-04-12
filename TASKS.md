@@ -9,15 +9,15 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-367: BQ Quick Index: generate cn_elevator_pitch batch 2 (EX-10 to EX-33, 13 examples)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-366
+- **Description**: Generate high-quality Chinese elevator pitch summaries for remaining 13 examples missing cn_elevator_pitch. Format: '{summary} | KEY FACTS: {fact1}|{fact2}|...' Style: technical Chinese mixed with English terms matching existing pitches. Examples: EX-10, EX-11, EX-12, EX-13, EX-14, EX-18, EX-19, EX-20, EX-21, EX-22, EX-23, EX-24, EX-33. Steps: (1) Start backend server. (2) For each example, GET STAR content. (3) Distill into one-sentence Chinese summary + 3-5 key facts. (4) PUT /behavioral/examples/{db_id} with cn_elevator_pitch. (5) Verify all 13 show pitch via API. (6) Final check: all 34 examples now have cn_elevator_pitch. AC: All 34 examples return non-null cn_elevator_pitch. Quick Index BQ cards all display Chinese summaries.
+
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
-
-#### T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, read the example record and verify it contains BOTH (a) a quantitative number in the Result section (e.g., '+1% GMB', '200M+', 'p99 latency dropped 30%') AND (b) a metric name and direction-of-change in the Action section. (a)+(b) together is the bar for a real data-driven story; either one alone is too easy to satisfy with hand-waving (per code-review tightening). (c) an A/B test reference and (d) a data-derived hypothesis are STRONG SUPPORTING evidence — if an example has (c) or (d) plus only one of (a)/(b), it can be marked NEEDS-NOTE rather than RECOMMEND-UNTAG. If an example has neither (a) nor (b), the technical depth narrative is unsupported -- either (i) the relevance_note on the technical_problem_solving theme tag must explain why this story still belongs to tech depth without numbers, OR (ii) untag from technical_problem_solving and document the untag reason. Generate a markdown audit report at docs/audits/tech_depth_data_driven_2026-04.md listing each of the 27 examples with PASS / NEEDS-NOTE / RECOMMEND-UNTAG verdicts. Do NOT auto-untag in this task -- collect findings for human review. AC: report file exists, all 27 examples accounted for, summary counts at the top.
 
 ### P3 -- Stretch Goals
 
@@ -102,9 +102,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-11** -- T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence. Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, re
 - [x] **2026-04-11** -- T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30. STRUCTURAL/MECHANICAL polish ONLY for the 4 remaining failure-cluster master stories. Brings them in line with the EX-33
 - [x] **2026-04-11** -- T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer. Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> ex
 - [x] **2026-04-11** -- T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links. # Behavioral: semantic relevance spot-check script for 10 random Q-example links
 - [x] **2026-04-11** -- T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as 
 - [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
 - [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
+- [x] **2026-04-11** -- T-P0-366: BQ Quick Index: generate cn_elevator_pitch batch 1 (BLOG-01 to EX-09, 14 examples). Generate high-quality Chinese elevator pitch summaries for 14 examples missing cn_elevator_pitch. Format: '{summary} | K
