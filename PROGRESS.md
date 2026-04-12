@@ -583,3 +583,10 @@
 - **Sanity check result**: Notes length 4711 chars; sqlite SELECT confirms stored content begins with correct header.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-377 --status completed
+
+## 2026-04-12 18:45 -- [T-P1-378] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs)
+- **What I did**: Wrote Chinese solution notes for LC 1723 covering three approaches -- binary-search-on-answer + backtracking feasibility with three key prunings (sort jobs desc, per-level `seen` set for worker symmetry, "empty-worker first-job fail => break"), bitmask DP `O(k*3^n)` with standard subset enumeration `sub = (sub-1) & mask`, and plain backtracking. Added code-review pitfalls, recognition template distinguishing LC 410 (ordered split) from LC 1723 (arbitrary assignment), and family links LC 698/473/2305/1986. Stored via scripts/_update_1723_notes.py.
+- **Deliverables**: scripts/_update_1723_notes.py; data/mle_prep.db (problems.notes for leetcode_id=1723).
+- **Sanity check result**: Notes length 5604 chars; sqlite update confirmed.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-378 --status completed

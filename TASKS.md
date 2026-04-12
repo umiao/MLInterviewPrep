@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs desc, skip duplicate workers), bitmask-DP alternative. Write in Chinese.
-
 ### P2 -- Nice to Have
 
 #### T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244
@@ -114,6 +108,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
 - [x] **2026-04-12** -- T-P1-375: [Pinterest/notes] Write LC 410 solution notes (Split Array Largest Sum). Pinterest must-do; no notes yet. Cover: binary-search-on-answer approach (monotonic feasibility check), DP on (i,k) alte
