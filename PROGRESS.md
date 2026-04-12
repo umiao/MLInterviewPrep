@@ -555,3 +555,17 @@
 - **Sanity check result**: Lengths 604 / 918 / 2568 chars respectively; verified via sqlite SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-374 --status completed
+
+## 2026-04-12 -- [orchestrator] Launched autonomous_run.ps1 for 12-task Pinterest CN batch
+- **What I did**: Per user approval, launched `powershell -ExecutionPolicy Bypass -File scripts/autonomous_run.ps1 12` in background. Using PowerShell path per 2026-04-11 SIGPIPE lesson (bash autonomous_run.sh dies when parent harness closes stdout fd). At 25-min mark, 6/12 child sessions completed and self-committed (T-P1-368..372 translations + T-P1-374 descriptions); session 7 in flight. Scheduled a wakeup at 17:01 PT to verify completion of remaining 6 (LC 410/43/642/1723 new notes, LC 311/815/1244 polish, T-P2-379 dependent index refresh). Orchestrator sends progress update to Discord.
+- **Deliverables**: logs/autonomous.log (live trace); 6 child-session commits (53bb0f2..770bac6 inclusive); 6 child-session PROGRESS.md entries above.
+- **Sanity check result**: Log shows all session timestamps advancing every 3-4 min; sessions 1-6 exited 0; SIGPIPE fix effective (no silent death). Git log confirms commits landed. Child sessions update their own task_db status on exit.
+- **Status**: [PARTIAL] -- orchestrator-launch work done; 6/12 child tasks complete in background, 6 remaining.
+- **Request**: No direct task_db update from this session -- child sessions handle their own.
+
+## 2026-04-12 17:15 -- [T-P1-375] Write LC 410 solution notes (Split Array Largest Sum)
+- **What I did**: Wrote Chinese solution notes for LC 410 covering binary-search-on-answer (推荐) with O(n) greedy feasibility check, DP on (i,k) alternative, code review pitfalls (lower bound = max(nums), `while lo < hi` template), recognition triggers for binary-search-on-answer pattern, and related family LC 1011/1760/875/1482. Stored via scripts/_update_410_notes.py into problems.notes.
+- **Deliverables**: scripts/_update_410_notes.py; data/mle_prep.db (problems.notes for leetcode_id=410).
+- **Sanity check result**: Notes length 3677 chars; sqlite SELECT confirms stored content begins with correct header.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-375 --status completed
