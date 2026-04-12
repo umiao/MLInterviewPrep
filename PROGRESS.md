@@ -527,3 +527,10 @@
 - **Sanity check result**: Script ran clean; verified stored length = 5375 via sqlite SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-369 --status completed
+
+## 2026-04-12 -- [T-P1-370] Translate LC 282 notes to Chinese
+- **What I did**: Translated LC 282 (Expression Add Operators) notes to Chinese following the same bilingual convention: code blocks, algorithm names, and technical terms (backtracking, prev trick, DFS, operand, operator, submask) stay in English; prose in Chinese. Covers Version A (brute-force + custom myEval), why-not-eval argument, Version B (prev trick, canonical solution), and worked example.
+- **Deliverables**: scripts/_translate_282_notes.py; data/mle_prep.db (problems.notes for leetcode_id=282, 6418 chars).
+- **Sanity check result**: Script ran clean; verified stored length = 6418 via sqlite SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-370 --status completed
