@@ -569,3 +569,10 @@
 - **Sanity check result**: Notes length 3677 chars; sqlite SELECT confirms stored content begins with correct header.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-375 --status completed
+
+## 2026-04-12 17:45 -- [T-P1-376] Write LC 43 solution notes (Multiply Strings)
+- **What I did**: Wrote Chinese solution notes for LC 43 covering digit-by-digit with position array (推荐) using `p1=i+j`, `p2=i+j+1` convention, shift-and-add alternative, code review pitfalls ("0" edge case, p1/p2 direction, leading-zero strip, `+=` for carry), recognition template, and related family LC 2/415/67/66/989. Stored via scripts/_update_43_notes.py into problems.notes.
+- **Deliverables**: scripts/_update_43_notes.py; data/mle_prep.db (problems.notes for leetcode_id=43).
+- **Sanity check result**: Notes length 3020 chars; sqlite SELECT confirms stored content begins with correct header.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-376 --status completed
