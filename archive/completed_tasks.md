@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 318 completed tasks archived as of latest archival.
+> 334 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -452,3 +452,40 @@ Lesson summary: Con
 - [x] **2026-04-10** -- T-P1-350: Add California FTB tax call reminder to dashboard (2026-04-13). Insert a full-day interview_events row for Monday 2026-04-13: call California Franchise Tax Board to notify that the cor
 - [x] **2026-04-10** -- T-P2-343: Problem model: tolerate legacy comma-separated tag strings. Add defensive try/except JSONDecodeError fallback in tags_list/company_tags_list/messages_list getters, fall back to com
 - [x] **2026-04-10** -- T-P2-345: LC problem updates: _update_*.py scripts (1055, 1055v2, 2128, 815, Uber final round, SD tasks). Idempotent one-off update scripts per the _update_*.py convention: LC 1055 Pinterest tag + Chinese note, LC 1055 cleanup
+- [x] **2026-04-11** -- T-P0-351: Behavioral: seed 3 failure-story placeholders EX-30/31/32 [NEEDS-INPUT: 3 failure stories]. # Behavioral: seed 3 failure-story placeholders EX-30/31/32
+
+## Context
+Audit on 2026-04-11 found only 4 of 29 behaviora
+- [x] **2026-04-11** -- T-P1-352: Behavioral: add secondary example links for single-link Qs in communication/collaboration/leadership. # Behavioral: secondary links for single-link Qs in communication/collaboration/leadership
+
+## Context
+Audit 2026-04-11:
+- [x] **2026-04-11** -- T-P1-353: Behavioral: seed 15-theme vocabulary, tag tables, and keyword backfill on Qs and examples. # Behavioral: 15-theme vocabulary, tag tables, keyword backfill
+
+## Context
+Audit 2026-04-11 proposed 15 themes cross-cu
+- [x] **2026-04-11** -- T-P1-354: Behavioral: theme pills on question rows + frequency-sorted filter sidebar on BehavioralQuestions page. # Behavioral: theme pills + frequency-sorted filter sidebar on BehavioralQuestions page
+
+## Context
+Frontend consumer of
+- [x] **2026-04-11** -- T-P1-355: Frontend: DrawerLayout single-source-of-truth responsive two-column refactor for drawer family. # Frontend: DrawerLayout single-source-of-truth responsive two-column refactor
+
+## Context
+SlideOverPanel.tsx:18 default
+- [x] **2026-04-11** -- T-P1-357: Behavioral: populate EX-30 with Hash Misdesign + create EX-33 for MoE->Allocation. # Behavioral: populate EX-30 with Hash Misdesign + create EX-33 for MoE->Allocation paradigm shift
+
+## Context
+Source ma
+- [x] **2026-04-11** -- T-P1-358: Behavioral: add cn_elevator_pitch column + seed 7 master story pitches. Add behavioral_examples.cn_elevator_pitch column + populate for the 7 polished master stories: EX-15, EX-16, EX-17, EX-3
+- [x] **2026-04-11** -- T-P1-359: Behavioral API: fix /questions and /examples theme filter (returns all instead of filtered). Fix /api/behavioral/questions and /api/behavioral/examples theme filter.
+
+ROOT CAUSE (already investigated):
+The code in
+- [x] **2026-04-11** -- T-P1-360: QuickIndex: add section toggle bar (LC / ML coding / BQ). Restructure src/frontend/src/pages/QuickIndex.tsx — add a top toggle bar so the user can show ONE of three sections at a
+- [x] **2026-04-11** -- T-P1-361: QuickIndex BQ section: render theme cards grouped by cluster. Inside the BQ section of QuickIndex (placeholder added by T-P1-360), render the 15 behavioral_themes as cards grouped by
+- [x] **2026-04-11** -- T-P1-362: BQ theme detail page: example cards with Chinese pitch + STAR drawer. New page at route /behavioral/theme/:slug for the BQ theme detail view. Add the route in src/frontend/src/App.tsx and cr
+- [x] **2026-04-11** -- T-P2-321: [SYNC] helixos: Propagate 3 new lessons from MLInterviewPrep 2026-04-08. Three new MLInterviewPrep LESSONS.md entries not yet in helixos: (1) autonomous_run.sh uses sub-project task_db not root
+- [x] **2026-04-10** -- T-P2-346: Seed LinkedIn/Google/Pinterest prep content. Add seed scripts for LinkedIn question index, LinkedIn problem notes insertion, Google prep content, Pinterest prep cont
+- [x] **2026-04-10** -- T-P2-347: Pillar 3/6 translation and expansion scripts. Add translation + expansion scripts for the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130). Scripts generate/u
+- [x] **2026-04-10** -- T-P3-348: Lint: apply ruff auto-fixes to seed/translate/fix scripts. Apply ruff auto-fixes to scripts: import reordering, removal of unused imports, f-string cleanup (no placeholders).
+- [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for
