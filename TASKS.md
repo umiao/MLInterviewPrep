@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-374: [Pinterest/desc] Fetch missing problem descriptions: LC 2402, 1110, 1723
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Three Pinterest problems have empty description field. Use the existing fetch-description endpoint or leetcode.ca scraper (per reference_leetcode_ca memory). Affected: LC 2402 Meeting Rooms III, LC 1110 Delete Nodes And Return Forest, LC 1723 Find Minimum Time to Finish All Jobs. Verify via drawer on /companies/29/prep after.
-
 #### T-P1-375: [Pinterest/notes] Write LC 410 solution notes (Split Array Largest Sum)
 - **Priority**: P1
 - **Complexity**: S
@@ -138,6 +132,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-12** -- T-P1-374: [Pinterest/desc] Fetch missing problem descriptions: LC 2402, 1110, 1723. Three Pinterest problems have empty description field. Use the existing fetch-description endpoint or leetcode.ca scrape
 - [x] **2026-04-12** -- T-P1-372: [Pinterest/CN] Translate LC 1110 notes to Chinese (Delete Nodes And Return Forest). Translate existing English notes (5361 chars) to Chinese. is_root flag + carry-state-down-vs-post-order principle. Keep 
 - [x] **2026-04-12** -- T-P1-371: [Pinterest/CN] Translate LC 2402 notes to Chinese (Meeting Rooms III). Translate existing English notes (5257 chars) to Chinese. Two-heap simulation pattern. Keep code and complexity notation
 - [x] **2026-04-12** -- T-P1-370: [Pinterest/CN] Translate LC 282 notes to Chinese (Expression Add Operators). Translate existing English notes (8433 chars) to Chinese. Covers Version A (brute-force + custom myEval), Version B (pre

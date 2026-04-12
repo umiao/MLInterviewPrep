@@ -548,3 +548,10 @@
 - **Sanity check result**: Script ran clean; stored length = 3289.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-372 --status completed
+
+## 2026-04-12 -- [T-P1-374] Fetch missing Pinterest LC descriptions
+- **What I did**: Fetched descriptions for LC 1110, 1723 (via leetcode.ca) and LC 2402 (via leetcode.com GraphQL, since leetcode.ca only hosts IDs <= 1857). Stored into problems.description with description_source set accordingly.
+- **Deliverables**: scripts/_fetch_missing_pinterest_desc.py; data/mle_prep.db (problems.description for leetcode_id in {1110, 1723, 2402}).
+- **Sanity check result**: Lengths 604 / 918 / 2568 chars respectively; verified via sqlite SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-374 --status completed
