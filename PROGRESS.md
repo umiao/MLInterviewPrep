@@ -541,3 +541,10 @@
 - **Sanity check result**: Script ran clean; verified stored length = 3829 via sqlite SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-371 --status completed
+
+## 2026-04-12 -- [T-P1-372] Translate LC 1110 notes to Chinese
+- **What I did**: Translated LC 1110 (Delete Nodes And Return Forest) notes to Chinese. Preserved code blocks and English algorithm terms (is_root, DFS, post-order, unlink, membership). Covers key insight, canonical solution, code review, carry-state-down-vs-post-order principle, traps, complexity, pattern recognition.
+- **Deliverables**: scripts/_translate_1110_notes.py; data/mle_prep.db (problems.notes for leetcode_id=1110, 3289 chars).
+- **Sanity check result**: Script ran clean; stored length = 3289.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-372 --status completed

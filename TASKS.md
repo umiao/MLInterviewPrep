@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-372: [Pinterest/CN] Translate LC 1110 notes to Chinese (Delete Nodes And Return Forest)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Translate existing English notes (5361 chars) to Chinese. is_root flag + carry-state-down-vs-post-order principle. Keep code.
-
 #### T-P1-374: [Pinterest/desc] Fetch missing problem descriptions: LC 2402, 1110, 1723
 - **Priority**: P1
 - **Complexity**: S
@@ -144,6 +138,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-12** -- T-P1-372: [Pinterest/CN] Translate LC 1110 notes to Chinese (Delete Nodes And Return Forest). Translate existing English notes (5361 chars) to Chinese. is_root flag + carry-state-down-vs-post-order principle. Keep 
 - [x] **2026-04-12** -- T-P1-371: [Pinterest/CN] Translate LC 2402 notes to Chinese (Meeting Rooms III). Translate existing English notes (5257 chars) to Chinese. Two-heap simulation pattern. Keep code and complexity notation
 - [x] **2026-04-12** -- T-P1-370: [Pinterest/CN] Translate LC 282 notes to Chinese (Expression Add Operators). Translate existing English notes (8433 chars) to Chinese. Covers Version A (brute-force + custom myEval), Version B (pre
 - [x] **2026-04-12** -- T-P1-369: [Pinterest/CN] Translate LC 465 notes to Chinese (Optimal Account Balancing). Translate existing English notes (9898 chars) to Chinese. Includes two approaches (Bitmask DP + naive DFS), Full-Transfe
