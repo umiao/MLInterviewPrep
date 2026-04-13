@@ -16,6 +16,8 @@ Every story below has been reviewed and improved per these criteria:
 
 ---
 
+> **Unresolved TODO placeholders** are consolidated into a single answerable question sheet at [`bq_todo_tracker.md`](./bq_todo_tracker.md) (12 open items as of T-P0-179, 2026-04-13). Answer there, then patch the source spans in this file.
+
 ### 2026-04-13 Metric Sweep (T-P1-387)
 
 Pass 1 added `[TODO: confirm ...]` placeholders to adjective-heavy Result sections in EX-01, EX-04, EX-14, EX-15, EX-17, EX-21, EX-23, EX-24. Placeholders are explicit asks for concrete numbers (quarter, lift %, adoption count, FP-rate delta, etc.) -- never invented values.

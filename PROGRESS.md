@@ -331,3 +331,17 @@
 - **Sanity check result**: Verified new content in DB via SELECT; confirmed all 5 required sections present + spot-checked lc://1851, lc://1526, system_design_ad_ctr, bq_question_map links. Did not spin up backend for live API verification given change is content-only append to a single column.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-413 --status completed`
+
+## 2026-04-13 -- Batch 2 complete: all 34 BQ+Pinterest tasks done
+- **What I did**: Reported final state to user. Batch 2 (bg id bgjp3psy4) completed all 23 remaining tasks across 24 sessions (session 24 hit all_done=true). Total across both batches: 34 tasks committed (grep verified 34 matching commits in today's git log: `[T-P[0-9]-38[0-9]..41[0-3]]`). Pinterest problem pool doubled from 14 to 28. New docs/pinterest/ directory has 9 markdown files (7 system designs + bq_question_map + restaurant-interval investigation). Integration task T-P2-413 refreshed company_documents id=47 to include all new sections with drawer-clickable links.
+- **Deliverables**: 34 commits; 9 new markdown files in docs/pinterest/; 14 new problem DB entries (7 new LC + 7 Pinterest custom); refreshed company_documents id=47
+- **Sanity check result**: `git log | grep -c T-P[0-9]-` returned 34 matching commits; Pinterest-tagged problems count = 28; session_state.json correctly has all_done=true; no failed sessions in logs/autonomous.log.
+- **Status**: [DONE] both batches complete.
+- **Request**: No further task_db changes; user to review placeholders and new SD docs.
+
+## 2026-04-13 20:00 -- [T-P0-179] BQ rework TODO placeholder resolution
+- **What I did**: Surveyed all `[TODO: confirm ...]` placeholders across BQ story assets. Found 12 unresolved asks in `docs/bq_improved_stories.md` (EX-01, EX-04, EX-07, EX-14 x3, EX-15, EX-17, EX-21, EX-23, EX-24 x2) and 1 mirrored in `docs/bq_behavioral_examples.json` (EX-07). Since concrete numbers can only come from the user's own production data, created `docs/bq_todo_tracker.md` consolidating every placeholder into a single question sheet with file:line references, exact ask, and why-it-matters rationale. Added pointer to the tracker from the top of `bq_improved_stories.md` above the 2026-04-13 Metric Sweep section.
+- **Deliverables**: `docs/bq_todo_tracker.md` (new, 12 open items + patch checklist), `docs/bq_improved_stories.md` (+1 pointer line to tracker).
+- **Sanity check result**: `grep -c TODO docs/bq_improved_stories.md` = 12 (matches tracker count); tracker enumerates every line with a TODO (57, 115, 174, 301 x3, 320, 355, 431, 464, 482 x2) + the JSON mirror (381). No TODOs invented and no existing content mutated beyond the added pointer line.
+- **Status**: [DONE] -- user input required to close the 12 open items (tracker is the action surface).
+- **Request**: `task_db.py update T-P0-179 --status completed`.
