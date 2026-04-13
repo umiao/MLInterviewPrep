@@ -472,3 +472,11 @@
 - **Sanity check result**: Script ran [OK], tags now ["LinkedIn","Uber","Adobe","Pinterest"], notes_len=4874; also verified canonical solution against 4 test cases including [2,1,5,6,2,3]=10, [5,5,5]=15, []=0.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-390 --status completed` (already applied)
+
+
+## 2026-04-13 -- [T-P1-391] Pinterest LC 392 Is Subsequence: Pinterest tag + Chinese notes
+- **What I did**: Tagged LC 392 with Pinterest and overwrote notes (id=417) with a 4392-char Chinese study note covering (1) double-pointer O(n+m) with greedy correctness argument, (2) follow-up multi-query: bisect on per-char index lists O(n log m), (3) next-DP table O(m*26) preprocessing + O(n) query, (4) method selection table by k/charset size, (5) cross-links to LC 1055/524/792/115/1143, (6) traps (off-by-one in bisect, empty-string edge cases, sentinel in next table).
+- **Deliverables**: scripts/_update_lc392_pinterest_notes.py (new, one-shot idempotent), data/mle_prep.db (LC 392 row: +Pinterest tag, notes replaced)
+- **Sanity check result**: Script ran [OK], tags now ["LinkedIn","Uber","Adobe","Pinterest"], notes_len=4392; verified all three solutions against 5 test cases (including empty s, empty t, full match).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-391 --status completed` (already applied)
