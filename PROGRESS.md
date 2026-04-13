@@ -387,3 +387,11 @@
 - **Sanity check result**: Script reports `Updated 26 problems. Remaining NULL/empty concept descriptions: 0`. Spot-check on ids 1031 (Purchase Optimization), 1055 (Driver Queue SD), 1064 (K-Means) shows Chinese summary + approach paragraph with English algo/formula terms as expected.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-183 --status completed`
+
+## 2026-04-13 -- [T-P2-171] System design formula audit: all 8 modules
+- **What I did**: Wrote `scripts/audit_sd_formulas.py` (read-only) that scans the 8 core `system_designs` rows (`llm-orchestration`, `ranking-allocation`, `distributed-task-queue`, `database-comparison`, `pbe-pipeline`, `module-arbitration`, `ml-system-design-patterns`, `vibe-code-engineering-patterns`) across all 8 long-form text fields (overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline) for: bare `|` in `$$...$$` blocks (should be `\mid`), multi-line `$$` blocks, consecutive `$$` blocks lacking a blank line between them (matches only `$$\n$$`, not `$$\n\n$$`), and unbalanced `$$`.
+- **Deliverables**: `MLInterviewPrep/scripts/audit_sd_formulas.py` (re-runnable auditor).
+- **Sanity check result**: All 8 modules clean on all four math-safety axes. GRAND TOTAL = 0 issues. No seed script changes required, no re-seed performed. The `module-arbitration` bare-`|` regression that motivated this audit has not recurred; the post-fix convention (`\mid`, single-line `$$`, blank-line separation) holds across the 7 other modules as well.
+- **Observation (not in ACs, not fixed)**: Chinese prose in several modules uses `$` as a currency sigil (e.g., `$5K-$50K/月`, `$30K`). Because remark-math pairs consecutive unescaped `$`, two currency tokens on the same line can be mis-parsed as inline math. Out of scope for T-P2-171 (ACs target math blocks, not prose), but worth a future pass — candidate fix is escaping with `\$` in seed scripts.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-171 --status completed`
