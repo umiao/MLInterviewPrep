@@ -380,3 +380,10 @@
 - **Sanity check result**: Extracted the `python` code block from the updated DB notes and ran it — all smoke-test assertions pass (getPeople/getTop/entry-order-tiebreak/finished-room no-op). Verified FIFO+DLL acronyms expanded and the O(R+K) note is present.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-180 --status completed`
+
+## 2026-04-13 -- [T-P1-183] ML/concept problems description backfill
+- **What I did**: Created `scripts/backfill_concept_descriptions.py` with hand-authored Chinese descriptions for all 26 non-LC problems (leetcode_id IS NULL) where description was NULL/empty: 24 Uber 1point3acres algorithm problems (IDs 1031-1054), 1 system design (1055 Driver Queue), 1 ML coding (1064 K-Means++). Each description is 1-2 short paragraphs in Chinese prose per `feedback_lc_notes_chinese`, with algorithm names, data structures, API signatures, and complexity notation kept in English.
+- **Deliverables**: `MLInterviewPrep/scripts/backfill_concept_descriptions.py`; updated `description` + `description_source='manual'` on 26 rows in `data/mle_prep.db`.
+- **Sanity check result**: Script reports `Updated 26 problems. Remaining NULL/empty concept descriptions: 0`. Spot-check on ids 1031 (Purchase Optimization), 1055 (Driver Queue SD), 1064 (K-Means) shows Chinese summary + approach paragraph with English algo/formula terms as expected.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-183 --status completed`
