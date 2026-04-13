@@ -444,3 +444,10 @@
 - **Sanity check result**: File written UTF-8, 14 ## sections, no emoji, structural check passed.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-406 --status completed`
+
+## 2026-04-13 -- [T-P0-407] Pinterest SD: Pin Ranking for Home/Topic Feed
+- **What I did**: Authored end-to-end ML SD doc for Pinterest home-feed pin ranking at docs/pinterest/system_design_pin_ranking.md. 14 sections: clarifying (surface/scale/latency/objective), high-level architecture (retrieval -> L1 -> L2 MMOE -> blending -> business rules), multi-source retrieval (PinSage ANN + board/topic follow + co-pin + trending + creator fresh), feature families (pin/user/context/cross) with feature-store consistency notes, model family contrasting MMOE+DCN-v2 vs W&D vs HSTU-style generative ranker, multi-objective optimization (Pareto weight tuning, Lagrangian constraint, MMR diversity, counterfactual LTV head), serving (400ms E2E budget breakdown, ~300 GPU capacity estimate, graceful degradation), metric ladder (offline AUC/NDCG/ECE/IPS uplift, online north-star WAU+session+repin with guardrails), cold start (new-user/new-pin/dormant), failure modes (filter bubble/clickbait/creator-matthew/position-bias), 7 follow-up hooks, 45-min timing cheat sheet, and two appendices (home vs related vs search; key numbers).
+- **Deliverables**: docs/pinterest/system_design_pin_ranking.md (370 lines, 14 H2 sections).
+- **Sanity check result**: File written UTF-8, 14 ## sections, zero emoji/symbol chars, structural check passed.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-407 --status completed`

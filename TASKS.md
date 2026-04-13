@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Pinterest SD 2025-11. Pin ranking for home/topic feed. (1) two-stage retrieval+rerank, (2) features (pin/user/context/graph), (3) model family (MMOE/wide-and-deep/transformer), (4) multi-objective (engagement+diversity+long-term), (5) serving constraints, (6) metric ladder. Chinese markdown docs/pinterest/system_design_pin_ranking.md.
-
 #### T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async)
 - **Priority**: P0
 - **Complexity**: L
@@ -240,6 +234,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 350 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation. Pinterest SD 2025-11. Pin ranking for home/topic feed. (1) two-stage retrieval+rerank, (2) features (pin/user/context/gr
 - [x] **2026-04-13** -- T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation. Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) d
 - [x] **2026-04-12** -- T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches. After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index compan
 - [x] **2026-04-12** -- T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244. Three existing notes are MIX (ratios 0.11-0.29). Rewrite the English prose sections to Chinese, keep code blocks and tec
