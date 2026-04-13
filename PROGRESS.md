@@ -268,3 +268,10 @@
 - **Sanity check result**: `python scripts/_smoke_round_by_precision.py` -> OK 18 valid + 6 invalid cases passed (+ Decimal-ref parity on all valid). Seeder -> `[INSERT] id=1074`; second run -> `[SKIP]` (idempotent). Caught 3 bugs during smoke: (1) missing `frac[0]` fallback when `keep_len == len(int_part)` (bit `2.5/p=1`), (2) all-zero magnitude rendering `'000'` instead of `'0'`, (3) Decimal ref needed `Decimal(1).scaleb(k)` because `Decimal('100')` has exponent 0 -- quantize target silently treated as ones.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-403 --status completed`
+
+## 2026-04-13 -- [T-P1-404] LC 332 loop follow-up addendum
+- **What I did**: Appended Pinterest 2025-11 follow-up addendum to existing LC 332 notes (problem id=148) answering "what if tickets form a cycle?" — Hierholzer handles Eulerian circuits natively (dead-end/post-order mechanics identical for path vs circuit; JFK ends up at both head and tail after reversal). Added Eulerian existence conditions table (path vs circuit degree + connectivity), O(V+E) infeasibility-detection recipe, and the "two disjoint cycles = degrees valid but not connected" gotcha. No new problem row — addendum lives inline after a `---` separator in the existing notes.
+- **Deliverables**: scripts/_append_lc332_loop_addendum.py (new, idempotent updater keyed on `### Pinterest 2025-11 Follow-up` marker), data/mle_prep.db (id=148 notes 2167 -> 3403 chars).
+- **Sanity check result**: First run -> `[UPDATE] id=148 notes 2167 -> 3403 chars`; second run -> `[SKIP] addendum already present`. Verified appended content via UTF-8 stdout dump (last 800 chars render correctly, tables and code fences intact).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-404 --status completed`

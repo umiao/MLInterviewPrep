@@ -23,12 +23,6 @@
 - **Depends on**: None
 - **Description**: Pinterest coding 2025-11. Graph connectivity problem on pin/board/user graph. Research variant, write canonical (Union-Find or BFS/DFS) + Chinese notes. Non-LC entry.
 
-#### T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian circuits naturally (returns to JFK). If question is detecting infeasible itinerary, discuss Eulerian existence conditions. Append as addendum to existing LC 332 notes (don't create new problem entry).
-
 #### T-P1-408: [Pinterest/SD] SD: Ad CTR prediction
 - **Priority**: P1
 - **Complexity**: L
@@ -150,6 +144,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 
 - [x] **2026-04-13** -- T-P1-403: [Pinterest/custom] Round string s by precision p. Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->
 - [x] **2026-04-13** -- T-P1-402: [Pinterest/custom] round() from scratch (string input). Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.
 - [x] **2026-04-13** -- T-P1-399: [Pinterest/custom] Prefix-match first-word-index. Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix
