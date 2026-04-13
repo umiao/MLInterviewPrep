@@ -494,3 +494,10 @@
 - **Sanity check result**: Script ran [OK]; tags=[LinkedIn, Uber, Adobe, Pinterest], notes_len=3349; verified algorithm against 3 test cases ([1,2,3,2,1]=3, [3,1,1,2]=4, [3,1,5,4,2]=7).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-393 --status completed`
+
+## 2026-04-13 -- [T-P1-394] Pinterest LC 1564 Put Boxes Into Warehouse I: insert + Chinese notes
+- **What I did**: Inserted new problem row for LC 1564 (not previously in DB) with Pinterest tag and a 4275-char Chinese study note covering (1) prefix-min "effective height" reduction, (2) greedy with sorted boxes + reverse-sweep of rooms (skip room, not box, when minimum box cannot fit), (3) exchange-argument correctness proof, (4) two traced examples, (5) contrast table vs LC 1580 (single vs dual entrance), (6) cross-links to LC 11/42/881/1580/2064, (7) edge cases (m != n, duplicate heights, all-too-big), (8) 45-sec pitch.
+- **Deliverables**: scripts/_update_lc1564_pinterest_notes.py (new, idempotent), data/mle_prep.db (LC 1564: newly inserted, notes_len=4275)
+- **Sanity check result**: Script ran [NEW]; verified greedy against 4 test cases ([4,3,4,1]/[5,3,3,4,1]=3; [1,2,2,3,4]/[3,4,1,2]=3; [1,2,3]/[1,2,3,4]=1; [3,5,5,2]/[2,1,3,4,5]=1).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-394 --status completed` (already applied)

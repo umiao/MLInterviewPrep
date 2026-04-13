@@ -29,12 +29,6 @@
 - **Depends on**: None
 - **Description**: Remaining Tier-2 stories not covered by metric or ownership sweeps. Primary: EX-7 (add downstream metric after unbiased dataset adoption). Scan JSON/md for any other stories flagged in 2026-04-13 audit that dont fit metric or ownership sweeps. One-off fixes per story -- structural polish only. Edit JSON + markdown.
 
-#### T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight.
-
 #### T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II
 - **Priority**: P1
 - **Complexity**: S
@@ -118,7 +112,7 @@
 #### T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections
 - **Priority**: P2
 - **Complexity**: M
-- **Depends on**: T-P1-390, T-P1-391, T-P1-392, T-P1-393, T-P1-394, T-P1-395, T-P0-397, T-P0-405, T-P0-406, T-P0-410, T-P1-412
+- **Depends on**: T-P1-390, T-P1-391, T-P1-392, T-P1-393, T-P1-394, T-P1-395, T-P0-410, T-P1-412
 - **Description**: Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC section (84, 392, 3229, 1526, 1564, 1580, 餐馆区间), (2) Custom Coding section (Escape Room, Lighthouse, Prefix-match, Grant Access, Pin Connectivity, round(), Round-by-p, LC332 loop) with lc:// drawer links where applicable, (3) System Design section with links to docs/pinterest/system_design_*.md files, (4) BQ Question Map link, (5) cross-links LC problems <-> relevant SD modules (e.g. LC 1244 <-> Leaderboard SD family). Depends on all previous Pinterest expansion tasks being complete.
 
 ### P3 -- Stretch Goals
@@ -202,26 +196,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 350 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I. New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight
 - [x] **2026-04-13** -- T-P1-393: [Pinterest/LC] Add + notes: LC 1526 Min Increments on Subarrays. New Pinterest problem. Diff-array + greedy sign-change pattern. Chinese notes explaining why counting positive deltas is
 - [x] **2026-04-13** -- T-P1-392: [Pinterest/LC] Add + notes: LC 3229 Min Operations to Make Array Equal to Target. New Pinterest problem. Diff-scan greedy (same family as LC 1526). Chinese notes covering increment/decrement region hand
 - [x] **2026-04-13** -- T-P1-391: [Pinterest/LC] Add + notes: LC 392 Is Subsequence. New Pinterest problem. Two-pointer O(n+m). Follow-up: many queries -> precompute indexed char positions, binary search e
 - [x] **2026-04-13** -- T-P1-390: [Pinterest/LC] Add + notes: LC 84 Largest Rectangle in Histogram. New Pinterest problem (2025-11 cutoff). Add to problems DB with Pinterest tag; fetch description; write Chinese notes: m
 - [x] **2026-04-13** -- T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async). Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume;
-- [x] **2026-04-13** -- T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation. Pinterest SD 2025-11. Pin ranking for home/topic feed. (1) two-stage retrieval+rerank, (2) features (pin/user/context/gr
-- [x] **2026-04-13** -- T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation. Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) d
-- [x] **2026-04-12** -- T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches. After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index compan
-- [x] **2026-04-12** -- T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244. Three existing notes are MIX (ratios 0.11-0.29). Rewrite the English prose sections to Chinese, keep code blocks and tec
-- [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
-- [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
-- [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
-- [x] **2026-04-12** -- T-P0-405: [Pinterest/SD] ML SD: Design Pins Search Engine. Pinterest SD (most frequently asked 2025-11). End-to-end: (1) candidate generation (two-tower embedding, ANN/HNSW, multi
-- [x] **2026-04-12** -- T-P0-397: [Pinterest/custom] Escape Room game-state (Game(rooms, people)). Pinterest coding 2025-11. Design data structure: proceedToNextRoom(pid), getTop(K), getPeople(roomId). Requirements: O(1
-- [x] **2026-04-12** -- T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win. Flags C+D. Target: DB `behavioral_examples` row example_id=EX-33 "MoE -> Allocation Paradigm Shift - Org-Level Reframe v
-- [x] **2026-04-12** -- T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost. Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-0
-- [x] **2026-04-12** -- T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric. Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-
-- [x] **2026-04-12** -- T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius. Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches
-- [x] **2026-04-12** -- T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally. Flags C+D. Use user-provided facts (2026-04-13 Discord): This was NOT a user-facing prod-model impact -- but it took 2 f
-- [x] **2026-04-12** -- T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric. Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production ch
-- [x] **2026-04-12** -- T-P0-380: [BQ-rework] EX-12 Code Review Standards: add concrete metric. Flag C (vague metric). Use user-provided facts (2026-04-13 Discord): before the checklist/standards, ~80% of changes req
