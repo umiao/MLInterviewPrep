@@ -5,8 +5,10 @@ import { api } from "../utils/api";
 import { usePrepNotes } from "../hooks/usePrepNotes";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
+import ProblemDrawer from "../components/problems/ProblemDrawer";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
+import KnowledgeCardsPanel from "../components/companies/KnowledgeCardsPanel";
 import DocTocSidebar from "../components/ui/DocTocSidebar";
 import DynamicTocSidebar from "../components/ui/DynamicTocSidebar";
 import type { TocHeading } from "../utils/slugify";
@@ -19,7 +21,7 @@ import type { Company } from "../types/company";
 
 type ImportMode = "append" | "replace";
 /** "notes" = main prep_notes, "forum" = forum tab, "doc:N" = child document N */
-type PageTab = "notes" | "forum" | `doc:${number}`;
+type PageTab = "notes" | "forum" | "knowledge" | `doc:${number}`;
 
 /** Threshold: only show TOC sidebar for documents >= 20K chars */
 const TOC_MIN_CHARS = 8_000;
@@ -206,6 +208,11 @@ export default function PrepNotesPage() {
               </select>
             )}
             <TabButton
+              label="Knowledge"
+              active={activeTab === "knowledge"}
+              onClick={() => setActiveTab("knowledge")}
+            />
+            <TabButton
               label="Forum Posts"
               active={activeTab === "forum"}
               onClick={() => setActiveTab("forum")}
@@ -349,6 +356,8 @@ export default function PrepNotesPage() {
             </div>
           </div>
         </>
+      ) : activeTab === "knowledge" ? (
+        <KnowledgeCardsPanel companyId={companyId} />
       ) : activeDocId !== null ? (
         <DocumentViewer
           companyId={companyId}
@@ -410,6 +419,7 @@ function DocumentViewer({
   const [localContent, setLocalContent] = useState<string | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
+  const [lcDrawerId, setLcDrawerId] = useState<number | null>(null);
   const isAdobe = companyId === 23;
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -465,7 +475,11 @@ function DocumentViewer({
         ) : (
           <div className="prep-prose">
             {content ? (
-              <MarkdownPreview markdown={content} onHeadingsExtracted={!isAdobe ? setTocHeadings : undefined} />
+              <MarkdownPreview
+                markdown={content}
+                onHeadingsExtracted={!isAdobe ? setTocHeadings : undefined}
+                onLcLinkClick={setLcDrawerId}
+              />
             ) : (
               <p className="text-gray-400 italic">
                 Empty document. Switch to Edit mode to add content.
@@ -474,6 +488,7 @@ function DocumentViewer({
           </div>
         )}
       </div>
+      <ProblemDrawer lcId={lcDrawerId} onClose={() => setLcDrawerId(null)} />
     </>
   );
 }

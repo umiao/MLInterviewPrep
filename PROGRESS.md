@@ -423,3 +423,10 @@
 - **Sanity check result**: Seed script run end-to-end; 12/12 INSERT for cards, 10/10 INSERT for overlays. Post-run table totals: knowledge_cards=14, company_card_overlays=13 (phase 1 contributed 2+3). All cards cite provenance with source_file + source_line_start/end. No bare `|` in math (`\mid` used where needed); all display math single-line $$ with blank separators per repo formula spec.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-189 --status completed`. T-P1-190 (frontend merged view) unblocked for visual completeness; T-P2-191 (Adobe EN mirror deletion approval) remains.
+
+## 2026-04-13 -- [T-P1-190] Knowledge cards: wire /companies/:id/prep merged view (frontend)
+- **What I did**: Added `KnowledgeCardsPanel` component that calls `GET /api/knowledge_cards?company_id={id}` and renders each card as `canonical_body` followed by any company-specific overlays (angle-labeled, blue-tinted). Cards with overlays for this company surface first under "Company-specific"; remaining shared canonical cards collapse behind a toggle. Added a new "Knowledge" tab to PrepNotesPage between the document selector and Forum Posts; mode toggle (Preview/Edit) is hidden for that tab.
+- **Deliverables**: src/frontend/src/components/companies/KnowledgeCardsPanel.tsx (new), src/frontend/src/pages/PrepNotesPage.tsx (tab wiring).
+- **Sanity check result**: `npm run build` clean (tsc -b && vite build succeed, no type errors). Backend endpoint verified with 14 cards + 13 overlays present in data/mle_prep.db.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-190 --status completed`.
