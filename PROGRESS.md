@@ -487,3 +487,10 @@
 - **Sanity check result**: Script ran [OK]; tags=["Pinterest"], notes_len=3641; verified algorithm against 4 test cases (mixed-sign, all-zero, ascending, equal).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-392 --status completed`
+
+## 2026-04-13 -- [T-P1-393] Pinterest LC 1526 Min Increments on Subarrays: tag + Chinese notes
+- **What I did**: Tagged LC 1526 with Pinterest and wrote notes (id=236) with a 3349-char Chinese study note covering (1) the O(n) upper-edge counting formula `ans = target[0] + sum(max(0, t[i]-t[i-1]))`, (2) correctness via diff-array lower bound argument (each op contributes one +1 rise), (3) two traced examples, (4) cross-links to LC 3229/370/1109/798/2772/1564, (5) edge cases (single peak, plateau, monotonic, multi-peak), (6) 45-sec pitch positioning as the single-sided version of LC 3229.
+- **Deliverables**: scripts/_update_lc1526_pinterest_notes.py (new, idempotent), data/mle_prep.db (LC 1526: +Pinterest tag, notes 0 -> 3349 chars)
+- **Sanity check result**: Script ran [OK]; tags=[LinkedIn, Uber, Adobe, Pinterest], notes_len=3349; verified algorithm against 3 test cases ([1,2,3,2,1]=3, [3,1,1,2]=4, [3,1,5,4,2]=7).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-393 --status completed`
