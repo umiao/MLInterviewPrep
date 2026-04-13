@@ -303,3 +303,10 @@
 - **Sanity check result**: File created; line count 260; structure mirrors existing pinterest SD docs (pin_ranking, notification_reco); covers all 6 required topics from task description (pipeline, feature eng, model, calibration, serving, online metrics).
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-408 --status completed
+
+## 2026-04-13 -- [T-P1-409] Pinterest SD: User & Item Embeddings
+- **What I did**: Wrote end-to-end Chinese SD doc docs/pinterest/system_design_embeddings.md covering clarifying questions, high-level architecture (two-tower + PinSage graph), multi-task contrastive objective (long-repin primary + aux labels, LogQ correction, hard negatives), pin content tower (ViT+mBERT+taxonomy+graph) and user sequence tower (Transformer over last-50 engagement + long-term topic distribution), training pipeline (daily batch + 15-min user streaming + new-pin streaming), serving (ScaNN/HNSW ANN with shard + PQ quantization), 4 downstream uses (candidate gen / ranking features / similar-pins / lookalike), monitoring, and 10 common interview follow-ups (popularity bias, cold start, interest drift, ranker coupling, rollback).
+- **Deliverables**: docs/pinterest/system_design_embeddings.md (new, 340 lines).
+- **Sanity check result**: File created; 340 lines; structure mirrors existing pinterest SD docs (ad_ctr, pin_ranking, notification_reco); covers all 5 required topics from task description (objective, encoder, training pipeline, serving, downstream uses).
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-409 --status completed
