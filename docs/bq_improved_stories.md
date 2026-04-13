@@ -25,6 +25,12 @@ Open questions / follow-ups:
 - Task description also referenced **EX-29, EX-35, EX-36** (GMV delta, new-seller FP X->Y, 0 privacy incidents + recall@K). No such IDs exist in `bq_improved_stories.md` or `bq_behavioral_examples.json` (IDs stop at EX-24, plus EX-33). Candidates: user may mean Tier-3 stories not yet imported, or the Pinterest seller-trust story in `bq_new_stories_A_J.txt`. User to clarify which story each set of numbers belongs to.
 - JSON mirror (`docs/bq_behavioral_examples.json`) not yet synced -- pending disambiguation of EX-18 / EX-29 / EX-35 / EX-36 above, to avoid writing the wrong numbers into the canonical DB.
 
+### 2026-04-13 Ownership Sharpening Sweep (T-P1-388)
+
+Swept Action/Result sections in EX-02, EX-11, and EX-13 (MD + JSON) to make ownership unambiguous: every Action bullet now explicitly starts with "I" (or credits the correct actor, e.g. "My intern prepared..."), and the +1% GMB lift in EX-02 is now front-loaded as "I led the first experiment to a +1% GMB lift." EX-11 now calls out the compression split ("I led compression; researcher gave context"). EX-13 now names the flag/point-taking/air-cover split ("I flagged... I took point on negotiations... my manager gave air cover"). "We" is preserved only in Situation sections (team context).
+
+Task spec also referenced EX-25, EX-26, EX-27 (independent research and build; defined AC and validated final choice; DRI / critical-path owner). No such IDs exist in either the MD or the JSON (canonical IDs stop at EX-24, plus EX-33). Same disposition as the T-P1-387 EX-29/35/36 questions: user to clarify which stories these numbers/claims belong to, then a follow-up pass can apply the ownership sharpening to those canonical IDs.
+
 ---
 
 ## STORY 1: Search Diversity -- Intent Collapse (EX-01)
@@ -57,12 +63,12 @@ Open questions / follow-ups:
 **Risk if not addressed:** A validated project with demonstrated GMB improvement potential would die due to organizational misalignment. The 200M+ opportunity would remain untapped, and users on multi-intent queries would continue seeing homogeneous results indefinitely.
 
 **Action:**
-- Attempted to reframe the project within the existing team's charter -- this failed because the team's OKRs were fundamentally about relevance thresholds, not ranking quality
-- Recognized the core issue: the project was a ranking problem being housed in a relevance team
-- Made the deliberate decision to transfer to the Final Ranking team, reframing diversity as a ranking allocation problem to align with their charter
-- Acknowledged my own gap: I should have translated the business case into the team's OKR language earlier and found a ranking team sponsor sooner
+- I attempted to reframe the project within the existing team's charter -- this failed because the team's OKRs were fundamentally about relevance thresholds, not ranking quality
+- I recognized the core issue: the project was a ranking problem being housed in a relevance team
+- I made the deliberate decision to transfer to the Final Ranking team, reframing diversity as a ranking allocation problem to align with their charter
+- I acknowledged my own gap: I should have translated the business case into the team's OKR language earlier and found a ranking team sponsor sooner
 
-**Result:** The transfer gave me complete ownership and resources. The first experiment delivered **+1% GMB**, and the allocation framework was subsequently reused across multiple verticals for **200M+ annualized impact**. Key lesson: "the problem follows the person" -- proactively seek the right organizational home rather than accepting structural constraints.
+**Result:** The transfer gave me complete ownership and resources. **I led the first experiment to a +1% GMB lift** on diversity ranking, and the allocation framework was subsequently reused across multiple verticals for **200M+ annualized impact**. Key lesson: "the problem follows the person" -- proactively seek the right organizational home rather than accepting structural constraints.
 
 ---
 
@@ -228,10 +234,10 @@ Open questions / follow-ups:
 **Risk if not addressed:** Without intervention, the intern would receive a negative performance evaluation despite doing good work, potentially losing his return offer. The perception gap would also undermine the team's confidence in hosting PhD interns, threatening the pipeline for future research talent.
 
 **Action:**
-- Raised the issue in weekly 1:1, framed positively: "how to better showcase your contributions" rather than "you're doing it wrong"
-- Taught the distinction between what leaders want to see (visibility, roadmap, confidence level) vs. raw technical details
-- Shared practical rule: every update should cover goals, current progress, and confidence on completion -- not implementation details
-- Coached on phased deliverables with verifiable milestones instead of overly aggressive multi-week goals
+- I raised the issue in our weekly 1:1, framed positively: "how to better showcase your contributions" rather than "you're doing it wrong"
+- I taught the distinction between what leaders want to see (visibility, roadmap, confidence level) vs. raw technical details -- I led the compression of his progress into a leader-readable format; the researcher side gave me context on how he wanted to frame the work
+- I shared the practical rule: every update should cover goals, current progress, and confidence on completion -- not implementation details
+- I coached him on phased deliverables with verifiable milestones instead of overly aggressive multi-week goals
 
 **Result:** The intern **significantly improved** his goal communication, effectively showcased his contributions, and **received a return offer**. The coaching framework (goals-progress-confidence) became my standard approach for onboarding new researchers, bridging the academia-to-industry communication gap.
 
@@ -263,10 +269,10 @@ Open questions / follow-ups:
 **Risk if not addressed:** Accepting "gift authorship" would set a toxic precedent -- anyone who briefly touched a project could claim credit for others' work. This would demoralize the intern who did substantial work, discourage future collaboration, and undermine the integrity of the team's publications.
 
 **Action:**
-- Had multiple private conversations articulating the principle: authorship should reflect actual contribution to the manuscript, not project initiation
-- Stated clearly that "authorship as gift" was unacceptable and would not be the norm
-- Intern prepared supporting materials: academic ethics guidelines, conference submission requirements for author declarations
-- When working-level discussion failed to resolve it, brought both managers in for mediation
+- I flagged the issue and had multiple private conversations articulating the principle: authorship should reflect actual contribution to the manuscript, not project initiation
+- I took point on the negotiations and stated clearly that "authorship as gift" was unacceptable and would not be the norm
+- My intern prepared supporting materials at my direction: academic ethics guidelines, conference submission requirements for author declarations
+- When working-level discussion failed to resolve it, I escalated and brought both managers in for mediation; my manager gave air cover so I could hold the contribution-based position without the relationship becoming a career risk
 
 **Result:** Management **agreed with the contribution-based position**. The team established a lasting norm: first authorship goes to whoever made the single largest contribution; if contributions are comparable, rotate. This rule was applied to all subsequent publications -- **no further authorship disputes arose**. The intern felt validated, and the team gained a clear, fair framework for collaboration.
 
