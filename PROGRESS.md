@@ -480,3 +480,10 @@
 - **Sanity check result**: Script ran [OK], tags now ["LinkedIn","Uber","Adobe","Pinterest"], notes_len=4392; verified all three solutions against 5 test cases (including empty s, empty t, full match).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-391 --status completed` (already applied)
+
+## 2026-04-13 -- [T-P1-392] Pinterest LC 3229 Min Operations to Make Array Equal to Target: tag + Chinese notes
+- **What I did**: Tagged LC 3229 with Pinterest and overwrote notes (id=157) with a 3641-char Chinese study note covering (1) the diff-scan greedy d[i]=target[i]-nums[i] single-pass formulation, (2) correctness via "LC1526(max(d,0)) + LC1526(max(-d,0))" decomposition, (3) two traced examples, (4) cross-links to LC 1526/370/798/1109/2772, (5) edge cases (prev=0 seed, cross-zero non-merging, monotonic descending), (6) 45-sec pitch.
+- **Deliverables**: scripts/_update_lc3229_pinterest_notes.py (new, idempotent), data/mle_prep.db (LC 3229: +Pinterest tag, notes replaced 564 -> 3641 chars)
+- **Sanity check result**: Script ran [OK]; tags=["Pinterest"], notes_len=3641; verified algorithm against 4 test cases (mixed-sign, all-zero, ascending, equal).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-392 --status completed`
