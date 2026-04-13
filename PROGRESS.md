@@ -317,3 +317,10 @@
 - **Sanity check result**: File created; 337 lines; structure mirrors existing pinterest SD docs (embeddings, ad_ctr, pin_ranking); covers all 6 required topics from task description (conversation understanding, intent classification, RAG, grounding, safety/moderation, evaluation).
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-411 --status completed
+
+## 2026-04-13 -- [T-P2-396] Pinterest LC Investigation: 寻找餐馆区间
+- **What I did**: Investigated the no-LC-number problem "寻找餐馆区间" from Pinterest 2025-11 dump. Compared 4 candidates (LC 1779/2563/1094/1851) against keywords 「寻找」and「区间」and difficulty prior. Concluded LC 1851 "Minimum Interval to Include Each Query" is best match (Hard; offline sort + min-heap keyed on interval length; natural restaurant-service-radius themeing). Wrote Chinese investigation note documenting rationale + fallback if onsite was actually 1094/2563. Tagged LC 1851 with Pinterest company tag in problems DB.
+- **Deliverables**: docs/pinterest/lc_investigation_restaurant_intervals.md (new); problems table LC 1851 company_tags += Pinterest.
+- **Sanity check result**: Note created with comparison table + rationale; DB tag update verified via SELECT (company_tags=['Pinterest']).
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P2-396 --status completed

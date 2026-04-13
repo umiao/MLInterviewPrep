@@ -13,16 +13,10 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 / 2563 / 1094 / 1851). If LC match found, add/update. If custom, create non-LC entry.
-
 #### T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections
 - **Priority**: P2
 - **Complexity**: M
-- **Depends on**: T-P1-390, T-P1-391, T-P1-392, T-P1-393, T-P1-394, T-P1-395, T-P0-410, T-P1-412
+- **Depends on**: T-P1-412
 - **Description**: Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC section (84, 392, 3229, 1526, 1564, 1580, 餐馆区间), (2) Custom Coding section (Escape Room, Lighthouse, Prefix-match, Grant Access, Pin Connectivity, round(), Round-by-p, LC332 loop) with lc:// drawer links where applicable, (3) System Design section with links to docs/pinterest/system_design_*.md files, (4) BQ Question Map link, (5) cross-links LC problems <-> relevant SD modules (e.g. LC 1244 <-> Leaderboard SD family). Depends on all previous Pinterest expansion tasks being complete.
 
 ### P3 -- Stretch Goals
@@ -106,26 +100,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间. Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 
 - [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons
 - [x] **2026-04-13** -- T-P1-411: [Pinterest/SD] ML SD: Personalized Chat Bot Recommending Pins. Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit
 - [x] **2026-04-13** -- T-P1-409: [Pinterest/SD] SD: User & Item Embeddings. Pinterest SD 2025-11. (1) objective (self-supervised contrastive / supervised from engagement), (2) encoder (towers, use
 - [x] **2026-04-13** -- T-P1-408: [Pinterest/SD] SD: Ad CTR prediction. Pinterest SD 2025-11. (1) data pipeline (impressions/clicks with attribution), (2) feature engineering (user/ad/context 
 - [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 
-- [x] **2026-04-13** -- T-P1-403: [Pinterest/custom] Round string s by precision p. Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->
-- [x] **2026-04-13** -- T-P1-402: [Pinterest/custom] round() from scratch (string input). Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.
-- [x] **2026-04-13** -- T-P1-401: [Pinterest/custom] Pin Connectivity. Pinterest coding 2025-11. Graph connectivity problem on pin/board/user graph. Research variant, write canonical (Union-F
-- [x] **2026-04-13** -- T-P1-400: [Pinterest/custom] Grant Access permission propagation. Pinterest coding 2025-11. Problem linked at hack2hire.com (URL in dump). Research and document: likely DAG/graph permiss
-- [x] **2026-04-13** -- T-P1-399: [Pinterest/custom] Prefix-match first-word-index. Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix
-- [x] **2026-04-13** -- T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation. Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirro
-- [x] **2026-04-13** -- T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II. New Pinterest problem (harder variant of 1564, enter from both ends). Chinese notes: two-pointer shortest-interior-heigh
-- [x] **2026-04-13** -- T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I. New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight
-- [x] **2026-04-13** -- T-P1-393: [Pinterest/LC] Add + notes: LC 1526 Min Increments on Subarrays. New Pinterest problem. Diff-array + greedy sign-change pattern. Chinese notes explaining why counting positive deltas is
-- [x] **2026-04-13** -- T-P1-392: [Pinterest/LC] Add + notes: LC 3229 Min Operations to Make Array Equal to Target. New Pinterest problem. Diff-scan greedy (same family as LC 1526). Chinese notes covering increment/decrement region hand
-- [x] **2026-04-13** -- T-P1-391: [Pinterest/LC] Add + notes: LC 392 Is Subsequence. New Pinterest problem. Two-pointer O(n+m). Follow-up: many queries -> precompute indexed char positions, binary search e
-- [x] **2026-04-13** -- T-P1-390: [Pinterest/LC] Add + notes: LC 84 Largest Rectangle in Histogram. New Pinterest problem (2025-11 cutoff). Add to problems DB with Pinterest tag; fetch description; write Chinese notes: m
-- [x] **2026-04-13** -- T-P1-389: [BQ-sweep] Tier-2 catch-all polish: remaining 1-weak-signal stories. Remaining Tier-2 stories not covered by metric or ownership sweeps. Primary: EX-7 (add downstream metric after unbiased 
-- [x] **2026-04-13** -- T-P1-388: [BQ-sweep] Tier-2 ownership sharpening: "we" -> "I" in Action sections. Sweep target stories: EX-2 (lead +1% GMB prominently), EX-11 (I led compression, researcher gave context), EX-13 (I flag
-- [x] **2026-04-13** -- T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories. User guidance (2026-04-13 Discord): "Fill in similarly". For stories where user has not provided facts, use [TODO: confi
-- [x] **2026-04-13** -- T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async). Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume;
