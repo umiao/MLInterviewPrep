@@ -465,3 +465,10 @@
 - **Sanity check result**: File UTF-8, 14 H2 sections, zero emoji chars (checked 0x2600-0x27BF and 0x1F000-0x1FFFF ranges), structural check passed
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-410 --status completed`
+
+## 2026-04-13 -- [T-P1-390] Pinterest LC 84 Largest Rectangle: Pinterest tag + expanded Chinese notes
+- **What I did**: Tagged LC 84 with Pinterest company tag and overwrote problems.notes (id=85) with a full 4874-char Chinese study note covering (1) monotonic-stack O(n) canonical with sentinel + equivalent "append 0" variant, (2) divide-and-conquer O(n log n) avg / O(n^2) worst, (3) two-pass left/right precompute variant, (4) relation table to LC 85/42/11/496/907, (5) 单调栈 pattern-recognition checklist, (6) traps (strict vs non-strict pop, clear-stack step, empty array, recursion limit), and a 45s interview opener.
+- **Deliverables**: scripts/_update_lc84_pinterest_notes.py (new, one-shot idempotent), data/mle_prep.db (LC 84 row: company_tags +Pinterest, notes replaced)
+- **Sanity check result**: Script ran [OK], tags now ["LinkedIn","Uber","Adobe","Pinterest"], notes_len=4874; also verified canonical solution against 4 test cases including [2,1,5,6,2,3]=10, [5,5,5]=15, []=0.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-390 --status completed` (already applied)
