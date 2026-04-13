@@ -11,6 +11,7 @@ from src.backend.models.behavioral_theme import (
     QuestionThemeTag,
 )
 from src.backend.models.company import Company, CompanyTopicWeight
+from src.backend.models.knowledge_card import CompanyCardOverlay, KnowledgeCard
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.models.framework import FrameworkNode, StudyLog
 from src.backend.models.problem import Attempt, Problem, QASession
@@ -36,6 +37,8 @@ __all__ = [
     "StudyLog",
     "Company",
     "CompanyTopicWeight",
+    "KnowledgeCard",
+    "CompanyCardOverlay",
     "InterviewEvent",
     "ReadingProgress",
     "ReadingSession",
