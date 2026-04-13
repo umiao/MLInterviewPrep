@@ -345,3 +345,10 @@
 - **Sanity check result**: `grep -c TODO docs/bq_improved_stories.md` = 12 (matches tracker count); tracker enumerates every line with a TODO (57, 115, 174, 301 x3, 320, 355, 431, 464, 482 x2) + the JSON mirror (381). No TODOs invented and no existing content mutated beyond the added pointer line.
 - **Status**: [DONE] -- user input required to close the 12 open items (tracker is the action surface).
 - **Request**: `task_db.py update T-P0-179 --status completed`.
+
+## 2026-04-13 21:00 -- [T-P0-164] System design depth: llm-orchestration expansion
+- **What I did**: Verified scripts/content_llm_orchestration.py already encodes the full expanded Chinese content for the llm-orchestration module (721 lines). Ran the seed script against the DB and confirmed all 8 sections populated with 18,407 total chars. Verified AC: Iteration & Evaluation subsection present (four-layer evaluation + IPS/DR reasoning + hyperparameter tuning table), 5 Defense Q&A in acknowledge-mitigate-data format, 3 documented failure modes (intent hallucination, filter field drift, cascading fallback storm) each with root cause + fix + measured effect. Scanned all math blocks for bare | -- only a false positive from two USD currency \$ symbols across a table row; no actual math-block violations.
+- **Deliverables**: scripts/content_llm_orchestration.py (existing, re-run against DB); DB row system_designs[slug=llm-orchestration] refreshed.
+- **Sanity check result**: Seed script reported [DONE] with per-section char counts; TOTAL: 18407 chars (target >= 16K). Defense section 2235 chars, 5 Q&A. Failure modes 3 (target >= 2). Iteration section present at line 474. No bare pipes in math.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P0-164 --status completed (already applied)
