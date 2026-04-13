@@ -430,3 +430,10 @@
 - **Sanity check result**: Smoke test of the NOTES code path (Game([1,2,3],[10,20,30])) passed all assertions incl. getTop tiebreak by entry order and final-room no-op guard. DB verified via SELECT.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-397 --status completed`
+
+## 2026-04-13 -- [T-P0-405] Pinterest SD: Pins Search Engine
+- **What I did**: Authored end-to-end ML SD doc for Pinterest Pins Search at docs/pinterest/system_design_pins_search.md. Covers 12 sections: clarifying questions, 4-stage funnel diagram, query understanding (normalization/NER/intent/embedding cache), candidate generation (multi-source retrieval, two-tower + InfoNCE with hard negatives, HNSW/PQ, online fresh index), ranking (L1 GBDT LambdaRank + L2 MMoE multi-task DNN with CTR/Repin/CloseUp/Hide heads), re-ranking (MMR diversity, freshness boost, policy/ads blending), offline metrics (NDCG/MAP/Recall@K), online metrics + A/B (repin-rate north star), infra (feature store, training pipeline, serving stack, capacity math for 100K QPS / 5B pins), cold-start (pin/user/query), failure modes, 7 likely follow-ups, and 45-min timing template.
+- **Deliverables**: docs/pinterest/system_design_pins_search.md (376 lines, 14.4KB, 13 H2 sections).
+- **Sanity check result**: File written UTF-8, structural check passed (title present, 13 ## sections).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-405 --status completed`
