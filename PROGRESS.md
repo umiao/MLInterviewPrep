@@ -501,3 +501,10 @@
 - **Sanity check result**: Script ran [NEW]; verified greedy against 4 test cases ([4,3,4,1]/[5,3,3,4,1]=3; [1,2,2,3,4]/[3,4,1,2]=3; [1,2,3]/[1,2,3,4]=1; [3,5,5,2]/[2,1,3,4,5]=1).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-394 --status completed` (already applied)
+
+## 2026-04-13 -- [T-P1-395] Pinterest LC 1580 Put Boxes Into Warehouse II: insert + Chinese notes
+- **What I did**: Inserted new problem row for LC 1580 (hard, harder variant of 1564 with dual entrance) tagged Pinterest, with a 4720-char Chinese study note covering (1) bidirectional prefix-min "upper envelope" eff[j] = max(leftMin[j], rightMin[j]) reduction, (2) why eff loses monotonicity vs 1564 and therefore requires sorting eff, (3) double-sort + two-pointer greedy (skip room, never box) with worked code, (4) exchange-argument correctness sketch, (5) two traced examples, (6) contrast table vs LC 1564, (7) cross-links LC 1564/42/11/881/1705, (8) edge cases (eff-as-max-not-min trap, n=1, all-too-big), (9) 45-sec pitch.
+- **Deliverables**: scripts/_update_lc1580_pinterest_notes.py (new, idempotent), data/mle_prep.db (LC 1580: newly inserted, notes_len=4720)
+- **Sanity check result**: Script ran [NEW]; verified greedy against 5 test cases ([1,2,2,3,4]/[3,4,1,2]=4; [3,5,5,2]/[2,1,3,4,5]=3; [1,2,3]/[1,2,3,4]=3; [4,5,6]/[1,1,1]=0; [9,5,5,2,3,1]/[1,2,3,4,5]=4).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-395 --status completed`
