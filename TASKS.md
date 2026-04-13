@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P1-412
-- **Description**: Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC section (84, 392, 3229, 1526, 1564, 1580, 餐馆区间), (2) Custom Coding section (Escape Room, Lighthouse, Prefix-match, Grant Access, Pin Connectivity, round(), Round-by-p, LC332 loop) with lc:// drawer links where applicable, (3) System Design section with links to docs/pinterest/system_design_*.md files, (4) BQ Question Map link, (5) cross-links LC problems <-> relevant SD modules (e.g. LC 1244 <-> Leaderboard SD family). Depends on all previous Pinterest expansion tasks being complete.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -102,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections. Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC secti
 - [x] **2026-04-13** -- T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间. Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 
 - [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons
 - [x] **2026-04-13** -- T-P1-411: [Pinterest/SD] ML SD: Personalized Chat Bot Recommending Pins. Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit

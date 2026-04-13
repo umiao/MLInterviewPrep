@@ -324,3 +324,10 @@
 - **Sanity check result**: Note created with comparison table + rationale; DB tag update verified via SELECT (company_tags=['Pinterest']).
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P2-396 --status completed
+
+## 2026-04-13 -- [T-P2-413] Pinterest LC Index Doc Enrichment
+- **What I did**: Enriched company_documents id=47 "Pinterest LC Must-Do -- Review & Index" with 5 new appendix sections: (1) Pinterest Expansion LC set (84, 392, 3229, 1526, 1564, 1580, 1851) with difficulty/pattern/notes + 4 new clusters (F-I); (2) Custom Coding Problems table (8 Pinterest-specific customs including LC332 loop addendum); (3) System Design Modules table linking to all 7 docs/pinterest/system_design_*.md files; (4) BQ Question Map link to docs/pinterest/bq_question_map.md; (5) LC <-> SD cross-links table mapping each SD module to most-relevant LC problems. Used lc:// drawer scheme for all LC problems with leetcode_id; SD links use relative paths.
+- **Deliverables**: scripts/_enrich_pinterest_index_doc.py (new); company_documents id=47 content updated (6687 -> 12446 chars).
+- **Sanity check result**: Verified new content in DB via SELECT; confirmed all 5 required sections present + spot-checked lc://1851, lc://1526, system_design_ad_ctr, bq_question_map links. Did not spin up backend for live API verification given change is content-only append to a single column.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-413 --status completed`
