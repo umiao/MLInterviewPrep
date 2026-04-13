@@ -34,6 +34,7 @@ class Problem(Base):
     )
     tags = Column(Text, nullable=True)  # JSON array
     pattern = Column(Text, nullable=True, index=True)
+    family = Column(Text, nullable=True, index=True)
     category = Column(
         String,
         CheckConstraint("category IN ('algorithm','ml_coding','system_design')"),

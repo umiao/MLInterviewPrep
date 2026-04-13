@@ -25,6 +25,24 @@ const LC_PROBLEMS: { dbId: number; lcId: number; title: string }[] = [
   { dbId: 183, lcId: 2858, title: "Min Edge Reversals" },
 ];
 
+// Stateful data-structure design family (problems.family='stateful_ds_design').
+// Rendered as a collapsible group above ungrouped LC problems.
+const STATEFUL_DS_DESIGN: { lcId: number; title: string }[] = [
+  { lcId: 146, title: "LRU Cache" },
+  { lcId: 362, title: "Design Hit Counter" },
+  { lcId: 432, title: "All O`one Data Structure" },
+  { lcId: 460, title: "LFU Cache" },
+  { lcId: 703, title: "Kth Largest Element in a Stream" },
+  { lcId: 716, title: "Max Stack" },
+  { lcId: 895, title: "Maximum Frequency Stack" },
+  { lcId: 1146, title: "Snapshot Array" },
+  { lcId: 1244, title: "Design A Leaderboard" },
+  { lcId: 1825, title: "Finding MK Average" },
+  { lcId: 1845, title: "Seat Reservation Manager" },
+];
+
+const STATEFUL_DS_LC_IDS = new Set(STATEFUL_DS_DESIGN.map((p) => p.lcId));
+
 const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1064, title: "K-Means (K-Means++)" },
   { dbId: 1050, title: "Lock Combination BFS (Bidirectional)" },
@@ -161,23 +179,53 @@ export default function QuickIndex() {
       </div>
 
       {section === "lc" && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {LC_PROBLEMS.map((p) => (
-            <button
-              key={p.dbId}
-              type="button"
-              onClick={() => {
-                setDrawerDbId(null);
-                setDrawerLcId(p.lcId);
-              }}
-              className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
-            >
-              <span className="text-xs text-gray-400 font-mono">
-                #{p.lcId}
+        <div className="space-y-6">
+          <details open className="group">
+            <summary className="cursor-pointer text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 select-none">
+              Stateful Data Structure Design
+              <span className="ml-2 text-xs font-normal text-gray-400">
+                ({STATEFUL_DS_DESIGN.length})
               </span>
-              <div className="mt-1 font-medium text-gray-800">{p.title}</div>
-            </button>
-          ))}
+            </summary>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-3">
+              {STATEFUL_DS_DESIGN.map((p) => (
+                <button
+                  key={p.lcId}
+                  type="button"
+                  onClick={() => {
+                    setDrawerDbId(null);
+                    setDrawerLcId(p.lcId);
+                  }}
+                  className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+                >
+                  <span className="text-xs text-gray-400 font-mono">
+                    #{p.lcId}
+                  </span>
+                  <div className="mt-1 font-medium text-gray-800">
+                    {p.title}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </details>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {LC_PROBLEMS.filter((p) => !STATEFUL_DS_LC_IDS.has(p.lcId)).map((p) => (
+              <button
+                key={p.dbId}
+                type="button"
+                onClick={() => {
+                  setDrawerDbId(null);
+                  setDrawerLcId(p.lcId);
+                }}
+                className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+              >
+                <span className="text-xs text-gray-400 font-mono">
+                  #{p.lcId}
+                </span>
+                <div className="mt-1 font-medium text-gray-800">{p.title}</div>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

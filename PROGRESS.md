@@ -395,3 +395,10 @@
 - **Observation (not in ACs, not fixed)**: Chinese prose in several modules uses `$` as a currency sigil (e.g., `$5K-$50K/月`, `$30K`). Because remark-math pairs consecutive unescaped `$`, two currency tokens on the same line can be mis-parsed as inline math. Out of scope for T-P2-171 (ACs target math blocks, not prose), but worth a future pass — candidate fix is escaping with `\$` in seed scripts.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-171 --status completed`
+
+## 2026-04-13 -- [T-P1-187] LC stateful-DS family column + 11-problem group
+- **What I did**: Added additive `problems.family` TEXT column (+ `ix_problems_family` index) via `migrate_add_problem_family.py`; inserted 3 missing LC rows (1146 SnapshotArray, 1845 SeatReservationManager, 1825 FindingMKAverage) and ran `backfill_lc_descriptions.py` to populate descriptions from leetcode.com GraphQL; populated `family='stateful_ds_design'` for all 11 target LC IDs; updated SQLAlchemy Problem model with the new column; added a collapsible "Stateful Data Structure Design" group in QuickIndex.tsx rendered above the ungrouped LC grid (deduped against LC_PROBLEMS by lcId).
+- **Deliverables**: `scripts/migrate_add_problem_family.py`, `src/backend/models/problem.py` (+family column), `src/frontend/src/pages/QuickIndex.tsx` (+STATEFUL_DS_DESIGN constant + collapsible group).
+- **Sanity check result**: `SELECT leetcode_id FROM problems WHERE family='stateful_ds_design' ORDER BY leetcode_id` returns exactly 11 rows: {146, 362, 432, 460, 703, 716, 895, 1146, 1244, 1825, 1845}. Descriptions for 1146/1825/1845 fetched successfully (1172/2241/1870 chars, source=leetcode.com). `npm run build` passes (617ms, no TS errors).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-187 --status completed`
