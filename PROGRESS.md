@@ -522,3 +522,10 @@
 - **Sanity check result**: `python -c "import json; json.load(open('docs/bq_behavioral_examples.json', encoding='utf-8'))"` -> JSON OK. No numbers fabricated.
 - **Status**: [PARTIAL] -- EX-02/11/13 complete. EX-25, EX-26, EX-27 (mentioned in task spec) do not exist in canonical files (IDs stop at EX-24 + EX-33). Flagged in the MD sweep header for user to disambiguate (same disposition as T-P1-387 EX-29/35/36 open questions).
 - **Request**: `task_db.py update T-P1-388 --status completed`; follow-up pass can apply the same ownership sharpening to EX-25/26/27 once user clarifies which canonical IDs those refer to.
+
+## 2026-04-13 -- [T-P1-389] BQ Tier-2 catch-all polish: EX-07 downstream metric placeholder
+- **What I did**: EX-07 (relevance dataset bias / self-fulfilling prophecy) Result previously ended on a process outcome with no downstream signal. Added a `[TODO: confirm downstream metric delta after dataset reformulation -- e.g., NDCG lift / relevance precision gain / abandonment-rate drop, with baseline quarter]` placeholder to both `docs/bq_improved_stories.md` and `docs/bq_behavioral_examples.json` so the two stay in sync. Added a T-P1-389 sweep header to the MD. Scanned the rest of the Tier-2 stories for gaps not already covered by T-P1-387 (metric sweep) or T-P1-388 (ownership sweep); no additional structural gaps found outside the already-tracked EX-29/35/36 and EX-25/26/27 open-ID questions.
+- **Deliverables**: docs/bq_improved_stories.md (EX-07 Result + T-P1-389 sweep header), docs/bq_behavioral_examples.json (EX-07 result mirrored)
+- **Sanity check result**: `python -c "import json; json.load(open('docs/bq_behavioral_examples.json', encoding='utf-8'))"` -> JSON OK. No numbers fabricated -- placeholder only.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-389 --status completed`

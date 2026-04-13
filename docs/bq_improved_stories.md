@@ -31,6 +31,10 @@ Swept Action/Result sections in EX-02, EX-11, and EX-13 (MD + JSON) to make owne
 
 Task spec also referenced EX-25, EX-26, EX-27 (independent research and build; defined AC and validated final choice; DRI / critical-path owner). No such IDs exist in either the MD or the JSON (canonical IDs stop at EX-24, plus EX-33). Same disposition as the T-P1-387 EX-29/35/36 questions: user to clarify which stories these numbers/claims belong to, then a follow-up pass can apply the ownership sharpening to those canonical IDs.
 
+### 2026-04-13 Tier-2 Catch-all Polish (T-P1-389)
+
+Remaining Tier-2 stories not picked up by the metric or ownership sweeps. **EX-07** (relevance dataset bias) Result previously ended on a process outcome ("redirected effort toward building an unbiased evaluation framework") with no downstream signal. Added a `[TODO: confirm downstream metric delta after dataset reformulation -- e.g., NDCG lift / relevance precision gain / abandonment-rate drop, with baseline quarter]` placeholder in MD + mirrored the same sentence into the JSON Result so the two stay in sync. Scan of the remaining stories flagged on 2026-04-13 found no additional Tier-2 structural gaps outside the EX-29/35/36 and EX-25/26/27 open-ID questions already tracked above.
+
 ---
 
 ## STORY 1: Search Diversity -- Intent Collapse (EX-01)
@@ -167,7 +171,7 @@ Task spec also referenced EX-25, EX-26, EX-27 (independent research and build; d
 - Demonstrated that XGBoost's unbiased fitting on the accepted dataset was nearly unbeatable -- but this had nothing to do with model quality; it was an artifact of the dataset itself
 - Through cross-functional alignment, advocated for fixing the problem at the source (dataset and problem formulation) rather than trying different models on flawed data
 
-**Result:** Successfully convinced stakeholders to shift focus from model optimization to **problem formulation correctness** -- the actual bottleneck. This prevented further wasted engineering cycles on a self-fulfilling evaluation loop and redirected effort toward building an unbiased evaluation framework.
+**Result:** Successfully convinced stakeholders to shift focus from model optimization to **problem formulation correctness** -- the actual bottleneck. This prevented further wasted engineering cycles on a self-fulfilling evaluation loop and redirected effort toward building an unbiased evaluation framework. After the unbiased dataset was adopted, downstream ranking experiments showed **[TODO: confirm downstream metric delta after dataset reformulation -- e.g., NDCG lift / relevance precision gain / abandonment-rate drop, with baseline quarter]**, validating that the evaluation fix (not a new model) was the real unlock.
 
 ---
 
