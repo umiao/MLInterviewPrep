@@ -3,8 +3,10 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import type { BehavioralThemeSummary } from "../types/behavioral";
+import type { FrameworkNode } from "../types/framework";
 import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 import ProblemDrawer from "../components/problems/ProblemDrawer";
+import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
 
 const LC_PROBLEMS: { dbId: number; lcId: number; title: string }[] = [
   { dbId: 93, lcId: 146, title: "LRU Cache" },
@@ -40,21 +42,62 @@ const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] =
 
 const ALL_KNOWN_SLUGS = new Set(CLUSTER_FAMILIES.flatMap((f) => f.theme_slugs));
 
-type SectionType = "lc" | "ml" | "bq";
+type KnowledgeTab = {
+  id: string;
+  label: string;
+  pillarPath: string;
+};
+
+const KNOWLEDGE_TABS: KnowledgeTab[] = [
+  { id: "stats", label: "Stats", pillarPath: "pillar7" },
+  { id: "llm", label: "LLM", pillarPath: "pillar6" },
+  { id: "ml_theory", label: "ML Theory", pillarPath: "pillar2" },
+  { id: "ml_system_design", label: "ML System Design", pillarPath: "pillar3" },
+  { id: "mlops", label: "MLOps", pillarPath: "pillar5" },
+  { id: "applied_ml", label: "Applied ML", pillarPath: "pillar4" },
+];
+
+const BASE_TABS = ["lc", "ml", "bq"] as const;
+const KNOWLEDGE_TAB_IDS = KNOWLEDGE_TABS.map((t) => t.id);
+const ALL_TAB_IDS: string[] = [...BASE_TABS, ...KNOWLEDGE_TAB_IDS];
+
+type SectionType = string;
+
+/** Collect all leaf descendants of a node. */
+function collectLeaves(node: FrameworkNode): FrameworkNode[] {
+  if (!node.children?.length) return [node];
+  return node.children.flatMap(collectLeaves);
+}
+
+/** Group leaves by their depth-1 category (immediate child of the pillar root). */
+function getGroupedLeaves(
+  pillar: FrameworkNode,
+): { category: string; leaves: FrameworkNode[] }[] {
+  if (!pillar.children?.length) return [];
+  const groups: { category: string; leaves: FrameworkNode[] }[] = [];
+  for (const cat of pillar.children) {
+    const leaves = collectLeaves(cat);
+    if (leaves.length > 0) {
+      groups.push({ category: cat.title, leaves });
+    }
+  }
+  return groups;
+}
 
 export default function QuickIndex() {
   useRouteScrollRestore();
   const [params, setParams] = useSearchParams();
   const raw = params.get("section");
-  const section: SectionType =
-    raw === "lc" || raw === "ml" || raw === "bq" ? raw : "lc";
+  const section: SectionType = raw && ALL_TAB_IDS.includes(raw) ? raw : "lc";
 
   const [drawerLcId, setDrawerLcId] = useState<number | null>(null);
   const [drawerDbId, setDrawerDbId] = useState<number | null>(null);
+  const [drawerNodeId, setDrawerNodeId] = useState<number | null>(null);
   const closeDrawer = () => {
     setDrawerLcId(null);
     setDrawerDbId(null);
   };
+  const closeNodeDrawer = () => setDrawerNodeId(null);
 
   const { data: themes } = useQuery({
     queryKey: ["behavioral-themes"],
@@ -64,29 +107,55 @@ export default function QuickIndex() {
     gcTime: 1000 * 60 * 60,
   });
 
+  const isKnowledgeTab = KNOWLEDGE_TAB_IDS.includes(section);
+
+  const { data: tree } = useQuery<FrameworkNode[]>({
+    queryKey: ["framework", "tree"],
+    queryFn: () => api.get<FrameworkNode[]>("/framework/tree"),
+    enabled: isKnowledgeTab,
+    staleTime: 60_000,
+  });
+
   const themeBySlug = new Map(
     (themes ?? []).map((t) => [t.slug, t]),
   );
 
   const otherThemes = (themes ?? []).filter((t) => !ALL_KNOWN_SLUGS.has(t.slug));
 
+  const activeTab = KNOWLEDGE_TABS.find((t) => t.id === section);
+  const pillarRoot = activeTab
+    ? (tree ?? []).find((n) => n.path === activeTab.pillarPath) ?? null
+    : null;
+  const groupedLeaves = pillarRoot ? getGroupedLeaves(pillarRoot) : [];
+
+  const baseTabBtn = (active: boolean) =>
+    "px-4 py-2 rounded-lg border text-sm font-medium transition-all " +
+    (active
+      ? "border-blue-500 bg-blue-50 text-blue-700"
+      : "border-gray-200 bg-white text-gray-600 hover:border-gray-300");
+
   return (
     <div className="p-6 h-full overflow-y-scroll">
       <h1 className="text-2xl font-bold mb-6">Quick Index</h1>
 
-      <div className="flex gap-2 mb-6">
-        {(["lc", "ml", "bq"] as const).map((s) => (
+      <div className="flex flex-wrap gap-2 mb-6">
+        {BASE_TABS.map((s) => (
           <button
             key={s}
             onClick={() => setParams({ section: s })}
-            className={
-              "px-4 py-2 rounded-lg border text-sm font-medium transition-all " +
-              (section === s
-                ? "border-blue-500 bg-blue-50 text-blue-700"
-                : "border-gray-200 bg-white text-gray-600 hover:border-gray-300")
-            }
+            className={baseTabBtn(section === s)}
           >
             {s === "lc" ? "LeetCode" : s === "ml" ? "ML Coding" : "Behavioral"}
+          </button>
+        ))}
+        <span className="mx-1 border-l border-gray-200" aria-hidden />
+        {KNOWLEDGE_TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setParams({ section: t.id })}
+            className={baseTabBtn(section === t.id)}
+          >
+            {t.label}
           </button>
         ))}
       </div>
@@ -166,7 +235,53 @@ export default function QuickIndex() {
         </div>
       )}
 
+      {isKnowledgeTab && (
+        <div className="space-y-8">
+          {!tree && (
+            <p className="text-gray-400 italic">Loading knowledge tree...</p>
+          )}
+          {tree && !pillarRoot && (
+            <p className="text-gray-400 italic">
+              Pillar not found in framework tree.
+            </p>
+          )}
+          {groupedLeaves.map((group) => (
+            <div key={group.category}>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                {group.category}
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {group.leaves.map((leaf) => (
+                  <button
+                    key={leaf.id}
+                    type="button"
+                    onClick={() => setDrawerNodeId(leaf.id)}
+                    className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="font-medium text-gray-800">
+                        {leaf.title}
+                      </div>
+                      <span className="text-xs text-gray-500 font-mono shrink-0">
+                        {leaf.progress_pct}%
+                      </span>
+                    </div>
+                    <div className="mt-2 h-1 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 rounded-full transition-all"
+                        style={{ width: `${leaf.progress_pct}%` }}
+                      />
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       <ProblemDrawer lcId={drawerLcId} dbId={drawerDbId} onClose={closeDrawer} />
+      <FrameworkNodeDrawer nodeId={drawerNodeId} onClose={closeNodeDrawer} />
     </div>
   );
 }
