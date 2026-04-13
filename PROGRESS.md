@@ -437,3 +437,10 @@
 - **Sanity check result**: File written UTF-8, structural check passed (title present, 13 ## sections).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-405 --status completed`
+
+## 2026-04-13 -- [T-P0-406] Pinterest SD: Notification Recommendation
+- **What I did**: Authored end-to-end ML SD doc for Pinterest notification reco at docs/pinterest/system_design_notification_reco.md. 12 sections covering: clarifying (scale/channel/goal/constraints), high-level pipeline (event+batch triggering -> CG -> rank -> delivery), triggering layer (event-driven vs scheduled, send/skip pCTR gate, budget/pacing via Lagrangian), content CG (two-tower for re-engagement, submodular selection for digest), 2-stage ranking (L1 GBDT + L2 MMoE with pOpen/pClick/pRepin/pDisable/pUnsub heads, long-term value head for counterfactual session uplift), delivery constraint layer (freq cap, quiet hours, channel fallback, dedup, GDPR), offline metrics (AUC/ECE/counterfactual), online metrics + A/B with WAU north star and 1% holdout, infra+capacity (35K QPS ranking), cold start, failure modes, 7 follow-ups, 45-min timing, and an appendix contrasting push vs pull products.
+- **Deliverables**: docs/pinterest/system_design_notification_reco.md (300 lines, 14.8KB, 14 H2 sections).
+- **Sanity check result**: File written UTF-8, 14 ## sections, no emoji, structural check passed.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-406 --status completed`

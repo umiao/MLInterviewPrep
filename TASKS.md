@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) delivery constraints (frequency cap, quiet hours, channel push/email/in-app), (5) offline metrics (open-rate AUC, long-term retention), (6) engagement-vs-annoyance tradeoffs. Chinese markdown docs/pinterest/system_design_notification_reco.md.
-
 #### T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation
 - **Priority**: P0
 - **Complexity**: L
@@ -246,6 +240,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 350 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation. Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) d
 - [x] **2026-04-12** -- T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches. After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index compan
 - [x] **2026-04-12** -- T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244. Three existing notes are MIX (ratios 0.11-0.29). Rewrite the English prose sections to Chinese, keep code blocks and tec
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
