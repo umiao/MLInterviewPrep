@@ -462,6 +462,23 @@ Every story below has been reviewed and improved per these criteria:
 
 ---
 
+## STORY 33: MoE Paradigm Shift -- Honest Negative Result, 200M+ Downstream (EX-33)
+
+**Situation:** In the eBay search org, the dominant paradigm was pairwise distributed ranking -- each item scored independently and then sorted. The industry had moved toward whole-page optimization and reranking, and several senior ICs, my manager, and I had been flagging the gap for several quarters. The org agreed at the abstract level but had no concrete path forward.
+
+**Risk if not addressed:** A ranker-centric paradigm cannot reconcile goals that are structurally orthogonal to conversion (diversity, abandonment, exploration). Without an empirical test the org could not reject, the paradigm would persist -- and every subsequent ranker upgrade would inherit the same blind spot.
+
+> **Simple analogy:** You suspect the entire blueprint of a factory is wrong, but everyone keeps asking for a better machine on the same assembly line. The only way to prove the blueprint is the problem is to build the most sophisticated machine possible *on that exact line* -- and let its honest failure show that the line itself has to change.
+
+**Action:**
+- **Framing at project launch -- "start test", not "test and launch".** Leadership assigned me the high-visibility MoE + neural-ranking project (~80 GPU nodes, nearly all org-wide headroom). I labeled the scope as "start test" against org convention. That gave up my carry-over protection on purpose: a wrapped success cannot convince anyone, and I wanted the result to be credible either way.
+- **Mid-execution realization.** Adding an expert for abandonment/exploration, I saw it co-activate with the conversion expert in opposite directions -- structural, not a training-rounds problem. A second finding: by launch criteria (MRR up, revenue neutral) the expert was launchable, yet homogeneity got worse. That made me question MRR as a self-fulfilling prophecy -- training objective and metric shared the same assumptions.
+- **Converting failure into a reframe proposal.** I wrote a proposal arguing: (a) the ranker architecture cannot carry goals structurally orthogonal to conversion; (b) the metric system was masking it; (c) the right move was to make the tradeoff explicit as an **allocation policy**, letting the model work inside a defined frame. I drove it through the review cycle personally.
+
+**Result:** The MoE direction was **officially deprecated** and did not ship -- a credibly honest negative result. But the downstream Allocation direction that emerged from it later shipped **200M+ in annualized GMB**, and three org-level follow-throughs locked in the reframe: (1) the team was **renamed** from "ranking modeling" -> "policy learning" -> **"Allocation team"**; (2) allocation policy became the team's new main line of work, with multiple downstream initiatives (authenticated listings, C2C new listings, diversity framework reuse) shipping under it; (3) leadership's default planning question shifted from "how do we train a better ranker" to "what user problem are we solving and is a ranker the right tool for it". **That mental-model change is irreversible, and the 200M GMB is its downstream receipt.**
+
+---
+
 ## EXISTING ANSWERS (COL-1 through COL-4) -- Improved
 
 ### COL-1: Disagreeing with a Teammate on Brand Recall Implementation

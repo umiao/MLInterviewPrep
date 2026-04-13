@@ -409,3 +409,10 @@
 - **Sanity check result**: JSON parses; EX-24 row now has action=842 chars, result=621 chars. Verified "2-3 weeks", "top-10", and "finite resource" all present in the updated JSON record. Markdown story leads Result with avoided-cost figure.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-385 --status completed`
+
+## 2026-04-13 -- [T-P0-386] EX-33 MoE Paradigm Shift: lead Result with 200M GMB downstream
+- **What I did**: Reworked DB `behavioral_examples` row example_id=EX-33 (DB-only story, no JSON match) per T-P0-386. Result now leads with "200M+ in annualized GMB" as the downstream receipt of the paradigm reframe, while keeping the honest-negative-result framing (MoE deprecated, did not ship). Added concrete downstream initiatives list (authenticated listings, C2C new listings, diversity framework reuse) as adoption evidence. Sharpened Action (1) from "my manager and I labeled" -> "I labeled (my manager signed off, but the framing was mine to propose and own)" to remove "we" ambiguity and show ownership. Also added STORY 33 section to docs/bq_improved_stories.md before the COL-1..COL-4 block.
+- **Deliverables**: data/mle_prep.db (EX-33 action + result rewritten), docs/bq_improved_stories.md (+STORY 33 section), scripts/_rework_ex33_moe_paradigm.py.
+- **Sanity check result**: DB update touched exactly 1 row; action=2293 chars, result=988 chars. Verified "200M" appears at position 83 in Result (lead sentence). STORY 33 inserted before "## EXISTING ANSWERS" anchor (idempotent guard included).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-386 --status completed`

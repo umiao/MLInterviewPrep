@@ -9,13 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Flags C+D. Target: DB `behavioral_examples` row example_id=EX-33 "MoE -> Allocation Paradigm Shift - Org-Level Reframe via Honest Negative Result" (NOT in JSON file -- DB-only story populated via scripts/_populate_hash_and_moe_examples.py on 2026-04-11). User confirmed story exists (keyword "MoE - failure").
-Key discovery during audit: the Result field ALREADY contains "200M annualized GMB from the subsequent allocation policy work" but buries it behind the org-rename narrative. Rework brief: (1) Lead Result with the 200M GMB number prominently (it is the business metric the audit claimed was missing); (2) Add adoption count if recoverable (how many Allocation-team shipped products post-rename?); (3) Keep the honest-negative-result framing (MoE deprecated) but let the follow-through win close the arc. Also polish Situation/Action if any "we" ambiguity. Edit DB row only (no JSON match needed). If a matching entry should also live in docs/bq_improved_stories.md, add a STORY 33 section.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories
@@ -126,6 +119,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win. Flags C+D. Target: DB `behavioral_examples` row example_id=EX-33 "MoE -> Allocation Paradigm Shift - Org-Level Reframe v
 - [x] **2026-04-12** -- T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost. Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-0
 - [x] **2026-04-12** -- T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric. Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-
 - [x] **2026-04-12** -- T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius. Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches
