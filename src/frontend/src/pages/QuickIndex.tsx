@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import type { BehavioralThemeSummary } from "../types/behavioral";
 import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
+import ProblemDrawer from "../components/problems/ProblemDrawer";
 
 const LC_PROBLEMS: { dbId: number; lcId: number; title: string }[] = [
   { dbId: 93, lcId: 146, title: "LRU Cache" },
@@ -47,6 +49,13 @@ export default function QuickIndex() {
   const section: SectionType =
     raw === "lc" || raw === "ml" || raw === "bq" ? raw : "lc";
 
+  const [drawerLcId, setDrawerLcId] = useState<number | null>(null);
+  const [drawerDbId, setDrawerDbId] = useState<number | null>(null);
+  const closeDrawer = () => {
+    setDrawerLcId(null);
+    setDrawerDbId(null);
+  };
+
   const { data: themes } = useQuery({
     queryKey: ["behavioral-themes"],
     queryFn: () => api.get<BehavioralThemeSummary[]>("/behavioral/themes"),
@@ -85,16 +94,20 @@ export default function QuickIndex() {
       {section === "lc" && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {LC_PROBLEMS.map((p) => (
-            <Link
+            <button
               key={p.dbId}
-              to={`/problems/${p.dbId}`}
-              className="block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+              type="button"
+              onClick={() => {
+                setDrawerDbId(null);
+                setDrawerLcId(p.lcId);
+              }}
+              className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
             >
               <span className="text-xs text-gray-400 font-mono">
                 #{p.lcId}
               </span>
               <div className="mt-1 font-medium text-gray-800">{p.title}</div>
-            </Link>
+            </button>
           ))}
         </div>
       )}
@@ -102,14 +115,18 @@ export default function QuickIndex() {
       {section === "ml" && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {ML_PROBLEMS.map((p) => (
-            <Link
+            <button
               key={p.dbId}
-              to={`/problems/${p.dbId}`}
-              className="block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+              type="button"
+              onClick={() => {
+                setDrawerLcId(null);
+                setDrawerDbId(p.dbId);
+              }}
+              className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
             >
               <span className="text-xs text-gray-400 font-mono">Custom</span>
               <div className="mt-1 font-medium text-gray-800">{p.title}</div>
-            </Link>
+            </button>
           ))}
         </div>
       )}
@@ -148,6 +165,8 @@ export default function QuickIndex() {
           )}
         </div>
       )}
+
+      <ProblemDrawer lcId={drawerLcId} dbId={drawerDbId} onClose={closeDrawer} />
     </div>
   );
 }
