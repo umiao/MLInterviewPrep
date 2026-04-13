@@ -381,3 +381,10 @@
 - **Sanity check result**: JSON parses cleanly (json.load). Result line leads with the concrete "6 interns" metric. All Action bullets start with "I".
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-381 --status completed`
+
+## 2026-04-13 -- [T-P0-382] EX-15/Story 15 Model Deprecation Incident: own the gap personally
+- **What I did**: Reworked STORY 15 / EX-15 Model Deprecation Incident in bq_improved_stories.md and bq_behavioral_examples.json per user-provided facts from 2026-04-13 Discord. Replaced the vague "one week on redeployment" framing with concrete "2-day fix turnaround, zero user-facing production impact, cross-team trust fully restored" metric. Added explicit self-ownership of the gap ("I should have checked downstream consumer Slack channels before deprecating") instead of the prior defensive-then-constructive arc. Added the post-mortem attribution norm as an explicit deliverable of the incident response. (Task title labels this as "EX-19" but the Model Deprecation content lives at EX-15/STORY 15 in the current files.)
+- **Deliverables**: docs/bq_improved_stories.md (STORY 15 Action + Result rewrite), docs/bq_behavioral_examples.json (EX-15 action + result).
+- **Sanity check result**: JSON parses cleanly (json.load). Result leads with the "2-day / zero user-facing impact / cross-team trust restored" triple. Action opens with personal ownership ("I should have checked downstream consumer Slack channels").
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-382 --status completed`

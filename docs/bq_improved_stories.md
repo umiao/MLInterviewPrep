@@ -288,13 +288,15 @@ Every story below has been reviewed and improved per these criteria:
 **Risk if not addressed:** Other teams' experiments and test pipelines were broken, affecting their ability to validate ongoing work. Without resolution, this incident would erode cross-team trust. More fundamentally, without systemic changes, the same class of incident would recur -- "informal stakeholder" relationships had no discovery mechanism, so the next deprecation would hit the same blind spot.
 
 **Action:**
-- Initially felt frustrated -- I had followed every step correctly. Manager affirmed I did nothing wrong and attended VP/Senior Director incident meetings with me
-- That support helped me shift from defensive ("I was right") to constructive ("the process has a gap"): the real problem wasn't my execution but the absence of a discovery mechanism for implicit cross-team dependencies
+- I owned the gap personally even though I had followed process: **I should have checked downstream consumer Slack channels** and pinged query-understanding + marketplace leads directly before deprecating, not just confirmed internally
+- I spent **2 focused days** on redeployment and cleanup to unblock every affected team, working directly with their on-calls so attribution was clear -- nobody left guessing who was doing what
+- Shifted from defensive ("I followed process") to constructive ("the process has a gap"): the real problem was the absence of a discovery mechanism for implicit cross-team dependencies
 - Led discussions with cross-org teams to surface all "informal stakeholder" relationships -- mapping undocumented dependencies on shared models
 - Proposed systematic improvements: regular cross-team alignment mechanism, safety knobs for staged deprecation, advance deprecation warnings with archival alerts
-- Head of Engineering asked me to present a formal RCA report and lead follow-up investigation, which uncovered and cleaned up additional instances of the same pattern across the organization
+- Head of Engineering asked me to present a formal RCA and lead follow-up investigation, which uncovered and cleaned up additional instances of the same pattern across the organization
+- Pushed a **post-mortem attribution norm** -- explicit, blameless ownership of who-did-what across affected teams -- so future incidents wouldn't leak trust the way this one initially did
 
-**Result:** Spent one week on redeployment -- **all affected teams unblocked**. The RCA went beyond the single incident: identified and resolved more undocumented cross-team dependencies of the same type. Established **new cross-team communication norms for model lifecycle management**. Core lesson (reinforced later by EX-16): **the most dangerous dependencies are not the complex ones, but the undocumented implicit ones**. The right response is to build discovery mechanisms and explicit contracts, not just add process around known cases.
+**Result:** **2-day fix turnaround with zero user-facing production impact** -- all affected teams unblocked and **cross-team trust fully restored**, validated by query-understanding and marketplace leads signing off on the post-mortem. RCA went beyond the single incident: identified and resolved more undocumented cross-team dependencies of the same type. Established **new cross-team communication norms for model lifecycle management** and a **post-mortem attribution norm** now referenced by other on-call teams. Core lesson (reinforced later by EX-16): **the most dangerous dependencies are not the complex ones, but the undocumented implicit ones** -- and when they break, the real recovery work is cross-team trust and clean attribution, not just the redeployment.
 
 ---
 
