@@ -451,3 +451,17 @@
 - **Sanity check result**: File written UTF-8, 14 ## sections, zero emoji/symbol chars, structural check passed.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-407 --status completed`
+
+## 2026-04-13 -- BQ rework batch 1 complete (11 tasks) + Pinterest expansion launched (23 remaining)
+- **What I did**: First autonomous batch completed 11 tasks (orchestrator ran into Pinterest P0s after BQ P0s since same priority): T-P0-380..386 (all 7 BQ P0 rework) + T-P0-397 (Escape Room) + T-P0-405/406/407 (Pinterest SD Pins Search/Notification/Pin Ranking). Commits 5ae75cf through 7b7d3c2. session_state.json was correctly maintained this time (all_done=false, last_task=T-P0-407) so no reset needed. Launched second autonomous batch for remaining 23 tasks: 3 BQ P1 sweeps (387/388/389), 1 Pinterest P0 (410 Catalog bulk update), 19 Pinterest P1/P2 (390-413 minus those already done). Background id: bgjp3psy4. T-P2-413 integration task gated on 11 deps, will run last.
+- **Deliverables**: 11 commits in batch 1; batch 2 running via background PowerShell; task_db reflects batch 1 completions
+- **Sanity check result**: logs/autonomous.log shows batch 1 exited cleanly with "Finished after 10 session(s)" (one of the 10 sessions accepted 2 tasks since both were same priority and quickly completable); session_state.json updated correctly this time indicating the fixed state from earlier reset.
+- **Status**: [PARTIAL] batch 2 in flight; will report when completed.
+- **Request**: No direct task_db update; child sessions handle their own status transitions.
+
+## 2026-04-13 -- [T-P0-410] Pinterest SD: Catalog bulk update (500M records, S3+async)
+- **What I did**: Authored end-to-end infra SD doc for catalog bulk update at docs/pinterest/system_design_catalog_bulk_update.md. 14 H2 sections covering clarifying (scale/freq/sources/downstream/consistency), high-level arch (S3 raw -> coordinator -> Spark partition workers -> Kafka single-topic -> 7 consumer groups + DLQ), ingestion (why S3 over sync API / quick-async / Kafka-direct, manifest protocol with _SUCCESS/sha256), partitioning (range vs hash vs consistent-hash, hash-mod-500 with 1M rows/part aligned to 1GB S3 parts, why Kafka needs consistent-hash-by-catalog_id for FIFO), retry (partition-level with Airflow meta DB checkpoint, at-least-once + version-based idempotency, 3-class DLQ routing), fan-out (single topic with 200 partitions replication=3, backpressure at producer/broker/consumer layers, Avro schema registry BACKWARD compat), monitoring (4 metric categories with thresholds + RPO=1d/RTO=2h), 4 key tradeoffs (sync/async, exactly-once/at-least-once, partition strategy, single-vs-per-consumer topic), 8 failure modes with mitigations, capacity planning (~$3.8K/mo), 7 follow-ups (delta upsert / multi-region / GDPR / schema upgrade / point-in-time / big seller / slow consumer), 45-min timing cheat sheet, and two appendices (three API styles, key numbers).
+- **Deliverables**: docs/pinterest/system_design_catalog_bulk_update.md (422 lines, 14 H2 sections)
+- **Sanity check result**: File UTF-8, 14 H2 sections, zero emoji chars (checked 0x2600-0x27BF and 0x1F000-0x1FFFF ranges), structural check passed
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-410 --status completed`

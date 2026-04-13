@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async)
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume; single sync/quick-async), (2) partitioning (range, hash, consistent-hash), (3) retry for failed partitions (at-least-once + idempotency, DLQ, checkpoint), (4) fan-out (Kafka, backpressure, flow control), (5) monitoring (lag, error-rate, RPO/RTO), (6) tradeoffs: sync-vs-async, exactly-once-vs-at-least-once. Chinese markdown docs/pinterest/system_design_catalog_bulk_update.md.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories
@@ -234,6 +228,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 350 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async). Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume;
 - [x] **2026-04-13** -- T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation. Pinterest SD 2025-11. Pin ranking for home/topic feed. (1) two-stage retrieval+rerank, (2) features (pin/user/context/gr
 - [x] **2026-04-13** -- T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation. Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) d
 - [x] **2026-04-12** -- T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches. After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index compan
