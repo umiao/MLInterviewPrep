@@ -402,3 +402,10 @@
 - **Sanity check result**: `SELECT leetcode_id FROM problems WHERE family='stateful_ds_design' ORDER BY leetcode_id` returns exactly 11 rows: {146, 362, 432, 460, 703, 716, 895, 1146, 1244, 1825, 1845}. Descriptions for 1146/1825/1845 fetched successfully (1172/2241/1870 chars, source=leetcode.com). `npm run build` passes (617ms, no TS errors).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-187 --status completed`
+
+## 2026-04-13 -- [T-P1-188] A/B test sample-size study note (pillar7 Probability & Statistics)
+- **What I did**: Created new framework leaf node `pillar7.probability_statistics.ab_test_sample_size` (id=193, under parent id=38) and populated its description via `StudyNoteBuilder` + `FormulaBlock` — no raw f-strings. Content covers: two-proportion z-test formula derivation (both unpooled and pooled variance forms), continuous-metric t-test analog, two worked examples (2%->2.2% conversion lift = 80.6k per arm; revenue with sigma=12 = 56.4k per arm), MDE sensitivity table (1%-50% relative MDE spanning 7.9M -> 3.4k n), decision table mapping scenarios to methods, 5 practical gotchas (multiple testing Bonferroni/BH, SRM, novelty/primacy, peeking + mSPRT/Group Sequential, CUPED variance reduction), 5 interview Q&A, and a self-check checklist.
+- **Deliverables**: `scripts/seed_ab_test_sample_size.py` (idempotent upsert). DB row `framework_nodes.id=193`, description length 7615 chars.
+- **Sanity check result**: Seed script runs clean, StudyNoteBuilder validate() returns 0 warnings (no orphan `$`). `npm run build` passes in 610ms (no TS/Vite errors). Chinese prose with English formulas/method names per feedback_lc_notes_chinese. 5 display-math blocks (>=3 required), 5 Q&A (>=4 required), 2 tables (sensitivity + decision).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-188 --status completed`
