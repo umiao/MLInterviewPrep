@@ -289,3 +289,10 @@
 - **Sanity check result**: Script inserted id=1075; ran the embedded smoke test end-to-end (tree + multi-parent DAG, 9 assertions) -- all pass. Verified row present via SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-400 --status completed
+
+## 2026-04-13 -- [T-P1-401] Pinterest Pin Connectivity custom problem
+- **What I did**: Added Pinterest coding 2025-11 custom problem "Pin Connectivity on a Pinterest Relationship Graph" via scripts/_add_pinterest_pin_connectivity.py. Canonical Union-Find (path compression + union-by-rank) solution, BFS/DFS alternative, follow-ups for component size / counts, edge removal (offline reverse + Holm dynamic connectivity), shortest-hop distance, and sharded-scale design. English + Chinese notes.
+- **Deliverables**: scripts/_add_pinterest_pin_connectivity.py (new); data/mle_prep.db row id=1076.
+- **Sanity check result**: Script inserted id=1076; embedded smoke test (9 assertions over pins/boards/users with tagged keys, multi-edge, duplicate, self-edge, unseen nodes) all pass. Verified row via SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-401 --status completed
