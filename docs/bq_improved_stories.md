@@ -455,10 +455,10 @@ Every story below has been reviewed and improved per these criteria:
 **Action:**
 - Used conclusion-first communication: told the VP three things upfront: (1) we're overestimating the achievable combined effect, (2) we're underestimating the impact on default ranking, (3) this isn't an execution problem -- it's a structural one
 - Explained in VP-accessible terms: each policy performs well independently because it monopolizes top positions, but when launched simultaneously they compete for the same positions -- no free lunch
-- Framed it as an allocation problem: ranking is fundamentally about distributing limited positions, not adding independent improvements
-- Recommended limiting scope to highest-ROI policies first
+- **Brought a concrete deliverable I had been iterating on: a top-10 and top-30 slot-distribution analysis**, framed as "you can bias toward any ONE of the priorities you want, but not all simultaneously -- slots are a finite resource". This turned an abstract argument into a decision aid the VP could act on in the meeting.
+- Recommended limiting scope to the highest-ROI policies first and sequencing the rest
 
-**Result:** VP **accepted the analysis** and adjusted project direction. The allocation framing became the **team's mental model** for thinking about ranking strategy going forward -- a lasting impact beyond the immediate project decision.
+**Result:** **Avoided an estimated 2-3 weeks of debugging + reverse-test data collection** that a combo-launch would have burned for an outcome already predictable from the slot-distribution analysis. VP **adopted the slot-as-finite-resource framing** and adjusted project direction on the spot. The allocation framing became the **team-wide mental model** for ranking strategy going forward -- it spread because it combined near-real-time deployment capability, authenticity as a root-cause diagnosis (not a post-hoc narrative), long-term business value, and a clean fit with the broader C2C strategy, not just because the VP endorsed it once.
 
 ---
 

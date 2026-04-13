@@ -402,3 +402,10 @@
 - **Sanity check result**: JSON parses cleanly (json.load). DB row updated (action 722 chars, result 844 chars). All three surfaces now say "delivered analysis that drove leaders to converge" (active voice) and name the freed-capacity downstream wins (contextualized embedding + larger model).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-384 --status completed`
+
+## 2026-04-13 -- [T-P0-385] EX-24 Allocation-to-VP: add avoided-cost metric + top-10/30 deliverable
+- **What I did**: Reworked STORY 24 / EX-24 "Explaining Allocation Problem to VP" across docs/bq_improved_stories.md, docs/bq_behavioral_examples.json, and data/mle_prep.db (behavioral_examples row, example_id=EX-24) per 2026-04-13 Discord facts (Q4/Q5/Q6). Added a concrete tangible deliverable in Action: top-10 and top-30 slot-distribution analysis framed as "bias toward ONE priority -- slots are a finite resource". Led the Result with the avoided-cost estimate (~2-3 weeks of debugging + reverse-test collection saved). Replaced passive "VP accepted" with "VP adopted the slot-as-finite-resource framing" + follow-through reasons (near-real-time deployment, authenticity, long-term business value, C2C-strategy fit).
+- **Deliverables**: docs/bq_improved_stories.md (STORY 24 Action + Result), docs/bq_behavioral_examples.json (EX-24 action/result/evidence_quotes), data/mle_prep.db (behavioral_examples row for EX-24), scripts/_update_ex24_allocation_vp.py.
+- **Sanity check result**: JSON parses; EX-24 row now has action=842 chars, result=621 chars. Verified "2-3 weeks", "top-10", and "finite resource" all present in the updated JSON record. Markdown story leads Result with avoided-cost figure.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-385 --status completed`

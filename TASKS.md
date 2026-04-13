@@ -9,16 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-04-13 Discord):
-(Q4 avoided cost) combo-launch would have burned at least 2-3 weeks on debugging + reverse-test collection for an outcome already known;
-(Q5 follow-through) allocation framing became broadly adopted because of its near-real-time deployment capability + authenticity + long-term business value + fit with C2C strategy; team-wide mental model shift;
-(Q6 tangible deliverable) I brought a concrete analysis I had been iterating on: the top-10 and top-30 slot distribution, framed as "you can bias toward any ONE of the priorities you want but not all simultaneously -- slots are a finite resource".
-Rewrite Result to lead with the avoided-cost estimate and the top-10/top-30 analysis as the active deliverable. Replace "VP accepted" with "VP adopted the slot-as-finite-resource framing; allocation became team mental model for ranking strategy". Edit JSON (EX-24) + markdown (STORY 24) + DB row (example_id=EX-24).
-
 #### T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win
 - **Priority**: P0
 - **Complexity**: M
@@ -136,6 +126,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost. Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-0
 - [x] **2026-04-12** -- T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric. Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-
 - [x] **2026-04-12** -- T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius. Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches
 - [x] **2026-04-12** -- T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally. Flags C+D. Use user-provided facts (2026-04-13 Discord): This was NOT a user-facing prod-model impact -- but it took 2 f
