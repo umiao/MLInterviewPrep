@@ -395,3 +395,10 @@
 - **Sanity check result**: JSON parses cleanly (json.load). Result leads with "6-hour deployment delay blocking 2 dependent launches; presented RCA to Head of Engineering twice; drove follow-up cleanup...". Action explicitly separates my scope from backend team's rollback mechanics.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-383 --status completed`
+
+## 2026-04-13 -- [T-P0-384] EX-18 Pushback on Scope: add delivery-impact metric
+- **What I did**: Reworked STORY 18 / EX-18 "Pushing Back on Unreasonable Scope" across docs/bq_improved_stories.md, docs/bq_behavioral_examples.json, and the behavioral_examples DB row (example_id=EX-18) per 2026-04-13 Discord facts. Replaced passive "leadership accepted" framing with active "I delivered a pros/cons + resource/timeline analysis that let leaders converge". Added concrete delivery-impact metric: freed capacity was redeployed to ship a new contextualized embedding feature and a larger ranking model (moved business metrics) rather than a speculative multi-stack infrastructure bet. Quantified burnout (~1 month intermittent 10h/day). Closed with first-quarter-after-rotation self-reflection line about over-indexing on proving I could deliver.
+- **Deliverables**: docs/bq_improved_stories.md (STORY 18 Action + Result + new Self-reflection paragraph), docs/bq_behavioral_examples.json (EX-18 action + result), data/mle_prep.db (behavioral_examples.action + result for example_id=EX-18).
+- **Sanity check result**: JSON parses cleanly (json.load). DB row updated (action 722 chars, result 844 chars). All three surfaces now say "delivered analysis that drove leaders to converge" (active voice) and name the freed-capacity downstream wins (contextualized embedding + larger model).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-384 --status completed`

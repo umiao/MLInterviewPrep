@@ -9,16 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-04-13 Discord):
-(Q1 burnout duration) Sustained 1 month, intermittently 10h/day;
-(Q2 eng-time post-descope) freed time shipped new contextualized embedding + larger model work; avoided pulling the team in an opposite-direction speculative tech investment;
-(Q3 self-reflection) this was my first quarter after rotating into the ranking team - still learning team/stack/business context; wanted to overstretch myself to prove I could deliver.
-Rewrite to lead with these specifics. Replace "leadership accepted" passive framing with active "I delivered pros/cons analysis that let leaders converge". Close with the self-reflection line. Edit docs/bq_behavioral_examples.json (EX-18) + docs/bq_improved_stories.md (STORY 18) + behavioral_examples DB row (example_id=EX-18).
-
 #### T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost
 - **Priority**: P0
 - **Complexity**: S
@@ -146,6 +136,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric. Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-
 - [x] **2026-04-12** -- T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius. Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches
 - [x] **2026-04-12** -- T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally. Flags C+D. Use user-provided facts (2026-04-13 Discord): This was NOT a user-facing prod-model impact -- but it took 2 f
 - [x] **2026-04-12** -- T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric. Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production ch

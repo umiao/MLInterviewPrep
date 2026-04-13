@@ -344,12 +344,14 @@ Every story below has been reviewed and improved per these criteria:
 > **Simple analogy:** Imagine your boss asks you to simultaneously test-drive a Toyota, a BMW, and a Tesla, write detailed comparison reports on each, AND continue doing your regular job. The real problem isn't that you're not working hard enough -- it's that your bosses can't agree on which car to buy, and they're using your labor as a substitute for making a decision.
 
 **Action:**
-- Recognized this was fundamentally a multi-manager "route dispute" -- each leader preferred a different tech stack and couldn't convince the other
-- Proactively discussed with manager and reached alignment on the real issue: expecting one engineer to resolve a leadership alignment problem through exhaustive exploration was unreasonable
-- Shifted approach: instead of trying to complete all explorations, provided analysis of pros/cons, required resources, and realistic timelines for each path -- let leaders make the decision with full information
-- Explicitly corrected the director's expectation of "executable migration plan for next quarter"
+- Recognized this was fundamentally a multi-manager "route dispute" -- each leader preferred a different tech stack and couldn't convince the other, and no amount of solo exploration would resolve that
+- Proactively aligned with manager that expecting one engineer to resolve a leadership-alignment problem via exhaustive exploration was unreasonable
+- Shifted approach: **I delivered a pros/cons + resource/timeline analysis across Ray, Google/AWS providers, and K8s -- structured so leaders could converge on a single decision, instead of me executing all three paths in parallel**
+- Explicitly re-set the director's expectation from "executable migration plan for next quarter" to "decision-grade analysis this quarter"
 
-**Result:** Leadership **accepted the analysis** and deprioritized distributed training, removing it from the next quarter's roadmap. This freed me to focus on the business projects that actually needed attention. The analysis also documented why distributed training isn't always better -- especially for tree-based models where parallelization bottlenecks are well-known and no widely-adopted solutions exist.
+**Result:** The analysis **drove leadership to converge** and remove distributed training from the next quarter's roadmap. **Freed engineering capacity was redeployed to ship a new contextualized embedding feature and a larger ranking model** -- work that directly moved the ranking team's business metrics, instead of burning the quarter on a speculative multi-stack infrastructure bet. Before the re-scope I had sustained **~1 month of intermittent 10h/day work**; after, the roadmap fit a single engineer's realistic capacity.
+
+**Self-reflection:** Part of why I let scope grow this far was that this was my **first quarter after rotating into the ranking team** -- still learning the stack and business context, I over-indexed on proving I could deliver and under-indexed on pushing back early. I now flag scope mismatches at planning time rather than absorbing them.
 
 ---
 
