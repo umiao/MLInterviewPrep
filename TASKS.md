@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirrors? coverage? cycle?). Research variants; write solution + Chinese notes as non-LC entry.
-
 #### T-P1-399: [Pinterest/custom] Prefix-match first-word-index
 - **Priority**: P1
 - **Complexity**: S
@@ -174,6 +168,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation. Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirro
 - [x] **2026-04-13** -- T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II. New Pinterest problem (harder variant of 1564, enter from both ends). Chinese notes: two-pointer shortest-interior-heigh
 - [x] **2026-04-13** -- T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I. New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight
 - [x] **2026-04-13** -- T-P1-393: [Pinterest/LC] Add + notes: LC 1526 Min Increments on Subarrays. New Pinterest problem. Diff-array + greedy sign-change pattern. Chinese notes explaining why counting positive deltas is

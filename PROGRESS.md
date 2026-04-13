@@ -529,3 +529,10 @@
 - **Sanity check result**: `python -c "import json; json.load(open('docs/bq_behavioral_examples.json', encoding='utf-8'))"` -> JSON OK. No numbers fabricated -- placeholder only.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-389 --status completed`
+
+## 2026-04-13 -- [T-P1-398] Pinterest Lighthouse 2D light-propagation custom problem
+- **What I did**: Picked the ray-tracing variant (beam + mirrors `/` `\` + splitters `|` `-`, akin to AoC 2023 Day 16) as the canonical interpretation of the 2025-11 dump entry. Wrote an idempotent seeder `scripts/_add_pinterest_lighthouse.py` that inserts a non-LC problem into `data/mle_prep.db` with Python implementation, complexity analysis, English + Chinese notes, mirror-transform formulas, a "variant map" so an interviewer's alternate phrasing (radius coverage / cycle detection / multi-lighthouse overlay) can be remapped onto the same file, and three verified smoke tests.
+- **Deliverables**: scripts/_add_pinterest_lighthouse.py (new), scripts/_smoke_lighthouse.py (new, standalone BFS verifier), data/mle_prep.db (new row id=1071, title "Lighthouse 2D Light Propagation").
+- **Sanity check result**: `python scripts/_smoke_lighthouse.py` -> OK all 3 smoke tests passed (straight beam, `/` reflection, `|` split). `python scripts/_add_pinterest_lighthouse.py` -> `[INSERT] id=1071`. Self-test in the notes was cross-validated against the live BFS before committing.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-398 --status completed`
