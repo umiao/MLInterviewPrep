@@ -41,12 +41,6 @@
 - **Depends on**: None
 - **Description**: Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit-chat), (3) retrieval-augmented pin recommendation, (4) grounding (pins match intent), (5) safety/moderation, (6) evaluation (relevance + conversation quality). Chinese markdown docs/pinterest/system_design_chatbot_pins.md.
 
-#### T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not responsible, (4) negative feedback received, (5) working with someone missing deadlines. Create docs/pinterest/bq_question_map.md mapping each Q to 2-3 best-fit EX-XX stories with 1-sentence angle each. Reference post-rework stories. Chinese.
-
 ### P2 -- Nice to Have
 
 #### T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间
@@ -144,6 +138,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons
 - [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 
 - [x] **2026-04-13** -- T-P1-403: [Pinterest/custom] Round string s by precision p. Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->
 - [x] **2026-04-13** -- T-P1-402: [Pinterest/custom] round() from scratch (string input). Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.

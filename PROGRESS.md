@@ -275,3 +275,10 @@
 - **Sanity check result**: First run -> `[UPDATE] id=148 notes 2167 -> 3403 chars`; second run -> `[SKIP] addendum already present`. Verified appended content via UTF-8 stdout dump (last 800 chars render correctly, tables and code fences intact).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-404 --status completed`
+
+## 2026-04-13 -- [T-P1-412] Pinterest BQ question -> story map
+- **What I did**: Created docs/pinterest/bq_question_map.md mapping the 5 Pinterest 2025-11 BQ questions (end-to-end own, requirement origin, stepping ahead, negative feedback, teammate missing deadlines) to 2-3 best-fit post-rework EX-XX stories each with a one-sentence angle. Chinese. References EX IDs in docs/bq_behavioral_examples.json.
+- **Deliverables**: docs/pinterest/bq_question_map.md (new, ~50 lines, 5 mapping tables + usage notes).
+- **Sanity check result**: Verified all 12 referenced EX IDs exist in docs/bq_behavioral_examples.json; each question maps to 2-3 distinct stories; avoided over-reuse (EX-01 only primary in Q2, backup in Q3; EX-15 backup in both Q3 and Q5 with distinct angles, flagged in usage notes).
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-412 --status completed (already done)
