@@ -23,9 +23,10 @@ from urllib.request import Request, urlopen
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
 GRAPHQL_URL = "https://leetcode.com/graphql/"
-LEETCODE_CA_URL = "https://leetcode.ca/all/{}.html"
+LEETCODE_CA_SITEMAP = "https://leetcode.ca/sitemap.xml"
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 QUERY = "query q($s: String!){question(titleSlug: $s){content}}"
+_CA_URL_CACHE: dict[int, str] = {}
 
 
 class HTMLToText(HTMLParser):
@@ -139,15 +140,41 @@ def fetch_graphql(slug: str) -> str | None:
     return text if len(text) >= 40 else None
 
 
+def _load_ca_sitemap() -> dict[int, str]:
+    """Parse leetcode.ca sitemap into {leetcode_id: url}. One-time per process."""
+    if _CA_URL_CACHE:
+        return _CA_URL_CACHE
+    req = Request(LEETCODE_CA_SITEMAP, headers={"User-Agent": USER_AGENT})
+    try:
+        with urlopen(req, timeout=30) as resp:
+            xml = resp.read().decode("utf-8", errors="replace")
+    except (HTTPError, URLError, TimeoutError):
+        return _CA_URL_CACHE
+    for m in re.finditer(
+        r"https://leetcode\.ca/\d{4}-\d{2}-\d{2}-(\d+)-[^/<]+/", xml
+    ):
+        lc_id = int(m.group(1))
+        _CA_URL_CACHE.setdefault(lc_id, m.group(0))
+    return _CA_URL_CACHE
+
+
 def fetch_leetcode_ca(leetcode_id: int) -> str | None:
-    """Fallback fetch via leetcode.ca (mirror for older problems)."""
-    req = Request(LEETCODE_CA_URL.format(leetcode_id), headers={"User-Agent": USER_AGENT})
+    """Fallback fetch via leetcode.ca (mirror for premium/locked problems)."""
+    ca_map = _load_ca_sitemap()
+    url = ca_map.get(leetcode_id)
+    if not url:
+        return None
+    req = Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urlopen(req, timeout=15) as resp:
             html = resp.read().decode("utf-8", errors="replace")
     except (HTTPError, URLError, TimeoutError):
         return None
-    m = re.search(r'<div[^>]*class="[^"]*markdown-body[^"]*"[^>]*>(.*?)<h3', html, re.DOTALL)
+    m = re.search(
+        r"(?:Description|Problem)[^<]{0,20}</h[1-3]>(.*?)<h[1-3]",
+        html,
+        re.DOTALL | re.IGNORECASE,
+    )
     if not m:
         return None
     text = html_to_text(m.group(1))
