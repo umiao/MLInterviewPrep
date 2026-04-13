@@ -366,3 +366,10 @@
 - **Sanity check result**: DB query confirms all 5 topics present (Priority Inversion / Worker Starvation / Distributed Lock Trade-off / Exactly-once Delivery / Poison Pill Handling). 承认局限 count = 5. Existing Chinese content preserved in all 8 sections. No new bare | in math introduced.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-166 --status completed`
+
+## 2026-04-13 -- [T-P1-167] database-comparison depth verification
+- **What I did**: Audited existing `scripts/content_database_comparison.py` against AC. Found the seed already contains Migration Strategy (dual-write + shadow read, CDC streaming, stop-the-world), 3 failure modes with fixes (split brain, compaction storm, hot partition), Capacity Planning formulas (storage, node count, throughput), and Iteration & Evaluation methodology table. Re-ran seed script to confirm DB state matches script.
+- **Deliverables**: No file changes; verification only. DB record `database-comparison` = 24503 chars, 11 display-math blocks, 6 Defense Q&A, 4 failure-mode anchors.
+- **Sanity check result**: grep for bare `|` inside `$...$` returns 0 matches (the seed script's in-script counter gives 68 but that is a false positive from its flipping heuristic on single-line `$$...$$`). All Chinese content preserved. Total chars 24503 >= 24K AC.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-167 --status completed`
