@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-411: [Pinterest/SD] ML SD: Personalized Chat Bot Recommending Pins
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit-chat), (3) retrieval-augmented pin recommendation, (4) grounding (pins match intent), (5) safety/moderation, (6) evaluation (relevance + conversation quality). Chinese markdown docs/pinterest/system_design_chatbot_pins.md.
-
 ### P2 -- Nice to Have
 
 #### T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间
@@ -115,6 +109,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons
+- [x] **2026-04-13** -- T-P1-411: [Pinterest/SD] ML SD: Personalized Chat Bot Recommending Pins. Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit
 - [x] **2026-04-13** -- T-P1-409: [Pinterest/SD] SD: User & Item Embeddings. Pinterest SD 2025-11. (1) objective (self-supervised contrastive / supervised from engagement), (2) encoder (towers, use
 - [x] **2026-04-13** -- T-P1-408: [Pinterest/SD] SD: Ad CTR prediction. Pinterest SD 2025-11. (1) data pipeline (impressions/clicks with attribution), (2) feature engineering (user/ad/context 
 - [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 

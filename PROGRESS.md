@@ -310,3 +310,10 @@
 - **Sanity check result**: File created; 340 lines; structure mirrors existing pinterest SD docs (ad_ctr, pin_ranking, notification_reco); covers all 5 required topics from task description (objective, encoder, training pipeline, serving, downstream uses).
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-409 --status completed
+
+## 2026-04-13 -- [T-P1-411] Pinterest SD: Personalized Chat Bot Recommending Pins
+- **What I did**: Wrote end-to-end Chinese SD doc docs/pinterest/system_design_chatbot_pins.md covering clarifying questions, high-level architecture (safety -> dialog state -> intent -> query rewrite -> multi-retriever RAG -> grounded generation -> output safety), conversation understanding (LLM-compiled state + context compression + coreference), intent taxonomy (ask-pins / refine / compare / chit-chat / off-topic) w/ built-in vs guardrail classifier, RAG design (dense ANN + BM25 + personalized re-rank via RRF, LGBM stage-1, optional LLM stage-2), grounded generation (prompt structure, 7B fine-tune, structured decoding, citation enforcement), dual-direction safety layer (PII, toxicity, self-harm, jailbreak, ads disclosure, kill switch), training (SFT + DPO + retrieval alignment + online), serving budget / scale, monitoring (offline + online + A/B), and 10 common interview follow-ups.
+- **Deliverables**: docs/pinterest/system_design_chatbot_pins.md (new, 337 lines).
+- **Sanity check result**: File created; 337 lines; structure mirrors existing pinterest SD docs (embeddings, ad_ctr, pin_ranking); covers all 6 required topics from task description (conversation understanding, intent classification, RAG, grounding, safety/moderation, evaluation).
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-411 --status completed
