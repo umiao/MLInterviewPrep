@@ -16,6 +16,17 @@ Every story below has been reviewed and improved per these criteria:
 
 ---
 
+### 2026-04-13 Metric Sweep (T-P1-387)
+
+Pass 1 added `[TODO: confirm ...]` placeholders to adjective-heavy Result sections in EX-01, EX-04, EX-14, EX-15, EX-17, EX-21, EX-23, EX-24. Placeholders are explicit asks for concrete numbers (quarter, lift %, adoption count, FP-rate delta, etc.) -- never invented values.
+
+Open questions / follow-ups:
+- **EX-18** (distributed-training pushback) was flagged in the task description as having "known numbers: 18K labels/day at $500, 1.5% GMB". Those numbers actually describe **LLM-as-Judge throughput + GMB win** (EX-14), not distributed-training pushback. This pass wrote the 18K/day, $500/day, +1.5% GMB claims into EX-14 behind `[TODO: confirm]`, and left EX-18 Result unchanged. User to confirm assignment before the placeholders come out.
+- Task description also referenced **EX-29, EX-35, EX-36** (GMV delta, new-seller FP X->Y, 0 privacy incidents + recall@K). No such IDs exist in `bq_improved_stories.md` or `bq_behavioral_examples.json` (IDs stop at EX-24, plus EX-33). Candidates: user may mean Tier-3 stories not yet imported, or the Pinterest seller-trust story in `bq_new_stories_A_J.txt`. User to clarify which story each set of numbers belongs to.
+- JSON mirror (`docs/bq_behavioral_examples.json`) not yet synced -- pending disambiguation of EX-18 / EX-29 / EX-35 / EX-36 above, to avoid writing the wrong numbers into the canonical DB.
+
+---
+
 ## STORY 1: Search Diversity -- Intent Collapse (EX-01)
 
 **Situation:** During Hacker Week, I discovered that our search ranking system was silently failing half its users. Multi-intent queries like "pokemon" returned 90%+ trading cards, even though purchase data showed half the buyers actually wanted games, toys, or figures. Standard metrics looked healthy because the dominant-intent users were satisfied -- the problem was invisible.
@@ -33,7 +44,7 @@ Every story below has been reviewed and improved per these criteria:
 - Diagnosed the root cause -- our ranking model scored each item in isolation, so it had no mechanism to reason about diversity across the full results page. The highest-scoring items all looked alike.
 - Built an end-to-end diversity-blending prototype in one week -- data pipeline, blending algorithm, and experiment framework -- and validated with purchase data that it surfaced previously invisible user intents
 
-**Result:** This self-initiated project proved clear revenue improvement potential and grew into a multi-year initiative with **200M+ annualized impact** across multiple product verticals. The core insight -- that item-level scoring creates page-level homogeneity -- fundamentally changed how the organization approached ranking optimization. The methodology was also published as a full research paper at **SIGIR**, a premier information retrieval conference.
+**Result:** This self-initiated project proved clear revenue improvement potential and grew into a multi-year initiative with **200M+ annualized impact** across multiple product verticals. Initial A/B lift before scaling: **[TODO: confirm initial GMB/CTR lift % from first vertical experiment]**. The core insight -- that item-level scoring creates page-level homogeneity -- fundamentally changed how the organization approached ranking optimization. The methodology was also published as a full research paper at **SIGIR**, a premier information retrieval conference.
 
 > **Memory anchor:** "Standard metrics said everything was fine -- because they only measured the users who stayed."
 
@@ -91,7 +102,7 @@ Every story below has been reviewed and improved per these criteria:
 - Used abandonment rate decrease as UX guardrail evidence -- users were staying longer and buying more
 - Delivered the key reframe: "We slightly reduced ranking efficiency for dominant-intent users, but awakened minority-intent users who were completely unserved -- the marketplace is net positive"
 
-**Result:** Leadership accepted the new framing and adjusted team OKRs to incorporate abandonment data alongside traditional metrics. This was a **fundamental shift** in how the organization evaluated ranking quality -- moving from single-intent proxy metrics to holistic marketplace health indicators.
+**Result:** Leadership accepted the new framing and adjusted team OKRs (**[TODO: confirm which quarter -- Q_/YYYY OKR cycle]**) to incorporate abandonment data alongside traditional metrics. This was a **fundamental shift** in how the organization evaluated ranking quality -- moving from single-intent proxy metrics to holistic marketplace health indicators.
 
 ---
 
@@ -277,7 +288,7 @@ Every story below has been reviewed and improved per these criteria:
 - Deep-dived into the backlog of severe relevance issues; discovered LLM-as-Judge could effectively identify, classify, and label difficult samples that humans struggled with
 - Overcame multiple obstacles: human annotators themselves disagreed significantly (making AI-human agreement a flawed metric), LLM instruction-following was immature (JSON failures, NSFW policy blocks), offline comparison initially showed no improvement (diagnosed as dataset quality issue, not model quality)
 
-**Result:** The LLM-as-Judge approach **won across multiple relevance metrics, delivered GMB improvement, and increased user engagement**. It became **production infrastructure adopted by the ads team and other groups** for measuring the impact of their changes on user experience -- scaling from a solo exploration into org-wide measurement infrastructure.
+**Result:** The LLM-as-Judge approach **won across multiple relevance metrics, delivered GMB improvement (+1.5% GMB [TODO: confirm]), and increased user engagement**. Throughput reached ~**18K labels/day at ~$500/day cost [TODO: confirm figures]**. It became **production infrastructure adopted by the ads team and [TODO: confirm # of additional teams, e.g., 3-5] other groups** for measuring the impact of their changes on user experience -- scaling from a solo exploration into org-wide measurement infrastructure.
 
 ---
 
@@ -296,7 +307,7 @@ Every story below has been reviewed and improved per these criteria:
 - Head of Engineering asked me to present a formal RCA and lead follow-up investigation, which uncovered and cleaned up additional instances of the same pattern across the organization
 - Pushed a **post-mortem attribution norm** -- explicit, blameless ownership of who-did-what across affected teams -- so future incidents wouldn't leak trust the way this one initially did
 
-**Result:** **2-day fix turnaround with zero user-facing production impact** -- all affected teams unblocked and **cross-team trust fully restored**, validated by query-understanding and marketplace leads signing off on the post-mortem. RCA went beyond the single incident: identified and resolved more undocumented cross-team dependencies of the same type. Established **new cross-team communication norms for model lifecycle management** and a **post-mortem attribution norm** now referenced by other on-call teams. Core lesson (reinforced later by EX-16): **the most dangerous dependencies are not the complex ones, but the undocumented implicit ones** -- and when they break, the real recovery work is cross-team trust and clean attribution, not just the redeployment.
+**Result:** **2-day fix turnaround with zero user-facing production impact** -- all affected teams unblocked and **cross-team trust fully restored**, validated by query-understanding and marketplace leads signing off on the post-mortem. RCA went beyond the single incident: identified and resolved more undocumented cross-team dependencies of the same type. Established **new cross-team communication norms for model lifecycle management** and a **post-mortem attribution norm** now referenced by **[TODO: confirm # of other on-call teams / incidents avoided since]** other on-call teams. Core lesson (reinforced later by EX-16): **the most dangerous dependencies are not the complex ones, but the undocumented implicit ones** -- and when they break, the real recovery work is cross-team trust and clean attribution, not just the redeployment.
 
 ---
 
@@ -331,7 +342,7 @@ Every story below has been reviewed and improved per these criteria:
 - Developed a clear policy for engineer-researcher collaboration: PRs must be engineer-owned (aligned with existing org policy), meaning the engineer is responsible for all changes before merge
 - Proactively reached out to the senior IC to explain the full context (researcher's late changes broke a verified PR) and shared my concrete improvement plan
 
-**Result:** **Built mutual respect** with the senior IC and became good professional friends. We both became known in the org for rigorous checklist adherence and fast response times. The engineer-researcher collaboration policy prevented similar incidents for the team going forward.
+**Result:** **Built mutual respect** with the senior IC and became good professional friends. We both became known in the org for rigorous checklist adherence and fast response times (**[TODO: confirm # of subsequent joint on-call rotations with zero escalations, or duration of positive trajectory]**). The engineer-researcher collaboration policy prevented similar incidents for the team going forward.
 
 ---
 
@@ -407,7 +418,7 @@ Every story below has been reviewed and improved per these criteria:
 - Built parity tests proving hand-generated expressions were **identical** to what the declarative system's profiling layer would generate -- hard evidence, not promises
 - Demoed equivalence to the team; declarative team had no objections because the proof was mechanical
 
-**Result:** Feature **shipped on time** with business win, rather than being blocked for a year. When the declarative system finally became ready, migration was smooth -- the core expression implementation was already consistent, requiring only storage/versioning migration. The interim solution effectively became **early validation for the declarative system itself**. Key thesis: tech debt isn't a "fast vs. clean" binary -- it's whether you understand the architectural boundary between core and peripheral.
+**Result:** Feature **shipped on time** with business win (**[TODO: confirm # of merged PRs landed with zero review-restart via the interim path]**), rather than being blocked for a year. When the declarative system finally became ready, migration was smooth -- the core expression implementation was already consistent, requiring only storage/versioning migration. The interim solution effectively became **early validation for the declarative system itself**. Key thesis: tech debt isn't a "fast vs. clean" binary -- it's whether you understand the architectural boundary between core and peripheral.
 
 ---
 
@@ -440,7 +451,7 @@ Every story below has been reviewed and improved per these criteria:
 - Found a deeper structural issue: multiple policies that tested successfully independently **competed for the same top slots** when launched simultaneously -- their effects would cancel each other out
 - Convinced VP in weekly meeting to limit scope to highest-ROI policies rather than combo-launching everything
 
-**Result:** Project **delivered within the VP's deadline**. More critically, I prevented the team from making a costly mistake: blindly combo-launching all policies would have shown disappointing results (policies canceling each other), potentially killing good individual policies based on a flawed combined test. The scope adjustment ensured the **highest-impact policies launched cleanly**, and the allocation insight became the team's framework for future ranking strategy.
+**Result:** Project **delivered within the VP's deadline**. Avoided running an invalidated A/B that would have consumed **[TODO: confirm % of NYC C2C traffic that would have been burned on the broken control-overwrite test]** of experimentation traffic. More critically, I prevented the team from making a costly mistake: blindly combo-launching all policies would have shown disappointing results (policies canceling each other), potentially killing good individual policies based on a flawed combined test. The scope adjustment ensured the **highest-impact policies launched cleanly**, and the allocation insight became the team's framework for future ranking strategy.
 
 ---
 
@@ -458,7 +469,7 @@ Every story below has been reviewed and improved per these criteria:
 - **Brought a concrete deliverable I had been iterating on: a top-10 and top-30 slot-distribution analysis**, framed as "you can bias toward any ONE of the priorities you want, but not all simultaneously -- slots are a finite resource". This turned an abstract argument into a decision aid the VP could act on in the meeting.
 - Recommended limiting scope to the highest-ROI policies first and sequencing the rest
 
-**Result:** **Avoided an estimated 2-3 weeks of debugging + reverse-test data collection** that a combo-launch would have burned for an outcome already predictable from the slot-distribution analysis. VP **adopted the slot-as-finite-resource framing** and adjusted project direction on the spot. The allocation framing became the **team-wide mental model** for ranking strategy going forward -- it spread because it combined near-real-time deployment capability, authenticity as a root-cause diagnosis (not a post-hoc narrative), long-term business value, and a clean fit with the broader C2C strategy, not just because the VP endorsed it once.
+**Result:** **Avoided an estimated 2-3 weeks of debugging + reverse-test data collection** that a combo-launch would have burned for an outcome already predictable from the slot-distribution analysis. VP **adopted the slot-as-finite-resource framing** and adjusted project direction on the spot (slot-allocation false-positive rate on combo-launch predictions fell from **[TODO: confirm X%] to [TODO: confirm Y%]** after the reframe was adopted team-wide). The allocation framing became the **team-wide mental model** for ranking strategy going forward -- it spread because it combined near-real-time deployment capability, authenticity as a root-cause diagnosis (not a post-hoc narrative), long-term business value, and a clean fit with the broader C2C strategy, not just because the VP endorsed it once.
 
 ---
 

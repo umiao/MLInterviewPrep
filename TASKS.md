@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: User guidance (2026-04-13 Discord): "Fill in similarly". For stories where user has not provided facts, use [TODO: confirm number] placeholder markers -- never invent metrics. Target stories and suggested fills: EX-1 (initial A/B lift before scaling), EX-4 (which Q OKRs updated), EX-14 (adoption count + Q), EX-15 (intern perf rating or ticket backlog), EX-17 (# subsequent papers applying the norm), EX-18 (sync DB to improved-story version: 18K labels/day at $500, 1.5% GMB -- these are known), EX-21 (# merged PRs with zero review-restart), EX-23 (traffic % avoided on invalid A/B), EX-24 (FP-rate delta), EX-29 (GMV delta or A/B result), EX-35 (new-seller FP rate X%->Y%), EX-36 (0 privacy incidents + retrieval recall@K unchanged). Replace "improved/streamlined/widely adopted" with either a concrete number (if known) or "[TODO: confirm]". Do NOT fabricate. Edit JSON + markdown for each.
-
 #### T-P1-388: [BQ-sweep] Tier-2 ownership sharpening: "we" -> "I" in Action sections
 - **Priority**: P1
 - **Complexity**: M
@@ -198,4 +192,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-13** -- T-P1-392: [Pinterest/LC] Add + notes: LC 3229 Min Operations to Make Array Equal to Target. New Pinterest problem. Diff-scan greedy (same family as LC 1526). Chinese notes covering increment/decrement region hand
 - [x] **2026-04-13** -- T-P1-391: [Pinterest/LC] Add + notes: LC 392 Is Subsequence. New Pinterest problem. Two-pointer O(n+m). Follow-up: many queries -> precompute indexed char positions, binary search e
 - [x] **2026-04-13** -- T-P1-390: [Pinterest/LC] Add + notes: LC 84 Largest Rectangle in Histogram. New Pinterest problem (2025-11 cutoff). Add to problems DB with Pinterest tag; fetch description; write Chinese notes: m
+- [x] **2026-04-13** -- T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories. User guidance (2026-04-13 Discord): "Fill in similarly". For stories where user has not provided facts, use [TODO: confi
 - [x] **2026-04-13** -- T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async). Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume;
