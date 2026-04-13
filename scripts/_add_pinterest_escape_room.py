@@ -66,19 +66,21 @@ Design `Game(rooms, people)` with three operations:
 
 ## Canonical Data Structure
 
-- Per-room **doubly-linked list** keeps entry order, supports O(1) append-tail
-  and O(1) unlink-by-node.
+- Per-room **Doubly-Linked List (DLL)** keeps entry order, supports O(1)
+  append-tail and O(1) unlink-by-node.
 - Global **hash map** `people: pid -> Node` gives O(1) lookup for the person's
   current node (the node stores a back-pointer to its owning room).
 - `rooms: dict[int, DLL]` keyed by room id. For `getTop`, iterate `sorted(rooms,
   reverse=True)` once at construction (rooms are typically small and static).
 
-### Why doubly-linked list (not list / deque)?
+### Why a Doubly-Linked List (DLL) instead of `list` / `deque`?
 
 - `proceedToNextRoom` must unlink `pid` from the middle of its current room
-  (people don't always move in FIFO order -- whoever solves the puzzle first
-  advances). A Python `list.remove(x)` is O(k); DLL unlink is O(1) via the
-  node reference stored in the global map.
+  (people don't always move in **FIFO (First-In-First-Out)** order -- whoever
+  solves the puzzle first advances). A Python `list.remove(x)` is O(k);
+  DLL unlink is O(1) via the node reference stored in the global map.
+- `collections.deque` only supports O(1) on the two ends; middle removal is
+  still O(k), so it is not sufficient either.
 - Append to the new room's tail preserves entry-order for tiebreaks.
 
 ## Python Implementation
@@ -203,6 +205,11 @@ class Game:
 
 Total space: O(R + N) for the rooms + people maps + DLL nodes.
 
+Note on `getTop(K)` complexity: the interview spec states O(N + K), which is
+also a valid bound because R <= N (empty rooms contribute a constant scan
+step). The tighter bound O(R + K) holds whenever K people are collected
+before all rooms are visited, which is the typical case.
+
 ## Edge Cases
 
 1. `pid` already in the final room -> `proceedToNextRoom` no-ops (guard on `-1`).
@@ -213,12 +220,14 @@ Total space: O(R + N) for the rooms + people maps + DLL nodes.
 
 ## Chinese Notes (中文解析)
 
-**核心思路**: "每房间一个双向链表 + 全局 pid->Node 映射"。两者缺一不可:
+**核心思路**: "每房间一个**双向链表 (Doubly-Linked List, DLL)** + 全局
+`pid -> Node` 映射 (hash map)"。两者缺一不可:
 - 只有链表没映射 -> 无法 O(1) 定位某人节点, unlink 变 O(k)。
 - 只有映射没链表 -> 无法 O(1) unlink + 保持入房顺序。
 
-**为什么不能用 deque?** deque 只支持两端 O(1), 中间 remove 是 O(k)。
-房间里的人不按 FIFO 出房 (先解谜的先走), 所以必须能 O(1) 从中间摘除。
+**为什么不能用 `deque`?** `deque` 只支持两端 O(1), 中间 remove 是 O(k)。
+房间里的人不按 **FIFO (First-In-First-Out, 先进先出)** 出房 (先解谜的先走),
+所以必须能 O(1) 从中间摘除。
 
 **Top-K 排名规则**: 房号大的优先 (越靠后越领先), 同房内先到先优先。
 因此遍历房间倒序, 每个房间内链表正序, 累计到 K 即返回。

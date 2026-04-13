@@ -373,3 +373,10 @@
 - **Sanity check result**: grep for bare `|` inside `$...$` returns 0 matches (the seed script's in-script counter gives 68 but that is a false positive from its flipping heuristic on single-line `$$...$$`). All Chinese content preserved. Total chars 24503 >= 24K AC.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-167 --status completed`
+
+## 2026-04-13 17:00 -- [T-P1-180] Escape Room code & acronym review
+- **What I did**: Reviewed `scripts/_add_pinterest_escape_room.py` canonical solution. Expanded acronyms to full form on first mention (DLL -> Doubly-Linked List (DLL); FIFO -> First-In-First-Out (FIFO, 先进先出)). Added a complexity-clarification note reconciling the interview spec's O(N+K) leaderboard bound with the implementation's tighter O(R+K). Force-updated the existing DB row (notes had canonical tag so the script's skip guard would have no-oped).
+- **Deliverables**: `MLInterviewPrep/scripts/_add_pinterest_escape_room.py` edits; `data/mle_prep.db` row id=1068 notes field refreshed (6607 -> 7138 chars).
+- **Sanity check result**: Extracted the `python` code block from the updated DB notes and ran it — all smoke-test assertions pass (getPeople/getTop/entry-order-tiebreak/finished-room no-op). Verified FIFO+DLL acronyms expanded and the O(R+K) note is present.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-180 --status completed`
