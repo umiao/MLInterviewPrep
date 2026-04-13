@@ -270,3 +270,100 @@
 - **Sanity check result**: Script reported [UPDATE] LC 311 1692 chars, LC 815 2681 chars, LC 1244 794 chars (rows=1 each). Prose outside code blocks is fully Chinese; remaining ASCII chars are tech terms/identifiers per task spec.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P2-373 --status completed
+
+## 2026-04-12 -- [investigation] Session-state + LC 1244 expanded notes with lazy-heap discussion
+- **What I did**: (1) Investigated user's concern about session_state update being "blocked" -- ran forensic check: session_state.json is at `{last_task: T-P2-379, all_done: false}` which is correct because T-P2-373 was still running. Reconstructed execution order from logs+git: T-P2-379 ran before T-P2-373 despite T-P2-373 being unblocked earlier, because the orchestrator picks by (priority, sort_order) and T-P2-379 had lower sort_order. No bug; just sort_order + dependency interaction. (2) Written comprehensive LC 1244 expanded notes (5577 chars, fully Chinese) addressing user's observation that real-time `heapq.nlargest` is preferred over lazy heap: walks Approach A (nlargest canonical), Approach B (user's lazy heap with detailed code review of 5 pitfalls including `scores[pid]=-1` magic sentinel risk, heap size unbounded, recovery-required-on-every-path), Approach C (SortedList), when lazy heap is legitimately preferable (streaming LC 703 territory, N>>1M, top-K with small K), and interview talking-points ladder. Ran after session 12 (T-P2-373 polish) completed to avoid overwrite race.
+- **Deliverables**: scripts/_update_1244_notes.py (new); data/mle_prep.db (problems.notes for leetcode_id=1244: 794 -> 5577 chars after overwrite of polish version)
+- **Sanity check result**: Script reported `[OK] LC 1244 notes updated (5577 chars)`; sqlite SELECT length confirms 5577 stored. Session 12 T-P2-373 had committed first (8105291), then my expanded-notes script ran on top -- verified via git log that T-P2-373 committed before my overwrite. Autonomous runner fully complete: 12/12 sessions, all committed, all child tasks marked completed in task_db.
+- **Status**: [DONE]
+- **Request**: No task_db update -- investigation/coaching work, not a tracked backlog task.
+
+## 2026-04-13 -- LC 410 code-review appendix for user's curBox variant
+- **What I did**: User submitted their LC 410 solution using a `curBox` remaining-capacity counter (non-canonical). Appended a Code Review section to the existing autonomous-written Chinese notes identifying 4 improvements (redundant `v > upperbound` check, non-canonical usedCnt logic, missing early termination on `segs > k`, redundant post-loop mid recalculation) plus a bonus corner-case note on all-zeros semantics. Kept the existing canonical binary-search + DP coverage intact.
+- **Deliverables**: scripts/_append_410_code_review.py; data/mle_prep.db (problems.notes leetcode_id=410: 3677 -> 6554 chars)
+- **Sanity check result**: Script reported extension 3677 -> 6554; Discord reply sent.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching on already-completed task.
+
+## 2026-04-13 -- LC 43 appendix: three-perspective derivation for `i+j+1` index
+- **What I did**: User worked out a good intuition for why `ansArr[i+j+1]` is the correct target index in LC 43 Multiply Strings and asked for a quicker on-the-fly derivation. Appended a "three viewpoints" section to LC 43 DB notes: (A) rigorous weight algebra (`10^(m-1-i) * 10^(n-1-j)` -> k = i+j+1), (B) bounded-length + two-anchor verification (i=m-1 j=n-1 -> k=m+n-1; i=0 j=0 -> k=1, user's own approach), (C) one-liner mnemonic with `99*99` sanity check. Also clarified that the two for-loops (accumulation vs carry propagation) are decoupled -- index derivation and carry logic should be discussed separately.
+- **Deliverables**: scripts/_append_43_weight_derivation.py; data/mle_prep.db (problems.notes leetcode_id=43: 3020 -> 4912 chars)
+- **Sanity check result**: Script reported extension 3020 -> 4912 chars; Discord reply sent with matching structure.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching on completed task.
+
+## 2026-04-13 -- LC 410 enrichment: segs=1 correctness defense
+- **What I did**: User asked to roll Discord discussions back into the DB notes. Added a new "深入点 #2" section to LC 410 capturing the `segs=1` vs `usedCnt=0` debate: core invariant (non-empty array -> >= 1 segment), corner-case table contrasting behavior on 4 inputs, "全零 AC 是运气不是正确" argument, and the variant-problem failure mode (minimize-seg-count tasks where usedCnt=0 algorithm breaks). Completed the sweep: audited all 14 Pinterest problems, confirmed every other discussion point is already captured in the corresponding problem's notes.
+- **Deliverables**: scripts/_append_410_segs_defense.py; data/mle_prep.db (LC 410 notes: 6554 -> 8107 chars)
+- **Sanity check result**: Script reported extension; 14-problem audit table shared on Discord showing final notes lengths.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive enrichment pass.
+
+## 2026-04-13 -- LC 1723 audit: existing notes are optimal, user's code missing pruning #3
+- **What I did**: User shared their LC 1723 solution and asked to verify coverage is optimal. Read full DB notes (5604 chars) -- already comprehensive with Approach A (binary search + backtracking + 3 prunings), Approach B (bitmask DP O(k*3^n)), Approach C (plain backtracking), 7 code-review points, pattern recognition with 5 related problems, interview talking template, LPT greedy discussion. Concluded: no DB changes needed. Separately flagged user's code gaps: (1) missing "empty-worker-first-job-fail => break" pruning (their seenCapacity subsumes it in most cases but is not identical); (2) `self.ans` instance variable pattern is awkward -- return-value DFS is cleaner.
+- **Deliverables**: No DB write (existing notes already optimal); Discord reply with concrete diffs between user's code and canonical.
+- **Sanity check result**: Verified notes cover all 3 approaches + all 3 prunings + full related-problem family. No gaps found.
+- **Status**: [DONE]
+- **Request**: No task_db update.
+
+## 2026-04-13 -- LC 642 code review: Trie API cleanness + encapsulation
+- **What I did**: User shared their LC 642 AutocompleteSystem implementation using Trie + incremental cursor + dead flag, asked for code-review focused on cleanness. Reviewed 6 improvement axes: (1) `match(word, startNode)` dual-mode API confusion -> split to single-mode `advance(ch)`, (2) `dead` flag leaking from Trie into AutocompleteSystem (encapsulation violation) + redundant outer check, (3) `defaultdict(TrieNode)` autovivification risk in query paths -> explicit `setdefault` + `get`, (4) double return signals (dead flag + []) -> pick one, (5) kept `heapq.nsmallest(3, ...)` (semantically clearer than `sorted[:3]`), (6) scale-up optimization: precompute top-3 at each node for O(3) query. Included full improved reference implementation with iterative DFS (no recursion stack overflow risk) and `cursor: Optional[TrieNode]` idiom.
+- **Deliverables**: scripts/_append_642_code_review.py; data/mle_prep.db (LC 642 notes: 4711 -> 9711 chars)
+- **Sanity check result**: Script reported extension 4711 -> 9711; Discord reply sent with numbered diff.
+- **Status**: [DONE]
+- **Request**: No task_db update -- interactive coaching.
+
+## 2026-04-13 -- Fix drawer blank-content bug + mark all Pinterest problems Done
+- **What I did**: User reported Pinterest prep page drawer links "work but open to blank". Diagnosed: react-markdown v10's default `urlTransform` sanitizes non-whitelisted URL schemes (http/https/mailto/tel) BEFORE the custom `a` component override runs, so `lc://N` href arrived as empty string. My override's regex didn't match, and the fallback `<a href="" target="_blank">` opened a blank new tab. Fixed by adding `urlTransform={(url) => url}` (identity) to MarkdownPreview's ReactMarkdown config -- safe because our custom `a` override already handles the security split (lc:// -> button, everything else -> external anchor with noopener). Separately: user reported all 14 problems are solved and want status updated. Marked all 14 Pinterest problems `is_completed=1` in DB and regenerated the index doc with Status="Done" across the board.
+- **Deliverables**: src/frontend/src/components/ui/MarkdownPreview.tsx (urlTransform added); scripts/_create_pinterest_lc_index_doc.py (status column all Done); data/mle_prep.db (14 problems is_completed=1; company_documents id=47 refreshed to 6687 chars)
+- **Sanity check result**: `npx tsc --noEmit` -> 0 errors. Backend on :8000 confirmed NOT running (curl returns 000); user needs to start it for the drawer API fetch to succeed.
+- **Status**: [DONE] -- pending user's browser smoke test after backend start.
+- **Request**: No task_db update -- infrastructure fix + status reflecting completed work; no new tasks.
+
+## 2026-04-13 -- Lesson-worthy: react-markdown v10 urlTransform strips custom schemes
+- **What I learned**: Custom URL schemes (e.g., `lc://N` for drawer-opening links) are silently stripped by react-markdown v10's default `defaultUrlTransform`. The user-facing symptom was "clicks work but content is blank" because `<a href="">` opens a blank tab. Custom `a` component overrides receive the already-sanitized href, so they can't inspect or preserve the original.
+- **Fix pattern**: Pass `urlTransform={(url) => url}` (identity) to ReactMarkdown when you want custom-scheme links to reach your component override. Pair this with a defensive `a` override that still routes unknown schemes safely (e.g., fall through to `rel="noopener noreferrer"` on real http(s), or simply render `children` as text for unsupported schemes).
+- **Detection**: The only visible signal was "clicking a styled link opens a blank tab" -- no console errors, no network failures. Diagnostic hint: inspect the rendered DOM of the link -- if `href` is empty string, the sanitizer is the culprit.
+- **Applies to**: Any project using react-markdown 8+ with custom drawer-on-click or app-internal-route schemes.
+
+## 2026-04-13 -- BQ rubric audit: 34 stories scored against strong/weak signal framework
+- **What I did**: User supplied a 5-strong + 4-weak signal rubric and asked to audit all BQ examples. Delegated full scan to Explore agent (read-only, nuanced judgment task) across DB `behavioral_examples` + `docs/bq_*.json` + `docs/bq_improved_stories.md`. Corpus is 34 stories (IDs 1-30, 33-36; 31-32 absent). Classified into Tier 1 rework (7 stories), Tier 2 minor polish (19), Tier 3 solid (8). Identified 3 systemic cross-corpus fixes: adjective-to-metric replacement (~15 stories), Action-section "we" to "I" shift (~11 stories), incident stories need post-fix verification metrics (EX-19, EX-20). Reported findings to user on Discord with two execution options: A) fine-grained per-story tasks (~11 total), B) coarse three sweep tasks addressing each systemic fix family + individual Tier-1 rewrites.
+- **Deliverables**: No DB writes (pure audit phase); Discord reply with tiered tables + systemic fix analysis + execution plan options.
+- **Sanity check result**: Audit covers all 34 DB entries; cross-referenced with bq_improved_stories.md; Tier-1/2/3 buckets sum to 34.
+- **Status**: [DONE] audit phase -- awaiting user choice between plan A/B for execution.
+- **Request**: No task_db update yet -- execution tasks will be added after user picks plan granularity.
+
+## 2026-04-13 -- BQ rework plan A: 10 tasks created in task_db
+- **What I did**: User chose Plan A (fine-grained). Batched 10 tasks via task_db.py: 7 P0 individual Tier-1 rewrites (T-P0-380..386 for EX-12/16/19/20/22/28/33) + 3 P1 Tier-2 sweeps (T-P1-387 metric-number replacement across ~12 stories, T-P1-388 "we"->"I" ownership sharpening in Action sections across ~6 stories, T-P1-389 catch-all polish for remaining Tier-2). Each task description includes specific target stories, concrete fixes per 2026-04-13 audit, and instruction to edit both docs/bq_behavioral_examples.json + docs/bq_improved_stories.md. Regenerated TASKS.md.
+- **Deliverables**: .claude/tasks.db (10 new tasks), TASKS.md (regenerated)
+- **Sanity check result**: task_db.py batch returned all 10 task IDs; project command confirmed regen.
+- **Status**: [DONE] planning. Execution pending user's go-ahead on autonomous launch.
+- **Request**: 10 P0/P1 tasks queued; await user direction on autonomous_run.ps1 launch.
+
+## 2026-04-13 -- BQ rework tasks enriched with user-provided facts + TODO placeholder rule
+- **What I did**: User reviewed the 10-task plan and supplied concrete facts for 4 stories via Discord: EX-12 (custom-deploy rate 80%->50% despite urgent request rise), EX-16 (6 org interns adopted; outcome fed to HR+University team), EX-19 (2-day fulltime fix, 0 prod impact, core is cross-team trust/attribution), EX-20 (~6h delay blocking 2 launches, 2x RCA to Head of Engineering + implicit-coupling cleanup + factor/model migration). Updated task descriptions T-P0-380/381/382/383 to embed these. For EX-22/28/33 (no facts given), updated descriptions to instruct autonomous sessions to use `[TODO: confirm number]` placeholders rather than fabricate. Also updated T-P1-387 metric sweep with the same placeholder rule (never invent numbers). Awaiting user launch confirmation.
+- **Deliverables**: 7 task descriptions updated in .claude/tasks.db (T-P0-380..386 + T-P1-387)
+- **Sanity check result**: Each task_db.py update returned ok:true; placeholder rule explicit in descriptions so autonomous sessions produce fillable slots instead of fabrications.
+- **Status**: [DONE] enrichment phase. Awaiting user launch.
+- **Request**: No further task_db change; ready for autonomous_run.ps1 10.
+
+## 2026-04-13 -- Audit ID mismatch discovered + context-gathering for remaining 3 BQ rework tasks
+- **What I did**: Pulled current content of EX-22/28/33 target stories to identify specific number slots needed. Discovered the 2026-04-13 audit used sequential numbering that doesn't match the JSON's EX-NN IDs: audit's "EX-22 Pushback on Scope" = JSON EX-18, audit's "EX-28 VP Allocation" = JSON EX-24. Also discovered audit's "EX-33 MoE -> Allocation Paradigm Shift" has NO corresponding story in either docs/bq_behavioral_examples.json or docs/bq_improved_stories.md -- may be a planned/unwritten story or an audit mis-label. Drafted 9 specific context questions (Q1-Q9) across the 3 stories and sent to user on Discord: burnout duration + eng-time use post-descope + brief self-reflection for EX-18; avoided cost estimate + follow-through for allocation framing + tangible VP-meeting deliverable for EX-24; existence check + file location + decision on skip/create for audit's missing EX-33.
+- **Deliverables**: No file changes; Discord questions sent as 2 parts.
+- **Sanity check result**: Confirmed via JSON scan that EX-18 = Pushback-on-Scope and EX-24 = VP-Allocation; confirmed via keyword grep that "MoE" and "paradigm shift" are absent from both BQ files.
+- **Status**: [BLOCKED] on user answering Q1-Q9 before autonomous launch. Any answer subset is workable.
+- **Request**: No task_db update; 3 task descriptions still carry `[TODO: confirm number]` placeholder rule as fallback.
+
+## 2026-04-13 -- MoE story mystery solved + 3 Tier-1 tasks finalized + autonomous launched
+- **What I did**: Used user's context answers (1 month 10h/day burnout, contextualized-embedding delivery, first-quarter-rotation reflection; 2-3 weeks avoided combo-launch waste, top-10/top-30 distribution analysis, allocation framing adoption; MoE story exists keyword hint). Discovered EX-33 MoE story lives in DB behavioral_examples table only, not the JSON file -- was populated via scripts/_populate_hash_and_moe_examples.py on 2026-04-11. Further discovered the audit's claim "EX-33 has no business metric" was wrong: the Result field already includes 200M annualized GMB from subsequent allocation policy, just buried. Updated T-P0-384/385/386 task descriptions with user facts + the lead-with-existing-200M-GMB guidance for EX-33. Launched autonomous_run.ps1 with 10 max sessions via background powershell subprocess (background task id: bbpyn2fin).
+- **Deliverables**: 3 task_db descriptions finalized (T-P0-384/385/386); autonomous runner launched in background
+- **Sanity check result**: Each task_db update returned ok:true; background task ID returned cleanly (output file in tasks/ dir). Runner using proven PowerShell path (2026-04-11 SIGPIPE fix effective).
+- **Status**: [DONE] planning + launch. Execution in flight.
+- **Request**: No direct task_db update from this session; child sessions will mark their own tasks completed.
+
+## 2026-04-13 -- [T-P0-380] EX-12 Code Review Standards: add concrete metric
+- **What I did**: Reworked COL-2 story in docs/bq_improved_stories.md with user-provided metric (80% -> 50% custom-deployment rate, even as urgent-request volume rose). Converted passive "we agreed / team aligned" framing into active "I proposed the shared checklist / I documented the tradeoff". Mirrored the same situation/task/action/result into the JSON BLOG-02 entry (which previously had only cross-refs and tags).
+- **Deliverables**: docs/bq_improved_stories.md (COL-2 rewrite), docs/bq_behavioral_examples.json (BLOG-02 populated with full STAR).
+- **Sanity check result**: JSON parses cleanly (python json.load). Metric leads the Result line. Action bullets start with "I".
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-380 --status completed`

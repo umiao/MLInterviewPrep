@@ -9,7 +9,70 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production checklist/template; outcome was reported back to the HR + University team as input to improve the academic->industry transition program. Lead Result with "6 interns across the org adopted the checklist; outcome cited by HR + University team for onboarding program iteration". Convert "we/team" in Action to "I built the template / I ran the first review pass / I briefed HR on the outcome". Edit both JSON + markdown.
+
+#### T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Flags C+D. Use user-provided facts (2026-04-13 Discord): This was NOT a user-facing prod-model impact -- but it took 2 full days of my dedicated effort to fix, and the real test was cross-team trust, collaboration, and reasonable attribution of who did what. Reframe the story: own the attribution/trust dimension explicitly ("I should have checked downstream consumer Slack channels before deprecating; I spent 2 focused days resolving, and more importantly re-established trust and a post-mortem attribution norm across the affected teams"). Quantify: 2-day fix turnaround; zero user-facing impact; cross-team trust restored. Edit JSON + markdown.
+
+#### T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches (name them if known, else "two dependent launches"); I felt significant pressure and was called in TWICE to present RCA reports to Head of Engineering. Add additional achievements in Result: e.g. systematic cleanup of other implicit-coupling instances discovered during RCA, science-team factor/model migration to declarative artifactory. Lead with: "6-hour deployment delay blocking 2 launches; presented RCA to Head of Engineering x2; drove follow-up cleanup of N additional implicit-coupling sites". Replace "quickly stabilized" with concrete blast radius + MTTR + RCA-to-fix deliverable. Sharpen personal contribution vs backend team. Edit JSON + markdown.
+
+#### T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-04-13 Discord):
+(Q1 burnout duration) Sustained 1 month, intermittently 10h/day;
+(Q2 eng-time post-descope) freed time shipped new contextualized embedding + larger model work; avoided pulling the team in an opposite-direction speculative tech investment;
+(Q3 self-reflection) this was my first quarter after rotating into the ranking team - still learning team/stack/business context; wanted to overstretch myself to prove I could deliver.
+Rewrite to lead with these specifics. Replace "leadership accepted" passive framing with active "I delivered pros/cons analysis that let leaders converge". Close with the self-reflection line. Edit docs/bq_behavioral_examples.json (EX-18) + docs/bq_improved_stories.md (STORY 18) + behavioral_examples DB row (example_id=EX-18).
+
+#### T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-04-13 Discord):
+(Q4 avoided cost) combo-launch would have burned at least 2-3 weeks on debugging + reverse-test collection for an outcome already known;
+(Q5 follow-through) allocation framing became broadly adopted because of its near-real-time deployment capability + authenticity + long-term business value + fit with C2C strategy; team-wide mental model shift;
+(Q6 tangible deliverable) I brought a concrete analysis I had been iterating on: the top-10 and top-30 slot distribution, framed as "you can bias toward any ONE of the priorities you want but not all simultaneously -- slots are a finite resource".
+Rewrite Result to lead with the avoided-cost estimate and the top-10/top-30 analysis as the active deliverable. Replace "VP accepted" with "VP adopted the slot-as-finite-resource framing; allocation became team mental model for ranking strategy". Edit JSON (EX-24) + markdown (STORY 24) + DB row (example_id=EX-24).
+
+#### T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Flags C+D. Target: DB `behavioral_examples` row example_id=EX-33 "MoE -> Allocation Paradigm Shift - Org-Level Reframe via Honest Negative Result" (NOT in JSON file -- DB-only story populated via scripts/_populate_hash_and_moe_examples.py on 2026-04-11). User confirmed story exists (keyword "MoE - failure").
+Key discovery during audit: the Result field ALREADY contains "200M annualized GMB from the subsequent allocation policy work" but buries it behind the org-rename narrative. Rework brief: (1) Lead Result with the 200M GMB number prominently (it is the business metric the audit claimed was missing); (2) Add adoption count if recoverable (how many Allocation-team shipped products post-rename?); (3) Keep the honest-negative-result framing (MoE deprecated) but let the follow-through win close the arc. Also polish Situation/Action if any "we" ambiguity. Edit DB row only (no JSON match needed). If a matching entry should also live in docs/bq_improved_stories.md, add a STORY 33 section.
+
 ### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: User guidance (2026-04-13 Discord): "Fill in similarly". For stories where user has not provided facts, use [TODO: confirm number] placeholder markers -- never invent metrics. Target stories and suggested fills: EX-1 (initial A/B lift before scaling), EX-4 (which Q OKRs updated), EX-14 (adoption count + Q), EX-15 (intern perf rating or ticket backlog), EX-17 (# subsequent papers applying the norm), EX-18 (sync DB to improved-story version: 18K labels/day at $500, 1.5% GMB -- these are known), EX-21 (# merged PRs with zero review-restart), EX-23 (traffic % avoided on invalid A/B), EX-24 (FP-rate delta), EX-29 (GMV delta or A/B result), EX-35 (new-seller FP rate X%->Y%), EX-36 (0 privacy incidents + retrieval recall@K unchanged). Replace "improved/streamlined/widely adopted" with either a concrete number (if known) or "[TODO: confirm]". Do NOT fabricate. Edit JSON + markdown for each.
+
+#### T-P1-388: [BQ-sweep] Tier-2 ownership sharpening: "we" -> "I" in Action sections
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Sweep target stories: EX-2 (lead +1% GMB prominently), EX-11 (I led compression, researcher gave context), EX-13 (I flagged, I took point on negotiations; manager gave air cover), EX-25 (I independently researched and built), EX-26 (I defined acceptance criteria, validated final choice), EX-27 (I served as DRI / critical-path owner, not coordinator). Keep "we" only in Situation (context). Every Action bullet must start with "I". Edit JSON + markdown.
+
+#### T-P1-389: [BQ-sweep] Tier-2 catch-all polish: remaining 1-weak-signal stories
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Remaining Tier-2 stories not covered by metric or ownership sweeps. Primary: EX-7 (add downstream metric after unbiased dataset adoption). Scan JSON/md for any other stories flagged in 2026-04-13 audit that dont fit metric or ownership sweeps. One-off fixes per story -- structural polish only. Edit JSON + markdown.
 
 ### P2 -- Nice to Have
 
@@ -94,26 +157,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 334 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 350 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-12** -- T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches. After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index compan
 - [x] **2026-04-12** -- T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244. Three existing notes are MIX (ratios 0.11-0.29). Rewrite the English prose sections to Chinese, keep code blocks and tec
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
-- [x] **2026-04-12** -- T-P1-375: [Pinterest/notes] Write LC 410 solution notes (Split Array Largest Sum). Pinterest must-do; no notes yet. Cover: binary-search-on-answer approach (monotonic feasibility check), DP on (i,k) alte
-- [x] **2026-04-12** -- T-P1-374: [Pinterest/desc] Fetch missing problem descriptions: LC 2402, 1110, 1723. Three Pinterest problems have empty description field. Use the existing fetch-description endpoint or leetcode.ca scrape
-- [x] **2026-04-12** -- T-P1-372: [Pinterest/CN] Translate LC 1110 notes to Chinese (Delete Nodes And Return Forest). Translate existing English notes (5361 chars) to Chinese. is_root flag + carry-state-down-vs-post-order principle. Keep 
-- [x] **2026-04-12** -- T-P1-371: [Pinterest/CN] Translate LC 2402 notes to Chinese (Meeting Rooms III). Translate existing English notes (5257 chars) to Chinese. Two-heap simulation pattern. Keep code and complexity notation
-- [x] **2026-04-12** -- T-P1-370: [Pinterest/CN] Translate LC 282 notes to Chinese (Expression Add Operators). Translate existing English notes (8433 chars) to Chinese. Covers Version A (brute-force + custom myEval), Version B (pre
-- [x] **2026-04-12** -- T-P1-369: [Pinterest/CN] Translate LC 465 notes to Chinese (Optimal Account Balancing). Translate existing English notes (9898 chars) to Chinese. Includes two approaches (Bitmask DP + naive DFS), Full-Transfe
-- [x] **2026-04-12** -- T-P1-368: [Pinterest/CN] Translate LC 332 notes to Chinese (Reconstruct Itinerary). Translate existing English notes (2977 chars) to Chinese. Keep code blocks, algorithm names (Hierholzer, Eulerian Path),
-- [x] **2026-04-11** -- T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence. Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, re
-- [x] **2026-04-11** -- T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30. STRUCTURAL/MECHANICAL polish ONLY for the 4 remaining failure-cluster master stories. Brings them in line with the EX-33
-- [x] **2026-04-11** -- T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer. Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> ex
-- [x] **2026-04-11** -- T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links. # Behavioral: semantic relevance spot-check script for 10 random Q-example links
-- [x] **2026-04-11** -- T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as 
-- [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
-- [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
-- [x] **2026-04-11** -- T-P0-367: BQ Quick Index: generate cn_elevator_pitch batch 2 (EX-10 to EX-33, 13 examples). Generate high-quality Chinese elevator pitch summaries for remaining 13 examples missing cn_elevator_pitch. Format: '{su
-- [x] **2026-04-11** -- T-P0-366: BQ Quick Index: generate cn_elevator_pitch batch 1 (BLOG-01 to EX-09, 14 examples). Generate high-quality Chinese elevator pitch summaries for 14 examples missing cn_elevator_pitch. Format: '{summary} | K
+- [x] **2026-04-12** -- T-P0-380: [BQ-rework] EX-12 Code Review Standards: add concrete metric. Flag C (vague metric). Use user-provided facts (2026-04-13 Discord): before the checklist/standards, ~80% of changes req

@@ -280,35 +280,38 @@ Every story below has been reviewed and improved per these criteria:
 
 ---
 
-## STORY 15: Model Deprecation Incident -- From Crisis to Process Improvement (EX-15 / Story E)
+## STORY 15: Model Deprecation Incident -- From Implicit Dependencies to Explicit Contracts (EX-15 / Story E)
 
-**Situation:** During on-call, I followed proper process to deprecate old models (confirmed with manager and teammates), but immediately received incident tickets -- other teams had been running undocumented tests on those models.
+**Situation:** During on-call, I followed proper process to deprecate old models (confirmed with manager and teammates), but immediately received incident tickets -- query understanding and marketplace teams had been running undocumented tests on those models. Root cause: these teams had "informal stakeholder" relationships -- real production dependencies that existed outside any documented ownership or communication channel.
 
-**Risk if not addressed:** Other teams' experiments and test pipelines were broken, affecting their ability to validate ongoing work. Without resolution, this incident would erode cross-team trust, and without process changes, the same type of incident would inevitably recur because "informal stakeholder" relationships had no documentation or discovery mechanism.
+**Risk if not addressed:** Other teams' experiments and test pipelines were broken, affecting their ability to validate ongoing work. Without resolution, this incident would erode cross-team trust. More fundamentally, without systemic changes, the same class of incident would recur -- "informal stakeholder" relationships had no discovery mechanism, so the next deprecation would hit the same blind spot.
 
 **Action:**
-- Shifted from defensive mindset ("I followed the process correctly") to constructive mode with manager's support (who affirmed I did nothing wrong and attended VP/Senior Director meetings together)
-- Led discussions with cross-org teams to surface all "informal stakeholder" relationships -- undocumented dependencies on shared models
+- Initially felt frustrated -- I had followed every step correctly. Manager affirmed I did nothing wrong and attended VP/Senior Director incident meetings with me
+- That support helped me shift from defensive ("I was right") to constructive ("the process has a gap"): the real problem wasn't my execution but the absence of a discovery mechanism for implicit cross-team dependencies
+- Led discussions with cross-org teams to surface all "informal stakeholder" relationships -- mapping undocumented dependencies on shared models
 - Proposed systematic improvements: regular cross-team alignment mechanism, safety knobs for staged deprecation, advance deprecation warnings with archival alerts
+- Head of Engineering asked me to present a formal RCA report and lead follow-up investigation, which uncovered and cleaned up additional instances of the same pattern across the organization
 
-**Result:** Spent one week on redeployment and RCA reports -- **all affected teams were unblocked**. More importantly, established **new cross-team communication norms for model lifecycle management** that prevented recurrence. The incident transformed from a stressful on-call crisis into lasting process improvement that made the entire org's model management more robust.
+**Result:** Spent one week on redeployment -- **all affected teams unblocked**. The RCA went beyond the single incident: identified and resolved more undocumented cross-team dependencies of the same type. Established **new cross-team communication norms for model lifecycle management**. Core lesson (reinforced later by EX-16): **the most dangerous dependencies are not the complex ones, but the undocumented implicit ones**. The right response is to build discovery mechanisms and explicit contracts, not just add process around known cases.
 
 ---
 
-## STORY 16: Cross-Datacenter Deployment Incident -- Learning Tribal Knowledge (EX-16 / Story F)
+## STORY 16: Cross-Datacenter Deployment Incident -- Architectural Mismatch Discovery (EX-16 / Story F)
 
-**Situation:** I proactively took on latency optimization work without budgeted infra support to unblock my team, but when deploying to a second datacenter, the error rate spiked because of undocumented "tribal knowledge" -- the search system's C++ backend was statically compiled, meaning inconsistent definitions across datacenters caused system panic.
+**Situation:** I proactively took on latency optimization without budgeted infra support to unblock my team. Initial version was approved and deployed. When iterating on the same feature/factor name, I hit undocumented "tribal knowledge": the search backend was statically compiled C++ -- any inconsistent definitions across datacenters would cause system panic. Rolled out to the second datacenter's preprod environment; error rate spiked and alerts fired.
 
 > **Terms:** *Statically compiled* = code is frozen at build time; changing a definition in one place without rebuilding everywhere causes incompatibility. *Dynamically linked* = code loads definitions at runtime, allowing independent updates.
 
-**Risk if not addressed:** The error rate spike was affecting live search traffic. If not quickly resolved, user-facing search quality would degrade across the affected datacenter. Beyond the immediate incident, this class of risk (static compilation incompatibility) would continue to bite anyone who made similar cross-datacenter changes without knowing the tribal knowledge.
+**Risk if not addressed:** Preprod caught the failure before customer impact, but the root cause would have been identical in prod. More importantly, this was not just "I didn't ask the right person" -- the deployment model (DC-by-DC, assuming loose coupling between DCs) was fundamentally mismatched with the system's actual coupling structure (static compilation creating implicit strong coupling across DCs). Anyone making similar changes would hit the same trap.
 
 **Action:**
-- Urgently coordinated with the backend team to rollback and stabilize
-- Post-incident: discussed with manager about working more strategically -- engaging counterpart teams proactively rather than trying to avoid "bothering" them
-- Established new practice: ensure the counterpart team's tech lead or senior IC is informed before cross-boundary changes; require at least one approver from the relevant team, not just the generic "2 approvers" policy
+- Immediately coordinated with backend team; rollback was a force-merge and re-release on the affected DC -- blast radius contained to a preprod delay, no customer impact
+- Treated it as prod-severity anyway: diagnosed the root cause as an **architectural mismatch** -- DC-by-DC rollout assumes each DC is independently servable, but static compilation silently violated that assumption by requiring bit-consistent definitions across all DCs. Recognized that DC-by-DC actually saved us (full rollout would have meant org-wide spike with no healthy DC to fall back to)
+- Presented formal RCA to Head of Engineering. Established new practice: counterpart team's tech lead must be an explicit approver (enforced via CODEOWNERS) for cross-DC shared artifact changes -- not just meeting the generic "2 approvers" policy
+- Led follow-up investigation that uncovered and cleaned up additional instances of the same implicit coupling pattern
 
-**Result:** Error rate was **quickly stabilized** through rollback. While the static compilation issue couldn't be fixed immediately, the experience gave me deep familiarity with the backend architecture. This directly led to being **invited to participate in the "declarative artifactory" initiative** -- converting static compiled C++ loading to dynamic, fundamentally eliminating this entire class of risk for the organization.
+**Result:** Migrated the science team's factors and models from statically compiled artifacts to the new **declarative artifactory system** -- dynamically loaded, version-checked resources that eliminated the exact class of risk. Core lesson (same pattern as EX-15): **the most dangerous dependencies are the undocumented implicit ones**. In EX-15 it was undocumented cross-team stakeholder relationships; here it was an architectural mismatch between deployment assumptions and system coupling. Both required the same response: make implicit contracts explicit, then build mechanisms so the system enforces them rather than relying on tribal knowledge.
 
 ---
 
@@ -475,16 +478,17 @@ Every story below has been reviewed and improved per these criteria:
 
 ### COL-2: Aligning on Code Review Standards
 
-**Situation:** A teammate's repetitive code review requests -- often for tests already covered by existing policy -- were delaying PR merges and creating friction on the team.
+**Situation:** Before we aligned on shared standards, **~80% of changes on our team required custom deployment paths** to bypass the standard review queue -- reviewer bandwidth was a bottleneck, and urgent requests kept pulling multiple teams in. Repetitive review requests for tests already covered by existing policy were compounding the delay.
 
-**Risk if not addressed:** Unresolved friction would slow delivery velocity, erode team morale, and create an environment where engineers avoided submitting PRs to avoid lengthy review cycles.
+**Risk if not addressed:** A persistent 80% bypass rate meant the standard review process was effectively non-functional, eroding the quality gate it was meant to provide. Unresolved friction would also slow delivery velocity and push engineers to avoid PR submission altogether.
 
 **Action:**
-- Initiated a direct 1:1 conversation to understand his review standards and share my testing approach
-- Showed which tests were already covered, addressing his specific concerns with evidence
-- Proposed creating shared review guidelines; volunteered to draft the initial proposal and discussed it with the project lead
+- I initiated a direct 1:1 conversation to understand his review standards and share my testing approach
+- I walked him through which tests were already covered by existing policy, addressing his specific concerns with concrete evidence
+- **I proposed the shared review checklist** and volunteered to draft the initial version; discussed it with the project lead to get buy-in
+- **I documented the tradeoff** (standard-review throughput vs. custom-deployment risk) in the review doc so the team had a single source of truth
 
-**Result:** Team **aligned on clear review standards**, making reviews smoother and more efficient. The project stayed on schedule, and the guidelines empowered the team to handle future reviews constructively without interpersonal friction.
+**Result:** **Cut custom-deployment rate from ~80% to ~50%, even as business-driven urgent-request volume kept rising.** Reviews became smoother, the project stayed on schedule, and the checklist + tradeoff doc became a durable artifact the team used for subsequent review disagreements without interpersonal friction.
 
 ---
 
