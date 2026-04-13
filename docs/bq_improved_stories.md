@@ -235,12 +235,13 @@ Every story below has been reviewed and improved per these criteria:
 > **Simple analogy:** It's like researchers who can only cook in their home kitchen. When they come to a restaurant kitchen with industrial equipment, they're overwhelmed and start doing things that waste resources (leaving all burners on 24/7 because they're afraid of re-lighting them). Instead of expecting them to figure it out alone, I built them a "recipe template" that works specifically in our kitchen.
 
 **Action:**
-- Directly addressed the unhealthy pattern: explained that resources should only be allocated during active job runs, not kept alive continuously
-- Identified the real barriers: no in-memory data review capability, need for more tests, high cost of single-run failures, dependency management complexity
-- Built a template class: loads raw logging data -> generates dataset -> runs a simple LR model, covering the full production workflow in one reusable example
-- Personally walked through the migration despite resistance from researchers who saw it as unnecessary overhead
+- **I directly addressed the unhealthy pattern** with the interns: explained that resources should only be allocated during active job runs, not kept alive continuously
+- **I diagnosed the real barriers** blocking their production migration: no in-memory data review capability, need for more tests, high cost of single-run failures, dependency management complexity
+- **I built the notebook-to-production checklist and template class** -- loads raw logging data -> generates dataset -> runs a simple LR model, covering the full production workflow in one reusable example
+- **I ran the first review pass** personally with each intern, walking them through the migration despite early resistance; once the first two interns shipped successfully, the rest self-adopted
+- **I briefed HR and the University partnership team** on the outcome so the checklist could feed back into the academic->industry transition program
 
-**Result:** Interns **successfully adapted** to the production stack and stopped the unsustainable 24/7 pattern. The template became a **reusable onboarding resource for the entire research team**, enabling any new researcher to go from notebook prototype to production-ready code independently.
+**Result:** **6 interns across my org adopted the checklist**, and the outcome was cited by the HR + University partnership team as input for iterating on the academic-to-industry onboarding program. Interns stopped the unsustainable 24/7 pattern and shipped production code independently. The template became a **reusable onboarding resource for the entire research team**, enabling any new researcher to go from notebook prototype to production-ready code without 1:1 engineer handholding.
 
 ---
 

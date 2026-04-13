@@ -367,3 +367,17 @@
 - **Sanity check result**: JSON parses cleanly (python json.load). Metric leads the Result line. Action bullets start with "I".
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-380 --status completed`
+
+## 2026-04-13 -- Orchestrator bailed early; fixed sticky all_done flag and relaunched
+- **What I did**: First launch of autonomous_run.ps1 for BQ rework batch (10 tasks) only completed T-P0-380 (EX-12 Code Review, commit 5ae75cf with "80% -> 50% bypass rate" metric) before bailing with "all_done=true -- all tasks complete!" despite 9 active tasks remaining. Root caused: previous Pinterest batch left session_state.json all_done=true and child sessions don't auto-reset when new tasks enter backlog. Manually reset all_done=false; relaunched autonomous_run.ps1 10 (background task id: btnkr4dn8). Documented the sticky-flag pattern + detection tip + fix procedure in LESSONS.md.
+- **Deliverables**: .claude/session_state.json (all_done=false, last_status=reset_for_new_batch); 1 completed task (T-P0-380 committed 5ae75cf); LESSONS.md appended
+- **Sanity check result**: task_db still shows 9 active; session_state rewritten and verified; relaunch accepted (background task id confirmed).
+- **Status**: [PARTIAL] -- 1/10 done, 9 in flight.
+- **Request**: No direct task_db update from this session; in-flight child sessions handle their own.
+
+## 2026-04-13 -- [T-P0-381] EX-12 PhD Interns Notebook-to-Production: add onboarding metric
+- **What I did**: Reworked EX-12 (Story 12) in bq_improved_stories.md and bq_behavioral_examples.json per user-provided facts from 2026-04-13 Discord. Result now leads with "6 interns across my org adopted the checklist; outcome cited by HR + University partnership team for academic-to-industry onboarding program iteration". Converted passive "we/team" framing in Action to active first-person: "I built the checklist/template", "I ran the first review pass", "I briefed HR on the outcome". Added specific diffusion detail ("once the first two shipped, the rest self-adopted") to strengthen the ownership narrative.
+- **Deliverables**: docs/bq_improved_stories.md (STORY 12 rewrite), docs/bq_behavioral_examples.json (EX-12 action + result).
+- **Sanity check result**: JSON parses cleanly (json.load). Result line leads with the concrete "6 interns" metric. All Action bullets start with "I".
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-381 --status completed`

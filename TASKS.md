@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production checklist/template; outcome was reported back to the HR + University team as input to improve the academic->industry transition program. Lead Result with "6 interns across the org adopted the checklist; outcome cited by HR + University team for onboarding program iteration". Convert "we/team" in Action to "I built the template / I ran the first review pass / I briefed HR on the outcome". Edit both JSON + markdown.
-
 #### T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally
 - **Priority**: P0
 - **Complexity**: S
@@ -164,4 +158,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric. Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production ch
 - [x] **2026-04-12** -- T-P0-380: [BQ-rework] EX-12 Code Review Standards: add concrete metric. Flag C (vague metric). Use user-provided facts (2026-04-13 Discord): before the checklist/standards, ~80% of changes req
