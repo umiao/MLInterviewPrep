@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-399: [Pinterest/custom] Prefix-match first-word-index
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix. Trie with earliest-word-index at each node (or sort+binary-search). Python + Chinese notes.
-
 #### T-P1-400: [Pinterest/custom] Grant Access permission propagation
 - **Priority**: P1
 - **Complexity**: M
@@ -168,6 +162,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-13** -- T-P1-399: [Pinterest/custom] Prefix-match first-word-index. Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix
 - [x] **2026-04-13** -- T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation. Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirro
 - [x] **2026-04-13** -- T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II. New Pinterest problem (harder variant of 1564, enter from both ends). Chinese notes: two-pointer shortest-interior-heigh
 - [x] **2026-04-13** -- T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I. New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight

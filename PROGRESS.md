@@ -536,3 +536,10 @@
 - **Sanity check result**: `python scripts/_smoke_lighthouse.py` -> OK all 3 smoke tests passed (straight beam, `/` reflection, `|` split). `python scripts/_add_pinterest_lighthouse.py` -> `[INSERT] id=1071`. Self-test in the notes was cross-validated against the live BFS before committing.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-398 --status completed`
+
+## 2026-04-13 -- [T-P1-399] Pinterest Prefix-Match First-Word-Index custom problem
+- **What I did**: Added a non-LC Pinterest-tag problem to `data/mle_prep.db` covering the 2025-11 prefix-first-index prompt. Notes carry two canonical solutions (Trie with `min_index` updated on every node of the insertion path + bisect_left on sorted input with an explicit startswith verification), English + Chinese explanations, complexity table, edge cases (empty prefix, bisect-lands-on-non-match trap), and follow-ups (all matches / streaming inserts / many queries).
+- **Deliverables**: scripts/_add_pinterest_prefix_first_index.py (new, idempotent seeder), scripts/_smoke_prefix_first_index.py (new, standalone verifier), data/mle_prep.db (new row id=1072).
+- **Sanity check result**: `python scripts/_smoke_prefix_first_index.py` -> OK all smoke tests passed (Trie/bisect parity on sorted input, unsorted-only Trie cases, empty-prefix, and the bisect-lands-on-'az'-for-prefix-'ap' trap). Seeder -> `[INSERT] id=1072`.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-399 --status completed`
