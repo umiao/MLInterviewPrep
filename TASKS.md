@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches (name them if known, else "two dependent launches"); I felt significant pressure and was called in TWICE to present RCA reports to Head of Engineering. Add additional achievements in Result: e.g. systematic cleanup of other implicit-coupling instances discovered during RCA, science-team factor/model migration to declarative artifactory. Lead with: "6-hour deployment delay blocking 2 launches; presented RCA to Head of Engineering x2; drove follow-up cleanup of N additional implicit-coupling sites". Replace "quickly stabilized" with concrete blast radius + MTTR + RCA-to-fix deliverable. Sharpen personal contribution vs backend team. Edit JSON + markdown.
-
 #### T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric
 - **Priority**: P0
 - **Complexity**: S
@@ -152,6 +146,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius. Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches
 - [x] **2026-04-12** -- T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally. Flags C+D. Use user-provided facts (2026-04-13 Discord): This was NOT a user-facing prod-model impact -- but it took 2 f
 - [x] **2026-04-12** -- T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric. Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production ch
 - [x] **2026-04-12** -- T-P0-380: [BQ-rework] EX-12 Code Review Standards: add concrete metric. Flag C (vague metric). Use user-provided facts (2026-04-13 Discord): before the checklist/standards, ~80% of changes req

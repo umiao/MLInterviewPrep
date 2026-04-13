@@ -388,3 +388,10 @@
 - **Sanity check result**: JSON parses cleanly (json.load). Result leads with the "2-day / zero user-facing impact / cross-team trust restored" triple. Action opens with personal ownership ("I should have checked downstream consumer Slack channels").
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-382 --status completed`
+
+## 2026-04-13 -- [T-P0-383] EX-16/STORY 16 Cross-DC Deployment Incident: quantify blast radius
+- **What I did**: Reworked STORY 16 / EX-16 Cross-Datacenter Deployment Incident in bq_improved_stories.md and bq_behavioral_examples.json per 2026-04-13 Discord facts. Replaced "quickly stabilized / preprod delay" framing with concrete blast radius + MTTR: "6-hour deployment delay blocking 2 dependent launches; RCA presented to Head of Engineering twice; follow-up cleanup of additional implicit-coupling sites; science-team factor/model migration to declarative artifactory". Sharpened personal contribution vs backend team (I owned diagnosis/coordination/architectural fix; backend team handled rollback mechanics). Added the "called in twice" detail and the pressure framing. (Task title labels this as EX-20, but the Cross-DC content lives at EX-16/STORY 16 in the current files; the prior T-P0-382 had the same label/content offset.)
+- **Deliverables**: docs/bq_improved_stories.md (STORY 16 Action + Result rewrite), docs/bq_behavioral_examples.json (EX-16 action + result).
+- **Sanity check result**: JSON parses cleanly (json.load). Result leads with "6-hour deployment delay blocking 2 dependent launches; presented RCA to Head of Engineering twice; drove follow-up cleanup...". Action explicitly separates my scope from backend team's rollback mechanics.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-383 --status completed`
