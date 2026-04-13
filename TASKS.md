@@ -9,6 +9,30 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-405: [Pinterest/SD] ML SD: Design Pins Search Engine
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD (most frequently asked 2025-11). End-to-end: (1) candidate generation (two-tower embedding, ANN/HNSW, multi-source text/image/history), (2) ranking (pairwise vs pointwise, feature eng: text/image/graph/user-context, loss functions, offline metrics NDCG/MAP/AUC), (3) online metrics (CTR, repin-rate, session engagement), (4) infra (Faiss/ScaNN, feature stores, training pipeline), (5) cold-start + freshness. Chinese markdown docs/pinterest/system_design_pins_search.md.
+
+#### T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) delivery constraints (frequency cap, quiet hours, channel push/email/in-app), (5) offline metrics (open-rate AUC, long-term retention), (6) engagement-vs-annoyance tradeoffs. Chinese markdown docs/pinterest/system_design_notification_reco.md.
+
+#### T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD 2025-11. Pin ranking for home/topic feed. (1) two-stage retrieval+rerank, (2) features (pin/user/context/graph), (3) model family (MMOE/wide-and-deep/transformer), (4) multi-objective (engagement+diversity+long-term), (5) serving constraints, (6) metric ladder. Chinese markdown docs/pinterest/system_design_pin_ranking.md.
+
+#### T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async)
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume; single sync/quick-async), (2) partitioning (range, hash, consistent-hash), (3) retry for failed partitions (at-least-once + idempotency, DLQ, checkpoint), (4) fan-out (Kafka, backpressure, flow control), (5) monitoring (lag, error-rate, RPO/RTO), (6) tradeoffs: sync-vs-async, exactly-once-vs-at-least-once. Chinese markdown docs/pinterest/system_design_catalog_bulk_update.md.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories
@@ -29,7 +53,121 @@
 - **Depends on**: None
 - **Description**: Remaining Tier-2 stories not covered by metric or ownership sweeps. Primary: EX-7 (add downstream metric after unbiased dataset adoption). Scan JSON/md for any other stories flagged in 2026-04-13 audit that dont fit metric or ownership sweeps. One-off fixes per story -- structural polish only. Edit JSON + markdown.
 
+#### T-P1-390: [Pinterest/LC] Add + notes: LC 84 Largest Rectangle in Histogram
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: New Pinterest problem (2025-11 cutoff). Add to problems DB with Pinterest tag; fetch description; write Chinese notes: monotonic-stack O(n) canonical + divide-and-conquer O(n log n) + related LC 85/42/11 + pattern recognition.
+
+#### T-P1-391: [Pinterest/LC] Add + notes: LC 392 Is Subsequence
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: New Pinterest problem. Two-pointer O(n+m). Follow-up: many queries -> precompute indexed char positions, binary search each query. Chinese notes. Cross-link LC 1055 (greedy subsequence family).
+
+#### T-P1-392: [Pinterest/LC] Add + notes: LC 3229 Min Operations to Make Array Equal to Target
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: New Pinterest problem. Diff-scan greedy (same family as LC 1526). Chinese notes covering increment/decrement region handling + sign-change counting. Cross-link LC 1526.
+
+#### T-P1-393: [Pinterest/LC] Add + notes: LC 1526 Min Increments on Subarrays
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: New Pinterest problem. Diff-array + greedy sign-change pattern. Chinese notes explaining why counting positive deltas is optimal. Cross-link LC 3229.
+
+#### T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight.
+
+#### T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: New Pinterest problem (harder variant of 1564, enter from both ends). Chinese notes: two-pointer shortest-interior-height preprocessing. Contrast with 1564.
+
+#### T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirrors? coverage? cycle?). Research variants; write solution + Chinese notes as non-LC entry.
+
+#### T-P1-399: [Pinterest/custom] Prefix-match first-word-index
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix. Trie with earliest-word-index at each node (or sort+binary-search). Python + Chinese notes.
+
+#### T-P1-400: [Pinterest/custom] Grant Access permission propagation
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11. Problem linked at hack2hire.com (URL in dump). Research and document: likely DAG/graph permission propagation. Solution + Chinese notes as non-LC entry. Link in Pinterest index doc.
+
+#### T-P1-401: [Pinterest/custom] Pin Connectivity
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11. Graph connectivity problem on pin/board/user graph. Research variant, write canonical (Union-Find or BFS/DFS) + Chinese notes. Non-LC entry.
+
+#### T-P1-402: [Pinterest/custom] round() from scratch (string input)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.' (trailing dot). Parse digits+dot+sign manually; half-up rounding. Chinese notes with state machine.
+
+#### T-P1-403: [Pinterest/custom] Round string s by precision p
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->'1234.7'. Parse both, determine decimal places from p, round accordingly. Chinese notes.
+
+#### T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian circuits naturally (returns to JFK). If question is detecting infeasible itinerary, discuss Eulerian existence conditions. Append as addendum to existing LC 332 notes (don't create new problem entry).
+
+#### T-P1-408: [Pinterest/SD] SD: Ad CTR prediction
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD 2025-11. (1) data pipeline (impressions/clicks with attribution), (2) feature engineering (user/ad/context crosses), (3) model (DeepFM/wide-and-deep/AutoInt), (4) calibration (Platt/isotonic), (5) serving (model server, feature store, latency budget), (6) online metrics (NE, LogLoss, calibration error). Chinese markdown docs/pinterest/system_design_ad_ctr.md.
+
+#### T-P1-409: [Pinterest/SD] SD: User & Item Embeddings
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD 2025-11. (1) objective (self-supervised contrastive / supervised from engagement), (2) encoder (towers, user sequence, graph-based GraphSAGE/PinSage), (3) training pipeline (streaming vs batch), (4) serving (ANN index, freshness, dimension), (5) downstream uses (candidate gen, ranking features, similar-pins). Chinese markdown docs/pinterest/system_design_embeddings.md.
+
+#### T-P1-411: [Pinterest/SD] ML SD: Personalized Chat Bot Recommending Pins
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit-chat), (3) retrieval-augmented pin recommendation, (4) grounding (pins match intent), (5) safety/moderation, (6) evaluation (relevance + conversation quality). Chinese markdown docs/pinterest/system_design_chatbot_pins.md.
+
+#### T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not responsible, (4) negative feedback received, (5) working with someone missing deadlines. Create docs/pinterest/bq_question_map.md mapping each Q to 2-3 best-fit EX-XX stories with 1-sentence angle each. Reference post-rework stories. Chinese.
+
 ### P2 -- Nice to Have
+
+#### T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 / 2563 / 1094 / 1851). If LC match found, add/update. If custom, create non-LC entry.
+
+#### T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P1-390, T-P1-391, T-P1-392, T-P1-393, T-P1-394, T-P1-395, T-P0-397, T-P0-405, T-P0-406, T-P0-410, T-P1-412
+- **Description**: Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC section (84, 392, 3229, 1526, 1564, 1580, 餐馆区间), (2) Custom Coding section (Escape Room, Lighthouse, Prefix-match, Grant Access, Pin Connectivity, round(), Round-by-p, LC332 loop) with lc:// drawer links where applicable, (3) System Design section with links to docs/pinterest/system_design_*.md files, (4) BQ Question Map link, (5) cross-links LC problems <-> relevant SD modules (e.g. LC 1244 <-> Leaderboard SD family). Depends on all previous Pinterest expansion tasks being complete.
 
 ### P3 -- Stretch Goals
 
@@ -119,6 +257,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
 - [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
 - [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P0-397: [Pinterest/custom] Escape Room game-state (Game(rooms, people)). Pinterest coding 2025-11. Design data structure: proceedToNextRoom(pid), getTop(K), getPeople(roomId). Requirements: O(1
 - [x] **2026-04-12** -- T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win. Flags C+D. Target: DB `behavioral_examples` row example_id=EX-33 "MoE -> Allocation Paradigm Shift - Org-Level Reframe v
 - [x] **2026-04-12** -- T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost. Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-0
 - [x] **2026-04-12** -- T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric. Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-

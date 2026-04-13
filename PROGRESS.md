@@ -416,3 +416,17 @@
 - **Sanity check result**: DB update touched exactly 1 row; action=2293 chars, result=988 chars. Verified "200M" appears at position 83 in Result (lead sentence). STORY 33 inserted before "## EXISTING ANSWERS" anchor (idempotent guard included).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-386 --status completed`
+
+## 2026-04-13 -- Pinterest expansion planning: 24 tasks for new LC/custom/SD/BQ/integration
+- **What I did**: User shared a 2025-11 Pinterest interview dump (LC problems, custom coding, system designs, BQ questions) with request to plan via task planning mode, expand explanations, and link LC <-> SD back to prep notes. Planned 24 tasks via task_db.py batch (not executed): 7 new LC problems (84/392/3229/1526/1564/1580 + restaurant-interval investigation), 8 Pinterest-specific custom coding (Escape Room, Lighthouse, Prefix-match, Grant Access, Pin Connectivity, round-from-scratch, round-by-precision, LC332 loop follow-up), 7 system designs (Pins Search/Notification/Pin Ranking/Ad CTR/Embeddings/Catalog bulk update/Chat bot), 1 BQ mapping, 1 integration. Added 11 dependencies on T-P2-413 integration task. Regenerated TASKS.md.
+- **Deliverables**: scripts/_plan_pinterest_expansion_tasks.py (batch script); .claude/tasks.db (24 new tasks T-P1-390..T-P2-413 with deps); TASKS.md regenerated
+- **Sanity check result**: Batch returned 24 ok:true ids; all 11 depend commands succeeded; project confirmed regen.
+- **Status**: [DONE] planning. Awaiting user review + current BQ rework batch completion before launch.
+- **Request**: No further task_db changes until user reviews; BQ rework (bg id btnkr4dn8) still in flight (session 6/10).
+
+## 2026-04-13 -- [T-P0-397] Pinterest Escape Room custom problem seeded
+- **What I did**: Added Pinterest 2025-11 "Escape Room Game State" non-LC problem to mle_prep.db (id=1068). Canonical design: per-room doubly-linked list + global pid->Node map, giving O(1) proceedToNextRoom, O(1)+O(k) getPeople, O(R+K) getTop. Notes include Python impl (Game/_DLL/_Node), complexity table, edge cases, 中文 解析 with follow-up extensions (per-person skip sequences, O(K) getTop via non-empty-rooms DLL), and self-test.
+- **Deliverables**: scripts/_add_pinterest_escape_room.py (idempotent seed); data/mle_prep.db row id=1068 (desc=937 chars, notes=6607 chars, company_tags=["Pinterest"]).
+- **Sanity check result**: Smoke test of the NOTES code path (Game([1,2,3],[10,20,30])) passed all assertions incl. getTop tiebreak by entry order and final-room no-op guard. DB verified via SELECT.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-397 --status completed`
