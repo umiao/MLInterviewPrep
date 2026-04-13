@@ -352,3 +352,10 @@
 - **Sanity check result**: Seed script reported [DONE] with per-section char counts; TOTAL: 18407 chars (target >= 16K). Defense section 2235 chars, 5 Q&A. Failure modes 3 (target >= 2). Iteration section present at line 474. No bare pipes in math.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P0-164 --status completed (already applied)
+
+## 2026-04-13 22:30 -- [T-P0-178] Pinterest prep page Chinese-ify audit
+- **What I did**: Audited Pinterest problem notes (company_tags LIKE '%Pinterest%', 28 rows) for Chinese-prose default. Found 5 entries failing the bar: 4 custom problems (1072/1074/1075/1076) were English-prose-first with Chinese block appended (CJK 11-18% of natural-language chars); LC 1851 (id=144) had empty notes. Rewrote all 5 so Chinese is the primary narrative while keeping code blocks, complexity tables, algorithm names (Trie, DSU, bisect_left, BFS), and Python signatures in English per `feedback_lc_notes_chinese`. Company index doc id=47 reviewed -- already correct (tables English, headings a mix; no prose-level issues).
+- **Deliverables**: Updated `problems.notes` for ids 1072, 1074, 1075, 1076, 144 via `_apply_pinterest.py`. No code changes outside the data layer. Audit script `_audit_pinterest.py` computes CJK% excluding code/math.
+- **Sanity check result**: Post-update CJK ratios: 1072 60.7%, 1074 76.5%, 1075 61.9%, 1076 59.5%, 1851 80.4%. Zero entries below 20% threshold. `solve_sorted`, `round_by_precision`, `PermissionSystem`, `ConnectivityService`, `min_interval` code blocks unchanged from source. All 28 Pinterest problems now pass Chinese-default bar.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-178 --status completed`
