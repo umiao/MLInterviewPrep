@@ -804,7 +804,57 @@ Worker 总是先排空高优先级队列，那么当高优先级流量持续时�
 **数据 (Data)：** 在我们的支付处理管道中，只有约 15% 的任务类型需要分布式锁
 （涉及真实扣费的任务）。其余 85% 依赖数据库唯一约束实现幂等性，无需锁。锁续期
 将 TTL 不匹配导致的双重执行从每天约 50 次降至 0。锁服务（Redis Sentinel 集群）
-的可用性为 99.99%，年宕机约 53 分钟，期间采用 fail-closed 策略。"""
+的可用性为 99.99%，年宕机约 53 分钟，期间采用 fail-closed 策略。
+
+### 问：你声称"有效一次处理"，但跨系统边界真的能做到恰好一次吗？(Exactly-once Delivery)
+
+**承认局限 (Limitation acknowledged)：** 在分布式系统边界之间不存在真正的
+**恰好一次投递 (exactly-once delivery)**。Worker 与 Broker 之间、Worker 与
+下游系统之间的网络都不可靠，任何一次 ack 丢失都会触发重投，因此底层投递
+语义最多做到**至少一次 (at-least-once)**。宣称恰好一次的系统，实际上是
+在**消费侧**通过幂等性把重复执行吸收掉。
+
+**缓解措施 (Mitigation)：**
+
+1. **至少一次投递 + 幂等消费者：** Broker 配置为超时/nack 时重投，
+   Worker 侧使用幂等键（task_id、request_id）+ 数据库唯一约束 +
+   `INSERT ... ON CONFLICT DO NOTHING` 或 CAS 写入吸收重复。
+2. **事务性发件箱 (Transactional Outbox)：** 跨 DB 与 Broker 的一致性场景，
+   将业务写入和 outbox 条目放在同一事务内，中继进程再把 outbox 发布到
+   Broker，下游消费者继续靠幂等键去重。
+3. **单系统内 EOS：** 在 Kafka 内部可用事务性生产者 + 消费者偏移量提交
+   实现真正的 **EOS (Exactly-Once Semantics)**，但一旦写入外部系统
+   （支付、邮件、第三方 API），必须回到发件箱 + 幂等下游的组合。
+
+**数据 (Data)：** 在支付管道中，启用幂等键 + 发件箱后，因重投导致的重复扣费
+从每周约 12 例降至过去 6 个月 0 例。代价是每任务一次额外的去重查询
+（加约 1.5 ms P50 延迟）和一张 outbox 表（日均约 2 GB 增量，TTL 7 天归档）。
+
+### 问：毒丸任务不断把 Worker 烧死，怎么兜底？(Poison Pill Handling)
+
+**承认局限 (Limitation acknowledged)：** 毒丸消息（**poison pill**，永久失败
+的任务）如果没有防线，会被 Broker 无限重投，每次都消耗 Worker CPU/内存并
+挤占正常任务的处理容量，最终表现为队列积压和整体吞吐下降——即所谓
+"一个坏任务拖垮整个池"。
+
+**缓解措施 (Mitigation)：**
+
+1. **错误分类 + 快速失败：** 在 Worker 侧把异常分为**瞬态 (transient)**
+   （超时、429、5xx）与**永久 (permanent)**（400、schema 校验失败、业务
+   规则违反）。永久错误不重试，直接进 **DLQ (Dead Letter Queue)**。
+2. **有界重试 + 指数退避 + 抖动 (jitter)：** `delay = min(cap, base * 2^n) + rand`，
+   达到 `max_retries`（典型 5 次）后路由到 DLQ，保证单条消息占用 Worker 的
+   总时长有界。
+3. **载荷 schema 校验：** Producer 侧入队前用 JSON Schema / protobuf 校验，
+   Consumer 侧出队后再校验一次；不合法载荷直接 DLQ，不进重试循环。
+4. **DLQ 可观测性：** 监控 `dlq.depth`、`dlq.age_p99`、按 `error_class`
+   分组的错误分布；DLQ 深度 > 阈值或有消息年龄 > 1 小时即告警，运维可
+   检查、修复后重放或清除。
+
+**数据 (Data)：** 上线"永久错误直进 DLQ + max_retries=5 + 指数退避"后，
+毒丸任务对 Worker 的平均占用时间从约 45 分钟（旧配置下反复重试）降至
+约 12 秒（仅消费 5 次快速失败）；单个毒丸导致的吞吐损失从约 8% 降至
+< 0.3%，主队列 P95 等待时间不再受单个坏任务影响。"""
 
 # ---------------------------------------------------------------------------
 # Section 8: Verbal Outline

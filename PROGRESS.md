@@ -359,3 +359,10 @@
 - **Sanity check result**: Post-update CJK ratios: 1072 60.7%, 1074 76.5%, 1075 61.9%, 1076 59.5%, 1851 80.4%. Zero entries below 20% threshold. `solve_sorted`, `round_by_precision`, `PermissionSystem`, `ConnectivityService`, `min_interval` code blocks unchanged from source. All 28 Pinterest problems now pass Chinese-default bar.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-178 --status completed`
+
+## 2026-04-13 -- [T-P1-166] Distributed task queue: add Defense Q&A (exactly-once + poison pill)
+- **What I did**: Verified DB defense section was missing the 5 required acknowledge/mitigate/data Q&A topics. Priority Inversion, Worker Starvation, Distributed Lock Trade-off already existed in correct format. Added Exactly-once Delivery and Poison Pill Handling Q&A in the same acknowledge/mitigate/data Chinese-with-English-terms format to `scripts/content_distributed_task_queue.py` DEFENSE section, appended after the Distributed Lock block. Ran the seed script to push to DB.
+- **Deliverables**: Edited `scripts/content_distributed_task_queue.py` (DEFENSE section, +~65 lines). DB record `distributed-task-queue` defense now 9379 chars (was 7589), total 27061 chars, 14 total Q&A, 5 full acknowledge/mitigate/data blocks.
+- **Sanity check result**: DB query confirms all 5 topics present (Priority Inversion / Worker Starvation / Distributed Lock Trade-off / Exactly-once Delivery / Poison Pill Handling). 承认局限 count = 5. Existing Chinese content preserved in all 8 sections. No new bare | in math introduced.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-166 --status completed`
