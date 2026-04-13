@@ -296,3 +296,10 @@
 - **Sanity check result**: Script inserted id=1076; embedded smoke test (9 assertions over pins/boards/users with tagged keys, multi-edge, duplicate, self-edge, unseen nodes) all pass. Verified row via SELECT.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-401 --status completed
+
+## 2026-04-13 -- [T-P1-408] Pinterest SD: Ad CTR Prediction
+- **What I did**: Wrote end-to-end Chinese SD doc docs/pinterest/system_design_ad_ctr.md covering clarifying questions, high-level architecture (multi-stage candidate gen / L1 / L2 / calibration / auction), data pipeline + delayed-feedback label construction, four feature families + train/serve skew, DeepFM vs DCN-v2 vs AutoInt model choice, Platt/isotonic calibration + negative-sampling prior correction, serving latency budget breakdown, online metrics (NE, LogLoss, calibration ratio, ECE), and 8 common follow-ups with Chinese interview Q/A snippets.
+- **Deliverables**: docs/pinterest/system_design_ad_ctr.md (new, 260 lines).
+- **Sanity check result**: File created; line count 260; structure mirrors existing pinterest SD docs (pin_ranking, notification_reco); covers all 6 required topics from task description (pipeline, feature eng, model, calibration, serving, online metrics).
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-408 --status completed

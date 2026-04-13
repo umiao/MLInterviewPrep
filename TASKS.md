@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-408: [Pinterest/SD] SD: Ad CTR prediction
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Pinterest SD 2025-11. (1) data pipeline (impressions/clicks with attribution), (2) feature engineering (user/ad/context crosses), (3) model (DeepFM/wide-and-deep/AutoInt), (4) calibration (Platt/isotonic), (5) serving (model server, feature store, latency budget), (6) online metrics (NE, LogLoss, calibration error). Chinese markdown docs/pinterest/system_design_ad_ctr.md.
-
 #### T-P1-409: [Pinterest/SD] SD: User & Item Embeddings
 - **Priority**: P1
 - **Complexity**: L
@@ -127,6 +121,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 366 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons
+- [x] **2026-04-13** -- T-P1-408: [Pinterest/SD] SD: Ad CTR prediction. Pinterest SD 2025-11. (1) data pipeline (impressions/clicks with attribution), (2) feature engineering (user/ad/context 
 - [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 
 - [x] **2026-04-13** -- T-P1-403: [Pinterest/custom] Round string s by precision p. Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->
 - [x] **2026-04-13** -- T-P1-402: [Pinterest/custom] round() from scratch (string input). Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.
