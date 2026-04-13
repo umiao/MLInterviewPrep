@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-400: [Pinterest/custom] Grant Access permission propagation
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Pinterest coding 2025-11. Problem linked at hack2hire.com (URL in dump). Research and document: likely DAG/graph permission propagation. Solution + Chinese notes as non-LC entry. Link in Pinterest index doc.
-
 #### T-P1-401: [Pinterest/custom] Pin Connectivity
 - **Priority**: P1
 - **Complexity**: M
@@ -142,6 +136,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 
 - [x] **2026-04-13** -- T-P1-403: [Pinterest/custom] Round string s by precision p. Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->
 - [x] **2026-04-13** -- T-P1-402: [Pinterest/custom] round() from scratch (string input). Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.
+- [x] **2026-04-13** -- T-P1-400: [Pinterest/custom] Grant Access permission propagation. Pinterest coding 2025-11. Problem linked at hack2hire.com (URL in dump). Research and document: likely DAG/graph permiss
 - [x] **2026-04-13** -- T-P1-399: [Pinterest/custom] Prefix-match first-word-index. Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix
 - [x] **2026-04-13** -- T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation. Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirro
 - [x] **2026-04-13** -- T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II. New Pinterest problem (harder variant of 1564, enter from both ends). Chinese notes: two-pointer shortest-interior-heigh

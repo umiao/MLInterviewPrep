@@ -282,3 +282,10 @@
 - **Sanity check result**: Verified all 12 referenced EX IDs exist in docs/bq_behavioral_examples.json; each question maps to 2-3 distinct stories; avoided over-reuse (EX-01 only primary in Q2, backup in Q3; EX-15 backup in both Q3 and Q5 with distinct angles, flagged in usage notes).
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-412 --status completed (already done)
+
+## 2026-04-13 -- [T-P1-400] Pinterest Grant Access / permission propagation custom problem
+- **What I did**: Added Pinterest coding 2025-11 custom problem "Grant Access / Permission Propagation on a DAG" via scripts/_add_pinterest_grant_access.py. Covers canonical upward ancestor-walk solution, downward-closure alternative, revoke semantics (deny-list vs recompute), true-DAG multi-parent handling, group grants, and scale trade-offs. English + Chinese notes.
+- **Deliverables**: scripts/_add_pinterest_grant_access.py (new); data/mle_prep.db row id=1075.
+- **Sanity check result**: Script inserted id=1075; ran the embedded smoke test end-to-end (tree + multi-parent DAG, 9 assertions) -- all pass. Verified row present via SELECT.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-400 --status completed
