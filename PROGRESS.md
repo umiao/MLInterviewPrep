@@ -543,3 +543,10 @@
 - **Sanity check result**: `python scripts/_smoke_prefix_first_index.py` -> OK all smoke tests passed (Trie/bisect parity on sorted input, unsorted-only Trie cases, empty-prefix, and the bisect-lands-on-'az'-for-prefix-'ap' trap). Seeder -> `[INSERT] id=1072`.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-399 --status completed`
+
+## 2026-04-13 -- [T-P1-402] Pinterest round()-from-scratch custom problem
+- **What I did**: Added a non-LC Pinterest-tag problem to `data/mle_prep.db` for the 2025-11 "implement round() on a decimal string without using float()" prompt. Notes contain the canonical 4-segment state-machine parser (whitespace/sign/int/dot/frac), half-up carry propagation, English + Chinese explanations, a why-not-float() section (overflow + `2.675` binary artefact), and an edge-case matrix including `'-.2'`, `'2.'`, `'9.5' -> 10`, `'99.5' -> 100`, explicit `+` sign, and `ValueError` cases (`''`, `'.'`, `'1.2.3'`, `'1e2'`).
+- **Deliverables**: scripts/_add_pinterest_round_from_scratch.py (new, idempotent seeder), scripts/_smoke_round_from_scratch.py (new, standalone verifier), data/mle_prep.db (new row id=1073).
+- **Sanity check result**: `python scripts/_smoke_round_from_scratch.py` -> OK 20 valid + 9 invalid cases passed (including 400-digit input that would overflow float()). Seeder -> `[INSERT] id=1073`; second run -> `[SKIP]` (idempotent).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-402 --status completed`
