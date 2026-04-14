@@ -556,3 +556,10 @@
 - **Sanity check result**: First run inserted 21 rows. Second run: 0 INSERT / 0 UPDATE / 21 SKIP (idempotent). Counts match AC4: problems=13, nodes=5, bq=3.
 - **Status**: [DONE]
 - **Request**: Cross off T-P0-218.
+
+## 2026-04-14 -- [T-P0-216] Portal: Coding tab + Problem drawer + deeplink regression test
+- **What I did**: Added a new `Coding` tab to `PrepNotesPage`, moved tab state to URL (`?tab=...`), preserved legacy `?doc=N` via a pure parser `parsePrepParams`. Coding tab fetches the unified `/companies/:id/prep` endpoint and renders tagged problems grouped by core/likely/stretch; card click pushes `?tab=coding&problem=N` and opens `ProblemDrawer` via dbId. Close drawer uses `navigate(-1)` so the browser back button closes the drawer without leaving the tab. Tab changes use `replace:true` (no history pollution).
+- **Deliverables**: `src/utils/prepUrlParams.ts`, `src/utils/prepUrlParams.test.ts` (11 tests: legacy `?doc=38`, `?tab=docs&doc=38`, `?tab=coding&problem=1081`, bogus tab fallback, etc.), `src/components/companies/CodingTab.tsx`, `src/pages/PrepNotesPage.tsx` (refactor).
+- **Sanity check result**: `npm test` 39/39 pass (11 new). `npm run build` passes (tsc -b + vite). Manual browser smoke deferred to user per AC6 intent (Playwright not installed); regression test pins URL contract at unit level.
+- **Status**: [DONE]
+- **Request**: Cross off T-P0-216.

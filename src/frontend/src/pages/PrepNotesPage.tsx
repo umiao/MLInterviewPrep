@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, useCallback, useEffect } from "react";
+import { useRef, useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
@@ -9,6 +9,7 @@ import ProblemDrawer from "../components/problems/ProblemDrawer";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
 import KnowledgeCardsPanel from "../components/companies/KnowledgeCardsPanel";
+import CodingTab from "../components/companies/CodingTab";
 import DocTocSidebar from "../components/ui/DocTocSidebar";
 import DynamicTocSidebar from "../components/ui/DynamicTocSidebar";
 import type { TocHeading } from "../utils/slugify";
@@ -18,10 +19,9 @@ import {
   type CompanyDocument,
 } from "../hooks/useForumPosts";
 import type { Company } from "../types/company";
+import { parsePrepParams, type PrepTab } from "../utils/prepUrlParams";
 
 type ImportMode = "append" | "replace";
-/** "notes" = main prep_notes, "forum" = forum tab, "doc:N" = child document N */
-type PageTab = "notes" | "forum" | "knowledge" | `doc:${number}`;
 
 /** Threshold: only show TOC sidebar for documents >= 20K chars */
 const TOC_MIN_CHARS = 8_000;
@@ -36,25 +36,40 @@ export default function PrepNotesPage() {
   const navigate = useNavigate();
   const [importMode, setImportMode] = useState<ImportMode>("append");
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialDocParam = searchParams.get("doc");
-  const [activeTab, setActiveTab] = useState<PageTab>(
-    initialDocParam && /^\d+$/.test(initialDocParam)
-      ? (`doc:${Number(initialDocParam)}` as PageTab)
-      : "notes",
+  const prepParams = useMemo(
+    () => parsePrepParams("?" + searchParams.toString()),
+    [searchParams],
+  );
+  const { tab: activeTab, docId: activeDocId, problemId: activeProblemId } =
+    prepParams;
+
+  const goToTab = useCallback(
+    (tab: PrepTab, docId?: number) => {
+      const next = new URLSearchParams();
+      next.set("tab", tab);
+      if (tab === "docs" && docId !== undefined) next.set("doc", String(docId));
+      // Tab change uses replaceState -- no history pollution.
+      setSearchParams(next, { replace: true });
+    },
+    [setSearchParams],
   );
 
-  // Keep `?doc=N` URL param in sync with current activeTab.
-  useEffect(() => {
-    const next = new URLSearchParams(searchParams);
-    if (typeof activeTab === "string" && activeTab.startsWith("doc:")) {
-      next.set("doc", activeTab.slice(4));
-    } else {
-      next.delete("doc");
+  const openProblemDrawer = useCallback(
+    (problemId: number) => {
+      // Drawer open uses pushState so back button closes drawer but stays on tab.
+      navigate(
+        { search: `?tab=coding&problem=${problemId}` },
+        { replace: false },
+      );
+    },
+    [navigate],
+  );
+
+  const closeProblemDrawer = useCallback(() => {
+    if (activeProblemId !== null) {
+      navigate(-1);
     }
-    if (next.toString() !== searchParams.toString()) {
-      setSearchParams(next, { replace: true });
-    }
-  }, [activeTab, searchParams, setSearchParams]);
+  }, [navigate, activeProblemId]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -124,11 +139,6 @@ export default function PrepNotesPage() {
   // Child documents
   const { data: documents } = useCompanyDocuments(companyId);
 
-  // Parse active document ID from tab
-  const activeDocId =
-    typeof activeTab === "string" && activeTab.startsWith("doc:")
-      ? Number(activeTab.slice(4))
-      : null;
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -202,16 +212,16 @@ export default function PrepNotesPage() {
             <TabButton
               label="Notes"
               active={activeTab === "notes"}
-              onClick={() => setActiveTab("notes")}
+              onClick={() => goToTab("notes")}
             />
             {documents && documents.length > 0 && (
               <select
-                value={activeDocId !== null ? activeTab : ""}
+                value={activeTab === "docs" && activeDocId !== null ? String(activeDocId) : ""}
                 onChange={(e) => {
-                  if (e.target.value) setActiveTab(e.target.value as PageTab);
+                  if (e.target.value) goToTab("docs", Number(e.target.value));
                 }}
                 className={`text-sm px-3 py-1 rounded border-0 cursor-pointer ${
-                  activeDocId !== null
+                  activeTab === "docs"
                     ? "bg-gray-100 text-gray-800 font-medium"
                     : "text-gray-500 hover:bg-gray-50 bg-transparent"
                 }`}
@@ -220,25 +230,30 @@ export default function PrepNotesPage() {
                   Documents ({documents.length})
                 </option>
                 {documents.map((doc) => (
-                  <option key={doc.id} value={`doc:${doc.id}`}>
+                  <option key={doc.id} value={String(doc.id)}>
                     {doc.title}
                   </option>
                 ))}
               </select>
             )}
             <TabButton
+              label="Coding"
+              active={activeTab === "coding"}
+              onClick={() => goToTab("coding")}
+            />
+            <TabButton
               label="Knowledge"
               active={activeTab === "knowledge"}
-              onClick={() => setActiveTab("knowledge")}
+              onClick={() => goToTab("knowledge")}
             />
             <TabButton
               label="Forum Posts"
               active={activeTab === "forum"}
-              onClick={() => setActiveTab("forum")}
+              onClick={() => goToTab("forum")}
             />
             </div>
           </div>
-          {activeDocId !== null && documents && (
+          {activeTab === "docs" && activeDocId !== null && documents && (
             <span className="text-xs text-gray-500">
               {documents.find((d) => d.id === activeDocId)?.title}
             </span>
@@ -253,7 +268,7 @@ export default function PrepNotesPage() {
             enableKeyboard={mode === "preview"}
           />
           {/* Mode toggle -- notes/doc tabs only */}
-          {(activeTab === "notes" || activeDocId !== null) && (
+          {(activeTab === "notes" || activeTab === "docs") && (
             <>
               <div className="flex gap-1">
                 <button
@@ -377,15 +392,30 @@ export default function PrepNotesPage() {
         </>
       ) : activeTab === "knowledge" ? (
         <KnowledgeCardsPanel companyId={companyId} />
-      ) : activeDocId !== null ? (
+      ) : activeTab === "coding" ? (
+        <>
+          <CodingTab
+            companyId={companyId}
+            onSelect={(p) => openProblemDrawer(p.id)}
+          />
+          <ProblemDrawer
+            dbId={activeProblemId}
+            onClose={closeProblemDrawer}
+          />
+        </>
+      ) : activeTab === "docs" && activeDocId !== null ? (
         <DocumentViewer
           companyId={companyId}
           docId={activeDocId}
           mode={mode}
         />
-      ) : (
+      ) : activeTab === "forum" ? (
         <div className="flex-1 overflow-auto p-6 min-h-0">
           <ForumPostsTab companyId={companyId} />
+        </div>
+      ) : (
+        <div className="flex-1 overflow-auto p-6 min-h-0 text-gray-400 italic">
+          Select a document from the dropdown.
         </div>
       )}
     </div>
