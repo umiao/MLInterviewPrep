@@ -10,7 +10,12 @@ from src.backend.models.behavioral_theme import (
     ExampleThemeTag,
     QuestionThemeTag,
 )
-from src.backend.models.company import Company, CompanyTopicWeight
+from src.backend.models.company import Company, CompanyDocument, CompanyTopicWeight
+from src.backend.models.company_tags import (
+    BehavioralExampleCompanyTag,
+    NodeCompanyTag,
+    ProblemCompanyTag,
+)
 from src.backend.models.knowledge_card import CompanyCardOverlay, KnowledgeCard
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.models.framework import FrameworkNode, StudyLog
@@ -36,7 +41,11 @@ __all__ = [
     "FrameworkNode",
     "StudyLog",
     "Company",
+    "CompanyDocument",
     "CompanyTopicWeight",
+    "ProblemCompanyTag",
+    "NodeCompanyTag",
+    "BehavioralExampleCompanyTag",
     "KnowledgeCard",
     "CompanyCardOverlay",
     "InterviewEvent",

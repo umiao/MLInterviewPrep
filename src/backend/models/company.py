@@ -88,6 +88,15 @@ class CompanyDocument(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False, default="")
     source_type = Column(String, nullable=False, default="manual")
+    doc_kind = Column(
+        String,
+        CheckConstraint(
+            "doc_kind IN ('prep_note','hub_doc','recruiter_call','other')"
+        ),
+        nullable=False,
+        default="prep_note",
+        server_default="prep_note",
+    )
     content_hash = Column(String, nullable=True)
     source_path = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())

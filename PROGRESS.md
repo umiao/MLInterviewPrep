@@ -521,3 +521,10 @@
 - **Sanity check**: Script ran twice -- first INSERTED, second UPDATED to identical lengths. All three self-test sections passed.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-211 --status completed`.
+
+## 2026-04-14 21:00 -- [T-P0-214] Portal migrations 19/20/21 + doc_kind + tag models
+- **What I did**: Appended migrations 19/20/21 to `src/backend/database.py::MIGRATIONS`: (19) `problem_company_tags` table with `relevance` (core/likely/stretch) + `source` (manual/auto_from_doc_ref/auto_from_overlay/auto_from_interview_log) CHECK constraints, UNIQUE(problem_id, company_id), indices on (company_id, relevance) and problem_id; also adds `company_documents.doc_kind` TEXT CHECK ∈ (prep_note/hub_doc/recruiter_call/other) DEFAULT 'prep_note' with backfill (recruiter-titled → `recruiter_call`, others → `prep_note`). (20) same shape `node_company_tags` (node_id ↔ framework_nodes). (21) `behavioral_example_company_tags` with generic `company_attribute TEXT` (not google_attribute — works for Meta/Amazon). Created `src/backend/models/company_tags.py` with `ProblemCompanyTag`, `NodeCompanyTag`, `BehavioralExampleCompanyTag` SQLAlchemy models using `backref` + `passive_deletes=True` so DB-level ON DELETE CASCADE handles parent deletes. Added `doc_kind` column to `CompanyDocument` model. Registered new models in `models/__init__.py`. No `group_tag` field per review.
+- **Deliverables**: modified `src/backend/database.py` (+~80 lines migrations), `src/backend/models/company.py` (+doc_kind), `src/backend/models/__init__.py` (+3 exports); new `src/backend/models/company_tags.py`, `tests/test_tag_models.py` (7 tests covering AC2-AC5).
+- **Sanity check**: `pytest tests/test_tag_models.py` → 7/7 passed. Verifies schema_versions ≥ 21, doc_kind default, CRUD on each tag table, UNIQUE constraint violation, DB-level cascade delete (with `PRAGMA foreign_keys=ON`), and relevance CHECK constraint rejection.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-214 --status completed`.

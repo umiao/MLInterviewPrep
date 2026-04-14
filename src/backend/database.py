@@ -481,6 +481,82 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ALTER TABLE system_designs ADD COLUMN source_path TEXT",
         ],
     ),
+    (
+        19,
+        "Create problem_company_tags + add company_documents.doc_kind column",
+        [
+            "CREATE TABLE IF NOT EXISTS problem_company_tags ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  problem_id INTEGER NOT NULL REFERENCES problems(id) ON DELETE CASCADE,"
+            "  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,"
+            "  relevance VARCHAR NOT NULL DEFAULT 'core'"
+            "    CHECK(relevance IN ('core','likely','stretch')),"
+            "  source VARCHAR NOT NULL DEFAULT 'manual'"
+            "    CHECK(source IN ('manual','auto_from_doc_ref','auto_from_overlay','auto_from_interview_log')),"
+            "  notes TEXT,"
+            "  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(problem_id, company_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_pct_company_relevance "
+            "ON problem_company_tags(company_id, relevance)",
+            "CREATE INDEX IF NOT EXISTS ix_pct_problem_id "
+            "ON problem_company_tags(problem_id)",
+            "ADD_COLUMN_IF_MISSING:company_documents:doc_kind:"
+            "ALTER TABLE company_documents ADD COLUMN doc_kind TEXT "
+            "DEFAULT 'prep_note' "
+            "CHECK(doc_kind IN ('prep_note','hub_doc','recruiter_call','other'))",
+            "UPDATE company_documents SET doc_kind = 'recruiter_call' "
+            "WHERE doc_kind IS NULL AND (LOWER(title) LIKE '%recruiter call%' "
+            "OR LOWER(title) LIKE '%recruiter-call%')",
+            "UPDATE company_documents SET doc_kind = 'prep_note' "
+            "WHERE doc_kind IS NULL",
+        ],
+    ),
+    (
+        20,
+        "Create node_company_tags table",
+        [
+            "CREATE TABLE IF NOT EXISTS node_company_tags ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  node_id INTEGER NOT NULL REFERENCES framework_nodes(id) ON DELETE CASCADE,"
+            "  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,"
+            "  relevance VARCHAR NOT NULL DEFAULT 'core'"
+            "    CHECK(relevance IN ('core','likely','stretch')),"
+            "  source VARCHAR NOT NULL DEFAULT 'manual'"
+            "    CHECK(source IN ('manual','auto_from_doc_ref','auto_from_overlay','auto_from_interview_log')),"
+            "  notes TEXT,"
+            "  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(node_id, company_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_nct_company_relevance "
+            "ON node_company_tags(company_id, relevance)",
+            "CREATE INDEX IF NOT EXISTS ix_nct_node_id "
+            "ON node_company_tags(node_id)",
+        ],
+    ),
+    (
+        21,
+        "Create behavioral_example_company_tags table",
+        [
+            "CREATE TABLE IF NOT EXISTS behavioral_example_company_tags ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  example_id INTEGER NOT NULL REFERENCES behavioral_examples(id) ON DELETE CASCADE,"
+            "  company_id INTEGER NOT NULL REFERENCES companies(id) ON DELETE CASCADE,"
+            "  relevance VARCHAR NOT NULL DEFAULT 'core'"
+            "    CHECK(relevance IN ('core','likely','stretch')),"
+            "  source VARCHAR NOT NULL DEFAULT 'manual'"
+            "    CHECK(source IN ('manual','auto_from_doc_ref','auto_from_overlay','auto_from_interview_log')),"
+            "  company_attribute TEXT,"
+            "  notes TEXT,"
+            "  added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  UNIQUE(example_id, company_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_bect_company_relevance "
+            "ON behavioral_example_company_tags(company_id, relevance)",
+            "CREATE INDEX IF NOT EXISTS ix_bect_example_id "
+            "ON behavioral_example_company_tags(example_id)",
+        ],
+    ),
 ]
 
 
