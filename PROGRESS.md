@@ -465,3 +465,10 @@
 - **Sanity check result**: First run `[INSERTED] subtree id=194 ... [INSERTED] leaf id=195 ... length=5607`, second run idempotent `[EXISTS] ... [UPDATED] ... length=5607`. StudyNoteBuilder.validate returned no warnings (no orphan single-$, header comment present). FormulaBlock guarantees all math is $$-wrapped. Manual browser smoke at `/framework/195/notes` left for user verification per CLAUDE.md manual-smoke rule.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-201 --status completed`.
+
+## 2026-04-14 -- [T-P0-202] Google prep: Streaming Top-K deep dive
+- **What I did**: Built idempotent `scripts/seed_streaming_topk.py` that creates new leaf `pillar1.streaming_topk` directly under pillar1 (Coding & Algorithms). Content via StudyNoteBuilder/FormulaBlock: prerequisites, term registry (CMS/HLL/SS/MG/PPK), 12 sections covering clarify-first framing; precise heap+hashmap baseline with complexity; Count-Min Sketch with (epsilon,delta) parameter formulas w=e/eps, d=ln(1/delta) and additive error bound; HyperLogLog with cardinality formula and explicit "NOT for top-K" clarification; Space-Saving / Misra-Gries with N/K deterministic bound; decision table memory x accuracy x stationarity; reservoir sampling uniform-window contrast; distributed partition-by-key + K-way merge correctness argument; key-skew mitigations (salting, two-stage, hot-key fast path); worked example log-file top-K videos (connects to T-P1-206); common pitfalls; 3 Q&A (1MB/1e9 design, CMS vs SS, partition-by-key vs round-robin); self-check checklist. Chinese prose + English code/formulas per feedback_lc_notes_chinese + feedback_math_formatting.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_streaming_topk.py` (new), `data/mle_prep.db` (new row: framework_nodes id 196, length 7924 chars).
+- **Sanity check**: First run `[INSERTED] leaf id=196 ... length=7924`, second run idempotent `[UPDATED] ... length=7924`. StudyNoteBuilder.validate returned no warnings. Manual browser smoke at `/framework/196/notes` left for user verification.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-202 --status completed`.
