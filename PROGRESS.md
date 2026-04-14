@@ -472,3 +472,10 @@
 - **Sanity check**: First run `[INSERTED] leaf id=196 ... length=7924`, second run idempotent `[UPDATED] ... length=7924`. StudyNoteBuilder.validate returned no warnings. Manual browser smoke at `/framework/196/notes` left for user verification.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-202 --status completed`.
+
+## 2026-04-14 -- [T-P0-204] Google prep: Large-input resource-model framework (L4 coding extension)
+- **What I did**: Built idempotent `scripts/seed_scaling_resource_model.py` that creates new leaf `pillar1.scaling_resource_model` directly under pillar1. Content via StudyNoteBuilder/FormulaBlock: prerequisites, term registry (EMS/CMS/HLL/PPK/MR/IO), 11 sections covering why-L4-matters framing; 10-item clarify-first checklist (scale/batch-vs-stream/U/distribution/precision/latency/cluster/format/semantics); bottleneck analysis memory-vs-CPU-vs-IO with quantitative bounds (RAM 256GB, SSD 3GB/s, CPU 1e10 ops/s); single-machine upgrade ladder (streaming/reservoir/sketches/EMS/mmap/columnar) with IO cost formula; distributed MR three-phase costs + three shuffle-reduction tactics (combiner/broadcast/pre-partition); key-skew mitigations (salting/heavy-hitter/skew-aware/tree-agg); Terasort worked example (sampling+splitter); meeting-rooms interval time-window-partition worked example with boundary correction; decision table input-size->approach; pitfalls; 4 Q&A (10GB top-K / 1PB scaleup / 1PB sort / when-NOT-to-distribute); self-check checklist. Chinese prose + English formulas/terms.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_scaling_resource_model.py` (new), `data/mle_prep.db` (new row: framework_nodes id 197, length 8845 chars).
+- **Sanity check**: First run `[INSERTED] leaf id=197 ... length=8845`, second run idempotent `[UPDATED] ... length=8845`. StudyNoteBuilder.validate returned no warnings. Manual browser smoke at `/framework/197/notes` left for user verification.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-204 --status completed`.
