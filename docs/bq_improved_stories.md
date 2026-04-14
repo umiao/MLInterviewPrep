@@ -599,3 +599,80 @@ Remaining Tier-2 stories not picked up by the metric or ownership sweeps. **EX-0
 | **MurmurHash** | Fast, well-distributed, non-cryptographic hash function |
 | **Tech Debt** | Shortcuts in code/architecture that cost more to fix later |
 | **Declarative System** | Specify WHAT you want; system handles HOW |
+
+---
+
+# [google-g&l] Round 2 Polished Stories (2026-04-17)
+
+> Added 2026-04-14 for Google on-site Round 2 (Googleyness & Leadership). Three STAR-format 2-3 min versions of EX-02 / EX-08 / EX-17, each tagged with the Google Hiring Attribute + Googleyness sub-signal they target. These supersede the Tier-1 versions above for G&L delivery; the originals remain canonical for other interviews.
+
+## [google-g&l] STORY A: Conflict with Manager -- Strategic Team Transfer (EX-02)
+
+- **Target signals**: Leadership (emergent) + Googleyness: *Challenges status quo*, *Does the right thing*, *Values feedback*
+- **Interviewer prompts it answers**: "Time you disagreed with your manager", "Pushed back against a decision", "Time you faced organizational resistance"
+
+**Situation (30s):** After Hacker Week, I had a working diversity-ranking prototype showing 200M+ GMB opportunity, but my manager judged it out-of-scope -- our relevance team's charter was filtering thresholds, not ranking quality. Experiment slots were denied and the project was about to die.
+
+**Task (15s):** I had to either (a) keep pushing inside a team whose OKRs didn't match, or (b) move the problem somewhere it could breathe -- knowing a transfer would cost me political capital and rebuild time.
+
+**Action (90s):**
+- First I tried reframing the project within the team's charter -- explicitly adapted it to relevance-threshold language. It failed because the mismatch was structural: the team's OKRs measured precision/recall on relevance, not allocation across intents. No amount of reframing would change what they were measured on.
+- I acknowledged to my manager that I had misjudged the framing upfront -- I should have translated the business case into OKR language earlier and sought a ranking-team sponsor before Hacker Week, not after. Owning that prevented the conversation from becoming adversarial.
+- I made the call to transfer to the Final Ranking team, reframing diversity as an **allocation problem** so it mapped to their charter. I negotiated directly with the receiving team's lead before formally raising the transfer, so they were already a sponsor when the request went up.
+- Through the transfer I kept my previous manager in the loop -- no surprise, no escalation to their skip-level -- because "the right thing" was to leave cleanly, not to win.
+
+**Result (30s):** The transfer gave me complete ownership. I led the first experiment to a **+1% GMB lift**, and the allocation framework was subsequently reused across multiple verticals for **200M+ annualized impact**. Core lesson: *the problem follows the person* -- when organizational structure blocks a validated idea, move the idea to the right home instead of fighting gravity. I now pressure-test any new project against the receiving team's OKR language before I start coding.
+
+> **Googleyness hook**: This is *Challenges status quo* (my team's scope was the status quo, not just an industry metric) + *Does the right thing* (moved the work to serve users instead of protecting my territory) + *Values feedback* (took my manager's scope objection as a valid signal, not an obstacle to bulldoze).
+
+---
+
+## [google-g&l] STORY B: Conflict across Teams -- VP Escalation on Cumulative Degradation (EX-08)
+
+- **Target signals**: Leadership (emergent) + Googleyness: *Does the right thing*, *Thrives in ambiguity*, *Challenges status quo*
+- **Interviewer prompts it answers**: "Hardest stakeholder situation", "Time you escalated", "Time you noticed something others missed"
+
+**Situation (30s):** Over several months I noticed our search production baseline was silently degrading, but no one else saw it -- every team's A/B tests used the *latest* production as control, which hid the cumulative decline. Each team was independently launching modules (carousels, widgets) that passed individual tests but crowded out organic listings together.
+
+**Task (15s):** I had no mandate to audit other teams' launches, and raising it meant telling multiple teams their shipped, celebrated work was collectively harmful. I had to decide whether to surface it, and if so, how -- manager-level or higher.
+
+**Action (90s):**
+- Quantified the invisible regression first: ran an A/B against a **months-old** baseline (not the rolling one) and confirmed a significant GMB gap. Data before accusation.
+- Traced the mechanism: each module occupied 4-6x the space of a regular listing, so N independent "wins" compounded into a net loss. Each team was locally right, globally wrong.
+- Socialized the finding at peer-engineer level first -- I wanted the owning teams to see the data before I escalated, not learn it from a VP. Two teams agreed with the diagnosis; one pushed back that their module's standalone test was positive.
+- When peer-level alignment couldn't produce a cross-team fix (no single team owned the "shared canvas"), I escalated to the VP with a one-page memo: the baseline-drift evidence, the module-count trendline, and a concrete proposal for module arbitration. I was explicit that this wasn't a blame on any team -- it was a missing mechanism.
+
+**Result (30s):** The VP-level escalation triggered a full investigation and led to the creation of a **dedicated module arbitration team and system**. That system was the organizational genesis of the allocation framework that later produced **200M+ annualized impact**. Core lesson: *when independent local optima collectively destroy the global optimum, the fix is a mechanism, not a memo* -- and the right escalation altitude is the lowest level that owns the shared resource.
+
+> **Googleyness hook**: This is *Does the right thing* (uncomfortable escalation that made other teams look bad short-term but fixed a user-harming pattern) + *Thrives in ambiguity* (the degradation was invisible in every standard dashboard; I had to invent the right comparison) + *Challenges status quo* (the "latest-as-baseline" convention was the status quo, and it was the actual bug).
+
+---
+
+## [google-g&l] STORY C: Failure + Growth -- Harsh Feedback into Mutual Respect (EX-17)
+
+- **Target signals**: Googleyness: *Values feedback*, *Does the right thing*, *Collaboration*
+- **Interviewer prompts it answers**: "A project that failed", "Time you received hard feedback", "A mistake and what you learned"
+
+**Situation (30s):** A senior IC told me, in writing, that I "lacked basic engineering quality" and refused to review any more of my code. The trigger: a researcher I was supporting made late naming changes after I had verified the PR, the rename broke the build, and it landed under my name.
+
+**Task (15s):** I had a choice -- defend myself (the researcher made the change, not me), or accept that my name was on the PR and own the outcome. The first path felt fair; the second was the one that would actually fix anything.
+
+**Action (90s):**
+- I did **not** fire back a defense email. I took 24 hours, then shared the full context with my manager -- not to shift blame, but to get a second read on whether the feedback was calibrated. My manager confirmed the senior IC was harsh in tone but right in substance: *if your name is on the PR, you own it, full stop*.
+- I internalized the principle: engineer-owned PRs means the engineer is the last line of defense, regardless of who typed the change. Researcher contributions are inputs, not shared liability.
+- I defined a concrete personal protocol -- for any researcher-sourced PR, I now re-run the full build + tests **after** any researcher touch, no matter how cosmetic, and I block merge on any post-verification change until I re-verify.
+- I proactively set up a 1:1 with the senior IC. I did not ask them to reconsider. I (a) acknowledged the mistake was mine because my name was on the PR, (b) walked them through the new protocol, (c) asked for one specific code review in the next sprint to prove it in practice.
+
+**Result (30s):** They agreed to the single review, then another, then became one of my most frequent reviewers. Over time we became professional friends and were both known in the org for rigorous checklist adherence and fast response times. The engineer-researcher ownership policy I wrote up was adopted by the team and prevented a recurrence. Core lesson: *harsh feedback, even delivered badly, usually contains a signal -- my job is to extract the signal and change the system, not to grade the delivery*.
+
+> **Googleyness hook**: This is *Values feedback* at the clearest level (took a hostile piece of feedback as data, not as an attack) + *Does the right thing* (chose ownership over self-defense when the defense would have been technically correct but professionally wrong) + *Collaboration* (repaired a peer relationship instead of routing around it).
+
+---
+
+### G&L Delivery Reminders (common to all three)
+
+- Start each story with the **risk** in one sentence -- don't bury the stakes in setup.
+- Use **"I"** in every Action bullet. "We" is only allowed in Situation.
+- If the interviewer interrupts during Action, that's good -- stop and answer; the interrupt is signal about what they care about.
+- If asked for numbers you don't remember exactly, give **range + reasoning** ("on the order of X, derived from Y"), never invent.
+- End every story with the **one-line learning** -- Google G&L specifically scores whether you extracted a principle, not just an outcome.

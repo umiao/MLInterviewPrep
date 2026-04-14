@@ -83,9 +83,11 @@
 | Ambiguity + Bias for Action | **EX-01 Hacker Week** | "一周内从发现 intent collapse 到 prototype 验证，没人让我做，是 silent failure 让我做的" |
 | Challenge status quo + Have backbone | **EX-03 GMB vs Sale NDCG** | "行业标准指标系统性偏好低价商品，我从第一性原理质疑并提出替代" |
 | Collaboration + Earn trust | **EX-04 Stakeholder 教育** | "MRR 下降引发警惕，我要解释为什么'变差'的指标恰恰说明系统在变好" |
-| Leadership (no title) | **EX-02 主动转团队** | "经理说超出 scope，我没继续在错误边界硬推，转到 Final Ranking team 重新定义问题" |
-| Does the right thing | **EX-08 VP escalation** | "模块数量激增导致质量退化时，我推动建立模块仲裁机制，不是回避升级" |
-| Growth + Failure | 从 `bq_improved_stories.md` 挑一个失败 + 学习闭环的 | （开面前选定） |
+| **Conflict w/ Manager (polished)** | **EX-02 主动转团队 → [`[google-g&l] STORY A`](./bq_improved_stories.md#google-gl-story-a-conflict-with-manager----strategic-team-transfer-ex-02)** | "经理说超出 scope，我没继续在错误边界硬推，转到 Final Ranking team 重新定义问题" |
+| **Conflict across Teams (polished)** | **EX-08 VP escalation → [`[google-g&l] STORY B`](./bq_improved_stories.md#google-gl-story-b-conflict-across-teams----vp-escalation-on-cumulative-degradation-ex-08)** | "模块数量激增导致质量退化时，我推动建立模块仲裁机制，不是回避升级" |
+| **Failure + Growth (polished)** | **EX-17 Harsh feedback → [`[google-g&l] STORY C`](./bq_improved_stories.md#google-gl-story-c-failure--growth----harsh-feedback-into-mutual-respect-ex-17)** | "senior IC 说我缺乏基本工程素养，我没辩解，把 researcher 改动的锅也接下，最终从对立变成最常 review 我 PR 的人" |
+
+> **T-P0-200 polish note (2026-04-14)**: The three rows marked **polished** link to STAR 2-3 min versions in `bq_improved_stories.md` under the `# [google-g&l]` section, each tagged with the Google Hiring Attribute + Googleyness sub-signal they target. Use those versions for Round 2 delivery; the Tier-1 originals (EX-02/08/17) remain canonical for non-Google interviews.
 
 ### STAR 结构提醒 (2-3 min per story)
 - **S** 30s: 情境 + 为什么重要
