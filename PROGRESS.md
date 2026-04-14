@@ -479,3 +479,10 @@
 - **Sanity check**: First run `[INSERTED] leaf id=197 ... length=8845`, second run idempotent `[UPDATED] ... length=8845`. StudyNoteBuilder.validate returned no warnings. Manual browser smoke at `/framework/197/notes` left for user verification.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-204 --status completed`.
+
+## 2026-04-14 -- [T-P1-205] Google coding: Course Schedule + damage-node + Shortest path variants
+- **What I did**: Built idempotent `scripts/seed_google_course_schedule_shortest_path.py`. Appended Google 2026-04-17 follow-up notes to problems 45 (LC 207) and 113 (LC 210): 207 gets DAG-with-node-weights formulation (topo+DP O(V+E), Dijkstra upgrade, 0-1 BFS alternative, heap-pitfall extension); 210 gets clarification that "min-damaged topological order" is actually path-on-DAG (reduces to 207) plus a priority-queue tie-break variant. Added Google company tag + "Google 2026-04-17 prep" source badge. Inserted new custom problem id 1080 "Shortest Path A->B (undirected, unweighted)" with BFS baseline, Dijkstra follow-up, all-pairs Floyd-Warshall vs V x Dijkstra comparison (with sparse/dense decision table), predecessor-matrix reconstruction, and complexity summary table (BFS/Dijkstra/Bellman-Ford/Floyd/Johnson). All Chinese prose + English formulas/code per feedback_lc_notes_chinese.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_google_course_schedule_shortest_path.py` (new), `data/mle_prep.db` (problems 45/113 notes appended, new problem id 1080 inserted).
+- **Sanity check**: First run produced lengths {45: 2880, 113: 2453, 1080: 3361}; second run identical (idempotent via marker + JSON tag de-dup + source de-dup).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-205 --status completed`.
