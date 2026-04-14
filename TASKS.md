@@ -21,12 +21,6 @@
 - **Depends on**: None
 - **Description**: HR source: 'you can anticipate 90%... top 20 questions, 3 answers for each, detailed and data-driven'. AC: (1) 列出 top 20 (tell me about time / disagreed / failed / ambiguity / difficult stakeholder / pushback manager / hardest decision / went above beyond / mentored / lead without authority / handled feedback / conflict / deadline pressure / learned new skill / ethical choice / mistake / proudest / user-first over metric / ambiguous priority / feedback given to peer); (2) 每题至少 1 条 bq_improved_stories 故事可用; (3) 识别覆盖空洞(哪几题没故事映射到); (4) EX-02/08/17 已 polished 够用; (5) 输出 gap list 到 bq_todo_tracker.md.
 
-#### T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (company_id=3, doc_kind=prep_note). 格式: 每题 1 个 Q (自检问题) + 1 段 A (100 字以内, 必含 1 个公式或 1 个数字例子). 不是全文笔记, 是考试卡. AC: 13 张卡 + 末尾 3 个死记口诀 + 面试前晚 checklist (30 分钟过完).
-
 #### T-P0-433: [Google R2] G&L top-20 common questions × 6 polished stories 映射 audit
 - **Priority**: P0
 - **Complexity**: S
@@ -192,6 +186,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-14** -- T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3). 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (com
 - [x] **2026-04-14** -- T-P0-431: [Google R1] Bias/Variance + 过拟合诊断 drill note (company_id=3). 用户点名必须操练到位. Deliverable: docs/google_bias_variance_drill.md, ingest company_documents (company_id=3). AC: (1) 默写 E_D[(y-
 - [x] **2026-04-14** -- T-P0-430: [Google R1] Regularization 全景合并深挖 note (company_id=3). Gap: staging 零散提了 L2/dropout/AdamW, 但用户明确点名要合并深挖. Deliverable: docs/google_regularization_deep_dive.md, ingest as compan
 - [x] **2026-04-14** -- T-P0-414: Fix 4 failing CI checks (test/lint/emoji/migration). Migration _add_column_if_missing skipped; 3 ruff errors fixed; 17 emoji replaced with ASCII tags; 32 migration tests now

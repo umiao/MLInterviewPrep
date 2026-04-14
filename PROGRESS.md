@@ -276,3 +276,9 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified (company_id=3, source_type=manual)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-431 --status completed`
+## 2026-04-15 -- [T-P0-432] Staging 13-question flashcards for Google R1
+- **What I did**: Compressed the 13-block mock interview diagnostic (staging/04_14_ML问题深入拷打.md) into Q/A flashcards. Each card has one self-check question and a concise answer (under 100 words) with at least one formula or numeric example. Cards cover: (1) Bias-Variance, (2) GBDT, (3) Tree vs NN tabular, (4) Class Imbalance, (5) ROC vs PR AUC, (6) Softmax stability, (7) Online Softmax rescale, (8) Batch Norm, (9) BN+Dropout variance shift, (10) SGNS/word2vec, (11) InfoNCE/contrastive, (12) Adam/AdamW, (13) NaN debugging. Ends with 3 mnemonics, 12-item pre-interview checklist (30-min pass), and 3 answer habits. Built with StudyNoteBuilder, ingested into company_documents (company_id=3, doc_id=57).
+- **Deliverables**: scripts/seed_google_staging_13_flashcards.py, docs/google_staging_13_flashcards.md (12123 chars), DB record id=57
+- **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified (company_id=3, source_type=manual)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-432 --status completed`
