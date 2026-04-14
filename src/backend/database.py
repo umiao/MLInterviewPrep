@@ -467,6 +467,20 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ALTER TABLE behavioral_examples ADD COLUMN cn_elevator_pitch TEXT",
         ],
     ),
+    (
+        18,
+        "Add content_hash + source_path columns to company_documents and system_designs (docs<->DB sync)",
+        [
+            "ADD_COLUMN_IF_MISSING:company_documents:content_hash:"
+            "ALTER TABLE company_documents ADD COLUMN content_hash TEXT",
+            "ADD_COLUMN_IF_MISSING:company_documents:source_path:"
+            "ALTER TABLE company_documents ADD COLUMN source_path TEXT",
+            "ADD_COLUMN_IF_MISSING:system_designs:content_hash:"
+            "ALTER TABLE system_designs ADD COLUMN content_hash TEXT",
+            "ADD_COLUMN_IF_MISSING:system_designs:source_path:"
+            "ALTER TABLE system_designs ADD COLUMN source_path TEXT",
+        ],
+    ),
 ]
 
 

@@ -27,6 +27,9 @@ class SystemDesign(Base):
     defense = Column(Text, nullable=True)                 # S7: Adversarial Defense Q&A
     verbal_outline = Column(Text, nullable=True)          # S8: Verbal Outline (3-min & 10-min)
 
+    content_hash = Column(Text, nullable=True)
+    source_path = Column(String(500), nullable=True)
+
     display_order = Column(Integer, default=0)
     created_at = Column(DateTime, default=lambda: datetime.now(UTC))
     updated_at = Column(

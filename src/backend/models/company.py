@@ -88,6 +88,8 @@ class CompanyDocument(Base):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False, default="")
     source_type = Column(String, nullable=False, default="manual")
+    content_hash = Column(String, nullable=True)
+    source_path = Column(String, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
