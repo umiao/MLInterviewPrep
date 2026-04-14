@@ -458,3 +458,10 @@
 - **Sanity check result**: Grepped `^## STORY` in bq_improved_stories.md -- original Tier-1 stories (STORY 1..24, 33) unchanged, new anchors `[google-g&l] STORY A/B/C` appear at file tail. Reviewed each polished story for (a) S/T/A/R present, (b) at least one quantified Result, (c) explicit Googleyness sub-signal named, (d) "I" prefix on every Action bullet. No new stories created per task spec -- strictly reused EX-02/08/17.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-200 --status completed`.
+
+## 2026-04-14 -- [T-P0-201] Seed pillar2.regularization.bias_variance_geometric study note
+- **What I did**: Built idempotent `scripts/seed_bias_variance_geometric.py` that (a) creates new subtree `pillar2.regularization` under `pillar2` (id 194) if absent, (b) creates / updates leaf `pillar2.regularization.bias_variance_geometric` (id 195). Content authored via StudyNoteBuilder / FormulaBlock per CLAUDE.md: prerequisites, term registry (MSE/OLS/MAP/KKT), 8 sections (overview, bias-variance decomposition formula E[(y-hat_y)^2]=Bias^2+Variance+Noise, learning-curve diagnosis table, mitigation-map lever table, L1 vs L2 loss-surface + constraint-region geometric interpretation of sparsity via subgradient and diamond-vs-circle argument, ridge closed-form + lasso soft-thresholding, elastic net bridging, 3 Q&A: L1 sparsity, L2 multicollinearity, when neither suffices), plus self-check checklist. Chinese prose + English display math ($$ wrapped).
+- **Deliverables**: `MLInterviewPrep/scripts/seed_bias_variance_geometric.py` (new), `data/mle_prep.db` (new rows: framework_nodes id 194 subtree + id 195 leaf, description length 5607 chars).
+- **Sanity check result**: First run `[INSERTED] subtree id=194 ... [INSERTED] leaf id=195 ... length=5607`, second run idempotent `[EXISTS] ... [UPDATED] ... length=5607`. StudyNoteBuilder.validate returned no warnings (no orphan single-$, header comment present). FormulaBlock guarantees all math is $$-wrapped. Manual browser smoke at `/framework/195/notes` left for user verification per CLAUDE.md manual-smoke rule.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-201 --status completed`.
