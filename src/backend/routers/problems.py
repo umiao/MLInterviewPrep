@@ -257,6 +257,32 @@ def create_problem(
     return _problem_to_response(db_problem)
 
 
+@router.get("/problems/by-lc/{lc_id}", response_model=ProblemResponse)
+def get_problem_by_leetcode_id(
+    lc_id: int,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Get a single problem by its LeetCode number.
+
+    Used by the doc drawer to resolve `lc://N` markdown links without needing
+    the internal DB id.
+
+    Args:
+        lc_id: LeetCode problem number.
+        db: Database session.
+
+    Returns:
+        ProblemResponse dict.
+
+    Raises:
+        HTTPException: 404 if no problem with that leetcode_id exists.
+    """
+    db_problem = db.query(Problem).filter(Problem.leetcode_id == lc_id).first()
+    if not db_problem:
+        raise HTTPException(status_code=404, detail=f"Problem LC {lc_id} not found")
+    return _problem_to_response(db_problem)
+
+
 @router.get("/problems/{problem_id}", response_model=ProblemResponse)
 def get_problem(
     problem_id: int,

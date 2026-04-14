@@ -1,8 +1,8 @@
 """Audit all system design modules for formula rendering issues."""
-import sqlite3
-import re
-import sys
 import io
+import re
+import sqlite3
+import sys
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 

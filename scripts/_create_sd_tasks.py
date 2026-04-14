@@ -1,6 +1,6 @@
 """Create 20 individual SD interview prep tasks in task_db."""
-import subprocess
 import json
+import subprocess
 import sys
 from pathlib import Path
 

@@ -163,7 +163,7 @@
           "principles": ["ownership", "have_backbone", "think_big", "influence_without_authority", "earn_trust"]
         }
       ],
-      "improvement_notes": "BLOG-04是这条线的绝对亮点，叙事完整、冲突清晰。EX-15/16/18都比较薄——建议重点打磨EX-15(事故故事天然有戏剧性)。EX-16和EX-18可以合并为一个\"在不确定性中保护边界\"的综合故事。"
+      "improvement_notes": "BLOG-04是这条线的绝对亮点，叙事完整、冲突清晰。EX-15和EX-16已深化打磨(2026-04-11)：两个故事现在共享\"隐式依赖显式化\"核心主题，互相reference形成成长弧。EX-15加入了Head of Engineering RCA报告和systematic cleanup细节；EX-16加入了preprod细节、architectural mismatch根因分析、declarative artifactory具体交付。EX-18仍较薄，可考虑后续打磨。"
     },
     {
       "arc_id": "arc-6",

@@ -37,8 +37,11 @@ DESCRIPTION = (
     "\n"
     "Reminder sourced from user request 2026-04-10 (Discord)."
 )
-SCHEDULED_AT = "2026-04-13 09:00:00"  # naive Pacific; "full day" encoded via
-                                      # description + duration_minutes=None
+SCHEDULED_AT = "2026-04-13 17:00:00"  # naive Pacific; scheduled late (5pm) so
+                                      # the event stays in "upcoming" view all
+                                      # day instead of flipping to past at 9am.
+                                      # "Full day" intent encoded via
+                                      # description + duration_minutes=None.
 DURATION_MINUTES = None  # None = full day / open-ended
 LOCATION = "Phone"
 STATUS = "upcoming"

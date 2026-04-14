@@ -14,7 +14,7 @@ import sys
 import urllib.error
 import urllib.request
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 FRONTEND_URL = "http://localhost:5173"
@@ -166,7 +166,7 @@ def _save_screenshot(
     """Save a screenshot of the current page. Returns the file path or None."""
     archive_dir.mkdir(parents=True, exist_ok=True)
     slug = _page_slug(path)
-    ts = datetime.now(tz=timezone.utc).strftime("%Y%m%d_%H%M%S")
+    ts = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
     filepath = archive_dir / f"{slug}_{ts}.png"
     try:
         page.screenshot(path=str(filepath), full_page=True)  # type: ignore[union-attr]

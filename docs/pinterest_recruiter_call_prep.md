@@ -191,6 +191,29 @@
 
 ---
 
+## Pinterest LC 必刷题列表 (14 题)
+
+| # | LC | Title | Difficulty | Status |
+|---|-----|-------|-----------|--------|
+| 1 | 332 | Reconstruct Itinerary | Hard | TODO |
+| 2 | 465 | Optimal Account Balancing | Hard | Done |
+| 3 | 815 | Bus Routes | Hard | Done |
+| 4 | 322 | Coin Change | Medium | Done |
+| 5 | 282 | Expression Add Operators | Hard | TODO |
+| 6 | 1055 | Shortest Way to Form String | Medium | Done |
+| 7 | 311 | Sparse Matrix Multiplication | Medium | Done |
+| 8 | 2402 | Meeting Rooms III | Hard | TODO |
+| 9 | 1110 | Delete Nodes And Return Forest | Medium | TODO |
+| 10 | 1244 | Design A Leaderboard | Medium | Done |
+| 11 | 410 | Split Array Largest Sum | Hard | TODO |
+| 12 | 43 | Multiply Strings | Medium | TODO |
+| 13 | 642 | Design Search Autocomplete System | Hard | TODO |
+| 14 | 1723 | Find Minimum Time to Finish All Jobs | Hard | TODO |
+
+**Progress**: 6/14 completed | **TODO**: 8 remaining (5 Hard, 3 Medium)
+
+---
+
 ## 与现有准备材料的交叉引用
 
 | 方向 | 已有材料 |

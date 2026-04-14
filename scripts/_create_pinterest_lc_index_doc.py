@@ -20,22 +20,22 @@ CONTENT = r"""# Pinterest LC Must-Do -- Review & Index
 
 | # | LC | Title | Difficulty | Pattern | Status | Notes |
 |---|-----|-------|-----------|---------|--------|-------|
-| 1 | 332 | [Reconstruct Itinerary](lc://332) | Hard | Hierholzer (Eulerian Path) | TODO | Written |
+| 1 | 332 | [Reconstruct Itinerary](lc://332) | Hard | Hierholzer (Eulerian Path) | Done | Written |
 | 2 | 465 | [Optimal Account Balancing](lc://465) | Hard | Bitmask DP (zero-sum partition) | Done | Written |
 | 3 | 815 | [Bus Routes](lc://815) | Hard | BFS on route graph | Done | Written |
 | 4 | 322 | [Coin Change](lc://322) | Medium | DP (unbounded knapsack) | Done | Written |
-| 5 | 282 | [Expression Add Operators](lc://282) | Hard | Backtracking + `prev` trick | TODO | Written |
+| 5 | 282 | [Expression Add Operators](lc://282) | Hard | Backtracking + `prev` trick | Done | Written |
 | 6 | 1055 | [Shortest Way to Form String](lc://1055) | Medium | Greedy / DP | Done | Written |
 | 7 | 311 | [Sparse Matrix Multiplication](lc://311) | Medium | Hash-map compression | Done | Written |
-| 8 | 2402 | [Meeting Rooms III](lc://2402) | Hard | Two-heap simulation | TODO | Written |
-| 9 | 1110 | [Delete Nodes And Return Forest](lc://1110) | Medium | DFS + `is_root` flag | TODO | Written |
+| 8 | 2402 | [Meeting Rooms III](lc://2402) | Hard | Two-heap simulation | Done | Written |
+| 9 | 1110 | [Delete Nodes And Return Forest](lc://1110) | Medium | DFS + `is_root` flag | Done | Written |
 | 10 | 1244 | [Design A Leaderboard](lc://1244) | Medium | Sorted map / heap | Done | Written |
-| 11 | 410 | [Split Array Largest Sum](lc://410) | Hard | Binary search on answer / DP | TODO | Written |
-| 12 | 43 | [Multiply Strings](lc://43) | Medium | Simulation on digit arrays | TODO | Written |
-| 13 | 642 | [Design Search Autocomplete System](lc://642) | Hard | Trie + heap | TODO | Written |
-| 14 | 1723 | [Find Minimum Time to Finish All Jobs](lc://1723) | Hard | Binary search + backtracking | TODO | Written |
+| 11 | 410 | [Split Array Largest Sum](lc://410) | Hard | Binary search on answer / DP | Done | Written |
+| 12 | 43 | [Multiply Strings](lc://43) | Medium | Simulation on digit arrays | Done | Written |
+| 13 | 642 | [Design Search Autocomplete System](lc://642) | Hard | Trie + heap | Done | Written |
+| 14 | 1723 | [Find Minimum Time to Finish All Jobs](lc://1723) | Hard | Binary search + backtracking | Done | Written |
 
-**Progress**: 6/14 done | **Notes written**: 14/14 (Chinese translations complete for LC 332, 465, 282, 2402)
+**Progress**: 14/14 done | **Notes written**: 14/14 (全部含中文 + code review)
 
 ---
 

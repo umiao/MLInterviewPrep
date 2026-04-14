@@ -1,6 +1,6 @@
 """Update all 20 SD interview prep tasks with enhanced section guide."""
-import subprocess
 import json
+import subprocess
 import sys
 from pathlib import Path
 

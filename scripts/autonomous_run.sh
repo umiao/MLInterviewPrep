@@ -12,6 +12,20 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# --- Robustness: ignore SIGPIPE, always log to a file ---
+# Previously, launching this script via a Claude Code background subprocess
+# capture could kill the orchestrator after the first inner `claude -p`
+# session returned: any `echo` to stdout after that point would hit a
+# closed fd, SIGPIPE would fire, and `set -e` would terminate the parent
+# bash silently. Symptom: one commit landed, then nothing.
+#
+# Fix: trap and ignore SIGPIPE, AND tee all output to logs/autonomous.log
+# so progress is preserved regardless of which fd the parent harness
+# captures. The log file is append-only per run.
+trap '' PIPE
+mkdir -p logs
+exec > >(tee -a logs/autonomous.log) 2>&1
+
 # --- PID lockfile for concurrent run protection ---
 LOCKFILE=".claude/autonomous.lock"
 if [ -f "$LOCKFILE" ] && kill -0 "$(cat "$LOCKFILE")" 2>/dev/null; then
@@ -51,7 +65,13 @@ while [ $session_count -lt $MAX_SESSIONS ]; do
   if [ $exit_code -eq 0 ]; then
     consecutive_failures=0
     # Check if all tasks done
-    if python3 -c "
+    # Note: use `python`, not `python3`. On Windows git-bash, `python3` may
+    # resolve to AppData/Local/Microsoft/WindowsApps/python3 (the Windows
+    # Store stub) which exits with code 49 and never runs the script. That
+    # would silently always take the "not all done" branch, which is at
+    # least benign here but masks real failures. Project convention per
+    # CLAUDE.md: never use bare `python3` in scripts on this machine.
+    if python -c "
 import json, sys
 try:
     with open('.claude/session_state.json', encoding='utf-8') as f:

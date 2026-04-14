@@ -130,3 +130,22 @@
 - **What I learned**: All 4 are the same root cause: validating on a surface not isomorphic to the production path. INSERT success != API-visible data. `tsc --noEmit` != production build. "Compiles" != "looks right". The single rule: **verify through the consumer (API, browser, production build), never through the producer (DB insert, lenient compiler, code inspection).**
 - **Fix / Correct approach**: (1) After DB seed/insert, always verify via API `curl`, not `SELECT`. (2) Use `npm run build` (not `tsc --noEmit`) as TypeScript check -- matches production build. (3) For UI changes, run DOM assertions or take a screenshot via Playwright. (4) Side-effect verification must always go through the consumer path.
 - **Tags**: #validation #production-path #consumer-verification #visual-testing #seed #wal #typescript
+
+## 2026-04-13 -- react-markdown v10 urlTransform strips custom schemes
+- **Context**: Built a `lc://N` clickable-link convention so company prep docs could open a problem detail drawer in-place. Implemented via a custom `a` component override in MarkdownPreview that looks for `href` matching `/^lc:\/\/(\d+)$/`.
+- **What went wrong**: In dev the links were styled correctly but clicks opened blank new tabs. The drawer never fired.
+- **Root cause**: react-markdown 10's default `defaultUrlTransform` whitelists only `http`, `https`, `mailto`, `tel`, and relative URLs. Any other scheme (including `lc://`) is stripped to empty string BEFORE reaching custom component overrides. My `a` override received `href=""`, regex didn't match, fallback rendered `<a href="" target="_blank">` -> browser opens blank tab.
+- **Fix**: Add `urlTransform={(url) => url}` (identity) to `<ReactMarkdown>`. Security still holds because our override handles the scheme split: `lc://` -> in-app button, everything else -> external anchor with `rel="noopener noreferrer"`.
+- **Detection tip**: "Link clicks open blank tabs" with no console errors = DOM href is empty. Inspect the rendered `<a>` in devtools. If `href=""`, the markdown sanitizer is eating your custom scheme.
+- **Applies to**: Any project using react-markdown 8+ with custom URL schemes for in-app navigation or app-specific actions.
+- **Tags**: #frontend #react-markdown #custom-scheme #sanitization
+
+## 2026-04-13 -- Orchestrator `all_done` flag is sticky; new-batch launches can silently bail
+- **Context**: Added 10 new BQ rework tasks to task_db on 2026-04-13. Launched `autonomous_run.ps1 10` expecting all 10 to run. The runner completed only T-P0-380 then exited announcing "all_done=true -- all tasks complete!" even though 9 active tasks remained.
+- **Root cause**: `.claude/session_state.json` had `all_done: true` from the **previous** batch (Pinterest rework, completed 2026-04-12 17:01). The new batch's child sessions update `last_task` and `last_status` on exit, but do NOT automatically reset `all_done`. The orchestrator checks `all_done` at the top of each loop iteration and bails if true, regardless of whether new tasks exist in the backlog.
+- **Symptom**: Background runner exits after 1 session with exit 0 and a misleading "all tasks complete" log line, even though `task_db.py list` shows 9+ active tasks.
+- **Detection tip**: If a launched autonomous runner exits much sooner than expected (e.g. after 1 session when 10 were configured), check `.claude/session_state.json` for `all_done: true` + confirm via `task_db.py list` whether active tasks actually remain.
+- **Fix (manual)**: Before launching a new batch after a previous batch completed, reset: `python -c "import json, pathlib; p=pathlib.Path('.claude/session_state.json'); s=json.loads(p.read_text(encoding='utf-8')); s['all_done']=False; p.write_text(json.dumps(s, indent=2), encoding='utf-8')"`
+- **Fix (systemic, future work)**: Either (a) `task_db.py add` should reset `all_done=False` atomically when new tasks land, or (b) the orchestrator should cross-check: if `all_done=true` but `task_db.py has-unblocked` returns unblocked tasks, ignore the flag and proceed.
+- **Applies to**: Any project using `scripts/autonomous_run.{sh,ps1}` with multi-batch workflows where new tasks are added between runs.
+- **Tags**: #orchestration #autonomous #session-state #sticky-flag

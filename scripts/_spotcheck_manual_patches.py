@@ -20,7 +20,6 @@ check so re-runs are no-ops.
 from __future__ import annotations
 
 import sqlite3
-import sys
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parents[1] / "data" / "mle_prep.db"

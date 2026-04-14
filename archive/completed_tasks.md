@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 334 completed tasks archived as of latest archival.
+> 382 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -489,3 +489,54 @@ The code in
 - [x] **2026-04-10** -- T-P2-347: Pillar 3/6 translation and expansion scripts. Add translation + expansion scripts for the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130). Scripts generate/u
 - [x] **2026-04-10** -- T-P3-348: Lint: apply ruff auto-fixes to seed/translate/fix scripts. Apply ruff auto-fixes to scripts: import reordering, removal of unused imports, f-string cleanup (no placeholders).
 - [x] **2026-04-10** -- T-P3-349: Add node_content and node_translations artifacts from Chinese batch. Commit the per-node markdown artifacts generated during the pillar 3/6 Chinese conversion batch (T-P1-120..T-P1-130) for
+- [x] **2026-04-11** -- T-P0-366: BQ Quick Index: generate cn_elevator_pitch batch 1 (BLOG-01 to EX-09, 14 examples). Generate high-quality Chinese elevator pitch summaries for 14 examples missing cn_elevator_pitch. Format: '{summary} | K
+- [x] **2026-04-11** -- T-P0-367: BQ Quick Index: generate cn_elevator_pitch batch 2 (EX-10 to EX-33, 13 examples). Generate high-quality Chinese elevator pitch summaries for remaining 13 examples missing cn_elevator_pitch. Format: '{su
+- [x] **2026-04-12** -- T-P1-368: [Pinterest/CN] Translate LC 332 notes to Chinese (Reconstruct Itinerary). Translate existing English notes (2977 chars) to Chinese. Keep code blocks, algorithm names (Hierholzer, Eulerian Path),
+- [x] **2026-04-12** -- T-P1-369: [Pinterest/CN] Translate LC 465 notes to Chinese (Optimal Account Balancing). Translate existing English notes (9898 chars) to Chinese. Includes two approaches (Bitmask DP + naive DFS), Full-Transfe
+- [x] **2026-04-12** -- T-P1-370: [Pinterest/CN] Translate LC 282 notes to Chinese (Expression Add Operators). Translate existing English notes (8433 chars) to Chinese. Covers Version A (brute-force + custom myEval), Version B (pre
+- [x] **2026-04-12** -- T-P1-371: [Pinterest/CN] Translate LC 2402 notes to Chinese (Meeting Rooms III). Translate existing English notes (5257 chars) to Chinese. Two-heap simulation pattern. Keep code and complexity notation
+- [x] **2026-04-12** -- T-P1-372: [Pinterest/CN] Translate LC 1110 notes to Chinese (Delete Nodes And Return Forest). Translate existing English notes (5361 chars) to Chinese. is_root flag + carry-state-down-vs-post-order principle. Keep 
+- [x] **2026-04-12** -- T-P1-374: [Pinterest/desc] Fetch missing problem descriptions: LC 2402, 1110, 1723. Three Pinterest problems have empty description field. Use the existing fetch-description endpoint or leetcode.ca scrape
+- [x] **2026-04-12** -- T-P1-375: [Pinterest/notes] Write LC 410 solution notes (Split Array Largest Sum). Pinterest must-do; no notes yet. Cover: binary-search-on-answer approach (monotonic feasibility check), DP on (i,k) alte
+- [x] **2026-04-11** -- T-P2-322: [DEBT] MLInterviewPrep: Add problems.db to .gitignore. problems.db is untracked in MLInterviewPrep git repo and not in .gitignore. The .gitignore already covers interview_prep
+- [x] **2026-04-11** -- T-P2-323: [DEBT] MLInterviewPrep: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: pytest, pytest-asyncio, beautifulsoup4, pyyaml, ruff, playwright. 
+- [x] **2026-04-11** -- T-P2-324: [DEBT] helixos: Sync dev deps from requirements.txt to pyproject.toml. 6 packages in requirements.txt not in pyproject.toml: httpx, ruff, pytest-asyncio, mypy, pytest, pytest-timeout. Add as 
+- [x] **2026-04-11** -- T-P2-356: Behavioral: semantic relevance spot-check script for 10 random Q-example links. # Behavioral: semantic relevance spot-check script for 10 random Q-example links
+
+## Context
+Audit 2026-04-11 confirmed 
+- [x] **2026-04-11** -- T-P2-363: BQ navigation: end-to-end browse-path preservation across QuickIndex/theme/drawer. Audit and fix end-to-end navigation paths so user never loses browse context across QuickIndex(BQ) -> theme detail -> ex
+- [x] **2026-04-11** -- T-P2-364: Behavioral failure cluster: structural polish (tags + narration guards) for EX-15/16/17/30. STRUCTURAL/MECHANICAL polish ONLY for the 4 remaining failure-cluster master stories. Brings them in line with the EX-33
+- [x] **2026-04-11** -- T-P2-365: Behavioral audit: verify all technical_problem_solving examples have explicit data-driven evidence. Audit pass over the example_theme_tags rows for theme_id=technical_problem_solving (currently 27 examples). For each, re
+- [x] **2026-04-12** -- T-P0-380: [BQ-rework] EX-12 Code Review Standards: add concrete metric. Flag C (vague metric). Use user-provided facts (2026-04-13 Discord): before the checklist/standards, ~80% of changes req
+- [x] **2026-04-12** -- T-P0-381: [BQ-rework] EX-16 PhD Interns Notebook-to-Production: add onboarding metric. Flags A+C. Use user-provided facts (2026-04-13 Discord): 6 interns in my org adopted a similar notebook-to-production ch
+- [x] **2026-04-12** -- T-P0-382: [BQ-rework] EX-19 Model Deprecation Incident: own the gap personally. Flags C+D. Use user-provided facts (2026-04-13 Discord): This was NOT a user-facing prod-model impact -- but it took 2 f
+- [x] **2026-04-12** -- T-P0-383: [BQ-rework] EX-20 Cross-DC Deployment Incident: quantify blast radius. Flags A+C. Use user-provided facts (2026-04-13 Discord): Cross-DC deployment was delayed ~6 hours, blocking TWO launches
+- [x] **2026-04-12** -- T-P0-384: [BQ-rework] EX-22 Pushback on Scope: add delivery-impact metric. Flags A+C+D. Target: JSON EX-18 (audit called it EX-22) "Pushing Back on Unreasonable Scope". User-provided facts (2026-
+- [x] **2026-04-12** -- T-P0-385: [BQ-rework] EX-28 Explaining Allocation to VP: estimate avoided cost. Flags A+C. Target: JSON EX-24 (audit called it EX-28) "Explaining Allocation Problem to VP". User-provided facts (2026-0
+- [x] **2026-04-12** -- T-P0-386: [BQ-rework] EX-33 MoE Paradigm Shift: close the arc with downstream win. Flags C+D. Target: DB `behavioral_examples` row example_id=EX-33 "MoE -> Allocation Paradigm Shift - Org-Level Reframe v
+- [x] **2026-04-12** -- T-P0-397: [Pinterest/custom] Escape Room game-state (Game(rooms, people)). Pinterest coding 2025-11. Design data structure: proceedToNextRoom(pid), getTop(K), getPeople(roomId). Requirements: O(1
+- [x] **2026-04-12** -- T-P0-405: [Pinterest/SD] ML SD: Design Pins Search Engine. Pinterest SD (most frequently asked 2025-11). End-to-end: (1) candidate generation (two-tower embedding, ANN/HNSW, multi
+- [x] **2026-04-13** -- T-P0-406: [Pinterest/SD] ML SD: Notification Recommendation. Pinterest SD 2025-11. (1) notification triggering (when to notify), (2) content candidate generation, (3) ranking, (4) d
+- [x] **2026-04-13** -- T-P0-407: [Pinterest/SD] ML SD: Pin Ranking Recommendation. Pinterest SD 2025-11. Pin ranking for home/topic feed. (1) two-stage retrieval+rerank, (2) features (pin/user/context/gr
+- [x] **2026-04-12** -- T-P1-376: [Pinterest/notes] Write LC 43 solution notes (Multiply Strings). Pinterest must-do; no notes yet. Cover: digit-by-digit simulation with (i+j, i+j+1) index trick, carry propagation, lead
+- [x] **2026-04-12** -- T-P1-377: [Pinterest/notes] Write LC 642 solution notes (Design Search Autocomplete System). Pinterest must-do; no notes yet. Cover: Trie + hot-words map at each node, top-k with heap, input streaming state machin
+- [x] **2026-04-12** -- T-P1-378: [Pinterest/notes] Write LC 1723 solution notes (Find Minimum Time to Finish All Jobs). Pinterest must-do; no notes yet. Cover: binary search on answer + backtracking feasibility check, pruning (sort jobs des
+- [x] **2026-04-12** -- T-P2-373: [Pinterest/CN] Polish mixed-language notes to full Chinese: LC 311, 815, 1244. Three existing notes are MIX (ratios 0.11-0.29). Rewrite the English prose sections to Chinese, keep code blocks and tec
+- [x] **2026-04-12** -- T-P2-379: [Pinterest/index] Refresh Pinterest LC index doc after translations/fetches. After Chinese translations and missing descriptions are done, regenerate the Pinterest LC Must-Do: Review & Index compan
+- [x] **2026-04-13** -- T-P0-410: [Pinterest/SD] SD: Catalog bulk update (500M records, S3+async). Pinterest SD 2025-11. Update internal downstream systems from large catalog (~500M). (1) ingestion (bulk via S3 consume;
+- [x] **2026-04-13** -- T-P1-387: [BQ-sweep] Tier-2 metric補充: replace adjectives with numbers across ~12 stories. User guidance (2026-04-13 Discord): "Fill in similarly". For stories where user has not provided facts, use [TODO: confi
+- [x] **2026-04-13** -- T-P1-388: [BQ-sweep] Tier-2 ownership sharpening: "we" -> "I" in Action sections. Sweep target stories: EX-2 (lead +1% GMB prominently), EX-11 (I led compression, researcher gave context), EX-13 (I flag
+- [x] **2026-04-13** -- T-P1-389: [BQ-sweep] Tier-2 catch-all polish: remaining 1-weak-signal stories. Remaining Tier-2 stories not covered by metric or ownership sweeps. Primary: EX-7 (add downstream metric after unbiased 
+- [x] **2026-04-13** -- T-P1-390: [Pinterest/LC] Add + notes: LC 84 Largest Rectangle in Histogram. New Pinterest problem (2025-11 cutoff). Add to problems DB with Pinterest tag; fetch description; write Chinese notes: m
+- [x] **2026-04-13** -- T-P1-391: [Pinterest/LC] Add + notes: LC 392 Is Subsequence. New Pinterest problem. Two-pointer O(n+m). Follow-up: many queries -> precompute indexed char positions, binary search e
+- [x] **2026-04-13** -- T-P1-392: [Pinterest/LC] Add + notes: LC 3229 Min Operations to Make Array Equal to Target. New Pinterest problem. Diff-scan greedy (same family as LC 1526). Chinese notes covering increment/decrement region hand
+- [x] **2026-04-13** -- T-P1-393: [Pinterest/LC] Add + notes: LC 1526 Min Increments on Subarrays. New Pinterest problem. Diff-array + greedy sign-change pattern. Chinese notes explaining why counting positive deltas is
+- [x] **2026-04-13** -- T-P1-394: [Pinterest/LC] Add + notes: LC 1564 Put Boxes Into Warehouse I. New Pinterest problem. Greedy: warehouse prefix-min + sort boxes desc. Chinese notes highlighting the prefix-min insight
+- [x] **2026-04-13** -- T-P1-395: [Pinterest/LC] Add + notes: LC 1580 Put Boxes Into Warehouse II. New Pinterest problem (harder variant of 1564, enter from both ends). Chinese notes: two-pointer shortest-interior-heigh
+- [x] **2026-04-13** -- T-P1-398: [Pinterest/custom] Lighthouse 2D matrix light propagation. Pinterest coding 2025-11. 2D matrix simulation of light propagation. Resolve exact variant from dump (light rays + mirro
+- [x] **2026-04-13** -- T-P1-399: [Pinterest/custom] Prefix-match first-word-index. Pinterest coding 2025-11: given ['a','apple','appz','b'] and prefix ['ap'], return index of first word containing prefix
+- [x] **2026-04-13** -- T-P1-400: [Pinterest/custom] Grant Access permission propagation. Pinterest coding 2025-11. Problem linked at hack2hire.com (URL in dump). Research and document: likely DAG/graph permiss
+- [x] **2026-04-13** -- T-P1-401: [Pinterest/custom] Pin Connectivity. Pinterest coding 2025-11. Graph connectivity problem on pin/board/user graph. Research variant, write canonical (Union-F
+- [x] **2026-04-13** -- T-P1-402: [Pinterest/custom] round() from scratch (string input). Pinterest coding 2025-11. Implement round() given string s without using float(). Edge cases: float overflow, '-.2', '2.
+- [x] **2026-04-13** -- T-P1-403: [Pinterest/custom] Round string s by precision p. Pinterest coding 2025-11 follow-up. Round s by precision p. Examples: s='12567',p='100'->'12600'; s='1234.678',p='0.1'->
