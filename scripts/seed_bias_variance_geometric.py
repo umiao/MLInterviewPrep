@@ -117,38 +117,99 @@ def build_content() -> str:
     )
 
     # ------------------------------------------------------------------
-    b.add_section("5. L1 vs L2: Loss Surfaces & Constraint Regions", [
+    b.add_section("5. L1 vs L2: Loss Surfaces & Constraint Regions (Clarified)", [
         (
-            "L2 与 L1 正则均可写成约束优化形式（Lagrange 对偶）："
+            "L1 / L2 正则有两种等价写法——**penalty form** 与 **constraint form**。"
+            "澄清这一点能避免将“几何切点图”误读为“优化过程图”。"
         ),
         FormulaBlock(
-            explanation="L2 ridge 的等价约束：",
-            latex=r"\min_{\beta}\;\|y - X\beta\|_2^2 \quad\text{s.t.}\quad \|\beta\|_2^2 \le t",
+            explanation="Penalty form（无约束，含惩罚项）：",
+            latex=r"(\mathrm{P1}):\quad \min_{w}\; \mathrm{MSE}(w) + \lambda\,\|w\|",
         ),
         FormulaBlock(
-            explanation="L1 lasso 的等价约束：",
-            latex=r"\min_{\beta}\;\|y - X\beta\|_2^2 \quad\text{s.t.}\quad \|\beta\|_1 \le t",
+            explanation="Constraint form（有界约束域）：",
+            latex=r"(\mathrm{P2}):\quad \min_{w}\; \mathrm{MSE}(w)\quad \text{s.t.}\quad \|w\| \le t",
         ),
         (
-            "**几何直观**：OLS 损失的等高线在 beta 空间是一族**同心椭圆**，中心为无约束最优解 hat_beta_OLS。"
-            "最优正则解出现在**损失等高线与约束区域首次相切**之处。约束区域形状决定切点性质："
+            "**静态几何对象（并非迭代轨迹）**：在 w 空间："
         ),
         (
-            "- **L2 约束区**：球 / 圆（二维）。表面**处处光滑**，切点几乎永不落在坐标轴上，因此 L2 让参数**整体收缩**但**不稀疏**。"
+            "- **椭圆等高线**：MSE(w) 的 level set，是一族**同心椭圆**，中心为无约束 MSE 最小点 $\\hat w$（即 OLS 解）。"
         ),
         (
-            "- **L1 约束区**：菱形 / 八面体，**顶点恰好在坐标轴上**。椭圆与菱形相切时，"
-            "切点大概率落在顶点，于是**若干 beta_i 恰为 0**——这就是 L1 产生**稀疏解**的几何原因。"
+            "- **约束区域**：L1 下是以原点为中心的**菱形（$\\ell_1$ ball）**；L2 下是**圆 / 球（$\\ell_2$ ball）**。"
         ),
         (
-            "维度越高，L1 单位球的**尖角密度**越大（角点数量以 O(2^p) 增长），稀疏性倾向更强；"
-            "而 L2 单位球始终处处光滑，维度再高也不产生零坐标。"
+            "- **最优解 w\\***：从椭圆中心 $\\hat w$ 出发不断**放大等高线**，"
+            "**首次触碰约束区域**的那个点就是 w\\*。这是**位置关系**，"
+            "与优化算法、初始点、步长都无关——换句话说，这张图描述的是**最优解在哪里**，不是**解是怎么走到的**。"
         ),
         (
-            "从次梯度（subgradient）角度看：L1 在 beta_i = 0 的次梯度集合为 [-1, 1]，"
-            "只要数据梯度的绝对值 <= lambda，KKT 条件就允许 beta_i 精确为 0；"
-            "L2 的梯度是 2 lambda beta_i，在原点为 0 且连续，不会"
-            "产生“吸附到 0”的门槛效应。这与前面几何切点结论完全一致。"
+            "**为什么 L1 偏顶点（稀疏性几何直觉）**：菱形的**顶点凸出**（锥形尖角），"
+            "椭圆从大多数方向逼近时会**先碰到顶点**；而顶点恰好落在**坐标轴上**，"
+            "对应某个分量 $w_i = 0$——这就是 L1 产生**稀疏解**的几何原因。"
+            "维度升高时，$\\ell_1$ 单位球的顶点数以 $O(2^p)$ 增长，稀疏性倾向**更强**。"
+        ),
+        (
+            "**为什么 L2 不稀疏**：圆 / 球表面**处处光滑**，"
+            "椭圆与圆的切点可以出现在圆周上**任意位置**，几乎不会精确落在坐标轴——"
+            "因此 L2 只把参数**整体压小**，却**不压到零**。"
+        ),
+        (
+            "**常见误读纠正**：这张“椭圆 + 菱形/圆”图**不是**梯度下降的轨迹图，"
+            "也不反映 $\\lambda$ 或初始点的影响；它仅描述**最优解位置**。"
+            "penalty form 里调大 $\\lambda$ ⇔ constraint form 里缩小 $t$（约束区收紧），"
+            "两者通过下一节的 KKT 一一对应。"
+        ),
+    ])
+
+    # ------------------------------------------------------------------
+    b.add_section("5.5 Primal-Dual Equivalence via KKT", [
+        (
+            "上一节给了**几何直觉**，本节给**严格推导**：penalty form (P1) 与 constraint form (P2) "
+            "通过 **Lagrangian** 和 **KKT 条件**一一对应。"
+            "以 L1 为例（L2 推导同构，只把 $\\|w\\|_1$ 换成 $\\|w\\|_2^2$）。"
+        ),
+        (
+            "**方向 1：(P2) ⇒ (P1)**。写 (P2) 的 Lagrangian，其中 $\\lambda \\ge 0$ 为对偶变量："
+        ),
+        FormulaBlock(
+            explanation="Lagrangian：",
+            latex=r"\mathcal{L}(w,\lambda) = \mathrm{MSE}(w) + \lambda\bigl(\|w\| - t\bigr)",
+        ),
+        FormulaBlock(
+            explanation="对偶函数（对 w 内层求极小）：",
+            latex=r"g(\lambda) = \min_{w}\;\mathcal{L}(w,\lambda) = \underbrace{\min_{w}\bigl[\mathrm{MSE}(w) + \lambda\|w\|\bigr]}_{\text{正是 (P1)}} \;-\;\lambda t",
+        ),
+        (
+            "中括号内的子问题**恰好就是 (P1)**；因此在固定 $\\lambda$ 下，两问题有**相同的内层最优 w**。"
+            "由 **Slater 条件**（只要 $t > 0$，取 $w = 0$ 严格满足 $\\|w\\| < t$），强对偶成立，KKT 条件既必要又充分："
+        ),
+        FormulaBlock(
+            explanation="KKT 四条件：",
+            latex=r"\begin{aligned} &\text{Stationarity:}\quad 0 \in \partial_w \mathrm{MSE}(w^*) + \lambda^*\,\partial\|w^*\|\\ &\text{Primal feasibility:}\quad \|w^*\| \le t\\ &\text{Dual feasibility:}\quad \lambda^* \ge 0\\ &\text{Complementary slackness:}\quad \lambda^*\bigl(\|w^*\| - t\bigr) = 0 \end{aligned}",
+        ),
+        (
+            "**方向 2：(P1) ⇒ (P2)**。给定某个 $\\lambda \\ge 0$，令 $w^*(\\lambda)$ 为 (P1) 最优解；"
+            "取 $t = \\|w^*(\\lambda)\\|$。反证：若存在某 $\\tilde w$ 使 $\\mathrm{MSE}(\\tilde w) < \\mathrm{MSE}(w^*)$ 且 $\\|\\tilde w\\| \\le t$，"
+            "则 $\\mathrm{MSE}(\\tilde w) + \\lambda\\|\\tilde w\\| < \\mathrm{MSE}(w^*) + \\lambda\\|w^*\\|$，"
+            "与 $w^*$ 是 (P1) 最优矛盾。故 $w^*$ 也是 (P2) 对该 $t$ 的最优解。"
+        ),
+        (
+            "**互补松弛的两种几何情形**："
+        ),
+        (
+            "- **情形 (i)**：$\\lambda^* = 0$。约束不起作用，$w^* = \\hat w$ 已经在约束区内——"
+            "等价于 penalty form 里 $\\lambda$ 过小、正则失效。"
+        ),
+        (
+            "- **情形 (ii)**：$\\|w^*\\| = t$。最优解**贴边界**；L1 下典型就是顶点，L2 下是圆周上某点。"
+            "这就是几何图里“首次触碰”场景的严格对应。"
+        ),
+        (
+            "**一句话总结**：$\\lambda$（penalty 强度）与 $t$（约束半径）通过 KKT **一一对应**；"
+            "几何图呈现的是 KKT 最优性条件的**可视化**，而非优化过程。"
+            "L2 推导结构完全相同，只需把次梯度 $\\partial\\|w\\|_1$ 换为光滑梯度 $\\nabla\\|w\\|_2^2 = 2w$。"
         ),
     ])
 
