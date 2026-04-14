@@ -617,6 +617,10 @@ def _add_column_if_missing(conn, directive: str) -> None:
     alter_sql = parts[3]
 
     existing = conn.execute(text(f"PRAGMA table_info({table})")).fetchall()
+    if not existing:
+        # Table doesn't exist yet (e.g. created later via Base.metadata.create_all,
+        # or not present in a partial-schema test fixture). Nothing to alter.
+        return
     existing_names = {row[1] for row in existing}
 
     if column not in existing_names:

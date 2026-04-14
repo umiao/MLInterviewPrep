@@ -96,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-14** -- T-P0-414: Fix 4 failing CI checks (test/lint/emoji/migration). Migration _add_column_if_missing skipped; 3 ruff errors fixed; 17 emoji replaced with ASCII tags; 32 migration tests now
 - [x] **2026-04-13** -- T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections. Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC secti
 - [x] **2026-04-13** -- T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间. Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 
 - [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons

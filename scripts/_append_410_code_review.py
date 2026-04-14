@@ -69,10 +69,10 @@ return mid
 #### 5. 全零 corner case 的语义漏洞（正确性 OK 但值得知道）
 
 `nums = [0, 0, 0], k = 1`:
-- `beg = max(nums) = 0`, `end = sum(nums) = 0` → 循环不进入 → `return 0` ✓
+- `beg = max(nums) = 0`, `end = sum(nums) = 0` → 循环不进入 → `return 0` [Y]
 
 `nums = [0, 0, 0, 5, 0], k = 3`:
-- `beg = 5, end = 5` → `return 5` ✓
+- `beg = 5, end = 5` → `return 5` [Y]
 
 但你的 `verify` 在 `cap = 0`, `nums = [0, 0, 0]` 时：
 - 每轮 `v=0`，`v > curBox` 是 `0 > 0` = False → 不开新段

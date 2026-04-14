@@ -570,3 +570,10 @@
 - **Sanity check result**: Ran script twice — identical output, banners unchanged (true idempotent). Master structure: 1 H1 + 8 H2 (TOC + 7 sources) + 60 H3 + 245 H4 + 29 H5. `npm run build` passes (628ms, no TS errors). Existing DynamicTocSidebar + MarkdownPreview already deliver sticky TOC / smooth scroll / IntersectionObserver active-section highlighting / non-history-polluting jumps — Part B needs no new code.
 - **Status**: [DONE]
 - **Request**: Cross off T-P0-221.
+
+## 2026-04-14 -- [T-P0-414] Unblock 4 failing CI checks (test/lint/emoji/migration)
+- **What I did**: Diagnosed and fixed all 4 red CI jobs. (1) Migration test 32 failures root-caused to `_add_column_if_missing` emitting ALTER TABLE on non-existent tables (migration 18 alters `system_designs`/`company_documents`, which are model-only tables created via `Base.metadata.create_all`, not via migrations; test fixtures that feed `_run_migrations` a partial old schema hit `no such table`). Added early-return when `PRAGMA table_info` is empty. (2) Ruff 3 errors: autofix for unsorted imports in `src/backend/models/__init__.py` and unused `Base` import in `tests/test_versioned_baseline.py`; manual rename `SessionLocal` -> `session_factory` in `tests/test_tag_models.py` for N806. (3) Emoji scan: 17 hits across 7 docs/scripts replaced with ASCII tags ([Y]/[N]/[!]) per project convention; `🍀` stripped.
+- **Deliverables**: `src/backend/database.py` (skip-missing-table guard in `_add_column_if_missing`), `src/backend/models/__init__.py`, `tests/test_versioned_baseline.py`, `tests/test_tag_models.py`, `docs/google_2026-04-17_prep.md`, `docs/plans/integrated_prep_portal_plan.md`, `scripts/seed_google_longest_nondec_calc_topk.py`, `scripts/_append_410_code_review.py`, `scripts/_append_410_segs_defense.py`, `scripts/_append_43_weight_derivation.py`, `scripts/_update_1244_notes.py`.
+- **Sanity check result**: Full pytest 1092 passed / 0 failed; `ruff check src/ tests/` -> All checks passed; `check_emoji.py` -> [OK] No emoji found. All 4 CI gates now green locally.
+- **Status**: [DONE]
+- **Request**: Cross off T-P0-414. Awaiting user commit approval.

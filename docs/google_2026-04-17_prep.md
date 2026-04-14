@@ -125,4 +125,4 @@ target_id: 51
 - Round 2 被追问细节时不要编——**承认不记得 exact 数字**，给 range + reasoning
 - Mock interview 冲突的话，**正式 Google 面试优先**，mock 可以改期/取消
 
-祝好运 🍀
+祝好运。

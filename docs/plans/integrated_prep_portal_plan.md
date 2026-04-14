@@ -42,12 +42,12 @@ Google 面试 3 天后开考，必须在此之前让 Google 的 prep 页面能�
 ### 2.1 数据分布
 | 内容类型 | 位置 | Google 相关内容 | 与公司的关联 |
 |---------|------|-------|------------|
-| 公司文档 | `company_documents` | 1 条（id=38 recruiter call prep） | ✅ `company_id=3` |
-| 编程题 | `problems` | 7 条新 custom (id 1080-1086) + LC 扩充 | ❌ **无 company_id 列**（仅 `source` 字符串） |
-| 理论笔记 | `framework_nodes.description` | 5 条新节点 (id 193,195,196,197,198) | ❌ **无关联** |
-| 磁盘 md | `docs/*.md` | 3 份 Google 相关 | ❌ **未入库** |
-| BQ 故事 | `behavioral_examples` | EX-02/08/17 polish | ❌ 无直接 company 关联（现有 `behavioral_themes`/`question_theme_tags` 不是 per-company） |
-| Knowledge cards | `knowledge_cards` + `company_card_overlays` | 已有 Google overlay 可能性未知 | ✅ `company_card_overlays.company_id` |
+| 公司文档 | `company_documents` | 1 条（id=38 recruiter call prep） | [Y] `company_id=3` |
+| 编程题 | `problems` | 7 条新 custom (id 1080-1086) + LC 扩充 | [N] **无 company_id 列**（仅 `source` 字符串） |
+| 理论笔记 | `framework_nodes.description` | 5 条新节点 (id 193,195,196,197,198) | [N] **无关联** |
+| 磁盘 md | `docs/*.md` | 3 份 Google 相关 | [N] **未入库** |
+| BQ 故事 | `behavioral_examples` | EX-02/08/17 polish | [N] 无直接 company 关联（现有 `behavioral_themes`/`question_theme_tags` 不是 per-company） |
+| Knowledge cards | `knowledge_cards` + `company_card_overlays` | 已有 Google overlay 可能性未知 | [Y] `company_card_overlays.company_id` |
 
 ### 2.2 现有 Prep 页前端行为
 - `PrepNotesPage.tsx / DocumentViewer` 只渲染 `company_documents`

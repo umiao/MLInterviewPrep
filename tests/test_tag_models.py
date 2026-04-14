@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, event, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, sessionmaker
 
-from src.backend.database import Base, init_db
+from src.backend.database import init_db
 from src.backend.models import (
     BehavioralExample,
     BehavioralExampleCompanyTag,
@@ -30,8 +30,8 @@ def db_session(tmp_path):
         dbapi_conn.execute("PRAGMA foreign_keys=ON")
 
     init_db(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
+    session_factory = sessionmaker(bind=engine)
+    session = session_factory()
     yield session
     session.close()
     engine.dispose()

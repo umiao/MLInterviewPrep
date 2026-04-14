@@ -22,7 +22,7 @@ LC 约束：最多 1000 次调用，`1 <= K <= playerCount`，分数累加无上
 | 方案 | `addScore` | `top(K)` | `reset` | 复杂度假设 | 推荐度 |
 |------|-----------|----------|---------|------------|--------|
 | **A. Hash + nlargest**（canonical）| O(1) | O(N log K) | O(1) | 小 N 下完全够 | ⭐ 推荐 |
-| **B. Lazy heap**（你的写法）| O(log M) | O((M-N') log M) 最坏 | O(1) | 玩家量大且 `top` 稀疏 | ⚠ 细节多 |
+| **B. Lazy heap**（你的写法）| O(log M) | O((M-N') log M) 最坏 | O(1) | 玩家量大且 `top` 稀疏 | [!] 细节多 |
 | **C. SortedList** | O(log N) | O(K) | O(log N) | 需 `sortedcontainers` | 面试不便 |
 
 其中 N = 当前玩家数，M = heap 中累积条目数（含过期），N' = 一次 top() 中遇到的有效条目数。

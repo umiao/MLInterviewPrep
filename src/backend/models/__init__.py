@@ -16,9 +16,9 @@ from src.backend.models.company_tags import (
     NodeCompanyTag,
     ProblemCompanyTag,
 )
-from src.backend.models.knowledge_card import CompanyCardOverlay, KnowledgeCard
 from src.backend.models.forum import ForumPost, ForumPostLink, ForumSeed
 from src.backend.models.framework import FrameworkNode, StudyLog
+from src.backend.models.knowledge_card import CompanyCardOverlay, KnowledgeCard
 from src.backend.models.problem import Attempt, Problem, QASession
 from src.backend.models.reading import AudioCache, ReadingProgress, ReadingSession
 from src.backend.models.scraper import InterviewQuestion, ScrapedPage, SeedURL
