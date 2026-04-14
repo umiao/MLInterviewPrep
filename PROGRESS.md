@@ -535,3 +535,10 @@
 - **Sanity check**: `pytest tests/test_sync_docs_create.py` → 2/2 pass. Second-run sync on both files = 0 writes / 1 skip each (idempotent). DB shows company_id=3 docs {38, 51, 52}.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-217 --status completed`.
+
+## 2026-04-14 23:00 -- [T-P0-219] Google Prep Hub company_document
+- **What I did**: Authored docs/google_2026-04-17_prep_hub.md with frontmatter doc_kind=hub_doc, company_id=3; synced via sync_docs_to_db.py (create-path). Hub aggregates Round 1 ML links (framework nodes 195/196/197/198/193), Round 2 G&L (EX-02/08/17 + 6 predicted Q→story mapping), 7 custom coding problems (db://1080-1086), likely LC (db://5/393/273/254/45/113), last-minute checklist.
+- **Deliverables**: docs/google_2026-04-17_prep_hub.md (new, company_documents id=53).
+- **Sanity check result**: Sync created id=53; re-run = 0 diff (idempotent, skipped=1). hub_doc identification query `WHERE company_id=3 AND doc_kind='hub_doc' ORDER BY updated_at DESC LIMIT 1` returns (53, 'Google 2026-04-17 Prep Hub', 'hub_doc'). All referenced entity ids verified to exist in DB.
+- **Status**: [DONE]
+- **Request**: Cross off T-P0-219.
