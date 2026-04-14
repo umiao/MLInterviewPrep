@@ -500,3 +500,10 @@
 - **Sanity check**: Built-in algorithm self-checks verify longest_nondec + one-replace DP (including adversarial `[1,5,3,2,6]`=3), LC 347 heap+bucket on `[1,1,1,2,2,3]`, LC 224 on `"(1+(4+5+2)-3)+(6+8)"`=23 and `"1-(2+3)"`=-4. Script ran twice -> identical notes_len {5:2692, 273:3713, 1082:4646}, confirming idempotency.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-207 --status completed`.
+
+## 2026-04-14 -- [T-P1-208] Google coding: Jammed Keyboard Dictionary Match
+- **What I did**: Built `scripts/seed_google_jammed_keyboard.py` (idempotent) that upserts a new custom (non-LC) problem `Jammed Keyboard Dictionary Match` (pid 1083). Problem = given letter-group partition + typed string + dictionary, return dictionary words with identical group-signature. Notes (3933 chars) cover: (1) signature-bucket solution O(NL) preprocess / O(L) query with Python tuple-key dict; (2) group-keyed trie alternative (children keyed by gid, not letter) for streaming inserts + prefix support; (3) follow-up chain A/B/C/D -- many queries, dynamic dictionary, group shifts (inverted-index-assisted partial rebuild), Unicode / 64-bit signature hashing; (4) correctness proof, common-mistake table, LC 249 / 49 / 1032 family cross-refs, interview checklist.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_google_jammed_keyboard.py` (new); problems row 1083 (new custom).
+- **Sanity check**: Self-check verifies both signature-bucket and group-keyed trie return the same match set against a hand-worked 9-word dictionary with `typed="bad"`. Script ran twice -> identical notes_len=3933, desc_len=1264, confirming idempotency.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-208 --status completed`.
