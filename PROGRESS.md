@@ -507,3 +507,10 @@
 - **Sanity check**: Self-check verifies both signature-bucket and group-keyed trie return the same match set against a hand-worked 9-word dictionary with `typed="bad"`. Script ran twice -> identical notes_len=3933, desc_len=1264, confirming idempotency.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-208 --status completed`.
+
+## 2026-04-14 -- [T-P2-210] Google coding: Tree/Trie level-order + Math expressions (LC 770/772/224)
+- **What I did**: Built `MLInterviewPrep/scripts/seed_google_tree_math.py` (idempotent). Adds Google-prep addendum to LC 102 covering BFS template, LC 103 zigzag (deque flip), LC 107 bottom-up, and a Trie BFS-level variant (for prefix debug + Aho-Corasick fail-link). Seeds compact notes for LC 103/107 standalone. Appends LC 772 notes (recursive descent + shunting-yard; traps: Python `//` negative rounding vs `int(a/b)` toward-zero; `(0-x` unary-minus preprocessing). Inserts new LC 770 Basic Calculator IV with Poly=Counter[tuple[str,...],int] model, `poly_add/mul/eval` code, output sort (-degree, lex), follow-ups (division -> rational, many-eval, shunting-yard). LC 224 untouched (already 3713-char notes).
+- **Deliverables**: `MLInterviewPrep/scripts/seed_google_tree_math.py` (new); problems rows: LC 102 notes 985->3797, LC 103 0->651, LC 107 0->652, LC 772 0->1839, LC 770 inserted (pid=1085, notes=2626).
+- **Sanity check**: Script ran twice -- first pass inserted/grew, second pass reported identical lengths across all 5 rows. MARKER-based re-append guard works.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-210 --status completed`.
