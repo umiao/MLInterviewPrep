@@ -1,18 +1,27 @@
 """Company management API routes."""
 import json
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.backend.database import get_db
+from src.backend.models.behavioral import BehavioralExample
 from src.backend.models.company import Company, CompanyDocument, CompanyTopicWeight
+from src.backend.models.company_tags import (
+    BehavioralExampleCompanyTag,
+    NodeCompanyTag,
+    ProblemCompanyTag,
+)
 from src.backend.models.framework import FrameworkNode
+from src.backend.models.knowledge_card import CompanyCardOverlay, KnowledgeCard
+from src.backend.models.problem import Problem
 from src.backend.schemas.company import (
     CompanyCreate,
     CompanyDocumentCreate,
     CompanyDocumentResponse,
     CompanyDocumentUpdate,
+    CompanyPrepResponse,
     CompanyResponse,
     CompanyUpdate,
     TopicWeightCreate,
@@ -433,3 +442,204 @@ def delete_document(
         raise HTTPException(status_code=404, detail="Document not found")
     db.delete(doc)
     db.commit()
+
+
+# --- Unified Prep Endpoint (T-P0-215) ---
+
+
+_RELEVANCE_KEYS = ("core", "likely", "stretch")
+
+
+def _empty_segments() -> dict[str, list]:
+    """Return a three-segment dict with empty lists."""
+    return {k: [] for k in _RELEVANCE_KEYS}
+
+
+def _problem_summary(p: Problem) -> dict[str, Any]:
+    """Compact problem metadata for list views (no description body)."""
+    return {
+        "id": p.id,
+        "leetcode_id": p.leetcode_id,
+        "title": p.title,
+        "url": p.url,
+        "difficulty": p.difficulty,
+        "category": p.category,
+        "pattern": p.pattern,
+        "is_completed": bool(p.is_completed),
+        "comfort_level": p.comfort_level,
+    }
+
+
+def _node_summary(n: FrameworkNode) -> dict[str, Any]:
+    """Compact framework node metadata."""
+    return {
+        "id": n.id,
+        "path": n.path,
+        "depth": n.depth,
+        "title": n.title,
+        "status": n.status,
+        "progress_pct": n.progress_pct,
+        "priority": n.priority,
+    }
+
+
+def _behavioral_story_markdown(ex: BehavioralExample) -> str:
+    """Concatenate STAR fields into a markdown-like string."""
+    parts: list[str] = []
+    for label, val in (
+        ("Situation", ex.situation),
+        ("Task", ex.task),
+        ("Action", ex.action),
+        ("Result", ex.result),
+    ):
+        if val:
+            parts.append(f"**{label}**\n\n{val}")
+    return "\n\n".join(parts)
+
+
+def _doc_meta(d: CompanyDocument) -> dict[str, Any]:
+    """Company document metadata (no content body)."""
+    return {
+        "id": d.id,
+        "company_id": d.company_id,
+        "title": d.title,
+        "source_type": d.source_type,
+        "doc_kind": d.doc_kind,
+        "created_at": d.created_at,
+        "updated_at": d.updated_at,
+    }
+
+
+@router.get("/companies/{company_id}/prep", response_model=CompanyPrepResponse)
+def get_company_prep(
+    company_id: int, db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    """Unified prep view: company + hub doc + tagged entities + overlays.
+
+    Returns a dict with keys:
+        company, hub_doc (or None), documents, problems{core,likely,stretch},
+        framework_nodes{core,likely,stretch}, knowledge_cards[],
+        behavioral_stories[].
+
+    Content bodies are inlined only for ``hub_doc``; other documents return
+    metadata only (drawer fetches full content via existing per-doc endpoint).
+    """
+    # Q1: company
+    company = db.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Company not found")
+
+    # Q2: hub_doc (most recent by updated_at, via doc_kind enum)
+    hub = (
+        db.query(CompanyDocument)
+        .filter(
+            CompanyDocument.company_id == company_id,
+            CompanyDocument.doc_kind == "hub_doc",
+        )
+        .order_by(CompanyDocument.updated_at.desc())
+        .first()
+    )
+    hub_doc: dict[str, Any] | None = None
+    if hub is not None:
+        hub_doc = {
+            **_doc_meta(hub),
+            "content": hub.content,
+        }
+
+    # Q3: other documents (metadata only)
+    other_docs = (
+        db.query(CompanyDocument)
+        .filter(
+            CompanyDocument.company_id == company_id,
+            CompanyDocument.doc_kind != "hub_doc",
+        )
+        .order_by(CompanyDocument.created_at)
+        .all()
+    )
+    documents = [_doc_meta(d) for d in other_docs]
+
+    # Q4: problem tags joined with problem
+    problem_tags = (
+        db.query(ProblemCompanyTag)
+        .options(joinedload(ProblemCompanyTag.problem))
+        .filter(ProblemCompanyTag.company_id == company_id)
+        .all()
+    )
+    problems = _empty_segments()
+    for t in problem_tags:
+        if t.relevance in problems and t.problem is not None:
+            problems[t.relevance].append(_problem_summary(t.problem))
+
+    # Q5: node tags joined with framework node
+    node_tags = (
+        db.query(NodeCompanyTag)
+        .options(joinedload(NodeCompanyTag.node))
+        .filter(NodeCompanyTag.company_id == company_id)
+        .all()
+    )
+    framework_nodes = _empty_segments()
+    for t in node_tags:
+        if t.relevance in framework_nodes and t.node is not None:
+            framework_nodes[t.relevance].append(_node_summary(t.node))
+
+    # Q6: behavioral example tags joined with example
+    be_tags = (
+        db.query(BehavioralExampleCompanyTag)
+        .options(joinedload(BehavioralExampleCompanyTag.example))
+        .filter(BehavioralExampleCompanyTag.company_id == company_id)
+        .all()
+    )
+    behavioral_stories: list[dict[str, Any]] = []
+    for t in be_tags:
+        if t.example is None:
+            continue
+        behavioral_stories.append({
+            "example_id": t.example.example_id,
+            "id": t.example.id,
+            "title": t.example.title,
+            "company_attribute": t.company_attribute,
+            "relevance": t.relevance,
+            "content": _behavioral_story_markdown(t.example),
+        })
+
+    # Q7: knowledge cards + overlays for this company (single join query)
+    overlay_rows = (
+        db.query(KnowledgeCard, CompanyCardOverlay)
+        .join(
+            CompanyCardOverlay,
+            (CompanyCardOverlay.card_id == KnowledgeCard.id)
+            & (CompanyCardOverlay.company_id == company_id),
+            isouter=True,
+        )
+        .order_by(KnowledgeCard.slug)
+        .all()
+    )
+    card_map: dict[int, dict[str, Any]] = {}
+    for card, overlay in overlay_rows:
+        entry = card_map.get(card.id)
+        if entry is None:
+            entry = {
+                "id": card.id,
+                "slug": card.slug,
+                "title": card.title,
+                "canonical_body": card.canonical_body,
+                "tags": json.loads(card.tags) if card.tags else [],
+                "overlays": [],
+            }
+            card_map[card.id] = entry
+        if overlay is not None:
+            entry["overlays"].append({
+                "angle": overlay.angle,
+                "overlay_body": overlay.overlay_body,
+            })
+    knowledge_cards = list(card_map.values())
+
+    return {
+        "company": _company_to_response(company),
+        "hub_doc": hub_doc,
+        "documents": documents,
+        "problems": problems,
+        "framework_nodes": framework_nodes,
+        "knowledge_cards": knowledge_cards,
+        "behavioral_stories": behavioral_stories,
+    }

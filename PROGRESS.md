@@ -542,3 +542,10 @@
 - **Sanity check result**: Sync created id=53; re-run = 0 diff (idempotent, skipped=1). hub_doc identification query `WHERE company_id=3 AND doc_kind='hub_doc' ORDER BY updated_at DESC LIMIT 1` returns (53, 'Google 2026-04-17 Prep Hub', 'hub_doc'). All referenced entity ids verified to exist in DB.
 - **Status**: [DONE]
 - **Request**: Cross off T-P0-219.
+
+## 2026-04-14 -- [T-P0-215] Unified GET /api/companies/:id/prep endpoint
+- **What I did**: Added router endpoint `get_company_prep` aggregating hub_doc, documents metadata, tagged problems/nodes/behavioral stories (core/likely/stretch segments), and knowledge cards with per-company overlays. Hub doc identified via `doc_kind='hub_doc'` (robust, no string match). 7 SELECTs per request via `joinedload` + targeted filters. Added `CompanyPrepResponse`/`ProblemSegments`/`NodeSegments` Pydantic schemas.
+- **Deliverables**: src/backend/routers/companies.py (new endpoint), src/backend/schemas/company.py (response schemas), tests/test_company_prep_endpoint.py (5 tests).
+- **Sanity check result**: 5/5 tests pass (populated seg response, empty-company three-seg, 404, N+1 guard <=8 SELECTs, Pydantic shape validation). Behavioral stories concatenate STAR fields into markdown; empty-tag company returns `{core:[], likely:[], stretch:[]}` (not missing keys).
+- **Status**: [DONE]
+- **Request**: Cross off T-P0-215.

@@ -1,6 +1,6 @@
 """Pydantic schemas for Company and CompanyDocument."""
 from datetime import date, datetime
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -80,5 +80,35 @@ class CompanyDocumentResponse(BaseModel):
     source_type: str
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ProblemSegments(BaseModel):
+    """Three-segment grouping by relevance for problems."""
+
+    core: list[dict[str, Any]] = []
+    likely: list[dict[str, Any]] = []
+    stretch: list[dict[str, Any]] = []
+
+
+class NodeSegments(BaseModel):
+    """Three-segment grouping by relevance for framework nodes."""
+
+    core: list[dict[str, Any]] = []
+    likely: list[dict[str, Any]] = []
+    stretch: list[dict[str, Any]] = []
+
+
+class CompanyPrepResponse(BaseModel):
+    """Unified prep-view payload for GET /api/companies/:id/prep."""
+
+    company: dict[str, Any]
+    hub_doc: dict[str, Any] | None = None
+    documents: list[dict[str, Any]] = []
+    problems: ProblemSegments = ProblemSegments()
+    framework_nodes: NodeSegments = NodeSegments()
+    knowledge_cards: list[dict[str, Any]] = []
+    behavioral_stories: list[dict[str, Any]] = []
 
     model_config = ConfigDict(from_attributes=True)
