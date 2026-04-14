@@ -437,3 +437,10 @@
 - **Sanity check result**: `npm run build` clean (tsc -b && vite build succeed, no type errors).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-195 --status completed`.
+
+## 2026-04-14 -- [T-P0-196] Retrofit script for drawer links + unit tests
+- **What I did**: Built `scripts/retrofit_doc_drawer_links.py` per T-P0-193 AC1+AC4. Exposes three idempotent rewriters -- `rewrite_lc` ('LC 123' / 'LC123' -> '[LC 123](lc://123)'), `rewrite_leetcode` (preserves literal casing, handles optional '#'), and `rewrite_custom` (per-doc `CustomMapping` list). Each rewriter uses a combined regex whose first alternative consumes already-linked markdown so a second pass is a no-op. CLI supports `--doc-ids`, `--dry-run`, `--diff`, `--db`. Added `fuzzy_find_problem_id` helper (difflib ratio, 0.6 default threshold) for AC4 custom-title resolution in T-P0-197. `CUSTOM_MAPPINGS` dict left empty -- T-P0-197 populates it with resolved (title_pattern -> db_id) after Pinterest #7 is seeded.
+- **Deliverables**: scripts/retrofit_doc_drawer_links.py (new), tests/test_retrofit_doc_drawer_links.py (new, 15 tests).
+- **Sanity check result**: `pytest tests/test_retrofit_doc_drawer_links.py -v` -> 15 passed in 0.12s. Dry-run against doc 3 reports 13 LC rewrites, matching T-P0-193 audit count exactly. Idempotence verified by unit test (`test_second_pass_is_noop`, `test_full_pass_idempotent`).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-196 --status completed`.
