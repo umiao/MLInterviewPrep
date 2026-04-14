@@ -493,3 +493,10 @@
 - **Sanity check**: (1) Algorithm self-check built into script: `sum_good([3,5,6,7,6])` = 83 matches worked example. (2) Script ran twice — identical lengths {393: 5155, 1081: 3950} on both runs, confirming idempotency via marker-based append + JSON tag de-dup.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-206 --status completed`.
+
+## 2026-04-14 -- [T-P1-207] Google coding: Longest non-decreasing + LC 347 + LC 224
+- **What I did**: Built `scripts/seed_google_longest_nondec_calc_topk.py` (idempotent, marker-based). (1) Inserts new custom problem `Longest Non-decreasing Subarray` (pid 1082, 4646 chars notes) with O(N) baseline + Follow-up A (allow one replacement, two-state DP `dp0/dp1` with "extend already-replaced" vs "use replacement now" branches) + Follow-up B (one-shot replace-all X->Y, O(n log n) via run decomposition + SortedList multiset of run lengths + local merge/undo). (2) Appends `[Google 2026-04-17] LC 347 Top-K Frequent Elements` addendum to problem 5 (2692 chars): heap O(N log K) + bucket sort O(N) + QuickSelect + cross-ref to LC 692 for distributed. (3) Fills LC 224 (problem 273) previously-empty notes (3713 chars): single-stack `sign_stack` sign-flip method, recursive descent alternative, shunting-yard for `*,/` extension, LC 224/227/772/770 comparison table, Python `int(a/b)` vs `//` negative-number trap.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_google_longest_nondec_calc_topk.py` (new); problems rows 5 (LC 347), 273 (LC 224), 1082 (new custom).
+- **Sanity check**: Built-in algorithm self-checks verify longest_nondec + one-replace DP (including adversarial `[1,5,3,2,6]`=3), LC 347 heap+bucket on `[1,1,1,2,2,3]`, LC 224 on `"(1+(4+5+2)-3)+(6+8)"`=23 and `"1-(2+3)"`=-4. Script ran twice -> identical notes_len {5:2692, 273:3713, 1082:4646}, confirming idempotency.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-207 --status completed`.
