@@ -549,3 +549,10 @@
 - **Sanity check result**: 5/5 tests pass (populated seg response, empty-company three-seg, 404, N+1 guard <=8 SELECTs, Pydantic shape validation). Behavioral stories concatenate STAR fields into markdown; empty-tag company returns `{core:[], likely:[], stretch:[]}` (not missing keys).
 - **Status**: [DONE]
 - **Request**: Cross off T-P0-215.
+
+## 2026-04-14 -- [T-P0-218] Tag Google content (problems/nodes/BQ)
+- **What I did**: Wrote idempotent seed script scripts/tag_google_content.py with UPSERT logic for all three tag tables. Inserted 7 core + 6 likely problems, 4 core + 1 likely framework nodes, and 3 core behavioral examples (2 leadership + 1 googleyness) for Google (company_id=3). BQ review gate prompts unless --auto-confirm.
+- **Deliverables**: scripts/tag_google_content.py.
+- **Sanity check result**: First run inserted 21 rows. Second run: 0 INSERT / 0 UPDATE / 21 SKIP (idempotent). Counts match AC4: problems=13, nodes=5, bq=3.
+- **Status**: [DONE]
+- **Request**: Cross off T-P0-218.
