@@ -32,14 +32,19 @@ TARGET_DOC_IDS: tuple[int, ...] = (3, 19, 26, 30, 31, 32, 35, 47)
 
 # Match either an already-rewritten LC link (group 1) or a bare 'LC 123' / 'LC123' (group 2+3).
 # The first alternative consumes existing links so we never rewrite them.
+# The second alternative's trailing negative lookahead skips any 'LC NNN' that is
+# already enclosed inside a larger markdown link of the form
+# '[...LC NNN...](lc://NNN)' (e.g. '[**LC 332** Reconstruct Itinerary](lc://332)').
+# Without this guard the inner 'LC 332' would be rewritten, producing nested
+# markdown like '[**[LC 332](lc://332)** ...](lc://332)'.
 _LC_COMBINED = re.compile(
     r"(\[LC\s*\d+\]\(lc://\d+\))"
-    r"|(\bLC\s*(\d+)\b)"
+    r"|(\bLC\s*(\d+)\b)(?![^\[]*\]\(lc://\3\))"
 )
 
 _LEETCODE_COMBINED = re.compile(
     r"(\[LeetCode\s*#?\s*\d+\]\(lc://\d+\))"
-    r"|(\b[Ll]eet[Cc]ode\s*#?\s*(\d+)\b)"
+    r"|(\b[Ll]eet[Cc]ode\s*#?\s*(\d+)\b)(?![^\[]*\]\(lc://\3\))"
 )
 
 
@@ -151,7 +156,56 @@ def retrofit_doc(
 # (T-P0-194) and any other custom rows are confirmed in the problems table. Keys are
 # doc ids; values are lists of CustomMapping.
 CUSTOM_MAPPINGS: dict[int, list[CustomMapping]] = {
-    # Doc 31 (Uber BPS Custom) + doc 47 (Pinterest) mappings filled in T-P0-197.
+    # Doc 47 (Pinterest) — seven Pinterest-specific custom problems mapped to
+    # problems.id rows 1068/1071/1072/1073/1074/1075/1076. Titles below are
+    # matched as literal strings (re.escape at build time) and must not be
+    # preceded by '[' so we do not nest inside existing markdown links.
+    47: [
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape("Escape Room Game State (rooms + people)"),
+            db_id=1068,
+        ),
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape(
+                "Lighthouse 2D Light Propagation (beam + mirrors + splitters)"
+            ),
+            db_id=1071,
+        ),
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape(
+                "Prefix-Match First-Word-Index (sorted dictionary)"
+            ),
+            db_id=1072,
+        ),
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape(
+                "Grant Access / Permission Propagation on a DAG"
+            ),
+            db_id=1075,
+        ),
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape(
+                "Pin Connectivity on a Pinterest Relationship Graph"
+            ),
+            db_id=1076,
+        ),
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape(
+                "round() from scratch (string input, no float)"
+            ),
+            db_id=1073,
+        ),
+        CustomMapping(
+            pattern=r"(?<!\[)" + re.escape(
+                "round by precision p (string s, precision p)"
+            ),
+            db_id=1074,
+        ),
+    ],
+    # Doc 31 (Uber BPS Custom) intentionally skipped: its TOC already wraps
+    # every custom title in a [Title](#anchor) internal link, so a text-level
+    # retrofit would nest [Title](db://ID) inside the anchor and break markdown.
+    # LC-linked references in doc 31 are still caught by rewrite_lc.
 }
 
 
