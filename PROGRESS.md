@@ -270,3 +270,9 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified (company_id=3, doc_kind=prep_note)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-430 --status completed`
+## 2026-04-15 -- [T-P0-431] Bias/Variance + overfitting diagnosis drill note for Google R1
+- **What I did**: Created 5-section bias-variance drill note covering all AC items: (1) E_D[(y-f_D)^2] = Bias^2 + Var + sigma^2 full decomposition with each term defined, (2) 4-quadrant diagnosis table (underfit/overfit/good/leakage) with fixes, (3) Bagging variance formula rho*sigma^2 + (1-rho)/B*sigma^2 and RF insight (random features lower rho), (4) RF vs GBDT duality table (deep trees averaged vs shallow trees stacked), (5) Learning curve 4 diagnostic shapes with actions. Each section has oral shortcuts. Built with StudyNoteBuilder, ingested into company_documents (company_id=3, doc_id=56).
+- **Deliverables**: scripts/seed_google_bias_variance_drill.py, docs/google_bias_variance_drill.md (7166 chars), DB record id=56
+- **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified (company_id=3, source_type=manual)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-431 --status completed`
