@@ -486,3 +486,10 @@
 - **Sanity check**: First run produced lengths {45: 2880, 113: 2453, 1080: 3361}; second run identical (idempotent via marker + JSON tag de-dup + source de-dup).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-205 --status completed`.
+
+## 2026-04-14 15:30 -- [T-P1-206] Google coding: LC 692 distributed Top-K + Sum of Good Subarrays O(N)
+- **What I did**: Built `scripts/seed_google_topk_good_subarrays.py` (idempotent). Appends Google distributed-Top-K follow-up addendum to LC 692 (problem id 393): Map-Shuffle-Reduce pipeline, shuffle-by-video_id, local size-K min-heap, tie-break comparator, skew mitigations (Combiner, salting, Count-Min Sketch, two-phase exact). Inserts new custom problem `Sum of Good Subarrays (max-min <= 1)` (pid 1081) with O(N) solution: double monotonic deque (min+max) + left-pointer shrink + prefix-sum contribution formula $S(r) = (r-L+1)\cdot P_{r+1} - (Q_{r+1}-Q_L)$ using second-order prefix sum $Q$. Worked example table for [3,5,6,7,6]=83, follow-ups (count-only, max-min<=K, streaming), wrong-approach comparison table.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_google_topk_good_subarrays.py` (new); problems row 393 notes addendum; new problems row 1081 (3950 chars).
+- **Sanity check**: (1) Algorithm self-check built into script: `sum_good([3,5,6,7,6])` = 83 matches worked example. (2) Script ran twice — identical lengths {393: 5155, 1081: 3950} on both runs, confirming idempotency via marker-based append + JSON tag de-dup.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-206 --status completed`.
