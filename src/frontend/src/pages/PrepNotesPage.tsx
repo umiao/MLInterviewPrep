@@ -1,5 +1,5 @@
-import { useRef, useState, useMemo, useCallback } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useRef, useState, useMemo, useCallback, useEffect } from "react";
+import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { usePrepNotes } from "../hooks/usePrepNotes";
@@ -35,7 +35,26 @@ export default function PrepNotesPage() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [importMode, setImportMode] = useState<ImportMode>("append");
-  const [activeTab, setActiveTab] = useState<PageTab>("notes");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialDocParam = searchParams.get("doc");
+  const [activeTab, setActiveTab] = useState<PageTab>(
+    initialDocParam && /^\d+$/.test(initialDocParam)
+      ? (`doc:${Number(initialDocParam)}` as PageTab)
+      : "notes",
+  );
+
+  // Keep `?doc=N` URL param in sync with current activeTab.
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    if (typeof activeTab === "string" && activeTab.startsWith("doc:")) {
+      next.set("doc", activeTab.slice(4));
+    } else {
+      next.delete("doc");
+    }
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [activeTab, searchParams, setSearchParams]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
