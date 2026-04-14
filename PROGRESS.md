@@ -563,3 +563,10 @@
 - **Sanity check result**: `npm test` 39/39 pass (11 new). `npm run build` passes (tsc -b + vite). Manual browser smoke deferred to user per AC6 intent (Playwright not installed); regression test pins URL contract at unit level.
 - **Status**: [DONE]
 - **Request**: Cross off T-P0-216.
+
+## 2026-04-14 -- [T-P0-221] DoorDash ML prep consolidation
+- **What I did**: Wrote `scripts/consolidate_doordash_ml_prep.py` (idempotent) to merge company_documents 40-46 into a master doc (id=54) with a top TOC and per-source H2 nesting (source H1 dropped, H2→H3, H3→H4). Added redirect banner to originals 40-46, guarded by HTML-comment marker so reruns are no-ops.
+- **Deliverables**: `scripts/consolidate_doordash_ml_prep.py`.
+- **Sanity check result**: Ran script twice — identical output, banners unchanged (true idempotent). Master structure: 1 H1 + 8 H2 (TOC + 7 sources) + 60 H3 + 245 H4 + 29 H5. `npm run build` passes (628ms, no TS errors). Existing DynamicTocSidebar + MarkdownPreview already deliver sticky TOC / smooth scroll / IntersectionObserver active-section highlighting / non-history-polluting jumps — Part B needs no new code.
+- **Status**: [DONE]
+- **Request**: Cross off T-P0-221.
