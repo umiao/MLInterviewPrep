@@ -514,3 +514,10 @@
 - **Sanity check**: Script ran twice -- first pass inserted/grew, second pass reported identical lengths across all 5 rows. MARKER-based re-append guard works.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-210 --status completed`.
+
+## 2026-04-14 -- [T-P2-211] Google coding: Distributed Word Count + KNN/K-means 0-shot + KDE
+- **What I did**: Built `MLInterviewPrep/scripts/seed_google_wordcount_knn_kde.py` (idempotent) seeding a single combined custom problem (id=1086) covering the three Google 2026-04-17 prep topics: (1) distributed word count via MapReduce + bounded-worker combiner with associativity/commutativity constraints and Zipf/skew discussion; (2) KNN vs K-means distinction matrix + 0-shot classification via KNN over pretrained embedding space with prototype lookup; (3) Parzen-window KDE with Gaussian kernel, bandwidth Silverman/CV, class-conditional KDE -> Bayes classifier, and comparison against histogram/KNN-density. Chinese prose + English code/complexity per feedback_lc_notes_chinese. Self-test verifies: 3-worker combiner matches single-machine Counter baseline + shuffle-reduce order-independence; 2-D embedding KNN picks correct prototype; 2000-sample Gaussian KDE yields p(0) > p(3) and p(0) in [0.30, 0.50] ballpark of 0.3989.
+- **Deliverables**: `MLInterviewPrep/scripts/seed_google_wordcount_knn_kde.py` (new); problems row id=1086 (desc_len=2192, notes_len=5714).
+- **Sanity check**: Script ran twice -- first INSERTED, second UPDATED to identical lengths. All three self-test sections passed.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-211 --status completed`.
