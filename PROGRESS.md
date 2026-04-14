@@ -528,3 +528,10 @@
 - **Sanity check**: `pytest tests/test_tag_models.py` → 7/7 passed. Verifies schema_versions ≥ 21, doc_kind default, CRUD on each tag table, UNIQUE constraint violation, DB-level cascade delete (with `PRAGMA foreign_keys=ON`), and relevance CHECK constraint rejection.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-214 --status completed`.
+
+## 2026-04-14 -- [T-P0-217] Portal T-217: Patch sync_docs_to_db.py for create-new-row + sync 2 Google md files
+- **What I did**: Extended `scripts/sync_docs_to_db.py` with a create-new-row path (for `target_table: company_documents` with `company_id` + `title` but no `target_id`). After INSERT the script rewrites the md frontmatter with the new `target_id` so re-runs resolve via id and skip. Added YAML frontmatter to `docs/google_2026-04-17_prep.md` and `docs/google_dnn_papers_gist.md` (company_id=3, doc_kind=prep_note) and synced both into `company_documents` (new ids 51, 52).
+- **Deliverables**: `scripts/sync_docs_to_db.py` (patched), `tests/test_sync_docs_create.py` (new — 2 tests), 2 md files with injected frontmatter + target_id.
+- **Sanity check**: `pytest tests/test_sync_docs_create.py` → 2/2 pass. Second-run sync on both files = 0 writes / 1 skip each (idempotent). DB shows company_id=3 docs {38, 51, 52}.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-217 --status completed`.

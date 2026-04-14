@@ -1,3 +1,10 @@
+---
+target_table: company_documents
+company_id: 3
+doc_kind: prep_note
+title: 'Google DNN / Key Papers Gist'
+target_id: 52
+---
 # Google DNN / Recs & Search Papers — One-Page Gist
 
 Talking-points cheatsheet for Google SWE III / ML interviews. Each entry: **What · Why-mattered · Architecture · Gotcha**. Not a deep dive — these are the 1-2 sentence hooks that show familiarity.

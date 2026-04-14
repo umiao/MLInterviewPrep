@@ -60,15 +60,18 @@ class SyncPlan:
 
     path: Path
     table: str
-    row_key: tuple[str, object]  # ("id", 19) or ("slug", "youtube-rec")
+    row_key: tuple[str, object] | None  # ("id", 19) or ("slug", "youtube-rec"); None = create
     column: str
     new_hash: str
     old_hash: str | None
     body: str
+    create_meta: dict[str, object] | None = None  # fields for INSERT when row_key is None
 
     @property
     def action(self) -> str:
         """Return action label for logging: insert/update/skip."""
+        if self.row_key is None:
+            return "create"
         if self.old_hash is None:
             return "insert"
         if self.old_hash == self.new_hash:
@@ -133,9 +136,26 @@ def build_plans(files: list[Path]) -> list[SyncPlan]:
                 print(f"[WARN] {path}: column {column!r} not allowed for {table}; skipping")
                 continue
             if "target_id" in meta:
-                row_key: tuple[str, object] = ("id", int(meta["target_id"]))
+                row_key: tuple[str, object] | None = ("id", int(meta["target_id"]))
             elif "target_slug" in meta and table == "system_designs":
                 row_key = ("slug", meta["target_slug"])
+            elif table == "company_documents" and meta.get("company_id") and meta.get("title"):
+                # Create-new-row path: no target_id yet. Will INSERT and rewrite frontmatter.
+                plans.append(SyncPlan(
+                    path=path,
+                    table=table,
+                    row_key=None,
+                    column=column,
+                    new_hash=sha256(body),
+                    old_hash=None,
+                    body=body,
+                    create_meta={
+                        "company_id": int(meta["company_id"]),
+                        "title": meta["title"],
+                        "doc_kind": meta.get("doc_kind", "prep_note"),
+                    },
+                ))
+                continue
             else:
                 print(f"[WARN] {path}: no target_id/target_slug; skipping")
                 continue
@@ -159,8 +179,37 @@ def build_plans(files: list[Path]) -> list[SyncPlan]:
     return plans
 
 
+def _rewrite_frontmatter_target_id(path: Path, new_id: int) -> None:
+    """Inject ``target_id: <new_id>`` into an existing YAML frontmatter block.
+
+    The sync create-path calls this after a successful INSERT so subsequent
+    runs resolve via target_id and are idempotent.
+    """
+    raw = path.read_text(encoding="utf-8")
+    if not raw.startswith(FRONTMATTER_DELIM):
+        return
+    lines = raw.split("\n")
+    end = -1
+    for i in range(1, len(lines)):
+        if lines[i].strip() == FRONTMATTER_DELIM:
+            end = i
+            break
+    if end < 0:
+        return
+    # Replace existing target_id if present, else insert before closing ---.
+    injected = False
+    for i in range(1, end):
+        if lines[i].split(":", 1)[0].strip() == "target_id":
+            lines[i] = f"target_id: {new_id}"
+            injected = True
+            break
+    if not injected:
+        lines.insert(end, f"target_id: {new_id}")
+    path.write_text("\n".join(lines), encoding="utf-8")
+
+
 def apply_plans(plans: list[SyncPlan], dry_run: bool) -> tuple[int, int, int]:
-    """Apply update/insert plans. Returns (updated, skipped, errors)."""
+    """Apply update/insert/create plans. Returns (updated, skipped, errors)."""
     updated = skipped = errors = 0
     engine = get_engine()
     with engine.begin() as conn:
@@ -168,7 +217,35 @@ def apply_plans(plans: list[SyncPlan], dry_run: bool) -> tuple[int, int, int]:
             if p.action == "skip":
                 skipped += 1
                 continue
-            col_name, col_val = p.row_key
+            src = str(p.path.relative_to(PROJECT_ROOT)).replace("\\", "/")
+            if p.action == "create":
+                assert p.create_meta is not None
+                meta = p.create_meta
+                if dry_run:
+                    print(f"[DRY CREATE] {p.path} -> {p.table} "
+                          f"(company_id={meta['company_id']}, title={meta['title']!r})")
+                    updated += 1
+                    continue
+                try:
+                    result = conn.execute(text(
+                        f"INSERT INTO {p.table} "
+                        "(company_id, title, content, source_type, doc_kind, "
+                        "content_hash, source_path) "
+                        "VALUES (:cid, :title, :body, 'manual', :kind, :h, :src)"
+                    ), {
+                        "cid": meta["company_id"], "title": meta["title"],
+                        "body": p.body, "kind": meta["doc_kind"],
+                        "h": p.new_hash, "src": src,
+                    })
+                    new_id = result.lastrowid
+                    _rewrite_frontmatter_target_id(p.path, int(new_id))
+                    print(f"[CREATE] {p.path} -> {p.table} id={new_id}")
+                    updated += 1
+                except Exception as exc:  # pragma: no cover
+                    print(f"[ERROR] {p.path}: {exc}")
+                    errors += 1
+                continue
+            col_name, col_val = p.row_key  # type: ignore[misc]
             sql = (
                 f"UPDATE {p.table} SET {p.column} = :body, content_hash = :h, "
                 f"source_path = :src WHERE {col_name} = :v"
@@ -181,7 +258,7 @@ def apply_plans(plans: list[SyncPlan], dry_run: bool) -> tuple[int, int, int]:
             try:
                 conn.execute(text(sql), {
                     "body": p.body, "h": p.new_hash,
-                    "src": str(p.path.relative_to(PROJECT_ROOT)).replace("\\", "/"),
+                    "src": src,
                     "v": col_val,
                 })
                 print(f"[{p.action.upper()}] {p.path} -> {p.table}.{p.column}")

@@ -1,3 +1,10 @@
+---
+target_table: company_documents
+company_id: 3
+doc_kind: prep_note
+title: 'Google 2026-04-17 Interview Prep Note'
+target_id: 51
+---
 # Google 面试准备 — 2026-04-17 (周五)
 
 > 第一轮 On-site Virtual 两场连背。**优先级高于任何冲突的 mock interview**。
