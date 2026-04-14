@@ -13,6 +13,18 @@ interface MarkdownPreviewProps {
   markdown: string;
   onCheckboxClick?: (lineIndex: number) => void;
   onHeadingsExtracted?: (headings: TocHeading[]) => void;
+  /**
+   * Called when the user clicks a link with href of form `lc://N` (e.g. `lc://332`).
+   * When provided, those links render as buttons that invoke this handler with the
+   * LeetCode number instead of navigating. All other links behave normally.
+   */
+  onLcLinkClick?: (lcId: number) => void;
+  /**
+   * Called when the user clicks a link with href of form `db://N` (e.g. `db://1074`).
+   * When provided, those links render as buttons invoking this handler with the
+   * problems-table database id (for custom problems with no LC number).
+   */
+  onDbLinkClick?: (dbId: number) => void;
 }
 
 /** Green checkmark SVG (GitHub PR style). */
@@ -56,6 +68,8 @@ export default function MarkdownPreview({
   markdown,
   onCheckboxClick,
   onHeadingsExtracted,
+  onLcLinkClick,
+  onDbLinkClick,
 }: MarkdownPreviewProps) {
   const headingsRef = useRef<TocHeading[]>([]);
   const prevJsonRef = useRef<string>("");
@@ -98,7 +112,50 @@ export default function MarkdownPreview({
       <ReactMarkdown
         remarkPlugins={[remarkGfm, [remarkMath, { singleDollarTextMath: true }]]}
         rehypePlugins={[rehypeRaw, rehypeKatex]}
+        urlTransform={(url) => url}
         components={{
+          a: ({ href, children, ...rest }) => {
+            // `lc://332` -> drawer click. `db://1074` -> drawer by DB id. Everything else -> default anchor.
+            const lcMatch = typeof href === "string" ? href.match(/^lc:\/\/(\d+)$/) : null;
+            if (lcMatch && onLcLinkClick) {
+              const lcId = Number(lcMatch[1]);
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onLcLinkClick(lcId);
+                  }}
+                  className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
+                >
+                  {children}
+                </button>
+              );
+            }
+            const dbMatch = typeof href === "string" ? href.match(/^db:\/\/(\d+)$/) : null;
+            if (dbMatch && onDbLinkClick) {
+              const dbId = Number(dbMatch[1]);
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onDbLinkClick(dbId);
+                  }}
+                  className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
+                >
+                  {children}
+                </button>
+              );
+            }
+            return (
+              <a href={href} target="_blank" rel="noopener noreferrer" {...rest}>
+                {children}
+              </a>
+            );
+          },
           h1: ({ children, ...props }) => <HeadingWithId level={1} {...props}>{children}</HeadingWithId>,
           h2: ({ children, ...props }) => <HeadingWithId level={2} {...props}>{children}</HeadingWithId>,
           h3: ({ children, ...props }) => <HeadingWithId level={3} {...props}>{children}</HeadingWithId>,

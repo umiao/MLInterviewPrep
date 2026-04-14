@@ -430,3 +430,10 @@
 - **Sanity check result**: `npm run build` clean (tsc -b && vite build succeed, no type errors). Backend endpoint verified with 14 cards + 13 overlays present in data/mle_prep.db.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-190 --status completed`.
+
+## 2026-04-14 -- [T-P0-195] Frontend db:// drawer scheme for custom problems
+- **What I did**: Extended `MarkdownPreview` with `onDbLinkClick` prop that handles `db://N` href markdown links symmetric to existing `lc://N` handling. Updated `DocumentViewer` in PrepNotesPage: added `dbDrawerId` state, wired it through `MarkdownPreview.onDbLinkClick`, and passed `dbId` to `ProblemDrawer` (dbId support already landed in T-P0-181). Both handlers clear the other drawer id on open to prevent both-set state; close handler clears both. Unblocks T-P0-197 retrofit to rewrite custom-problem titles as `[Title](db://ID)`.
+- **Deliverables**: src/frontend/src/components/ui/MarkdownPreview.tsx, src/frontend/src/pages/PrepNotesPage.tsx.
+- **Sanity check result**: `npm run build` clean (tsc -b && vite build succeed, no type errors).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-195 --status completed`.

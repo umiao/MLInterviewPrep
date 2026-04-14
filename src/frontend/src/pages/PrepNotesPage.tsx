@@ -420,6 +420,7 @@ function DocumentViewer({
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
   const [lcDrawerId, setLcDrawerId] = useState<number | null>(null);
+  const [dbDrawerId, setDbDrawerId] = useState<number | null>(null);
   const isAdobe = companyId === 23;
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -478,7 +479,8 @@ function DocumentViewer({
               <MarkdownPreview
                 markdown={content}
                 onHeadingsExtracted={!isAdobe ? setTocHeadings : undefined}
-                onLcLinkClick={setLcDrawerId}
+                onLcLinkClick={(id) => { setDbDrawerId(null); setLcDrawerId(id); }}
+                onDbLinkClick={(id) => { setLcDrawerId(null); setDbDrawerId(id); }}
               />
             ) : (
               <p className="text-gray-400 italic">
@@ -488,7 +490,11 @@ function DocumentViewer({
           </div>
         )}
       </div>
-      <ProblemDrawer lcId={lcDrawerId} onClose={() => setLcDrawerId(null)} />
+      <ProblemDrawer
+        lcId={lcDrawerId}
+        dbId={dbDrawerId}
+        onClose={() => { setLcDrawerId(null); setDbDrawerId(null); }}
+      />
     </>
   );
 }
