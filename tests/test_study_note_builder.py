@@ -119,6 +119,38 @@ class TestStudyNoteBuilder:
         # The second VAE should remain unbolded
         assert "VAE" in after_first_bold
 
+    def test_auto_bold_skips_math_blocks(self) -> None:
+        # Regression: registered term appearing first inside $$..$$ or $..$
+        # must not be wrapped in ** inside the LaTeX source.
+        b = StudyNoteBuilder()
+        b.set_title("Regression")
+        b.add_term("MSE", "Mean Squared Error", "Loss metric")
+        b.add_section("Intro", [
+            "We minimise $\\mathrm{MSE}(w) + \\lambda\\|w\\|$ here.",
+            "Then in prose we also discuss MSE behaviour.",
+        ])
+        content = b.build()
+        # Inside math: literal MSE must remain unbolded
+        assert "\\mathrm{**MSE**}" not in content
+        assert "\\mathrm{MSE}" in content
+        # First prose occurrence (the "MSE behaviour" line) gets bolded
+        assert "**MSE**" in content.split("\\mathrm{MSE}", 1)[1]
+
+    def test_auto_bold_skips_code_blocks(self) -> None:
+        b = StudyNoteBuilder()
+        b.set_title("Regression")
+        b.add_term("API", "Application Programming Interface", "Interface")
+        b.add_section("Intro", [
+            "Call `API` via `client.API()` first.",
+            "Our API philosophy is stable.",
+        ])
+        content = b.build()
+        # Inline code `API` stays unbolded
+        assert "`**API**`" not in content
+        assert "`API`" in content
+        # Prose occurrence does get bolded
+        assert "**API**" in content
+
     def test_orphan_single_dollar_raises_error(self) -> None:
         b = StudyNoteBuilder()
         b.set_title("Bad Note")

@@ -116,13 +116,13 @@ Standard training minimizes Empirical Risk (ERM): average loss over the exact tr
 
 Vicinal Risk: expectation over vicinity distribution nu around each point:
 
-$$R_{\text{**VRM**}} = \frac{1}{n}\sum_{i=1}^{n} \mathbb{E}_{x' \sim \nu(x_i)}[\ell(f(x'), y_i)]$$
+$$R_{\text{VRM}} = \frac{1}{n}\sum_{i=1}^{n} \mathbb{E}_{x' \sim \nu(x_i)}[\ell(f(x'), y_i)]$$
 
 This is Vicinal Risk Minimization (Chapelle et al. 2000). The vicinity distribution nu encodes domain knowledge: flips/crops for vision, synonym replacement for NLP, Mixup for interpolation between points.
 
 Regularization effect: augmentation smooths the decision boundary because the model must be correct not just at training points but in their neighborhoods. This reduces variance without increasing bias (if augmentations are label-preserving).
 
-Oral shortcut: 'Augmentation = training on neighborhoods instead of points. It smooths the boundary. Formally it is VRM -- the vicinity kernel replaces the Dirac delta in ERM.'
+Oral shortcut: 'Augmentation = training on neighborhoods instead of points. It smooths the boundary. Formally it is **VRM** -- the vicinity kernel replaces the Dirac delta in ERM.'
 
 **7-Method Regularization Panorama**
 

@@ -307,3 +307,10 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean on changed file
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-429 --status completed`
+
+## 2026-04-15 -- [code review] LC 85 user solution — boundary cleanup
+- **What I did**: User finished LC 85 on their own and asked for a boundary/edge-case cleanup while preserving code style. Reviewed their monotonic-stack-on-histograms solution and applied 3 minimal changes: (a) added empty-matrix guard (`matrix=[]` and `matrix=[[]]` would IndexError on `matrix[0]`), (b) simplified the heights DP recurrence by dropping the redundant `heights[i-1][j] > 0` check (X+0 == X makes it noise), (c) renamed inner `n` to `L` inside `solve()` to avoid shadowing the outer `n`. Kept all their naming (`queue`/`ret`/`curIdx`/`curArea`), the two-stage init style, and the commented-out debug prints.
+- **Deliverables**: Code-review reply on Discord (no repo changes — user holds the canonical solution).
+- **Sanity check result**: Ran refactored code on 6 LC 85 test cases incl. the two empty-matrix edges — all pass (6, 0, 1, 0, 0, 4 vs expected).
+- **Status**: [DONE]
+- **Request**: T-P0-434 already completed in prior autonomous session; no task update needed.

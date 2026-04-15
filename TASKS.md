@@ -15,12 +15,6 @@
 - **Depends on**: None
 - **Description**: Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90s; (2) 为什么对 Slack ML 感兴趣 (协作场景 ranking/search/summarization); (3) current role + 主线故事 (Pinterest Etsy); (4) timeline + comp expectation; (5) 3 个提问准备 (team structure / ML problem 类型 / interview loop). Calendar 加入, Zoom 链接待收.
 
-#### T-P0-433: [Google R2] G&L top-20 common questions × 6 polished stories 映射 audit
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: HR 明建议: top 20 questions × 3 answers each. Deliverable: update docs/bq_todo_tracker.md + append section to company_documents (company_id=3). AC: (1) 列 20 common BQ (disagreed/failed/ambiguity/stakeholder/pushback/hardest decision/above beyond/mentor/lead w/o authority/feedback/conflict/deadline/learn skill/ethical/mistake/proud/user-first/ambiguous priority/peer feedback/cross-team); (2) 每题标注 bq_improved_stories 里 1-3 条可用 story (EX-01..EX-17); (3) 识别覆盖空洞; (4) EX-02/08/17 已 polished 够用不再改.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P0-415: [Google/R1] LambdaRank/LambdaMART 推导 + pointwise/pairwise/listwise 对比自测
@@ -165,6 +159,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-14** -- T-P0-436: [LC/Pinterest] Sketch/Streaming 理论 1-pager (company_id=29). 用户明确说 K-largest 要结合 sketch 做法. Deliverable: docs/pinterest_sketch_streaming_1pager.md, ingest company_documents (company
 - [x] **2026-04-14** -- T-P0-435: [LC] K-largest heap/quickselect 家族 drill: 703 + 973 + 378. 三题都未完成, 用户点名 K-largest/sketch 方向必须 drill. AC 三题各自: (A) LC 703 Kth Largest in Stream — min-heap size k 核心模板, add() O(log 
 - [x] **2026-04-14** -- T-P0-434: [LC] 攻下 85 Maximal Rectangle + 写中文笔记. LC 85 未完成, 用户明确点名考核重点. AC: (1) solve 一次不 peek; (2) 核心解法 = 每行转 histogram, heights[j]+=1 若'1' else 0, 跑 LC 84 单调栈; (3) 时间 
+- [x] **2026-04-14** -- T-P0-433: [Google R2] G&L top-20 common questions × 6 polished stories 映射 audit. HR 明建议: top 20 questions × 3 answers each. Deliverable: update docs/bq_todo_tracker.md + append section to company_docum
 - [x] **2026-04-14** -- T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3). 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (com
 - [x] **2026-04-14** -- T-P0-431: [Google R1] Bias/Variance + 过拟合诊断 drill note (company_id=3). 用户点名必须操练到位. Deliverable: docs/google_bias_variance_drill.md, ingest company_documents (company_id=3). AC: (1) 默写 E_D[(y-
 - [x] **2026-04-14** -- T-P0-430: [Google R1] Regularization 全景合并深挖 note (company_id=3). Gap: staging 零散提了 L2/dropout/AdamW, 但用户明确点名要合并深挖. Deliverable: docs/google_regularization_deep_dive.md, ingest as compan

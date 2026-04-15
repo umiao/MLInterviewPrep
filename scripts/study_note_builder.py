@@ -227,26 +227,56 @@ class StudyNoteBuilder:
 
         Only bolds terms that appear as whole words outside of:
         - Code blocks (``` ... ```)
-        - Math blocks ($$ ... $$)
+        - Math blocks ($$ ... $$ and $ ... $)
         - Already bolded text (** ... **)
         - The Key Terms section itself
         """
+        # Split content into protected (math/code) and unprotected (prose) spans
+        # so auto-bolding only touches prose. A literal "MSE" inside
+        # \mathrm{MSE} must not become \mathrm{**MSE**}.
+        protect_re = re.compile(
+            r"(```[\s\S]*?```"      # fenced code block
+            r"|`[^`\n]*`"           # inline code
+            r"|\$\$[\s\S]*?\$\$"    # display math
+            r"|\$[^\$\n]+?\$)"      # inline math
+        )
+
+        key_terms_marker = "## Key Terms"
+
+        def bold_once_in_prose(text: str, pattern: re.Pattern) -> tuple[str, bool]:
+            """Apply pattern.sub on prose spans only; stop after first hit."""
+            done = False
+            out_parts: list[str] = []
+            pos = 0
+            for m in protect_re.finditer(text):
+                if not done:
+                    prose = text[pos:m.start()]
+                    new_prose, n = pattern.subn(r"**\1**", prose, count=1)
+                    out_parts.append(new_prose)
+                    if n:
+                        done = True
+                else:
+                    out_parts.append(text[pos:m.start()])
+                out_parts.append(m.group(0))
+                pos = m.end()
+            tail = text[pos:]
+            if not done:
+                tail, n = pattern.subn(r"**\1**", tail, count=1)
+                if n:
+                    done = True
+            out_parts.append(tail)
+            return "".join(out_parts), done
+
         for abbrev, _full_name, _ in self._terms:
-            # Bold the abbreviation's first prose occurrence
-            # Skip if already bolded
             pattern = re.compile(
-                r"(?<!\*\*)"  # not preceded by **
+                r"(?<!\*\*)"
                 r"\b(" + re.escape(abbrev) + r")\b"
-                r"(?!\*\*)",  # not followed by **
+                r"(?!\*\*)",
                 re.IGNORECASE,
             )
-            # Only replace the first match that's NOT in the Key Terms section
-            # Split on Key Terms section to protect it
-            key_terms_marker = "## Key Terms"
             if key_terms_marker in content:
                 before_terms = content[: content.index(key_terms_marker)]
                 terms_section_start = content.index(key_terms_marker)
-                # Find end of terms section (next ## heading or end)
                 rest = content[terms_section_start:]
                 next_heading = re.search(r"\n## (?!Key Terms)", rest)
                 if next_heading:
@@ -257,11 +287,10 @@ class StudyNoteBuilder:
                     terms_section = rest
                     after_terms = ""
 
-                # Only auto-bold in content after the terms section
-                after_terms = pattern.sub(r"**\1**", after_terms, count=1)
-                content = before_terms + terms_section + after_terms
+                new_after, _ = bold_once_in_prose(after_terms, pattern)
+                content = before_terms + terms_section + new_after
             else:
-                content = pattern.sub(r"**\1**", content, count=1)
+                content, _ = bold_once_in_prose(content, pattern)
 
         return content
 
