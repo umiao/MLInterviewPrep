@@ -211,7 +211,7 @@ Semantic ID:  [Asian] -> [Thai] -> [Spicy] -> [$$] -> [4.5-star]
 **设计思考**: DoorDash 的 Semantic ID 可以编码:
 - Level 1: Vertical (Restaurant / Grocery / Convenience)
 - Level 2: Cuisine/Category (Thai / Chinese / Mexican / Beverages / Snacks)
-- Level 3: Price Tier ($ / $$ / $$$ / $$$$)
+- Level 3: Price Tier (`$` / `$$` / `$$$` / `$$$$`)
 - Level 4: Quality Cluster (based on rating + repeat rate)
 - Level 5: Fine-grained feature (delivery speed, portion size)
 
