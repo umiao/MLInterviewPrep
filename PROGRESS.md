@@ -294,3 +294,9 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean on new script, DB records verified
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-435 --status completed`
+## 2026-04-15 -- [T-P0-436] Pinterest Sketch/Streaming theory 1-pager
+- **What I did**: Created a comprehensive 1-pager covering 4 streaming algorithms for Pinterest prep: (1) Count-Min Sketch with error bounds and overestimate-only property, (2) Space-Saving/Misra-Gries with deterministic heavy-hitter guarantees and CMS comparison, (3) Reservoir Sampling (LC 382/398) with weighted variant and Pinterest ad sampling application, (4) HyperLogLog for cardinality estimation with register math. Includes comparison table and interview bridge section for "real-time top-K trending pins" question (naive heap -> CMS+heap -> distributed sharding -> time decay).
+- **Deliverables**: scripts/_seed_pinterest_sketch_streaming.py, docs/pinterest_sketch_streaming_1pager.md (6152 chars), DB company_documents id=58 (company_id=29)
+- **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-436 --status completed`

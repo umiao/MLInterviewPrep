@@ -27,12 +27,6 @@
 - **Depends on**: None
 - **Description**: HR 明建议: top 20 questions × 3 answers each. Deliverable: update docs/bq_todo_tracker.md + append section to company_documents (company_id=3). AC: (1) 列 20 common BQ (disagreed/failed/ambiguity/stakeholder/pushback/hardest decision/above beyond/mentor/lead w/o authority/feedback/conflict/deadline/learn skill/ethical/mistake/proud/user-first/ambiguous priority/peer feedback/cross-team); (2) 每题标注 bq_improved_stories 里 1-3 条可用 story (EX-01..EX-17); (3) 识别覆盖空洞; (4) EX-02/08/17 已 polished 够用不再改.
 
-#### T-P0-436: [LC/Pinterest] Sketch/Streaming 理论 1-pager (company_id=29)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: 用户明确说 K-largest 要结合 sketch 做法. Deliverable: docs/pinterest_sketch_streaming_1pager.md, ingest company_documents (company_id=29 Pinterest, doc_kind=prep_note). 不要求会手写 sketch 代码, 要求知道方法 + 场景. AC 四条各 3-4 行: (1) Count-Min Sketch: 多哈希取 min, overestimate-only, 适合 top-K heavy hitter; (2) Space-Saving (Misra-Gries): O(1/ε) 空间估 heavy hitter, 比 CMS 空间省; (3) Reservoir Sampling (LC 382/398): 流中等概率抽 k, Pinterest 广告采样; (4) HyperLogLog: 估 cardinality 不是 top-K 但大数据背景常问. 末尾: 一句话桥 — 面试官问 Pinterest 实时 top-K trending pins 时的答题套路 (full heap 不扩展 → CMS 估 freq + min-heap 维 top-K).
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P0-415: [Google/R1] LambdaRank/LambdaMART 推导 + pointwise/pairwise/listwise 对比自测
@@ -174,6 +168,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-14** -- T-P0-436: [LC/Pinterest] Sketch/Streaming 理论 1-pager (company_id=29). 用户明确说 K-largest 要结合 sketch 做法. Deliverable: docs/pinterest_sketch_streaming_1pager.md, ingest company_documents (company
 - [x] **2026-04-14** -- T-P0-435: [LC] K-largest heap/quickselect 家族 drill: 703 + 973 + 378. 三题都未完成, 用户点名 K-largest/sketch 方向必须 drill. AC 三题各自: (A) LC 703 Kth Largest in Stream — min-heap size k 核心模板, add() O(log 
 - [x] **2026-04-14** -- T-P0-434: [LC] 攻下 85 Maximal Rectangle + 写中文笔记. LC 85 未完成, 用户明确点名考核重点. AC: (1) solve 一次不 peek; (2) 核心解法 = 每行转 histogram, heights[j]+=1 若'1' else 0, 跑 LC 84 单调栈; (3) 时间 
 - [x] **2026-04-14** -- T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3). 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (com
