@@ -282,3 +282,9 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified (company_id=3, source_type=manual)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-432 --status completed`
+## 2026-04-15 -- [T-P0-434] LC 85 Maximal Rectangle notes and completion
+- **What I did**: Wrote comprehensive Chinese notes for LC 85 (Maximal Rectangle). Notes cover: (1) row-to-histogram transformation intuition with worked example, (2) monotonic stack solution (reusing LC 84) with sentinel trick, (3) why total complexity is O(mn) not worse, (4) DP three-array alternative (left/right/height), (5) comparison table of stack vs DP approaches, (6) 45-second interview pitch. Updated DB record to is_completed=1.
+- **Deliverables**: scripts/_update_lc85_notes.py, DB record id=242 updated (notes_len=3798, is_completed=1)
+- **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-434 --status completed`
