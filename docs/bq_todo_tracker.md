@@ -138,3 +138,74 @@ required." Since concrete numbers can only come from the user's own
 production data, the deliverable is a single consolidated question sheet
 the user can answer in one pass rather than 12 scattered placeholders
 discovered one-by-one during interview drills.
+
+---
+
+## Google R2: Top-20 G&L Common Questions x bq_improved_stories Mapping
+
+Created: 2026-04-15 (T-P0-429)
+Source: HR advice -- "you can anticipate 90%... top 20 questions, 3 answers for each, detailed and data-driven"
+
+**Already-polished stories (no further edits needed):** EX-02, EX-08, EX-17
+
+### Mapping Table
+
+| # | Question | Story 1 | Story 2 | Story 3 | Coverage |
+|---|----------|---------|---------|---------|----------|
+| 1 | Tell me about a time you **disagreed** with someone | EX-13 (authorship dispute) | EX-20 (seller risk fairness vs. principal researcher) | COL-1 (brand recall implementation) | OK |
+| 2 | Tell me about a time you **failed** | EX-15 (model deprecation incident) | EX-16 (cross-DC deployment) | EX-33 (MoE honest negative result) | OK |
+| 3 | Tell me about a time you dealt with **ambiguity** | EX-14 (vague AI mandate -> LLM-as-Judge) | EX-09 (conversational search proxy item) | EX-01 (Hacker Week self-initiated discovery) | OK |
+| 4 | Tell me about a time you had a **difficult stakeholder** | EX-17 (harsh senior IC) | EX-24 (explaining allocation to VP) | COL-3 (ads team boundary defense) | OK |
+| 5 | Tell me about a time you **pushed back on your manager** | EX-18 (unreasonable distributed-training scope) | EX-02 (reframing diversity project) | COL-4 (manager pushed back on goal reform) | OK |
+| 6 | Tell me about a time you made the **hardest decision** | EX-02 (deliberate team transfer) | EX-20 (escalating ethical concern) | EX-33 (labeling MoE "start test" -- giving up carry-over protection) | OK |
+| 7 | Tell me about a time you **went above and beyond** | EX-01 (Hacker Week self-initiated 200M+) | EX-16 (proactive latency work without budgeted support) | EX-08 (detecting invisible cumulative degradation) | OK |
+| 8 | Tell me about a time you **mentored** someone | EX-11 (intern goal communication) | EX-12 (PhD interns notebook -> production) | EX-22 (delegation -- hashing decision) | OK |
+| 9 | Tell me about a time you **led without authority** | EX-23 (30-person NYC C2C project lead) | EX-01 (Hacker Week self-initiated -> multi-year initiative) | EX-08 (escalating degradation to VP) | OK |
+| 10 | Tell me about a time you **handled feedback** | EX-17 (harsh IC feedback -> mutual respect) | EX-04 (MRR paradox -> OKR adoption) | COL-4 (manager challenged goal reform proposal) | OK |
+| 11 | Tell me about a time you **resolved a conflict** | EX-13 (authorship dispute -> lasting norm) | EX-17 (senior IC -> professional respect) | EX-20 (researcher vs. fairness -> escalation) | OK |
+| 12 | Tell me about a time you dealt with **deadline pressure** | EX-23 (2-week VP deadline, 30-person team) | EX-21 (shipping without waiting for infra) | -- | OK (2 strong) |
+| 13 | Tell me about a time you **learned a new skill** quickly | EX-14 (LLM exploration from zero) | EX-16 (infra/C++ static compilation) | EX-12 (building production template for research stack) | OK |
+| 14 | Tell me about a time you faced an **ethical choice** | EX-20 (seller risk fairness -- escalation to senior director) | COL-3 (boundary defense -- relevance not a tunable dial) | -- | OK (2 strong) |
+| 15 | Tell me about a time you made a **mistake** | EX-15 (deleted models others depended on) | EX-16 (cross-DC factor name collision) | EX-02 (should have translated business case into OKR language sooner) | OK |
+| 16 | Tell me about a time you're **proudest of** | EX-01 (diversity 200M+ from Hacker Week) | EX-06 (allocation framework 200M+) | EX-33 (honest negative -> paradigm shift) | OK |
+| 17 | Tell me about a time you put **user-first over metric** | EX-07 (exposed self-fulfilling dataset bias) | EX-03 (challenged MRR as wrong metric) | EX-04 (abandonment -- "worse" MRR = better outcomes) | OK |
+| 18 | Tell me about a time you dealt with **ambiguous priority** | EX-18 (competing tech stacks, multi-manager route dispute) | EX-14 (vague "explore AI" -> pragmatic pivot) | EX-23 (combo-launch scope adjustment) | OK |
+| 19 | Tell me about a time you **gave feedback to a peer** | EX-11 (intern goal communication coaching) | EX-13 (authorship -- "authorship as gift" unacceptable) | COL-2 (code review standards) | OK |
+| 20 | Tell me about a time you drove a **cross-team** initiative | EX-06 (allocation framework across verticals) | EX-23 (NYC C2C 30-person cross-org) | COL-3 (ads x relevance LLM pipeline) | OK |
+
+### Coverage Summary
+
+**All 20 questions have at least 2 mapped stories. No coverage gaps.**
+
+Stories most frequently referenced (versatile anchors):
+- **EX-01** (diversity/intent collapse): ambiguity, above-and-beyond, led-without-authority, proudest
+- **EX-17** (harsh feedback -> respect): difficult stakeholder, feedback, conflict
+- **EX-14** (LLM-as-Judge): ambiguity, new skill, ambiguous priority
+- **EX-20** (seller risk fairness): disagreed, hardest decision, ethical, conflict
+- **EX-23** (NYC C2C): deadline, led-without-authority, cross-team, ambiguous priority
+
+Stories with low utilization (single-question coverage):
+- **EX-03** (MRR metric challenge): only user-first-over-metric
+- **EX-04** (MRR paradox): only feedback + user-first
+- **EX-05** (relevance filtering deployment): not mapped to any top-20 question
+- **EX-09** (conversational search proxy): only ambiguity
+- **EX-10** (SIGIR experiment design): not mapped to any top-20 question
+- **EX-19** (A/B test confounders to PM): not mapped (covered by EX-24 for "explain to non-technical")
+- **EX-22** (delegation hashing): only mentoring (as delegation variant)
+
+### Already-Polished Stories: EX-02, EX-08, EX-17
+
+These three stories have been through full rework passes and are interview-ready. No further edits needed:
+- **EX-02**: ownership sharpening done (T-P1-388). "I led the first experiment to a +1% GMB lift" front-loaded. Covers: disagreed, pushed-back, hardest-decision.
+- **EX-08**: metric sweep done (T-P1-387). VP escalation with quantified cumulative degradation. Covers: above-and-beyond, led-without-authority.
+- **EX-17**: ownership + metric sweeps done. "Built mutual respect" with durable professional outcome. Covers: difficult-stakeholder, feedback, conflict.
+
+### Gap Analysis: What Would Strengthen the Bank
+
+While all 20 questions are covered, some areas rely on fewer stories:
+
+1. **Deadline pressure** (Q12): only EX-23 + EX-21. A third story with a different flavor (e.g., personal delivery crunch vs. team-level project management) would help.
+2. **Ethical choice** (Q14): EX-20 is the anchor; COL-3 is a softer variant. A third story involving data privacy or user safety would diversify.
+3. **Gave feedback to a peer** (Q19): EX-11 is intern (not peer-level), EX-13 is dispute (not developmental feedback), COL-2 is process alignment. A story about giving growth-oriented feedback to a same-level engineer would be stronger.
+
+These are nice-to-haves, not blockers -- current coverage is sufficient for a 45-min G&L round.

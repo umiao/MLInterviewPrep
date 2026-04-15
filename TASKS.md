@@ -15,12 +15,6 @@
 - **Depends on**: None
 - **Description**: Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90s; (2) 为什么对 Slack ML 感兴趣 (协作场景 ranking/search/summarization); (3) current role + 主线故事 (Pinterest Etsy); (4) timeline + comp expectation; (5) 3 个提问准备 (team structure / ML problem 类型 / interview loop). Calendar 加入, Zoom 链接待收.
 
-#### T-P0-429: [Google/R2] G&L top-20 common questions × bq_improved_stories 映射 audit (HR 建议)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: HR source: 'you can anticipate 90%... top 20 questions, 3 answers for each, detailed and data-driven'. AC: (1) 列出 top 20 (tell me about time / disagreed / failed / ambiguity / difficult stakeholder / pushback manager / hardest decision / went above beyond / mentored / lead without authority / handled feedback / conflict / deadline pressure / learned new skill / ethical choice / mistake / proudest / user-first over metric / ambiguous priority / feedback given to peer); (2) 每题至少 1 条 bq_improved_stories 故事可用; (3) 识别覆盖空洞(哪几题没故事映射到); (4) EX-02/08/17 已 polished 够用; (5) 输出 gap list 到 bq_todo_tracker.md.
-
 #### T-P0-433: [Google R2] G&L top-20 common questions × 6 polished stories 映射 audit
 - **Priority**: P0
 - **Complexity**: S
@@ -174,6 +168,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-14** -- T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3). 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (com
 - [x] **2026-04-14** -- T-P0-431: [Google R1] Bias/Variance + 过拟合诊断 drill note (company_id=3). 用户点名必须操练到位. Deliverable: docs/google_bias_variance_drill.md, ingest company_documents (company_id=3). AC: (1) 默写 E_D[(y-
 - [x] **2026-04-14** -- T-P0-430: [Google R1] Regularization 全景合并深挖 note (company_id=3). Gap: staging 零散提了 L2/dropout/AdamW, 但用户明确点名要合并深挖. Deliverable: docs/google_regularization_deep_dive.md, ingest as compan
+- [x] **2026-04-14** -- T-P0-429: [Google/R2] G&L top-20 common questions × bq_improved_stories 映射 audit (HR 建议). HR source: 'you can anticipate 90%... top 20 questions, 3 answers for each, detailed and data-driven'. AC: (1) 列出 top 20
 - [x] **2026-04-14** -- T-P0-414: Fix 4 failing CI checks (test/lint/emoji/migration). Migration _add_column_if_missing skipped; 3 ruff errors fixed; 17 emoji replaced with ASCII tags; 32 migration tests now
 - [x] **2026-04-13** -- T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections. Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC secti
 - [x] **2026-04-13** -- T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间. Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 

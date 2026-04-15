@@ -300,3 +300,10 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-436 --status completed`
+
+## 2026-04-15 -- [T-P0-429] Google R2 G&L top-20 BQ mapping audit
+- **What I did**: Mapped all 20 common G&L behavioral questions to bq_improved_stories (EX-01 through EX-24, EX-33, COL-1 through COL-4). Each question has 2-3 story options. Identified EX-01/EX-17/EX-14/EX-20/EX-23 as versatile anchor stories. Confirmed EX-02/EX-08/EX-17 are already polished. No coverage gaps found -- all 20 questions covered. Noted 3 areas that could use a third story variant (deadline pressure, ethical choice, peer feedback).
+- **Deliverables**: docs/bq_todo_tracker.md (appended top-20 mapping table + gap analysis section)
+- **Sanity check result**: 1092 tests pass, ruff lint clean on changed file
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-429 --status completed`
