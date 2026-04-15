@@ -27,12 +27,6 @@
 - **Depends on**: None
 - **Description**: HR 明建议: top 20 questions × 3 answers each. Deliverable: update docs/bq_todo_tracker.md + append section to company_documents (company_id=3). AC: (1) 列 20 common BQ (disagreed/failed/ambiguity/stakeholder/pushback/hardest decision/above beyond/mentor/lead w/o authority/feedback/conflict/deadline/learn skill/ethical/mistake/proud/user-first/ambiguous priority/peer feedback/cross-team); (2) 每题标注 bq_improved_stories 里 1-3 条可用 story (EX-01..EX-17); (3) 识别覆盖空洞; (4) EX-02/08/17 已 polished 够用不再改.
 
-#### T-P0-435: [LC] K-largest heap/quickselect 家族 drill: 703 + 973 + 378
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: 三题都未完成, 用户点名 K-largest/sketch 方向必须 drill. AC 三题各自: (A) LC 703 Kth Largest in Stream — min-heap size k 核心模板, add() O(log k); (B) LC 973 K Closest Points — max-heap 或 quickselect 双解, 复杂度对比; (C) LC 378 Kth Smallest in Sorted Matrix — binary search on value + count≤mid (和你做过的 LC 410 同家族, 迁移). 三题都写 problems.notes 中文 + set is_completed=1. 另外写一段对比: heap O(n log k) vs quickselect 平均 O(n) 最坏 O(n²) vs bucket sort O(n).
-
 #### T-P0-436: [LC/Pinterest] Sketch/Streaming 理论 1-pager (company_id=29)
 - **Priority**: P0
 - **Complexity**: S
@@ -180,6 +174,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-14** -- T-P0-435: [LC] K-largest heap/quickselect 家族 drill: 703 + 973 + 378. 三题都未完成, 用户点名 K-largest/sketch 方向必须 drill. AC 三题各自: (A) LC 703 Kth Largest in Stream — min-heap size k 核心模板, add() O(log 
 - [x] **2026-04-14** -- T-P0-434: [LC] 攻下 85 Maximal Rectangle + 写中文笔记. LC 85 未完成, 用户明确点名考核重点. AC: (1) solve 一次不 peek; (2) 核心解法 = 每行转 histogram, heights[j]+=1 若'1' else 0, 跑 LC 84 单调栈; (3) 时间 
 - [x] **2026-04-14** -- T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3). 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (com
 - [x] **2026-04-14** -- T-P0-431: [Google R1] Bias/Variance + 过拟合诊断 drill note (company_id=3). 用户点名必须操练到位. Deliverable: docs/google_bias_variance_drill.md, ingest company_documents (company_id=3). AC: (1) 默写 E_D[(y-

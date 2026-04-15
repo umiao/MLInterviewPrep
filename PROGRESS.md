@@ -288,3 +288,9 @@
 - **Sanity check result**: 1092 tests pass, ruff lint clean, DB record verified
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-434 --status completed`
+## 2026-04-15 -- [T-P0-435] K-largest heap/quickselect family drill: LC 703 + 973 + 378
+- **What I did**: Wrote comprehensive Chinese notes for three K-largest family problems. LC 703 (Kth Largest in Stream): min-heap size k template, add() O(log k), plus a K-largest family comparison section (heap vs quickselect vs bucket sort with decision tree). LC 973 (K Closest Points): dual solution with max-heap O(n log k) and quickselect average O(n), complexity comparison table. LC 378 (Kth Smallest in Sorted Matrix): value-domain binary search with O(n) staircase counting from bottom-left, connection to LC 410 family. All three marked is_completed=1.
+- **Deliverables**: scripts/_update_klargest_family_notes.py, DB records id=587 (notes_len=2775), id=150 (notes_len=2392), id=434 (notes_len=2002) all updated
+- **Sanity check result**: 1092 tests pass, ruff lint clean on new script, DB records verified
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-435 --status completed`
