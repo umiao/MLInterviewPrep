@@ -64,6 +64,10 @@ const filterSchema = {
     parse: (raw: string) => parseInt(raw, 10) || 0,
     serialize: (v: number) => String(v),
   },
+  sourceType: {
+    defaultValue: "all" as "all" | "lc" | "custom",
+    parse: (raw: string) => raw as "all" | "lc" | "custom",
+  },
 };
 
 function ComfortStars({ level }: { level: number }) {
@@ -153,8 +157,8 @@ export default function Problems() {
 
   // ---- filter state (persisted in URL) ----
   const [
-    { difficulty, pattern, source, company, search, category, completed, sortBy, sortOrder, page },
-    { setDifficulty, setPattern, setSource, setCompany, setSearch, setCategory, setCompleted, setSortBy, setSortOrder, setPage, resetAll },
+    { difficulty, pattern, source, company, search, category, completed, sortBy, sortOrder, page, sourceType },
+    { setDifficulty, setPattern, setSource, setCompany, setSearch, setCategory, setCompleted, setSortBy, setSortOrder, setPage, setSourceType, resetAll },
   ] = useFilterParams(filterSchema);
 
   // ---- modal state ----
@@ -188,8 +192,11 @@ export default function Problems() {
 
   const isBlind75 = activeTab === "blind75";
   const isCompanyFreq = activeTab === "companyFreq";
-  // Load all results when searching, on Blind75 tab, or Company Freq tab
-  const loadAll = isBlind75 || isCompanyFreq || !!search;
+  const isAllTab = !isBlind75 && !isCompanyFreq;
+  // source_type filter is client-side; only meaningful on the All tab.
+  const sourceTypeFilterActive = isAllTab && sourceType !== "all";
+  // Load all results when searching, on Blind75 tab, Company Freq tab, or filtering by source type
+  const loadAll = isBlind75 || isCompanyFreq || !!search || sourceTypeFilterActive;
 
   const filters: ProblemFilters = useMemo(
     () => ({
@@ -246,8 +253,13 @@ export default function Problems() {
   const totalCount = problemsResult?.totalCount ?? 0;
   const error = queryError ? queryError.message : null;
 
-  // Search is now server-side; use allProblems directly
-  const problems = allProblems;
+  // Client-side source_type filter (backend returns both LC and custom).
+  const problems = useMemo(() => {
+    if (!sourceTypeFilterActive) return allProblems;
+    if (sourceType === "lc") return allProblems.filter((p) => p.leetcode_id != null);
+    if (sourceType === "custom") return allProblems.filter((p) => p.leetcode_id == null);
+    return allProblems;
+  }, [allProblems, sourceType, sourceTypeFilterActive]);
 
   // For Blind 75 tab: group by pattern with sort applied within groups
   const blind75ByPattern = useMemo(() => {
@@ -324,7 +336,16 @@ export default function Problems() {
   }, [allProblemsData]);
 
   const effectivePageSize = loadAll ? 200 : PAGE_SIZE;
-  const totalPages = Math.max(1, Math.ceil(totalCount / effectivePageSize));
+  // When client-side source_type filter is active, base pagination on the filtered count.
+  const paginationBase = sourceTypeFilterActive ? problems.length : totalCount;
+  const totalPages = Math.max(1, Math.ceil(paginationBase / effectivePageSize));
+
+  // When source_type filter is active we load all and must paginate client-side.
+  const displayedProblems = useMemo(() => {
+    if (!sourceTypeFilterActive) return problems;
+    const start = page * effectivePageSize;
+    return problems.slice(start, start + effectivePageSize);
+  }, [problems, sourceTypeFilterActive, page, effectivePageSize]);
 
   // Reset to page 0 when filters change (not sort/page)
   const filterKey = JSON.stringify({
@@ -335,6 +356,7 @@ export default function Problems() {
     completed,
     category,
     search,
+    sourceType,
   });
   const prevFilterKey = useRef(filterKey);
   useEffect(() => {
@@ -360,6 +382,9 @@ export default function Problems() {
       </td>
       <td className="px-3 py-2">
         <div className="flex items-center gap-2">
+          {p.leetcode_id == null && (
+            <Badge variant="purple">Custom</Badge>
+          )}
           <Link
             to={`/problems/${p.id}`}
             className="text-blue-600 hover:underline font-medium truncate max-w-xs block"
@@ -781,13 +806,21 @@ export default function Problems() {
     </div>
   );
 
+  const SOURCE_TYPE_OPTIONS: { value: "all" | "lc" | "custom"; label: string }[] = [
+    { value: "all", label: "All" },
+    { value: "lc", label: "LeetCode" },
+    { value: "custom", label: "Custom" },
+  ];
+
   const renderAllProblemsContent = () => (
     <>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">LeetCode Problems</h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-500">
-            {totalCount} problem{totalCount !== 1 ? "s" : ""}
+            {sourceTypeFilterActive
+              ? `Showing ${problems.length} / ${totalCount} problems`
+              : `${totalCount} problem${totalCount !== 1 ? "s" : ""}`}
           </span>
           <button
             onClick={() => fetchAllMutation.mutate()}
@@ -802,6 +835,28 @@ export default function Problems() {
           >
             + Add Problem
           </button>
+        </div>
+      </div>
+
+      {/* Source-type segmented control */}
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-xs font-medium text-gray-500 uppercase">Source:</span>
+        <div className="inline-flex rounded border border-gray-300 text-sm">
+          {SOURCE_TYPE_OPTIONS.map((opt, i) => (
+            <button
+              key={opt.value}
+              onClick={() => setSourceType(opt.value)}
+              className={`px-3 py-1 ${
+                sourceType === opt.value
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50"
+              } ${i === 0 ? "rounded-l" : ""} ${
+                i === SOURCE_TYPE_OPTIONS.length - 1 ? "rounded-r" : ""
+              } ${i > 0 ? "border-l border-gray-300" : ""}`}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -890,7 +945,7 @@ export default function Problems() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {problems.map((p) => renderProblemRow(p))}
+              {displayedProblems.map((p) => renderProblemRow(p))}
             </tbody>
           </table>
         </div>

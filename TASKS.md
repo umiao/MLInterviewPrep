@@ -11,69 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-443: Problems tab: Custom badge + source-type filter switch
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-442
-- **Description**: # Problems tab: Custom badge + source-type filter (T-ML-xxx)
-
-## Goal
-Make custom (non-LC) problems visually distinct in the Problems.tsx table and add a source-type switch at the top: All / LC Only / Custom Only.
-
-## Context
-- 44 custom problems exist in DB (`leetcode_id IS NULL`), covering Pinterest, Snowflake, Uber, DoorDash, 1point3acres, etc.
-- Backend `GET /problems` already returns them; no backend changes needed.
-- Current UI: custom rows show "-" in the LC column, visually dim and easy to miss.
-
-## Files
-- `src/frontend/src/pages/Problems.tsx` (1063 lines) — main page
-- `src/frontend/src/api.ts` — `GET /problems` client (no changes needed)
-- `src/backend/routers/problems.py:141-216` — reference for existing filters (DO NOT modify)
-
-## Changes
-
-### 1. Custom badge in title/LC column
-Replace the "-" rendering for `p.leetcode_id == null`:
-- Show a pill/badge like `[Custom]` or `[自建]` with colored background (e.g., purple/amber)
-- Keep the title prominent; badge should be a small inline tag
-- Example: `<Badge variant="custom">Custom</Badge> Escape Room Game State`
-
-### 2. Source-type switch
-Add a segmented control above the Problems table:
-- Options: `All` / `LeetCode` / `Custom`
-- Default: `All`
-- Renders as a 3-button segmented control (similar to existing UI primitives)
-- URL state: `?source_type=all|lc|custom`
-- Filter logic (client-side since API returns all):
-  - `all`: no filter
-  - `lc`: `p.leetcode_id != null`
-  - `custom`: `p.leetcode_id == null`
-
-### 3. Row count update
-Show filtered counts near the switch: "显示 44 / 共 1089 题" (show "filtered / total").
-
-## Acceptance Criteria
-- [ ] Custom problems display a visible [Custom] badge in the Problems table
-- [ ] Segmented control "All / LeetCode / Custom" appears above the table
-- [ ] Switching to "Custom" hides LC problems and vice versa
-- [ ] URL param `source_type` persists across reloads (`?source_type=custom`)
-- [ ] Row count label updates to reflect filtered count
-- [ ] No regression on existing filters (difficulty, category, pattern, source, company, status)
-- [ ] `npm run build` passes
-
-## Verification
-1. Start backend + frontend.
-2. Navigate to /problems — default All, see both LC and Custom rows.
-3. Switch to Custom — verify only custom rows, count correct.
-4. Switch to LeetCode — verify only LC rows, count correct.
-5. Combine with company filter "Snowflake" — only 2 Snowflake custom problems show.
-6. Refresh with `?source_type=custom` — starts on Custom tab.
-
-## Commit message
-`[T-ML-xxx] Problems tab: Custom badge + source-type filter switch`
-
-## Depends on: T-P1-442 (sequenced after Pinterest card index work to avoid frontend merge conflicts)
-
 #### T-P1-444: Problems tab: Custom-mode company-grouped view
 - **Priority**: P1
 - **Complexity**: S
@@ -264,6 +201,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-15** -- T-P1-443: Problems tab: Custom badge + source-type filter switch. # Problems tab: Custom badge + source-type filter (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-442: Pinterest card index: integrate tab=index into PrepNotesPage. # Pinterest Card Index: Integrate tab=index into PrepNotesPage (T-P1-226)
 - [x] **2026-04-15** -- T-P1-441: Pinterest card index: frontend CardGrid component. # Pinterest Card Index: Frontend CardGrid Component (T-P1-225)
 - [x] **2026-04-15** -- T-P1-440: Pinterest card index: backend + data prep. # Pinterest Card Index: Backend + Data Prep (T-P1-224)
