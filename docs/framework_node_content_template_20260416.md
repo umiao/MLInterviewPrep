@@ -1,6 +1,6 @@
 # framework_node Content Template — Phase 0.5 Deliverable
 
-**Status**: Template v1, pending user review
+**Status**: Template v1.1 (post-Sketch signal)
 **Supersedes**: §3–§5 of `docs/knowledge_graph_design_20260416.md` (data model / link convention / visualization). Those concerns become Phase 4+.
 **Why this exists**: KG design v1 and its reviewer both optimized the wrong axis. User's actual goal is per-node **one-stop coverage + progressive disclosure**. This template defines the shape a single framework_node page should take, so "what goes on this page" and "how deep to go" stop being authoring guesses.
 **Date**: 2026-04-16
@@ -47,12 +47,15 @@ The biggest authoring question this template resolves. Principle: **a node is a 
 | LLM pretraining / RLHF / SFT / LoRA | **Separate nodes** (existing 151–154) | Each is a distinct research + interview topic |
 | LambdaRank / LambdaMART | **One node** | Same algorithm family, MART is the extension |
 | Learning-to-Rank (pointwise/pairwise/listwise) | **Separate from LambdaRank** | Broader framing; LambdaRank is one instance under listwise |
+| Optimization: SGD / Momentum / AdaGrad / RMSProp / Adam / 二阶 (Newton/L-BFGS) | **One node** (existing node 74 Gradient Descent Family, ~10KB) | Horizontal foundation: all variants share the gradient-update framework and read as a single derivation chain. The always-visible (~3000b) carries the chain skeleton; each variant's mechanics live in drawer `variants`; 二阶 methods + convergence proofs go in drawer `derivation`. Splitting into 5–6 nodes would fragment a topic an MLE treats as one question ("which optimizer and why?"). **Escape-hatch reminder (§2.5)**: if an interview genuinely demands deep L-BFGS or Hessian-free treatment beyond drawer budget, split 二阶 out then — not pre-emptively. |
 
 ### 2.4 User's explicit granularity guidance (captured verbatim)
 
 > "LLM - TreeModel - Learning To Rank 各种 domain knowledge 必定不能放在一起或者一个单一的 page; 而 statisticals 如果不太复杂 我希望能集成进一个 page 除非情况超出了我的控制或者对 MLE 的一般要求"
 
 Operational translation: **domain verticals split, foundational horizontals consolidate**. When in doubt, ask: would an MLE specializing in the parent skill vertical already know this subtopic implicitly? If yes → drawer. If no → new node.
+
+**Depth-override boundary (v1.1, post-Sketch signal)**: the horizontal/vertical heuristic is necessary but not sufficient. A horizontal topic still splits when its interview depth requirement exceeds one node's §3 always-visible budget (~3000b) *even after* aggressive drawer offload. Concretely: if the 80% contract cannot be satisfied in ≤3000b without dropping content an MLE-at-target-level is expected to name in the first 60 seconds, the topic is a vertical in practice regardless of how it reads on paper. This is the §2.5 escape hatch applied at authoring-time rather than retroactively. Example of *not* tripping the override: Optimization stays consolidated because §3.1 can carry "SGD → momentum → adaptive → Adam" as a 3-sentence chain; individual optimizer math lives in drawer `variants`. Example that *would* trip the override: if a role demands full K-FAC / natural-gradient treatment, the second-order branch wants its own page.
 
 ### 2.5 Escape hatch for consolidated nodes (Q8 follow-through)
 
@@ -107,14 +110,16 @@ Everything beyond the always-visible belongs in drawer tabs. **Drawer tabs are o
 
 ### 4.1 Tab menu (canonical names; stable across all nodes)
 
-| Tab key | Tab title (CN/EN) | When to include | Size budget |
-|---|---|---|---|
-| `derivation` | 完整推导 / Full Derivation | Concept has a non-trivial proof or derivation | ≤ 5000b |
-| `code` | 手写实现 / From-Scratch Code | Concept maps to an implementable algorithm | ≤ 5000b (one clean Python block + 3-line commentary per section) |
-| `variants` | 变体与边界 / Variants & Edges | Has named variants (Focal vs CE, LR vs Softmax, etc.) or subtle edge cases | ≤ 4000b |
-| `interview_deep` | 面试深度追问 / Deeper Interview Angles | The interviewer pushed beyond §3.4's 2–3 framings | ≤ 3000b |
-| `see_also` | 相关链接 / See Also | Cross-refs: sibling framework_nodes + company-doc back-links | ≤ 1500b |
-| `history` | 历史与出处 / History & References | Seminal papers, authors, year, industry adoption | ≤ 1500b |
+Tabs render in the order below regardless of the author's markdown order. Rationale: **progressive disclosure by depth of follow-up** — `interview_deep` is the natural extension of §3.4's 2–3 framings, `variants`/`code` are the two most common "show me concretely" clicks, and `derivation`/`see_also`/`history` are deepest/most-background. A reader scanning left-to-right across the drawer bar therefore traverses from "what the interviewer asks next" → "how it behaves in the edges" → "show me the code" → "prove it to me" → "where else is this used" → "where did it come from", which matches the empirical click cadence of an interview prep session.
+
+| Order | Tab key | Tab title (CN/EN) | When to include | Size budget |
+|---|---|---|---|---|
+| 1 | `interview_deep` | 面试深度追问 / Deeper Interview Angles | The interviewer pushed beyond §3.4's 2–3 framings | ≤ 3000b |
+| 2 | `variants` | 变体与边界 / Variants & Edges | Has named variants (Focal vs CE, LR vs Softmax, etc.) or subtle edge cases | ≤ 4000b |
+| 3 | `code` | 手写实现 / From-Scratch Code | Concept maps to an implementable algorithm | ≤ 5000b (one clean Python block + 3-line commentary per section) |
+| 4 | `derivation` | 完整推导 / Full Derivation | Concept has a non-trivial proof or derivation | ≤ 5000b |
+| 5 | `see_also` | 相关链接 / See Also | Cross-refs: sibling framework_nodes + company-doc back-links | ≤ 1500b |
+| 6 | `history` | 历史与出处 / History & References | Seminal papers, authors, year, industry adoption | ≤ 1500b |
 
 ### 4.1.1 Budget overflow as split signal
 
@@ -180,7 +185,7 @@ A drawer tab that runs consistently **> 1.2× its §4.1 budget** (i.e., ~20% ove
 
 - Render always-visible content normally in the page body.
 - Below it, a drawer component (shadcn `Collapsible` or `Accordion` already in frontend dependencies — verify) shows each `Drawer: {key}` as a collapsed tab.
-- Tabs render in the §4.1 canonical order, regardless of author's markdown order. **(Note: the canonical render order is deferred to v1.1 pending Sketch-sample signal — see Revision Log.)**
+- Tabs render in the §4.1 canonical order (`interview_deep → variants → code → derivation → see_also → history`), regardless of the author's markdown order.
 - **Parse-marker rule**: `## Drawer: {key}` headings are markdown parse markers only. The frontend drawer component MUST NOT re-render the `## Drawer: {key}` heading inside the tab content body — the tab title is already shown by the drawer UI. Double-rendering the heading inside the body is a bug. Main page body similarly must not render any content from below the first `## Drawer:` marker.
 - If no `## Drawer:` headings exist, the drawer component does not render at all (empty stub suppression).
 
@@ -363,7 +368,9 @@ Those each need their own decision point or task.
   - §6.5 (new) — **PR description next-candidates convention** — every migration PR lists adjacent non-touched nodes, building a natural migration queue.
   - §2.5 (new) — **consolidation escape hatch** — pillar7 consolidation defaults to ~5 nodes but splits opportunistically when always-visible + drawer can't contain a legitimate deep-dive.
 
-- **v1.1 (planned, post-Sketch via T-P1-245)**: Deferred revisions requiring real-world signal.
-  - §2.3: Optimization (SGD/Adam/二阶) worked example + horizontal/vertical depth-override heuristic.
-  - §4.1 / §5.3: canonical drawer-tab render order (proposed: `interview_deep → variants → code → derivation → see_also → history`).
-  - Any tightening/loosening surfaced by T-P0-241 Sketch authoring experience.
+- **v1.1 (2026-04-16, post-Sketch via T-P1-457)**: Deferred revisions applied after T-P0-452 Sketch-family unification shipped real-world authoring signal.
+  - §2.3 — adds **Optimization (SGD/Momentum/AdaGrad/RMSProp/Adam/二阶) worked row** to the granularity decision table. Validates consolidation for the canonical horizontal-foundation topic (node 74 Gradient Descent Family stays as one ~10KB node rather than splitting into 5–6 smaller nodes).
+  - §2.4 — adds **depth-override boundary** to the horizontal/vertical heuristic: a horizontal topic splits when §3 always-visible budget (~3000b) cannot carry the 80% contract even after aggressive drawer offload. §2.5 escape hatch applied at authoring-time, not retroactively.
+  - §4.1 — declares **canonical drawer tab render order**: `interview_deep → variants → code → derivation → see_also → history`. Rationale: progressive disclosure by depth of follow-up — `interview_deep` is the natural extension of §3.4, `variants`/`code` are the most common "show me concretely" clicks, `derivation`/`see_also`/`history` are deepest/most-background.
+  - §5.3 — removes the v1.1-pending caveat on canonical render order; now cites the concrete order inline.
+  - Sketch-authoring signal check: node 196 grew from 7924b → 12770b under consolidation pressure, validating §2.5 escape-hatch framing (the 3-axis lens succeeded precisely because drawers absorbed the overflow). No new tightening surfaced; §3–§6 rules held as written.
