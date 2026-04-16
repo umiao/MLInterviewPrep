@@ -514,3 +514,10 @@
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-438 --status completed`
 
+
+## 2026-04-16 01:30 -- [T-P2-437] Propagate 4 new lessons to helixos LESSONS.md
+- **What I did**: Appended 4 MLInterviewPrep lessons (2026-04-10 through 2026-04-15) to `helixos/LESSONS.md` using the existing `[PROPAGATED]` naming pattern. Each entry includes Source attribution + an explicit "Helixos has the same shape" connection: (1) validation on production-isomorphic surfaces -- helixos has matching SQLite/WAL/tsc-b build/React UI surfaces; (2) react-markdown v10 urlTransform strips custom schemes -- helixos uses react-markdown in MarkdownRenderer/ConversationView; (3) orchestrator all_done sticky flag -- helixos uses the same autonomous_run.sh/ps1; (4) auto-bolding inside LaTeX/code leaks ** -- applies to any helixos prose post-processing touching KaTeX content. Rewrote each lesson in the helixos-appropriate voice where applicable, preserved all tag taxonomies, and added `#propagated`.
+- **Deliverables**: `helixos/LESSONS.md` (+76 lines appended, 297 -> 329 lines). No other files touched.
+- **Sanity check result**: `grep -n "\[PROPAGATED\]" helixos/LESSONS.md` shows 9 propagated entries with dates in chronological order (2026-03-20, 04-07, 04-08 x3, 04-10, 04-13 x2, 04-15). All 4 new sources match MLInterviewPrep/LESSONS.md dates.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-437 --status completed`

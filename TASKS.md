@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-04-10: Validation must happen on a surface isomorphic to the production path (#validation #production-path #consumer-verification). (2) 2026-04-13: react-markdown v10 urlTransform strips custom schemes (#react-markdown #custom-scheme -- helixos uses react-markdown). (3) 2026-04-13: Orchestrator all_done flag is sticky -- new batch launches silently bail if session_state.json has all_done:true (#autonomous #orchestration #sticky-flag). (4) 2026-04-15: Auto-bolding inside LaTeX/code leaks ** into rendered output -- regex substitutions must skip math/code spans (#markdown #latex #regex-scoping). Source: MLInterviewPrep/LESSONS.md entries dated 2026-04-10 through 2026-04-15.
-
 #### T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section
 - **Priority**: P2
 - **Complexity**: S
@@ -109,6 +103,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
+- [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
 - [x] **2026-04-16** -- T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold. AC: (1) PSI=Σ(a-e)·ln(a/e), 0.1 warn/0.25 critical; (2) KL 不对称无界, JS 对称 bounded; (3) 连续用 KS; (4) concept drift P(y|x) vs
 - [x] **2026-04-16** -- T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty. pillar7 有基础但缺 drill. AC: (1) n=(z+z)^2·2σ²/Δ²; (2) SRM 是 randomization 健康性不是结果; (3) CUPED 用 pre-period covariate 降 varia
