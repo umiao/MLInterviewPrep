@@ -43,13 +43,23 @@ export interface CompanyCreate {
   prep_notes?: string | null;
 }
 
+export type DocKind =
+  | "prep_note"
+  | "hub_doc"
+  | "recruiter_call"
+  | "other"
+  | "card_index"
+  | "canonical_hub"
+  | "composition"
+  | "drill";
+
 export interface CompanyDocument {
   id: number;
   company_id: number;
   title: string;
   content: string;
   source_type: string;
-  doc_kind: string;
+  doc_kind: DocKind;
   created_at: string | null;
   updated_at: string | null;
 }

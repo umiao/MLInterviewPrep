@@ -9,35 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy: add 'canonical_hub', 'composition', 'drill'.
-
-SCHEMA CHANGE:
-- Relax or rebuild CHECK on doc_kind to accept: prep_note, hub_doc, card_index, canonical_hub, composition, drill.
-- Use the copy-swap migration pattern already shipped (see scripts/_migrate_doc_kind_add_card_index.py as template).
-
-BACKFILL MAPPING (after schema):
-- All 11 Google R1 'Drill' docs (55,56,60,61,62,63,64,65,67,68,69) -> doc_kind='drill'
-- Google 2026-04-17 Prep Hub (53) -> hub_doc (already)
-- Pinterest card_index (66) -> card_index (already)
-- Everything else stays prep_note until Phase 2 classifies each.
-
-IMPLEMENTATION:
-- scripts/_migrate_doc_kind_add_taxonomy_20260416.py (idempotent, copy-swap + UPDATE backfill).
-- Verify reserve cost: N rows preserved.
-- Update pydantic schemas / TypeScript types that enumerate doc_kind (grep for Literal['prep_note', ...] and str enums).
-
-ACCEPTANCE CRITERIA:
-1. `sqlite3 data/mle_prep.db 'SELECT DISTINCT doc_kind FROM company_documents'` includes 'drill' for 11 Google docs.
-2. Re-run migration prints [UNCHANGED].
-3. Backend pydantic schema accepts new kinds; API test GET /api/companies/3/documents returns 200.
-4. Frontend CompanyDocument type updated.
-5. npm run build passes 0 TS errors.
-6. Commit: [KG-P1-02] doc_kind taxonomy: canonical_hub, composition, drill + Google R1 backfill
-
 #### T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes
 - **Priority**: P0
 - **Complexity**: S
@@ -454,4 +425,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill. Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy:
 - [x] **2026-04-16** -- T-P0-470: [KG-P1-01] Create concept_links table + migration. Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) 

@@ -91,7 +91,8 @@ class CompanyDocument(Base):
     doc_kind = Column(
         String,
         CheckConstraint(
-            "doc_kind IN ('prep_note','hub_doc','recruiter_call','other','card_index')"
+            "doc_kind IN ('prep_note','hub_doc','recruiter_call','other',"
+            "'card_index','canonical_hub','composition','drill')"
         ),
         nullable=False,
         default="prep_note",

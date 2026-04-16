@@ -475,3 +475,10 @@
 - **Sanity check result**: Ran migration twice -- first print [DONE], second [UNCHANGED]. `sqlite3 data/mle_prep.db '.schema concept_links'` shows all columns + CHECK clauses + both indexes. All 6 pytest cases pass in 0.06s.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-470 --status completed`
+
+## 2026-04-16 18:10 -- [T-P0-471] KG-P1-02 extend doc_kind CHECK taxonomy + Google R1 drill backfill
+- **What I did**: Wrote idempotent copy-swap migration that extends the `company_documents.doc_kind` CHECK list with the three KG taxonomy values `canonical_hub`, `composition`, `drill`. Backfilled the 11 Google R1 drill docs (ids 55, 56, 60, 61, 62, 63, 64, 65, 67, 68, 69) to `doc_kind='drill'`. Synced the SQLAlchemy `CompanyDocument.doc_kind` CheckConstraint and the `database.py` `ADD_COLUMN_IF_MISSING` bootstrap DDL so a fresh install gets the same CHECK. Tightened the frontend `CompanyDocument.doc_kind` type from bare `string` to a new `DocKind` union covering all 8 values.
+- **Deliverables**: scripts/_migrate_doc_kind_add_taxonomy_20260416.py (new); src/backend/models/company.py, src/backend/database.py, src/frontend/src/types/company.ts (updated); tests/test_doc_kind_taxonomy.py (new, 7 tests).
+- **Sanity check result**: Ran migration twice -- first print "[DONE] ... preserved 65 rows, backfilled 11 Google R1 drill docs", second "[UNCHANGED]". `sqlite3 .schema company_documents` shows the extended CHECK. `SELECT DISTINCT doc_kind` returns {prep_note, hub_doc, card_index, drill}. GET /api/companies/3/documents returns 200 with 17 docs and 11 drill entries via TestClient. Frontend `npm run build` succeeds 0 TS errors. All 7 taxonomy tests + 5 prep-endpoint tests + 6 concept_links tests pass (1.46s).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-471 --status completed`
