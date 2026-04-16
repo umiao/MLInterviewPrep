@@ -427,3 +427,10 @@
 - **Sanity check result**: First run printed `[UPDATED] LC 895 id=569 notes_len=3793 fields=['notes', 'is_completed', 'pattern']`; second run printed `[UNCHANGED] LC 895 id=569 (sentinel present)`. DB verification: is_completed=1, notes_length=3793 (>=2000), hanzi count=838 (>=500), sentinel present. All 4 ACs hold.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-464 --status completed`.
+
+## 2026-04-16 13:15 -- [T-P1-465] LC 1146 Snapshot Array: Chinese solution notes
+- **What I did**: Wrote canonical Chinese study notes for LC 1146 Snapshot Array covering the per-index `(snap_id, val)` stream + `bisect_right` pattern. Notes explain the killer insight (snap() is O(1) because we never clone the array; space O(K) decouples from length and snap count), include full Python code, a worked example showing `bisect_right((sid, +inf)) - 1` selecting the correct version, complexity breakdown, and 5 pitfalls (whole-array copy trap, same-snap overwrite vs append, bisect_right vs bisect_left tuple-sentinel idiom, default-0 for never-set indices, return value of `snap()`). Follow-up section bridges to LC 981 Time Based KV Store, database MVCC, version GC, rollback API, and persistent segment tree alternatives. Followed `_update_lc895_notes.py` pattern with sentinel-based idempotency.
+- **Deliverables**: `scripts/_update_lc1146_notes.py` (new, idempotent via `<!-- LC1146_NOTES -->` sentinel); `data/mle_prep.db` row 1077 (leetcode_id=1146) updated: notes (5015 chars), is_completed=1, pattern='hash map + binary search'.
+- **Sanity check result**: First run printed `[UPDATED] LC 1146 id=1077 notes_len=5015 fields=['notes', 'is_completed', 'pattern']`; second run printed `[UNCHANGED] LC 1146 id=1077 (sentinel present)`. DB verification: is_completed=1, notes_length=5015 (>=2000), hanzi count=1031 (>=500), sentinel present, family='stateful_ds_design' retained, pattern='hash map + binary search' set. All 4 ACs hold.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-465 --status completed`.

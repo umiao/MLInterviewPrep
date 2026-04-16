@@ -11,45 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
-
-CURRENT STATE (verified): leetcode_id=1146, family='stateful_ds_design', is_completed=0, LENGTH(notes)=0.
-
-PROBLEM RECAP: SnapshotArray(length) inits all-zero array. set(index,val) sets. snap() increments snap_id and returns previous. get(index,snap_id) returns val at index at that snap.
-
-SOLUTION TO COVER:
-- Per-index list of (snap_id, val) tuples, append-on-set with coalesce if same snap_id.
-- get: bisect_right(arr[index], (snap_id, inf)) - 1. O(log n) per get.
-- snap: just bump global snap_id, O(1). This is the key insight -- no deep copy.
-- set: append O(1) amortized. Special case: if last entry has same snap_id, overwrite in place.
-
-IMPLEMENTATION:
-- scripts/_update_lc1146_notes.py (pattern of _update_lc1570_notes.py)
-- StudyNoteBuilder required; Chinese prose; sentinel '<!-- LC1146_NOTES -->'.
-- Idempotent.
-
-NOTES MUST COVER:
-1. 题目定位: stateful_ds_design, 考点 = 版本化数据结构 + 二分查找
-2. 核心洞察: snap() O(1) 靠的是 per-index 只记增量 (snap_id, val), 从不整体拷贝. 空间 O(K) where K = 总 set 调用次数, 独立于 length 和 snap 次数.
-3. 完整 Python 代码 (defaultdict(list) + bisect)
-4. bisect_right 为什么用 -1: 找 <= snap_id 的最大 snap_id. 画一个走查示例.
-5. 复杂度: set O(1) amort; get O(log K_i); snap O(1). 空间 O(K).
-6. 易错点: 不能在 snap 时整体拷贝 (爆内存); bisect 条件要 snap_id 严格 <=; 同 snap_id 里多次 set 要覆盖不要 append (否则 bisect 会返回旧值).
-7. Follow-up: 并发 snap 怎么办 (copy-on-write / MVCC 思路) -> 指向数据库 MVCC 的桥接.
-8. 45 秒 pitch.
-
-AC:
-1. UPDATE notes + is_completed=1 for lcid=1146
-2. LENGTH(notes) >= 2000
-3. Re-run [UNCHANGED]
-4. Commit: [T-P1-465] LC 1146 Snapshot Array: Chinese solution notes
-
-REFERENCE: scripts/_update_lc1570_notes.py
-
 #### T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
@@ -280,4 +241,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
+- [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
