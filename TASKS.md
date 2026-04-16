@@ -9,64 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-452: [Meta-Cleanup] Sketch family unification: 3-axis view + terminology grounding across sketch docs
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: User-flagged: compact-DS content (CMS/HLL/SS/Bloom) duplicated across framework_nodes 196/197/103 + Pinterest doc 58, each treating primitives as independent solutions -> redundant text + term drift (HLL-family vs HLL-instance).
-
-GOAL: adopt user's 3-axis unified framework as the canonical lens. Primitives become specific axis-combinations, not separate topics. Eliminate duplicate math/formulas across docs.
-
-AUDIT TARGETS (read-only verified):
-- framework_node 196 (pillar1.streaming_topk, 7924b) -- PRIMARY CANONICAL
-- framework_node 197 (pillar1.scaling_resource_model, 8845b) -- references 196
-- framework_node 103 (pillar3.building_blocks.realtime_features, 5216b) -- tangential
-- company_document 58 (Pinterest Sketch/Streaming 1-Pager, 3817b)
-- LinkedIn docs 21/22 (huge合集) -- scan for any CMS/HLL section, add pointer if found
-
-THREE ORTHOGONAL AXES (adopt as canonical vocabulary everywhere):
-1. Hash source: flow label (canonical) / Bernoulli per-arrival / other dimension (timestamp, payload feature)
-2. Counter/register structure: scalar counter (CMS) / log counter (Morris) / bitmap register (PCSA, HLL variants)
-3. Aggregation operator: idempotent max (-> cardinality) / accumulative sum-or-set-bit (-> frequency)
-
-KEY TECHNICAL CONCEPTS to add to node 196 (currently missing):
-- CMM (Count-Mean-Min) > plain CM: f_hat(x) = (w*bucket - N)/(w-1); use MEDIAN across rows (not min post-correction). Light-flow relative-error improvement vs CMS.
-- Bernoulli frequency sketch: each arrival independently passes Bernoulli(p); survivors enter bucket. Error ~ sqrt(f(x))/p. Complements CMS's eps*||a||_1 -- heavy-flow-friendly where CMS relative error explodes for light flows.
-- Bitmap register generalization (beyond HLL max): each register stores bit vector, read statistics from patterns (longest-run, bit occupancy). Higher info utilization than HLL max-only, walks back toward PCSA route. Saturation handled by large m + saturation-aware estimator.
-- Unified 'test once' view: cardinality = per-flow-label test (max idempotent dedupes reruns); frequency = per-arrival test (accumulates). Same underlying structure, switch trigger semantics.
-
-SYSTEM DESIGN section (production pattern, goes into node 196 + Pinterest 58):
-- Layered architecture: cold filter (admission control) eats Zipf long-tail one-hit wonders; main sketch only sees 'promising' flows. Typical: 1/8 sampling + k-position-full-pass.
-- Two-layer bucketing: outer = flow -> m registers (cross-array collision suppression); inner = per-arrival -> register-bit (bit occupancy as freq proxy). Two orthogonal noise sources, tune independently.
-- Epoch-based reset + warm-up: sub-second reset prevents drift; previous epoch warms cold filter so true cold-start happens only once. Implicit assumption: heavy-hitter temporal locality (holds for network traffic).
-
-TERMINOLOGY GROUNDING (must appear up front in every touched doc):
-- 'HLL' in network-measurement community = family (hash + geometric/Bernoulli sampling + m-way bucketing)
-- 'HLL' in DB/general systems community strictly = Flajolet 2007 cardinality estimator (max-aggregation instance)
-- Cross-community discussion must first declare family vs instance to avoid looking unsound.
-
-ONE-LINER (canonical doc closing): 'Textbook teaches primitives; production teaches composition. 3-axis lens (hash source / counter structure / aggregation operator) + layered system design is the core frame for translating textbook sketches to engineering solutions.'
-
-ACCEPTANCE CRITERIA:
-1. framework_node 196 rewritten around 3-axis framework: primitives positioned as specific axis combos. CMM + Bernoulli-freq + bitmap-register + 'test once' view + system-design section all added. Terminology grounding in Key Terms. Length 10000-14000b (from 7924b -- conservative expansion, no fluff).
-2. framework_node 197: CMS/HLL mention reduced to 2-line definition + explicit pointer to 196. Duplicate formulas removed.
-3. framework_node 103: Key Terms CMS/HLL lines reduced to 1-line + pointer to 196. No duplicate math.
-4. company_document 58 rewritten as Pinterest-specific COMPOSITION 1-pager atop the canonical: primitives pointed to 196; focuses on Pinterest-specific combos (e.g. trending pins via axis-combo X; abuse detection via combo Y). Length 4000-6000b.
-5. Every 'HLL' mention across the 4 touched artifacts labels family-vs-instance on first use.
-6. Deliverable: one idempotent seed script scripts/consolidate_sketch_family_20260416.py that upserts all 4 artifacts; safe to re-run. No new stray seed scripts.
-7. Sanity: after running, grep for CMS/HLL math formulas -- should appear ONCE (in node 196), not duplicated across 103/197/58.
-
-EXPLICIT NON-GOALS:
-- Do NOT introduce new primitives (Bloom variants, t-digest, quantile sketches). Keep scope to frequency + cardinality.
-- Do NOT expand to distributed-merge mechanics at length (covered elsewhere or out of scope).
-- Do NOT touch node 151 (pretraining) or 143 (position encoding) even though they grep-matched 'sketch' (false positives).
-- Do NOT modify LinkedIn合集 docs unless they genuinely have duplicate sketch math (a pointer is enough if they have only passing mention).
-
-Confidence gate verification:
-- Context sufficiency: YES -- 4 exact doc IDs + char targets + axis taxonomy from user
-- Cross-company reuse: YES -- node 196 is pillar1 (company-agnostic), Pinterest doc 58 uses 196 as base, Google/LinkedIn future prep gets unified terminology
-- Duplication risk: NONE -- consolidation task by design; the 14 prior tasks (227-240) touch zero of {103, 196, 197, doc 58}
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-453: [Pinterest-CV] CNN foundation 1-pager: conv mechanics + ResNet/VGG/EfficientNet + transfer learning + data aug
@@ -207,6 +149,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
 - [x] **2026-04-16** -- T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold. AC: (1) PSI=Σ(a-e)·ln(a/e), 0.1 warn/0.25 critical; (2) KL 不对称无界, JS 对称 bounded; (3) 连续用 KS; (4) concept drift P(y|x) vs
+- [x] **2026-04-16** -- T-P0-452: [Meta-Cleanup] Sketch family unification: 3-axis view + terminology grounding across sketch docs. User-flagged: compact-DS content (CMS/HLL/SS/Bloom) duplicated across framework_nodes 196/197/103 + Pinterest doc 58, ea
 - [x] **2026-04-16** -- T-P0-451: [DL-Fund] DL training pitfalls 1-pager: Focal loss + BatchNorm/LayerNorm + vanishing/exploding gradients. Gap: three scattered pitfall topics consolidated. (1) Focal loss: alpha/gamma, class imbalance, when NOT to use (already
 - [x] **2026-04-16** -- T-P0-450: [DL-Fund] Optimizer family: SGD -> Momentum -> AdaGrad -> RMSProp -> Adam derivation chain. Gap: node 74 Gradient Descent Family is stub (141b). Existing study note source: data/t8_optimizers.md (port into DB). C
 - [x] **2026-04-16** -- T-P0-449: [DL-Fund] Activation functions unified: ReLU/LeakyReLU/Sigmoid/Tanh/Softmax when and why. Gap: no standalone activation-functions node. Single comparison table: {activation, range, derivative, vanishing-grad ri
