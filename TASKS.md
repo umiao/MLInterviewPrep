@@ -11,44 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
-
-CURRENT STATE: leetcode_id=1825, family='stateful_ds_design', is_completed=0, LENGTH(notes)=0.
-
-PROBLEM RECAP: MKAverage(m,k); addElement(num); calculateMKAverage() returns average of last m elements after removing smallest k and largest k (mean of middle m-2k).
-
-SOLUTION TO COVER:
-- Three SortedList (low=k smallest, mid=m-2k middle, high=k largest) + sum_mid running total.
-- addElement: append to deque; if deque len > m evict oldest from whichever bucket; insert new into correct bucket; rebalance.
-- calculateMKAverage: return sum_mid // (m-2k). O(1).
-- Alt: two heaps with lazy deletion.
-
-IMPLEMENTATION:
-- scripts/_update_lc1825_notes.py (pattern _update_lc1570_notes.py)
-- StudyNoteBuilder + Chinese prose + sentinel '<!-- LC1825_NOTES -->' + idempotent.
-
-NOTES COVER (Chinese):
-1. 题目定位: 滑动窗口 + 分桶维护第-k 大/小 (类比 LC 480 中位数, 但三桶版本).
-2. 核心洞察: 三个 SortedList + sum_mid, 避免每次 O(m) 重算; 维护 |low|=|high|=k 不变式.
-3. 完整 Python 代码 (sortedcontainers.SortedList + collections.deque).
-4. rebalance 6 种情况简化成先恢复 sizes 再按阈值迁移.
-5. 复杂度 add O(log m), calc O(1), 空间 O(m).
-6. 易错: evict 时要从正确桶精确删除 (bisect 定位, 不要盲 remove).
-7. Follow-up: 两 heap + lazy del.
-8. 45 秒 pitch.
-
-AC:
-1. UPDATE notes + is_completed=1 for lcid=1825.
-2. LENGTH(notes) >= 2000.
-3. Re-run prints [UNCHANGED].
-4. Commit: [T-P1-466] LC 1825 Finding MK Average: Chinese solution notes.
-
-REFERENCE: scripts/_update_lc1570_notes.py
-
 #### T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
@@ -241,5 +203,6 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
+- [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
