@@ -11,60 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-462
-- **Description**: REFACTOR src/frontend/src/pages/QuickIndex.tsx to render LC problems grouped by family, eliminating the current label-less flat grid.
-
-USER-APPROVED APPROACH (a): keep hardcoded LC_PROBLEMS array as the source of visible problems, but add a FAMILY_GROUPS mapping and render one collapsible <details> section per family (matching existing Stateful Data Structure Design pattern). NO backend API change.
-
-EXACT EDITS TO src/frontend/src/pages/QuickIndex.tsx:
-
-1. Extend LC_PROBLEMS entries to include a 'family' field (4th property). Use values from T-P1-462 mapping:
-   - LC 146/716/432 -> 'stateful_ds_design'  (already implicitly via STATEFUL_DS_DESIGN)
-   - LC 215/373     -> 'heap_topk'
-   - LC 127         -> 'graph_bfs'
-   - LC 269         -> 'graph_topo_sort'
-   - LC 200         -> 'graph_grid_traversal'
-   - LC 235         -> 'tree_lca'
-   - LC 212         -> 'trie_multiword'
-   - LC 15          -> 'two_pointers_target'
-   - LC 2503        -> 'offline_queries_dsu'
-   - LC 2791/2858   -> 'tree_dp_rerooting'
-
-2. Add FAMILY_LABELS constant mapping family slug to display name:
-   stateful_ds_design     -> 'Stateful Data Structure Design'
-   heap_topk              -> 'Heap / Top-K'
-   graph_bfs              -> 'Graph BFS (Word Ladder family)'
-   graph_topo_sort        -> 'Graph Topological Sort'
-   graph_grid_traversal   -> 'Graph / Grid Traversal'
-   tree_lca               -> 'Tree: LCA'
-   trie_multiword         -> 'Trie: Multi-word Search'
-   two_pointers_target    -> 'Two-Pointers Target Sum'
-   offline_queries_dsu    -> 'Offline Queries + DSU'
-   tree_dp_rerooting      -> 'Tree DP / Rerooting'
-
-3. Keep STATEFUL_DS_DESIGN constant as-is (stays as 11-item curated group). Render Stateful DS group FIRST (same position as today).
-
-4. Below Stateful DS group: group the remaining 11 LC_PROBLEMS by family. Render each family as <details open> with count badge, grid-cols-2/md:3/lg:4 identical to existing pattern. Render order: follow FAMILY_LABELS insertion order (heap_topk first, tree_dp_rerooting last). No 'Other / Ungrouped' section -- every problem must belong to a family after T-P1-462.
-
-5. Remove the current lines 211-228 'flat ungrouped grid' -- replaced by family-grouped rendering.
-
-ACCEPTANCE CRITERIA:
-1. Visit http://localhost:5173/quick-index?section=lc -> every LC card sits under a named <details> group. No unlabeled grid.
-2. LRU, LFU, AllOne still appear under 'Stateful Data Structure Design' group (no regression).
-3. Each group has a count badge showing correct count.
-4. npm run build passes with 0 TS errors.
-5. frontend vitest passes (existing 39+ tests).
-6. Click behavior unchanged: card -> ProblemDrawer opens with LC id.
-7. Manual smoke: visit page, count groups present (should be 8: Stateful DS + 7 new family groups since tree_dp_rerooting combines 2 items).
-8. Commit message: [T-P1-463] QuickIndex: family-based grouping replaces flat ungrouped grid
-
-DEPENDS ON: T-P1-462 must complete first (DB family values must be set before frontend groups by family; though frontend relies on hardcoded local mapping, the DB backfill is the contract/source of truth).
-
-NON-GOALS: Do NOT fetch from backend. Do NOT touch ML tab, BQ tab, or knowledge-tree tabs. Do NOT change ProblemDrawer behavior. Do NOT add pagination.
-
 #### T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
@@ -378,6 +324,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
+- [x] **2026-04-16** -- T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping. REFACTOR src/frontend/src/pages/QuickIndex.tsx to render LC problems grouped by family, eliminating the current label-le
 - [x] **2026-04-16** -- T-P1-462: [QIdx-A1] Backfill family on 11 ungrouped LC_PROBLEMS. BACKFILL family on 11 LC problems whose cards currently render in the label-less flat grid at the bottom of QuickIndex L
 - [x] **2026-04-16** -- T-P1-461: [adhoc] LC 815 follow-up: station-level shortest path section. Append follow-up to LC 815 notes: min-stops variant via station-level BFS / Dijkstra. Idempotent script with sentinel gu
 - [x] **2026-04-16** -- T-P1-457: [Phase 0.5b] Template v1.1 post-Sketch revision: drawer tab render order + Optimization granularity example. DEFERRED revision of Phase 0.5 content template after T-P0-241 Sketch sample ships real-world signal. Per independent re

@@ -8,22 +8,41 @@ import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 import ProblemDrawer from "../components/problems/ProblemDrawer";
 import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
 
-const LC_PROBLEMS: { dbId: number; lcId: number; title: string }[] = [
-  { dbId: 93, lcId: 146, title: "LRU Cache" },
-  { dbId: 179, lcId: 716, title: "Max Stack" },
-  { dbId: 182, lcId: 432, title: "All O`one Data Structure" },
-  { dbId: 99, lcId: 215, title: "Kth Largest Element in an Array" },
-  { dbId: 115, lcId: 127, title: "Word Ladder" },
-  { dbId: 510, lcId: 373, title: "Find K Pairs with Smallest Sums" },
-  { dbId: 29, lcId: 235, title: "Lowest Common Ancestor of a BST" },
-  { dbId: 38, lcId: 212, title: "Word Search II" },
-  { dbId: 48, lcId: 269, title: "Alien Dictionary" },
-  { dbId: 10, lcId: 15, title: "3Sum" },
-  { dbId: 42, lcId: 200, title: "Number of Islands" },
-  { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries" },
-  { dbId: 216, lcId: 2791, title: "Palindrome Paths in Tree" },
-  { dbId: 183, lcId: 2858, title: "Min Edge Reversals" },
+const LC_PROBLEMS: {
+  dbId: number;
+  lcId: number;
+  title: string;
+  family: string;
+}[] = [
+  { dbId: 93, lcId: 146, title: "LRU Cache", family: "stateful_ds_design" },
+  { dbId: 179, lcId: 716, title: "Max Stack", family: "stateful_ds_design" },
+  { dbId: 182, lcId: 432, title: "All O`one Data Structure", family: "stateful_ds_design" },
+  { dbId: 99, lcId: 215, title: "Kth Largest Element in an Array", family: "heap_topk" },
+  { dbId: 510, lcId: 373, title: "Find K Pairs with Smallest Sums", family: "heap_topk" },
+  { dbId: 115, lcId: 127, title: "Word Ladder", family: "graph_bfs" },
+  { dbId: 48, lcId: 269, title: "Alien Dictionary", family: "graph_topo_sort" },
+  { dbId: 42, lcId: 200, title: "Number of Islands", family: "graph_grid_traversal" },
+  { dbId: 29, lcId: 235, title: "Lowest Common Ancestor of a BST", family: "tree_lca" },
+  { dbId: 38, lcId: 212, title: "Word Search II", family: "trie_multiword" },
+  { dbId: 10, lcId: 15, title: "3Sum", family: "two_pointers_target" },
+  { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries", family: "offline_queries_dsu" },
+  { dbId: 216, lcId: 2791, title: "Palindrome Paths in Tree", family: "tree_dp_rerooting" },
+  { dbId: 183, lcId: 2858, title: "Min Edge Reversals", family: "tree_dp_rerooting" },
 ];
+
+// Render order + display labels for non-Stateful-DS family groups.
+// Insertion order is the render order in the UI.
+const FAMILY_LABELS: Record<string, string> = {
+  heap_topk: "Heap / Top-K",
+  graph_bfs: "Graph BFS (Word Ladder family)",
+  graph_topo_sort: "Graph Topological Sort",
+  graph_grid_traversal: "Graph / Grid Traversal",
+  tree_lca: "Tree: LCA",
+  trie_multiword: "Trie: Multi-word Search",
+  two_pointers_target: "Two-Pointers Target Sum",
+  offline_queries_dsu: "Offline Queries + DSU",
+  tree_dp_rerooting: "Tree DP / Rerooting",
+};
 
 // Stateful data-structure design family (problems.family='stateful_ds_design').
 // Rendered as a collapsible group above ungrouped LC problems.
@@ -40,8 +59,6 @@ const STATEFUL_DS_DESIGN: { lcId: number; title: string }[] = [
   { lcId: 1825, title: "Finding MK Average" },
   { lcId: 1845, title: "Seat Reservation Manager" },
 ];
-
-const STATEFUL_DS_LC_IDS = new Set(STATEFUL_DS_DESIGN.map((p) => p.lcId));
 
 const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1064, title: "K-Means (K-Means++)" },
@@ -208,24 +225,42 @@ export default function QuickIndex() {
               ))}
             </div>
           </details>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {LC_PROBLEMS.filter((p) => !STATEFUL_DS_LC_IDS.has(p.lcId)).map((p) => (
-              <button
-                key={p.dbId}
-                type="button"
-                onClick={() => {
-                  setDrawerDbId(null);
-                  setDrawerLcId(p.lcId);
-                }}
-                className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
-              >
-                <span className="text-xs text-gray-400 font-mono">
-                  #{p.lcId}
-                </span>
-                <div className="mt-1 font-medium text-gray-800">{p.title}</div>
-              </button>
-            ))}
-          </div>
+          {Object.keys(FAMILY_LABELS).map((familySlug) => {
+            const familyProblems = LC_PROBLEMS.filter(
+              (p) => p.family === familySlug,
+            );
+            if (familyProblems.length === 0) return null;
+            return (
+              <details key={familySlug} open className="group">
+                <summary className="cursor-pointer text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2 select-none">
+                  {FAMILY_LABELS[familySlug]}
+                  <span className="ml-2 text-xs font-normal text-gray-400">
+                    ({familyProblems.length})
+                  </span>
+                </summary>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-3">
+                  {familyProblems.map((p) => (
+                    <button
+                      key={p.dbId}
+                      type="button"
+                      onClick={() => {
+                        setDrawerDbId(null);
+                        setDrawerLcId(p.lcId);
+                      }}
+                      className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
+                    >
+                      <span className="text-xs text-gray-400 font-mono">
+                        #{p.lcId}
+                      </span>
+                      <div className="mt-1 font-medium text-gray-800">
+                        {p.title}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </details>
+            );
+          })}
         </div>
       )}
 
