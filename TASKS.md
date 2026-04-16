@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-456: [ML-RecSys] Matrix factorization: SGD vs ALS + bridge from CF to embedding models
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Gap: node 108 (Collaborative Filtering) covers CF concept but not the MF mechanics bridging CF -> Two-Tower. (1) Bias-only -> Funk-SVD (PMF) -> biased-MF (user bias + item bias + inner product). (2) Training: SGD (mini-batch, noisy, online-friendly) vs ALS (closed-form per block, parallelizable, offline). (3) Conceptual bridge: MF is the ancestor of Two-Tower -- user_emb * item_emb dot product but with learned towers instead of fixed lookup. AC: expand framework_node id=108 description AND optional docs/mf_to_two_tower_bridge.md. LINK to Google Two-Tower doc 64 -- do NOT re-derive InfoNCE or sampled-softmax (covered there). <=1500 words. Pyramid mid. Depends on: none.
-
 #### T-P1-457: [Phase 0.5b] Template v1.1 post-Sketch revision: drawer tab render order + Optimization granularity example
 - **Priority**: P1
 - **Complexity**: S
@@ -129,6 +123,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
+- [x] **2026-04-16** -- T-P1-456: [ML-RecSys] Matrix factorization: SGD vs ALS + bridge from CF to embedding models. Gap: node 108 (Collaborative Filtering) covers CF concept but not the MF mechanics bridging CF -> Two-Tower. (1) Bias-on
 - [x] **2026-04-16** -- T-P1-455: [Pinterest-RecSys] Cold-start strategies: user + item + pin bootstrap. Gap: cold-start absent from pillar4.recommender_systems nodes (108/109/110 cover CF/content-based/deep but not cold-star
 - [x] **2026-04-16** -- T-P1-454: [Pinterest-NLP] Word2Vec/GloVe history + ViT + cross-modal attention supplement. Gap: pre-transformer embedding history missing entirely; node 164 (Vision-Language Models) covers CLIP/LLaVA shallowly b
 - [x] **2026-04-16** -- T-P1-453: [Pinterest-CV] CNN foundation 1-pager: conv mechanics + ResNet/VGG/EfficientNet + transfer learning + data aug. Gap: Pinterest is visual-content-first, but CV framework_nodes 122/123 are shallow (5733b+6231b). (1) Conv op: stride/pa
