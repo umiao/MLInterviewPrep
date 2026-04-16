@@ -13,31 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-469: [QIdx-C1] Harden LC import scripts to set family
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Harden LC import scripts so new rows no longer default to family=NULL silently.
-
-BACKGROUND: Current pipeline adds LC problems via import_staging_lc.py and multiple seed_*lc*.py scripts. None set family; result is 1026 LC problems with family=NULL in DB. This task prevents the rot from growing.
-
-IMPLEMENTATION: Pick a low-intrusion path:
-- Locate all LC-insert call sites: grep -r -l "INSERT INTO problems" scripts/ and inspect each.
-- Typical files (verify before editing): scripts/import_staging_lc.py, scripts/seed_pinterest_lc_problems.py, scripts/_seed_*.py that touch problems.
-- At each INSERT: if family is not provided or is NULL/empty, log the row to logs/lc_family_quarantine.tsv (append-only tsv: timestamp\tlc_id\ttitle\tsource_script). Print WARN to stderr: [WARN] LC {id} inserted without family; logged to quarantine.
-- DO NOT fail the insert -- non-blocking warn-and-log.
-- Add a new helper module scripts/_lc_import_helpers.py with one function: warn_if_missing_family(lc_id, title, family, source_script). Each import script imports and calls this before/after the INSERT.
-
-ACCEPTANCE CRITERIA:
-1. scripts/_lc_import_helpers.py exists with warn_if_missing_family.
-2. At least 2 existing import call sites patched to use it.
-3. Demo: running any patched importer with a row that has no family produces a WARN line and appends a row to logs/lc_family_quarantine.tsv.
-4. Rows WITH family do not produce warnings or quarantine entries.
-5. Existing smoke tests (if any for these importers) still pass.
-6. Commit: [T-P2-469] Harden LC import scripts: warn + quarantine rows missing family
-
-NON-GOALS: No DB schema change. No retroactive fix for the 1026 existing NULL-family rows (covered separately if needed). No hard validation failure on insert (non-blocking warn only).
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -121,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 430 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-16** -- T-P2-469: [QIdx-C1] Harden LC import scripts to set family. Harden LC import scripts so new rows no longer default to family=NULL silently.
 - [x] **2026-04-16** -- T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook. Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with
 - [x] **2026-04-16** -- T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost. Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal)
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b

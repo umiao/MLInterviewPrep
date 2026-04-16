@@ -5,9 +5,23 @@ Idempotent: adds Pinterest company tag to existing problems, creates missing one
 Data source: Pinterest interview prep LC list (user-provided 2026-04-12).
 """
 
+import importlib.util
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from pathlib import Path
+
+# Load sibling helper by file path -- the workspace has a colliding
+# ``scripts`` package from another sub-project, so ``from scripts.*`` is
+# unreliable here.
+_HELPER_PATH = Path(__file__).resolve().parent / "_lc_import_helpers.py"
+_helper_spec = importlib.util.spec_from_file_location(
+    "_lc_import_helpers", _HELPER_PATH
+)
+assert _helper_spec is not None and _helper_spec.loader is not None
+_lc_import_helpers = importlib.util.module_from_spec(_helper_spec)
+_helper_spec.loader.exec_module(_lc_import_helpers)
+warn_if_missing_family = _lc_import_helpers.warn_if_missing_family
 
 DB_PATH = "data/mle_prep.db"
 
@@ -88,16 +102,24 @@ def seed_pinterest_problems(conn: sqlite3.Connection) -> tuple[int, int, int]:
                 skipped += 1
                 print(f"  [SKIP] LC {lc_id} - {prob['title']}: already tagged Pinterest")
         else:
-            # Create new problem
+            # Create new problem. This seed script does not set a family, so
+            # flag each fresh insert (warn + append to quarantine TSV).
             meta = NEW_PROBLEMS.get(lc_id, {})
             url = meta.get("url", f"https://leetcode.com/problems/{prob['title'].lower().replace(' ', '-')}/")
             tags = meta.get("tags", "[]")
             pattern = meta.get("pattern", "")
+            family = meta.get("family")
+            warn_if_missing_family(
+                lc_id=lc_id,
+                title=prob["title"],
+                family=family,
+                source_script="seed_pinterest_lc_problems.py",
+            )
             cursor.execute(
                 """INSERT INTO problems
-                (leetcode_id, title, url, difficulty, tags, pattern, category,
+                (leetcode_id, title, url, difficulty, tags, pattern, family, category,
                  source, company_tags, priority, is_completed, comfort_level, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, 'algorithm', 'pinterest_prep', ?, 1, 0, 0, ?)""",
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'algorithm', 'pinterest_prep', ?, 1, 0, 0, ?)""",
                 (
                     lc_id,
                     prob["title"],
@@ -105,8 +127,9 @@ def seed_pinterest_problems(conn: sqlite3.Connection) -> tuple[int, int, int]:
                     prob["difficulty"],
                     tags,
                     pattern,
+                    family,
                     json.dumps(["Pinterest"]),
-                    datetime.now(timezone.utc).isoformat(),
+                    datetime.now(UTC).isoformat(),
                 ),
             )
             created += 1

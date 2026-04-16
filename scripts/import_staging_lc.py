@@ -20,8 +20,22 @@ from sqlalchemy.orm import Session
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+import importlib.util  # noqa: E402
+
 from src.backend.database import SessionLocal, init_db  # noqa: E402
 from src.backend.models.problem import Problem  # noqa: E402
+
+# Load sibling helper by file path -- the workspace has a colliding
+# ``scripts`` package from another sub-project, so ``from scripts.*`` is
+# unreliable here.
+_HELPER_PATH = PROJECT_ROOT / "scripts" / "_lc_import_helpers.py"
+_helper_spec = importlib.util.spec_from_file_location(
+    "_lc_import_helpers", _HELPER_PATH
+)
+assert _helper_spec is not None and _helper_spec.loader is not None
+_lc_import_helpers = importlib.util.module_from_spec(_helper_spec)
+_helper_spec.loader.exec_module(_lc_import_helpers)
+warn_if_missing_family = _lc_import_helpers.warn_if_missing_family
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -108,13 +122,22 @@ def import_problems(db: Session, dry_run: bool = False) -> dict:
                 existing.url = url
             stats["merged"] += 1
         else:
-            # Insert new problem
+            # Insert new problem. staging_lc does not set a family, so every
+            # newly inserted row is flagged (warn + append to quarantine TSV).
+            family = item.get("family")
+            warn_if_missing_family(
+                lc_id=lc_id,
+                title=title,
+                family=family,
+                source_script="import_staging_lc.py",
+            )
             new_problem = Problem(
                 leetcode_id=lc_id,
                 title=title,
                 url=url,
                 difficulty=difficulty,
                 category="algorithm",
+                family=family,
                 company_tags=json.dumps(company_tags, ensure_ascii=False),
                 priority=2,
             )
