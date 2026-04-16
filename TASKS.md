@@ -9,35 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularization treatment into framework_node 195 as canonical authority.
-
-CURRENT STATE (verified):
-- framework_node id=195 was expanded under T-P0-220 with primal-dual KKT derivation + geometric picture. Length: 7543 chars (post-expansion).
-- Legacy 合集 Doc 21 (LinkedIn 概率统计) contains L1/L2 proofs as UNIQUE sole source per audit.
-- Multiple drill docs mention regularization tangentially (e.g., Google 55 Regularization Deep Dive, Doc 27 ML理论).
-
-SCOPE:
-1. Read Doc 21's L1/L2 sections + Google Doc 55 + any framework_node content touching regularization. Produce a diff analysis (what's unique, what's duplicated).
-2. Absorb Doc 21 unique L1/L2 proofs into framework_node 195 (target: 10000-14000 chars; stay within drawer/always-visible budget per template v1.1).
-3. Reposition Google Doc 55 as 'drill' (doc_kind='drill' via KG-P1-02 taxonomy): trim re-derivations, replace with '> **正典** [Regularization (pillarN.path)](/framework/195)'. Target: 55 shrinks from 8396 -> ~5000 chars.
-4. concept_links: doc 55 -> node 195 (canonical); node 195 -> doc 55 (drill) + doc 21 (absorbed_from).
-5. Archive pre-migration snapshots of doc 55 + relevant Doc 21 sections to archive/pre_kg/YYYYMMDD/.
-
-ACCEPTANCE CRITERIA:
-1. framework_node 195 length: 10000-14000 chars; covers L1 vs L2 geometric picture + KKT + soft-thresholding + probabilistic Laplace/Gaussian priors + elastic net brief + weight decay vs L2 subtlety in Adam.
-2. Google Doc 55 trimmed to <=5500 chars, contains canonical pointer blockquote.
-3. concept_links rows inserted (3 edges).
-4. Idempotent seed: scripts/consolidate_regularization_20260416.py.
-5. Commit: [KG-P2-02] Regularization canonical hub (node 195) + Google doc 55 trim + Doc 21 absorb
-
-DEPENDS ON: KG-P1-01 (concept_links), KG-P1-02 (doc_kind), KG-P1-03 (markdown convention).
-
-NON-GOALS: Do NOT delete Doc 21 (legacy 合集 per user: per-concept manual review only). Do NOT touch other Doc 21 sections (only the L1/L2 subsection).
-
 #### T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27
 - **Priority**: P0
 - **Complexity**: S
@@ -373,6 +344,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195). Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularizatio
 - [x] **2026-04-16** -- T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node). Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authori
 - [x] **2026-04-16** -- T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes. Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into con
 - [x] **2026-04-16** -- T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill. Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy:
