@@ -9,9 +9,157 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-445: [ML-Fund] Cost-sensitive model selection: FP/FN decision rubric + Pinterest/Google examples
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: when two models have near-equal accuracy/AUC, how to choose. Steps: (1) quantify FP vs FN business cost; (2) pick operating point on PR curve along cost-weighted axis; (3) threshold recalibration; (4) class-weighted CE / cost-sensitive loss. AC: (a) expand framework_node id=17 (Model Selection & Validation) description from 0b -> >=3000b with decision rubric + worked example. (b) Seed one hub doc at docs/ml_cost_sensitive_selection.md with Pinterest unsafe-content (high FN cost) + Google Ads (high FP cost) concrete cases. (c) LINK to existing Google doc 62 (Calibration drill) -- do NOT duplicate Platt/Isotonic/Temperature math, only reference. Target <=2500 words. Pyramid base -- no fancy expansion. Depends on: none.
+
+#### T-P0-446: [ML-Fund] Logistic regression coefficient interpretation: odds ratio for categorical + boolean variables
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: typical Google/LinkedIn screen: 'LR coef 0.7 on one-hot vs reference -- what does it mean?'. Cover: (a) continuous feature one-unit change -> exp(beta); (b) categorical with k levels (one-hot, reference level, exp(beta_k) vs reference baseline); (c) boolean variable exp(beta). Include 3-example decision script. AC: expand framework_node id=64 (Linear Models) description from 145b -> >=3000b. NO new doc -- node description is enough. Do NOT duplicate content from Google DNN gist (doc 52). Pyramid base. Depends on: none.
+
+#### T-P0-447: [ML-Fund] Bagging vs Boosting decision rubric + XGBoost/LightGBM mechanics
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Gap: (1) when bagging (high variance, stable base learner) vs boosting (high bias, weak learner). (2) XGBoost core: 2nd-order Taylor, L1/L2 reg term, sparse-aware split, histogram approx. (3) LightGBM: leaf-wise growth, GOSS, EFB, native categorical. (4) XGB vs LGB latency/memory at scale. Google/Pinterest screen: 'why LGB beats XGB on wide datasets'. AC: (a) populate framework_node id=65 (Tree Models) description 124b -> >=4000b. (b) Seed one-pager docs/bagging_boosting_xgb_lgb_1pager.md. LINK to Google LambdaMART doc 60 -- do not re-derive gradient boosting basics covered there. <=3000 words. Pyramid base -- don't go deep on optimizer-specific hyperparameters, stay at decision-rubric level. Depends on: none.
+
+#### T-P0-448: [ML-Fund] Classical model pitches: KNN / Naive Bayes / K-Means / DBSCAN when-to-use
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: node 71 Clustering stub + no NB/KNN nodes. Pitch-format 1-pager: per model -> (what / assumption / when use / when avoid / complexity / Pinterest or Google angle). Pitch-level ONLY -- do NOT re-derive Bayes theorem or k-means convergence proof. Topics: KNN (lazy, curse of dim, needs normalization), NB (feature independence, text baseline), K-Means (centroid, K choice via elbow/silhouette, sensitive to init), DBSCAN (density, eps/minPts tuning, non-convex clusters). AC: (a) expand framework_node id=71 (Clustering) desc 115b -> >=2500b. (b) Seed docs/classical_model_pitches.md. (c) Reference data/t4_knn_kmeans.md and data/t5_naive_bayes.md if present -- do NOT duplicate their derivations, link only. <=2000 words. Depends on: none.
+
+#### T-P0-449: [DL-Fund] Activation functions unified: ReLU/LeakyReLU/Sigmoid/Tanh/Softmax when and why
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: no standalone activation-functions node. Single comparison table: {activation, range, derivative, vanishing-grad risk, compute cost, typical use}. Why ReLU default for vision (cheap, non-saturating on positives, induces sparsity). Why sigmoid at binary output. Softmax for multi-class + temperature tricks (distillation/sampling). Leaky/PReLU as dying-ReLU fix. AC: expand framework_node id=77 (Training Tricks) description 135b -> >=3000b including the table + 3 when-to-pick examples. NO new doc. Pyramid base -- pitch-level, no deep math on smoothness theory. Depends on: none.
+
+#### T-P0-450: [DL-Fund] Optimizer family: SGD -> Momentum -> AdaGrad -> RMSProp -> Adam derivation chain
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Gap: node 74 Gradient Descent Family is stub (141b). Existing study note source: data/t8_optimizers.md (port into DB). Cover update rules with math: SGD (high variance), Momentum (velocity smoothing), AdaGrad (per-param LR decay -> freezes late), RMSProp (decaying avg fixes freeze), Adam (Momentum + RMSProp + bias correction). When NOT Adam: vision/generalization often favors SGD+Momentum + cosine schedule. AC: (a) port content from data/t8_optimizers.md; (b) expand framework_node id=74 description 141b -> >=5000b. (c) Optional docs/optimizer_family.md only if node size overflows. Pyramid base. Do NOT expand to LARS/LAMB/Lion (fancy -- skip). Depends on: none.
+
+#### T-P0-451: [DL-Fund] DL training pitfalls 1-pager: Focal loss + BatchNorm/LayerNorm + vanishing/exploding gradients
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-449
+- **Description**: Gap: three scattered pitfall topics consolidated. (1) Focal loss: alpha/gamma, class imbalance, when NOT to use (already balanced data). (2) BatchNorm: train vs eval mode common trap, internal-covariate-shift motivation (now disputed), why LayerNorm is used for sequences/transformers. (3) Vanishing/exploding grads: sigmoid/tanh stacks, residual connections fix, gradient clipping, Xavier (tanh) vs He (ReLU) init. AC: (a) seed docs/dl_training_pitfalls_1pager.md. (b) Expand framework_node id=77 (Training Tricks) description (AFTER Gap-5 activation-functions task, same node) by adding a second section. <=3500 words. Pyramid base. Depends on: T-P0-<gap5>.
+
+#### T-P0-452: [Meta-Cleanup] Sketch family unification: 3-axis view + terminology grounding across sketch docs
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: User-flagged: compact-DS content (CMS/HLL/SS/Bloom) duplicated across framework_nodes 196/197/103 + Pinterest doc 58, each treating primitives as independent solutions -> redundant text + term drift (HLL-family vs HLL-instance).
+
+GOAL: adopt user's 3-axis unified framework as the canonical lens. Primitives become specific axis-combinations, not separate topics. Eliminate duplicate math/formulas across docs.
+
+AUDIT TARGETS (read-only verified):
+- framework_node 196 (pillar1.streaming_topk, 7924b) -- PRIMARY CANONICAL
+- framework_node 197 (pillar1.scaling_resource_model, 8845b) -- references 196
+- framework_node 103 (pillar3.building_blocks.realtime_features, 5216b) -- tangential
+- company_document 58 (Pinterest Sketch/Streaming 1-Pager, 3817b)
+- LinkedIn docs 21/22 (huge合集) -- scan for any CMS/HLL section, add pointer if found
+
+THREE ORTHOGONAL AXES (adopt as canonical vocabulary everywhere):
+1. Hash source: flow label (canonical) / Bernoulli per-arrival / other dimension (timestamp, payload feature)
+2. Counter/register structure: scalar counter (CMS) / log counter (Morris) / bitmap register (PCSA, HLL variants)
+3. Aggregation operator: idempotent max (-> cardinality) / accumulative sum-or-set-bit (-> frequency)
+
+KEY TECHNICAL CONCEPTS to add to node 196 (currently missing):
+- CMM (Count-Mean-Min) > plain CM: f_hat(x) = (w*bucket - N)/(w-1); use MEDIAN across rows (not min post-correction). Light-flow relative-error improvement vs CMS.
+- Bernoulli frequency sketch: each arrival independently passes Bernoulli(p); survivors enter bucket. Error ~ sqrt(f(x))/p. Complements CMS's eps*||a||_1 -- heavy-flow-friendly where CMS relative error explodes for light flows.
+- Bitmap register generalization (beyond HLL max): each register stores bit vector, read statistics from patterns (longest-run, bit occupancy). Higher info utilization than HLL max-only, walks back toward PCSA route. Saturation handled by large m + saturation-aware estimator.
+- Unified 'test once' view: cardinality = per-flow-label test (max idempotent dedupes reruns); frequency = per-arrival test (accumulates). Same underlying structure, switch trigger semantics.
+
+SYSTEM DESIGN section (production pattern, goes into node 196 + Pinterest 58):
+- Layered architecture: cold filter (admission control) eats Zipf long-tail one-hit wonders; main sketch only sees 'promising' flows. Typical: 1/8 sampling + k-position-full-pass.
+- Two-layer bucketing: outer = flow -> m registers (cross-array collision suppression); inner = per-arrival -> register-bit (bit occupancy as freq proxy). Two orthogonal noise sources, tune independently.
+- Epoch-based reset + warm-up: sub-second reset prevents drift; previous epoch warms cold filter so true cold-start happens only once. Implicit assumption: heavy-hitter temporal locality (holds for network traffic).
+
+TERMINOLOGY GROUNDING (must appear up front in every touched doc):
+- 'HLL' in network-measurement community = family (hash + geometric/Bernoulli sampling + m-way bucketing)
+- 'HLL' in DB/general systems community strictly = Flajolet 2007 cardinality estimator (max-aggregation instance)
+- Cross-community discussion must first declare family vs instance to avoid looking unsound.
+
+ONE-LINER (canonical doc closing): 'Textbook teaches primitives; production teaches composition. 3-axis lens (hash source / counter structure / aggregation operator) + layered system design is the core frame for translating textbook sketches to engineering solutions.'
+
+ACCEPTANCE CRITERIA:
+1. framework_node 196 rewritten around 3-axis framework: primitives positioned as specific axis combos. CMM + Bernoulli-freq + bitmap-register + 'test once' view + system-design section all added. Terminology grounding in Key Terms. Length 10000-14000b (from 7924b -- conservative expansion, no fluff).
+2. framework_node 197: CMS/HLL mention reduced to 2-line definition + explicit pointer to 196. Duplicate formulas removed.
+3. framework_node 103: Key Terms CMS/HLL lines reduced to 1-line + pointer to 196. No duplicate math.
+4. company_document 58 rewritten as Pinterest-specific COMPOSITION 1-pager atop the canonical: primitives pointed to 196; focuses on Pinterest-specific combos (e.g. trending pins via axis-combo X; abuse detection via combo Y). Length 4000-6000b.
+5. Every 'HLL' mention across the 4 touched artifacts labels family-vs-instance on first use.
+6. Deliverable: one idempotent seed script scripts/consolidate_sketch_family_20260416.py that upserts all 4 artifacts; safe to re-run. No new stray seed scripts.
+7. Sanity: after running, grep for CMS/HLL math formulas -- should appear ONCE (in node 196), not duplicated across 103/197/58.
+
+EXPLICIT NON-GOALS:
+- Do NOT introduce new primitives (Bloom variants, t-digest, quantile sketches). Keep scope to frequency + cardinality.
+- Do NOT expand to distributed-merge mechanics at length (covered elsewhere or out of scope).
+- Do NOT touch node 151 (pretraining) or 143 (position encoding) even though they grep-matched 'sketch' (false positives).
+- Do NOT modify LinkedIn合集 docs unless they genuinely have duplicate sketch math (a pointer is enough if they have only passing mention).
+
+Confidence gate verification:
+- Context sufficiency: YES -- 4 exact doc IDs + char targets + axis taxonomy from user
+- Cross-company reuse: YES -- node 196 is pillar1 (company-agnostic), Pinterest doc 58 uses 196 as base, Google/LinkedIn future prep gets unified terminology
+- Duplication risk: NONE -- consolidation task by design; the 14 prior tasks (227-240) touch zero of {103, 196, 197, doc 58}
+
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-453: [Pinterest-CV] CNN foundation 1-pager: conv mechanics + ResNet/VGG/EfficientNet + transfer learning + data aug
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Gap: Pinterest is visual-content-first, but CV framework_nodes 122/123 are shallow (5733b+6231b). (1) Conv op: stride/pad/dilation, receptive field growth, parameter sharing. (2) Pool: max vs avg, global avg pool replacing FC. (3) Architectures one-liner each: VGG (deep stacked 3x3), ResNet (skip connections enable deep training), EfficientNet (compound scaling depth/width/resolution). (4) Transfer learning: head-only vs full fine-tune, when to freeze backbone, BN quirks when fine-tuning. (5) Augmentation catalog: geom/color/mixup/cutout/cutmix + text-image pair aug for multimodal. AC: (a) seed Pinterest company_document (company_id=29, doc_kind=prep_note) titled 'CNN Foundation for Visual Search'. (b) Expand framework_node id=122 (Image Classification) description to include Pinterest-specific angle. <=2500 words. Pyramid mid -- don't go into NAS / vision transformer internals (separate task). Depends on: none.
+
+#### T-P1-454: [Pinterest-NLP] Word2Vec/GloVe history + ViT + cross-modal attention supplement
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: pre-transformer embedding history missing entirely; node 164 (Vision-Language Models) covers CLIP/LLaVA shallowly but no ViT detail or cross-modal attention contrast. (1) Word2Vec (CBOW, skip-gram, negative sampling) + GloVe (co-occurrence matrix) as HISTORY -- why moved past: context-free embeddings. (2) ViT: patch embedding, [CLS] token, positional embedding, why scales beyond CNN. (3) Cross-modal attention: CLIP's dual-encoder contrastive alignment vs self-attention (in-modality); mention BLIP-2's Q-Former as fusion step. AC: expand framework_node id=164 description + add brief predecessor context in node 148 (BERT Family) description. Optional docs/nlp_pretransformer_to_vit_bridge.md if content exceeds. <=2000 words. Pyramid mid. Depends on: none.
+
+#### T-P1-455: [Pinterest-RecSys] Cold-start strategies: user + item + pin bootstrap
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: cold-start absent from pillar4.recommender_systems nodes (108/109/110 cover CF/content-based/deep but not cold-start). Strategies: (1) Content-based first-shot (Pinterest Pin = image+text, can embed immediately). (2) Cross-domain transfer (demographics, geo, device). (3) Meta-learning (MAML for fast adaptation). (4) Contextual bandits for explore/exploit. (5) Popular/trending baseline fallback. Pinterest-specific: fresh-pin surge from new boards, creator side cold-start. AC: (a) create new depth-2 framework_node 'Cold Start' under pillar4.recommender_systems (path pillar4.recommender_systems.cold_start). Description >=3500b. (b) Seed Pinterest company_document. <=2000 words. Pyramid mid. Depends on: none.
+
+#### T-P1-456: [ML-RecSys] Matrix factorization: SGD vs ALS + bridge from CF to embedding models
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: node 108 (Collaborative Filtering) covers CF concept but not the MF mechanics bridging CF -> Two-Tower. (1) Bias-only -> Funk-SVD (PMF) -> biased-MF (user bias + item bias + inner product). (2) Training: SGD (mini-batch, noisy, online-friendly) vs ALS (closed-form per block, parallelizable, offline). (3) Conceptual bridge: MF is the ancestor of Two-Tower -- user_emb * item_emb dot product but with learned towers instead of fixed lookup. AC: expand framework_node id=108 description AND optional docs/mf_to_two_tower_bridge.md. LINK to Google Two-Tower doc 64 -- do NOT re-derive InfoNCE or sampled-softmax (covered there). <=1500 words. Pyramid mid. Depends on: none.
+
+#### T-P1-457: [Phase 0.5b] Template v1.1 post-Sketch revision: drawer tab render order + Optimization granularity example
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-452
+- **Description**: DEFERRED revision of Phase 0.5 content template after T-P0-241 Sketch sample ships real-world signal. Per independent reviewer: (🟡 3) add Optimization (SGD/Adam/二阶) worked example to §2.3 granularity decision table + append horizontal/vertical heuristic boundary: 'when a horizontal topic's interview depth requirement exceeds one node's §3 budget (~3000b always-visible), still split'. (🟡 4) declare canonical drawer tab render order:  -- rationale: progressive disclosure by depth of follow-up, interview_deep being the natural extension of §3.4, derivation/history placed deepest/most-background. May also revise based on Sketch author-experience signals. Deliverable: template doc updated in place to v1.1. Depends on T-P0-241 (need real Sketch sample to validate/reject these assumptions).
+
 ### P2 -- Nice to Have
+
+#### T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for boards, visual-search result augmentation. KE-JI (restrained): pitch-only. AC: (a) seed one Pinterest company_document 'Generative Models Pitch for Pinterest' with single comparison table {GAN: adversarial/mode-collapse-risk/fast-inference; VAE: latent-space/blurry-output/fast; Diffusion: SOTA-quality/slow-but-DDIM-fixes}. (b) One paragraph per Pinterest use case. (c) DO NOT re-derive VAE ELBO or DDPM forward/reverse sampling -- cite papers instead. (d) NO new framework_node (avoid tree bloat at P2). <=1500 words. Pyramid top -- restrained. Depends on: none.
+
+#### T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal): early fusion vs late fusion trade-off, modality dropout during training, asymmetric confidence thresholds (ship only SFW-confident content), human-in-loop rules. (2) Query expansion for recall boost WITHOUT changing ranking algo: SynSet lookup, query rewriting via small LLM, embedding-based query-to-query similarity, click-driven expansion. AC: seed ONE combined Pinterest company_document 'Pinterest SD Gap-Fill: Unsafe Multimodal + Query Expansion'. <=3000 words. Pyramid top -- restrained, design-level pitch not code. Link to Pinterest sketch doc 58 for ANN/recall context. Depends on: none.
+
+#### T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with model monitoring. (1) Bias detection: group metrics on protected attributes, equal-opportunity / demographic-parity basics. (2) Fair-aware constrained ranking (post-hoc re-rank). (3) Drift: PSI, KS, performance drift thresholds. (4) Retraining cadence: scheduled vs trigger-based. AC: seed Pinterest company_document 'Responsible AI + Monitoring Playbook'. <=2000 words. Pyramid top -- restrained. Depends on: none.
 
 ### P3 -- Stretch Goals
 
