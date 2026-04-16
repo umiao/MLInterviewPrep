@@ -11,42 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-462: [QIdx-A1] Backfill family on 11 ungrouped LC_PROBLEMS
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: BACKFILL family on 11 LC problems whose cards currently render in the label-less flat grid at the bottom of QuickIndex LC tab (frontend file: src/frontend/src/pages/QuickIndex.tsx, LC_PROBLEMS list minus STATEFUL_DS_DESIGN set).
-
-EXACT 11 problems + proposed family values (final decision -- use these):
-  LC 215 Kth Largest Element in an Array          -> heap_topk
-  LC 373 Find K Pairs with Smallest Sums          -> heap_topk
-  LC 127 Word Ladder                              -> graph_bfs
-  LC 269 Alien Dictionary                         -> graph_topo_sort
-  LC 200 Number of Islands                        -> graph_grid_traversal
-  LC 235 Lowest Common Ancestor of a BST          -> tree_lca
-  LC 212 Word Search II                           -> trie_multiword
-  LC 15 3Sum                                      -> two_pointers_target
-  LC 2503 Max Points From Grid Queries            -> offline_queries_dsu
-  LC 2791 Palindrome Paths in Tree                -> tree_dp_rerooting
-  LC 2858 Min Edge Reversals                      -> tree_dp_rerooting
-
-IMPLEMENTATION:
-- Create scripts/backfill_quickindex_families_20260416.py (idempotent).
-- Mapping MUST be a dict at top of file (LC_ID -> family).
-- For each (lc_id, family): UPDATE problems SET family=? WHERE leetcode_id=? AND (family IS NULL OR family='').
-- Print per-row action: [SET] lc=215 family=heap_topk  OR  [SKIP] lc=215 family already set to heap_topk.
-- Re-run must produce all [SKIP] lines (idempotent test).
-
-ACCEPTANCE CRITERIA:
-1. After first run, query SELECT COUNT(*) FROM problems WHERE leetcode_id IN (215,373,127,269,200,235,212,15,2503,2791,2858) AND family IS NOT NULL  -> returns 11.
-2. Second run prints 11 [SKIP] lines, 0 [SET].
-3. No other problems modified (verify via pre/post row count of problems with non-null family; delta == 11 if starting from current NULL state).
-4. Commit message format: [T-P1-462] Backfill family on 11 QuickIndex LC problems
-
-CONFIDENCE GATE: all 11 LC IDs verified in DB (done in investigation); family values chosen to match existing conventions (existing non-null families: stateful_ds_design, sparse_representation, mst, bfs_state_space). New values introduced here are semantic and will be reused by T-P1-463 for frontend grouping.
-
-DO NOT TOUCH: Stateful DS problems (LC 146/460/432 etc) -- already have family='stateful_ds_design'. Do not touch the STATEFUL_DS_DESIGN constant in frontend (that is T-P1-463 scope).
-
 #### T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping
 - **Priority**: P1
 - **Complexity**: M
@@ -414,6 +378,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
+- [x] **2026-04-16** -- T-P1-462: [QIdx-A1] Backfill family on 11 ungrouped LC_PROBLEMS. BACKFILL family on 11 LC problems whose cards currently render in the label-less flat grid at the bottom of QuickIndex L
 - [x] **2026-04-16** -- T-P1-461: [adhoc] LC 815 follow-up: station-level shortest path section. Append follow-up to LC 815 notes: min-stops variant via station-level BFS / Dijkstra. Idempotent script with sentinel gu
 - [x] **2026-04-16** -- T-P1-457: [Phase 0.5b] Template v1.1 post-Sketch revision: drawer tab render order + Optimization granularity example. DEFERRED revision of Phase 0.5 content template after T-P0-241 Sketch sample ships real-world signal. Per independent re
 - [x] **2026-04-16** -- T-P1-456: [ML-RecSys] Matrix factorization: SGD vs ALS + bridge from CF to embedding models. Gap: node 108 (Collaborative Filtering) covers CF concept but not the MF mechanics bridging CF -> Two-Tower. (1) Bias-on
