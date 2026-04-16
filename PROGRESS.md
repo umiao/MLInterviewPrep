@@ -377,3 +377,10 @@
 - **Sanity check result**: Ruff clean on seed script; emoji scan = 0 hits on generated doc; seed re-run reports `[SKIP]` (idempotent); DB read-back confirms id=60, company_id=3, length=8910. StudyNoteBuilder's single-dollar check passed after escape.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-415 --status completed`
+
+## 2026-04-15 -- [T-P0-416] NDCG/MAP/MRR + position bias drill (Google R1)
+- **What I did**: Built the T-P0-416 drill note covering all four AC points: (1) from-memory DCG@K=sum(2^y_i-1)/log2(i+1) with NDCG=DCG/IDCG and the why-of-exponential-gain / why-of-log-discount rationale; (2) MAP with AP=(1/R)sum(Precision@k * 1[y_k relevant]) and a three-bullet explanation of why binarization destroys graded-label information (y=1 and y=4 collapse); (3) position bias via examination hypothesis P(click|q,d,k)=P(examine|k)*P(relevant|q,d), why it inflates offline NDCG for the production ranker, IPW and ULTR/PAL fixes with formulas; (4) numerical toy [3,2,1,0,0] vs [1,1,3,0,0] showing NDCG=1.000 vs 0.546 while MAP ties at 1.000. Included MRR + 4-row cheat-sheet table (NDCG/MAP/MRR/Precision@K) and an 11-item 2-min self-check checklist. Filed as companion to google_lambdarank_drill.md so R1 ranking topics sit side-by-side.
+- **Deliverables**: `docs/google_ndcg_map_mrr_drill.md` (new, 11651 chars); `scripts/seed_google_ndcg_map_mrr_drill.py` (idempotent). `company_documents` id=61 inserted (company_id=3 Google).
+- **Sanity check result**: Ruff clean on seed script; emoji scan = 0 hits on generated doc; orphan single-dollar scan = 0; seed re-run reports `[SKIP]` (idempotent); DB read-back confirms id=61, company_id=3, length=11651. StudyNoteBuilder passed its internal single-dollar check.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-416 --status completed`
