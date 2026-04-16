@@ -78,6 +78,7 @@ class CompanyDocumentResponse(BaseModel):
     title: str
     content: str
     source_type: str
+    doc_kind: str = "prep_note"
     created_at: datetime | None = None
     updated_at: datetime | None = None
 

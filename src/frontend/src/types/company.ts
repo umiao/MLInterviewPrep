@@ -42,3 +42,33 @@ export interface CompanyCreate {
   notes?: string | null;
   prep_notes?: string | null;
 }
+
+export interface CompanyDocument {
+  id: number;
+  company_id: number;
+  title: string;
+  content: string;
+  source_type: string;
+  doc_kind: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface CardIndexProblem {
+  id: number;
+  leetcode_id: number | null;
+  title: string;
+  one_liner: string;
+}
+
+export interface CardIndexCard {
+  name_zh: string;
+  name_en: string;
+  summary_zh: string;
+  problems: CardIndexProblem[];
+}
+
+export interface CardIndexContent {
+  schema_version: number;
+  cards: CardIndexCard[];
+}
