@@ -5,15 +5,15 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-445: [ML-Fund] Cost-sensitive model selection: FP/FN decision rubric + Pinterest/Google examples
 - **Priority**: P0
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: Gap: when two models have near-equal accuracy/AUC, how to choose. Steps: (1) quantify FP vs FN business cost; (2) pick operating point on PR curve along cost-weighted axis; (3) threshold recalibration; (4) class-weighted CE / cost-sensitive loss. AC: (a) expand framework_node id=17 (Model Selection & Validation) description from 0b -> >=3000b with decision rubric + worked example. (b) Seed one hub doc at docs/ml_cost_sensitive_selection.md with Pinterest unsafe-content (high FN cost) + Google Ads (high FP cost) concrete cases. (c) LINK to existing Google doc 62 (Calibration drill) -- do NOT duplicate Platt/Isotonic/Temperature math, only reference. Target <=2500 words. Pyramid base -- no fancy expansion. Depends on: none.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 #### T-P0-446: [ML-Fund] Logistic regression coefficient interpretation: odds ratio for categorical + boolean variables
 - **Priority**: P0
