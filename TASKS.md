@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-447: [ML-Fund] Bagging vs Boosting decision rubric + XGBoost/LightGBM mechanics
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Gap: (1) when bagging (high variance, stable base learner) vs boosting (high bias, weak learner). (2) XGBoost core: 2nd-order Taylor, L1/L2 reg term, sparse-aware split, histogram approx. (3) LightGBM: leaf-wise growth, GOSS, EFB, native categorical. (4) XGB vs LGB latency/memory at scale. Google/Pinterest screen: 'why LGB beats XGB on wide datasets'. AC: (a) populate framework_node id=65 (Tree Models) description 124b -> >=4000b. (b) Seed one-pager docs/bagging_boosting_xgb_lgb_1pager.md. LINK to Google LambdaMART doc 60 -- do not re-derive gradient boosting basics covered there. <=3000 words. Pyramid base -- don't go deep on optimizer-specific hyperparameters, stay at decision-rubric level. Depends on: none.
-
 #### T-P0-448: [ML-Fund] Classical model pitches: KNN / Naive Bayes / K-Means / DBSCAN when-to-use
 - **Priority**: P0
 - **Complexity**: S
@@ -238,6 +232,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
 - [x] **2026-04-16** -- T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold. AC: (1) PSI=Σ(a-e)·ln(a/e), 0.1 warn/0.25 critical; (2) KL 不对称无界, JS 对称 bounded; (3) 连续用 KS; (4) concept drift P(y|x) vs
 - [x] **2026-04-16** -- T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty. pillar7 有基础但缺 drill. AC: (1) n=(z+z)^2·2σ²/Δ²; (2) SRM 是 randomization 健康性不是结果; (3) CUPED 用 pre-period covariate 降 varia
+- [x] **2026-04-16** -- T-P0-447: [ML-Fund] Bagging vs Boosting decision rubric + XGBoost/LightGBM mechanics. Gap: (1) when bagging (high variance, stable base learner) vs boosting (high bias, weak learner). (2) XGBoost core: 2nd-
 - [x] **2026-04-16** -- T-P0-446: [ML-Fund] Logistic regression coefficient interpretation: odds ratio for categorical + boolean variables. Gap: typical Google/LinkedIn screen: 'LR coef 0.7 on one-hot vs reference -- what does it mean?'. Cover: (a) continuous 
 - [x] **2026-04-16** -- T-P0-445: [ML-Fund] Cost-sensitive model selection: FP/FN decision rubric + Pinterest/Google examples. Gap: when two models have near-equal accuracy/AUC, how to choose. Steps: (1) quantify FP vs FN business cost; (2) pick o
 - [x] **2026-04-15** -- T-P1-444: Problems tab: Custom-mode company-grouped view. # Problems tab: Custom-mode company-grouped view (T-ML-xxx)
