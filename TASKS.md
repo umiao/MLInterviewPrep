@@ -11,46 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
-
-CURRENT STATE (verified): leetcode_id=1845, family='stateful_ds_design', is_completed=0, LENGTH(notes)=0.
-
-PROBLEM RECAP: SeatManager(n) has n unreserved seats (1..n). reserve() returns smallest-numbered unreserved seat. unreserve(seat_number) marks seat unreserved again. Both O(log n) expected.
-
-SOLUTION TO COVER:
-- Min-heap of available seat numbers. reserve = heappop. unreserve = heappush.
-- Two init strategies:
-  (a) Upfront: heapq with 1..n all pushed at __init__ (O(n) via heapify). Pro: simple; con: O(n) memory + init time even if few reserves.
-  (b) Lazy: maintain next_seat int + heap of returned seats. reserve: if heap nonempty return heappop; else return next_seat++. unreserve: heappush. Pro: O(1) init.
-- Interview answer: default (a) heapify (heapq.heapify([1..n]) is O(n) not O(n log n)), mention (b) as optimization.
-
-IMPLEMENTATION:
-- scripts/_update_lc1845_notes.py (pattern _update_lc1570_notes.py)
-- StudyNoteBuilder + Chinese + sentinel '<!-- LC1845_NOTES -->' + idempotent.
-
-NOTES COVER:
-1. 题目定位: stateful_ds_design 里最简单的 heap 问题, 但是是很多真实调度系统的 canonical 模型
-2. 核心洞察: 只要 '最小可用 id' 这个语义, min-heap 最直接
-3. 完整 Python 代码 (class SeatManager with heapq.heapify in __init__)
-4. 两种 init 策略对比表 (内存 / 初始化时间 / 大 n 下的行为)
-5. heapify O(n) 为什么不是 O(n log n) -- 自底向上 sift-down 的几何级数求和 (给出简略推导)
-6. 复杂度: reserve/unreserve 都是 O(log n). 空间 (a) O(n) (b) O(R) where R=已归还数量.
-7. 易错点: 不要用 sorted list + pop(0) (O(n) 每次); 不要用 set + min(s) (min 是 O(n)).
-8. Follow-up: 若要求 'largest unreserved' 用 max-heap (Python 用负号); 若 unreserve 无序, 要不要去重保护 (一般题目说保证不重复, 省略).
-9. 45 秒 pitch.
-
-AC:
-1. UPDATE notes + is_completed=1 for lcid=1845
-2. LENGTH(notes) >= 2000
-3. Re-run [UNCHANGED]
-4. Commit: [T-P1-467] LC 1845 Seat Reservation Manager: Chinese solution notes
-
-REFERENCE: _update_lc1570_notes.py
-
 #### T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes
 - **Priority**: P1
 - **Complexity**: S
@@ -203,6 +163,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
+- [x] **2026-04-16** -- T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes. Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
