@@ -11,7 +11,55 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-462: [QIdx-A1] Backfill family on 11 ungrouped LC_PROBLEMS
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Assign family to 11 LC problems rendering in QuickIndex ungrouped grid (family=NULL, pattern set). Mapping: LC 215/373 -> heap_topk; LC 127/269/200 -> graph_traversal; LC 235 -> tree_lca; LC 212 -> trie_multiword; LC 15 -> two_pointers_target; LC 2503 -> offline_queries_dsu; LC 2791/2858 -> tree_dp_rerooting. Idempotent script scripts/backfill_quickindex_families.py with sentinel. AC: all 14 LC_PROBLEMS LC IDs have non-NULL family after run.
+
+#### T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-462
+- **Description**: DECISION-PENDING user approval. Default approach (a): keep hardcoded LC_PROBLEMS but add family->label map, render one collapsible group per family (smaller blast radius). Alt (b): fetch GET /problems from backend. AC: no flat ungrouped grid; every visible LC sits under a named family group; LRU/LFU/AllOne stay under Stateful Data Structure Design; npm run build passes.
+
+#### T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Chinese solution notes via StudyNoteBuilder. Covers stack_of_stacks pattern: dict[freq]->stack + freq map + maxFreq tracker; push/pop both O(1); worked example; complexity; interview pitch; follow-up pointer to LC 716 (Max Stack). Set is_completed=1 + family=stateful_ds_design.
+
+#### T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Chinese notes: per-index sorted snapshots list + bisect_right-1 binary search on snap_id. Snap O(1) (bump global id). Set O(1). Get O(log n). Contrast vs naive per-snapshot deep copy. Pitch + follow-up. is_completed=1.
+
+#### T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Chinese notes: three SortedList (low/mid/high) + sliding window deque + rebalance on add/evict. addElement O(log m), calculate O(1). Alt: two-heap with lazy deletion. Pitch + follow-up. is_completed=1.
+
+#### T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Chinese notes: min-heap of available seats; reserve=heappop, unreserve=heappush. Lazy init vs upfront init tradeoff (O(N) initial push if upfront). O(log N) per op. Pitch + follow-up. is_completed=1.
+
+#### T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Current 956 chars too thin. Expand: queue-of-timestamps O(N) per getHits vs circular-buffer[300] O(1) with counter+timestamp per bucket; concurrency/thread-safe follow-up; extension to arbitrary window. Pitch. is_completed=1 after.
+
 ### P2 -- Nice to Have
+
+#### T-P2-469: [QIdx-C1] Harden LC import scripts to set family
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Update import_staging_lc.py and any seed_*lc*.py: at insert time either require family OR print WARN for NULL family and append row to logs/lc_family_quarantine.tsv. Prevents silent rot. No schema change.
 
 ### P3 -- Stretch Goals
 
