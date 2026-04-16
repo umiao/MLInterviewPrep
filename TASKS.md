@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-451: [DL-Fund] DL training pitfalls 1-pager: Focal loss + BatchNorm/LayerNorm + vanishing/exploding gradients
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-449
-- **Description**: Gap: three scattered pitfall topics consolidated. (1) Focal loss: alpha/gamma, class imbalance, when NOT to use (already balanced data). (2) BatchNorm: train vs eval mode common trap, internal-covariate-shift motivation (now disputed), why LayerNorm is used for sequences/transformers. (3) Vanishing/exploding grads: sigmoid/tanh stacks, residual connections fix, gradient clipping, Xavier (tanh) vs He (ReLU) init. AC: (a) seed docs/dl_training_pitfalls_1pager.md. (b) Expand framework_node id=77 (Training Tricks) description (AFTER Gap-5 activation-functions task, same node) by adding a second section. <=3500 words. Pyramid base. Depends on: T-P0-<gap5>.
-
 #### T-P0-452: [Meta-Cleanup] Sketch family unification: 3-axis view + terminology grounding across sketch docs
 - **Priority**: P0
 - **Complexity**: M
@@ -213,6 +207,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
 - [x] **2026-04-16** -- T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold. AC: (1) PSI=Σ(a-e)·ln(a/e), 0.1 warn/0.25 critical; (2) KL 不对称无界, JS 对称 bounded; (3) 连续用 KS; (4) concept drift P(y|x) vs
+- [x] **2026-04-16** -- T-P0-451: [DL-Fund] DL training pitfalls 1-pager: Focal loss + BatchNorm/LayerNorm + vanishing/exploding gradients. Gap: three scattered pitfall topics consolidated. (1) Focal loss: alpha/gamma, class imbalance, when NOT to use (already
 - [x] **2026-04-16** -- T-P0-450: [DL-Fund] Optimizer family: SGD -> Momentum -> AdaGrad -> RMSProp -> Adam derivation chain. Gap: node 74 Gradient Descent Family is stub (141b). Existing study note source: data/t8_optimizers.md (port into DB). C
 - [x] **2026-04-16** -- T-P0-449: [DL-Fund] Activation functions unified: ReLU/LeakyReLU/Sigmoid/Tanh/Softmax when and why. Gap: no standalone activation-functions node. Single comparison table: {activation, range, derivative, vanishing-grad ri
 - [x] **2026-04-16** -- T-P0-448: [ML-Fund] Classical model pitches: KNN / Naive Bayes / K-Means / DBSCAN when-to-use. Gap: node 71 Clustering stub + no NB/KNN nodes. Pitch-format 1-pager: per model -> (what / assumption / when use / when 
