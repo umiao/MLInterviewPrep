@@ -457,3 +457,10 @@
 - **Sanity check result**: Ran the seed — `[ADDED] LC 1654 id=1090`. Verified row via sqlite3: id=1090, url set, difficulty=medium, pattern=BFS, family=bfs_state_space, is_completed=1, description 861 chars, notes 3261 chars. Script idempotent (UPSERT-shaped: existing row path updates notes + marks completed).
 - **Status**: [DONE]
 - **Request**: No task_db entry — ad-hoc user-initiated LC add, no pre-existing T-ID.
+
+## 2026-04-16 -- [planning] ML topic gap-analysis -> 14-task backlog for Google R1 + Pinterest prep
+- **What I did**: Task-planning-mode session. Read-only audit of mle_prep.db coverage (47 depth-2 framework_nodes + 13 Google docs + 6 Pinterest docs) against user-provided 9-category ML rubric (39 subtopics). Built coverage matrix, identified genuinely-missing content vs already-deep-covered content. Planted 14 tasks in task_db (T-P0-227 through T-P2-240) following pyramid-bottom-first rule: P0x7 (ML/DL fundamentals shared by Google+Pinterest), P1x4 (Pinterest-lean CV/NLP/RecSys gaps), P2x3 (generative + SD, restrained pitch-only). Every AC contains explicit char targets and LINK-not-duplicate rules referencing existing Google docs (55/56/60/61/62/63/64/65) and Pinterest docs (58/66) to prevent rework. Added T-P0-233 -> T-P0-231 dependency. Regenerated TASKS.md projection.
+- **Deliverables**: 14 task rows in `.claude/tasks.db`; TASKS.md regenerated; no framework_node content written (planning only). Also earlier this session: `scripts/add_lc1654_minimum_jumps.py` + pushed 14 clean commits to origin/main (c3ef731..84ab84f).
+- **Sanity check result**: `task_db.py list --status active` returns all 14 tasks with correct priorities/complexities. `task_db.py depend T-P0-233 --on T-P0-231` returned `{"ok": true, "dependency": "T-P0-233 depends on T-P0-231"}`. `task_db.py project` regenerated TASKS.md cleanly. No DB writes beyond tasks.db.
+- **Status**: [DONE] for planning phase. Execution blocked on user's explicit go/no-go for autonomous_run.sh launch (user interrupted prior launch attempt). autonomous_run.sh is NOT running.
+- **Request**: No task_db.py status changes -- all 14 new tasks remain `active` waiting for execution.
