@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: pillar7 有基础但缺 drill. AC: (1) n=(z+z)^2·2σ²/Δ²; (2) SRM 是 randomization 健康性不是结果; (3) CUPED 用 pre-period covariate 降 variance; (4) novelty 早期正偏/primacy 负偏 1 周洗期; (5) Etsy GMB 碰过哪个 trap.
-
 #### T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold
 - **Priority**: P2
 - **Complexity**: S
@@ -132,6 +126,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-16** -- T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty. pillar7 有基础但缺 drill. AC: (1) n=(z+z)^2·2σ²/Δ²; (2) SRM 是 randomization 健康性不是结果; (3) CUPED 用 pre-period covariate 降 varia
 - [x] **2026-04-15** -- T-P1-444: Problems tab: Custom-mode company-grouped view. # Problems tab: Custom-mode company-grouped view (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-443: Problems tab: Custom badge + source-type filter switch. # Problems tab: Custom badge + source-type filter (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-442: Pinterest card index: integrate tab=index into PrepNotesPage. # Pinterest Card Index: Integrate tab=index into PrepNotesPage (T-P1-226)

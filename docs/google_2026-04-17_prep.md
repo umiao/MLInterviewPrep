@@ -49,7 +49,7 @@ target_id: 51
    - **Calibration**: Platt / Isotonic / temperature scaling；GMB bidding 的校准陷阱
    - **Eval offline/online 不一致**: counterfactual eval / IPS / 去偏 NDCG（我的 SIGIR paper）
    - **LTR → Two-tower retrieval**: 为什么分层、negative sampling 策略
-   - **A/B test**: 样本量、MDE、SRM、novelty effect (已有 study note: pillar7.probability_statistics.ab_test_sample_size)
+   - **A/B test**: 样本量、MDE、SRM、novelty effect、CUPED、Etsy GMB trap (drill: `docs/google_ab_test_rigor_drill.md`; 基础 note: pillar7.probability_statistics.ab_test_sample_size)
    - **Feature drift / 监控**: PSI、KL、Jensen-Shannon、分阶段 alert
 
 ### 快速复习 pointer
