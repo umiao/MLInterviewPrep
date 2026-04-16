@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P0-419: [Google/R1] Two-tower retrieval 深挖 (超越 InfoNCE 基础)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: staging 11 覆盖 InfoNCE 但缺系统级. AC: (1) 为什么两塔 (query 塔不看 doc 侧 → offline index); (2) negative sampling 四种 + failure mode; (3) HNSW vs IVF-PQ recall/latency tradeoff; (4) offline recall@K vs online NDCG 断裂 = training-serving skew. Ref: doordash_retrieval.md section 2.
-
 #### T-P0-420: [Google/R1] Multi-objective ranking: DPP/MMR + Etsy diversity 故事机制
 - **Priority**: P1
 - **Complexity**: S
@@ -338,6 +332,138 @@ Start backend + frontend, then in browser:
 
 ## Depends on: T-P1-225
 
+#### T-P1-443: Problems tab: Custom badge + source-type filter switch
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-442
+- **Description**: # Problems tab: Custom badge + source-type filter (T-ML-xxx)
+
+## Goal
+Make custom (non-LC) problems visually distinct in the Problems.tsx table and add a source-type switch at the top: All / LC Only / Custom Only.
+
+## Context
+- 44 custom problems exist in DB (`leetcode_id IS NULL`), covering Pinterest, Snowflake, Uber, DoorDash, 1point3acres, etc.
+- Backend `GET /problems` already returns them; no backend changes needed.
+- Current UI: custom rows show "-" in the LC column, visually dim and easy to miss.
+
+## Files
+- `src/frontend/src/pages/Problems.tsx` (1063 lines) — main page
+- `src/frontend/src/api.ts` — `GET /problems` client (no changes needed)
+- `src/backend/routers/problems.py:141-216` — reference for existing filters (DO NOT modify)
+
+## Changes
+
+### 1. Custom badge in title/LC column
+Replace the "-" rendering for `p.leetcode_id == null`:
+- Show a pill/badge like `[Custom]` or `[自建]` with colored background (e.g., purple/amber)
+- Keep the title prominent; badge should be a small inline tag
+- Example: `<Badge variant="custom">Custom</Badge> Escape Room Game State`
+
+### 2. Source-type switch
+Add a segmented control above the Problems table:
+- Options: `All` / `LeetCode` / `Custom`
+- Default: `All`
+- Renders as a 3-button segmented control (similar to existing UI primitives)
+- URL state: `?source_type=all|lc|custom`
+- Filter logic (client-side since API returns all):
+  - `all`: no filter
+  - `lc`: `p.leetcode_id != null`
+  - `custom`: `p.leetcode_id == null`
+
+### 3. Row count update
+Show filtered counts near the switch: "显示 44 / 共 1089 题" (show "filtered / total").
+
+## Acceptance Criteria
+- [ ] Custom problems display a visible [Custom] badge in the Problems table
+- [ ] Segmented control "All / LeetCode / Custom" appears above the table
+- [ ] Switching to "Custom" hides LC problems and vice versa
+- [ ] URL param `source_type` persists across reloads (`?source_type=custom`)
+- [ ] Row count label updates to reflect filtered count
+- [ ] No regression on existing filters (difficulty, category, pattern, source, company, status)
+- [ ] `npm run build` passes
+
+## Verification
+1. Start backend + frontend.
+2. Navigate to /problems — default All, see both LC and Custom rows.
+3. Switch to Custom — verify only custom rows, count correct.
+4. Switch to LeetCode — verify only LC rows, count correct.
+5. Combine with company filter "Snowflake" — only 2 Snowflake custom problems show.
+6. Refresh with `?source_type=custom` — starts on Custom tab.
+
+## Commit message
+`[T-ML-xxx] Problems tab: Custom badge + source-type filter switch`
+
+## Depends on: T-P1-442 (sequenced after Pinterest card index work to avoid frontend merge conflicts)
+
+#### T-P1-444: Problems tab: Custom-mode company-grouped view
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-443
+- **Description**: # Problems tab: Custom-mode company-grouped view (T-ML-xxx)
+
+## Goal
+When the user switches to `source_type=custom`, render custom problems as a COMPANY-GROUPED card layout (like the Pinterest card index), not a flat table. This makes company-based discovery primary for custom problems.
+
+## Context
+Depends on T-P1-443 (custom badge + switch). T-P1-443 adds the switch but still renders custom rows in the same flat table. This task upgrades the Custom view to a grouped card layout.
+
+## Files
+- `src/frontend/src/pages/Problems.tsx` — add grouped-by-company rendering for Custom mode
+- `src/frontend/src/components/CompanyCardIndex.tsx` (from T-P1-441) — reference pattern for card layout; may extract a shared `ProblemCardGroup` component if reuse is clean
+- `src/frontend/src/api.ts` — `GET /problems?source_type=custom` (client-side filter, no backend change)
+
+## Design
+
+### Layout (only when `source_type === 'custom'`)
+- Group the filtered custom problems by `company_tags` (JSON array, can contain multiple companies per problem — show under EACH company)
+- For problems with `company_tags == []`, group under "未归类 / Unassigned"
+- Each group is a card:
+  ```
+  ┌───────────────────────────────────────┐
+  │ Snowflake (2 题)                       │
+  ├───────────────────────────────────────┤
+  │ • Nearest Bathroom to Each Desk       │
+  │ • Max Tree Height After Deleting ...  │
+  └───────────────────────────────────────┘
+  ```
+- Click problem title → open existing ProblemDrawer (same as flat table row click)
+- Grid: 2 columns desktop, 1 column mobile (same as CompanyCardIndex)
+
+### Company filter interaction
+- Existing sidebar company filter still applies — if set, only that company's card shows
+- If no company filter, all company cards render
+
+### Problem counts per company (current custom problem distribution)
+Verify roughly matches expectation (pull via API or quick query):
+- Pinterest: ~7 custom
+- Snowflake: 2 custom (just added)
+- Uber: ~X custom
+- DoorDash: ~X custom
+- 1point3acres: ~X
+- Others: likely single-company tags
+
+## Acceptance Criteria
+- [ ] When switched to Custom tab, problems render as company-grouped cards (not flat table)
+- [ ] Clicking a problem title opens the ProblemDrawer
+- [ ] Problems with multi-company tags appear under EACH company (dedup if same problem twice in one company)
+- [ ] Problems with empty company_tags go to "未归类" group
+- [ ] Sidebar company filter narrows to selected company only
+- [ ] Switching back to "All" or "LC" restores flat table
+- [ ] No regression on Problems page filters
+- [ ] `npm run build` passes
+
+## Verification
+1. Switch to Custom — see grouped cards with company names
+2. Click "Snowflake" card problem → drawer opens with notes
+3. Sidebar company filter "Pinterest" → only Pinterest card visible
+4. Switch to "All" → flat table restored, custom rows still have [Custom] badge
+5. Clear filters, count per card matches actual custom-problem distribution
+
+## Commit message
+`[T-ML-xxx] Problems tab: company-grouped view for Custom mode`
+
+## Depends on: T-P1-443
+
 ### P2 -- Nice to Have
 
 #### T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty
@@ -457,26 +583,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-15** -- T-P0-424: [Slack-SFDC] HR call Wed 2026-04-15 14:00 EST = 11:00 PT. Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90
+- [x] **2026-04-15** -- T-P0-419: [Google/R1] Two-tower retrieval 深挖 (超越 InfoNCE 基础). staging 11 覆盖 InfoNCE 但缺系统级. AC: (1) 为什么两塔 (query 塔不看 doc 侧 → offline index); (2) negative sampling 四种 + failure mode; (
 - [x] **2026-04-15** -- T-P0-418: [Google/R1] IPS/counterfactual eval/去偏 NDCG (SIGIR paper talking points). Gap: staging 无. SIGIR paper 必问. AC: (1) IPS 重加权 1/P(shown); (2) examination hypothesis P(click)=P(exam)·P(rel); (3) SNIP
 - [x] **2026-04-15** -- T-P0-417: [Google/R1] Calibration 三法 (Platt/Isotonic/Temperature) + GMB bidding 校准陷阱. Gap: staging 没提. Round1 recruiter 明列. AC: (1) Platt=logistic over logit; (2) Isotonic preserve ranking 粒度粗; (3) Temperat
 - [x] **2026-04-15** -- T-P0-416: [Google/R1] NDCG/MAP/MRR 定义 + position bias 拷打自测. Gap: staging 只讲 ROC/PR. AC: (1) 默写 DCG=Σ(2^rel-1)/log2(i+1), NDCG=DCG/IDCG; (2) 为什么 MAP 不适合 graded relevance; (3) positi
 - [x] **2026-04-15** -- T-P0-415: [Google/R1] LambdaRank/LambdaMART 推导 + pointwise/pairwise/listwise 对比自测. Gap vs staging 13: staging 无 ranking loss 推导. Round1 必考. AC: (1) 默写 RankNet pairwise sigmoid loss; (2) LambdaRank 如何用 de
-- [x] **2026-04-14** -- T-P0-436: [LC/Pinterest] Sketch/Streaming 理论 1-pager (company_id=29). 用户明确说 K-largest 要结合 sketch 做法. Deliverable: docs/pinterest_sketch_streaming_1pager.md, ingest company_documents (company
-- [x] **2026-04-14** -- T-P0-435: [LC] K-largest heap/quickselect 家族 drill: 703 + 973 + 378. 三题都未完成, 用户点名 K-largest/sketch 方向必须 drill. AC 三题各自: (A) LC 703 Kth Largest in Stream — min-heap size k 核心模板, add() O(log 
-- [x] **2026-04-14** -- T-P0-434: [LC] 攻下 85 Maximal Rectangle + 写中文笔记. LC 85 未完成, 用户明确点名考核重点. AC: (1) solve 一次不 peek; (2) 核心解法 = 每行转 histogram, heights[j]+=1 若'1' else 0, 跑 LC 84 单调栈; (3) 时间 
-- [x] **2026-04-14** -- T-P0-433: [Google R2] G&L top-20 common questions × 6 polished stories 映射 audit. HR 明建议: top 20 questions × 3 answers each. Deliverable: update docs/bq_todo_tracker.md + append section to company_docum
-- [x] **2026-04-14** -- T-P0-432: [Google R1] Staging 13 题 2-min 口头答复本 (company_id=3). 把 staging/04_14_ML问题深入拷打.md 13 题压缩成问答卡. Deliverable: docs/google_staging_13_flashcards.md, ingest company_documents (com
-- [x] **2026-04-14** -- T-P0-431: [Google R1] Bias/Variance + 过拟合诊断 drill note (company_id=3). 用户点名必须操练到位. Deliverable: docs/google_bias_variance_drill.md, ingest company_documents (company_id=3). AC: (1) 默写 E_D[(y-
-- [x] **2026-04-14** -- T-P0-430: [Google R1] Regularization 全景合并深挖 note (company_id=3). Gap: staging 零散提了 L2/dropout/AdamW, 但用户明确点名要合并深挖. Deliverable: docs/google_regularization_deep_dive.md, ingest as compan
-- [x] **2026-04-14** -- T-P0-429: [Google/R2] G&L top-20 common questions × bq_improved_stories 映射 audit (HR 建议). HR source: 'you can anticipate 90%... top 20 questions, 3 answers for each, detailed and data-driven'. AC: (1) 列出 top 20
-- [x] **2026-04-14** -- T-P0-414: Fix 4 failing CI checks (test/lint/emoji/migration). Migration _add_column_if_missing skipped; 3 ruff errors fixed; 17 emoji replaced with ASCII tags; 32 migration tests now
-- [x] **2026-04-13** -- T-P2-413: [Pinterest/integration] Enrich Pinterest index doc with new sections. Final integration after all new LC/custom/SD content lands. Refresh company_documents id=47 to include: (1) new LC secti
-- [x] **2026-04-13** -- T-P2-396: [Pinterest/LC] Investigate + notes: 寻找餐馆区间. Pinterest dump 2025-11 mentions this with no LC number. Research to identify the actual LC mapping (candidates: LC 1779 
-- [x] **2026-04-13** -- T-P1-412: [Pinterest/BQ] Map Pinterest BQ questions to existing stories. Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, (3) stepping ahead when not respons
-- [x] **2026-04-13** -- T-P1-411: [Pinterest/SD] ML SD: Personalized Chat Bot Recommending Pins. Pinterest SD 2025-11. (1) conversation understanding (LLM multi-turn state), (2) intent classification (ask-pins vs chit
-- [x] **2026-04-13** -- T-P1-409: [Pinterest/SD] SD: User & Item Embeddings. Pinterest SD 2025-11. (1) objective (self-supervised contrastive / supervised from engagement), (2) encoder (towers, use
-- [x] **2026-04-13** -- T-P1-408: [Pinterest/SD] SD: Ad CTR prediction. Pinterest SD 2025-11. (1) data pipeline (impressions/clicks with attribution), (2) feature engineering (user/ad/context 
-- [x] **2026-04-13** -- T-P1-404: [Pinterest/custom] LC 332 loop follow-up addendum. Pinterest coding 2025-11 follow-up to LC 332: what if tickets form a cycle? Explain Hierholzer already handles Eulerian 
