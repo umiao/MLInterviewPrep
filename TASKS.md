@@ -9,36 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into concept_links table.
-
-CONVENTION (to document in docs/protocol/kg_markdown_conventions.md):
-- Canonical (one-source-of-truth pointer):
-    > **正典** [Concept Title (pillar1.path.to.node)](/framework/{node_id})
-- Mentions / see-also:
-    > **也见** [Title](/framework/{node_id})
-- Composed-of (for canonical_hub listing its components):
-    - [Component Title](/framework/{node_id}) -- 一句话角色
-- Prereq / follow-up: use '> **前置**' / '> **后续**' prefixes.
-
-All canonical links MUST sit on their own markdown blockquote line (> prefix) so a future parser can extract via regex `> \*\*(正典|也见|前置|后续)\*\* \[.*?\]\(/framework/(\d+)\)`.
-
-POC SCOPE:
-1. Write the convention doc at docs/protocol/kg_markdown_conventions.md (~150 lines, with examples + anti-patterns).
-2. Pick TWO existing framework_nodes that reference other nodes informally today (grep framework_nodes.description for /framework/ and '见 node' etc). Patch their description to use the new blockquote syntax. Prefer nodes where the link already exists as plain text.
-3. Add unit test tests/test_kg_link_convention.py that regex-scans the two patched nodes and asserts at least one canonical-syntax link is found.
-
-ACCEPTANCE CRITERIA:
-1. docs/protocol/kg_markdown_conventions.md exists with 正典/也见/前置/后续/composed-of examples.
-2. At least 2 framework_nodes patched; DB UPDATE via scripts/patch_kg_link_syntax_poc.py (idempotent, sentinel 'KG_LINK_POC_20260416').
-3. Test passes.
-4. Commit: [KG-P1-03] KG markdown link convention + POC patch on 2 nodes
-
-NON-GOALS: Do NOT backfill the whole corpus; POC only. Do NOT build the scraper that populates concept_links (separate task).
-
 #### T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node)
 - **Priority**: P0
 - **Complexity**: M
@@ -425,5 +395,6 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes. Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into con
 - [x] **2026-04-16** -- T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill. Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy:
 - [x] **2026-04-16** -- T-P0-470: [KG-P1-01] Create concept_links table + migration. Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) 
