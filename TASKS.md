@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P0-420: [Google/R1] Multi-objective ranking: DPP/MMR + Etsy diversity 故事机制
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Etsy diversity 必被追问机制. AC: (1) MMR = λ·rel-(1-λ)·max_sim; (2) DPP 用 det(L_S) 同时 model rel(对角) + diversity(非对角); (3) intent collapse → allocation primitive 平台化 = module arbitration; (4) 和 uncertainty weighting/GradNorm/Pareto 正交. Ref: doordash_ranking §5.
-
 #### T-P1-440: Pinterest card index: backend + data prep
 - **Priority**: P1
 - **Complexity**: S
@@ -586,6 +580,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-15** -- T-P0-424: [Slack-SFDC] HR call Wed 2026-04-15 14:00 EST = 11:00 PT. Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90
+- [x] **2026-04-15** -- T-P0-420: [Google/R1] Multi-objective ranking: DPP/MMR + Etsy diversity 故事机制. Etsy diversity 必被追问机制. AC: (1) MMR = λ·rel-(1-λ)·max_sim; (2) DPP 用 det(L_S) 同时 model rel(对角) + diversity(非对角); (3) inte
 - [x] **2026-04-15** -- T-P0-419: [Google/R1] Two-tower retrieval 深挖 (超越 InfoNCE 基础). staging 11 覆盖 InfoNCE 但缺系统级. AC: (1) 为什么两塔 (query 塔不看 doc 侧 → offline index); (2) negative sampling 四种 + failure mode; (
 - [x] **2026-04-15** -- T-P0-418: [Google/R1] IPS/counterfactual eval/去偏 NDCG (SIGIR paper talking points). Gap: staging 无. SIGIR paper 必问. AC: (1) IPS 重加权 1/P(shown); (2) examination hypothesis P(click)=P(exam)·P(rel); (3) SNIP
 - [x] **2026-04-15** -- T-P0-417: [Google/R1] Calibration 三法 (Platt/Isotonic/Temperature) + GMB bidding 校准陷阱. Gap: staging 没提. Round1 recruiter 明列. AC: (1) Platt=logistic over logit; (2) Isotonic preserve ranking 粒度粗; (3) Temperat
