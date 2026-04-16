@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-424: [Slack-SFDC] HR call Wed 2026-04-15 14:00 EST = 11:00 PT
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90s; (2) 为什么对 Slack ML 感兴趣 (协作场景 ranking/search/summarization); (3) current role + 主线故事 (Pinterest Etsy); (4) timeline + comp expectation; (5) 3 个提问准备 (team structure / ML problem 类型 / interview loop). Calendar 加入, Zoom 链接待收.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P0-415: [Google/R1] LambdaRank/LambdaMART 推导 + pointwise/pairwise/listwise 对比自测
@@ -72,6 +66,24 @@
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 skew (时间戳/null 语义/填充); (4) label leakage: future-only aggregates; (5) 一个真实踩坑.
+
+#### T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-04-10: Validation must happen on a surface isomorphic to the production path (#validation #production-path #consumer-verification). (2) 2026-04-13: react-markdown v10 urlTransform strips custom schemes (#react-markdown #custom-scheme -- helixos uses react-markdown). (3) 2026-04-13: Orchestrator all_done flag is sticky -- new batch launches silently bail if session_state.json has all_done:true (#autonomous #orchestration #sticky-flag). (4) 2026-04-15: Auto-bolding inside LaTeX/code leaks ** into rendered output -- regex substitutions must skip math/code spans (#markdown #latex #regex-scoping). Source: MLInterviewPrep/LESSONS.md entries dated 2026-04-10 through 2026-04-15.
+
+#### T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This is a silent duplicate: installing with [dev] extras adds httpx twice, potentially causing version conflicts in future. Fix: remove from dev group since it is already a main dependency.
+
+#### T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appear in the main (non-optional) section of requirements.txt. This means pip install -r requirements.txt always installs scraper deps even in non-scraper environments. Fix: move both to a [scraper] comment group in requirements.txt or add a requirements-scraper.txt. Note: pyproject.toml is canonical spec per CLAUDE.md.
 
 ### P3 -- Stretch Goals
 
@@ -156,6 +168,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 382 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-15** -- T-P0-424: [Slack-SFDC] HR call Wed 2026-04-15 14:00 EST = 11:00 PT. Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90
 - [x] **2026-04-14** -- T-P0-436: [LC/Pinterest] Sketch/Streaming 理论 1-pager (company_id=29). 用户明确说 K-largest 要结合 sketch 做法. Deliverable: docs/pinterest_sketch_streaming_1pager.md, ingest company_documents (company
 - [x] **2026-04-14** -- T-P0-435: [LC] K-largest heap/quickselect 家族 drill: 703 + 973 + 378. 三题都未完成, 用户点名 K-largest/sketch 方向必须 drill. AC 三题各自: (A) LC 703 Kth Largest in Stream — min-heap size k 核心模板, add() O(log 
 - [x] **2026-04-14** -- T-P0-434: [LC] 攻下 85 Maximal Rectangle + 写中文笔记. LC 85 未完成, 用户明确点名考核重点. AC: (1) solve 一次不 peek; (2) 核心解法 = 每行转 histogram, heights[j]+=1 若'1' else 0, 跑 LC 84 单调栈; (3) 时间 

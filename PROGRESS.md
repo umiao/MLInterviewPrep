@@ -314,3 +314,59 @@
 - **Sanity check result**: Ran refactored code on 6 LC 85 test cases incl. the two empty-matrix edges — all pass (6, 0, 1, 0, 0, 4 vs expected).
 - **Status**: [DONE]
 - **Request**: T-P0-434 already completed in prior autonomous session; no task update needed.
+
+## 2026-04-15 -- [fix] StudyNoteBuilder auto-bold bleeding into LaTeX / code
+- **What I did**: User reported markdown rendering issues in framework node 195 (http://localhost:5173/framework/195/notes). Traced to `StudyNoteBuilder._auto_bold_terms` applying regex substitution over the entire document without excluding math/code spans, despite the docstring claiming it did. Any registered term (MSE, VRM, CMS, etc.) whose first occurrence landed inside `$$...$$` or `$...$` got wrapped as literal `\mathrm{**MSE**}`, which renders as asterisks-in-math rather than bold. Rewrote the method to split content on protected spans (fenced code, inline code, display math, inline math) and only substitute inside prose, stopping after the first hit. Re-seeded node 195 via seed_bias_variance_geometric.py; direct UPDATE on doc 55 since save_to_db is insert-skip-idempotent. Regenerated docs/google_regularization_deep_dive.md.
+- **Deliverables**: scripts/study_note_builder.py (rewritten _auto_bold_terms), tests/test_study_note_builder.py (+2 regression tests), docs/google_regularization_deep_dive.md (clean re-gen), DB: node 195 content updated, doc 55 content patched. Committed as 9e9a05d, pushed to main.
+- **Sanity check result**: 1094 tests pass (+2 new), ruff clean, emoji scan clean. Post-fix scan: 0 `\mathrm{...**...}` or `\text{...**...}` hits in any node or the 4 Google prep docs. Remaining "bold-in-math" regex hits in docs 45/54 (DoorDash) are a different pre-existing bug unrelated to this fix (display-math delimiters used as prose brackets) — user-unreported, separate scope.
+- **Status**: [DONE]
+- **Request**: No task change (Q&A-triggered fix, not tied to an open task).
+
+## 2026-04-15 -- [fix] DoorDash Price-Tier dollar signs swallowed by math tokenizer
+- **What I did**: Scanned all DoorDash docs after the earlier `** in math` finding. Most hits my scanner flagged turned out to be false positives (legitimate `$$...$$` math closers followed by prose lists). The only real bug was line 214 of `docs/doordash_ml_domain_llm_frontier.md`: `Level 3: Price Tier ($ / $$ / $$$ / $$$$)` — four consecutive dollar-token prices that a markdown+math renderer eagerly pairs into a malformed math span. Wrapped each tier in backtick inline code: `(`$` / `$$` / `$$$` / `$$$$`)`. Re-seeded doc 45 via its seed script; patched doc 54 (Master aggregate, no seed source) with a direct UPDATE.
+- **Deliverables**: `docs/doordash_ml_domain_llm_frontier.md` (1-line escape fix), DB docs id=45 and id=54 both updated. Committed as `0a22c37`, pushed.
+- **Sanity check result**: 1094 tests pass, ruff clean, emoji clean. Post-fix: zero plain-prose `$$` ambiguity in DoorDash docs. The `$$ price range` on line 65 of the same md is inside a fenced code block and needs no fix.
+- **Status**: [DONE]
+- **Request**: No task change.
+
+## 2026-04-15 -- [lc] Add LC 1135 Connecting Cities With Minimum Cost with bidirectional link to LC 815
+- **What I did**: User shared their Kruskal MST solution for LC 1135 and asked to add it with a follow-up link to LC 815. LC 1135 was missing from the problems table; LC 815 already existed (id=217) with a "进阶追问" section that already listed "LC 1135 Connecting Cities" (so the 815->1135 forward reference pre-existed). Fetched description from leetcode.ca (per reference memory), wrote a 2.1 KB Chinese notes block covering Prim-vs-Kruskal tradeoffs, UF path-compression / union-by-rank invariants, early-termination at `target == 1`, common 1-indexed gotchas, and the follow-up bridge explaining why LC 815 is "weighted MST -> unweighted BFS" abstraction-wise. Wrote an idempotent seed script (handles both INSERT and UPDATE-to-fill-gaps paths; gracefully no-ops the problem_family_links linking since that table doesn't exist in this schema).
+- **Deliverables**: `scripts/add_lc1135_mst_with_notes.py`; DB problem id=1087 created with url/description/notes/family='mst'/is_completed=1. Committed as `a46c2f0`, pushed.
+- **Sanity check result**: 1094 tests pass, ruff clean, emoji clean. Ran seed twice — second run reports UPDATE with only {is_completed, family} fields touched (notes and description preserved), confirming idempotency.
+- **Status**: [DONE]
+- **Request**: No task change (user request, not tracked as a formal task).
+
+## 2026-04-15 -- [lc] LC 1570 Dot Product of Two Sparse Vectors -- notes + mark complete
+- **What I did**: User shared their hashmap solution for LC 1570. Problem already existed in DB (id=239) with URL and description but no notes and `is_completed=0`. LC 311 already referenced 1570 in its 进阶追问 section (user pre-existing), so the forward link was there. Wrote 2.5 KB Chinese notes covering: (A) hashmap solution with the "iterate the smaller side" optimization, (B) sorted (index, value) pairs + two-pointer alternative with tradeoff table, (C) the ~5-10% density switch-over where dense arrays beat sparse, (D) explicit callout of the `defaultdict` access-creates-entry trap and commutativity check, (E) the LC 311 follow-up bridge explaining "nnz small -> map; both sparse -> take key intersection and multiply". Idempotent seed script.
+- **Deliverables**: `scripts/_update_lc1570_notes.py`; DB problem id=239 now has `is_completed=1`, `family='sparse_representation'`, `pattern='hash map'`, and the Chinese notes. Committed as `f9eac5a`, pushed.
+- **Sanity check result**: 1094 tests pass, ruff clean, emoji clean. Second seed run only re-asserts `is_completed` (idempotent; notes/family/pattern untouched once set).
+- **Status**: [DONE]
+- **Request**: No task change.
+
+## 2026-04-15 -- [lc] LC 1244 Approach A: surface the size-K min-heap mechanism
+- **What I did**: User pushed back on the LC 1244 notes: Approach A was `return sum(heapq.nlargest(K, values))`, which reads as "I know the API" not "I know the algorithm". Rewrote Approach A to an explicit size-K min-heap with `heapreplace`, kept the `nlargest` one-liner as an inline comment for the "if you can use it" path. Added a paragraph explaining why the manual version is the interview default (shows understanding) and called out `heapreplace` vs `heappop + heappush` as a bonus keyword. Complexity and correctness unchanged: O(N log K) time, O(K) space.
+- **Deliverables**: `scripts/_update_lc1244_approach_a.py` (idempotent: locates the old block by exact match, replaces only if present and not already rewritten); DB problem id=199 notes updated (5577 -> 6177 chars). Committed as `0c1d51e`, pushed.
+- **Sanity check result**: 1094 tests pass, ruff clean, emoji clean. Second run reports [NOOP] as expected.
+- **Status**: [DONE]
+- **Request**: No task change.
+
+## 2026-04-15 -- [pinterest] Doc 47 refactor: drop static prep scaffolding, unify problem tables
+- **What I did**: User said the sections from "Core Patterns Cheat Sheet" through "Daily Review Template" are not useful ("都done了 written note了 我不需要这些静态字段") and asked to either fold or delete them, elevate the actual problem inventory (custom + expansion + follow-ups) into one coherent reading flow, and replace the redundant Status/Notes columns (every row read "Done / Written") with a Chinese 考察要点 column carrying real review signal. User also asked to merge the additional LC 1135 + 1570 (added earlier today) into the unified table rather than a separate trailing section. Wrote a new full-body version: dropped Pattern Clusters + Core Patterns Cheat Sheet + Common Traps + Daily Review Template + the dead Links section; merged 2025-11 expansion and today's 815/311 follow-ups into one "扩展 & Follow-up" table with a 来源 column; rewrote Quick Status into "核心 14 道" with 考察要点 per row; kept SD modules / BQ cross-ref / recruiter prep pointer for navigation.
+- **Deliverables**: `scripts/_rewrite_pinterest_lc_doc47.py` (idempotent via "*Last refactored: 2026-04-15.*" marker); DB doc id=47 content rewritten 12701 -> 6492 chars (49% shrink, higher signal density). Committed as `73c0bf2`, pushed.
+- **Sanity check result**: 1094 tests pass, ruff clean (fixed W605 by switching NEW_CONTENT to raw string since the markdown-escaped `\|` in `O(\|t\|·26)` was being treated as an invalid Python escape), emoji clean. Second run reports [NOOP] as expected.
+- **Status**: [DONE]
+- **Request**: No task change.
+
+## 2026-04-15 -- [pinterest] Translate problem statements to Chinese for 7 custom + 6 LC follow-ups
+- **What I did**: User asked to translate the 题面 for Pinterest's custom + 补全 problems into Chinese while preserving original meaning. Translated 13 problem descriptions: 7 Pinterest custom (Escape Room Game State id=1068, Lighthouse 2D id=1071, Prefix-Match First-Word-Index id=1072, round() from scratch id=1073, round_by_precision id=1074, Grant Access DAG id=1075, Pin Connectivity id=1076) and 6 recent LC follow-ups I added over the last two days (LC 1135 Connecting Cities, LC 85 Maximal Rectangle, LC 1570 Dot Product Sparse Vectors, LC 703 Kth Largest Stream, LC 973 K Closest Points, LC 378 Kth Smallest Sorted Matrix). API names, variable names, and formulas stay English; everything else Chinese.
+- **Deliverables**: `scripts/_translate_pinterest_descriptions_to_zh.py` (idempotent via trailing marker `*题面中文翻译 2026-04-15，原英文见 git 历史。*`); 13 `problems.description` rows rewritten; `description_source` set to `zh-translation`. Committed as `c3ef731`, pushed.
+- **Sanity check result**: 1094 tests pass, ruff clean, emoji clean. Second run reports `updated=0 skipped=13` (idempotent).
+- **Status**: [DONE]
+- **Request**: No task change.
+
+## 2026-04-15 -- [T-P0-424] Slack (Salesforce) HR call prep doc
+- **What I did**: Recruiter screen today 2026-04-15 Wed 14:00 EST = 11:00 PT, 30-45 min, Slack ML team under Salesforce ownership. Wrote a full HR-call prep note following the Uber HR call format: 90-sec self-intro (eBay Ranking-as-Allocation + LLM-as-Judge eval, tuned to Slack collaboration ML angle), why-Slack (collab ranking + search + summarization canvas + Slack AI/Agentforce thesis), Q2-Q7 high-frequency answers (why leaving, why Slack, ML project deep dive, comp expectation $400-550K TC, timeline 4-6 weeks, 3 prepared questions: team structure / ML roadmap / interview loop), Slack product-line ML context (Slack AI, message/channel ranking, enterprise search, Agentforce), red flags, post-call action items, and a one-line cheat-sheet table. Seeded the doc into `company_documents` (company_id=32), flipped `companies.status` to `phone_screen`, added `interview_stages`, and enriched the existing `interview_events` row for the 2 PM PT = 11 AM PT hr_call.
+- **Deliverables**: `docs/slack_hr_call_prep.md` (new, ~270 lines); `scripts/seed_slack_hr_call_prep.py` (idempotent upsert by title). `company_documents` id=59 created; Slack company row (id=32) and interview_events row updated.
+- **Sanity check result**: Ruff clean on seed script; emoji scan reports 0 hits on both files; second run of seed script reports `[UPDATE]` instead of `[INSERT]` (idempotent). DB reads back all three updates (doc, company row, event row).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-424 --status completed`
