@@ -15,43 +15,288 @@
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Assign family to 11 LC problems rendering in QuickIndex ungrouped grid (family=NULL, pattern set). Mapping: LC 215/373 -> heap_topk; LC 127/269/200 -> graph_traversal; LC 235 -> tree_lca; LC 212 -> trie_multiword; LC 15 -> two_pointers_target; LC 2503 -> offline_queries_dsu; LC 2791/2858 -> tree_dp_rerooting. Idempotent script scripts/backfill_quickindex_families.py with sentinel. AC: all 14 LC_PROBLEMS LC IDs have non-NULL family after run.
+- **Description**: BACKFILL family on 11 LC problems whose cards currently render in the label-less flat grid at the bottom of QuickIndex LC tab (frontend file: src/frontend/src/pages/QuickIndex.tsx, LC_PROBLEMS list minus STATEFUL_DS_DESIGN set).
+
+EXACT 11 problems + proposed family values (final decision -- use these):
+  LC 215 Kth Largest Element in an Array          -> heap_topk
+  LC 373 Find K Pairs with Smallest Sums          -> heap_topk
+  LC 127 Word Ladder                              -> graph_bfs
+  LC 269 Alien Dictionary                         -> graph_topo_sort
+  LC 200 Number of Islands                        -> graph_grid_traversal
+  LC 235 Lowest Common Ancestor of a BST          -> tree_lca
+  LC 212 Word Search II                           -> trie_multiword
+  LC 15 3Sum                                      -> two_pointers_target
+  LC 2503 Max Points From Grid Queries            -> offline_queries_dsu
+  LC 2791 Palindrome Paths in Tree                -> tree_dp_rerooting
+  LC 2858 Min Edge Reversals                      -> tree_dp_rerooting
+
+IMPLEMENTATION:
+- Create scripts/backfill_quickindex_families_20260416.py (idempotent).
+- Mapping MUST be a dict at top of file (LC_ID -> family).
+- For each (lc_id, family): UPDATE problems SET family=? WHERE leetcode_id=? AND (family IS NULL OR family='').
+- Print per-row action: [SET] lc=215 family=heap_topk  OR  [SKIP] lc=215 family already set to heap_topk.
+- Re-run must produce all [SKIP] lines (idempotent test).
+
+ACCEPTANCE CRITERIA:
+1. After first run, query SELECT COUNT(*) FROM problems WHERE leetcode_id IN (215,373,127,269,200,235,212,15,2503,2791,2858) AND family IS NOT NULL  -> returns 11.
+2. Second run prints 11 [SKIP] lines, 0 [SET].
+3. No other problems modified (verify via pre/post row count of problems with non-null family; delta == 11 if starting from current NULL state).
+4. Commit message format: [T-P1-462] Backfill family on 11 QuickIndex LC problems
+
+CONFIDENCE GATE: all 11 LC IDs verified in DB (done in investigation); family values chosen to match existing conventions (existing non-null families: stateful_ds_design, sparse_representation, mst, bfs_state_space). New values introduced here are semantic and will be reused by T-P1-463 for frontend grouping.
+
+DO NOT TOUCH: Stateful DS problems (LC 146/460/432 etc) -- already have family='stateful_ds_design'. Do not touch the STATEFUL_DS_DESIGN constant in frontend (that is T-P1-463 scope).
 
 #### T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: T-P1-462
-- **Description**: DECISION-PENDING user approval. Default approach (a): keep hardcoded LC_PROBLEMS but add family->label map, render one collapsible group per family (smaller blast radius). Alt (b): fetch GET /problems from backend. AC: no flat ungrouped grid; every visible LC sits under a named family group; LRU/LFU/AllOne stay under Stateful Data Structure Design; npm run build passes.
+- **Description**: REFACTOR src/frontend/src/pages/QuickIndex.tsx to render LC problems grouped by family, eliminating the current label-less flat grid.
+
+USER-APPROVED APPROACH (a): keep hardcoded LC_PROBLEMS array as the source of visible problems, but add a FAMILY_GROUPS mapping and render one collapsible <details> section per family (matching existing Stateful Data Structure Design pattern). NO backend API change.
+
+EXACT EDITS TO src/frontend/src/pages/QuickIndex.tsx:
+
+1. Extend LC_PROBLEMS entries to include a 'family' field (4th property). Use values from T-P1-462 mapping:
+   - LC 146/716/432 -> 'stateful_ds_design'  (already implicitly via STATEFUL_DS_DESIGN)
+   - LC 215/373     -> 'heap_topk'
+   - LC 127         -> 'graph_bfs'
+   - LC 269         -> 'graph_topo_sort'
+   - LC 200         -> 'graph_grid_traversal'
+   - LC 235         -> 'tree_lca'
+   - LC 212         -> 'trie_multiword'
+   - LC 15          -> 'two_pointers_target'
+   - LC 2503        -> 'offline_queries_dsu'
+   - LC 2791/2858   -> 'tree_dp_rerooting'
+
+2. Add FAMILY_LABELS constant mapping family slug to display name:
+   stateful_ds_design     -> 'Stateful Data Structure Design'
+   heap_topk              -> 'Heap / Top-K'
+   graph_bfs              -> 'Graph BFS (Word Ladder family)'
+   graph_topo_sort        -> 'Graph Topological Sort'
+   graph_grid_traversal   -> 'Graph / Grid Traversal'
+   tree_lca               -> 'Tree: LCA'
+   trie_multiword         -> 'Trie: Multi-word Search'
+   two_pointers_target    -> 'Two-Pointers Target Sum'
+   offline_queries_dsu    -> 'Offline Queries + DSU'
+   tree_dp_rerooting      -> 'Tree DP / Rerooting'
+
+3. Keep STATEFUL_DS_DESIGN constant as-is (stays as 11-item curated group). Render Stateful DS group FIRST (same position as today).
+
+4. Below Stateful DS group: group the remaining 11 LC_PROBLEMS by family. Render each family as <details open> with count badge, grid-cols-2/md:3/lg:4 identical to existing pattern. Render order: follow FAMILY_LABELS insertion order (heap_topk first, tree_dp_rerooting last). No 'Other / Ungrouped' section -- every problem must belong to a family after T-P1-462.
+
+5. Remove the current lines 211-228 'flat ungrouped grid' -- replaced by family-grouped rendering.
+
+ACCEPTANCE CRITERIA:
+1. Visit http://localhost:5173/quick-index?section=lc -> every LC card sits under a named <details> group. No unlabeled grid.
+2. LRU, LFU, AllOne still appear under 'Stateful Data Structure Design' group (no regression).
+3. Each group has a count badge showing correct count.
+4. npm run build passes with 0 TS errors.
+5. frontend vitest passes (existing 39+ tests).
+6. Click behavior unchanged: card -> ProblemDrawer opens with LC id.
+7. Manual smoke: visit page, count groups present (should be 8: Stateful DS + 7 new family groups since tree_dp_rerooting combines 2 items).
+8. Commit message: [T-P1-463] QuickIndex: family-based grouping replaces flat ungrouped grid
+
+DEPENDS ON: T-P1-462 must complete first (DB family values must be set before frontend groups by family; though frontend relies on hardcoded local mapping, the DB backfill is the contract/source of truth).
+
+NON-GOALS: Do NOT fetch from backend. Do NOT touch ML tab, BQ tab, or knowledge-tree tabs. Do NOT change ProblemDrawer behavior. Do NOT add pagination.
 
 #### T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Chinese solution notes via StudyNoteBuilder. Covers stack_of_stacks pattern: dict[freq]->stack + freq map + maxFreq tracker; push/pop both O(1); worked example; complexity; interview pitch; follow-up pointer to LC 716 (Max Stack). Set is_completed=1 + family=stateful_ds_design.
+- **Description**: Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+
+CURRENT STATE (verified via DB query):
+- problems.leetcode_id=895, title='Maximum Frequency Stack'
+- family='stateful_ds_design', is_completed=0, LENGTH(notes)=0
+
+PROBLEM RECAP: FreqStack supports push(val), pop() which removes and returns the most frequent element; ties broken by most recent. All O(1) expected.
+
+SOLUTION TO COVER (canonical):
+- Data structures: dict[val]->freq; dict[freq]->stack (list); int max_freq.
+- push(val): freq[val]++; if freq[val]>max_freq: max_freq=freq[val]; groups[freq[val]].append(val). O(1).
+- pop(): v = groups[max_freq].pop(); freq[v]--; if not groups[max_freq]: max_freq--. Return v. O(1).
+- Key insight: group-by-frequency + recency-within-group (stack LIFO). No deletion from earlier-frequency groups needed -- val stays in ALL lower-frequency groups too (this is the clever part).
+
+IMPLEMENTATION:
+- Script: scripts/_update_lc895_notes.py (follow pattern of scripts/_update_lc1570_notes.py)
+- Use StudyNoteBuilder from scripts/study_note_builder.py (required per CLAUDE.md; use FormulaBlock for any display math; $...$ inline is OK per feedback memory).
+- Chinese prose (per memory feedback_lc_notes_chinese); code blocks English Python; algorithm names/complexity in English.
+- Idempotent via sentinel in script: SELECT notes -- if notes already includes sentinel '<!-- LC895_NOTES -->' skip.
+
+NOTES SHOULD COVER (in Chinese):
+1. 题目定位 (1 段): stateful_ds_design 家族, 考点 = 频次分组 + 组内栈序
+2. 核心洞察: 同一 val 在所有 ≤ freq 的 groups 里都有副本. 为什么 pop 时 freq-- 后不需要在低层清理 -- 因为低层副本本来就在, 代表低频时期的那个它.
+3. 完整 Python 代码 (defaultdict(int) + defaultdict(list) + max_freq)
+4. 走一个示例: push(5), push(7), push(5), push(7), push(4), pop(), pop(), pop(), pop() -> 5,7,5,4
+5. 复杂度 O(1) amortized; 空间 O(总 push 次数)
+6. 易错点: 用 heap (freq, neg_seq, val) 也能做但 O(log n); 面试官想要 O(1), 不要这么答.
+7. Follow-up 追问指针 -> LC 716 Max Stack (同家族, 另一种 stateful 栈变体) + LC 1429 First Unique Number (类似 eviction 思路)
+8. 45 秒 pitch
+
+ACCEPTANCE CRITERIA:
+1. UPDATE problems SET notes=..., is_completed=1 WHERE leetcode_id=895.
+2. LENGTH(notes) >= 2000.
+3. Re-run prints [UNCHANGED] (sentinel present).
+4. Contains Chinese prose (至少 500 汉字).
+5. Commit: [T-P1-464] LC 895 Maximum Frequency Stack: Chinese solution notes
+
+REFERENCE: scripts/_update_lc1570_notes.py (same pattern; 1500 chars Chinese notes, is_completed=1).
 
 #### T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Chinese notes: per-index sorted snapshots list + bisect_right-1 binary search on snap_id. Snap O(1) (bump global id). Set O(1). Get O(log n). Contrast vs naive per-snapshot deep copy. Pitch + follow-up. is_completed=1.
+- **Description**: Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
+
+CURRENT STATE (verified): leetcode_id=1146, family='stateful_ds_design', is_completed=0, LENGTH(notes)=0.
+
+PROBLEM RECAP: SnapshotArray(length) inits all-zero array. set(index,val) sets. snap() increments snap_id and returns previous. get(index,snap_id) returns val at index at that snap.
+
+SOLUTION TO COVER:
+- Per-index list of (snap_id, val) tuples, append-on-set with coalesce if same snap_id.
+- get: bisect_right(arr[index], (snap_id, inf)) - 1. O(log n) per get.
+- snap: just bump global snap_id, O(1). This is the key insight -- no deep copy.
+- set: append O(1) amortized. Special case: if last entry has same snap_id, overwrite in place.
+
+IMPLEMENTATION:
+- scripts/_update_lc1146_notes.py (pattern of _update_lc1570_notes.py)
+- StudyNoteBuilder required; Chinese prose; sentinel '<!-- LC1146_NOTES -->'.
+- Idempotent.
+
+NOTES MUST COVER:
+1. 题目定位: stateful_ds_design, 考点 = 版本化数据结构 + 二分查找
+2. 核心洞察: snap() O(1) 靠的是 per-index 只记增量 (snap_id, val), 从不整体拷贝. 空间 O(K) where K = 总 set 调用次数, 独立于 length 和 snap 次数.
+3. 完整 Python 代码 (defaultdict(list) + bisect)
+4. bisect_right 为什么用 -1: 找 <= snap_id 的最大 snap_id. 画一个走查示例.
+5. 复杂度: set O(1) amort; get O(log K_i); snap O(1). 空间 O(K).
+6. 易错点: 不能在 snap 时整体拷贝 (爆内存); bisect 条件要 snap_id 严格 <=; 同 snap_id 里多次 set 要覆盖不要 append (否则 bisect 会返回旧值).
+7. Follow-up: 并发 snap 怎么办 (copy-on-write / MVCC 思路) -> 指向数据库 MVCC 的桥接.
+8. 45 秒 pitch.
+
+AC:
+1. UPDATE notes + is_completed=1 for lcid=1146
+2. LENGTH(notes) >= 2000
+3. Re-run [UNCHANGED]
+4. Commit: [T-P1-465] LC 1146 Snapshot Array: Chinese solution notes
+
+REFERENCE: scripts/_update_lc1570_notes.py
 
 #### T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Chinese notes: three SortedList (low/mid/high) + sliding window deque + rebalance on add/evict. addElement O(log m), calculate O(1). Alt: two-heap with lazy deletion. Pitch + follow-up. is_completed=1.
+- **Description**: Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
+
+CURRENT STATE: leetcode_id=1825, family='stateful_ds_design', is_completed=0, LENGTH(notes)=0.
+
+PROBLEM RECAP: MKAverage(m,k); addElement(num); calculateMKAverage() returns average of last m elements after removing smallest k and largest k (mean of middle m-2k).
+
+SOLUTION TO COVER:
+- Three SortedList (low=k smallest, mid=m-2k middle, high=k largest) + sum_mid running total.
+- addElement: append to deque; if deque len > m evict oldest from whichever bucket; insert new into correct bucket; rebalance.
+- calculateMKAverage: return sum_mid // (m-2k). O(1).
+- Alt: two heaps with lazy deletion.
+
+IMPLEMENTATION:
+- scripts/_update_lc1825_notes.py (pattern _update_lc1570_notes.py)
+- StudyNoteBuilder + Chinese prose + sentinel '<!-- LC1825_NOTES -->' + idempotent.
+
+NOTES COVER (Chinese):
+1. 题目定位: 滑动窗口 + 分桶维护第-k 大/小 (类比 LC 480 中位数, 但三桶版本).
+2. 核心洞察: 三个 SortedList + sum_mid, 避免每次 O(m) 重算; 维护 |low|=|high|=k 不变式.
+3. 完整 Python 代码 (sortedcontainers.SortedList + collections.deque).
+4. rebalance 6 种情况简化成先恢复 sizes 再按阈值迁移.
+5. 复杂度 add O(log m), calc O(1), 空间 O(m).
+6. 易错: evict 时要从正确桶精确删除 (bisect 定位, 不要盲 remove).
+7. Follow-up: 两 heap + lazy del.
+8. 45 秒 pitch.
+
+AC:
+1. UPDATE notes + is_completed=1 for lcid=1825.
+2. LENGTH(notes) >= 2000.
+3. Re-run prints [UNCHANGED].
+4. Commit: [T-P1-466] LC 1825 Finding MK Average: Chinese solution notes.
+
+REFERENCE: scripts/_update_lc1570_notes.py
 
 #### T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Chinese notes: min-heap of available seats; reserve=heappop, unreserve=heappush. Lazy init vs upfront init tradeoff (O(N) initial push if upfront). O(log N) per op. Pitch + follow-up. is_completed=1.
+- **Description**: Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
+
+CURRENT STATE (verified): leetcode_id=1845, family='stateful_ds_design', is_completed=0, LENGTH(notes)=0.
+
+PROBLEM RECAP: SeatManager(n) has n unreserved seats (1..n). reserve() returns smallest-numbered unreserved seat. unreserve(seat_number) marks seat unreserved again. Both O(log n) expected.
+
+SOLUTION TO COVER:
+- Min-heap of available seat numbers. reserve = heappop. unreserve = heappush.
+- Two init strategies:
+  (a) Upfront: heapq with 1..n all pushed at __init__ (O(n) via heapify). Pro: simple; con: O(n) memory + init time even if few reserves.
+  (b) Lazy: maintain next_seat int + heap of returned seats. reserve: if heap nonempty return heappop; else return next_seat++. unreserve: heappush. Pro: O(1) init.
+- Interview answer: default (a) heapify (heapq.heapify([1..n]) is O(n) not O(n log n)), mention (b) as optimization.
+
+IMPLEMENTATION:
+- scripts/_update_lc1845_notes.py (pattern _update_lc1570_notes.py)
+- StudyNoteBuilder + Chinese + sentinel '<!-- LC1845_NOTES -->' + idempotent.
+
+NOTES COVER:
+1. 题目定位: stateful_ds_design 里最简单的 heap 问题, 但是是很多真实调度系统的 canonical 模型
+2. 核心洞察: 只要 '最小可用 id' 这个语义, min-heap 最直接
+3. 完整 Python 代码 (class SeatManager with heapq.heapify in __init__)
+4. 两种 init 策略对比表 (内存 / 初始化时间 / 大 n 下的行为)
+5. heapify O(n) 为什么不是 O(n log n) -- 自底向上 sift-down 的几何级数求和 (给出简略推导)
+6. 复杂度: reserve/unreserve 都是 O(log n). 空间 (a) O(n) (b) O(R) where R=已归还数量.
+7. 易错点: 不要用 sorted list + pop(0) (O(n) 每次); 不要用 set + min(s) (min 是 O(n)).
+8. Follow-up: 若要求 'largest unreserved' 用 max-heap (Python 用负号); 若 unreserve 无序, 要不要去重保护 (一般题目说保证不重复, 省略).
+9. 45 秒 pitch.
+
+AC:
+1. UPDATE notes + is_completed=1 for lcid=1845
+2. LENGTH(notes) >= 2000
+3. Re-run [UNCHANGED]
+4. Commit: [T-P1-467] LC 1845 Seat Reservation Manager: Chinese solution notes
+
+REFERENCE: _update_lc1570_notes.py
 
 #### T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Current 956 chars too thin. Expand: queue-of-timestamps O(N) per getHits vs circular-buffer[300] O(1) with counter+timestamp per bucket; concurrency/thread-safe follow-up; extension to arbitrary window. Pitch. is_completed=1 after.
+- **Description**: Expand thin notes for LC 362 Design Hit Counter to full solution + mark completed.
+
+CURRENT STATE: leetcode_id=362, family='stateful_ds_design', is_completed=0, LENGTH(notes)=956 (too thin).
+
+PROBLEM RECAP: HitCounter with hit(timestamp) and getHits(timestamp) returning hits in past 300 seconds (sliding 5-minute window).
+
+SOLUTIONS TO COVER:
+- Solution A: queue of timestamps. hit: append. getHits: popleft while front < timestamp - 300; return len(queue). O(1) amortized hit; O(k) getHits where k = expired entries.
+- Solution B: circular buffer size 300, bucket[(ts % 300)] = (ts, count). hit: if bucket.ts == ts increment else reset (ts, 1). getHits: sum bucket.count for each of 300 buckets where ts > timestamp - 300. O(1) hit, O(300) = O(1) getHits.
+- B vs A: B is O(1) per op but fixed 300 memory; A is O(calls in window) memory and O(k) getHits which can burst. Production systems use B.
+
+IMPLEMENTATION:
+- scripts/_update_lc362_notes.py (REPLACE existing thin notes, do not append; use sentinel '<!-- LC362_NOTES_V2 -->' to detect re-run).
+- StudyNoteBuilder + Chinese + idempotent.
+
+NOTES COVER (Chinese):
+1. 题目定位: stateful_ds_design, 滑动时间窗计数 canonical 问题.
+2. 两解法对比表 (内存 / 时间 / 爆发容忍 / 是否支持任意窗口大小).
+3. 解法 A 代码 + 走查; 解法 B 代码 + 为什么 bucket=300 固定 (题目给定 window).
+4. 复杂度分析 + 为什么 B 的 O(300) 算 O(1).
+5. Follow-up:
+   (a) 并发 hit 安全 -> bucket 上加 CAS 或 shard 按 ts 哈希;
+   (b) 任意窗口大小 window_sec -> bucket 数 = window_sec, getHits 遍历全部桶;
+   (c) 超高 QPS 下 bucket 溢出 -> 按秒的 count 用 atomic int64;
+   (d) 分布式 -> Redis sliding-window-log (zset + remove-score-range).
+6. 45 秒 pitch.
+
+AC:
+1. UPDATE notes (REPLACE, not append), is_completed=1, for lcid=362.
+2. LENGTH(notes) >= 2500.
+3. Re-run prints [UNCHANGED].
+4. Commit: [T-P1-468] LC 362 Design Hit Counter: expand to full A/B comparison + follow-ups.
 
 ### P2 -- Nice to Have
 
@@ -59,7 +304,26 @@
 - **Priority**: P2
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Update import_staging_lc.py and any seed_*lc*.py: at insert time either require family OR print WARN for NULL family and append row to logs/lc_family_quarantine.tsv. Prevents silent rot. No schema change.
+- **Description**: Harden LC import scripts so new rows no longer default to family=NULL silently.
+
+BACKGROUND: Current pipeline adds LC problems via import_staging_lc.py and multiple seed_*lc*.py scripts. None set family; result is 1026 LC problems with family=NULL in DB. This task prevents the rot from growing.
+
+IMPLEMENTATION: Pick a low-intrusion path:
+- Locate all LC-insert call sites: grep -r -l "INSERT INTO problems" scripts/ and inspect each.
+- Typical files (verify before editing): scripts/import_staging_lc.py, scripts/seed_pinterest_lc_problems.py, scripts/_seed_*.py that touch problems.
+- At each INSERT: if family is not provided or is NULL/empty, log the row to logs/lc_family_quarantine.tsv (append-only tsv: timestamp\tlc_id\ttitle\tsource_script). Print WARN to stderr: [WARN] LC {id} inserted without family; logged to quarantine.
+- DO NOT fail the insert -- non-blocking warn-and-log.
+- Add a new helper module scripts/_lc_import_helpers.py with one function: warn_if_missing_family(lc_id, title, family, source_script). Each import script imports and calls this before/after the INSERT.
+
+ACCEPTANCE CRITERIA:
+1. scripts/_lc_import_helpers.py exists with warn_if_missing_family.
+2. At least 2 existing import call sites patched to use it.
+3. Demo: running any patched importer with a row that has no family produces a WARN line and appends a row to logs/lc_family_quarantine.tsv.
+4. Rows WITH family do not produce warnings or quarantine entries.
+5. Existing smoke tests (if any for these importers) still pass.
+6. Commit: [T-P2-469] Harden LC import scripts: warn + quarantine rows missing family
+
+NON-GOALS: No DB schema change. No retroactive fix for the 1026 existing NULL-family rows (covered separately if needed). No hard validation failure on insert (non-blocking warn only).
 
 ### P3 -- Stretch Goals
 
