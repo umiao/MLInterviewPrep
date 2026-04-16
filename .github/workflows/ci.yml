@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r requirements-scraper.txt
       - run: ruff check src/ tests/
 
   test:
@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r requirements-scraper.txt
       - run: python -m pytest tests/ -v --tb=short
 
   migration-test:
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt -r requirements-scraper.txt
       - run: python -m pytest tests/test_migrations.py tests/test_schema_audit.py -v --tb=short
 
   emoji-scan:

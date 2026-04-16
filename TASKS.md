@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appear in the main (non-optional) section of requirements.txt. This means pip install -r requirements.txt always installs scraper deps even in non-scraper environments. Fix: move both to a [scraper] comment group in requirements.txt or add a requirements-scraper.txt. Note: pyproject.toml is canonical spec per CLAUDE.md.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -102,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s

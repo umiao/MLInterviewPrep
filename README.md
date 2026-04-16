@@ -36,6 +36,8 @@ See [`scripts/QUICKSTART.md`](scripts/QUICKSTART.md) for full setup details.
 python -m venv .venv
 source .venv/bin/activate        # PowerShell: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+# Optional: scraper deps (bs4 + playwright) for forum-ingest features
+# pip install -r requirements-scraper.txt
 uvicorn src.backend.main:app --reload --port 8100
 
 # Frontend (separate terminal)

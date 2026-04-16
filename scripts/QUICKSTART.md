@@ -18,6 +18,8 @@
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+# Optional: scraper deps for forum-ingest features or running scraper tests
+# pip install -r requirements-scraper.txt
 ```
 
 **PowerShell:**
@@ -26,6 +28,8 @@ pip install -r requirements.txt
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+# Optional: scraper deps for forum-ingest features or running scraper tests
+# pip install -r requirements-scraper.txt
 ```
 
 ### 2. Create `.env`

@@ -521,3 +521,10 @@
 - **Sanity check result**: `grep -n "\[PROPAGATED\]" helixos/LESSONS.md` shows 9 propagated entries with dates in chronological order (2026-03-20, 04-07, 04-08 x3, 04-10, 04-13 x2, 04-15). All 4 new sources match MLInterviewPrep/LESSONS.md dates.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-437 --status completed`
+
+## 2026-04-16 02:00 -- [T-P2-439] Move scraper deps to requirements-scraper.txt
+- **What I did**: Created `requirements-scraper.txt` holding the 2 optional scraper pins (beautifulsoup4==4.12.2, playwright==1.58.0) and removed them from `requirements.txt`, so default `pip install -r requirements.txt` no longer pulls scraper-only chains (playwright + its bundled browsers) in non-scraper dev envs. Updated `.github/workflows/ci.yml` jobs (lint, test, migration-test) to install both files (scraper tests exist: test_extractors.py, test_crawler_cdp_cookie.py, etc.), and added optional-install notes to README.md and scripts/QUICKSTART.md (bash + PowerShell blocks).
+- **Deliverables**: new `requirements-scraper.txt` (2 deps + header comment); edited `requirements.txt` (removed bs4+playwright, added pointer comment); edited `.github/workflows/ci.yml` (3 CI jobs now install both files); edited `README.md` + `scripts/QUICKSTART.md` (optional-install hint).
+- **Sanity check result**: Wrote a tomllib-based diff check: `requirements.txt` set equals pyproject project deps + dev extra; `requirements-scraper.txt` set equals pyproject scraper extra. Output: `SYNC OK`. Confirms the two requirements files now exactly mirror pyproject.toml classification and debt is cleared.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-439 --status completed`
