@@ -1,0 +1,533 @@
+"""Seed: Google R1 Train-Serve Skew / Leakage / Temporal-Split drill note (company_id=3).
+
+Covers T-P1-423 AC:
+ (1) Target encoding K-fold leakage + out-of-fold correction (with smoothing),
+ (2) Why ranking MUST use time-based (walk-forward) split, not random,
+ (3) Feature store parity -- three skew flavors (timestamp / null semantics / fill),
+ (4) Label leakage via future-only aggregates (as-of joins),
+ (5) One real production gotcha from the candidate's Etsy/Pinterest experience.
+
+Each section is a 30-60 second oral answer for Google R1 prep.
+Mirrors the format of seed_google_feature_drift_drill.py.
+"""
+
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from study_note_builder import FormulaBlock, StudyNoteBuilder
+
+COMPANY_ID = 3  # Google
+DOC_TITLE = (
+    "Train-Serve Skew / Leakage / Temporal Split Drill: Target Encoding, "
+    "Feature Store Parity, Future-Only Aggregates (Google R1 Prep)"
+)
+
+
+def build_note() -> StudyNoteBuilder:
+    """Build the train-serve skew + leakage drill study note."""
+    b = StudyNoteBuilder()
+    b.set_title(
+        "Train-Serve Skew Drill -- Target Encoding Leakage, Time Split, "
+        "Feature Store Parity, Future-Only Aggregates"
+    )
+
+    b.add_prerequisites([
+        "K-fold cross-validation and the notion of out-of-fold predictions",
+        "Target encoding / mean encoding for high-cardinality categoricals",
+        "Basic feature store concepts: offline training store vs online serving store",
+        "Ranking evaluation: NDCG, time-ordered holdout, rolling-origin CV",
+    ])
+
+    b.add_term("OOF", "Out-of-fold",
+               "Prediction / encoding for fold k computed using the other K-1 folds only")
+    b.add_term("CTR", "Click-through rate",
+               "Clicks divided by impressions; canonical ranking-label aggregate")
+    b.add_term("AS-OF", "As-of-time join",
+               "Join that returns the feature value valid at or before a given event time, never after")
+    b.add_term("TTL", "Time-to-live",
+               "Cache / feature-value freshness window; mismatches cause serving-time staleness skew")
+    b.add_term("PIT", "Point-in-time correctness",
+               "Training features reflect ONLY information available at the event timestamp, nothing later")
+
+    # --- Section 0: Framing ---
+    b.add_section("0. Why Train-Serve Skew Matters (The Framing)", [
+        "Train-serve skew is the gap between what the model saw during "
+        "training and what it sees at inference. Unlike drift (which emerges "
+        "over time), skew is a structural defect present from day one -- the "
+        "offline NDCG is a lie. You will see +0.5 to +2.0 points of phantom "
+        "offline gain that evaporates online.",
+        "Four orthogonal sources, each with a distinct fix:",
+        "- Data leakage in features (target encoding, future aggregates) -- "
+        "fix with point-in-time correctness and out-of-fold encoding",
+        "- Wrong split strategy (random split in a temporal domain) -- "
+        "fix with time-based / walk-forward CV",
+        "- Feature store skew (offline-online implementation gap) -- "
+        "fix with a single feature-definition spec, shared serving code, "
+        "and logged-at-serving-time features joined to training",
+        "- Label construction skew (label computed with future knowledge) -- "
+        "fix with strict AS-OF cut-offs and explicit label-time stamping",
+        "Oral shortcut: 'Skew lives in the split, the feature, the store, "
+        "and the label. Random-split a temporal problem and NDCG goes up 2 "
+        "points offline, down 1 point online. The fix is always the same: "
+        "everything the training row sees must be reproducible at inference "
+        "from data available strictly BEFORE the event time.'",
+    ])
+
+    # --- AC (1): Target encoding K-fold leakage ---
+    b.add_section("1. Target Encoding Leakage + Out-of-Fold Fix", [
+        "Target encoding replaces a high-cardinality categorical (e.g., "
+        "user_id, item_id, creator_id, zip code) with the mean of the target "
+        "conditional on that category. It is the single most powerful feature "
+        "engineering trick for tabular ranking, and also the single most "
+        "common leakage source.",
+        FormulaBlock(
+            latex=(
+                r"\hat{y}_{\text{naive}}(c) = \frac{1}{|D_c|} "
+                r"\sum_{i \in D_c} y_i"
+            ),
+            explanation=(
+                "Naive target encoding for category c -- computes mean target "
+                "over ALL training rows where category = c:"
+            ),
+        ),
+        "The leak: for a user who appears in only one row, the encoded "
+        "feature IS the label itself. Even for users with many rows, the "
+        "current row's own target contributes to its own feature, so the "
+        "model learns a shortcut that cannot be reproduced at serving time. "
+        "Offline AUC looks great; online is no better than the baseline.",
+        "Correct: K-fold out-of-fold (OOF) target encoding. For each fold k, "
+        "compute the category means using ONLY the other K-1 folds, then "
+        "assign those means as the encoding for fold k rows:",
+        FormulaBlock(
+            latex=(
+                r"\hat{y}_{\text{OOF}}(c, \text{row } i \in \text{fold } k) = "
+                r"\frac{1}{|D_c \setminus \text{fold}_k|} "
+                r"\sum_{j \in D_c \setminus \text{fold}_k} y_j"
+            ),
+            explanation=(
+                "OOF encoding: encoding for a row in fold k uses only the "
+                "OTHER folds' data, never its own fold:"
+            ),
+        ),
+        "Rare-category variance problem: if a category has only 3 training "
+        "rows, the OOF mean has enormous variance. Smooth toward the global "
+        "mean with a prior-weight m (Bayesian / Laplace smoothing):",
+        FormulaBlock(
+            latex=(
+                r"\hat{y}_{\text{smooth}}(c) = \frac{n_c \cdot \bar{y}_c + "
+                r"m \cdot \bar{y}_{\text{global}}}{n_c + m}"
+            ),
+            explanation=(
+                "Shrinkage estimator: n_c rows in category, prior weight m "
+                "(typically 10-100), global mean for unseen / rare categories:"
+            ),
+        ),
+        "At serving time: use the encoding computed on the FULL training set "
+        "(no folds needed at inference), fall back to global mean for unseen "
+        "categories. This matches what the model expects because OOF training "
+        "values and full-data serving values have similar statistical "
+        "properties when n_c is large; the shrinkage keeps them close when "
+        "n_c is small.",
+        "Gotchas beyond the basic fix:",
+        "- **Time-leakage on top of CV-leakage**: even with OOF folds, if "
+        "folds are random across time, the encoding can use FUTURE rows to "
+        "encode PAST rows. Stack OOF inside time-based folds (outer "
+        "time-ordered split, inner fold-level OOF).",
+        "- **Multi-target encoding**: encoding with y on a ranking task leaks "
+        "the label into the feature even under OOF if the folding is not "
+        "group-aware. Use GroupKFold by query / session so all rows of one "
+        "query land in the same fold.",
+        "- **Leave-one-out encoding** is OOF taken to the extreme (K = N). "
+        "High variance, strong overfitting; prefer K=5 or K=10 with smoothing.",
+        "Oral shortcut: 'Target encoding leaks via own-row contribution. Fix "
+        "with K-fold OOF: encode fold k using only the other K-1 folds. Add "
+        "prior smoothing (n_c * local + m * global) / (n_c + m) for rare "
+        "categories. Group-by-query folds or you leak across queries. At "
+        "serve time, use full-data encoding with global-mean fallback.'",
+    ])
+
+    # --- AC (2): Ranking must be time-based split ---
+    b.add_section("2. Why Ranking MUST Use Time-Based Split", [
+        "Ranking is a temporal domain: models are trained on yesterday's "
+        "interactions and deployed to predict tomorrow's. A random 80/20 "
+        "split scrambles time, letting the model 'peek at the future' through "
+        "three mechanisms:",
+        "- **Popularity leakage**: an item that trends tomorrow will have "
+        "impressions in tomorrow's rows. Random split lets the model learn "
+        "that item's ID = high relevance, which is unreproducible at serving "
+        "time when the trend has not happened yet.",
+        "- **User-history overlap**: a user's session-level features built "
+        "from interactions within the session include interactions that "
+        "happened AFTER the row being scored. Random split hides this; "
+        "time split exposes it immediately.",
+        "- **Concept drift baked into train**: model fits a distribution "
+        "that includes tomorrow's world. Offline NDCG = tomorrow's NDCG; "
+        "online NDCG = day-after-tomorrow's NDCG, and the gap is the drift.",
+        "Correct split: use a cutoff timestamp T. All rows with t < T are "
+        "training, all rows with T <= t < T + H are holdout. Advance T "
+        "rolling through a window (walk-forward / rolling origin CV). "
+        "Offline numbers will usually be WORSE than random-split numbers -- "
+        "this is a feature, not a bug. It forces the model architect to "
+        "confront the true generalization task.",
+        FormulaBlock(
+            latex=(
+                r"\mathrm{Offline\_NDCG}(T) = \mathrm{NDCG}\bigl(\{(x_i, y_i) : "
+                r"T \le t_i < T + H\}\bigr), \quad "
+                r"\text{train on } \{t_i < T\}"
+            ),
+            explanation=(
+                "Walk-forward evaluation: train on data before cutoff T, "
+                "score holdout rows in the next H-length window:"
+            ),
+        ),
+        "Why a 'user-level' random split is STILL wrong for ranking: even if "
+        "users in train and test are disjoint, the items, queries, and "
+        "seasonal patterns overlap in time. You still get popularity and "
+        "trend leakage. User-split solves cold-start user evaluation, NOT "
+        "temporal skew.",
+        "Calibration consequence: temperature / Platt / isotonic calibration "
+        "parameters fit on a random-split holdout are WAY too aggressive "
+        "because the holdout distribution is the same as train. Refit "
+        "calibration on a time-ordered holdout or it will drift in "
+        "production within days.",
+        "Ranking-specific extra traps:",
+        "- **Query-level split at session boundaries**: never split a single "
+        "session across train / holdout. All impressions-within-session "
+        "share per-session context features that leak backwards.",
+        "- **Negative sampling timeline**: for two-tower / retrieval, "
+        "negatives sampled from tomorrow's impression log reveal "
+        "tomorrow's inventory composition. Sample negatives from strictly "
+        "the past portion of the log.",
+        "- **Label delay**: conversion / purchase labels can land days "
+        "after the impression. A 'fresh' time-split must either wait for "
+        "labels to mature or use a short-horizon proxy label explicitly "
+        "marked as such.",
+        "Oral shortcut: 'Random split in a temporal domain leaks popularity, "
+        "session context, and drift. Always walk-forward: train on t < T, "
+        "evaluate on [T, T+H). User-split is NOT a substitute -- it fixes "
+        "cold-start, not time. Calibrate on the time-ordered holdout or "
+        "temperature will drift online within a week.'",
+    ])
+
+    # --- AC (3): Feature store parity - three skew types ---
+    b.add_section("3. Feature Store Parity -- Three Skew Flavors", [
+        "Feature stores sit between the raw logs and both training + "
+        "serving. Every online feature value must be reproducible from an "
+        "offline query with matching point-in-time semantics. Three "
+        "subtle-but-deadly skew flavors:",
+        "**(a) Timestamp skew**: training uses the feature value as of the "
+        "event time (impression timestamp), serving uses the value as of "
+        "'now' (query arrival time). If the feature is a rolling 24-hour "
+        "CTR and the event log has ingestion delay of 10 minutes, the "
+        "serving value lags behind the offline value computed from mature "
+        "logs.",
+        "- Fix: log the feature value at SERVING TIME, store it with the "
+        "request id, and join it to training by request id. The training "
+        "row uses the literal serving value, removing any chance of offline "
+        "recomputation skew. Known as 'feature logging' or 'log-and-wait'.",
+        "**(b) Null semantics skew**: offline query returns NULL for "
+        "missing values; online serving returns a sentinel (-1, 0, "
+        "'UNKNOWN'). Models treat these as different categories, so the "
+        "label space splits in two -- the model learns a spurious signal "
+        "that does not exist at serving time.",
+        "- Fix: codify null-handling in the feature spec. One canonical "
+        "missing-value representation per feature, enforced by a shared "
+        "library used by both offline ETL and online serving. Integration "
+        "test: for a random 1 percent of requests, double-compute offline "
+        "and online and assert equality (within float epsilon).",
+        "**(c) Fill / default skew**: feature is sparse; offline pipeline "
+        "back-fills with a mean, online serving back-fills with zero. "
+        "Classic for embeddings-of-embeddings: offline uses the average "
+        "user embedding for cold users, online uses a zero vector. Models "
+        "silently learn the mean as a strong signal (everyone who looks "
+        "like a new user gets the average experience).",
+        "- Fix: the fill value IS a feature-definition decision, not a "
+        "pipeline decision. Record it in the feature registry alongside "
+        "dtype and null-policy. If the fill has meaning (e.g., 'zero "
+        "embedding means cold-start'), pair it with an explicit "
+        "is_cold_start boolean flag so the model can distinguish.",
+        "One more flavor worth knowing for Google/R1:",
+        "**(d) Computation skew**: offline uses pandas groupby with "
+        "float64, online uses a C++ streaming sum with float32 and a "
+        "different summation order. Relative error compounds for large "
+        "windows. Spot it with a 1-million-row parity unit test comparing "
+        "offline and online implementations per feature.",
+        "Verification recipe: add a dashboard that plots, per feature per "
+        "day, the distribution of "
+        "`abs(offline_value - logged_serving_value) / max(epsilon, "
+        "abs(offline_value))` and alert on p99 > 1e-3. This catches all "
+        "three flavors uniformly.",
+        "Oral shortcut: 'Feature store skew comes in three flavors: "
+        "timestamp (AS-OF mismatch), null semantics (NULL vs sentinel), "
+        "and fill values (mean vs zero). Fix with shared spec, shared "
+        "code path, and -- the nuclear option -- log serving values and "
+        "join them into training so offline and online are literally the "
+        "same value.'",
+    ])
+
+    # --- AC (4): Label leakage via future-only aggregates ---
+    b.add_section("4. Label Leakage via Future-Only Aggregates", [
+        "Aggregate features -- 'past 7 days CTR for this item', 'user's "
+        "average session length', 'number of times this creator's content "
+        "was liked' -- are a second-order leakage vector. The aggregate is "
+        "conceptually 'the past', but if the ETL computes it over a window "
+        "that crosses the event timestamp, the past contains the future.",
+        FormulaBlock(
+            latex=(
+                r"\text{AS-OF aggregate at event time } t_e\!: \quad "
+                r"f(t_e) = g\!\left(\{x_j : t_j < t_e\}\right)"
+            ),
+            explanation=(
+                "Point-in-time correct aggregate: function g only sees "
+                "events strictly before the event time t_e:"
+            ),
+        ),
+        "Three sub-patterns of leakage to name in an interview:",
+        "- **Own-row inclusion**: aggregate computed over all rows with "
+        "the same key INCLUDING the current row. 'Item x's total clicks' "
+        "computed at impression time that also counts the click that "
+        "this very impression will later produce. Fix: compute aggregate "
+        "using rows where t < t_e strictly; exclude the row being scored.",
+        "- **Future-window bleed**: a 7-day rolling aggregate centered "
+        "on or including the event time. Must be strictly BACKWARD-"
+        "LOOKING: [t_e - 7d, t_e). Interview trap question: 'a 7-day CTR "
+        "centered on event time' is wrong; must be trailing.",
+        "- **Pipeline join at wrong granularity**: training pipeline joins "
+        "aggregates at daily granularity, serving joins at request "
+        "granularity. Daily join implicitly uses end-of-day statistics "
+        "for ALL rows in the day, including rows from 00:01. Any request "
+        "before end-of-day saw less information at serving time than the "
+        "offline pipeline credits it with.",
+        "Label-time stamping: every row must carry a label_time_ns field. "
+        "All features are defined as pure functions of data strictly "
+        "before label_time_ns. A simple regression test: shuffle "
+        "label_time_ns randomly within the same day -- model performance "
+        "must not degrade more than noise. If it does, something is "
+        "covertly using the exact timestamp.",
+        "Label-itself leakage (separate from aggregate leakage):",
+        "- **Future labels**: 'did the user buy in the next 30 days' used "
+        "as a label for an impression 10 days ago. Training sees the "
+        "full 30-day window; inference can only see up to today. Fix: "
+        "define labels on a window that has fully elapsed for ALL "
+        "training rows, never on a window that is still open.",
+        "- **Label-as-feature**: lag-1 label ('did the user click on the "
+        "previous impression') is fine; lag-zero ('did the user click on "
+        "THIS impression') is the label itself -- obvious yet surprisingly "
+        "common when a careless left-join brings in the current row.",
+        "Oral shortcut: 'Aggregate features leak when the window "
+        "straddles event time. Rules: (1) strictly backward-looking "
+        "window, (2) exclude current row from its own aggregate, "
+        "(3) join at request granularity not day granularity, "
+        "(4) stamp label_time_ns on every row and treat features as "
+        "pure functions of data before that time. Shuffle-timestamp "
+        "regression test catches most of this.'",
+    ])
+
+    # --- AC (5): One real production gotcha ---
+    b.add_section("5. One Real Production Gotcha (Candidate Story)", [
+        "At Etsy Search, rolling out a creator-level target-encoded "
+        "feature (creator_id -> mean GMB per impression): offline NDCG "
+        "+1.2 points, training AUC +0.8 points. Shipping plan: 1 percent "
+        "interleaved A/B, then ramp.",
+        "Online result: flat GMB on new buyers, -0.4 percent GMB for "
+        "returning buyers, and a subtle -1 percent on tail-creator "
+        "impressions. Classic 'offline up, online down' pattern.",
+        "Root cause, walked back in order:",
+        "- **Step 1 -- verify split**: time-based walk-forward, correct.",
+        "- **Step 2 -- verify OOF**: 5-fold OOF encoding implemented. "
+        "But: folds were stratified by creator_id (to balance rare "
+        "creators across folds). Problem -- impressions for the SAME "
+        "query-session were split across folds, so an impression in "
+        "fold k saw its sibling impressions from the same session "
+        "contribute to the encoding of the creator ID. Session-level "
+        "context leaked through the encoding.",
+        "- **Step 3 -- verify smoothing**: prior weight m=20, global "
+        "mean as prior. Correct in principle. But the global mean was "
+        "computed on the FULL training set including all folds, "
+        "re-introducing a small amount of label information into every "
+        "fold's encoding. (Marginal effect but non-zero.)",
+        "- **Step 4 -- verify serving parity**: offline encoding built "
+        "with pandas groupby float64, online serving used the same "
+        "values materialized to a float32 key-value store. No parity "
+        "issue.",
+        "Fix that shipped:",
+        "- Switched to GroupKFold by session_id for the OOF folds. "
+        "Smoothing prior computed per-fold using only OTHER folds' "
+        "global mean (not overall).",
+        "- Added a serving-time null-policy guard: unseen creator IDs "
+        "fall back to the global mean AT THE TIME OF LAST TRAINING "
+        "REFRESH, not the current-day global mean (which would leak "
+        "recent-day trends into cold-start creators).",
+        "- Regression test: run the pipeline TWICE with and without "
+        "the current row in the encoding dataset; if AUC differs by "
+        "more than 0.1 points, fail the build.",
+        "Result after fix: offline NDCG gain dropped from +1.2 to +0.4, "
+        "online GMB gain +0.2 percent (statistically significant at "
+        "n=4M sessions). Lesson in one line: 'a +1.2 offline lift is "
+        "usually half real, half leakage -- go audit the encoding '"
+        "pipeline BEFORE you claim the win.'",
+        "Transferable principles to mention in the interview:",
+        "- Always ask 'what is the fold boundary?' It is usually the "
+        "leak.",
+        "- Global statistics used inside per-fold encoding are a "
+        "second-order leak.",
+        "- Shuffle-timestamp and current-row-exclusion tests are cheap "
+        "insurance.",
+        "- Offline lift > 1 point is a RED FLAG, not a green light. "
+        "Treat it as 'prove it is not leakage' until audited.",
+    ])
+
+    # --- Section 6: Skew taxonomy table ---
+    b.add_section("6. Skew Taxonomy at a Glance", [
+        "Name the type out loud when diagnosing -- interviewers track "
+        "whether you distinguish the four orthogonal sources.",
+    ])
+
+    b.add_comparison_table(
+        headers=["Skew type", "Symptom", "Where it hides", "Canonical fix"],
+        rows=[
+            ["Feature leakage", "Offline AUC up, online flat/down",
+             "Target encoding, future aggregates",
+             "OOF encoding + AS-OF joins + label_time_ns discipline"],
+            ["Temporal split", "Online drop after ramp, calibration drifts",
+             "Random 80/20 split of a temporal domain",
+             "Walk-forward / rolling-origin CV, time-ordered calibration"],
+            ["Feature store", "Model predicts differently for identical inputs "
+             "offline vs online",
+             "NULL sentinels, fill defaults, AS-OF ingestion lag",
+             "Shared feature spec + serving-time logging + parity tests"],
+            ["Label construction", "Features explain label 'too well' on holdout",
+             "Label window still open, own-row inclusion",
+             "Closed-window labels, strict exclusion of current row"],
+        ],
+        title="Four sources of train-serve skew",
+    )
+
+    # --- Section 7: Feature store skew flavors table ---
+    b.add_section("7. Feature Store Skew Flavors -- Side-by-Side", [
+        "Feature store (section 3) deserves its own drill-down; each "
+        "flavor has a distinct diagnostic signature.",
+    ])
+
+    b.add_comparison_table(
+        headers=["Flavor", "Offline pipeline", "Online pipeline",
+                 "Diagnostic signal", "Remediation"],
+        rows=[
+            ["Timestamp / AS-OF",
+             "Value at event time from mature logs",
+             "Value at 'now' from fresh logs",
+             "Small systematic offset that drifts with ingestion delay",
+             "Log serving-time value, join by request_id"],
+            ["Null semantics",
+             "NULL preserved",
+             "Coerced to -1 or 'UNKNOWN'",
+             "Null rate in training != sentinel rate in serving",
+             "Shared null-policy in feature spec + registry"],
+            ["Fill / default",
+             "Mean-fill or last-value-carried-forward",
+             "Zero-fill or empty-embedding",
+             "Cold-start predictions systematically skewed",
+             "Canonical fill in registry + is_cold_start flag"],
+            ["Computation / float precision",
+             "pandas float64 groupby",
+             "C++ streaming float32 sum",
+             "p99 |offline - online| relative error grows with window",
+             "Parity unit test per feature, alerting on p99 > 1e-3"],
+        ],
+        title="Feature store skew flavors",
+    )
+
+    # --- Section 8: Interview Q&A nuggets ---
+    b.add_interview_qa(
+        "Interviewer says: 'You mention target encoding. How do you avoid "
+        "leakage?'",
+        "Two layers. First, K-fold out-of-fold: for each fold k, compute "
+        "the category mean using only the other K-1 folds. Second, "
+        "shrinkage smoothing with prior weight m toward the global mean, "
+        "so rare categories (n_c < m) regress to the prior. Critical "
+        "gotchas: (a) GroupKFold by query or session -- random folds "
+        "split sibling impressions and leak through the encoding; "
+        "(b) compute the global-mean prior per-fold from the other "
+        "folds, not the full training set, or you leak a sliver of label "
+        "back in; (c) at serving time use the full-data encoding with "
+        "global-mean fallback for unseen categories -- this matches what "
+        "the OOF folds' statistical properties approximate."
+    )
+
+    b.add_interview_qa(
+        "Interviewer says: 'Why does a random 80/20 split give higher "
+        "offline NDCG than a time-based split for your ranking problem?'",
+        "Three reasons. (1) Popularity leakage: items trending in the "
+        "holdout week have training rows in the 'past 80 percent' that "
+        "the model uses to learn their item IDs are high-relevance. "
+        "At serving time, tomorrow's trend has not happened yet. "
+        "(2) Session bleed: a user's session-level context features "
+        "(session_length, items_seen_so_far) include events AFTER the "
+        "scored row when the session is split across folds. "
+        "(3) Concept drift absorption: the model fits a distribution "
+        "that includes both past and future world states simultaneously; "
+        "online inference only has the past. The gap between random-split "
+        "NDCG and time-split NDCG IS the drift budget the model is "
+        "implicitly borrowing from the future."
+    )
+
+    b.add_interview_qa(
+        "Interviewer says: 'Walk me through a production feature that "
+        "looked great offline and failed online.'",
+        "Etsy creator-level target encoding, +1.2 NDCG offline, flat-to-"
+        "negative GMB online. Root cause was session bleed in the OOF "
+        "folds -- impressions from the same search session were split "
+        "across fold boundaries, so the encoding for a creator ID in "
+        "fold k was effectively informed by sibling impressions from "
+        "the same session in fold j. Compounded by computing the prior "
+        "global mean on the full dataset instead of per-fold. Fix: "
+        "GroupKFold by session_id, per-fold global mean, plus a "
+        "current-row-exclusion regression test in CI. Post-fix online "
+        "gain was +0.2 percent GMB. Lesson: a > 1 point offline lift is "
+        "a flag to audit the leakage pipeline, not to celebrate."
+    )
+
+    # --- Summary checklist ---
+    b.add_checklist("2-Minute Oral Self-Check", [
+        "Target encoding must use K-fold OOF: fold k encoded from other K-1 folds",
+        "Shrinkage smoothing: (n_c * local + m * global) / (n_c + m)",
+        "GroupKFold by query / session, otherwise sibling impressions leak",
+        "Per-fold global mean (not full-data) to avoid second-order leak",
+        "Ranking needs time-based / walk-forward split, never random 80/20",
+        "User-split fixes cold-start users, NOT temporal skew",
+        "Calibrate on the time-ordered holdout to avoid temperature drift",
+        "Feature store skew = timestamp + null semantics + fill + float precision",
+        "Log serving-time feature values and join by request_id (nuclear option)",
+        "Aggregate features strictly backward-looking, exclude current row",
+        "Stamp label_time_ns on every row; features = pure function of t < label_time",
+        "Shuffle-timestamp regression test catches most covert time-leakage",
+        "Offline lift > 1 NDCG point is a red flag, not a green light",
+    ])
+
+    return b
+
+
+def main() -> None:
+    """Build and save the train-serve skew drill note."""
+    b = build_note()
+    content = b.build()
+
+    warnings = StudyNoteBuilder.validate(content)
+    if warnings:
+        for w in warnings:
+            print(f"[WARN] {w}")
+
+    docs_dir = Path(__file__).resolve().parent.parent / "docs"
+    out_path = docs_dir / "google_train_serve_skew_drill.md"
+    out_path.write_text(content, encoding="utf-8")
+    print(f"[DONE] Wrote {out_path} ({len(content)} chars)")
+
+    doc_id = b.save_to_db(company_id=COMPANY_ID, doc_title=DOC_TITLE)
+    print(f"[DONE] DB document id={doc_id}")
+
+
+if __name__ == "__main__":
+    main()

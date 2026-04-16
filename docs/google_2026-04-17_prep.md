@@ -38,7 +38,7 @@ target_id: 51
 
 2. **数据分析与处理**
    - 数据质量、Sale NDCG 的偏差、GMB 作为正确代理目标
-   - 采样、特征 leakage、train-serve skew
+   - 采样、特征 leakage、train-serve skew (drill: `docs/google_train_serve_skew_drill.md`; 涵盖 target encoding K-fold OOF + 平滑、ranking 必须 time-based split、feature store 三种 skew、future-only aggregates、一个 Etsy creator-encoding 真实踩坑)
 
 3. **ML + 产品判断**
    - Diversity vs MRR 指标悖论的 stakeholder 沟通
