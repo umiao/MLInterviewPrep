@@ -370,3 +370,10 @@
 - **Sanity check result**: Ruff clean on seed script; emoji scan reports 0 hits on both files; second run of seed script reports `[UPDATE]` instead of `[INSERT]` (idempotent). DB reads back all three updates (doc, company row, event row).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-424 --status completed`
+
+## 2026-04-15 -- [T-P0-415] LambdaRank/LambdaMART derivation drill (Google R1)
+- **What I did**: Built a targeted 2-min oral drill note for T-P0-415. Four sections mapped to AC: (1) RankNet pairwise loss L=log(1+exp(-(s_i-s_j))) with gradient -(1-P_ij); (2) LambdaRank lambda_ij = RankNet gradient * |deltaNDCG_ij| with per-doc aggregation, plus LambdaMART = (lambda_i, w_i) fed to GBDT; (3) pointwise BCE / pairwise RankNet / listwise ListNet / LambdaMART comparison table with when-to-use rules; (4) Sale NDCG -> GMB bidding story hook (eBay Ranking-as-Allocation, +1% GMB first A/B). Added 11-item self-check checklist. Used StudyNoteBuilder with FormulaBlock for all math; escaped literal \\$5/\\$100 so they don't render as inline math.
+- **Deliverables**: `docs/google_lambdarank_drill.md` (new, ~135 lines); `scripts/seed_google_lambdarank_drill.py` (idempotent). `company_documents` id=60 inserted (company_id=3 Google).
+- **Sanity check result**: Ruff clean on seed script; emoji scan = 0 hits on generated doc; seed re-run reports `[SKIP]` (idempotent); DB read-back confirms id=60, company_id=3, length=8910. StudyNoteBuilder's single-dollar check passed after escape.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-415 --status completed`
