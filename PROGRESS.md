@@ -413,3 +413,11 @@
 - **Sanity check result**: Ruff clean on seed script; non-ASCII scan = 0 hits on generated doc; orphan single-dollar scan = 0 (16 total $, 4 $$ display-math pairs); seed re-run reports `[SKIP]` (idempotent); DB read-back confirms id=65, company_id=3, length=22011; all required section markers present (MMR, DPP, Intent Collapse, Allocation Primitive, GradNorm, Etsy, det(L_S)). StudyNoteBuilder's internal single-dollar check passed after USD substitution.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-420 --status completed`
+
+
+## 2026-04-15 -- [T-P1-440] Pinterest card index: backend + data prep
+- **What I did**: Extended `CompanyDocument.doc_kind` enum to include `card_index` (model + migration 19 string), added one-shot migration `scripts/_migrate_doc_kind_add_card_index.py` that copy-swaps `company_documents` to rewrite the CHECK constraint on existing DBs, tagged LC 85 (problems.id=242 Maximal Rectangle) with "Pinterest" in `company_tags`, and seeded a single `card_index` document for Pinterest (company_id=29) containing 10 cluster cards that group 29 problems. Verified 29 (not 28) — the task spec's AC text said 28 but the explicit per-card listing enumerated 29 distinct problem IDs, so I followed the listing.
+- **Deliverables**: `src/backend/models/company.py` (CHECK), `src/backend/database.py` (migration 19 enum), `scripts/_migrate_doc_kind_add_card_index.py` (NEW), `scripts/_seed_pinterest_card_index.py` (NEW). DB: `company_documents` id=66 inserted (company_id=29 Pinterest, doc_kind=card_index); `problems.id=242` company_tags now `['LinkedIn','Uber','Adobe','Pinterest']`; CHECK constraint rewritten preserving all 55 pre-existing rows.
+- **Sanity check result**: Ruff clean on all 4 changed files. Existing DB: migration ran once, re-run reports `[SKIP]` (idempotent). Seed re-run reports `[SKIP] LC 85 already tagged Pinterest` + `Updated card_index doc id=66` (upsert, no dup). Fresh in-memory DB smoke test: `card_index` accepted, bogus `doc_kind='bogus'` rejected with IntegrityError. AC checks all pass: (1) CHECK allows card_index, (2) LC 85 tagged Pinterest, (3) exactly 1 card_index doc, (4) JSON parses schema_version=1, (5) 10 cards with 29 problems, all IDs resolve, (6) seed is idempotent.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-440 --status completed`

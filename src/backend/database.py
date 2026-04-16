@@ -504,7 +504,7 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ADD_COLUMN_IF_MISSING:company_documents:doc_kind:"
             "ALTER TABLE company_documents ADD COLUMN doc_kind TEXT "
             "DEFAULT 'prep_note' "
-            "CHECK(doc_kind IN ('prep_note','hub_doc','recruiter_call','other'))",
+            "CHECK(doc_kind IN ('prep_note','hub_doc','recruiter_call','other','card_index'))",
             "UPDATE company_documents SET doc_kind = 'recruiter_call' "
             "WHERE doc_kind IS NULL AND (LOWER(title) LIKE '%recruiter call%' "
             "OR LOWER(title) LIKE '%recruiter-call%')",
