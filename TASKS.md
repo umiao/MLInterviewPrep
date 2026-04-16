@@ -9,28 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-470
-- **Description**: Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authority, with Google drill doc 56 repositioned as a 'drill' that LINKS to the canonical hub (no re-derivation).
-
-CURRENT STATE (verify before editing):
-- Google company_documents id=56 'Bias-Variance + Overfitting Diagnosis Drill' = 7166 chars (Google R1 specific).
-- Possible framework_nodes covering bias-variance: search framework_nodes.title / path for 'bias', 'variance', 'overfit' (you should find at least one; identify it).
-- LinkedIn 合集 doc 21 has a bias-variance section (chars unknown; part of 66.8K).
-
-AC:
-1. Canonical framework_node (identified or newly created) becomes the CANONICAL authority; length 8000-12000 bytes; covers: definitions, decomposition proof sketch, diagnostic curves (train vs val as complexity rises), remedies table (high bias / high variance / both), interview pitfalls.
-2. Google doc 56 rewritten as DRILL: keeps Google-specific angle (whatever that is -- read the doc first), but replaces any re-derivation with '> **正典** [Bias-Variance (pillarN.path)](/framework/{id})' pointer. Target length <=5000 chars after shrinking.
-3. concept_links entries inserted (requires KG-P1-01 to be complete):
-    - src=company_document:56, dst=framework_node:<id>, relation='canonical'
-    - src=framework_node:<id>, dst=company_document:56, relation='drill' (reverse edge)
-4. Idempotent seed script scripts/consolidate_bias_variance_20260416.py.
-5. Commit: [KG-P2-01] Bias-Variance canonical hub + Google drill 56 trim
-
-DEPENDS ON: KG-P1-01 (concept_links), KG-P1-02 (doc_kind 'drill'), KG-P1-03 (markdown convention).
-
 #### T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195)
 - **Priority**: P0
 - **Complexity**: S
@@ -395,6 +373,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node). Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authori
 - [x] **2026-04-16** -- T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes. Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into con
 - [x] **2026-04-16** -- T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill. Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy:
 - [x] **2026-04-16** -- T-P0-470: [KG-P1-01] Create concept_links table + migration. Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) 
