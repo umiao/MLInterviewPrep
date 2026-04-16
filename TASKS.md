@@ -121,20 +121,34 @@ AC:
 
 DEPENDS ON: KG-P1-01 (concept_links), KG-P1-02 (doc_kind 'drill'), KG-P1-03 (markdown convention).
 
-#### T-P0-474: [KG-P2-02] DECISION-PENDING Second canonical hub selection
+#### T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195)
 - **Priority**: P0
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: DECISION-PENDING user input. Candidates (ranked by duplication risk / value):
+- **Description**: Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularization treatment into framework_node 195 as canonical authority.
 
-A) **Regularization** (Doc 21 unique L1/L2 proofs + existing framework_node 195 already expanded via T-P0-220 KKT). Pro: high duplication; Node 195 ready to absorb as canonical.
-B) **Optimizer Family** (T-P0-450 already landed unified framework_node 74 SGD->Adam chain; can be reframed as canonical_hub pulling in doc 27 Adam/RMSprop code).
-C) **Class Imbalance** (existing Node 84 + covered by LinkedIn 21; mostly already consolidated; lowest risk).
-D) **Evaluation Metrics** (NDCG/MAP/MRR in Google doc 61 + Calibration in doc 62 + offline/online metrics across multiple docs).
+CURRENT STATE (verified):
+- framework_node id=195 was expanded under T-P0-220 with primal-dual KKT derivation + geometric picture. Length: 7543 chars (post-expansion).
+- Legacy 合集 Doc 21 (LinkedIn 概率统计) contains L1/L2 proofs as UNIQUE sole source per audit.
+- Multiple drill docs mention regularization tangentially (e.g., Google 55 Regularization Deep Dive, Doc 27 ML理论).
 
-RECOMMENDATION: A (Regularization) -- highest duplication, pattern proven by Bias-Variance hub.
+SCOPE:
+1. Read Doc 21's L1/L2 sections + Google Doc 55 + any framework_node content touching regularization. Produce a diff analysis (what's unique, what's duplicated).
+2. Absorb Doc 21 unique L1/L2 proofs into framework_node 195 (target: 10000-14000 chars; stay within drawer/always-visible budget per template v1.1).
+3. Reposition Google Doc 55 as 'drill' (doc_kind='drill' via KG-P1-02 taxonomy): trim re-derivations, replace with '> **正典** [Regularization (pillarN.path)](/framework/195)'. Target: 55 shrinks from 8396 -> ~5000 chars.
+4. concept_links: doc 55 -> node 195 (canonical); node 195 -> doc 55 (drill) + doc 21 (absorbed_from).
+5. Archive pre-migration snapshots of doc 55 + relevant Doc 21 sections to archive/pre_kg/YYYYMMDD/.
 
-Once user picks: create consolidation task mirroring KG-P2-01 structure. Until picked, this task stays in planning state with no AC.
+ACCEPTANCE CRITERIA:
+1. framework_node 195 length: 10000-14000 chars; covers L1 vs L2 geometric picture + KKT + soft-thresholding + probabilistic Laplace/Gaussian priors + elastic net brief + weight decay vs L2 subtlety in Adam.
+2. Google Doc 55 trimmed to <=5500 chars, contains canonical pointer blockquote.
+3. concept_links rows inserted (3 edges).
+4. Idempotent seed: scripts/consolidate_regularization_20260416.py.
+5. Commit: [KG-P2-02] Regularization canonical hub (node 195) + Google doc 55 trim + Doc 21 absorb
+
+DEPENDS ON: KG-P1-01 (concept_links), KG-P1-02 (doc_kind), KG-P1-03 (markdown convention).
+
+NON-GOALS: Do NOT delete Doc 21 (legacy 合集 per user: per-concept manual review only). Do NOT touch other Doc 21 sections (only the L1/L2 subsection).
 
 #### T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27
 - **Priority**: P0
@@ -326,27 +340,54 @@ ACCEPTANCE CRITERIA:
 
 DEPENDS ON: DOCS-01.
 
-#### T-P1-483: [KG-VIZ-01] DECISION-PENDING /kg visualization library choice + POC
+#### T-P1-483: [KG-VIZ-01] /kg visualization POC: Cytoscape.js + dagre (user-picked)
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: None
-- **Description**: DECISION-PENDING user input on library. Prior research summary:
+- **Description**: User-picked Cytoscape.js (over React Flow / D3-Force / Sigma / vis-network). POC scope below.
 
-RECOMMENDED: Cytoscape.js + react-cytoscapejs (~110KB gzip). Pros: rich layout catalog (dagre for DAG, cose-bilkent for force, expand-collapse extension for pillar collapse), scale sweet-spot 200-2000 nodes matches our target. Cons: imperative API (ref-based) vs declarative React.
+DEPENDENCIES TO ADD (src/frontend/package.json):
+- cytoscape
+- react-cytoscapejs
+- cytoscape-dagre (dagre layout adapter)
+- cytoscape-expand-collapse (optional but highly recommended for pillar collapse; add if bundle budget allows)
+- @types/cytoscape (types)
 
-ALTERNATIVE A: React Flow + dagre (~120KB). Pros: React-native feel, JSX-as-nodes. Cons: no native tree layout, need to hand-roll pillar expand/collapse logic.
+BACKEND API (new endpoint):
+- GET /api/kg/graph returns: {nodes: [{id, kind, pillar, path, title, content_length}], edges: [{src_kind, src_id, dst_kind, dst_id, relation}]}
+- Nodes source: framework_nodes + (later) company_documents. For POC, emit framework_nodes only.
+- Edges source: concept_links table (requires KG-P1-01 completed).
+- Implement in src/backend/app/routers/kg.py (new file) with tests under src/backend/tests/test_kg_router.py.
 
-ALTERNATIVE B: D3 Force via react-force-graph (~35-80KB). Pros: tiniest bundle, max flexibility. Cons: high implementation cost (zoom, pan, selection all custom).
+FRONTEND ROUTE (new):
+- src/frontend/src/pages/KnowledgeGraph.tsx renders full-viewport Cytoscape canvas.
+- Register in App.tsx / router: path='/kg'.
+- Layout: dagre (rankDir='TB') for pillar hierarchy; force fallback for cross-pillar concept_links.
+- Interactions: pan/zoom, click node -> open FrameworkNodeDrawer (reuse existing component), search box filters by title.
+- Styling: pillar colors via CSS-in-Cytoscape-style; Tailwind only for surrounding UI (header, search, legend).
 
-Existing framework UI: FrameworkTreeView.tsx (431 lines, collapsible tree) + FrameworkTreemap.tsx (237 lines). We can keep both as 2D views; /kg is the NEW graph-with-edges view.
+POC SCOPE (smaller than full build):
+- Support 30-50 framework_nodes (any pillar subset) + 10 synthetic concept_links if DB table empty.
+- Pillar grouping visible; click expands/collapses pillar.
+- FrameworkNodeDrawer opens on click.
+- Search filter works.
 
-ONCE USER PICKS: task expands into a POC scope:
-- /kg route with 30-50 framework_nodes + 10 synthetic concept_links
-- pillar-level grouping, click node -> open FrameworkNodeDrawer
-- pan/zoom/search by title
-- AC: renders without layout flicker, npm run build passes, Lighthouse perf >=80.
+ACCEPTANCE CRITERIA:
+1. /kg route accessible and renders without layout flicker.
+2. Bundle size delta under 200 KB gzip (cytoscape + dagre + react wrapper).
+3. npm run build passes 0 TS errors.
+4. Frontend vitest: add at least 1 test hitting KnowledgeGraph.tsx mounted + mocked /api/kg/graph.
+5. Backend: /api/kg/graph returns 200 with nodes + edges schema validated.
+6. Smoke: manually opened page shows 30+ nodes grouped by pillar, click opens drawer.
+7. Commit: [KG-VIZ-01] /kg POC: Cytoscape.js + dagre (framework_nodes + concept_links)
 
-Until library decision: task stays in planning state.
+DEPENDS ON: KG-P1-01 (concept_links table; without this, edges source is empty and we ship POC with synthetic edges). Best to run AFTER KG-P1-01 to use real edges.
+
+NON-GOALS:
+- No Company lens / filter in POC (defer to VIZ-02).
+- No orphan detection view (defer).
+- No 3D / force-only layout (dagre is primary).
+- Do NOT remove FrameworkTreeView or FrameworkTreemap -- keep as complementary 2D views.
 
 ### P2 -- Nice to Have
 
