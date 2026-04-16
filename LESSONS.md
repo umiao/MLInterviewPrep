@@ -149,3 +149,21 @@
 - **Fix (systemic, future work)**: Either (a) `task_db.py add` should reset `all_done=False` atomically when new tasks land, or (b) the orchestrator should cross-check: if `all_done=true` but `task_db.py has-unblocked` returns unblocked tasks, ignore the flag and proceed.
 - **Applies to**: Any project using `scripts/autonomous_run.{sh,ps1}` with multi-batch workflows where new tasks are added between runs.
 - **Tags**: #orchestration #autonomous #session-state #sticky-flag
+
+### [2026-04-15] Auto-bolding inside LaTeX/code leaks ** into rendered output
+- **Context**: StudyNoteBuilder registered abbreviations and auto-bolded the first occurrence via `re.sub` over the entire content string. Docstring claimed it skipped math/code; implementation did not.
+- **What went wrong**: A term whose first match was inside `$$...$$` (e.g. `\mathrm{MSE}`) became `\mathrm{**MSE**}`. In math mode `**` is not bold syntax — it renders as literal asterisks inside the formula. Reported by user viewing node 195.
+- **Fix pattern**: Substitutions that semantically belong to prose must explicitly tokenise the input into prose vs protected spans (code fences, inline code, display math, inline math) and run the substitution ONLY on prose spans. Lookbehind/lookahead guards (e.g. `(?<!\*\*)`) are insufficient because they don't know about surrounding context like `\mathrm{...}`.
+- **Also**: `save_to_db` with "skip-if-title-exists" idempotency made the fix harder to roll out — re-running the seed didn't refresh content. Consider making content-repair seeds explicitly support update-on-hash-mismatch, or at least document how to force a repair.
+- **Tags**: #markdown #latex #regex-scoping #idempotent-seed-limitation
+
+## [2026-04-16] Dual tasks.db scoping: `task_db.py` adds go to cwd's nearest CLAUDE.md
+- **Context**: planted 16 active tasks from root `Gen_AI_Proj` cwd via `python .claude/hooks/task_db.py add`; launched `autonomous_run.sh MLInterviewPrep`. 10 sessions no-op'd; all burned.
+- **What I learned**: `_find_project_root()` in `.claude/hooks/task_db.py` walks up from `Path.cwd()` for the first `CLAUDE.md`. Since Gen_AI_Proj and each sub-project (MLInterviewPrep, helixos, etc.) have their own `CLAUDE.md`, they resolve to DIFFERENT `.claude/tasks.db` files. A task added while cwd=root lives in root's tasks.db and is invisible to the sub-project. autonomous_run.sh cd's into the sub-project before spawning each session -- so sub-project scope saw 0 active tasks even though root scope had 16.
+- **Fix / correct approach**:
+  1. BEFORE `task_db.py add`, always `cd` into the project directory whose work this task represents. Root-cwd task adds are for *repo-level* work only.
+  2. `autonomous_run.sh` now runs `python .claude/hooks/task_db.py has-unblocked` from `WORK_DIR` at the top of its main loop; if exit code != 0, break immediately (no wasted session). This catches future scoping mistakes as "orchestrator stops at session 0" rather than "orchestrator runs 10 no-op sessions".
+  3. Migration between DBs: use `task_db.py add` (letting the target DB assign fresh global-counter IDs), NOT SQL INSERT with old IDs -- IDs can collide across DBs (T-P2-239 did, as two unrelated tasks).
+- **Detection**: after adding tasks intended for a sub-project, verify `cd <subproject> && python .claude/hooks/task_db.py list --status active` shows them. If not, planting was mis-scoped.
+- **Related**: scripts/migrate_active_tasks_to_mlp_20260416.py (this session's one-shot migration tool); commits 98d6cc4 (root) + 1022be8 (MLP).
+- **Tags**: #orchestrator #task-db #multi-repo #session-scoping #silent-failure
