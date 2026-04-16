@@ -10,6 +10,7 @@ import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
 import KnowledgeCardsPanel from "../components/companies/KnowledgeCardsPanel";
 import CodingTab from "../components/companies/CodingTab";
+import CompanyCardIndex from "../components/CompanyCardIndex";
 import DocTocSidebar from "../components/ui/DocTocSidebar";
 import DynamicTocSidebar from "../components/ui/DynamicTocSidebar";
 import type { TocHeading } from "../utils/slugify";
@@ -139,6 +140,23 @@ export default function PrepNotesPage() {
   // Child documents
   const { data: documents } = useCompanyDocuments(companyId);
 
+  // Index-tab drawer state (local, mirrors DocumentViewer pattern)
+  const [indexLcDrawerId, setIndexLcDrawerId] = useState<number | null>(null);
+  const [indexDbDrawerId, setIndexDbDrawerId] = useState<number | null>(null);
+
+  const hasCardIndex = useMemo(
+    () => (documents ?? []).some((d) => d.doc_kind === "card_index"),
+    [documents],
+  );
+
+  // When URL has no explicit tab and the company has a card_index, the
+  // Index tab is the preferred landing view. Parsing defaults `tab` to
+  // "notes", so intercept that case using the raw `tab` query param.
+  const hasExplicitTab = searchParams.get("tab") !== null;
+  const hasDocParam = searchParams.get("doc") !== null;
+  const effectiveTab: PrepTab =
+    !hasExplicitTab && !hasDocParam && hasCardIndex ? "index" : activeTab;
+
 
   /** Import .md file handler. */
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -209,19 +227,26 @@ export default function PrepNotesPage() {
               {company.name}
             </h1>
             <div className="flex gap-1 border border-gray-200 rounded p-0.5 items-center">
+            {hasCardIndex && (
+              <TabButton
+                label={"\u7d22\u5f15 / Index"}
+                active={effectiveTab === "index"}
+                onClick={() => goToTab("index")}
+              />
+            )}
             <TabButton
               label="Notes"
-              active={activeTab === "notes"}
+              active={effectiveTab === "notes"}
               onClick={() => goToTab("notes")}
             />
             {documents && documents.length > 0 && (
               <select
-                value={activeTab === "docs" && activeDocId !== null ? String(activeDocId) : ""}
+                value={effectiveTab === "docs" && activeDocId !== null ? String(activeDocId) : ""}
                 onChange={(e) => {
                   if (e.target.value) goToTab("docs", Number(e.target.value));
                 }}
                 className={`text-sm px-3 py-1 rounded border-0 cursor-pointer ${
-                  activeTab === "docs"
+                  effectiveTab === "docs"
                     ? "bg-gray-100 text-gray-800 font-medium"
                     : "text-gray-500 hover:bg-gray-50 bg-transparent"
                 }`}
@@ -238,22 +263,22 @@ export default function PrepNotesPage() {
             )}
             <TabButton
               label="Coding"
-              active={activeTab === "coding"}
+              active={effectiveTab === "coding"}
               onClick={() => goToTab("coding")}
             />
             <TabButton
               label="Knowledge"
-              active={activeTab === "knowledge"}
+              active={effectiveTab === "knowledge"}
               onClick={() => goToTab("knowledge")}
             />
             <TabButton
               label="Forum Posts"
-              active={activeTab === "forum"}
+              active={effectiveTab === "forum"}
               onClick={() => goToTab("forum")}
             />
             </div>
           </div>
-          {activeTab === "docs" && activeDocId !== null && documents && (
+          {effectiveTab === "docs" && activeDocId !== null && documents && (
             <span className="text-xs text-gray-500">
               {documents.find((d) => d.id === activeDocId)?.title}
             </span>
@@ -268,7 +293,7 @@ export default function PrepNotesPage() {
             enableKeyboard={mode === "preview"}
           />
           {/* Mode toggle -- notes/doc tabs only */}
-          {(activeTab === "notes" || activeTab === "docs") && (
+          {(effectiveTab === "notes" || effectiveTab === "docs") && (
             <>
               <div className="flex gap-1">
                 <button
@@ -319,7 +344,29 @@ export default function PrepNotesPage() {
       </header>
 
       {/* Content area */}
-      {activeTab === "notes" ? (
+      {effectiveTab === "index" ? (
+        <div className="flex-1 overflow-auto min-h-0">
+          <CompanyCardIndex
+            companyId={companyId}
+            onLcClick={(lcId) => {
+              setIndexDbDrawerId(null);
+              setIndexLcDrawerId(lcId);
+            }}
+            onDbClick={(dbId) => {
+              setIndexLcDrawerId(null);
+              setIndexDbDrawerId(dbId);
+            }}
+          />
+          <ProblemDrawer
+            lcId={indexLcDrawerId}
+            dbId={indexDbDrawerId}
+            onClose={() => {
+              setIndexLcDrawerId(null);
+              setIndexDbDrawerId(null);
+            }}
+          />
+        </div>
+      ) : effectiveTab === "notes" ? (
         <>
           {/* TOC sidebar for large notes */}
           {mode === "preview" && notesLargeEnough && (
@@ -390,9 +437,9 @@ export default function PrepNotesPage() {
             </div>
           </div>
         </>
-      ) : activeTab === "knowledge" ? (
+      ) : effectiveTab === "knowledge" ? (
         <KnowledgeCardsPanel companyId={companyId} />
-      ) : activeTab === "coding" ? (
+      ) : effectiveTab === "coding" ? (
         <>
           <CodingTab
             companyId={companyId}
@@ -403,13 +450,13 @@ export default function PrepNotesPage() {
             onClose={closeProblemDrawer}
           />
         </>
-      ) : activeTab === "docs" && activeDocId !== null ? (
+      ) : effectiveTab === "docs" && activeDocId !== null ? (
         <DocumentViewer
           companyId={companyId}
           docId={activeDocId}
           mode={mode}
         />
-      ) : activeTab === "forum" ? (
+      ) : effectiveTab === "forum" ? (
         <div className="flex-1 overflow-auto p-6 min-h-0">
           <ForumPostsTab companyId={companyId} />
         </div>

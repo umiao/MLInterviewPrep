@@ -138,6 +138,7 @@ export interface CompanyDocument {
   title: string;
   content: string;
   source_type: string;
+  doc_kind: string;
   created_at: string | null;
   updated_at: string | null;
 }

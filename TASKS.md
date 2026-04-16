@@ -11,90 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-442: Pinterest card index: integrate tab=index into PrepNotesPage
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-441
-- **Description**: # Pinterest Card Index: Integrate tab=index into PrepNotesPage (T-P1-226)
-
-## Goal
-Add a new `tab=index` to PrepNotesPage that renders CompanyCardIndex. Tab is only visible when the company has a card_index document.
-
-## Files
-- `src/frontend/src/pages/PrepNotesPage.tsx` (549 lines) — add new tab
-- `src/backend/schemas/company.py:73-84` — verify CompanyDocumentResponse already exposes `doc_kind` (add if missing)
-- `src/backend/routers/companies.py` — verify list endpoint returns doc_kind (already does per grep at line 507)
-
-## Backend check first
-Before frontend work, verify `CompanyDocumentResponse` schema includes `doc_kind`. If missing:
-```python
-# schemas/company.py CompanyDocumentResponse
-doc_kind: str | None = None
-```
-(The companies router already returns doc_kind in responses — line 507.)
-
-## Frontend changes
-
-### 1. Tab state
-Find the tab state management in PrepNotesPage (search for `tab=docs` or similar URL query logic). Add `'index'` as a valid tab value.
-
-### 2. Tab button rendering
-Find the tab button bar. Add:
-```tsx
-{hasCardIndex && (
-  <button
-    onClick={() => setTab('index')}
-    className={tab === 'index' ? 'active' : ''}
-  >
-    索引 / Index
-  </button>
-)}
-```
-where `hasCardIndex` is derived from the docs list:
-```tsx
-const hasCardIndex = documents.some(d => d.doc_kind === 'card_index');
-```
-
-### 3. Conditional rendering
-In the tab content rendering, add:
-```tsx
-{tab === 'index' && (
-  <CompanyCardIndex
-    companyId={Number(id)}
-    onLcClick={(lcId) => { setDbDrawerId(null); setLcDrawerId(lcId); }}
-    onDbClick={(dbId) => { setLcDrawerId(null); setDbDrawerId(dbId); }}
-  />
-)}
-```
-(Reuse the exact drawer handler pattern from line 531-532.)
-
-### 4. Default tab logic
-If the URL has no explicit `?tab=X` and the company has a card_index, default to `tab=index`. Otherwise preserve existing default. This makes the index the landing view for Pinterest.
-
-## Acceptance Criteria
-- [ ] `GET /companies/29/prep` (no tab param) lands on Index tab (card grid visible)
-- [ ] URL `?tab=index` renders CompanyCardIndex
-- [ ] URL `?tab=docs` still works (no regression)
-- [ ] URL `?tab=problems` still works
-- [ ] Index tab button is HIDDEN for companies with no card_index document (e.g. `/companies/1/prep`)
-- [ ] Clicking a problem card opens the drawer (LC or DB)
-- [ ] No console errors in browser devtools on initial load
-- [ ] `npm run build` passes
-
-## Verification (manual smoke)
-Start backend + frontend, then in browser:
-1. http://localhost:5173/companies/29/prep — should land on Index tab
-2. Click one card problem — drawer opens with correct problem notes
-3. Switch to Docs tab — doc 47 renders as before
-4. Switch to Problems tab — problem list renders as before
-5. Visit http://localhost:5173/companies/1/prep — Index tab should NOT appear
-6. Open browser console — no errors
-
-## Commit message
-`[T-P1-226] Add tab=index to PrepNotesPage rendering CompanyCardIndex`
-
-## Depends on: T-P1-225
-
 #### T-P1-443: Problems tab: Custom badge + source-type filter switch
 - **Priority**: P1
 - **Complexity**: S
@@ -348,6 +264,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-15** -- T-P1-442: Pinterest card index: integrate tab=index into PrepNotesPage. # Pinterest Card Index: Integrate tab=index into PrepNotesPage (T-P1-226)
 - [x] **2026-04-15** -- T-P1-441: Pinterest card index: frontend CardGrid component. # Pinterest Card Index: Frontend CardGrid Component (T-P1-225)
 - [x] **2026-04-15** -- T-P1-440: Pinterest card index: backend + data prep. # Pinterest Card Index: Backend + Data Prep (T-P1-224)
 - [x] **2026-04-15** -- T-P0-424: [Slack-SFDC] HR call Wed 2026-04-15 14:00 EST = 11:00 PT. Slack (Salesforce) ML team recruiter call. 时间: 04/15 Wed 14:00 EST = 13:00 CST = 11:00 PT. 30-45 min 预期. 准备: (1) 自我介绍 90

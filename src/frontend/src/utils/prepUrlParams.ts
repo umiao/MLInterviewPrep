@@ -1,4 +1,10 @@
-export type PrepTab = "notes" | "knowledge" | "forum" | "docs" | "coding";
+export type PrepTab =
+  | "notes"
+  | "knowledge"
+  | "forum"
+  | "docs"
+  | "coding"
+  | "index";
 
 export interface PrepParams {
   tab: PrepTab;
@@ -12,6 +18,7 @@ const VALID_TABS: readonly PrepTab[] = [
   "forum",
   "docs",
   "coding",
+  "index",
 ];
 
 function parsePositiveInt(raw: string | null): number | null {
