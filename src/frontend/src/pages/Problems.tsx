@@ -340,12 +340,53 @@ export default function Problems() {
   const paginationBase = sourceTypeFilterActive ? problems.length : totalCount;
   const totalPages = Math.max(1, Math.ceil(paginationBase / effectivePageSize));
 
+  // Custom mode renders as company-grouped cards (no table, no pagination).
+  const isCustomGroupedView = isAllTab && sourceType === "custom";
+
   // When source_type filter is active we load all and must paginate client-side.
   const displayedProblems = useMemo(() => {
     if (!sourceTypeFilterActive) return problems;
+    // Custom mode shows all at once in card form — skip slicing.
+    if (isCustomGroupedView) return problems;
     const start = page * effectivePageSize;
     return problems.slice(start, start + effectivePageSize);
-  }, [problems, sourceTypeFilterActive, page, effectivePageSize]);
+  }, [problems, sourceTypeFilterActive, page, effectivePageSize, isCustomGroupedView]);
+
+  // Group custom problems by company_tags. A problem with multiple tags
+  // appears under each company card; empty tags go to "未归类".
+  const UNCATEGORIZED_KEY = "\u672a\u5f52\u7c7b / Unassigned";
+  const customByCompany = useMemo(() => {
+    if (!isCustomGroupedView) return [];
+    const groups: Record<string, Problem[]> = {};
+    for (const p of problems) {
+      if (!p.company_tags || p.company_tags.length === 0) {
+        (groups[UNCATEGORIZED_KEY] ??= []).push(p);
+      } else {
+        const seen = new Set<string>();
+        for (const c of p.company_tags) {
+          if (seen.has(c)) continue;
+          seen.add(c);
+          (groups[c] ??= []).push(p);
+        }
+      }
+    }
+    // Sidebar company filter narrows to matching company card only
+    // (case-insensitive substring match to align with the backend filter).
+    if (company) {
+      const target = company.toLowerCase();
+      const narrowed: Record<string, Problem[]> = {};
+      for (const [k, v] of Object.entries(groups)) {
+        if (k.toLowerCase().includes(target)) narrowed[k] = v;
+      }
+      return Object.entries(narrowed).sort(([a], [b]) => a.localeCompare(b));
+    }
+    // Largest groups first, "Unassigned" pinned to the end.
+    return Object.entries(groups).sort(([a, ap], [b, bp]) => {
+      if (a === UNCATEGORIZED_KEY) return 1;
+      if (b === UNCATEGORIZED_KEY) return -1;
+      return bp.length - ap.length || a.localeCompare(b);
+    });
+  }, [problems, isCustomGroupedView, company]);
 
   // Reset to page 0 when filters change (not sort/page)
   const filterKey = JSON.stringify({
@@ -818,9 +859,11 @@ export default function Problems() {
         <h1 className="text-2xl font-bold">LeetCode Problems</h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-500">
-            {sourceTypeFilterActive
-              ? `Showing ${problems.length} / ${totalCount} problems`
-              : `${totalCount} problem${totalCount !== 1 ? "s" : ""}`}
+            {isCustomGroupedView
+              ? `Showing ${problems.length} custom problems across ${customByCompany.length} compan${customByCompany.length === 1 ? "y" : "ies"}`
+              : sourceTypeFilterActive
+                ? `Showing ${problems.length} / ${totalCount} problems`
+                : `${totalCount} problem${totalCount !== 1 ? "s" : ""}`}
           </span>
           <button
             onClick={() => fetchAllMutation.mutate()}
@@ -930,8 +973,58 @@ export default function Problems() {
         />
       )}
 
-      {/* Table */}
-      {!loading && problems.length > 0 && (
+      {/* Custom mode: company-grouped card view */}
+      {!loading && isCustomGroupedView && problems.length > 0 && (
+        <div
+          className="grid gap-4"
+          style={{ gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))" }}
+        >
+          {customByCompany.map(([companyName, companyProblems]) => (
+            <article
+              key={companyName}
+              className="border border-gray-200 rounded-lg bg-white shadow-sm p-4"
+            >
+              <h3 className="text-base mb-2 flex items-center gap-2">
+                <span className="font-bold text-gray-900">{companyName}</span>
+                <Badge variant="purple">{`${companyProblems.length} \u9898`}</Badge>
+              </h3>
+              <ul className="space-y-1.5 text-sm">
+                {companyProblems.map((p) => (
+                  <li key={p.id} className="flex items-start gap-2">
+                    <Link
+                      to={`/problems/${p.id}`}
+                      className="text-blue-700 hover:text-blue-900 hover:underline truncate"
+                      title={p.title}
+                    >
+                      {p.title}
+                    </Link>
+                    {p.difficulty && (
+                      <Badge
+                        variant={
+                          p.difficulty === "easy"
+                            ? "green"
+                            : p.difficulty === "medium"
+                              ? "yellow"
+                              : "red"
+                        }
+                        className="capitalize shrink-0 text-[10px]"
+                      >
+                        {p.difficulty}
+                      </Badge>
+                    )}
+                    {p.is_completed && (
+                      <Badge variant="green" className="shrink-0 text-[10px]">done</Badge>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {/* Flat table (All + LeetCode modes) */}
+      {!loading && !isCustomGroupedView && problems.length > 0 && (
         <div className="overflow-x-auto rounded border border-gray-200">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-xs text-gray-500 uppercase">
@@ -951,8 +1044,10 @@ export default function Problems() {
         </div>
       )}
 
-      {/* Pagination */}
-      <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      {/* Pagination (hidden in Custom grouped view) */}
+      {!isCustomGroupedView && (
+        <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      )}
     </>
   );
 

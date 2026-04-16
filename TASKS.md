@@ -11,75 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-444: Problems tab: Custom-mode company-grouped view
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-443
-- **Description**: # Problems tab: Custom-mode company-grouped view (T-ML-xxx)
-
-## Goal
-When the user switches to `source_type=custom`, render custom problems as a COMPANY-GROUPED card layout (like the Pinterest card index), not a flat table. This makes company-based discovery primary for custom problems.
-
-## Context
-Depends on T-P1-443 (custom badge + switch). T-P1-443 adds the switch but still renders custom rows in the same flat table. This task upgrades the Custom view to a grouped card layout.
-
-## Files
-- `src/frontend/src/pages/Problems.tsx` — add grouped-by-company rendering for Custom mode
-- `src/frontend/src/components/CompanyCardIndex.tsx` (from T-P1-441) — reference pattern for card layout; may extract a shared `ProblemCardGroup` component if reuse is clean
-- `src/frontend/src/api.ts` — `GET /problems?source_type=custom` (client-side filter, no backend change)
-
-## Design
-
-### Layout (only when `source_type === 'custom'`)
-- Group the filtered custom problems by `company_tags` (JSON array, can contain multiple companies per problem — show under EACH company)
-- For problems with `company_tags == []`, group under "未归类 / Unassigned"
-- Each group is a card:
-  ```
-  ┌───────────────────────────────────────┐
-  │ Snowflake (2 题)                       │
-  ├───────────────────────────────────────┤
-  │ • Nearest Bathroom to Each Desk       │
-  │ • Max Tree Height After Deleting ...  │
-  └───────────────────────────────────────┘
-  ```
-- Click problem title → open existing ProblemDrawer (same as flat table row click)
-- Grid: 2 columns desktop, 1 column mobile (same as CompanyCardIndex)
-
-### Company filter interaction
-- Existing sidebar company filter still applies — if set, only that company's card shows
-- If no company filter, all company cards render
-
-### Problem counts per company (current custom problem distribution)
-Verify roughly matches expectation (pull via API or quick query):
-- Pinterest: ~7 custom
-- Snowflake: 2 custom (just added)
-- Uber: ~X custom
-- DoorDash: ~X custom
-- 1point3acres: ~X
-- Others: likely single-company tags
-
-## Acceptance Criteria
-- [ ] When switched to Custom tab, problems render as company-grouped cards (not flat table)
-- [ ] Clicking a problem title opens the ProblemDrawer
-- [ ] Problems with multi-company tags appear under EACH company (dedup if same problem twice in one company)
-- [ ] Problems with empty company_tags go to "未归类" group
-- [ ] Sidebar company filter narrows to selected company only
-- [ ] Switching back to "All" or "LC" restores flat table
-- [ ] No regression on Problems page filters
-- [ ] `npm run build` passes
-
-## Verification
-1. Switch to Custom — see grouped cards with company names
-2. Click "Snowflake" card problem → drawer opens with notes
-3. Sidebar company filter "Pinterest" → only Pinterest card visible
-4. Switch to "All" → flat table restored, custom rows still have [Custom] badge
-5. Clear filters, count per card matches actual custom-problem distribution
-
-## Commit message
-`[T-ML-xxx] Problems tab: company-grouped view for Custom mode`
-
-## Depends on: T-P1-443
-
 ### P2 -- Nice to Have
 
 #### T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty
@@ -201,6 +132,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 398 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-15** -- T-P1-444: Problems tab: Custom-mode company-grouped view. # Problems tab: Custom-mode company-grouped view (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-443: Problems tab: Custom badge + source-type filter switch. # Problems tab: Custom badge + source-type filter (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-442: Pinterest card index: integrate tab=index into PrepNotesPage. # Pinterest Card Index: Integrate tab=index into PrepNotesPage (T-P1-226)
 - [x] **2026-04-15** -- T-P1-441: Pinterest card index: frontend CardGrid component. # Pinterest Card Index: Frontend CardGrid Component (T-P1-225)
