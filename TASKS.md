@@ -5,12 +5,6 @@
 
 ## In Progress
 
-#### T-P0-445: [ML-Fund] Cost-sensitive model selection: FP/FN decision rubric + Pinterest/Google examples
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Gap: when two models have near-equal accuracy/AUC, how to choose. Steps: (1) quantify FP vs FN business cost; (2) pick operating point on PR curve along cost-weighted axis; (3) threshold recalibration; (4) class-weighted CE / cost-sensitive loss. AC: (a) expand framework_node id=17 (Model Selection & Validation) description from 0b -> >=3000b with decision rubric + worked example. (b) Seed one hub doc at docs/ml_cost_sensitive_selection.md with Pinterest unsafe-content (high FN cost) + Google Ads (high FP cost) concrete cases. (c) LINK to existing Google doc 62 (Calibration drill) -- do NOT duplicate Platt/Isotonic/Temperature math, only reference. Target <=2500 words. Pyramid base -- no fancy expansion. Depends on: none.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -250,6 +244,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
 - [x] **2026-04-16** -- T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold. AC: (1) PSI=Σ(a-e)·ln(a/e), 0.1 warn/0.25 critical; (2) KL 不对称无界, JS 对称 bounded; (3) 连续用 KS; (4) concept drift P(y|x) vs
 - [x] **2026-04-16** -- T-P1-421: [Google/R1] A/B test 严谨性: sample size/SRM/CUPED/novelty. pillar7 有基础但缺 drill. AC: (1) n=(z+z)^2·2σ²/Δ²; (2) SRM 是 randomization 健康性不是结果; (3) CUPED 用 pre-period covariate 降 varia
+- [x] **2026-04-16** -- T-P0-445: [ML-Fund] Cost-sensitive model selection: FP/FN decision rubric + Pinterest/Google examples. Gap: when two models have near-equal accuracy/AUC, how to choose. Steps: (1) quantify FP vs FN business cost; (2) pick o
 - [x] **2026-04-15** -- T-P1-444: Problems tab: Custom-mode company-grouped view. # Problems tab: Custom-mode company-grouped view (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-443: Problems tab: Custom badge + source-type filter switch. # Problems tab: Custom badge + source-type filter (T-ML-xxx)
 - [x] **2026-04-15** -- T-P1-442: Pinterest card index: integrate tab=index into PrepNotesPage. # Pinterest Card Index: Integrate tab=index into PrepNotesPage (T-P1-226)
