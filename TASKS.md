@@ -9,30 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-470
-- **Description**: Doc 19 'Adobe MLE Prep All-in-One' contains Diffusion Models content (DDPM, DDIM, CFG, CLIP, SDE/ODE) that prior audit flagged as SOLE SOURCE -- not found in any framework_node or other doc. Must migrate before Doc 19 is touched.
-
-SCOPE:
-1. Read Doc 19's diffusion-model section from DB (company_documents id=19). Identify exact subsection boundaries.
-2. Create NEW framework_node under pillar6 (Special Topics / Generative Models) or appropriate pillar -- researcher picks based on current tree (call it 'diffusion_models' or similar; confirm path doesn't collide).
-3. Write canonical content (8000-14000 chars) covering: forward diffusion, reverse denoising, DDPM loss derivation (short), DDIM determinism, Classifier-Free Guidance, connection to SDE/ODE; paper pointers only (no long derivations of variance scheduling -- pointer to standalone doc if any).
-4. Create standalone docs/diffusion_models_canonical.md that is the paper-style deep dive (longer form).
-5. concept_links: framework_node <new_id> <-> company_document 19 relation='mentions'; mark the Diffusion section of Doc 19 with a '> **正典** [Diffusion Models](/framework/...)' block.
-6. Archive pre-migration Doc 19 snapshot to archive/pre_kg/20260416/adobe_doc19_pre_diffusion_migration.md.
-
-ACCEPTANCE CRITERIA:
-1. New framework_node exists with >=8000 chars, no empty sections.
-2. Standalone docs/diffusion_models_canonical.md exists.
-3. Doc 19's diffusion section now references the canonical node via markdown '> **正典**' line.
-4. Archive snapshot exists.
-5. Idempotent seeder scripts/migrate_doc19_diffusion_20260416.py.
-6. Commit: [KG-M-01] Migrate Doc 19 Diffusion Models to canonical framework_node
-
-DEPENDS ON: KG-P1-01 (concept_links), KG-P1-02 (doc_kind), KG-P1-03 (markdown convention).
-
 #### T-P0-478: [KG-M-02] CRITICAL: Migrate Doc 19 RoPE + Long Context (sole source) to framework_node
 - **Priority**: P0
 - **Complexity**: M
@@ -317,6 +293,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone. Doc 19 'Adobe MLE Prep All-in-One' contains Diffusion Models content (DDPM, DDIM, CFG, CLIP, SDE/ODE) that prior audit f
 - [x] **2026-04-16** -- T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27. FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so 
 - [x] **2026-04-16** -- T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195). Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularizatio
 - [x] **2026-04-16** -- T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node). Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authori
