@@ -420,3 +420,10 @@
 - **Sanity check result**: `npm run build` passes (0 TS errors, built in 637ms). `npx vitest run` passes 39/39 tests across 3 suites. Code review confirms ACs 1-6 hold: every LC card now sits under a named `<details>` group; Stateful DS group unchanged (LRU/Max Stack/AllOne still appear there); each group has `({count})` badge; click handler still opens ProblemDrawer via `setDrawerLcId(p.lcId)`. Note on AC7: task spec text says "8 groups" but explicit family mapping produces 9 non-Stateful groups (heap_topk[2] + 7 singletons + tree_dp_rerooting[2]) = 10 total groups with Stateful DS. Followed explicit mapping per task spec.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-463 --status completed`.
+
+## 2026-04-16 12:30 -- [T-P1-464] LC 895 Maximum Frequency Stack: Chinese solution notes
+- **What I did**: Wrote canonical Chinese study notes for LC 895 FreqStack covering the dual-dict + max_freq pattern (`freq[val] -> int`, `groups[freq] -> stack`, cached `max_freq`). Notes explain the central insight (low-freq groups retain val copies after re-push, so pop never needs cross-layer cleanup), include full Python code, a step-by-step trace of the canonical `push 5,7,5,7,4` example with state tables, complexity analysis, common mistakes (heap-based O(log n) answer is wrong for this prompt; max_freq decrement gating), and follow-up pointers (LC 716 Max Stack, LC 1429 First Unique Number, popMin variant, concurrency angle). Followed `_update_lc1570_notes.py` pattern with sentinel-based idempotency.
+- **Deliverables**: `scripts/_update_lc895_notes.py` (new, idempotent via `<!-- LC895_NOTES -->` sentinel); `data/mle_prep.db` row 569 (leetcode_id=895) updated: notes (3793 chars), is_completed=1, pattern='hash map + stack'.
+- **Sanity check result**: First run printed `[UPDATED] LC 895 id=569 notes_len=3793 fields=['notes', 'is_completed', 'pattern']`; second run printed `[UNCHANGED] LC 895 id=569 (sentinel present)`. DB verification: is_completed=1, notes_length=3793 (>=2000), hanzi count=838 (>=500), sentinel present. All 4 ACs hold.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-464 --status completed`.

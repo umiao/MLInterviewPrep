@@ -11,49 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
-
-CURRENT STATE (verified via DB query):
-- problems.leetcode_id=895, title='Maximum Frequency Stack'
-- family='stateful_ds_design', is_completed=0, LENGTH(notes)=0
-
-PROBLEM RECAP: FreqStack supports push(val), pop() which removes and returns the most frequent element; ties broken by most recent. All O(1) expected.
-
-SOLUTION TO COVER (canonical):
-- Data structures: dict[val]->freq; dict[freq]->stack (list); int max_freq.
-- push(val): freq[val]++; if freq[val]>max_freq: max_freq=freq[val]; groups[freq[val]].append(val). O(1).
-- pop(): v = groups[max_freq].pop(); freq[v]--; if not groups[max_freq]: max_freq--. Return v. O(1).
-- Key insight: group-by-frequency + recency-within-group (stack LIFO). No deletion from earlier-frequency groups needed -- val stays in ALL lower-frequency groups too (this is the clever part).
-
-IMPLEMENTATION:
-- Script: scripts/_update_lc895_notes.py (follow pattern of scripts/_update_lc1570_notes.py)
-- Use StudyNoteBuilder from scripts/study_note_builder.py (required per CLAUDE.md; use FormulaBlock for any display math; $...$ inline is OK per feedback memory).
-- Chinese prose (per memory feedback_lc_notes_chinese); code blocks English Python; algorithm names/complexity in English.
-- Idempotent via sentinel in script: SELECT notes -- if notes already includes sentinel '<!-- LC895_NOTES -->' skip.
-
-NOTES SHOULD COVER (in Chinese):
-1. 题目定位 (1 段): stateful_ds_design 家族, 考点 = 频次分组 + 组内栈序
-2. 核心洞察: 同一 val 在所有 ≤ freq 的 groups 里都有副本. 为什么 pop 时 freq-- 后不需要在低层清理 -- 因为低层副本本来就在, 代表低频时期的那个它.
-3. 完整 Python 代码 (defaultdict(int) + defaultdict(list) + max_freq)
-4. 走一个示例: push(5), push(7), push(5), push(7), push(4), pop(), pop(), pop(), pop() -> 5,7,5,4
-5. 复杂度 O(1) amortized; 空间 O(总 push 次数)
-6. 易错点: 用 heap (freq, neg_seq, val) 也能做但 O(log n); 面试官想要 O(1), 不要这么答.
-7. Follow-up 追问指针 -> LC 716 Max Stack (同家族, 另一种 stateful 栈变体) + LC 1429 First Unique Number (类似 eviction 思路)
-8. 45 秒 pitch
-
-ACCEPTANCE CRITERIA:
-1. UPDATE problems SET notes=..., is_completed=1 WHERE leetcode_id=895.
-2. LENGTH(notes) >= 2000.
-3. Re-run prints [UNCHANGED] (sentinel present).
-4. Contains Chinese prose (至少 500 汉字).
-5. Commit: [T-P1-464] LC 895 Maximum Frequency Stack: Chinese solution notes
-
-REFERENCE: scripts/_update_lc1570_notes.py (same pattern; 1500 chars Chinese notes, is_completed=1).
-
 #### T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes
 - **Priority**: P1
 - **Complexity**: S
@@ -316,26 +273,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 414 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 430 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-16** -- T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook. Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with
 - [x] **2026-04-16** -- T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost. Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal)
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
-- [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
-- [x] **2026-04-16** -- T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping. REFACTOR src/frontend/src/pages/QuickIndex.tsx to render LC problems grouped by family, eliminating the current label-le
-- [x] **2026-04-16** -- T-P1-462: [QIdx-A1] Backfill family on 11 ungrouped LC_PROBLEMS. BACKFILL family on 11 LC problems whose cards currently render in the label-less flat grid at the bottom of QuickIndex L
-- [x] **2026-04-16** -- T-P1-461: [adhoc] LC 815 follow-up: station-level shortest path section. Append follow-up to LC 815 notes: min-stops variant via station-level BFS / Dijkstra. Idempotent script with sentinel gu
-- [x] **2026-04-16** -- T-P1-457: [Phase 0.5b] Template v1.1 post-Sketch revision: drawer tab render order + Optimization granularity example. DEFERRED revision of Phase 0.5 content template after T-P0-241 Sketch sample ships real-world signal. Per independent re
-- [x] **2026-04-16** -- T-P1-456: [ML-RecSys] Matrix factorization: SGD vs ALS + bridge from CF to embedding models. Gap: node 108 (Collaborative Filtering) covers CF concept but not the MF mechanics bridging CF -> Two-Tower. (1) Bias-on
-- [x] **2026-04-16** -- T-P1-455: [Pinterest-RecSys] Cold-start strategies: user + item + pin bootstrap. Gap: cold-start absent from pillar4.recommender_systems nodes (108/109/110 cover CF/content-based/deep but not cold-star
-- [x] **2026-04-16** -- T-P1-454: [Pinterest-NLP] Word2Vec/GloVe history + ViT + cross-modal attention supplement. Gap: pre-transformer embedding history missing entirely; node 164 (Vision-Language Models) covers CLIP/LLaVA shallowly b
-- [x] **2026-04-16** -- T-P1-453: [Pinterest-CV] CNN foundation 1-pager: conv mechanics + ResNet/VGG/EfficientNet + transfer learning + data aug. Gap: Pinterest is visual-content-first, but CV framework_nodes 122/123 are shallow (5733b+6231b). (1) Conv op: stride/pa
-- [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
-- [x] **2026-04-16** -- T-P1-422: [Google/R1] Feature drift 监控: PSI/KL/JS 区别 + alert threshold. AC: (1) PSI=Σ(a-e)·ln(a/e), 0.1 warn/0.25 critical; (2) KL 不对称无界, JS 对称 bounded; (3) 连续用 KS; (4) concept drift P(y|x) vs
-- [x] **2026-04-16** -- T-P0-452: [Meta-Cleanup] Sketch family unification: 3-axis view + terminology grounding across sketch docs. User-flagged: compact-DS content (CMS/HLL/SS/Bloom) duplicated across framework_nodes 196/197/103 + Pinterest doc 58, ea
-- [x] **2026-04-16** -- T-P0-451: [DL-Fund] DL training pitfalls 1-pager: Focal loss + BatchNorm/LayerNorm + vanishing/exploding gradients. Gap: three scattered pitfall topics consolidated. (1) Focal loss: alpha/gamma, class imbalance, when NOT to use (already
-- [x] **2026-04-16** -- T-P0-450: [DL-Fund] Optimizer family: SGD -> Momentum -> AdaGrad -> RMSProp -> Adam derivation chain. Gap: node 74 Gradient Descent Family is stub (141b). Existing study note source: data/t8_optimizers.md (port into DB). C
-- [x] **2026-04-16** -- T-P0-449: [DL-Fund] Activation functions unified: ReLU/LeakyReLU/Sigmoid/Tanh/Softmax when and why. Gap: no standalone activation-functions node. Single comparison table: {activation, range, derivative, vanishing-grad ri
-- [x] **2026-04-16** -- T-P0-448: [ML-Fund] Classical model pitches: KNN / Naive Bayes / K-Means / DBSCAN when-to-use. Gap: node 71 Clustering stub + no NB/KNN nodes. Pitch-format 1-pager: per model -> (what / assumption / when use / when 
+- [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
