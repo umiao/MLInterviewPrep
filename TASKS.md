@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for boards, visual-search result augmentation. KE-JI (restrained): pitch-only. AC: (a) seed one Pinterest company_document 'Generative Models Pitch for Pinterest' with single comparison table {GAN: adversarial/mode-collapse-risk/fast-inference; VAE: latent-space/blurry-output/fast; Diffusion: SOTA-quality/slow-but-DDIM-fixes}. (b) One paragraph per Pinterest use case. (c) DO NOT re-derive VAE ELBO or DDPM forward/reverse sampling -- cite papers instead. (d) NO new framework_node (avoid tree bloat at P2). <=1500 words. Pyramid top -- restrained. Depends on: none.
-
 #### T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost
 - **Priority**: P2
 - **Complexity**: M
@@ -114,6 +108,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 414 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
