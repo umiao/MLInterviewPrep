@@ -506,3 +506,11 @@
 - **Sanity check result**: Seed ran cleanly: `[DONE] Wrote docs/google_train_serve_skew_drill.md (22121 chars)`, `[DONE] Inserted document id=69`. StudyNoteBuilder.validate returned no warnings. Re-ran seed; got `[SKIP] Document already exists (id=69)` confirming idempotency. Verified 10 `$$` markers (= 5 FormulaBlocks, each paired) via python count. DB row verified: id=69, company_id=3, title matches, content length 22121.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-423 --status completed`
+
+## 2026-04-16 01:00 -- [T-P2-438] Remove duplicate httpx from dev optional-dependencies
+- **What I did**: Removed the duplicate `httpx==0.27.2` entry from `[project.optional-dependencies].dev` in pyproject.toml. httpx remains in `[project].dependencies` (main), so `pip install -e .[dev]` still gets it -- just once, not twice.
+- **Deliverables**: `pyproject.toml` (1-line edit: dev list went from 5 items to 4 items).
+- **Sanity check result**: Parsed pyproject.toml via tomllib: `main has httpx: True`, `dev has httpx: False`, dev list = [pytest, pytest-asyncio, ruff, pyyaml]. No other consumers of the dev extra reference httpx directly.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-438 --status completed`
+
