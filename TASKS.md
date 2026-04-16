@@ -9,37 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-470: [KG-P1-01] Create concept_links table + migration
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) and documents (company_documents).
-
-SCHEMA:
-  id INTEGER PRIMARY KEY AUTOINCREMENT
-  src_kind TEXT NOT NULL CHECK(src_kind IN ('framework_node','company_document'))
-  src_id INTEGER NOT NULL
-  dst_kind TEXT NOT NULL CHECK(dst_kind IN ('framework_node','company_document'))
-  dst_id INTEGER NOT NULL
-  relation TEXT NOT NULL CHECK(relation IN ('canonical','mentions','composed_of','prereq','follow_up','see_also'))
-  weight REAL DEFAULT 1.0
-  note TEXT
-  created_at TEXT DEFAULT (datetime('now'))
-  UNIQUE(src_kind, src_id, dst_kind, dst_id, relation)
-
-IMPLEMENTATION:
-- scripts/_migrate_add_concept_links_20260416.py (idempotent: CREATE TABLE IF NOT EXISTS + index).
-- Index on (src_kind, src_id), (dst_kind, dst_id) for both-direction lookup.
-- Verify rerun: prints [UNCHANGED] on second invocation.
-
-ACCEPTANCE CRITERIA:
-1. `sqlite3 data/mle_prep.db '.schema concept_links'` shows the table with all columns + CHECK constraints.
-2. Re-run script prints [UNCHANGED].
-3. pytest for a light smoke test that insert/select works (new test file tests/test_concept_links_table.py; skipif db missing).
-4. Commit: [KG-P1-01] concept_links table + migration
-
-NON-GOALS: No data migration yet (Phase 2+); no backend API/endpoint yet (separate task); no backfill of existing inline links.
-
 #### T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill
 - **Priority**: P0
 - **Complexity**: S
@@ -485,3 +454,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-470: [KG-P1-01] Create concept_links table + migration. Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) 

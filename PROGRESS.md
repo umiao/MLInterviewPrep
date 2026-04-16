@@ -468,3 +468,10 @@
 - **Sanity check result**: Verified via `task_db.py list` that all 14 new tasks present with correct priority/complexity/dependencies. Confirmed dependency wiring via get T-P0-473 shows depends_on=T-P0-470. Audited 合集 doc content lengths by direct DB query (Doc 19 = 124940, Doc 29 = Doc 28 = 151774 matching). Re-surveyed framework_nodes to confirm no pre-existing Diffusion or RoPE node (sole-source claim holds). Re-read QuickIndex.tsx (post-refactor) to confirm 9 family groups + Stateful DS group rendering path.
 - **Status**: [PARTIAL] -- 14 tasks durably planned in task_db, full context + rationale persisted. Execution gated on 3 user decisions: (1) KG-P2-02 second hub pick; (2) KG-VIZ-01 library pick (recommended Cytoscape); (3) whether DOCS-01 runs first alone (recommended) before the Phase 1 schema batch. Discord summary sent in 2 parts covering all 3 research streams + re-explanation of option 7.
 - **Request**: No task_db change -- tasks in active planning state awaiting user decisions.
+
+## 2026-04-16 17:05 -- [T-P0-470] KG-P1-01 concept_links table + migration
+- **What I did**: Created idempotent SQLite migration that adds the `concept_links` cross-reference table (KG Phase 1 schema foundation). Table stores directed edges between framework_nodes and company_documents with CHECK-constrained src_kind/dst_kind/relation columns, a UNIQUE constraint on the full edge tuple, and two lookup indexes (src/dst). Wrote a pytest smoke test file that verifies table existence, index presence, insert/select round-trip, CHECK enforcement on src_kind and relation, and the UNIQUE constraint.
+- **Deliverables**: scripts/_migrate_add_concept_links_20260416.py (new), tests/test_concept_links_table.py (new, 6 tests). DB state: concept_links table + ix_concept_links_src + ix_concept_links_dst live in data/mle_prep.db.
+- **Sanity check result**: Ran migration twice -- first print [DONE], second [UNCHANGED]. `sqlite3 data/mle_prep.db '.schema concept_links'` shows all columns + CHECK clauses + both indexes. All 6 pytest cases pass in 0.06s.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-470 --status completed`
