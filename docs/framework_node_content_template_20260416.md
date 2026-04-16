@@ -54,6 +54,15 @@ The biggest authoring question this template resolves. Principle: **a node is a 
 
 Operational translation: **domain verticals split, foundational horizontals consolidate**. When in doubt, ask: would an MLE specializing in the parent skill vertical already know this subtopic implicitly? If yes → drawer. If no → new node.
 
+### 2.5 Escape hatch for consolidated nodes (Q8 follow-through)
+
+The consolidation principle (§2.2, §2.4) is intentionally aggressive for pillar7 (Math/Stats) — target ~5 canonical nodes rather than ~15 granular ones. But if a specific interview genuinely demands depth that exceeds a consolidated node's always-visible budget (§3.1's 3000b) AND cannot fit a drawer tab (§4.1.1's 1.2× overflow rule), split opportunistically at that moment. Examples where this escape hatch is likely to trigger:
+- A/B-test peeking correction (if a role deep-dives beyond typical MLE scope)
+- Specific Bayesian inference procedures if a Bayesian-modeling role demands more than one MCMC variant
+- Rare estimator families (e.g., M-estimators, U-statistics) outside general MLE expectation
+
+Rule: consolidation is the default; split is the signal-triggered exception, never pre-emptive.
+
 ---
 
 ## 3. Always-Visible Section Schema (the 80% contract)
@@ -69,6 +78,7 @@ Every framework_node.description, when rendered, leads with these 5 sections **i
 - 1–3 formulas maximum, each with 1-sentence gloss.
 - If the concept is algorithmic, a ≤ 20-line pseudocode block (not full implementation — that goes in drawer).
 - Use LaTeX (`$...$` inline, `$$...$$` display).
+- **Statement of result only — no derivations.** §3.2 writes the conclusion (equation + conditions for validity in one line). Any "因为…所以…" / "by Markov..." / "because this term goes to zero..." chain belongs in drawer `derivation`. This rule prevents §3.2 and drawer.derivation from overlapping; a reader who only reads always-visible should see WHAT is true, and click `derivation` when they need WHY.
 
 ### 3.3 `## Tradeoffs & 常见误解`
 - 3–5 bulleted items.
@@ -79,6 +89,11 @@ Every framework_node.description, when rendered, leads with these 5 sections **i
 - 2–3 question framings you've actually seen (or realistically expect).
 - For each: 2–3 sentences of response skeleton.
 - Tags the company if known (e.g., `[Google L5]`, `[Pinterest Senior MLE]`).
+- **Sourcing tag required (one of three, mandatory)**. Every framing must carry one of these markers so PR review can distinguish documented interview content from speculation:
+  - `[实际来自: doc-{id} §{section}]` — the framing is attested in an existing `company_document` (paste the doc id and section heading).
+  - `[改编自: {source}]` — adapted from a named source (e.g., `[改编自: Etsy 2020 SIGIR position-bias talk]`, `[改编自: Google DNN/Key Papers Gist]`).
+  - `[预期问法: {reasoning one-liner}]` — explicitly speculative; include the reasoning (e.g., `[预期问法: Pinterest 从卡片尺寸约束出发反问 CLIP patch size]`). This tag forces the author to own the guess instead of laundering it as fact.
+- A framing missing its tag is a PR block. This rule also surfaces as a secondary signal: a node with many `[预期问法]` tags and few `[实际来自]` is under-sourced and should be deprioritized for canonical status.
 
 ### 3.5 `## Prerequisites` *(existing convention, keep)*
 - Bulleted list of prerequisite topics, with links to sibling framework_nodes when applicable.
@@ -100,6 +115,10 @@ Everything beyond the always-visible belongs in drawer tabs. **Drawer tabs are o
 | `interview_deep` | 面试深度追问 / Deeper Interview Angles | The interviewer pushed beyond §3.4's 2–3 framings | ≤ 3000b |
 | `see_also` | 相关链接 / See Also | Cross-refs: sibling framework_nodes + company-doc back-links | ≤ 1500b |
 | `history` | 历史与出处 / History & References | Seminal papers, authors, year, industry adoption | ≤ 1500b |
+
+### 4.1.1 Budget overflow as split signal
+
+A drawer tab that runs consistently **> 1.2× its §4.1 budget** (i.e., ~20% over) is treated as a signal — the subtopic wants to become its own framework_node rather than a tab. This is the operational link between drawer-budget discipline and §2 granularity rule: drawers cap the cost of progressive disclosure; when the cap binds twice on the same tab, split.
 
 ### 4.2 What does NOT belong in a drawer
 
@@ -161,7 +180,8 @@ Everything beyond the always-visible belongs in drawer tabs. **Drawer tabs are o
 
 - Render always-visible content normally in the page body.
 - Below it, a drawer component (shadcn `Collapsible` or `Accordion` already in frontend dependencies — verify) shows each `Drawer: {key}` as a collapsed tab.
-- Tabs render in the §4.1 canonical order, regardless of author's markdown order.
+- Tabs render in the §4.1 canonical order, regardless of author's markdown order. **(Note: the canonical render order is deferred to v1.1 pending Sketch-sample signal — see Revision Log.)**
+- **Parse-marker rule**: `## Drawer: {key}` headings are markdown parse markers only. The frontend drawer component MUST NOT re-render the `## Drawer: {key}` heading inside the tab content body — the tab title is already shown by the drawer UI. Double-rendering the heading inside the body is a bug. Main page body similarly must not render any content from below the first `## Drawer:` marker.
 - If no `## Drawer:` headings exist, the drawer component does not render at all (empty stub suppression).
 
 ---
@@ -190,6 +210,14 @@ Everything beyond the always-visible belongs in drawer tabs. **Drawer tabs are o
 ### 6.4 Drawer tab independence
 
 - Each drawer tab is self-contained: a reader who clicks only `code` must not need to read `derivation` first for the code to make sense. Use a 1–2 line preamble per tab if needed.
+
+### 6.5 PR description convention (migration natural queue)
+
+When a migration PR touches framework_node X, the PR description lists **adjacent non-touched nodes** under a `### Next candidates` section:
+- **Siblings** under the same pillar (same `parent_id` in framework_nodes).
+- **Nodes X references** via inline markdown links in the rewrite.
+
+This builds a natural migration queue without centralized planning — reviewers and future authors can see what's next without guessing, and "adjacent" is objective (not subjective-priority). A migration session is expected to read this list before picking its own target.
 
 ---
 
@@ -325,4 +353,17 @@ Those each need their own decision point or task.
 
 ## Revision Log
 
-- **v1 (2026-04-16)**: Initial Phase 0.5 deliverable. Responds to user review of KG design v1 + third-party reviewer critique; reframes from cross-doc graph to per-node UX contract.
+- **v1 (2026-04-16, earlier)**: Initial Phase 0.5 deliverable. Responds to user review of KG design v1 + third-party reviewer critique; reframes from cross-doc graph to per-node UX contract.
+
+- **v1.0.1 (2026-04-16, later)**: Tightening pass per second reviewer feedback. Critical changes before T-P0-241 Sketch execution:
+  - §3.2 adds **"statement-of-result only" rule** — all "because/therefore" chains belong in drawer `derivation`. Closes the §3.2↔drawer.derivation boundary ambiguity.
+  - §3.4 adds **mandatory sourcing tag** on every interview framing: `[实际来自: doc-{id} §{section}]` / `[改编自: {source}]` / `[预期问法: {reasoning}]`. Eliminates silent fabrication; missing tag is a PR block.
+  - §4.1.1 (new) — **20% budget overflow is a split signal**, wiring drawer discipline to §2 granularity.
+  - §5.3 adds **parse-marker rule** — frontend must not double-render `## Drawer: {key}` heading in tab body; main page must not render below first drawer marker.
+  - §6.5 (new) — **PR description next-candidates convention** — every migration PR lists adjacent non-touched nodes, building a natural migration queue.
+  - §2.5 (new) — **consolidation escape hatch** — pillar7 consolidation defaults to ~5 nodes but splits opportunistically when always-visible + drawer can't contain a legitimate deep-dive.
+
+- **v1.1 (planned, post-Sketch via T-P1-245)**: Deferred revisions requiring real-world signal.
+  - §2.3: Optimization (SGD/Adam/二阶) worked example + horizontal/vertical depth-override heuristic.
+  - §4.1 / §5.3: canonical drawer-tab render order (proposed: `interview_deep → variants → code → derivation → see_also → history`).
+  - Any tightening/loosening surfaced by T-P0-241 Sketch authoring experience.
