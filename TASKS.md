@@ -11,43 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Expand thin notes for LC 362 Design Hit Counter to full solution + mark completed.
-
-CURRENT STATE: leetcode_id=362, family='stateful_ds_design', is_completed=0, LENGTH(notes)=956 (too thin).
-
-PROBLEM RECAP: HitCounter with hit(timestamp) and getHits(timestamp) returning hits in past 300 seconds (sliding 5-minute window).
-
-SOLUTIONS TO COVER:
-- Solution A: queue of timestamps. hit: append. getHits: popleft while front < timestamp - 300; return len(queue). O(1) amortized hit; O(k) getHits where k = expired entries.
-- Solution B: circular buffer size 300, bucket[(ts % 300)] = (ts, count). hit: if bucket.ts == ts increment else reset (ts, 1). getHits: sum bucket.count for each of 300 buckets where ts > timestamp - 300. O(1) hit, O(300) = O(1) getHits.
-- B vs A: B is O(1) per op but fixed 300 memory; A is O(calls in window) memory and O(k) getHits which can burst. Production systems use B.
-
-IMPLEMENTATION:
-- scripts/_update_lc362_notes.py (REPLACE existing thin notes, do not append; use sentinel '<!-- LC362_NOTES_V2 -->' to detect re-run).
-- StudyNoteBuilder + Chinese + idempotent.
-
-NOTES COVER (Chinese):
-1. 题目定位: stateful_ds_design, 滑动时间窗计数 canonical 问题.
-2. 两解法对比表 (内存 / 时间 / 爆发容忍 / 是否支持任意窗口大小).
-3. 解法 A 代码 + 走查; 解法 B 代码 + 为什么 bucket=300 固定 (题目给定 window).
-4. 复杂度分析 + 为什么 B 的 O(300) 算 O(1).
-5. Follow-up:
-   (a) 并发 hit 安全 -> bucket 上加 CAS 或 shard 按 ts 哈希;
-   (b) 任意窗口大小 window_sec -> bucket 数 = window_sec, getHits 遍历全部桶;
-   (c) 超高 QPS 下 bucket 溢出 -> 按秒的 count 用 atomic int64;
-   (d) 分布式 -> Redis sliding-window-log (zset + remove-score-range).
-6. 45 秒 pitch.
-
-AC:
-1. UPDATE notes (REPLACE, not append), is_completed=1, for lcid=362.
-2. LENGTH(notes) >= 2500.
-3. Re-run prints [UNCHANGED].
-4. Commit: [T-P1-468] LC 362 Design Hit Counter: expand to full A/B comparison + follow-ups.
-
 ### P2 -- Nice to Have
 
 #### T-P2-469: [QIdx-C1] Harden LC import scripts to set family
@@ -163,6 +126,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
+- [x] **2026-04-16** -- T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes. Expand thin notes for LC 362 Design Hit Counter to full solution + mark completed.
 - [x] **2026-04-16** -- T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes. Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
