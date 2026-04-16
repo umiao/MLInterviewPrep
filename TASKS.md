@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-455: [Pinterest-RecSys] Cold-start strategies: user + item + pin bootstrap
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Gap: cold-start absent from pillar4.recommender_systems nodes (108/109/110 cover CF/content-based/deep but not cold-start). Strategies: (1) Content-based first-shot (Pinterest Pin = image+text, can embed immediately). (2) Cross-domain transfer (demographics, geo, device). (3) Meta-learning (MAML for fast adaptation). (4) Contextual bandits for explore/exploit. (5) Popular/trending baseline fallback. Pinterest-specific: fresh-pin surge from new boards, creator side cold-start. AC: (a) create new depth-2 framework_node 'Cold Start' under pillar4.recommender_systems (path pillar4.recommender_systems.cold_start). Description >=3500b. (b) Seed Pinterest company_document. <=2000 words. Pyramid mid. Depends on: none.
-
 #### T-P1-456: [ML-RecSys] Matrix factorization: SGD vs ALS + bridge from CF to embedding models
 - **Priority**: P1
 - **Complexity**: S
@@ -135,6 +129,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
+- [x] **2026-04-16** -- T-P1-455: [Pinterest-RecSys] Cold-start strategies: user + item + pin bootstrap. Gap: cold-start absent from pillar4.recommender_systems nodes (108/109/110 cover CF/content-based/deep but not cold-star
 - [x] **2026-04-16** -- T-P1-454: [Pinterest-NLP] Word2Vec/GloVe history + ViT + cross-modal attention supplement. Gap: pre-transformer embedding history missing entirely; node 164 (Vision-Language Models) covers CLIP/LLaVA shallowly b
 - [x] **2026-04-16** -- T-P1-453: [Pinterest-CV] CNN foundation 1-pager: conv mechanics + ResNet/VGG/EfficientNet + transfer learning + data aug. Gap: Pinterest is visual-content-first, but CV framework_nodes 122/123 are shallow (5733b+6231b). (1) Conv op: stride/pa
 - [x] **2026-04-16** -- T-P1-423: [Google/R1] Train-serve skew/leakage/时序 split 拷打. AC: (1) target encoding K-fold leakage + fold-out 修正; (2) 为什么 ranking 必须 time-based split; (3) feature store parity 三种 s
