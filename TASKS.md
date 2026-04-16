@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with model monitoring. (1) Bias detection: group metrics on protected attributes, equal-opportunity / demographic-parity basics. (2) Fair-aware constrained ranking (post-hoc re-rank). (3) Drift: PSI, KS, performance drift thresholds. (4) Retraining cadence: scheduled vs trigger-based. AC: seed Pinterest company_document 'Responsible AI + Monitoring Playbook'. <=2000 words. Pyramid top -- restrained. Depends on: none.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -102,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 414 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-16** -- T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook. Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with
 - [x] **2026-04-16** -- T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost. Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal)
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
