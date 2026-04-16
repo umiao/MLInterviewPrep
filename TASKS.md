@@ -13,12 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal): early fusion vs late fusion trade-off, modality dropout during training, asymmetric confidence thresholds (ship only SFW-confident content), human-in-loop rules. (2) Query expansion for recall boost WITHOUT changing ranking algo: SynSet lookup, query rewriting via small LLM, embedding-based query-to-query similarity, click-driven expansion. AC: seed ONE combined Pinterest company_document 'Pinterest SD Gap-Fill: Unsafe Multimodal + Query Expansion'. <=3000 words. Pyramid top -- restrained, design-level pitch not code. Link to Pinterest sketch doc 58 for ANN/recall context. Depends on: none.
-
 #### T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook
 - **Priority**: P2
 - **Complexity**: S
@@ -108,6 +102,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 414 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-16** -- T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost. Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal)
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
