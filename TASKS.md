@@ -9,33 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so user can sign off concept-by-concept.
-
-DELIVERABLE: docs/audits/legacy_hejiji_coverage_checklist_20260416.md with one section per doc (19, 21, 22, 27). Each concept gets:
-  - Concept title
-  - Status: COVERED / PARTIAL / UNIQUE
-  - Where it is (or isn't) in individual framework_nodes / other docs: specific IDs
-  - Proposed action: 'safe' / 'migrate to node <id>' / 'create new node'
-  - Empty checkbox: [ ] User-verified migration complete
-  - Empty checkbox: [ ] Signed off for deletion from this 合集
-
-IMPLEMENTATION:
-- scripts/audit_legacy_hejiji_coverage.py reads the 4 docs and queries framework_nodes + other company_documents.
-- Deterministic output; re-run produces identical file.
-- Use findings from prior Explore agent audit: doc 19 has 2 UNIQUE (Diffusion, RoPE); doc 21 has 4 UNIQUE (Simpson, Queueing, EM-GMM, L1-L2 proofs); doc 22 has 2 UNIQUE (LinkedIn Rec/Rank); doc 27 has 1-2 UNIQUE (Adam/RMSprop code).
-
-ACCEPTANCE CRITERIA:
-1. Output markdown file exists with 4 sections.
-2. Each section lists concepts with Status + Action + 2 checkboxes.
-3. Re-run produces identical file (deterministic).
-4. Commit: [KG-M-00] Generate legacy 合集 coverage checklist
-
-NON-GOALS: Do NOT delete anything. Do NOT auto-migrate. This task only produces the review artifact.
-
 #### T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone
 - **Priority**: P0
 - **Complexity**: M
@@ -344,6 +317,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27. FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so 
 - [x] **2026-04-16** -- T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195). Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularizatio
 - [x] **2026-04-16** -- T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node). Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authori
 - [x] **2026-04-16** -- T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes. Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into con
