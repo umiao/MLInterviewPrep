@@ -9,18 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-478: [KG-M-02] CRITICAL: Migrate Doc 19 RoPE + Long Context (sole source) to framework_node
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-470
-- **Description**: Sibling of KG-M-01. Doc 19 RoPE + Long Context section is sole source.
-
-SCOPE: Same pattern as KG-M-01 but for RoPE / long-context math (position encoding extension, base theta scaling, NTK-aware interpolation). Target pillar: likely pillar6 or pillar4 (transformer internals) -- researcher picks based on tree.
-
-ACCEPTANCE: Same 6-item AC as KG-M-01 but for RoPE content.
-
-DEPENDS ON: KG-P1-01, KG-P1-02, KG-P1-03.
-
 #### T-P0-480: [DOCS-01] Write docs/ filing convention proposal (no file moves yet)
 - **Priority**: P0
 - **Complexity**: S
@@ -293,6 +281,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-478: [KG-M-02] CRITICAL: Migrate Doc 19 RoPE + Long Context (sole source) to framework_node. Sibling of KG-M-01. Doc 19 RoPE + Long Context section is sole source.
 - [x] **2026-04-16** -- T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone. Doc 19 'Adobe MLE Prep All-in-One' contains Diffusion Models content (DDPM, DDIM, CFG, CLIP, SDE/ODE) that prior audit f
 - [x] **2026-04-16** -- T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27. FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so 
 - [x] **2026-04-16** -- T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195). Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularizatio
