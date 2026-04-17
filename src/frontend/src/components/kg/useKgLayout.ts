@@ -24,7 +24,7 @@ const BASE_OPTS: Record<string, string> = {
   "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
 };
 
-function dimensionsFor(meta: NodeMeta): { width: number; height: number } {
+export function dimensionsFor(meta: NodeMeta): { width: number; height: number } {
   const base =
     meta.kind === "pillar"
       ? LAYOUT_CONFIG.pillarNode
@@ -35,6 +35,45 @@ function dimensionsFor(meta: NodeMeta): { width: number; height: number } {
   // to preserve the layered rhythm.
   const scale = meta.kind === "leaf" ? meta.importanceScale : 1;
   return { width: base.width * scale, height: base.height * scale };
+}
+
+export type TranslateExtent = [[number, number], [number, number]];
+
+const DEFAULT_BBOX_PADDING = 300;
+
+/**
+ * Bounding box of a set of positioned React Flow nodes, padded on each side.
+ * Used to build `translateExtent` so users cannot pan into empty space.
+ * Returns a permissive default when the input is empty (no clamp).
+ */
+export function computeBBox(
+  nodes: Node[],
+  padding: number = DEFAULT_BBOX_PADDING,
+): TranslateExtent {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const n of nodes) {
+    const meta = (n.data as { meta?: NodeMeta } | undefined)?.meta;
+    if (!meta) continue;
+    const { width, height } = dimensionsFor(meta);
+    const { x, y } = n.position;
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (x + width > maxX) maxX = x + width;
+    if (y + height > maxY) maxY = y + height;
+  }
+  if (minX === Infinity) {
+    return [
+      [-Infinity, -Infinity],
+      [Infinity, Infinity],
+    ];
+  }
+  return [
+    [minX - padding, minY - padding],
+    [maxX + padding, maxY + padding],
+  ];
 }
 
 /** Sort key for pillar ordering: pillar1, pillar2, ..., pillar8, then fallbacks. */

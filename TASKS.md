@@ -9,42 +9,74 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-496: KG-UX-08: Left TreeNav panel (3-level, replaces pillar badges)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Current top-header pillar badges all call expandAll() - functionally useless. Replace with a left-side collapsible TreeNav panel (Adobe/Obsidian-style outline), 260px wide, expand/collapse chevron, 3 levels: pillar -> category -> leaf. Each entry shows: pillar color dot, title, child count badge, content-length indicator (a tiny horizontal bar showing contentLength/maxContentLength). Remove the old pillar badges row from the header. Keep Expand All / Collapse All / Search at their current positions.
+
+Files (new): src/frontend/src/components/kg/TreeNav.tsx, src/frontend/src/components/kg/TreeNav.test.tsx
+Files (edit): src/frontend/src/pages/KnowledgeGraph.tsx (layout: flex row with TreeNav left, canvas right)
+
+Acceptance:
+1. New TreeNav.tsx renders tree from model.childrenOf; independent expand/collapse per node (own local state, NOT coupled to canvas expanded state)
+2. Each row: pillar color dot | indent per depth | chevron (if has children) | title | child-count badge | contentLength mini-bar
+3. 3 levels supported: pillar / category / leaf (leaves have no chevron)
+4. Side panel has its own collapse button to shrink to 40px strip (just color dots)
+5. Pillar badges at top of KnowledgeGraph header REMOVED
+6. Unit tests: TreeNav.test.tsx covers render/expand/collapse + shows mini-bar width is proportional
+7. Build + vitest pass
+8. NOTE: click handler integration is in KG-UX-09 (this task only renders + self-expands)
+
+#### T-P0-497: KG-UX-09: TreeNav click -> expand ancestors + setCenter on canvas
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-496
+- **Description**: Wire TreeNav (KG-UX-08) to the canvas. Clicking an entry in TreeNav should: (1) setExpanded to include all ancestors of clicked id via expandToReveal (already in kgGraph.helpers), (2) setSelectedId = clicked id, (3) after layout effect resolves, rf.setCenter to the node (reuse lastActivatedRef mechanism from KG-UX-02). Leaf click additionally opens FrameworkNodeDrawer (same as canvas click).
+
+Files: src/frontend/src/pages/KnowledgeGraph.tsx (pass handleActivate-equivalent to TreeNav), src/frontend/src/components/kg/TreeNav.tsx (onSelect prop wiring)
+
+Acceptance:
+1. Click pillar in TreeNav -> canvas expands that pillar and centers it
+2. Click category in TreeNav -> auto-expands its pillar ancestor + category + centers
+3. Click leaf in TreeNav -> expands all ancestors + centers canvas + opens drawer
+4. Current zoom level preserved across setCenter
+5. TreeNav highlights the currently-selected entry (selectedId sync both ways)
+6. Build + vitest pass; add integration test: click deep leaf in TreeNav -> canvas visible set contains all its ancestors
+7. Smoke test: click "Diffusion Models" in TreeNav -> drawer opens
+
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-494: [DEBT] helixos: Replace bare python with /c/Anaconda/python.exe in settings.json (11 occurrences) + add setup_python_env.sh
+#### T-P1-498: KG-CN-01: Rewrite node descriptions to CN narration + full English terms
 - **Priority**: P1
-- **Complexity**: S
+- **Complexity**: L
 - **Depends on**: None
-- **Description**: helixos/.claude/settings.json uses bare python in all 11 hook commands. Per CLAUDE.md: Never use bare python in hook commands. The Windows Store stub (AppData/Local/Microsoft/WindowsApps/python.exe) exits with code 49, breaking all hooks silently.
+- **Description**: Unify framework_nodes.description style: Chinese narration, all technical terms in English, prefer FULL expansion (e.g., "Key-Value cache" not "KV cache" on first mention). First-occurrence format: `**English full name** (acronym, 中文译名)`, subsequent mentions use acronym alone. Applies to ALL ~130 nodes with content_length>0 that are not already >=60% Chinese. Retroactive: existing bare-acronym uses (KV/MHA/MoE/RoPE/PEFT/LoRA/etc.) must be rewritten to full-expansion-first-occurrence where missing.
 
-MLInterviewPrep already fixed this and uses /c/Anaconda/python.exe in all 11 positions.
+Deliverable: scripts/rewrite_nodes_to_cn.py (idempotent seed script, committed to git as recovery path per LESSON [2026-04-08]).
 
-Additionally, helixos is missing setup_python_env.sh in .claude/hooks/ and in the SessionStart hook section. MLInterviewPrep has this for Bash tool PATH injection.
+Script requirements:
+1. Backup data/mle_prep.db -> data/mle_prep.db.bak.YYYYMMDD_HHMMSS before any write
+2. New table framework_nodes_description_history(id PK, node_id FK, description TEXT, changed_at TIMESTAMP) - save old desc before each update
+3. Model routing: default claude-haiku-4-5; nodes with len(desc)>12000 use claude-sonnet-4-6
+4. Prompt caching: system prompt (rewrite rules - the memory feedback_content_style_cn_en.md verbatim) cached with cache_control
+5. Skip condition: if current node already >=60% Chinese character ratio AND no bare-acronym-without-expansion detected, skip
+6. Batch: process all candidates in one run; log each (id, title, old_zh_ratio, new_zh_ratio, tokens_used, model); write summary to logs/rewrite_nodes_to_cn_YYYYMMDD_HHMMSS.md
+7. Anthropic API key: from .env ANTHROPIC_API_KEY (never hardcode)
+8. Dry-run flag: --dry-run prints what would change without DB writes
 
-Actions:
-1. Replace python with /c/Anaconda/python.exe in all 11 hook command entries in helixos/.claude/settings.json
-2. Copy setup_python_env.sh from MLInterviewPrep/.claude/hooks/ to helixos/.claude/hooks/
-3. Add setup_python_env.sh as first entry in SessionStart hooks section
-
-Priority: P1 because broken hooks mean lint_check, test_check, block_dangerous all silently fail on any Windows session that hits the Store stub.
+AC:
+1. Backup file exists at expected path after run
+2. history table populated (one row per updated node)
+3. Post-run: 0 nodes with zh_ratio<0.4 AND content_length>500 (target: >=40% Chinese narration everywhere)
+4. First occurrence of each English term uses full expansion format in updated nodes
+5. Code blocks, formula ($$...$$), Markdown structure preserved verbatim
+6. Log markdown summarizes: total nodes examined, skipped, updated, total API cost
+7. Re-running script with no DB changes -> no API calls (idempotent)
+8. Smoke test: open drawer for id=191 (SQL Fundamentals), id=42 (STAR), id=192 (OOD SOLID) -> prose is Chinese, all terms are **English full name** (acronym, 中文) on first mention
+9. npm run build + backend pytest + vitest all pass (no schema-breaking migration)
 
 ### P2 -- Nice to Have
-
-#### T-P2-493: [SYNC] Propagate dual tasks.db scoping lesson (2026-04-16) from MLInterviewPrep to helixos
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: MLInterviewPrep LESSONS.md has a new lesson [2026-04-16] not yet propagated to helixos:
-
-"Dual tasks.db scoping: task_db.py adds go to cwd nearest CLAUDE.md"
-
-Summary: task_db.py resolves project root from cwd -- tasks added from root Gen_AI_Proj go into root tasks.db, not the sub-project db. autonomous_run.sh cds into sub-project, sees 0 tasks, 10 sessions no-op. Fix: always cd into sub-project before task_db.py add.
-
-Tags in source: #orchestrator #task-db #multi-repo #session-scoping #silent-failure -- all universal.
-
-Action: Append a [PROPAGATED] version of this lesson to helixos/LESSONS.md.
-
-Source: MLInterviewPrep/LESSONS.md, section [2026-04-16].
 
 ### P3 -- Stretch Goals
 
@@ -133,6 +165,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
 - [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
+- [x] **2026-04-17** -- T-P0-495: KG-UX-07: Limit pan range (translateExtent) + zoom bounds. Pan range is unlimited; user can drag canvas into empty space far outside graph bbox. Fix: compute bbox from all cached 
 - [x] **2026-04-17** -- T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts. Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.
 - [x] **2026-04-17** -- T-P0-488: KG-UX-02: Preserve focus on expand/collapse (setCenter). Clicking expand reshuffles layout and user loses focus on the clicked node. Fix: after layoutAll(), if a node was just a
 - [x] **2026-04-17** -- T-P0-487: KG-UX-01: Restore pan-drag and add Controls panel. Canvas is unpannable after zoom. Fix: panOnDrag=true, panOnScroll=false, zoomOnScroll=true. Add <Controls> (zoom in/out/

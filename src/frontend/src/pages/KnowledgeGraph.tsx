@@ -30,7 +30,7 @@ import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
 import PillarNode from "../components/kg/PillarNode";
 import CategoryNode from "../components/kg/CategoryNode";
 import LeafNode from "../components/kg/LeafNode";
-import { useKgLayout } from "../components/kg/useKgLayout";
+import { computeBBox, useKgLayout } from "../components/kg/useKgLayout";
 import {
   readUrlState,
   useSyncUrl,
@@ -376,6 +376,10 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
       ? Number(selectedId.slice(1))
       : null;
 
+  // Clamp pan range to the current graph bbox + 300px on each side so users
+  // cannot drag the canvas into pure empty space beyond the rendered nodes.
+  const translateExtent = useMemo(() => computeBBox(rfNodes), [rfNodes]);
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: KG_STYLE_OVERRIDES }} />
@@ -403,6 +407,9 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         panOnScroll={false}
         zoomOnScroll
         zoomOnDoubleClick={false}
+        translateExtent={translateExtent}
+        minZoom={0.2}
+        maxZoom={2.0}
         onNodeClick={handleNodeClick}
         proOptions={{ hideAttribution: true }}
         className="kg-canvas"

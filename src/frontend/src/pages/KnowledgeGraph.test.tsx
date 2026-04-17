@@ -25,6 +25,7 @@ import {
 import CategoryNode from "../components/kg/CategoryNode";
 import LeafNode from "../components/kg/LeafNode";
 import {
+  computeBBox,
   groupVisibleByPillar,
   pillarSortKey,
   stackLanes,
@@ -714,6 +715,59 @@ describe("swimlane: stackLanes", () => {
     // x is unchanged across re-stacks
     expect(r1.positions.get("n3")!.x).toBe(r2.positions.get("n3")!.x);
     expect(r1.positions.get("n4")!.x).toBe(r2.positions.get("n4")!.x);
+  });
+});
+
+describe("computeBBox", () => {
+  it("returns a permissive extent when no nodes are provided", () => {
+    const extent = computeBBox([]);
+    expect(extent[0][0]).toBe(-Infinity);
+    expect(extent[1][1]).toBe(Infinity);
+  });
+
+  it("pads the bbox by 300px on every side by default", () => {
+    const meta = makeCategoryMeta({ childCount: 0 });
+    const nodes = [
+      {
+        id: meta.id,
+        type: "category",
+        position: { x: 0, y: 0 },
+        data: { meta },
+      },
+      {
+        id: "n2",
+        type: "category",
+        position: { x: 500, y: 200 },
+        data: { meta: { ...meta, id: "n2", rawId: 2 } },
+      },
+    ] as unknown as Parameters<typeof computeBBox>[0];
+    const [[minX, minY], [maxX, maxY]] = computeBBox(nodes);
+    const catW = LAYOUT_CONFIG.categoryNode.width;
+    const catH = LAYOUT_CONFIG.categoryNode.height;
+    expect(minX).toBe(0 - 300);
+    expect(minY).toBe(0 - 300);
+    expect(maxX).toBe(500 + catW + 300);
+    expect(maxY).toBe(200 + catH + 300);
+  });
+
+  it("accounts for leaf importanceScale when sizing the bbox", () => {
+    const big = {
+      ...makeLeafMeta(),
+      id: "n10",
+      rawId: 10,
+      importanceScale: 1.5,
+    };
+    const nodes = [
+      {
+        id: big.id,
+        type: "leaf",
+        position: { x: 100, y: 100 },
+        data: { meta: big },
+      },
+    ] as unknown as Parameters<typeof computeBBox>[0];
+    const [, [maxX, maxY]] = computeBBox(nodes, 0);
+    expect(maxX).toBe(100 + LAYOUT_CONFIG.leafNode.width * 1.5);
+    expect(maxY).toBe(100 + LAYOUT_CONFIG.leafNode.height * 1.5);
   });
 });
 
