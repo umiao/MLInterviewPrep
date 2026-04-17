@@ -369,3 +369,9 @@
 - **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. Interaction model now clean: left-click = node only, middle/right = pan, scroll = zoom.
 - **Status**: [PARTIAL] — fix committed, awaiting user browser confirmation.
 - **Request**: No task_db change — adhoc hotfix continuation (hotfixes 1-4 for KG VIZ jitter).
+## 2026-04-17 08:15 -- [KG-VIZ-hotfix5] Cursor flicker + pan control + layout overlap fix
+- **What I did**: User reported 3 remaining issues: (1) hover cursor still flickering between grab/pointer — fixed with CSS overrides forcing grab on pane, pointer on nodes; (2) can't drag empty space to pan — reverted panOnDrag to true (left-drag on canvas = pan, nodesDraggable=false prevents conflict with node click); (3) expanding pillars causes subtree overlap — switched from incremental sub-tree layout to full ELK re-layout on every expand/collapse (<200 nodes = <200ms, eliminates all overlap).
+- **Deliverables**: KnowledgeGraph.tsx modified (+15/-29 lines), commit f554ca5.
+- **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. Interaction model: left-drag canvas = pan, left-click node = activate, scroll = zoom.
+- **Status**: [PARTIAL] — fix committed, awaiting user browser confirmation of all 3 fixes.
+- **Request**: No task_db change — adhoc hotfix continuation (hotfix 5 of 5 for KG VIZ jitter series).
