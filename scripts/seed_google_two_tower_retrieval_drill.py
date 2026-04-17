@@ -13,7 +13,7 @@ Covers T-P0-419 AC:
 
 Goes beyond staging-11 InfoNCE flashcard (which covers the loss in
 isolation) into system-level concerns a Google L5/L6 phone-screen will
-press on. Ref: docs/doordash_ml_domain_retrieval.md section 2.
+press on. Ref: docs/company/doordash/ml_domain_retrieval.md section 2.
 """
 
 from __future__ import annotations

@@ -2,7 +2,7 @@
 
 Adds: (1) New LC section (84, 392, 3229, 1526, 1564, 1580, 1851),
 (2) Custom Coding section with titles, (3) System Design section linking
-to docs/pinterest/system_design_*.md, (4) BQ Question Map link,
+to docs/company/pinterest/system_design_*.md, (4) BQ Question Map link,
 (5) cross-links LC <-> SD.
 """
 from __future__ import annotations
@@ -63,7 +63,7 @@ live under `problems.notes` in the problems DB; search by title.
 
 ## System Design (SD) Modules
 
-Each Pinterest-flavored SD write-up lives in `docs/pinterest/`. These are
+Each Pinterest-flavored SD write-up lives in `docs/company/pinterest/`. These are
 multi-section documents with: problem framing, metrics, data/feature, model
 architecture, training, serving, online eval, failure modes.
 

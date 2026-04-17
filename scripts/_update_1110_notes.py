@@ -3,7 +3,7 @@ import sqlite3
 
 NOTES = r'''## LC 1110 - Delete Nodes And Return Forest (DFS + "is_root" Flag)
 
-> Pinterest must-do list. See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list. See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### Problem Recap
 Given a binary tree and a `to_delete` list of values. Delete those nodes. The remaining nodes form a forest. Return the list of roots of each tree in the forest (each unique tree listed once, root order doesn't matter).

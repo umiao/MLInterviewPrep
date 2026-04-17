@@ -60,7 +60,7 @@ def build_hub_doc() -> StudyNoteBuilder:
         "(miss is catastrophic -- high FN cost) and Google Ads quality filtering "
         "(false block is catastrophic -- high FP cost).",
         "Scope note: calibration techniques (Platt / Isotonic / Temperature) are referenced but "
-        "not derived here -- see `docs/google_calibration_drill.md` for the math. "
+        "not derived here -- see `docs/company/google/calibration_drill.md` for the math. "
         "This doc focuses on the selection and threshold layer that sits on top of calibrated scores.",
     ])
 
@@ -157,7 +157,7 @@ def build_hub_doc() -> StudyNoteBuilder:
         "the catch-net of downstream human review and advertiser-level reputation scores.",
         "Cost ratio inverts to C_FP / C_FN ~ 20:1 to 50:1. The EC-minimizing threshold sits HIGH -- "
         "err on letting the ad run, catch the bad ones via a second-pass reviewer.",
-        "Calibration is now load-bearing (see `docs/google_calibration_drill.md`): bid = value * P(conversion), "
+        "Calibration is now load-bearing (see `docs/company/google/calibration_drill.md`): bid = value * P(conversion), "
         "and a miscalibrated policy score that shifts P by factor k shifts CPA by factor 1/k even when ROC-AUC is flat. "
         "Temperature scaling on the policy model is standard before the threshold is applied.",
         "Concrete lever mix:",

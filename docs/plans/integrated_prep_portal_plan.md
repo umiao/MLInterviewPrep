@@ -24,7 +24,7 @@
 当前 `/companies/:id/prep` 只展示 `company_documents` 表里的 markdown，无法看到：
 - 最近种入 `framework_nodes` 的 ML 理论/SD 笔记（5 个 Google 新节点）
 - 最近加入 `problems` 表的自定义题（7 个 Google 新题 + 改写的 LC 扩充）
-- 磁盘上的 md 文件（如 `docs/google_2026-04-17_prep.md`、`docs/google_dnn_papers_gist.md`）
+- 磁盘上的 md 文件（如 `docs/company/google/2026-04-17_prep.md`、`docs/company/google/dnn_papers_gist.md`）
 - `bq_improved_stories.md` 里的 `[google-g&l]` section
 
 Google 面试 3 天后开考，必须在此之前让 Google 的 prep 页面能一站式看到所有相关内容。
@@ -378,7 +378,7 @@ Response:
 **目标**：用 T-P1-213 的 `sync_docs_to_db.py`（已落地）把 3 份磁盘 md 入库。
 
 **AC**
-1. `docs/google_2026-04-17_prep.md` + `docs/google_dnn_papers_gist.md` 头部加 YAML frontmatter:
+1. `docs/company/google/2026-04-17_prep.md` + `docs/company/google/dnn_papers_gist.md` 头部加 YAML frontmatter:
    ```yaml
    ---
    target_table: company_documents
@@ -386,7 +386,7 @@ Response:
    source_type: prep_note
    ---
    ```
-2. `docs/bq_improved_stories.md` 的 `[google-g&l]` section 单独拆到 `docs/google_bq_polished_stories.md` + frontmatter（保留原文件不变以免影响通用 BQ 页）
+2. `docs/bq_improved_stories.md` 的 `[google-g&l]` section 单独拆到 `docs/company/google/bq_polished_stories.md` + frontmatter（保留原文件不变以免影响通用 BQ 页）
 3. 运行 `sync_docs_to_db.py --apply` 创建 3 条新 company_documents 行
 4. 验证：`/api/companies/3/documents` 列表出现 3 个新 doc（或更新了现有）
 5. 再次运行 sync 脚本：0 change（幂等）
@@ -433,7 +433,7 @@ Response:
 **目标**：写一篇叙事 hub doc 作为 prep 页顶部渲染入口。
 
 **AC**
-1. 新建 `docs/google_2026-04-17_prep_hub.md`（frontmatter `kind: hub_doc`, `company_id: 3`）
+1. 新建 `docs/company/google/2026-04-17_prep_hub.md`（frontmatter `kind: hub_doc`, `company_id: 3`）
 2. 内容结构：
    - 顶部：日程 + 3 天倒计时
    - Round 1 ML Basics：关键话题清单 + 链接到 framework_node id 195/196/197/198/193

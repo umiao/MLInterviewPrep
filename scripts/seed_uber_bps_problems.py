@@ -799,7 +799,7 @@ def step3_create_interview_event(conn: sqlite3.Connection) -> int:
                     "Platform: HackerRank with screen share.\n"
                     "Content: 1-2 coding problems + D&A project discussion + ML fundamentals.\n"
                     "Problem patterns: BFS/DFS, Union Find, Binary Search, DP, OOD.\n"
-                    "See docs/uber_phone_screen_prep.md for full prep materials.\n"
+                    "See docs/company/uber/phone_screen_prep.md for full prep materials.\n"
                     "19 LC problems + 25 custom problems seeded from 1p3a reports."
                 ),
                 60,
@@ -822,7 +822,7 @@ def step3_create_interview_event(conn: sqlite3.Connection) -> int:
                     "Platform: HackerRank with screen share.\n"
                     "Content: 1-2 coding problems + D&A project discussion + ML fundamentals.\n"
                     "Problem patterns: BFS/DFS, Union Find, Binary Search, DP, OOD.\n"
-                    "See docs/uber_phone_screen_prep.md for full prep materials.\n"
+                    "See docs/company/uber/phone_screen_prep.md for full prep materials.\n"
                     "19 LC problems + 25 custom problems seeded from 1p3a reports."
                 ),
                 datetime(2026, 4, 7, 10, 0, 0).isoformat(),

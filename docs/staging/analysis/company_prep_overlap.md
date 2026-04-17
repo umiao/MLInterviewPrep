@@ -17,7 +17,7 @@
 | `linkedin_prob_notes_content.md` | 35 KB | Weighted prob sampling (L29), RV mean/var (L108), Simpson's paradox (L193), Queueing (L286), Distributions (L333), Class imbalance (L429), Large-dataset sampling (L484), Tree overfitting (L530), L1/L2 bias (L575), RF theory (L625), MLE / GMM (L689), Reservoir sampling (L817), Biased coin → uniform (L895), Linear ↔ logistic equivalence (L969) |
 | `linkedin_sd_notes_content.md` | 49 KB | Typeahead (L26), Short-video reco (L96), Metrics monitoring (L180), Job scheduler (L278), Single-machine KV store (L367), InMail LLM personalization (L462), Top-K search words (L565), Ranking system (L639), isMalicious API (L699), LinkedIn Skills mining (L775), Inverted-doc search (L853), SD interview strategy (L956) |
 
-### Uber (`MLInterviewPrep/docs/uber_bps_*.md`)
+### Uber (`MLInterviewPrep/docs/company/uber/bps_*.md`)
 | File | Size | Primary sections |
 |---|---|---|
 | `uber_bps_custom_solutions.md` | 78 KB | 25 custom coding problems (L41+): purchase opt, rider-connection union-find, elevator binary search, server throughput heap, cart pricing, circular-array jump, robot grid, monotonic-stack discount, parking-lot OOD, 2-D BFS grid, etc. |

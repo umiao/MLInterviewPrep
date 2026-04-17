@@ -9,7 +9,7 @@ DB_PATH = "data/mle_prep.db"
 
 NOTES = r"""## LC 84 - Largest Rectangle in Histogram (单调栈 / 分治)
 
-> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目回顾
 给定 `heights: list[int]`，每根柱子宽度为 1，求直方图中所能围出的最大矩形面积。

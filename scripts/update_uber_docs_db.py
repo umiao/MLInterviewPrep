@@ -13,13 +13,13 @@ DB_PATH = "data/mle_prep.db"
 
 # Mapping: markdown file path -> DB document ID
 FILE_TO_DOC = {
-    "docs/uber_bps_mock_sets.md": 35,
-    "docs/uber_phone_screen_prep.md": 3,
-    "docs/uber_bps_knn_ml_fundamentals.md": 34,
-    "docs/uber_bps_pattern_cheatsheet.md": 32,
-    "docs/uber_bps_lc_solutions.md": 30,
-    "docs/uber_bps_design_architecture.md": 33,
-    "docs/uber_bps_custom_solutions.md": 31,
+    "docs/company/uber/bps_mock_sets.md": 35,
+    "docs/company/uber/phone_screen_prep.md": 3,
+    "docs/company/uber/bps_knn_ml_fundamentals.md": 34,
+    "docs/company/uber/bps_pattern_cheatsheet.md": 32,
+    "docs/company/uber/bps_lc_solutions.md": 30,
+    "docs/company/uber/bps_design_architecture.md": 33,
+    "docs/company/uber/bps_custom_solutions.md": 31,
 }
 
 

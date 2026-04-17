@@ -4,13 +4,13 @@ T-P1-394 deliverable. Idempotent: creates problem row if missing, tags Pinterest
 """
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 DB_PATH = "data/mle_prep.db"
 
 NOTES = r"""## LC 1564 - Put Boxes Into Warehouse I (前缀最小 + 贪心)
 
-> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目回顾
 给定两个数组：
@@ -174,7 +174,7 @@ def main() -> None:
                 json.dumps(["Array", "Greedy", "Sorting"]),
                 "Greedy",
                 json.dumps(["Pinterest"]),
-                datetime.now(timezone.utc).isoformat(),
+                datetime.now(UTC).isoformat(),
                 NOTES,
             ),
         )

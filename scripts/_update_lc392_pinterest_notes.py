@@ -9,7 +9,7 @@ DB_PATH = "data/mle_prep.db"
 
 NOTES = r"""## LC 392 - Is Subsequence (双指针 / 多查询预处理)
 
-> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目回顾
 给定字符串 `s` 与 `t`，判断 `s` 是否为 `t` 的子序列（保持相对顺序，允许中间跳过任意字符）。`len(s) <= 100`, `len(t) <= 10^4`。

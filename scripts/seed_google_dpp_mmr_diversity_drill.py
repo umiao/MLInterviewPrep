@@ -14,8 +14,8 @@ Covers T-P0-420 AC:
      serving. They can and should coexist. Interviewers press on this.
  (5) Etsy GMB diversity story: 'bidding reranker maxes click-weighted GMB'
      trap (relevance collapse onto a few sellers), and the two-knob fix.
-     Ref: docs/doordash_ml_domain_ranking.md section 5; docs/doordash_ml_domain_search.md
-     section 6.2-6.3; docs/pinterest/system_design_pin_ranking.md.
+     Ref: docs/company/doordash/ml_domain_ranking.md section 5; docs/company/doordash/ml_domain_search.md
+     section 6.2-6.3; docs/company/pinterest/system_design_pin_ranking.md.
 
 Staging context: pillar-5 / doordash MO drill covers scalarization + MGDA +
 uncertainty weighting but does NOT cover slate-level diversity. Google R1 for

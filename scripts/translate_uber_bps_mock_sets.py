@@ -15,7 +15,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 DB_PATH = "data/mle_prep.db"
 DOC_ID = 35
-MD_PATH = "docs/uber_bps_mock_sets.md"
+MD_PATH = "docs/company/uber/bps_mock_sets.md"
 
 CHINESE_CONTENT = r"""# Uber BPS -- Timed Mock Interview Problem Sets（限时模拟面试题组）
 

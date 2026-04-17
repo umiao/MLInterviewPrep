@@ -50,31 +50,6 @@ ACCEPTANCE CRITERIA:
 
 NON-GOALS: Do NOT touch doc 57 (Staging 13 Flashcards -- already Chinese); do NOT auto-generate via LLM prompt chain without diff review.
 
-#### T-P1-481: [DOCS-02] Migrate top-level company prep files to docs/company/<slug>/
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Per proposed convention (DOCS-01), move 34 top-level company prep files into docs/company/<slug>/ subdirs.
-
-SCOPE (verify count via `ls docs/*_prep.md docs/google_*.md docs/uber_*.md docs/doordash_*.md docs/slack_*.md`):
-- Create docs/company/google/, docs/company/uber/, docs/company/doordash/, docs/company/slack/, docs/company/linkedin/, docs/company/adobe/ (if any corresponding files exist).
-- docs/company/pinterest/ already exists -- consolidate any pinterest_* top-level files into it.
-- git mv (preserves history) each file to its slug dir.
-- Filename convention: strip company prefix ('google_staging_13_flashcards.md' becomes 'staging_13_flashcards.md' inside docs/company/google/).
-
-IMPLEMENTATION:
-- scripts/migrate_docs_company_subdirs.py that builds the move map and executes `git mv` via subprocess (or just moves files and user stages + commits).
-- Update any code that references these paths (grep 'docs/google_' 'docs/uber_' etc in scripts/ and src/).
-
-ACCEPTANCE CRITERIA:
-1. docs/company/<slug>/ dirs exist with migrated files.
-2. No top-level docs/*_prep.md / docs/google_*.md etc files remain (except symlinks if needed during transition).
-3. Any script/seed referencing the old path is updated.
-4. pytest + npm run build still pass.
-5. Commit: [DOCS-02] Migrate company prep to docs/company/<slug>/
-
-DEPENDS ON: DOCS-01 (convention doc must exist first for reference).
-
 #### T-P1-483: [KG-VIZ-01] /kg visualization POC: Cytoscape.js + dagre (user-picked)
 - **Priority**: P1
 - **Complexity**: M
@@ -215,3 +190,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P1-482: [DOCS-03] Move intermediate / generated / audits / synced into docs/staging/. Per DOCS-01 convention, move 274 generated system design fragments + audits/ + synced/ + analysis/ into docs/staging/ wi
+- [x] **2026-04-16** -- T-P1-481: [DOCS-02] Migrate top-level company prep files to docs/company/<slug>/. Per proposed convention (DOCS-01), move 34 top-level company prep files into docs/company/<slug>/ subdirs.

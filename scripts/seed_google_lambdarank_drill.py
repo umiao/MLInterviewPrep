@@ -6,7 +6,7 @@ Covers the 4-point AC from T-P0-415:
 (3) Pointwise BCE / pairwise / listwise (ListNet softmax) when-to-use matrix
 (4) Sale NDCG -> GMB bidding story hook (eBay Ranking-as-Allocation)
 
-Reference: docs/prep_learning_to_rank.md, docs/doordash_ml_domain_ranking.md section 4.
+Reference: docs/prep_learning_to_rank.md, docs/company/doordash/ml_domain_ranking.md section 4.
 """
 
 from __future__ import annotations

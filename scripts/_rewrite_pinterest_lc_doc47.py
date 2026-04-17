@@ -84,7 +84,7 @@ Onsite 报告中无直接 LC 映射的题目；完整中文解法在 `problems.n
 
 ## System Design 模块
 
-每个 Pinterest 风格 SD 写作在 `docs/pinterest/`；含问题 framing / metrics / data / model / training / serving / online eval / failure modes。
+每个 Pinterest 风格 SD 写作在 `docs/company/pinterest/`；含问题 framing / metrics / data / model / training / serving / online eval / failure modes。
 
 | # | Topic | Link | 关联 LC |
 |---|-------|------|---------|

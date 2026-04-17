@@ -23,7 +23,7 @@ Two classifiers arrive on your desk. Model A has AUC 0.812, model B has AUC 0.80
 
 This doc gives a 4-step rubric for that decision, then walks through two concrete cases that sit on opposite ends of the cost spectrum: Pinterest unsafe-content filtering (miss is catastrophic -- high **FN** cost) and Google Ads quality filtering (false block is catastrophic -- high **FP** cost).
 
-Scope note: calibration techniques (Platt / Isotonic / Temperature) are referenced but not derived here -- see `docs/google_calibration_drill.md` for the math. This doc focuses on the selection and threshold layer that sits on top of calibrated scores.
+Scope note: calibration techniques (Platt / Isotonic / Temperature) are referenced but not derived here -- see `docs/company/google/calibration_drill.md` for the math. This doc focuses on the selection and threshold layer that sits on top of calibrated scores.
 
 ## 1. Four-Step Decision Rubric
 
@@ -101,7 +101,7 @@ Cost asymmetry runs the other way vs. Pinterest (figures in USD):
 
 Cost ratio inverts to C_FP / C_FN ~ 20:1 to 50:1. The EC-minimizing threshold sits HIGH -- err on letting the ad run, catch the bad ones via a second-pass reviewer.
 
-Calibration is now load-bearing (see `docs/google_calibration_drill.md`): bid = value * P(conversion), and a miscalibrated policy score that shifts P by factor k shifts CPA by factor 1/k even when ROC-AUC is flat. Temperature scaling on the policy model is standard before the threshold is applied.
+Calibration is now load-bearing (see `docs/company/google/calibration_drill.md`): bid = value * P(conversion), and a miscalibrated policy score that shifts P by factor k shifts CPA by factor 1/k even when ROC-AUC is flat. Temperature scaling on the policy model is standard before the threshold is applied.
 
 Concrete lever mix:
 

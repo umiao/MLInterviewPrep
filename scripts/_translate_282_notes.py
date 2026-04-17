@@ -3,7 +3,7 @@ import sqlite3
 
 NOTES = r'''## LC 282 - Expression Add Operators (Backtracking + `prev` Trick)
 
-> Pinterest must-do list. See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list. See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目
 给定数字字符串 `num` 和目标值 `T`，在数字之间插入 `+`、`-`、`*`（不允许一元符号、不允许括号），使表达式的求值等于 `T`。返回所有满足条件的表达式。数字不能有前导零（除 `"0"` 本身外）。

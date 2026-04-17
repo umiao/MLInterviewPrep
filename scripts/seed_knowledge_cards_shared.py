@@ -115,7 +115,7 @@ $$
         "title": "偏差-方差分解 (Bias-Variance Tradeoff)",
         "tags": ["ml-theory", "generalization", "model-selection"],
         "source_company": "Uber",
-        "source_file": "docs/uber_bps_knn_ml_fundamentals.md",
+        "source_file": "docs/company/uber/bps_knn_ml_fundamentals.md",
         "source_line_start": 405,
         "source_line_end": 448,
         "canonical_body": r"""## 分解公式
@@ -190,7 +190,7 @@ OVERLAYS = [
 - KNN 无显式参数不谈 L1/L2，但会问"距离度量的尺度正则"——特征缩放即隐式正则。
 - 对 CTR / 定价模型会问："在有大量稀疏 cross feature 时选 L1 还是 Elastic Net？" 答：Elastic Net，原因是相关特征组应一起选/弃。
 - 追问常与 bias-variance 串联：`λ ↑ → variance ↓ / bias ↑`。""",
-        "source_file": "docs/uber_bps_knn_ml_fundamentals.md",
+        "source_file": "docs/company/uber/bps_knn_ml_fundamentals.md",
         "source_line_start": 449,
         "source_line_end": 498,
     },
@@ -203,7 +203,7 @@ OVERLAYS = [
 - 要求口头说出分解公式的三项以及 KNN 中 $k$ 对应的 bias/variance 走向。
 - 常与 cross-validation（knn_ml:475）串联："如何用 CV 找到 bias-variance sweet spot？"
 - 会把它接到 ranking / CTR 场景："线上 AUC 抖动大是 variance 问题吗？" 答：多半是样本量 + 特征稳定性，不一定是模型 variance。""",
-        "source_file": "docs/uber_bps_knn_ml_fundamentals.md",
+        "source_file": "docs/company/uber/bps_knn_ml_fundamentals.md",
         "source_line_start": 405,
         "source_line_end": 474,
     },

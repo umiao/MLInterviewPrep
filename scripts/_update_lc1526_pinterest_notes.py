@@ -9,7 +9,7 @@ DB_PATH = "data/mle_prep.db"
 
 NOTES = r"""## LC 1526 - Minimum Number of Increments on Subarrays to Form a Target Array (差分贪心 / 上升沿计数)
 
-> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目回顾
 给定长度为 n 的非负数组 `target`。从全 0 数组出发，每次操作选一个**子数组** `[l..r]`，把其中**每个元素 +1**。问至少多少次操作才能得到 `target`。`1 <= n <= 1e5`，`1 <= target[i] <= 1e5`。

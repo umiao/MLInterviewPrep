@@ -3,7 +3,7 @@ import sqlite3
 
 NOTES = r'''## LC 1244 - Design A Leaderboard (nlargest vs Lazy Heap)
 
-> Pinterest must-do 列表。见 [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md)。
+> Pinterest must-do 列表。见 [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md)。
 
 ### 题意回顾
 设计一个 `Leaderboard`，支持：

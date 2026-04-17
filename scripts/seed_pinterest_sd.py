@@ -1,6 +1,6 @@
 """Seed Pinterest system-design markdown into DB.
 
-Reads 7 `docs/pinterest/system_design_*.md` files and upserts them into
+Reads 7 `docs/company/pinterest/system_design_*.md` files and upserts them into
 the `system_designs` table with slugs `pinterest-*`. Also seeds 3 non-SD
 markdown files (bq_question_map, lc_investigation_restaurant_intervals,
 uber_phone_screen_prep) as rows in `company_documents`.
@@ -16,7 +16,7 @@ import argparse
 import re
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -54,7 +54,7 @@ VERBAL_KEYS = ("timing", "cheat sheet", "45-min", "45 min", "时间分配")
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def split_sections(md: str) -> tuple[str, list[tuple[str, str]]]:
@@ -163,7 +163,7 @@ def upsert_sd(cur: sqlite3.Cursor, slug: str, title: str, fields: dict[str, str 
         return f"updated id={existing[0]} slug={slug}"
     payload["created_at"] = now
     cols = ", ".join(payload.keys())
-    placeholders = ", ".join(f":{k}" for k in payload.keys())
+    placeholders = ", ".join(f":{k}" for k in payload)
     if dry:
         return f"INSERT slug={slug}"
     cur.execute(
@@ -217,7 +217,7 @@ def main() -> int:
 
     # Seed system_designs.
     for i, (stem, slug) in enumerate(SD_FILES):
-        src = DOCS / "pinterest" / f"{stem}.md"
+        src = DOCS / "company" / "pinterest" / f"{stem}.md"
         if not src.exists():
             print(f"WARN: missing {src}", file=sys.stderr)
             continue

@@ -99,7 +99,7 @@ Both libraries implement gradient boosting and converge to similar accuracy on m
 
 ## 5. Pointers (Avoid Re-Deriving)
 
-- **Gradient boosting math + ranking-specific application**: see `docs/google_lambdamart_drill.md` (DB doc 60). RankNet / LambdaRank pseudo-gradients plug into XGB (`rank:ndcg`) and LGB (`lambdarank`); this one-pager intentionally does not re-derive the loss math.
+- **Gradient boosting math + ranking-specific application**: see `docs/company/google/lambdamart_drill.md` (DB doc 60). RankNet / LambdaRank pseudo-gradients plug into XGB (`rank:ndcg`) and LGB (`lambdarank`); this one-pager intentionally does not re-derive the loss math.
 
 - **Bias-variance framing for bagging vs boosting**: framework_node 67.
 

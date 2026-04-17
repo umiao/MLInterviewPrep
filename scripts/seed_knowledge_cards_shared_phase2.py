@@ -166,7 +166,7 @@ $$
         "title": "分类评估指标 (Precision / Recall / F1 / AUC / PR-AUC)",
         "tags": ["evaluation", "ml-theory", "classification"],
         "source_company": "Uber",
-        "source_file": "docs/uber_bps_knn_ml_fundamentals.md",
+        "source_file": "docs/company/uber/bps_knn_ml_fundamentals.md",
         "source_line_start": 499,
         "source_line_end": 538,
         "canonical_body": r"""## 混淆矩阵与基本定义
@@ -371,7 +371,7 @@ $$
         "title": "特征工程与尺度归一化",
         "tags": ["feature-engineering", "preprocessing", "ml-engineering"],
         "source_company": "Uber",
-        "source_file": "docs/uber_bps_knn_ml_fundamentals.md",
+        "source_file": "docs/company/uber/bps_knn_ml_fundamentals.md",
         "source_line_start": 158,
         "source_line_end": 613,
         "canonical_body": r"""## 为什么特征工程仍重要
@@ -879,7 +879,7 @@ OVERLAYS = [
 - LR 仍是 CTR baseline，常与 FM / DeepFM 同时作为 ensemble 的一员；面试会问"何时 LR 足够"（特征稀疏高维 + 线性可分）。
 - 与 KNN 对比：KNN 无参数、依赖距离；LR 有全局参数、可用 L2 正则和 calibration。
 - 常被引申到"如何在线更新 LR"——FTRL-Proximal 算法（Google 2013）。""",
-        "source_file": "docs/uber_bps_knn_ml_fundamentals.md",
+        "source_file": "docs/company/uber/bps_knn_ml_fundamentals.md",
         "source_line_start": 354,
         "source_line_end": 404,
     },
@@ -904,7 +904,7 @@ OVERLAYS = [
 - 停车场 OOD (custom:1473) 的"最近离开车位"策略其实是 LRU 变体；需要同时支持按车位号 / 按到达时间两种查询。
 - 解法：HashMap<SpotId, Node> + 双向链表（按到达时间排序）+ 按车型分桶。
 - Cheatsheet:502 把 OOD 归入"组合容器"类题型——考察数据结构选型能力而非算法难度。""",
-        "source_file": "docs/uber_bps_custom_solutions.md",
+        "source_file": "docs/company/uber/bps_custom_solutions.md",
         "source_line_start": 1473,
         "source_line_end": 1560,
     },
@@ -916,7 +916,7 @@ OVERLAYS = [
         "overlay_body": r"""Uber pattern cheatsheet 把 DFS/回溯列为独立模式：
 - cheatsheet:87 给出 DFS 模板（visited + 回溯）与 union-find 的对比速查：检测无向图连通性用 UF；检测有向图环用 DFS 三色法。
 - 自定义题 (custom) 常把 DAG 嵌入业务场景（司机调度依赖），需要把业务名词映射回"图 + 拓扑排序"。""",
-        "source_file": "docs/uber_bps_pattern_cheatsheet.md",
+        "source_file": "docs/company/uber/bps_pattern_cheatsheet.md",
         "source_line_start": 87,
         "source_line_end": 179,
     },
@@ -930,7 +930,7 @@ OVERLAYS = [
 - 用拉格朗日乘子把约束转为 score 调整：$\text{score}' = \text{score} - \lambda \cdot \text{cost}$。
 - 线上用对偶反馈调 $\lambda$（Proportional-Integral 控制器），保证日度预算 converge。
 - 与 LinkedIn 广告排序 (sd:462) 的差异：Uber 的 supply 约束是**即时的**（司机此刻在哪），feed ranking 约束更多是 *slot-level diversity*。""",
-        "source_file": "docs/uber_bps_design_architecture.md",
+        "source_file": "docs/company/uber/bps_design_architecture.md",
         "source_line_start": 59,
         "source_line_end": 165,
     },
@@ -955,7 +955,7 @@ OVERLAYS = [
         "overlay_body": r"""Uber cheatsheet:332 把调度抽象为贪心问题：
 - "N 个任务分配到 K 个 worker，最大化完成数" 常用贪心 + 堆 (cheatsheet:356)。
 - custom 题里"server throughput heap"是 rate limit 的变体：给定时序请求，判断当前秒是否超限——滑窗队列或最小堆。""",
-        "source_file": "docs/uber_bps_pattern_cheatsheet.md",
+        "source_file": "docs/company/uber/bps_pattern_cheatsheet.md",
         "source_line_start": 332,
         "source_line_end": 441,
     },
@@ -968,7 +968,7 @@ OVERLAYS = [
 - 实时 top-K 活跃司机区域：每分钟聚合订单数，维护 size-K 小顶堆。
 - 分布式版本：各 shard 本地 top-K，再归并。
 - 问"如果 K 也很大呢？"答：切换到近似算法 (Count-Min + Misra-Gries)。""",
-        "source_file": "docs/uber_bps_pattern_cheatsheet.md",
+        "source_file": "docs/company/uber/bps_pattern_cheatsheet.md",
         "source_line_start": 356,
         "source_line_end": 395,
     },

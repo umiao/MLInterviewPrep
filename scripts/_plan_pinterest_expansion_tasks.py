@@ -2,7 +2,6 @@
 import json
 import subprocess
 import sys
-from pathlib import Path
 
 TASKS = [
     # --- New LC problems: add + write Chinese notes ---
@@ -187,7 +186,7 @@ TASKS = [
             "(3) online metrics (CTR, repin-rate, session engagement), "
             "(4) infra (Faiss/ScaNN, feature stores, training pipeline), "
             "(5) cold-start + freshness. "
-            "Chinese markdown docs/pinterest/system_design_pins_search.md."
+            "Chinese markdown docs/company/pinterest/system_design_pins_search.md."
         ),
     },
     {
@@ -202,7 +201,7 @@ TASKS = [
             "(4) delivery constraints (frequency cap, quiet hours, channel push/email/in-app), "
             "(5) offline metrics (open-rate AUC, long-term retention), "
             "(6) engagement-vs-annoyance tradeoffs. "
-            "Chinese markdown docs/pinterest/system_design_notification_reco.md."
+            "Chinese markdown docs/company/pinterest/system_design_notification_reco.md."
         ),
     },
     {
@@ -216,7 +215,7 @@ TASKS = [
             "(3) model family (MMOE/wide-and-deep/transformer), "
             "(4) multi-objective (engagement+diversity+long-term), "
             "(5) serving constraints, (6) metric ladder. "
-            "Chinese markdown docs/pinterest/system_design_pin_ranking.md."
+            "Chinese markdown docs/company/pinterest/system_design_pin_ranking.md."
         ),
     },
     {
@@ -232,7 +231,7 @@ TASKS = [
             "(4) calibration (Platt/isotonic), "
             "(5) serving (model server, feature store, latency budget), "
             "(6) online metrics (NE, LogLoss, calibration error). "
-            "Chinese markdown docs/pinterest/system_design_ad_ctr.md."
+            "Chinese markdown docs/company/pinterest/system_design_ad_ctr.md."
         ),
     },
     {
@@ -247,7 +246,7 @@ TASKS = [
             "(3) training pipeline (streaming vs batch), "
             "(4) serving (ANN index, freshness, dimension), "
             "(5) downstream uses (candidate gen, ranking features, similar-pins). "
-            "Chinese markdown docs/pinterest/system_design_embeddings.md."
+            "Chinese markdown docs/company/pinterest/system_design_embeddings.md."
         ),
     },
     {
@@ -263,7 +262,7 @@ TASKS = [
             "(4) fan-out (Kafka, backpressure, flow control), "
             "(5) monitoring (lag, error-rate, RPO/RTO), "
             "(6) tradeoffs: sync-vs-async, exactly-once-vs-at-least-once. "
-            "Chinese markdown docs/pinterest/system_design_catalog_bulk_update.md."
+            "Chinese markdown docs/company/pinterest/system_design_catalog_bulk_update.md."
         ),
     },
     {
@@ -279,7 +278,7 @@ TASKS = [
             "(4) grounding (pins match intent), "
             "(5) safety/moderation, "
             "(6) evaluation (relevance + conversation quality). "
-            "Chinese markdown docs/pinterest/system_design_chatbot_pins.md."
+            "Chinese markdown docs/company/pinterest/system_design_chatbot_pins.md."
         ),
     },
     # --- BQ + Integration ---
@@ -292,7 +291,7 @@ TASKS = [
             "Pinterest BQ (2025-11): (1) project led end-to-end, (2) where requirement came from, "
             "(3) stepping ahead when not responsible, (4) negative feedback received, "
             "(5) working with someone missing deadlines. "
-            "Create docs/pinterest/bq_question_map.md mapping each Q to 2-3 best-fit EX-XX "
+            "Create docs/company/pinterest/bq_question_map.md mapping each Q to 2-3 best-fit EX-XX "
             "stories with 1-sentence angle each. Reference post-rework stories. Chinese."
         ),
     },
@@ -307,7 +306,7 @@ TASKS = [
             "(1) new LC section (84, 392, 3229, 1526, 1564, 1580, 餐馆区间), "
             "(2) Custom Coding section (Escape Room, Lighthouse, Prefix-match, Grant Access, "
             "Pin Connectivity, round(), Round-by-p, LC332 loop) with lc:// drawer links where applicable, "
-            "(3) System Design section with links to docs/pinterest/system_design_*.md files, "
+            "(3) System Design section with links to docs/company/pinterest/system_design_*.md files, "
             "(4) BQ Question Map link, "
             "(5) cross-links LC problems <-> relevant SD modules (e.g. LC 1244 <-> Leaderboard SD family). "
             "Depends on all previous Pinterest expansion tasks being complete."

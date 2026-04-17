@@ -3,7 +3,7 @@ import sqlite3
 
 NOTES = r'''## LC 2402 - Meeting Rooms III (Two-Heap Simulation)
 
-> Pinterest must-do list. See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list. See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目回顾
 - 共 `n` 个房间，编号 `0..n-1`。给出 `meetings[i] = [start, end]`，所有 `start` 互不相同。

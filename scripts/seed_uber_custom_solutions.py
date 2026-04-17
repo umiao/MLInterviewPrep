@@ -1,6 +1,6 @@
 """Seed detailed solutions for custom (non-LC) Uber problems into mle_prep.db.
 
-Parses docs/uber_bps_custom_solutions.md and extracts per-problem sections,
+Parses docs/company/uber/bps_custom_solutions.md and extracts per-problem sections,
 then appends them to the `notes` field of matching DB problems.
 
 Idempotent: skips problems that already have the [Uber BPS Custom Solution] tag.

@@ -6,8 +6,8 @@ Covers the 4-point AC from T-P0-416:
 (3) Position bias contaminates offline NDCG (examination hypothesis) -- IPW / ULTR fix
 (4) Numerical example comparing MAP vs NDCG verdicts on the same list
 
-Companion drill to docs/google_lambdarank_drill.md (T-P0-415).
-Reference: docs/prep_learning_to_rank.md, docs/doordash_ml_domain_search.md section 4.
+Companion drill to docs/company/google/lambdarank_drill.md (T-P0-415).
+Reference: docs/prep_learning_to_rank.md, docs/company/doordash/ml_domain_search.md section 4.
 """
 
 from __future__ import annotations

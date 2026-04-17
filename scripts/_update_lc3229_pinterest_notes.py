@@ -9,7 +9,7 @@ DB_PATH = "data/mle_prep.db"
 
 NOTES = r"""## LC 3229 - Min Operations to Make Array Equal to Target (差分贪心)
 
-> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/pinterest_recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
+> Pinterest must-do list (2025-11 cutoff). See [Pinterest Prep Notes](../docs/company/pinterest/recruiter_call_prep.md#pinterest-lc-%E5%BF%85%E5%88%B7%E9%A2%98%E5%88%97%E8%A1%A8-14-%E9%A2%98)
 
 ### 题目回顾
 给定两个长度为 n 的数组 `nums` 与 `target`。每次操作可以选一个**子数组** `nums[l..r]`，对里面所有元素**同时 +1 或 -1**。返回把 `nums` 变成 `target` 所需的**最少操作数**。`1 <= n <= 1e5`，数值范围可能含负数。

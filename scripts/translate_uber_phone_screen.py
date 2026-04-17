@@ -11,7 +11,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 
 DB_PATH = "data/mle_prep.db"
 DOC_ID = 3
-MD_PATH = "docs/uber_phone_screen_prep.md"
+MD_PATH = "docs/company/uber/phone_screen_prep.md"
 
 CHINESE_CONTENT = r"""# Uber MLE -- BPS (Behavioral + Problem Solving，行为+问题解决) 面试准备材料
 

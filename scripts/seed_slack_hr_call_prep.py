@@ -56,7 +56,7 @@ def main() -> None:
 
     notes = (
         "Slack ML team (Salesforce ownership). HR call 2026-04-15 Wed 14:00 EST = 11:00 PT, 30-45 min.\n"
-        "Prep doc: docs/slack_hr_call_prep.md. Self-intro, why-Slack, main story, comp, 3 questions.\n"
+        "Prep doc: docs/company/slack/hr_call_prep.md. Self-intro, why-Slack, main story, comp, 3 questions.\n"
         "Target comp: $400-550K TC for Senior MLE. Timeline: 4-6 weeks.\n"
         "Slack ML hot spots: Slack AI (summary, search answers), channel/message ranking, "
         "enterprise search, Agentforce integration."
@@ -72,7 +72,7 @@ def main() -> None:
     # 3. Attach prep reference to the existing hr_call interview_event (keep status=upcoming until call happens).
     updated_desc = (
         "2026-04-15 Wed 14:00 EST = 11:00 PT, 30-45 min. Recruiter screen for Slack (Salesforce) ML. "
-        "Prep doc: docs/slack_hr_call_prep.md. Goals: (1) confirm team/role/loop, "
+        "Prep doc: docs/company/slack/hr_call_prep.md. Goals: (1) confirm team/role/loop, "
         "(2) deliver 90s self-intro + Ranking-as-Allocation main story, "
         "(3) comp anchor $400-550K TC, (4) ask 3 prepared questions."
     )
