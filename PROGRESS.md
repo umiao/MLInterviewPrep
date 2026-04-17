@@ -375,3 +375,9 @@
 - **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. Interaction model: left-drag canvas = pan, left-click node = activate, scroll = zoom.
 - **Status**: [PARTIAL] — fix committed, awaiting user browser confirmation of all 3 fixes.
 - **Request**: No task_db change — adhoc hotfix continuation (hotfix 5 of 5 for KG VIZ jitter series).
+## 2026-04-17 08:20 -- [KG-VIZ-hotfix6] Nuclear jitter fix: remove all hover effects + scroll pan
+- **What I did**: After 5 incremental hotfixes failed to fully resolve hover-induced jitter, determined root cause is fundamental: React Flow's internal mouse event handling (cursor management, ResizeObserver, selection overlay) conflicts with any onNodeMouseEnter/Leave-driven state updates. Applied nuclear fix: removed ALL hover state (hoveredId, hoveredNeighbors, PortalTooltip, onNodeMouseEnter/Leave, all hover visual states), -167 lines. Node info now accessible via click→drawer only. Changed pan model: panOnDrag=false + panOnScroll=true (scroll wheel = pan, Ctrl+scroll = zoom). Kept CSS cursor overrides (grab on pane, pointer on nodes). Selection-only lightweight effect remains for click→drawer.
+- **Deliverables**: KnowledgeGraph.tsx (-167 lines), commit 96b1bc8.
+- **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. No hover state changes = zero re-renders on mouse movement = no jitter possible.
+- **Status**: [PARTIAL] — fix committed, awaiting user browser confirmation that jitter is fully eliminated.
+- **Request**: No task_db change — final adhoc hotfix in the KG VIZ jitter series (hotfixes 1-6).
