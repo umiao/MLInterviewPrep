@@ -9,26 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-480: [DOCS-01] Write docs/ filing convention proposal (no file moves yet)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Prior audit: docs/ has 365 files, 6 content categories mixed together, 3 mess examples. Propose a 6-subdir convention before any migration.
-
-DELIVERABLE: docs/protocol/docs_filing_convention.md (~200 lines) specifying:
-- Charter of each top-level subdir: study/, company/<slug>/, design/, protocol/, staging/, archive/
-- Filename conventions per subdir (dated vs undated, language, case)
-- Graduation rules for staging/ (TTL, max age, how to promote)
-- Anti-patterns (what NOT to put where)
-- Migration map preview: how many files from current state move to each subdir (based on prior audit: 30 study, 52 company, 6 design, 7 protocol, 284 staging, rest archive)
-
-DO NOT execute migration. Document-only deliverable.
-
-ACCEPTANCE CRITERIA:
-1. docs/protocol/docs_filing_convention.md exists with all 6 subdirs documented.
-2. Contains 3-5 anti-pattern examples from current state.
-3. Commit: [DOCS-01] docs/ filing convention proposal
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-475: [KG-G-01] Translate 11 Google R1 drill docs to Chinese (company_documents 55,56,60-65,67-69)
@@ -281,6 +261,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
 - [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
 - [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+- [x] **2026-04-16** -- T-P0-480: [DOCS-01] Write docs/ filing convention proposal (no file moves yet). Prior audit: docs/ has 365 files, 6 content categories mixed together, 3 mess examples. Propose a 6-subdir convention be
 - [x] **2026-04-16** -- T-P0-478: [KG-M-02] CRITICAL: Migrate Doc 19 RoPE + Long Context (sole source) to framework_node. Sibling of KG-M-01. Doc 19 RoPE + Long Context section is sole source.
 - [x] **2026-04-16** -- T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone. Doc 19 'Adobe MLE Prep All-in-One' contains Diffusion Models content (DDPM, DDIM, CFG, CLIP, SDE/ODE) that prior audit f
 - [x] **2026-04-16** -- T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27. FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so 
