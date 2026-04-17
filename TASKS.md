@@ -50,26 +50,6 @@ ACCEPTANCE CRITERIA:
 
 NON-GOALS: Do NOT touch doc 57 (Staging 13 Flashcards -- already Chinese); do NOT auto-generate via LLM prompt chain without diff review.
 
-#### T-P1-479: [KG-M-03] Delete Doc 29 Adobe ML Fundamentals (byte-identical duplicate of Doc 28)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Prior audit confirmed doc 29 (Adobe) and doc 28 (Uber) both titled 'ML Fundamentals From-Scratch' are 151,774 chars each -- byte-identical. Safe to delete 29; all concepts covered in 28.
-
-ACTION:
-1. Verify via SHA256 that content of docs 28 and 29 match (if not, halt and re-audit).
-2. archive/pre_kg/20260416/adobe_doc29_snapshot.md: save a copy.
-3. DELETE FROM company_documents WHERE id=29.
-4. Grep repo for any '/api/companies/.../documents/29' references -- none expected but verify.
-
-ACCEPTANCE CRITERIA:
-1. sha256(doc 28 content) == sha256(doc 29 content) before delete.
-2. Doc 29 no longer returned by API.
-3. No broken references.
-4. Commit: [KG-M-03] Delete Doc 29 Adobe duplicate of Doc 28
-
-DEPENDS ON: KG-M-00 (generate checklist first; user approves the delete).
-
 #### T-P1-481: [DOCS-02] Migrate top-level company prep files to docs/company/<slug>/
 - **Priority**: P1
 - **Complexity**: M
@@ -256,6 +236,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
+- [x] **2026-04-16** -- T-P1-479: [KG-M-03] Delete Doc 29 Adobe ML Fundamentals (byte-identical duplicate of Doc 28). Prior audit confirmed doc 29 (Adobe) and doc 28 (Uber) both titled 'ML Fundamentals From-Scratch' are 151,774 chars each
 - [x] **2026-04-16** -- T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes. Expand thin notes for LC 362 Design Hit Counter to full solution + mark completed.
 - [x] **2026-04-16** -- T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes. Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
 - [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.

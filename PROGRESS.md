@@ -541,3 +541,10 @@
 - **Sanity check result**: 276 lines (target ~200, slightly long but covers all 6 subdirs + 5 anti-patterns + migration table + open questions); 5 anti-pattern subsections present (5.1-5.5, target 3-5); all 6 subdirs explicitly chartered with §2.x subsections; cross-referenced as the contract for DOCS-02 / DOCS-03.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P0-480 --status completed
+
+## 2026-04-16 -- [T-P1-479] KG-M-03 Delete Doc 29 Adobe (byte-identical duplicate of Doc 28 Uber)
+- **What I did**: Verified SHA256(doc28 content) == SHA256(doc29 content) == 3f2db8f9...e31d51 (both 151,774 chars, same title ML Fundamentals From-Scratch). Wrote idempotent seed scripts/seed_delete_adobe_doc29_20260416.py: pre-check SHA match, check concept_links has 0 refs to id=29, snapshot to archive/pre_kg/20260416/adobe_doc29_snapshot.md, DELETE FROM company_documents WHERE id=29, verify absent. Re-run prints [UNCHANGED]. Adobe (company_id=23) now has 9 docs (was 10); doc 28 (Uber) intact.
+- **Deliverables**: scripts/seed_delete_adobe_doc29_20260416.py, archive/pre_kg/20260416/adobe_doc29_snapshot.md (151,906 chars incl header)
+- **Sanity check result**: sha256 match confirmed; 0 concept_links refs; ORM get(CompanyDocument, 29) returns None; db.query filter(id.in_([28,29])) returns only [28]; idempotent re-run prints [UNCHANGED]
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-479 --status completed
