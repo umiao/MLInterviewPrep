@@ -1,7 +1,7 @@
+import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
 import { styleForPillar } from "./kgStyles";
-import { HoverTooltip } from "./HoverTooltip";
 
 export interface PillarNodeData extends Record<string, unknown> {
   meta: NodeMeta;
@@ -16,9 +16,9 @@ export interface PillarNodeData extends Record<string, unknown> {
 
 const HUB_EDGE_THRESHOLD = 10;
 
-export default function PillarNode({ id, data }: NodeProps) {
+function PillarNodeInner({ id, data }: NodeProps) {
   const d = data as PillarNodeData;
-  const { meta, isExpanded, isSelected, isMatch, dimmed, isHovered, isNeighborOfHover, onActivate } = d;
+  const { meta, isExpanded, isSelected, isMatch, dimmed, isNeighborOfHover, onActivate } = d;
   const style = styleForPillar(meta.pillar);
   const isHub = meta.edgeCount > HUB_EDGE_THRESHOLD;
   const ringClass = isSelected
@@ -47,6 +47,7 @@ export default function PillarNode({ id, data }: NodeProps) {
       style={{
         width: 240,
         height: 48,
+        contain: "size",
         borderLeft: `${isHub ? 6 : 4}px solid ${style.border}`,
         borderTop: isHub ? `2px solid ${style.border}` : undefined,
         borderRight: isHub ? `2px solid ${style.border}` : undefined,
@@ -77,17 +78,20 @@ export default function PillarNode({ id, data }: NodeProps) {
         </span>
       </div>
       <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
-      {isHovered && (
-        <HoverTooltip
-          title={meta.pillarName}
-          pillarName={meta.pillarName}
-          pillarColor={style.border}
-          pillarBg={style.bg}
-          contentLength={meta.contentLength}
-          edgeCount={meta.edgeCount}
-          actionHint={isExpanded ? "Click to collapse" : "Click to expand"}
-        />
-      )}
     </div>
   );
 }
+
+export default memo(PillarNodeInner, (prev, next) => {
+  const p = prev.data as PillarNodeData;
+  const n = next.data as PillarNodeData;
+  return (
+    p.isHovered === n.isHovered &&
+    p.isNeighborOfHover === n.isNeighborOfHover &&
+    p.isSelected === n.isSelected &&
+    p.isExpanded === n.isExpanded &&
+    p.isMatch === n.isMatch &&
+    p.dimmed === n.dimmed &&
+    p.meta.id === n.meta.id
+  );
+});

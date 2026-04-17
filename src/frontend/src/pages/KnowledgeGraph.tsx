@@ -53,6 +53,76 @@ const NODE_TYPES = {
   leaf: LeafNode,
 };
 
+/**
+ * Tooltip rendered OUTSIDE the ReactFlow canvas (portal-level) so it never
+ * affects node DOM dimensions / ResizeObserver. Positioned using
+ * flowToScreenPosition from the hovered node's cached layout coordinates.
+ */
+function PortalTooltip({
+  hoveredId,
+  model,
+  layout: layoutHook,
+  rf,
+}: {
+  hoveredId: string | null;
+  model: KgGraphModel;
+  layout: ReturnType<typeof useKgLayout>;
+  rf: ReturnType<typeof useReactFlow>;
+}) {
+  if (!hoveredId) return null;
+  const meta = model.nodesById.get(hoveredId);
+  if (!meta) return null;
+  const pos = layoutHook.getPosition(hoveredId);
+  if (!pos) return null;
+  const style = styleForPillar(meta.pillar);
+  // Convert flow coordinates to screen coordinates for the tooltip.
+  let screenX = 0;
+  let screenY = 0;
+  try {
+    const screen = rf.flowToScreenPosition({ x: pos.x, y: pos.y });
+    screenX = screen.x;
+    screenY = screen.y;
+  } catch {
+    return null;
+  }
+  const contentLabel =
+    meta.contentLength === 0
+      ? "Empty"
+      : meta.contentLength < 2000
+        ? `Stub (${meta.contentLength.toLocaleString()} chars)`
+        : `${meta.contentLength.toLocaleString()} chars`;
+  const actionHint =
+    meta.kind === "leaf"
+      ? "Click to view"
+      : "Click to expand/collapse";
+  return (
+    <div
+      role="tooltip"
+      className="fixed z-[9999] pointer-events-none"
+      style={{ left: screenX, top: screenY - 8, transform: "translate(-50%, -100%)" }}
+    >
+      <div className="rounded-md bg-gray-900 text-white shadow-lg px-3 py-2 text-[11px] leading-snug min-w-[200px]">
+        <div className="font-semibold text-[12px] truncate">{meta.title}</div>
+        <div className="mt-1 flex items-center gap-1.5">
+          <span
+            className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
+            style={{ backgroundColor: style.bg, color: style.border }}
+          >
+            {meta.pillarName}
+          </span>
+          <span className="text-gray-300">{contentLabel}</span>
+        </div>
+        {meta.edgeCount > 0 && (
+          <div className="mt-0.5 text-gray-400">
+            {meta.edgeCount} concept link{meta.edgeCount === 1 ? "" : "s"}
+          </div>
+        )}
+        <div className="mt-1 text-gray-400 italic">{actionHint}</div>
+      </div>
+    </div>
+  );
+}
+
 function edgeStyleFor(relation: string, highlighted: boolean) {
   const base =
     relation === "parent"
@@ -415,6 +485,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         <Background variant={BackgroundVariant.Dots} gap={20} color="#f1f5f9" />
         <MiniMap nodeColor={minimapColor} pannable zoomable />
       </ReactFlow>
+      <PortalTooltip hoveredId={hoveredId} model={model} layout={layout} rf={rf} />
       <FrameworkNodeDrawer
         nodeId={selectedRawId}
         onClose={() => setSelectedId(null)}

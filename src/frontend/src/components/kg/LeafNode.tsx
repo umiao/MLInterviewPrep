@@ -1,7 +1,7 @@
+import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
 import { LAYOUT_CONFIG, styleForPillar } from "./kgStyles";
-import { HoverTooltip } from "./HoverTooltip";
 
 export interface LeafNodeData extends Record<string, unknown> {
   meta: NodeMeta;
@@ -78,9 +78,9 @@ function CompletenessArc({
   );
 }
 
-export default function LeafNode({ id, data }: NodeProps) {
+function LeafNodeInner({ id, data }: NodeProps) {
   const d = data as LeafNodeData;
-  const { meta, isSelected, isMatch, dimmed, isHovered, isNeighborOfHover, onActivate } = d;
+  const { meta, isSelected, isMatch, dimmed, isNeighborOfHover, onActivate } = d;
   const style = styleForPillar(meta.pillar);
   const isHub = meta.edgeCount > HUB_EDGE_THRESHOLD;
   const ringClass = isSelected
@@ -116,6 +116,7 @@ export default function LeafNode({ id, data }: NodeProps) {
       style={{
         width,
         height,
+        contain: "size",
         borderLeft: `${leftBorderWidth}px solid ${style.border}`,
         borderTop: sideBorder,
         borderRight: sideBorder,
@@ -139,17 +140,20 @@ export default function LeafNode({ id, data }: NodeProps) {
         </span>
       </div>
       <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
-      {isHovered && (
-        <HoverTooltip
-          title={meta.title}
-          pillarName={meta.pillarName}
-          pillarColor={style.border}
-          pillarBg={style.bg}
-          contentLength={meta.contentLength}
-          edgeCount={meta.edgeCount}
-          actionHint="Click to view"
-        />
-      )}
     </div>
   );
 }
+
+export default memo(LeafNodeInner, (prev, next) => {
+  const p = prev.data as LeafNodeData;
+  const n = next.data as LeafNodeData;
+  return (
+    p.isHovered === n.isHovered &&
+    p.isNeighborOfHover === n.isNeighborOfHover &&
+    p.isSelected === n.isSelected &&
+    p.isExpanded === n.isExpanded &&
+    p.isMatch === n.isMatch &&
+    p.dimmed === n.dimmed &&
+    p.meta.id === n.meta.id
+  );
+});
