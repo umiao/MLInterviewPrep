@@ -297,13 +297,13 @@ for semantic fit (not just valence).
 - [ ] scripts/audit_qe_link_relevance.py uses random.Random(seed) with seed defaulting to 20260411 for reproducibility
 - [ ] Review mode: for each of 10 random links, print question text, example title + 1-line situation + 1-line result, current relevance_note, and a markdown checklist line (keep / drop / update-note)
 - [ ] Apply mode: read a filled-in markdown file and apply the decisions (DROP removes the link row, UPDATE overwrites relevance_note, KEEP no-op)
-- [ ] Output report committed to docs/audits/qe_link_spotcheck_2026-04-11.md
+- [ ] Output report committed to docs/staging/audits/qe_link_spotcheck_2026-04-11.md
 - [ ] Script tolerates resumption (if reviewer only filled in 5 of 10, skip unfilled)
 
 ## Manual smoke test
 1. Run `python scripts/audit_qe_link_relevance.py --mode review`
-2. Fill decisions in docs/audits/qe_link_spotcheck_2026-04-11.md
-3. Run `python scripts/audit_qe_link_relevance.py --mode apply --file docs/audits/qe_link_spotcheck_2026-04-11.md`
+2. Fill decisions in docs/staging/audits/qe_link_spotcheck_2026-04-11.md
+3. Run `python scripts/audit_qe_link_relevance.py --mode apply --file docs/staging/audits/qe_link_spotcheck_2026-04-11.md`
 4. Verify via API consumer: `curl /api/behavioral/questions/<id>/examples` on a modified question shows updated relevance_notes (per CLAUDE.md rule "verify via consumer, not producer")
 
 ## Dependencies

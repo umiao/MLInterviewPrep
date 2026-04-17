@@ -5,7 +5,7 @@
 - **Authoring source**: markdown files under `MLInterviewPrep/docs/**/*.md` (Git-tracked).
 - **Runtime read path**: DB tables `company_documents`, `system_designs` (and later `knowledge_cards`, `framework_nodes.description`).
 - **Sync script**: `scripts/sync_docs_to_db.py` — one-way `docs → DB`, idempotent.
-- **Reverse script**: `scripts/dump_db_to_docs.py` — DR/backup into `docs/generated/` (gitignored).
+- **Reverse script**: `scripts/dump_db_to_docs.py` — DR/backup into `docs/staging/generated/` (gitignored).
 - **Never hand-edit DB content columns directly.** Edit the md, then sync.
 
 ## Why this pattern
@@ -60,8 +60,8 @@ deleting the md.
   `python scripts/sync_docs_to_db.py --backfill-hashes` once to populate
   sha256 of current DB content. After that, sync becomes hash-gated.
 - To start authoring an existing DB row in md, run `dump_db_to_docs.py`,
-  copy the generated file from `docs/generated/` into an authoring location
-  (e.g. `docs/synced/`), and commit it.
+  copy the generated file from `docs/staging/generated/` into an authoring location
+  (e.g. `docs/staging/synced/`), and commit it.
 
 ## Archive
 
@@ -78,8 +78,8 @@ drawer routes by a follow-up migration pass (unblocks T-P0-199).
 ## Files
 
 - `scripts/sync_docs_to_db.py` — docs → DB upsert (idempotent, hash-gated).
-- `scripts/dump_db_to_docs.py` — DB → `docs/generated/` dump (DR only).
+- `scripts/dump_db_to_docs.py` — DB → `docs/staging/generated/` dump (DR only).
 - `src/backend/database.py` migration 18 — adds `content_hash` + `source_path`
   columns to `company_documents` and `system_designs`.
-- `docs/synced/` — curated authoring md files with frontmatter (dogfood).
-- `docs/generated/` — gitignored DR output of `dump_db_to_docs.py`.
+- `docs/staging/synced/` — curated authoring md files with frontmatter (dogfood).
+- `docs/staging/generated/` — gitignored DR output of `dump_db_to_docs.py`.

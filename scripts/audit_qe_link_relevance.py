@@ -5,7 +5,7 @@ Two modes:
 review
     Sample 10 random question_example_links (reproducible via --seed),
     print each pair with a markdown checklist for human review, and
-    write the result to docs/audits/qe_link_spotcheck_2026-04-11.md.
+    write the result to docs/staging/audits/qe_link_spotcheck_2026-04-11.md.
 
 apply
     Read a filled-in review file and apply the human decisions
@@ -34,6 +34,7 @@ DEFAULT_SEED = 20260411
 DEFAULT_OUT = (
     Path(__file__).resolve().parents[1]
     / "docs"
+    / "staging"
     / "audits"
     / "qe_link_spotcheck_2026-04-11.md"
 )

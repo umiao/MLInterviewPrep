@@ -6,7 +6,7 @@ AC (T-P1-185):
   - New table `company_card_overlays` (per-company product/interview-format
     overlay under a canonical card), with UNIQUE(card_id, company_id, angle).
   - Schema aligns with the Option A consolidation plan in
-    docs/analysis/company_prep_overlap.md (T-P0-184).
+    docs/staging/analysis/company_prep_overlap.md (T-P0-184).
 
 Usage:
     python scripts/migrate_add_knowledge_cards.py

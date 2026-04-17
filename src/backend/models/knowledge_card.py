@@ -1,7 +1,7 @@
 """Knowledge card models: canonical cross-company cards + per-company overlays.
 
 Introduced by T-P1-185 per the Option A consolidation plan in
-docs/analysis/company_prep_overlap.md (T-P0-184). See that audit for the
+docs/staging/analysis/company_prep_overlap.md (T-P0-184). See that audit for the
 14 SHARED topics targeted for canonical-card migration and the provenance
 conventions enforced by the source_* columns.
 """

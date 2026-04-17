@@ -1,7 +1,7 @@
-"""Reverse sync: dump DB content into markdown under ``docs/generated/`` (DR/backup).
+"""Reverse sync: dump DB content into markdown under ``docs/staging/generated/`` (DR/backup).
 
 Produces one .md per row with frontmatter capturing the origin row + hash so the
-files can be round-tripped through ``sync_docs_to_db.py``.  ``docs/generated/``
+files can be round-tripped through ``sync_docs_to_db.py``.  ``docs/staging/generated/``
 is gitignored; this is intended for disaster-recovery and one-off ad-hoc edits
 when the authoring md file has been lost or never existed.
 
@@ -23,7 +23,7 @@ from sqlalchemy import text  # noqa: E402
 
 from src.backend.database import get_engine, init_db  # noqa: E402
 
-OUT_ROOT = PROJECT_ROOT / "docs" / "generated"
+OUT_ROOT = PROJECT_ROOT / "docs" / "staging" / "generated"
 
 TABLE_COLUMNS = {
     "company_documents": [("content", "id", "title")],

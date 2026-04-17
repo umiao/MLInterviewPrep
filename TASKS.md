@@ -53,7 +53,7 @@ NON-GOALS: Do NOT touch doc 57 (Staging 13 Flashcards -- already Chinese); do NO
 #### T-P1-481: [DOCS-02] Migrate top-level company prep files to docs/company/<slug>/
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P0-480
+- **Depends on**: None
 - **Description**: Per proposed convention (DOCS-01), move 34 top-level company prep files into docs/company/<slug>/ subdirs.
 
 SCOPE (verify count via `ls docs/*_prep.md docs/google_*.md docs/uber_*.md docs/doordash_*.md docs/slack_*.md`):
@@ -74,27 +74,6 @@ ACCEPTANCE CRITERIA:
 5. Commit: [DOCS-02] Migrate company prep to docs/company/<slug>/
 
 DEPENDS ON: DOCS-01 (convention doc must exist first for reference).
-
-#### T-P1-482: [DOCS-03] Move intermediate / generated / audits / synced into docs/staging/
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-480
-- **Description**: Per DOCS-01 convention, move 274 generated system design fragments + audits/ + synced/ + analysis/ into docs/staging/ with TTL metadata.
-
-SCOPE:
-- git mv docs/generated/ -> docs/staging/generated/
-- git mv docs/audits/ -> docs/staging/audits/
-- git mv docs/synced/ -> docs/staging/synced/
-- git mv docs/analysis/ -> docs/staging/analysis/
-- Add docs/staging/README.md stating the TTL policy (files older than 30d must graduate or be deleted).
-
-ACCEPTANCE CRITERIA:
-1. Moved directories under docs/staging/ present.
-2. docs/staging/README.md explains TTL.
-3. Any script referencing old paths updated.
-4. Commit: [DOCS-03] Move intermediate content to docs/staging/
-
-DEPENDS ON: DOCS-01.
 
 #### T-P1-483: [KG-VIZ-01] /kg visualization POC: Cytoscape.js + dagre (user-picked)
 - **Priority**: P1
@@ -228,26 +207,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 430 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-16** -- T-P2-469: [QIdx-C1] Harden LC import scripts to set family. Harden LC import scripts so new rows no longer default to family=NULL silently.
 - [x] **2026-04-16** -- T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook. Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with
 - [x] **2026-04-16** -- T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost. Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal)
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
-- [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i
-- [x] **2026-04-16** -- T-P1-479: [KG-M-03] Delete Doc 29 Adobe ML Fundamentals (byte-identical duplicate of Doc 28). Prior audit confirmed doc 29 (Adobe) and doc 28 (Uber) both titled 'ML Fundamentals From-Scratch' are 151,774 chars each
-- [x] **2026-04-16** -- T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes. Expand thin notes for LC 362 Design Hit Counter to full solution + mark completed.
-- [x] **2026-04-16** -- T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes. Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
-- [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
-- [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
-- [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
-- [x] **2026-04-16** -- T-P0-480: [DOCS-01] Write docs/ filing convention proposal (no file moves yet). Prior audit: docs/ has 365 files, 6 content categories mixed together, 3 mess examples. Propose a 6-subdir convention be
-- [x] **2026-04-16** -- T-P0-478: [KG-M-02] CRITICAL: Migrate Doc 19 RoPE + Long Context (sole source) to framework_node. Sibling of KG-M-01. Doc 19 RoPE + Long Context section is sole source.
-- [x] **2026-04-16** -- T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone. Doc 19 'Adobe MLE Prep All-in-One' contains Diffusion Models content (DDPM, DDIM, CFG, CLIP, SDE/ODE) that prior audit f
-- [x] **2026-04-16** -- T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27. FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so 
-- [x] **2026-04-16** -- T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195). Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularizatio
-- [x] **2026-04-16** -- T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node). Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authori
-- [x] **2026-04-16** -- T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes. Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into con
-- [x] **2026-04-16** -- T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill. Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy:
-- [x] **2026-04-16** -- T-P0-470: [KG-P1-01] Create concept_links table + migration. Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) 
+- [x] **2026-04-16** -- T-P1-482: [DOCS-03] Move intermediate / generated / audits / synced into docs/staging/. Per DOCS-01 convention, move 274 generated system design fragments + audits/ + synced/ + analysis/ into docs/staging/ wi

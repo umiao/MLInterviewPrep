@@ -1,7 +1,7 @@
 """Knowledge card API: canonical cross-company cards + per-company overlays.
 
 Introduced by T-P1-185. Drives the merged company-prep view described in the
-Option A plan (docs/analysis/company_prep_overlap.md).
+Option A plan (docs/staging/analysis/company_prep_overlap.md).
 """
 import json
 from typing import Any

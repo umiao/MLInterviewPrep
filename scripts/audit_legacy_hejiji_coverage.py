@@ -16,7 +16,7 @@ concept actually appears as a section header in the source doc, then renders a
 deterministic markdown file. Re-running the script produces a byte-identical
 file (no timestamps in body, sorted iteration, fixed encoding).
 
-Output: docs/audits/legacy_hejiji_coverage_checklist_20260416.md
+Output: docs/staging/audits/legacy_hejiji_coverage_checklist_20260416.md
 
 Non-goals: This script does NOT delete or migrate anything. It only produces
 the review artifact for per-concept human sign-off.
@@ -32,7 +32,7 @@ from pathlib import Path
 from typing import Iterable
 
 DB_PATH = Path("data/mle_prep.db")
-OUTPUT_PATH = Path("docs/audits/legacy_hejiji_coverage_checklist_20260416.md")
+OUTPUT_PATH = Path("docs/staging/audits/legacy_hejiji_coverage_checklist_20260416.md")
 
 STATUS_VOCAB = ("COVERED", "PARTIAL", "UNIQUE")
 ACTION_VOCAB_PREFIXES = ("safe", "migrate to node ", "create new node")

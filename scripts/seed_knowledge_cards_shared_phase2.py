@@ -2,7 +2,7 @@
 
 Follow-up to seed_knowledge_cards_shared.py (phase 1 covered 2 of 14 SHARED
 topics). This phase seeds the remaining 12 SHARED canonical cards identified
-by the T-P0-184 audit (docs/analysis/company_prep_overlap.md section 2,
+by the T-P0-184 audit (docs/staging/analysis/company_prep_overlap.md section 2,
 Tier=SHARED): topics 1, 2, 7, 8, 10, 14, 18, 20, 22, 24, 26, 27.
 
 Canonical prose: Chinese by default per feedback_lc_notes_chinese; algorithm

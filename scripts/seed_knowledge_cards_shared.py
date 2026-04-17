@@ -1,7 +1,7 @@
 """Seed shared knowledge cards (T-P1-185, phase 1).
 
 Seeds canonical cross-company cards identified by the T-P0-184 audit
-(docs/analysis/company_prep_overlap.md §2 Tier=SHARED). Each card carries
+(docs/staging/analysis/company_prep_overlap.md §2 Tier=SHARED). Each card carries
 provenance back to the line range that contributed most of the canonical
 prose. Overlays capture company-specific angles (product framing, interview
 format) without duplicating the shared kernel.
