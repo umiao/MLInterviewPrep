@@ -363,3 +363,9 @@
 - **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. Playwright static screenshot stable. Live browser bounce verification pending user feedback.
 - **Status**: [PARTIAL] — fix committed + tested, awaiting user browser confirmation.
 - **Request**: No task_db change — adhoc hotfix continuation.
+## 2026-04-17 08:10 -- [KG-VIZ-hotfix4] Fix click/drag mode toggle jitter
+- **What I did**: User reported remaining jitter as rapid toggle between click and drag modes. Root cause: React Flow's default `panOnDrag` allows left-button pan, so mouse micro-movements during node clicks triggered pan-start → cancel → mode toggle → visual flicker. Fixed by: (1) `panOnDrag={[1,2]}` — pan only with middle/right button, left click is purely node interaction; (2) `elementsSelectable={false}` + `selectNodesOnDrag={false}` — disable internal selection box overlay; (3) `zoomOnDoubleClick={false}` — prevent accidental zoom; (4) removed `transition-shadow hover:shadow-md/lg` CSS from all 3 node components — these caused continuous repaints during hover.
+- **Deliverables**: 4 files modified (KnowledgeGraph.tsx + 3 node components), commit 74937e9.
+- **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. Interaction model now clean: left-click = node only, middle/right = pan, scroll = zoom.
+- **Status**: [PARTIAL] — fix committed, awaiting user browser confirmation.
+- **Request**: No task_db change — adhoc hotfix continuation (hotfixes 1-4 for KG VIZ jitter).
