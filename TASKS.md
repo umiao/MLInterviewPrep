@@ -9,25 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-496: KG-UX-08: Left TreeNav panel (3-level, replaces pillar badges)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Current top-header pillar badges all call expandAll() - functionally useless. Replace with a left-side collapsible TreeNav panel (Adobe/Obsidian-style outline), 260px wide, expand/collapse chevron, 3 levels: pillar -> category -> leaf. Each entry shows: pillar color dot, title, child count badge, content-length indicator (a tiny horizontal bar showing contentLength/maxContentLength). Remove the old pillar badges row from the header. Keep Expand All / Collapse All / Search at their current positions.
-
-Files (new): src/frontend/src/components/kg/TreeNav.tsx, src/frontend/src/components/kg/TreeNav.test.tsx
-Files (edit): src/frontend/src/pages/KnowledgeGraph.tsx (layout: flex row with TreeNav left, canvas right)
-
-Acceptance:
-1. New TreeNav.tsx renders tree from model.childrenOf; independent expand/collapse per node (own local state, NOT coupled to canvas expanded state)
-2. Each row: pillar color dot | indent per depth | chevron (if has children) | title | child-count badge | contentLength mini-bar
-3. 3 levels supported: pillar / category / leaf (leaves have no chevron)
-4. Side panel has its own collapse button to shrink to 40px strip (just color dots)
-5. Pillar badges at top of KnowledgeGraph header REMOVED
-6. Unit tests: TreeNav.test.tsx covers render/expand/collapse + shows mini-bar width is proportional
-7. Build + vitest pass
-8. NOTE: click handler integration is in KG-UX-09 (this task only renders + self-expands)
-
 #### T-P0-497: KG-UX-09: TreeNav click -> expand ancestors + setCenter on canvas
 - **Priority**: P0
 - **Complexity**: S
@@ -51,30 +32,37 @@ Acceptance:
 - **Priority**: P1
 - **Complexity**: L
 - **Depends on**: None
-- **Description**: Unify framework_nodes.description style: Chinese narration, all technical terms in English, prefer FULL expansion (e.g., "Key-Value cache" not "KV cache" on first mention). First-occurrence format: `**English full name** (acronym, 中文译名)`, subsequent mentions use acronym alone. Applies to ALL ~130 nodes with content_length>0 that are not already >=60% Chinese. Retroactive: existing bare-acronym uses (KV/MHA/MoE/RoPE/PEFT/LoRA/etc.) must be rewritten to full-expansion-first-occurrence where missing.
+- **Description**: Unify framework_nodes.description style: Chinese narration, all technical terms in English (prefer FULL expansion, e.g., "Key-Value cache" not "KV cache" on first mention). First-occurrence format: `**English full name** (acronym, 中文译名)`, subsequent use acronym alone. Applies to all ~130 nodes with content_length>0 that are not already >=60% Chinese. Retroactive: bare-acronym uses (KV/MHA/MoE/RoPE/PEFT/LoRA/etc.) rewritten to full-expansion-first-occurrence where missing.
 
-Deliverable: scripts/rewrite_nodes_to_cn.py (idempotent seed script, committed to git as recovery path per LESSON [2026-04-08]).
+Rewrite mechanism: use `claude -p` subprocess (NOT direct Anthropic SDK), reusing Claude Code CLI auth - no ANTHROPIC_API_KEY needed. Per-node pattern:
+```
+result = subprocess.run(["claude", "-p", prompt, "--model", model, "--output-format", "json"], capture_output=True, text=True, encoding="utf-8", timeout=180)
+```
+
+Deliverable: scripts/rewrite_nodes_to_cn.py (idempotent seed, committed).
 
 Script requirements:
 1. Backup data/mle_prep.db -> data/mle_prep.db.bak.YYYYMMDD_HHMMSS before any write
 2. New table framework_nodes_description_history(id PK, node_id FK, description TEXT, changed_at TIMESTAMP) - save old desc before each update
-3. Model routing: default claude-haiku-4-5; nodes with len(desc)>12000 use claude-sonnet-4-6
-4. Prompt caching: system prompt (rewrite rules - the memory feedback_content_style_cn_en.md verbatim) cached with cache_control
-5. Skip condition: if current node already >=60% Chinese character ratio AND no bare-acronym-without-expansion detected, skip
-6. Batch: process all candidates in one run; log each (id, title, old_zh_ratio, new_zh_ratio, tokens_used, model); write summary to logs/rewrite_nodes_to_cn_YYYYMMDD_HHMMSS.md
-7. Anthropic API key: from .env ANTHROPIC_API_KEY (never hardcode)
-8. Dry-run flag: --dry-run prints what would change without DB writes
+3. Model routing: default claude-haiku-4-5; nodes with len(desc)>12000 use claude-sonnet-4-6. Pass via --model flag.
+4. Prompt: system-role instructions = verbatim copy of memory feedback_content_style_cn_en.md body; user-role payload = current description; ask Claude to return ONLY the rewritten Markdown, preserving fences/formulas/structure
+5. Skip condition: current node >=60% Chinese AND no bare-acronym-without-expansion detected -> skip
+6. Batch: process all candidates sequentially; log per-node (id, title, old_zh_ratio, new_zh_ratio, model, elapsed_s); write summary to logs/rewrite_nodes_to_cn_YYYYMMDD_HHMMSS.md
+7. Dry-run flag: --dry-run prints what would change, no DB writes, no claude calls
+8. Progress UX: print `[i/N] id=X title="..." model=Y zh_ratio=0.12->0.55` each node
+9. Resume support: if history table has row for node with newer changed_at than session start, skip (prevents double-rewrite)
 
 AC:
 1. Backup file exists at expected path after run
 2. history table populated (one row per updated node)
-3. Post-run: 0 nodes with zh_ratio<0.4 AND content_length>500 (target: >=40% Chinese narration everywhere)
-4. First occurrence of each English term uses full expansion format in updated nodes
-5. Code blocks, formula ($$...$$), Markdown structure preserved verbatim
-6. Log markdown summarizes: total nodes examined, skipped, updated, total API cost
-7. Re-running script with no DB changes -> no API calls (idempotent)
-8. Smoke test: open drawer for id=191 (SQL Fundamentals), id=42 (STAR), id=192 (OOD SOLID) -> prose is Chinese, all terms are **English full name** (acronym, 中文) on first mention
-9. npm run build + backend pytest + vitest all pass (no schema-breaking migration)
+3. Post-run: 0 nodes with zh_ratio<0.4 AND content_length>500 (target: >=40% Chinese narration)
+4. First occurrence of each English term uses full-expansion format
+5. Code blocks, $$formulas$$, Markdown structure preserved verbatim (sampled spot-check via diff)
+6. Log markdown summarizes: examined/skipped/updated totals, per-node time, total wallclock
+7. Re-running with no new candidates -> exits in <5s (idempotent guard)
+8. Smoke test: open drawer for id=191/42/192 - prose Chinese, terms format `**English** (acronym, 中文)`
+9. npm run build + backend pytest + vitest all pass
+10. Script does NOT require ANTHROPIC_API_KEY
 
 ### P2 -- Nice to Have
 
@@ -165,6 +153,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
 - [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
+- [x] **2026-04-17** -- T-P0-496: KG-UX-08: Left TreeNav panel (3-level, replaces pillar badges). Current top-header pillar badges all call expandAll() - functionally useless. Replace with a left-side collapsible TreeN
 - [x] **2026-04-17** -- T-P0-495: KG-UX-07: Limit pan range (translateExtent) + zoom bounds. Pan range is unlimited; user can drag canvas into empty space far outside graph bbox. Fix: compute bbox from all cached 
 - [x] **2026-04-17** -- T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts. Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.
 - [x] **2026-04-17** -- T-P0-488: KG-UX-02: Preserve focus on expand/collapse (setCenter). Clicking expand reshuffles layout and user loses focus on the clicked node. Fix: after layoutAll(), if a node was just a

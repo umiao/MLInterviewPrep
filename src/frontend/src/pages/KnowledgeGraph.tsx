@@ -30,6 +30,7 @@ import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
 import PillarNode from "../components/kg/PillarNode";
 import CategoryNode from "../components/kg/CategoryNode";
 import LeafNode from "../components/kg/LeafNode";
+import TreeNav from "../components/kg/TreeNav";
 import { computeBBox, useKgLayout } from "../components/kg/useKgLayout";
 import {
   readUrlState,
@@ -39,7 +40,6 @@ import {
   EDGE_STYLES,
   LANE_SEPARATOR_STYLE,
   LAYOUT_CONFIG,
-  PILLAR_STYLES,
   styleForPillar,
 } from "../components/kg/kgStyles";
 import type { LaneInfo } from "../components/kg/useKgLayout";
@@ -437,8 +437,6 @@ export default function KnowledgeGraph() {
 
   const model = useMemo(() => (data ? buildGraphModel(data) : null), [data]);
 
-  const pillars = useMemo(() => Object.entries(PILLAR_STYLES), []);
-
   const controlsRef = useRef<{
     expandAll: () => void;
     collapseAll: () => void;
@@ -451,17 +449,18 @@ export default function KnowledgeGraph() {
   );
 
   return (
-    <div data-testid="kg-page" className="flex flex-col h-[calc(100vh-3rem)]">
-      <header className="flex items-center justify-between gap-4 mb-3">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">Knowledge Graph</h1>
-          <p className="text-xs text-gray-500">
-            {data
-              ? `${data.nodes.length} nodes - ${data.edges.length} edges`
-              : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div data-testid="kg-page" className="flex h-[calc(100vh-3rem)] gap-3">
+      {model && <TreeNav model={model} />}
+      <div className="flex flex-col flex-1 min-w-0">
+        <header className="flex items-center justify-between gap-4 mb-3">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Knowledge Graph</h1>
+            <p className="text-xs text-gray-500">
+              {data
+                ? `${data.nodes.length} nodes - ${data.edges.length} edges`
+                : ""}
+            </p>
+          </div>
           <div className="flex items-center gap-1">
             <button
               type="button"
@@ -482,46 +481,27 @@ export default function KnowledgeGraph() {
               Collapse All
             </button>
           </div>
-          <div className="flex flex-wrap gap-2 text-[10px] text-gray-700">
-            {pillars.map(([key, s]) => (
-              <button
-                key={key}
-                type="button"
-                title={`Toggle ${s.name}`}
-                onClick={() => controlsRef.current?.expandAll()}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer hover:ring-1 hover:ring-gray-400 transition-shadow"
-                style={{ backgroundColor: s.bg, color: s.border }}
-              >
-                <span
-                  aria-hidden
-                  className="w-2 h-2 rounded-sm"
-                  style={{ backgroundColor: s.border }}
-                />
-                {s.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      </header>
+        </header>
 
-      {isLoading && (
-        <div className="text-gray-500 italic">Loading graph...</div>
-      )}
-      {error && (
-        <div className="text-red-600 text-sm">
-          Failed to load graph: {(error as Error).message}
-        </div>
-      )}
-
-      <div
-        data-testid="kg-canvas"
-        className="relative flex-1 min-h-[400px] border border-gray-200 rounded bg-white overflow-hidden"
-      >
-        {model && (
-          <ReactFlowProvider>
-            <KgGraphInner model={model} registerControls={registerControls} />
-          </ReactFlowProvider>
+        {isLoading && (
+          <div className="text-gray-500 italic">Loading graph...</div>
         )}
+        {error && (
+          <div className="text-red-600 text-sm">
+            Failed to load graph: {(error as Error).message}
+          </div>
+        )}
+
+        <div
+          data-testid="kg-canvas"
+          className="relative flex-1 min-h-[400px] border border-gray-200 rounded bg-white overflow-hidden"
+        >
+          {model && (
+            <ReactFlowProvider>
+              <KgGraphInner model={model} registerControls={registerControls} />
+            </ReactFlowProvider>
+          )}
+        </div>
       </div>
     </div>
   );
