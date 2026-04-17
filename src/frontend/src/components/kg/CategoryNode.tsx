@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
-import { styleForPillar } from "./kgStyles";
+import { LAYOUT_CONFIG, styleForPillar } from "./kgStyles";
 
 export interface CategoryNodeData extends Record<string, unknown> {
   meta: NodeMeta;
@@ -45,8 +45,8 @@ function CategoryNodeInner({ id, data }: NodeProps) {
       onKeyDown={handleKeyDown}
       className={`relative rounded-lg bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
       style={{
-        width: 200,
-        height: 40,
+        width: LAYOUT_CONFIG.categoryNode.width,
+        height: LAYOUT_CONFIG.categoryNode.height,
         contain: "size",
         borderLeft: `${isHub ? 4 : 2}px solid ${style.border}`,
         borderTop: isHub ? `2px solid ${style.border}` : undefined,
@@ -58,7 +58,7 @@ function CategoryNodeInner({ id, data }: NodeProps) {
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
       <div className="flex items-center justify-between h-full px-3">
         <span
-          className="truncate text-[13px] font-semibold text-gray-800"
+          className="line-clamp-2 break-words leading-tight text-[15px] font-semibold text-gray-800"
           title={meta.title}
         >
           {meta.title}

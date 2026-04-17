@@ -395,3 +395,10 @@
 - **Sanity check result**: `npm run build` succeeds (1.06s, 0 TS errors); `npx vitest run` 67/67 pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-488 --status completed`
+
+## 2026-04-17 10:39 -- [T-P0-489] KG-UX-03: Multi-line titles, wider nodes, bigger fonts
+- **What I did**: Enlarged KG node boxes and replaced single-line truncate with two-line wrap on titles. In `src/frontend/src/components/kg/kgStyles.ts`, bumped `LAYOUT_CONFIG` to pillarNode 280x60, categoryNode 260x54, leafNode 240x48 (was 240x48 / 200x40 / 180x36). In `PillarNode.tsx` and `CategoryNode.tsx`, replaced the inline hardcoded width/height with `LAYOUT_CONFIG.{pillar,category}Node.{width,height}` so ELK layout (which already reads LAYOUT_CONFIG in `useKgLayout.dimensionsFor`) and the rendered box stay in sync; imported `LAYOUT_CONFIG` in both. Title spans switched from `truncate` to `line-clamp-2 break-words leading-tight` with larger fonts: pillar text-[17px] font-bold, category text-[15px] font-semibold, leaf text-[14px] font-medium. Pillar subtitle ("N categories") kept on a single line via `truncate text-[10px]` to preserve the title/subtitle hierarchy; leaf completeness arc (non-text) untouched. LeafNode already pulled dimensions from `LAYOUT_CONFIG.leafNode` so it picks up the 240x48 base automatically (scaled by `meta.importanceScale` for hub leaves).
+- **Deliverables**: src/frontend/src/components/kg/kgStyles.ts (+3/-3), src/frontend/src/components/kg/PillarNode.tsx (+3/-3), src/frontend/src/components/kg/CategoryNode.tsx (+3/-3), src/frontend/src/components/kg/LeafNode.tsx (+1/-1).
+- **Sanity check result**: `npm run build` succeeds (1.03s, 0 TS errors); `npx vitest run` 67/67 pass. Could not directly verify AC1 id=196 (the local `mle_prep.db` only has 6 framework_node rows, all titles under 70 chars) — but 280x60 pillar box with line-clamp-2 at 17px/leading-tight accommodates ~80 chars across two lines. Longer titles still truncate via the line-clamp rule (AC2).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-489 --status completed`

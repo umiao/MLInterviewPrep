@@ -40,9 +40,9 @@ export const LAYOUT_CONFIG = {
   pillarColWidth: 260,
   categoryColWidth: 220,
   leafColWidth: 200,
-  pillarNode: { width: 240, height: 48 },
-  categoryNode: { width: 200, height: 40 },
-  leafNode: { width: 180, height: 36 },
+  pillarNode: { width: 280, height: 60 },
+  categoryNode: { width: 260, height: 54 },
+  leafNode: { width: 240, height: 48 },
 };
 
 export const EDGE_STYLES = {

@@ -127,7 +127,7 @@ function LeafNodeInner({ id, data }: NodeProps) {
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
       <div className="flex items-center justify-between h-full px-2.5">
         <span
-          className="truncate text-[12px] font-medium text-gray-700 pr-2"
+          className="line-clamp-2 break-words leading-tight text-[14px] font-medium text-gray-700 pr-2"
           title={meta.title}
         >
           {meta.title}

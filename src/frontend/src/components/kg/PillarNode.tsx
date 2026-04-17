@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
-import { styleForPillar } from "./kgStyles";
+import { LAYOUT_CONFIG, styleForPillar } from "./kgStyles";
 
 export interface PillarNodeData extends Record<string, unknown> {
   meta: NodeMeta;
@@ -45,8 +45,8 @@ function PillarNodeInner({ id, data }: NodeProps) {
       onKeyDown={handleKeyDown}
       className={`relative rounded-xl bg-white shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
       style={{
-        width: 240,
-        height: 48,
+        width: LAYOUT_CONFIG.pillarNode.width,
+        height: LAYOUT_CONFIG.pillarNode.height,
         contain: "size",
         borderLeft: `${isHub ? 6 : 4}px solid ${style.border}`,
         borderTop: isHub ? `2px solid ${style.border}` : undefined,
@@ -60,12 +60,12 @@ function PillarNodeInner({ id, data }: NodeProps) {
       <div className="flex items-center justify-between h-full px-3">
         <div className="flex flex-col overflow-hidden">
           <span
-            className="truncate text-[15px] font-bold text-gray-900"
+            className="line-clamp-2 break-words leading-tight text-[17px] font-bold text-gray-900"
             title={meta.pillarName}
           >
             {meta.pillarName}
           </span>
-          <span className="text-[10px] text-gray-500">
+          <span className="truncate text-[10px] text-gray-500">
             {meta.childCount} categories
           </span>
         </div>

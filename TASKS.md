@@ -9,24 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.
-
-Files: src/frontend/src/components/kg/kgStyles.ts, PillarNode.tsx, CategoryNode.tsx, LeafNode.tsx
-Changes:
-- LAYOUT_CONFIG.pillarNode: {w:280, h:60}; categoryNode: {w:260, h:54}; leafNode: {w:240, h:48}
-- truncate -> line-clamp-2 + break-words on title spans
-- Fonts: pillar text-[17px] font-bold; category text-[15px] font-semibold; leaf text-[14px] font-medium
-- Subtitle (categories count / content arc) still single-line
-AC:
-1. id=196 (82-char title) shows 2 lines, no truncation
-2. line-clamp-2 truncates longer still
-3. Build passes
-4. Smoke test: /kg, all pillar/category titles readable; no text overflow outside border
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge
@@ -171,6 +153,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
+- [x] **2026-04-17** -- T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts. Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.
 - [x] **2026-04-17** -- T-P0-488: KG-UX-02: Preserve focus on expand/collapse (setCenter). Clicking expand reshuffles layout and user loses focus on the clicked node. Fix: after layoutAll(), if a node was just a
 - [x] **2026-04-17** -- T-P0-487: KG-UX-01: Restore pan-drag and add Controls panel. Canvas is unpannable after zoom. Fix: panOnDrag=true, panOnScroll=false, zoomOnScroll=true. Add <Controls> (zoom in/out/
 - [x] **2026-04-17** -- T-P0-485: [KG-VIZ-R02] Visual encoding: palette + importance/completeness indicators + polish. Visual design pass after R01 migration. Adds information-dense encoding beyond just pillar color.
