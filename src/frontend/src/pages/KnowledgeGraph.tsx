@@ -132,6 +132,10 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   const [rfEdges, setRfEdges] = useState<Edge[]>([]);
   const debounceRef = useRef<number | null>(null);
   const initialFitDone = useRef(false);
+  // Refs mirror hoveredId/hoveredNeighbors so the structural layout effect
+  // can read them without depending on them (avoids flicker on hover).
+  const hoveredIdRef = useRef<string | null>(null);
+  const hoveredNeighborsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (debounceRef.current != null) window.clearTimeout(debounceRef.current);
@@ -163,6 +167,9 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     () => neighborsOfHover(model, visibleIds, hoveredId),
     [model, visibleIds, hoveredId],
   );
+  // Keep refs in sync for the structural layout effect to read without depending.
+  hoveredIdRef.current = hoveredId;
+  hoveredNeighborsRef.current = hoveredNeighbors;
 
   const handleActivate = useCallback(
     (id: string) => {
@@ -215,11 +222,38 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     ),
   });
 
-  // Initial full layout.
+  // ---- STRUCTURAL LAYOUT (runs on mount + expand/collapse) ----
+  // Only depends on model, visibleIds, effectiveExpanded. Does NOT depend on
+  // hover/selection state — those are handled by a lightweight updater below.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      await layout.layoutAll(model, visibleIds);
+      if (!initialFitDone.current) {
+        // First mount: full ELK pass.
+        await layout.layoutAll(model, visibleIds);
+      } else {
+        // Incremental: layout only newly-visible nodes relative to parent.
+        const missing = [...visibleIds].filter(
+          (id) => !layout.getPosition(id),
+        );
+        if (missing.length > 0) {
+          const parents = new Set<string>();
+          for (const id of missing) {
+            const parent = model.nodesById.get(id)?.parentId;
+            if (parent) parents.add(parent);
+          }
+          for (const parentId of parents) {
+            const siblingAndSelf = new Set<string>([parentId]);
+            for (const kid of model.childrenOf.get(parentId) ?? []) {
+              if (visibleIds.has(kid)) siblingAndSelf.add(kid);
+            }
+            await layout.layoutSubset(model, siblingAndSelf, {
+              anchorId: parentId,
+            });
+            if (cancelled) return;
+          }
+        }
+      }
       if (cancelled) return;
       const base = buildReactFlowNodes(
         model,
@@ -229,79 +263,58 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         searchMatches,
         searchMatches.size > 0,
         {
-          hoveredId,
-          hoveredNeighbors,
+          hoveredId: hoveredIdRef.current,
+          hoveredNeighbors: hoveredNeighborsRef.current,
           onActivate: handleActivate,
         },
       );
       const positioned = sortByTreeOrder(layout.applyPositions(base));
       setRfNodes(positioned);
       setRfEdges(
-        decorateEdges(buildReactFlowEdges(model, visibleIds, hoveredId)),
+        decorateEdges(
+          buildReactFlowEdges(model, visibleIds, hoveredIdRef.current),
+        ),
       );
-      // fitView once layout is in place.
-      requestAnimationFrame(() => {
-        rf.fitView({ padding: 0.1, duration: 300 });
-        initialFitDone.current = true;
-      });
+      if (!initialFitDone.current) {
+        requestAnimationFrame(() => {
+          rf.fitView({ padding: 0.1, duration: 300 });
+          initialFitDone.current = true;
+        });
+      }
     })();
     return () => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [model]);
+  }, [model, visibleIds, effectiveExpanded, searchMatches]);
 
-  // Incremental layout on expand/collapse or visible-set change.
+  // ---- LIGHTWEIGHT VISUAL UPDATE (hover / selection) ----
+  // Updates node data and edge styles in-place without re-running layout.
+  // Uses refs for hover state to avoid triggering the structural effect above.
   useEffect(() => {
     if (!initialFitDone.current) return;
-    let cancelled = false;
-    (async () => {
-      // Ensure every visible node has a position. Nodes that were newly
-      // revealed lack cached coords -- layout just those relative to their
-      // parent (anchor).
-      const missing = [...visibleIds].filter(
-        (id) => !layout.getPosition(id),
-      );
-      if (missing.length > 0) {
-        const parents = new Set<string>();
-        for (const id of missing) {
-          const parent = model.nodesById.get(id)?.parentId;
-          if (parent) parents.add(parent);
-        }
-        for (const parentId of parents) {
-          const siblingAndSelf = new Set<string>([parentId]);
-          for (const kid of model.childrenOf.get(parentId) ?? []) {
-            if (visibleIds.has(kid)) siblingAndSelf.add(kid);
-          }
-          await layout.layoutSubset(model, siblingAndSelf, {
-            anchorId: parentId,
-          });
-          if (cancelled) return;
-        }
-      }
-      const base = buildReactFlowNodes(
-        model,
-        visibleIds,
-        effectiveExpanded,
-        selectedId,
-        searchMatches,
-        searchMatches.size > 0,
-        {
-          hoveredId,
-          hoveredNeighbors,
-          onActivate: handleActivate,
+    setRfNodes((prev) =>
+      prev.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          isSelected: selectedId === n.id,
+          isHovered: hoveredId === n.id,
+          isNeighborOfHover: hoveredNeighbors.has(n.id),
         },
-      );
-      setRfNodes(sortByTreeOrder(layout.applyPositions(base)));
-      setRfEdges(
-        decorateEdges(buildReactFlowEdges(model, visibleIds, hoveredId)),
-      );
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleIds, effectiveExpanded, selectedId, searchMatches, hoveredId, hoveredNeighbors, handleActivate]);
+      })),
+    );
+    setRfEdges((prev) =>
+      prev.map((e) => {
+        const relation = (e.data?.relation as string) ?? "parent";
+        const src = e.source;
+        const dst = e.target;
+        const highlighted =
+          hoveredId != null && (src === hoveredId || dst === hoveredId);
+        return { ...e, style: edgeStyleFor(relation, highlighted) };
+      }),
+    );
+  }, [hoveredId, hoveredNeighbors, selectedId]);
 
   // Auto-zoom + pan to first search match.
   useEffect(() => {
@@ -426,9 +439,12 @@ export default function KnowledgeGraph() {
           </div>
           <div className="flex flex-wrap gap-2 text-[10px] text-gray-700">
             {pillars.map(([key, s]) => (
-              <span
+              <button
                 key={key}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded"
+                type="button"
+                title={`Toggle ${s.name}`}
+                onClick={() => controlsRef.current?.expandAll()}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded cursor-pointer hover:ring-1 hover:ring-gray-400 transition-shadow"
                 style={{ backgroundColor: s.bg, color: s.border }}
               >
                 <span
@@ -437,7 +453,7 @@ export default function KnowledgeGraph() {
                   style={{ backgroundColor: s.border }}
                 />
                 {s.name}
-              </span>
+              </button>
             ))}
           </div>
         </div>
