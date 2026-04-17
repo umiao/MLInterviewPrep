@@ -1,4 +1,9 @@
-import type { ElementDefinition } from "cytoscape";
+// Helpers that transform the /api/kg/graph payload into the shape our
+// React Flow + ELK.js based viewer consumes. Adds pillar/category/leaf
+// node kinds and derives expand state.
+
+import type { Edge, Node } from "@xyflow/react";
+import { PILLAR_STYLES, styleForPillar } from "../components/kg/kgStyles";
 
 export interface KgNode {
   id: number;
@@ -24,55 +29,215 @@ export interface KgGraphResponse {
   edges: KgEdge[];
 }
 
-export const PILLAR_COLORS: Record<string, string> = {
-  pillar1: "#ef4444",
-  pillar2: "#f97316",
-  pillar3: "#eab308",
-  pillar4: "#22c55e",
-  pillar5: "#06b6d4",
-  pillar6: "#3b82f6",
-  pillar7: "#8b5cf6",
-  pillar8: "#ec4899",
-};
+export type NodeKind = "pillar" | "category" | "leaf";
 
-export function colorForPillar(pillar: string | null): string {
-  if (!pillar) return "#9ca3af";
-  return PILLAR_COLORS[pillar] ?? "#9ca3af";
+export interface NodeMeta {
+  id: string;
+  rawId: number;
+  kind: NodeKind;
+  pillar: string | null;
+  pillarName: string;
+  title: string;
+  depth: number;
+  parentId: string | null;
+  contentLength: number;
+  path: string;
+  childCount: number;
 }
 
-export function buildElements(
-  data: KgGraphResponse,
-  search: string,
-): ElementDefinition[] {
-  const lc = search.trim().toLowerCase();
-  const elements: ElementDefinition[] = [];
+export interface KgGraphModel {
+  nodesById: Map<string, NodeMeta>;
+  childrenOf: Map<string, string[]>;
+  pillarIds: string[];
+  edges: KgEdge[];
+  rawResponse: KgGraphResponse;
+}
+
+export function colorForPillar(pillar: string | null | undefined): string {
+  return styleForPillar(pillar).border;
+}
+
+export function nodeIdOf(rawId: number): string {
+  return `n${rawId}`;
+}
+
+function kindForDepth(depth: number): NodeKind {
+  if (depth <= 0) return "pillar";
+  if (depth === 1) return "category";
+  return "leaf";
+}
+
+export function buildGraphModel(data: KgGraphResponse): KgGraphModel {
+  const nodesById = new Map<string, NodeMeta>();
+  const childrenOf = new Map<string, string[]>();
+  const pillarIds: string[] = [];
+  const childCounts = new Map<string, number>();
+
   for (const n of data.nodes) {
-    const matches = !lc || n.title.toLowerCase().includes(lc);
-    elements.push({
-      data: {
-        id: `n${n.id}`,
-        label: n.title,
-        nodeId: n.id,
-        pillar: n.pillar ?? "unknown",
-        depth: n.depth,
-        color: colorForPillar(n.pillar),
-        dim: lc ? !matches : false,
-      },
-    });
+    if (n.parent_id != null) {
+      const parentKey = nodeIdOf(n.parent_id);
+      childCounts.set(parentKey, (childCounts.get(parentKey) ?? 0) + 1);
+    }
   }
-  const validIds = new Set(data.nodes.map((n) => `n${n.id}`));
-  for (const e of data.edges) {
-    const src = `n${e.src_id}`;
-    const dst = `n${e.dst_id}`;
-    if (!validIds.has(src) || !validIds.has(dst)) continue;
-    elements.push({
-      data: {
-        id: `e${e.src_id}-${e.dst_id}-${e.relation}`,
-        source: src,
-        target: dst,
-        relation: e.relation,
-      },
-    });
+
+  for (const n of data.nodes) {
+    const id = nodeIdOf(n.id);
+    const parentId = n.parent_id != null ? nodeIdOf(n.parent_id) : null;
+    const meta: NodeMeta = {
+      id,
+      rawId: n.id,
+      kind: kindForDepth(n.depth),
+      pillar: n.pillar,
+      pillarName: styleForPillar(n.pillar).name,
+      title: n.title,
+      depth: n.depth,
+      parentId,
+      contentLength: n.content_length,
+      path: n.path,
+      childCount: childCounts.get(id) ?? 0,
+    };
+    nodesById.set(id, meta);
+    if (meta.kind === "pillar") pillarIds.push(id);
+    if (parentId) {
+      const arr = childrenOf.get(parentId) ?? [];
+      arr.push(id);
+      childrenOf.set(parentId, arr);
+    }
   }
-  return elements;
+
+  const validIds = new Set(data.nodes.map((n) => nodeIdOf(n.id)));
+  const edges = data.edges.filter(
+    (e) => validIds.has(nodeIdOf(e.src_id)) && validIds.has(nodeIdOf(e.dst_id)),
+  );
+
+  return { nodesById, childrenOf, pillarIds, edges, rawResponse: data };
 }
+
+/**
+ * Default expanded set: all pillars only. Categories themselves are visible
+ * (as pillar children) but their leaf children stay hidden until the user
+ * clicks a category. This yields the "pillar + category" skeleton the spec
+ * calls for (~49 nodes) on first render.
+ */
+export function defaultExpandedSet(model: KgGraphModel): Set<string> {
+  const expanded = new Set<string>();
+  for (const id of model.pillarIds) expanded.add(id);
+  return expanded;
+}
+
+/**
+ * Visible nodes: pillars always visible; deeper nodes visible iff every
+ * ancestor is expanded.
+ */
+export function computeVisibleNodeIds(
+  model: KgGraphModel,
+  expanded: Set<string>,
+): Set<string> {
+  const visible = new Set<string>();
+  for (const id of model.pillarIds) visible.add(id);
+  const stack = [...model.pillarIds];
+  while (stack.length) {
+    const current = stack.pop()!;
+    if (!expanded.has(current)) continue;
+    const kids = model.childrenOf.get(current) ?? [];
+    for (const kid of kids) {
+      visible.add(kid);
+      stack.push(kid);
+    }
+  }
+  return visible;
+}
+
+export function buildReactFlowNodes(
+  model: KgGraphModel,
+  visible: Set<string>,
+  expanded: Set<string>,
+  selectedId: string | null,
+  searchMatches: Set<string>,
+  hasActiveSearch: boolean,
+): Node[] {
+  const out: Node[] = [];
+  for (const id of visible) {
+    const meta = model.nodesById.get(id)!;
+    const isExpanded = expanded.has(id);
+    const isMatch = searchMatches.has(id);
+    const dimmed = hasActiveSearch && !isMatch;
+    out.push({
+      id,
+      type: meta.kind,
+      position: { x: 0, y: 0 },
+      data: {
+        meta,
+        isExpanded,
+        isSelected: selectedId === id,
+        isMatch,
+        dimmed,
+      },
+      draggable: false,
+      selectable: true,
+      connectable: false,
+    });
+  }
+  return out;
+}
+
+export function buildReactFlowEdges(
+  model: KgGraphModel,
+  visible: Set<string>,
+  hoveredId: string | null,
+): Edge[] {
+  const out: Edge[] = [];
+  for (const e of model.edges) {
+    const src = nodeIdOf(e.src_id);
+    const dst = nodeIdOf(e.dst_id);
+    if (!visible.has(src) || !visible.has(dst)) continue;
+    const isParent = e.relation === "parent";
+    const isCanonical = e.relation === "canonical";
+    const connectedToHover = hoveredId != null && (hoveredId === src || hoveredId === dst);
+    out.push({
+      id: `${src}-${dst}-${e.relation}`,
+      source: src,
+      target: dst,
+      type: isParent ? "smoothstep" : "default",
+      animated: isCanonical,
+      data: { relation: e.relation, highlighted: connectedToHover },
+    });
+  }
+  return out;
+}
+
+export function findSearchMatches(
+  model: KgGraphModel,
+  query: string,
+): Set<string> {
+  const matches = new Set<string>();
+  const q = query.trim().toLowerCase();
+  if (!q) return matches;
+  for (const [id, meta] of model.nodesById) {
+    if (meta.title.toLowerCase().includes(q)) matches.add(id);
+  }
+  return matches;
+}
+
+/**
+ * Expand ancestors of all match ids so they become visible on search.
+ */
+export function expandToReveal(
+  model: KgGraphModel,
+  ids: Set<string>,
+  baseExpanded: Set<string>,
+): Set<string> {
+  const next = new Set(baseExpanded);
+  for (const id of ids) {
+    let cursor: string | null = model.nodesById.get(id)?.parentId ?? null;
+    while (cursor) {
+      next.add(cursor);
+      cursor = model.nodesById.get(cursor)?.parentId ?? null;
+    }
+  }
+  return next;
+}
+
+export const PILLAR_COLORS: Record<string, string> = Object.fromEntries(
+  Object.entries(PILLAR_STYLES).map(([k, v]) => [k, v.border]),
+);

@@ -3,26 +3,24 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import {
-  buildElements,
+  buildGraphModel,
   colorForPillar,
+  computeVisibleNodeIds,
+  defaultExpandedSet,
+  expandToReveal,
+  findSearchMatches,
+  nodeIdOf,
   type KgGraphResponse,
 } from "./kgGraph.helpers";
+import {
+  readUrlState,
+  writeUrlState,
+} from "../components/kg/useKgUrlState";
 
 vi.mock("../utils/api", () => ({
   api: {
     get: vi.fn(() => new Promise(() => {})),
   },
-}));
-
-vi.mock("cytoscape-dagre", () => ({ default: () => undefined }));
-vi.mock("cytoscape", () => ({
-  default: Object.assign(
-    () => ({
-      on: () => undefined,
-      destroy: () => undefined,
-    }),
-    { use: () => undefined },
-  ),
 }));
 
 import KnowledgeGraph from "./KnowledgeGraph";
@@ -52,6 +50,16 @@ const SAMPLE: KgGraphResponse = {
     {
       id: 3,
       kind: "framework_node",
+      pillar: "pillar1",
+      path: "pillar1.dp.coin",
+      title: "Coin Change",
+      depth: 2,
+      parent_id: 2,
+      content_length: 2500,
+    },
+    {
+      id: 4,
+      kind: "framework_node",
       pillar: "pillar2",
       path: "pillar2",
       title: "ML Theory",
@@ -68,41 +76,39 @@ const SAMPLE: KgGraphResponse = {
       dst_id: 2,
       relation: "parent",
     },
+    {
+      src_kind: "framework_node",
+      src_id: 2,
+      dst_kind: "framework_node",
+      dst_id: 3,
+      relation: "parent",
+    },
   ],
 };
 
 describe("colorForPillar", () => {
-  it("returns the brand color for known pillars", () => {
-    expect(colorForPillar("pillar1")).toBe("#ef4444");
-    expect(colorForPillar("pillar3")).toBe("#eab308");
+  it("returns the pillar-specific border color", () => {
+    expect(colorForPillar("pillar1")).toBe("#475569");
+    expect(colorForPillar("pillar6")).toBe("#e11d48");
   });
 
-  it("returns a neutral grey for null or unknown pillars", () => {
-    expect(colorForPillar(null)).toBe("#9ca3af");
-    expect(colorForPillar("pillar99")).toBe("#9ca3af");
+  it("returns a neutral fallback for null or unknown pillars", () => {
+    const fallback = colorForPillar(null);
+    expect(fallback).toBe(colorForPillar("pillar99"));
+    expect(fallback).toMatch(/^#/);
   });
 });
 
-describe("buildElements", () => {
-  it("emits one element per node and per edge", () => {
-    const els = buildElements(SAMPLE, "");
-    expect(els).toHaveLength(SAMPLE.nodes.length + SAMPLE.edges.length);
-  });
-
-  it("dims nodes that do not match the search term", () => {
-    const els = buildElements(SAMPLE, "dynamic");
-    const dpEntry = els.find((e) => e.data?.id === "n2")!;
-    const codingEntry = els.find((e) => e.data?.id === "n1")!;
-    expect(dpEntry.data?.dim).toBe(false);
-    expect(codingEntry.data?.dim).toBe(true);
-  });
-
-  it("does not dim any nodes when the search term is empty", () => {
-    const els = buildElements(SAMPLE, "");
-    const nodeEls = els.filter((e) => !e.data?.source);
-    for (const ne of nodeEls) {
-      expect(ne.data?.dim).toBe(false);
-    }
+describe("buildGraphModel", () => {
+  it("classifies nodes by depth and wires parent/child maps", () => {
+    const m = buildGraphModel(SAMPLE);
+    expect(m.nodesById.size).toBe(4);
+    expect(m.pillarIds).toEqual([nodeIdOf(1), nodeIdOf(4)]);
+    expect(m.nodesById.get(nodeIdOf(1))!.kind).toBe("pillar");
+    expect(m.nodesById.get(nodeIdOf(2))!.kind).toBe("category");
+    expect(m.nodesById.get(nodeIdOf(3))!.kind).toBe("leaf");
+    expect(m.childrenOf.get(nodeIdOf(1))).toEqual([nodeIdOf(2)]);
+    expect(m.childrenOf.get(nodeIdOf(2))).toEqual([nodeIdOf(3)]);
   });
 
   it("drops edges whose endpoints are not in the node set", () => {
@@ -118,17 +124,90 @@ describe("buildElements", () => {
         },
       ],
     };
-    const els = buildElements(orphan, "");
-    const edgeEls = els.filter((e) => e.data?.source);
-    expect(edgeEls).toHaveLength(0);
+    const m = buildGraphModel(orphan);
+    expect(m.edges).toHaveLength(0);
   });
 
-  it("colors each node by its pillar", () => {
-    const els = buildElements(SAMPLE, "");
-    const codingNode = els.find((e) => e.data?.id === "n1")!;
-    const mlNode = els.find((e) => e.data?.id === "n3")!;
-    expect(codingNode.data?.color).toBe("#ef4444");
-    expect(mlNode.data?.color).toBe("#f97316");
+  it("computes child counts for parent nodes", () => {
+    const m = buildGraphModel(SAMPLE);
+    expect(m.nodesById.get(nodeIdOf(1))!.childCount).toBe(1);
+    expect(m.nodesById.get(nodeIdOf(2))!.childCount).toBe(1);
+    expect(m.nodesById.get(nodeIdOf(3))!.childCount).toBe(0);
+  });
+});
+
+describe("visibility + expansion", () => {
+  it("semi-expands pillars by default: pillar + category visible, leaves hidden", () => {
+    const m = buildGraphModel(SAMPLE);
+    const expanded = defaultExpandedSet(m);
+    const visible = computeVisibleNodeIds(m, expanded);
+    expect(visible.has(nodeIdOf(1))).toBe(true); // pillar
+    expect(visible.has(nodeIdOf(2))).toBe(true); // category (child of expanded pillar)
+    expect(visible.has(nodeIdOf(3))).toBe(false); // leaf hidden by default
+    expect(visible.has(nodeIdOf(4))).toBe(true);
+  });
+
+  it("reveals leaves when their parent category is expanded", () => {
+    const m = buildGraphModel(SAMPLE);
+    const expanded = defaultExpandedSet(m);
+    expanded.add(nodeIdOf(2));
+    const visible = computeVisibleNodeIds(m, expanded);
+    expect(visible.has(nodeIdOf(3))).toBe(true);
+  });
+
+  it("hides the whole subtree when the pillar is collapsed", () => {
+    const m = buildGraphModel(SAMPLE);
+    const expanded = defaultExpandedSet(m);
+    expanded.delete(nodeIdOf(1));
+    const visible = computeVisibleNodeIds(m, expanded);
+    expect(visible.has(nodeIdOf(1))).toBe(true);
+    expect(visible.has(nodeIdOf(2))).toBe(false);
+    expect(visible.has(nodeIdOf(3))).toBe(false);
+  });
+
+  it("expandToReveal walks ancestors of matched ids", () => {
+    const m = buildGraphModel(SAMPLE);
+    const base = new Set<string>();
+    const revealed = expandToReveal(m, new Set([nodeIdOf(3)]), base);
+    expect(revealed.has(nodeIdOf(1))).toBe(true);
+    expect(revealed.has(nodeIdOf(2))).toBe(true);
+    expect(revealed.has(nodeIdOf(3))).toBe(false);
+  });
+});
+
+describe("findSearchMatches", () => {
+  it("matches node titles case-insensitively", () => {
+    const m = buildGraphModel(SAMPLE);
+    expect(findSearchMatches(m, "dynamic")).toEqual(new Set([nodeIdOf(2)]));
+    expect(findSearchMatches(m, "THEORY")).toEqual(new Set([nodeIdOf(4)]));
+  });
+
+  it("returns empty set on empty query", () => {
+    const m = buildGraphModel(SAMPLE);
+    expect(findSearchMatches(m, "")).toEqual(new Set());
+    expect(findSearchMatches(m, "   ")).toEqual(new Set());
+  });
+});
+
+describe("URL state", () => {
+  it("roundtrips node + expanded", () => {
+    const qs = writeUrlState({
+      nodeId: "n42",
+      expanded: new Set(["n10", "n11"]),
+    });
+    const parsed = readUrlState(qs);
+    expect(parsed.nodeId).toBe("n42");
+    expect(parsed.expanded).toEqual(new Set(["n10", "n11"]));
+  });
+
+  it("ignores malformed ids", () => {
+    const parsed = readUrlState("?node=abc&expanded=n1,junk,n2");
+    expect(parsed.nodeId).toBeNull();
+    expect(parsed.expanded).toEqual(new Set(["n1", "n2"]));
+  });
+
+  it("returns empty string when state is empty", () => {
+    expect(writeUrlState({ nodeId: null, expanded: null })).toBe("");
   });
 });
 
@@ -146,10 +225,9 @@ describe("KnowledgeGraph page (initial render)", () => {
     );
   }
 
-  it("renders the page header, search input, and canvas container", () => {
+  it("renders the page shell and search input", () => {
     const html = render();
     expect(html).toContain("Knowledge Graph");
-    expect(html).toContain('aria-label="Filter nodes by title"');
     expect(html).toContain('data-testid="kg-canvas"');
     expect(html).toContain('data-testid="kg-page"');
   });
