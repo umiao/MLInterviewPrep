@@ -357,3 +357,9 @@
 - **Sanity check result**: npm run build 0 TS errors (1.06s); vitest 67/67 pass. Static Playwright screenshot stable. Live browser hover verification pending user feedback.
 - **Status**: [PARTIAL] — code fix committed + tested, awaiting user browser confirmation that jitter is resolved. Port 8000 error diagnosed as transient.
 - **Request**: No task_db change — continuation of adhoc hotfix.
+## 2026-04-17 08:05 -- [KG-VIZ-hotfix3] Eliminate hover bounce: portal tooltip + React.memo + contain:size
+- **What I did**: User reported bounce still present after hotfix2. Researched React Flow hover jitter via dedicated Explore agent — found root cause: HoverTooltip rendered inside node div changes DOM bounding box → ResizeObserver → re-measure → position shift → mouse leave → tooltip disappears → bounce loop. Applied three-pronged fix: (1) Moved tooltip to portal-level PortalTooltip component rendered as sibling of ReactFlow, positioned via flowToScreenPosition() — tooltip no longer part of node DOM. (2) Wrapped all 3 node components (PillarNode, CategoryNode, LeafNode) in React.memo with custom comparator — unchanged nodes skip re-render. (3) Added CSS `contain: size` to all node wrapper styles — prevents ResizeObserver from detecting dimension changes from CSS effects (shadow, ring). Removed HoverTooltip import from all 3 node files.
+- **Deliverables**: 4 files modified (KnowledgeGraph.tsx, PillarNode.tsx, CategoryNode.tsx, LeafNode.tsx), commit 89af1b9.
+- **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. Playwright static screenshot stable. Live browser bounce verification pending user feedback.
+- **Status**: [PARTIAL] — fix committed + tested, awaiting user browser confirmation.
+- **Request**: No task_db change — adhoc hotfix continuation.
