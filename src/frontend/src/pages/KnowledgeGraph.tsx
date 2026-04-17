@@ -64,18 +64,27 @@ const NODE_TYPES = {
   leaf: LeafNode,
 };
 
-function edgeStyleFor(relation: string, highlighted: boolean) {
+function edgeStyleFor(
+  relation: string,
+  highlighted: boolean,
+  sourcePillar: string | null | undefined,
+) {
+  if (relation === "parent") {
+    return {
+      stroke: styleForPillar(sourcePillar).border,
+      strokeWidth: EDGE_STYLES.parent.strokeWidth,
+      opacity: highlighted ? EDGE_STYLES.fullOpacity : EDGE_STYLES.parent.opacity,
+    };
+  }
   const base =
-    relation === "parent"
-      ? EDGE_STYLES.parent
-      : relation === "canonical"
-        ? EDGE_STYLES.canonical
-        : relation === "see_also"
-          ? EDGE_STYLES.seeAlso
-          : relation === "drill"
-            ? EDGE_STYLES.drill
-            : EDGE_STYLES.other;
-  const isSoft = relation !== "parent" && relation !== "canonical";
+    relation === "canonical"
+      ? EDGE_STYLES.canonical
+      : relation === "see_also"
+        ? EDGE_STYLES.seeAlso
+        : relation === "drill"
+          ? EDGE_STYLES.drill
+          : EDGE_STYLES.other;
+  const isSoft = relation !== "canonical";
   return {
     stroke: base.stroke,
     strokeWidth: base.strokeWidth,
@@ -91,7 +100,8 @@ function decorateEdges(edges: Edge[]): Edge[] {
   return edges.map((e) => {
     const relation = (e.data?.relation as string) ?? "parent";
     const highlighted = Boolean(e.data?.highlighted);
-    return { ...e, style: edgeStyleFor(relation, highlighted) };
+    const sourcePillar = e.data?.sourcePillar as string | null | undefined;
+    return { ...e, style: edgeStyleFor(relation, highlighted, sourcePillar) };
   });
 }
 

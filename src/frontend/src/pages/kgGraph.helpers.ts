@@ -252,16 +252,21 @@ export function buildReactFlowEdges(
     const src = nodeIdOf(e.src_id);
     const dst = nodeIdOf(e.dst_id);
     if (!visible.has(src) || !visible.has(dst)) continue;
-    const isParent = e.relation === "parent";
     const isCanonical = e.relation === "canonical";
     const connectedToHover = hoveredId != null && (hoveredId === src || hoveredId === dst);
+    const sourcePillar = model.nodesById.get(src)?.pillar ?? null;
     out.push({
       id: `${src}-${dst}-${e.relation}`,
       source: src,
       target: dst,
-      type: isParent ? "smoothstep" : "default",
+      // All edges use the default bezier type for mindmap aesthetic.
+      type: "default",
       animated: isCanonical,
-      data: { relation: e.relation, highlighted: connectedToHover },
+      data: {
+        relation: e.relation,
+        highlighted: connectedToHover,
+        sourcePillar,
+      },
     });
   }
   return out;

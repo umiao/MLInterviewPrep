@@ -11,26 +11,40 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-494: [DEBT] helixos: Replace bare python with /c/Anaconda/python.exe in settings.json (11 occurrences) + add setup_python_env.sh
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: helixos/.claude/settings.json uses bare python in all 11 hook commands. Per CLAUDE.md: Never use bare python in hook commands. The Windows Store stub (AppData/Local/Microsoft/WindowsApps/python.exe) exits with code 49, breaking all hooks silently.
+
+MLInterviewPrep already fixed this and uses /c/Anaconda/python.exe in all 11 positions.
+
+Additionally, helixos is missing setup_python_env.sh in .claude/hooks/ and in the SessionStart hook section. MLInterviewPrep has this for Bash tool PATH injection.
+
+Actions:
+1. Replace python with /c/Anaconda/python.exe in all 11 hook command entries in helixos/.claude/settings.json
+2. Copy setup_python_env.sh from MLInterviewPrep/.claude/hooks/ to helixos/.claude/hooks/
+3. Add setup_python_env.sh as first entry in SessionStart hooks section
+
+Priority: P1 because broken hooks mean lint_check, test_check, block_dangerous all silently fail on any Windows session that hits the Store stub.
+
 ### P2 -- Nice to Have
 
-#### T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish
+#### T-P2-493: [SYNC] Propagate dual tasks.db scoping lesson (2026-04-16) from MLInterviewPrep to helixos
 - **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P1-491
-- **Description**: Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap aesthetic.
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: MLInterviewPrep LESSONS.md has a new lesson [2026-04-16] not yet propagated to helixos:
 
-Files: src/frontend/src/pages/KnowledgeGraph.tsx, kgStyles.ts, kgGraph.helpers.ts
-Changes:
-- buildReactFlowEdges: for parent relation, type="default" (bezier). Keep canonical animated.
-- edgeStyleFor: parent edges stroke = styleForPillar(sourcePillarOfEdge).border with 0.7 opacity; strokeWidth: 2. Need pillar lookup in edgeStyleFor (pass src metadata via edge.data.sourcePillar).
-- LAYOUT_CONFIG: rankSep 150 -> 180; nodeSep 40 -> 20 (tighter vertical, wider horizontal)
-- Confirm visual: connecting lines to pillar1 nodes are slate gray, pillar6 nodes are rose, etc.
-AC:
-1. Parent edges render as smooth bezier curves
-2. Edge color matches source-pillar color
-3. Node vertical density increased; horizontal rhythm wider
-4. Build + vitest pass
-5. Smoke test: visually pleasing - no overlapping edges, clear color coding per topic lane
+"Dual tasks.db scoping: task_db.py adds go to cwd nearest CLAUDE.md"
+
+Summary: task_db.py resolves project root from cwd -- tasks added from root Gen_AI_Proj go into root tasks.db, not the sub-project db. autonomous_run.sh cds into sub-project, sees 0 tasks, 10 sessions no-op. Fix: always cd into sub-project before task_db.py add.
+
+Tags in source: #orchestrator #task-db #multi-repo #session-scoping #silent-failure -- all universal.
+
+Action: Append a [PROPAGATED] version of this lesson to helixos/LESSONS.md.
+
+Source: MLInterviewPrep/LESSONS.md, section [2026-04-16].
 
 ### P3 -- Stretch Goals
 
@@ -115,6 +129,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae
 - [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
 - [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc

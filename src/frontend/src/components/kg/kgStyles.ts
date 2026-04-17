@@ -35,8 +35,8 @@ export function colorForPillar(pillar: string | null | undefined): string {
 }
 
 export const LAYOUT_CONFIG = {
-  rankSep: 150,
-  nodeSep: 40,
+  rankSep: 180,
+  nodeSep: 20,
   pillarColWidth: 260,
   categoryColWidth: 220,
   leafColWidth: 200,
@@ -53,7 +53,8 @@ export const LANE_SEPARATOR_STYLE = {
 };
 
 export const EDGE_STYLES = {
-  parent: { stroke: "#cbd5e1", strokeWidth: 1.5 },
+  // Parent edges are pillar-colored at runtime; these are fallback values.
+  parent: { stroke: "#cbd5e1", strokeWidth: 2, opacity: 0.7 },
   canonical: { stroke: "#16a34a", strokeWidth: 2 },
   seeAlso: { stroke: "#0ea5e9", strokeWidth: 1 },
   drill: { stroke: "#8b5cf6", strokeWidth: 1 },

@@ -6,6 +6,7 @@ import { ReactFlowProvider } from "@xyflow/react";
 import {
   allParentIds,
   buildGraphModel,
+  buildReactFlowEdges,
   buildReactFlowNodes,
   colorForPillar,
   computeVisibleNodeIds,
@@ -504,6 +505,30 @@ describe("LeafNode stub badge", () => {
         zIndex={0} />,
     );
     expect(html).not.toContain('data-testid="kg-stub-badge"');
+  });
+});
+
+describe("buildReactFlowEdges (bezier + sourcePillar)", () => {
+  it("emits type='default' (bezier) for all edges, including parent", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1), nodeIdOf(2), nodeIdOf(3)]);
+    const edges = buildReactFlowEdges(m, visible, null);
+    expect(edges.length).toBeGreaterThan(0);
+    for (const e of edges) {
+      expect(e.type).toBe("default");
+    }
+  });
+
+  it("attaches the source node's pillar key to edge.data.sourcePillar", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1), nodeIdOf(2), nodeIdOf(3)]);
+    const edges = buildReactFlowEdges(m, visible, null);
+    // Edge 1->2 has source=pillar1 node; edge 2->3 has source=pillar1 category.
+    const byId = Object.fromEntries(edges.map((e) => [e.id, e]));
+    const e12 = byId[`${nodeIdOf(1)}-${nodeIdOf(2)}-parent`];
+    const e23 = byId[`${nodeIdOf(2)}-${nodeIdOf(3)}-parent`];
+    expect(e12.data?.sourcePillar).toBe("pillar1");
+    expect(e23.data?.sourcePillar).toBe("pillar1");
   });
 });
 
