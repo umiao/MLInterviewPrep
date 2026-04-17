@@ -11,58 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-485
-- **Description**: Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortcuts).
-
-## Features
-
-1. HOVER TOOLTIP:
-   - Floating div positioned above node on mouseenter
-   - Content: Title (bold) / Pillar name (colored badge) / Content: "8,234 chars" or "Stub" / "Click to view"
-   - Disappears on mouseleave
-   - Z-index above edges
-
-2. KEYBOARD NAVIGATION (a11y baseline):
-   - Tab: cycle through visible nodes in tree order (left-to-right, top-to-bottom)
-   - Enter on focused node: open FrameworkNodeDrawer
-   - Escape: close drawer + deselect
-   - Cut: +/-/0 zoom shortcuts (not a11y critical)
-
-3. EXPAND / COLLAPSE ALL:
-   - Button in page header: "Expand All" / "Collapse All"
-   - Updates URL state accordingly
-   - Re-runs incremental layout for newly visible subtrees
-
-4. HOVER EDGE HIGHLIGHT:
-   - On hover any node: all edges connected to that node go from opacity 0.3 -> 1.0
-   - Connected neighbor nodes get subtle highlight (ring-1 ring-gray-300)
-   - On mouseleave: revert
-
-5. CONNECTIVITY BORDER (deferred from R02):
-   - Nodes with >10 concept_links edges get 2px border (hub indicator)
-
-## NOT in scope (per review)
-- Edge legend toggle with checkboxes — CUT (replaced by hover highlight)
-- Pillar filter buttons — CUT
-- +/-/0 zoom shortcuts — CUT
-- Learning Path overlay — DEFERRED (reserve path_id field only)
-- Progressive loading — DEFERRED to future task if node count exceeds 500
-- Mobile layout — desktop-first declared
-
-## Acceptance Criteria
-1. Tooltip shows on hover with correct content
-2. Tab/Enter/Escape keyboard flow works
-3. Expand/Collapse All button toggles all pillars
-4. Edge hover highlight works (0.3 -> 1.0 on connected edges)
-5. Hub nodes (>10 edges) have thicker border
-6. npm run build 0 TS errors
-7. Commit: [KG-VIZ-R03] Interactions: tooltip, keyboard a11y, expand-all, hover highlight
-
-DEPENDS ON: T-P0-485
-
 ### P2 -- Nice to Have
 
 ### P3 -- Stretch Goals
@@ -148,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
 - [x] **2026-04-17** -- T-P0-485: [KG-VIZ-R02] Visual encoding: palette + importance/completeness indicators + polish. Visual design pass after R01 migration. Adds information-dense encoding beyond just pillar color.
 - [x] **2026-04-17** -- T-P0-484: [KG-VIZ-R01] React Flow + ELK.js LR mind-map + incremental layout + URL state. FULL REWRITE of /kg. Remove Cytoscape.js, adopt React Flow + ELK.js for LR mind-map.
 - [x] **2026-04-16** -- T-P2-469: [QIdx-C1] Harden LC import scripts to set family. Harden LC import scripts so new rows no longer default to family=NULL silently.

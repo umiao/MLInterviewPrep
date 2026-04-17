@@ -32,6 +32,7 @@ import {
   styleForPillar,
 } from "../components/kg/kgStyles";
 import {
+  allParentIds,
   buildGraphModel,
   buildReactFlowEdges,
   buildReactFlowNodes,
@@ -39,6 +40,7 @@ import {
   defaultExpandedSet,
   expandToReveal,
   findSearchMatches,
+  neighborsOfHover,
   nodeIdOf,
   type KgGraphModel,
   type KgGraphResponse,
@@ -82,6 +84,19 @@ function decorateEdges(edges: Edge[]): Edge[] {
   });
 }
 
+/**
+ * Sort nodes for predictable Tab traversal: by x (depth) then y (vertical).
+ * In an LR mind-map this yields tree-order: pillars first, then categories,
+ * then leaves, top-to-bottom within each column.
+ */
+function sortByTreeOrder(nodes: Node[]): Node[] {
+  return [...nodes].sort((a, b) => {
+    const dx = a.position.x - b.position.x;
+    if (Math.abs(dx) > 5) return dx;
+    return a.position.y - b.position.y;
+  });
+}
+
 function minimapColor(node: Node): string {
   const meta = node.data?.meta as NodeMeta | undefined;
   return styleForPillar(meta?.pillar).border;
@@ -89,9 +104,10 @@ function minimapColor(node: Node): string {
 
 interface InnerProps {
   model: KgGraphModel;
+  registerControls?: (c: { expandAll: () => void; collapseAll: () => void }) => void;
 }
 
-function KgGraphInner({ model }: InnerProps) {
+function KgGraphInner({ model, registerControls }: InnerProps) {
   const rf = useReactFlow();
   const layout = useKgLayout();
 
@@ -143,6 +159,53 @@ function KgGraphInner({ model }: InnerProps) {
     [model, effectiveExpanded],
   );
 
+  const hoveredNeighbors = useMemo(
+    () => neighborsOfHover(model, visibleIds, hoveredId),
+    [model, visibleIds, hoveredId],
+  );
+
+  const handleActivate = useCallback(
+    (id: string) => {
+      const meta = model.nodesById.get(id);
+      if (!meta) return;
+      if (meta.kind === "leaf") {
+        setSelectedId(id);
+        return;
+      }
+      setExpanded((prev) => {
+        const next = new Set(prev);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        return next;
+      });
+    },
+    [model],
+  );
+
+  const expandAll = useCallback(() => {
+    setExpanded(allParentIds(model));
+  }, [model]);
+
+  const collapseAll = useCallback(() => {
+    setExpanded(new Set());
+  }, []);
+
+  useEffect(() => {
+    registerControls?.({ expandAll, collapseAll });
+  }, [registerControls, expandAll, collapseAll]);
+
+  // Global Escape: close drawer + deselect + blur active node.
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setSelectedId(null);
+      const el = document.activeElement as HTMLElement | null;
+      if (el && typeof el.blur === "function") el.blur();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   useSyncUrl({
     nodeId: selectedId,
     expanded: new Set(
@@ -165,8 +228,13 @@ function KgGraphInner({ model }: InnerProps) {
         selectedId,
         searchMatches,
         searchMatches.size > 0,
+        {
+          hoveredId,
+          hoveredNeighbors,
+          onActivate: handleActivate,
+        },
       );
-      const positioned = layout.applyPositions(base);
+      const positioned = sortByTreeOrder(layout.applyPositions(base));
       setRfNodes(positioned);
       setRfEdges(
         decorateEdges(buildReactFlowEdges(model, visibleIds, hoveredId)),
@@ -218,8 +286,13 @@ function KgGraphInner({ model }: InnerProps) {
         selectedId,
         searchMatches,
         searchMatches.size > 0,
+        {
+          hoveredId,
+          hoveredNeighbors,
+          onActivate: handleActivate,
+        },
       );
-      setRfNodes(layout.applyPositions(base));
+      setRfNodes(sortByTreeOrder(layout.applyPositions(base)));
       setRfEdges(
         decorateEdges(buildReactFlowEdges(model, visibleIds, hoveredId)),
       );
@@ -228,7 +301,7 @@ function KgGraphInner({ model }: InnerProps) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visibleIds, effectiveExpanded, selectedId, searchMatches, hoveredId]);
+  }, [visibleIds, effectiveExpanded, selectedId, searchMatches, hoveredId, hoveredNeighbors, handleActivate]);
 
   // Auto-zoom + pan to first search match.
   useEffect(() => {
@@ -242,21 +315,9 @@ function KgGraphInner({ model }: InnerProps) {
 
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_evt, node) => {
-      const meta = node.data?.meta as NodeMeta | undefined;
-      if (!meta) return;
-      if (meta.kind === "leaf") {
-        setSelectedId(node.id);
-        return;
-      }
-      // pillar / category: toggle expansion
-      setExpanded((prev) => {
-        const next = new Set(prev);
-        if (next.has(node.id)) next.delete(node.id);
-        else next.add(node.id);
-        return next;
-      });
+      handleActivate(node.id);
     },
-    [],
+    [handleActivate],
   );
 
   const handleNodeEnter: NodeMouseHandler = useCallback((_e, n) => {
@@ -320,6 +381,17 @@ export default function KnowledgeGraph() {
 
   const pillars = useMemo(() => Object.entries(PILLAR_STYLES), []);
 
+  const controlsRef = useRef<{
+    expandAll: () => void;
+    collapseAll: () => void;
+  } | null>(null);
+  const registerControls = useCallback(
+    (c: { expandAll: () => void; collapseAll: () => void }) => {
+      controlsRef.current = c;
+    },
+    [],
+  );
+
   return (
     <div data-testid="kg-page" className="flex flex-col h-[calc(100vh-3rem)]">
       <header className="flex items-center justify-between gap-4 mb-3">
@@ -331,21 +403,43 @@ export default function KnowledgeGraph() {
               : ""}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2 text-[10px] text-gray-700">
-          {pillars.map(([key, s]) => (
-            <span
-              key={key}
-              className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded"
-              style={{ backgroundColor: s.bg, color: s.border }}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              data-testid="kg-expand-all"
+              onClick={() => controlsRef.current?.expandAll()}
+              disabled={!model}
+              className="px-2 py-1 text-xs border border-gray-300 rounded bg-white hover:bg-gray-50 disabled:opacity-50"
             >
+              Expand All
+            </button>
+            <button
+              type="button"
+              data-testid="kg-collapse-all"
+              onClick={() => controlsRef.current?.collapseAll()}
+              disabled={!model}
+              className="px-2 py-1 text-xs border border-gray-300 rounded bg-white hover:bg-gray-50 disabled:opacity-50"
+            >
+              Collapse All
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2 text-[10px] text-gray-700">
+            {pillars.map(([key, s]) => (
               <span
-                aria-hidden
-                className="w-2 h-2 rounded-sm"
-                style={{ backgroundColor: s.border }}
-              />
-              {s.name}
-            </span>
-          ))}
+                key={key}
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded"
+                style={{ backgroundColor: s.bg, color: s.border }}
+              >
+                <span
+                  aria-hidden
+                  className="w-2 h-2 rounded-sm"
+                  style={{ backgroundColor: s.border }}
+                />
+                {s.name}
+              </span>
+            ))}
+          </div>
         </div>
       </header>
 
@@ -364,7 +458,7 @@ export default function KnowledgeGraph() {
       >
         {model && (
           <ReactFlowProvider>
-            <KgGraphInner model={model} />
+            <KgGraphInner model={model} registerControls={registerControls} />
           </ReactFlowProvider>
         )}
       </div>

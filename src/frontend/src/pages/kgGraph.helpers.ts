@@ -164,6 +164,12 @@ export function computeVisibleNodeIds(
   return visible;
 }
 
+export interface BuildNodeOptions {
+  hoveredId?: string | null;
+  hoveredNeighbors?: Set<string>;
+  onActivate?: (id: string) => void;
+}
+
 export function buildReactFlowNodes(
   model: KgGraphModel,
   visible: Set<string>,
@@ -171,8 +177,11 @@ export function buildReactFlowNodes(
   selectedId: string | null,
   searchMatches: Set<string>,
   hasActiveSearch: boolean,
+  options: BuildNodeOptions = {},
 ): Node[] {
   const out: Node[] = [];
+  const hoveredId = options.hoveredId ?? null;
+  const neighbors = options.hoveredNeighbors ?? new Set<string>();
   for (const id of visible) {
     const meta = model.nodesById.get(id)!;
     const isExpanded = expanded.has(id);
@@ -188,11 +197,47 @@ export function buildReactFlowNodes(
         isSelected: selectedId === id,
         isMatch,
         dimmed,
+        isHovered: hoveredId === id,
+        isNeighborOfHover: neighbors.has(id),
+        onActivate: options.onActivate,
       },
       draggable: false,
       selectable: true,
       connectable: false,
     });
+  }
+  return out;
+}
+
+/**
+ * For a hovered node id, walk visible edges and return the set of opposite
+ * endpoints. Used to ring neighbor nodes during hover and as the source of
+ * truth for which edges should glow.
+ */
+export function neighborsOfHover(
+  model: KgGraphModel,
+  visible: Set<string>,
+  hoveredId: string | null,
+): Set<string> {
+  const out = new Set<string>();
+  if (!hoveredId) return out;
+  for (const e of model.edges) {
+    const src = nodeIdOf(e.src_id);
+    const dst = nodeIdOf(e.dst_id);
+    if (!visible.has(src) || !visible.has(dst)) continue;
+    if (src === hoveredId) out.add(dst);
+    else if (dst === hoveredId) out.add(src);
+  }
+  return out;
+}
+
+/**
+ * All node ids that own at least one child. Useful for "Expand All".
+ */
+export function allParentIds(model: KgGraphModel): Set<string> {
+  const out = new Set<string>();
+  for (const [parentId, kids] of model.childrenOf) {
+    if (kids.length > 0) out.add(parentId);
   }
   return out;
 }

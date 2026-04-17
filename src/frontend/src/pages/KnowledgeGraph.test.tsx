@@ -3,13 +3,16 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import {
+  allParentIds,
   buildGraphModel,
+  buildReactFlowNodes,
   colorForPillar,
   computeVisibleNodeIds,
   defaultExpandedSet,
   expandToReveal,
   findSearchMatches,
   importanceScaleFor,
+  neighborsOfHover,
   nodeIdOf,
   type KgGraphResponse,
 } from "./kgGraph.helpers";
@@ -250,6 +253,82 @@ describe("buildGraphModel edge_count -> importanceScale", () => {
   });
 });
 
+describe("neighborsOfHover", () => {
+  it("returns empty when nothing hovered", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1), nodeIdOf(2), nodeIdOf(3)]);
+    expect(neighborsOfHover(m, visible, null).size).toBe(0);
+  });
+
+  it("returns the opposite endpoints of edges touching the hovered node", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1), nodeIdOf(2), nodeIdOf(3)]);
+    // node 2 sits between 1 (parent) and 3 (child) -> both are neighbors.
+    const ns = neighborsOfHover(m, visible, nodeIdOf(2));
+    expect(ns).toEqual(new Set([nodeIdOf(1), nodeIdOf(3)]));
+  });
+
+  it("ignores edges whose other endpoint is not visible", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(2)]); // only n2 visible
+    expect(neighborsOfHover(m, visible, nodeIdOf(2)).size).toBe(0);
+  });
+});
+
+describe("allParentIds", () => {
+  it("returns every node that owns at least one child", () => {
+    const m = buildGraphModel(SAMPLE);
+    const ids = allParentIds(m);
+    expect(ids.has(nodeIdOf(1))).toBe(true); // pillar with child
+    expect(ids.has(nodeIdOf(2))).toBe(true); // category with child
+    expect(ids.has(nodeIdOf(3))).toBe(false); // leaf
+    expect(ids.has(nodeIdOf(4))).toBe(false); // childless pillar
+  });
+});
+
+describe("buildReactFlowNodes hover/activate options", () => {
+  it("threads hover, neighbor, and onActivate flags into node data", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1), nodeIdOf(2)]);
+    const onActivate = vi.fn();
+    const nodes = buildReactFlowNodes(
+      m,
+      visible,
+      defaultExpandedSet(m),
+      null,
+      new Set(),
+      false,
+      {
+        hoveredId: nodeIdOf(1),
+        hoveredNeighbors: new Set([nodeIdOf(2)]),
+        onActivate,
+      },
+    );
+    const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+    expect(byId[nodeIdOf(1)].data.isHovered).toBe(true);
+    expect(byId[nodeIdOf(1)].data.isNeighborOfHover).toBe(false);
+    expect(byId[nodeIdOf(2)].data.isHovered).toBe(false);
+    expect(byId[nodeIdOf(2)].data.isNeighborOfHover).toBe(true);
+    expect(byId[nodeIdOf(2)].data.onActivate).toBe(onActivate);
+  });
+
+  it("defaults hover/neighbor flags to false when options omitted", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1)]);
+    const nodes = buildReactFlowNodes(
+      m,
+      visible,
+      defaultExpandedSet(m),
+      null,
+      new Set(),
+      false,
+    );
+    expect(nodes[0].data.isHovered).toBe(false);
+    expect(nodes[0].data.isNeighborOfHover).toBe(false);
+    expect(nodes[0].data.onActivate).toBeUndefined();
+  });
+});
+
 describe("URL state", () => {
   it("roundtrips node + expanded", () => {
     const qs = writeUrlState({
@@ -296,5 +375,13 @@ describe("KnowledgeGraph page (initial render)", () => {
   it("shows the loading state before the /kg/graph response arrives", () => {
     const html = render();
     expect(html).toContain("Loading graph");
+  });
+
+  it("renders the Expand/Collapse All controls in the header", () => {
+    const html = render();
+    expect(html).toContain('data-testid="kg-expand-all"');
+    expect(html).toContain('data-testid="kg-collapse-all"');
+    expect(html).toContain("Expand All");
+    expect(html).toContain("Collapse All");
   });
 });
