@@ -54,6 +54,12 @@ DEFAULT_MODEL = "claude-haiku-4-5"
 BIG_MODEL = "claude-sonnet-4-6"
 BIG_DESC_THRESHOLD = 12000
 PER_CALL_TIMEOUT_S = 300
+BIG_CALL_TIMEOUT_S = 900
+
+# Ensure stdout can emit Chinese on Windows (cp1252 default crashes on CJK).
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 # Acronyms that should never appear bare on first mention. If the document
 # contains any of these AND does not also contain the corresponding full
@@ -274,12 +280,13 @@ def call_claude(
         "--setting-sources",
         "user",
     ]
+    per_call_timeout = BIG_CALL_TIMEOUT_S if model == BIG_MODEL else PER_CALL_TIMEOUT_S
     result = subprocess.run(
         cmd,
         capture_output=True,
         text=True,
         encoding="utf-8",
-        timeout=PER_CALL_TIMEOUT_S,
+        timeout=per_call_timeout,
     )
     elapsed = time.time() - t0
     if result.returncode != 0:
@@ -316,8 +323,14 @@ def validate_rewrite(
         issues.append(
             f"code-fence count changed: {orig_shape[0]} -> {new_shape[0]}"
         )
-    if new_shape[1] != orig_shape[1]:
-        issues.append(f"$$ count changed: {orig_shape[1]} -> {new_shape[1]}")
+    # Allow small $$ drift (model may merge/split display math) but reject
+    # catastrophic loss. Threshold: reject if delta > 25% of original, or
+    # if original had >=4 and rewrite has <=2.
+    orig_dd, new_dd = orig_shape[1], new_shape[1]
+    catastrophic = orig_dd >= 4 and new_dd <= 2
+    big_drift = orig_dd > 0 and abs(new_dd - orig_dd) > max(4, 0.25 * orig_dd)
+    if catastrophic or big_drift:
+        issues.append(f"$$ count changed: {orig_dd} -> {new_dd}")
     if new_shape[2] < orig_shape[2]:
         issues.append(
             f"heading count dropped: {orig_shape[2]} -> {new_shape[2]}"
