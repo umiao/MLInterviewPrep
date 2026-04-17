@@ -60,12 +60,21 @@ export interface TreeNavProps {
    */
   initialExpanded?: Set<string>;
   initialCollapsed?: boolean;
+  /**
+   * Fired when a row is clicked or activated. Parent wires this to the canvas
+   * (expand ancestors, select, setCenter, open drawer for leaves).
+   */
+  onSelect?: (id: string) => void;
+  /** Currently-selected node id from the canvas, used for row highlight. */
+  selectedId?: string | null;
 }
 
 export default function TreeNav({
   model,
   initialExpanded,
   initialCollapsed = false,
+  onSelect,
+  selectedId = null,
 }: TreeNavProps) {
   const [expanded, setExpanded] = useState<Set<string>>(
     () => new Set(initialExpanded ?? []),
@@ -147,8 +156,10 @@ export default function TreeNav({
             key={row.id}
             row={row}
             isExpanded={expanded.has(row.id)}
+            isSelected={selectedId === row.id}
             maxContentLength={maxContentLength}
             onToggle={toggle}
+            onSelect={onSelect}
           />
         ))}
       </ul>
@@ -159,15 +170,19 @@ export default function TreeNav({
 interface TreeRowProps {
   row: TreeNavRow;
   isExpanded: boolean;
+  isSelected: boolean;
   maxContentLength: number;
   onToggle: (id: string) => void;
+  onSelect?: (id: string) => void;
 }
 
 function TreeRow({
   row,
   isExpanded,
+  isSelected,
   maxContentLength,
   onToggle,
+  onSelect,
 }: TreeRowProps) {
   const { id, meta, depth, hasChildren } = row;
   const style = styleForPillar(meta.pillar);
@@ -177,31 +192,44 @@ function TreeRow({
   );
   const fillPx = Math.round(fraction * TREE_NAV_BAR_MAX_PX);
 
-  const handleClick = () => {
+  const activate = () => {
+    onSelect?.(id);
     if (hasChildren) onToggle(id);
   };
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!hasChildren) return;
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      onToggle(id);
-    }
+  const handleClick = () => {
+    activate();
   };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    e.preventDefault();
+    activate();
+  };
+
+  const selectedBg = isSelected ? style.bg : undefined;
+  const selectedBorder = isSelected
+    ? `inset 2px 0 0 ${style.border}`
+    : undefined;
 
   return (
     <li
       role="treeitem"
       aria-expanded={hasChildren ? isExpanded : undefined}
       aria-level={depth + 1}
+      aria-selected={isSelected || undefined}
     >
       <div
         data-testid={`kg-tree-row-${id}`}
         data-depth={depth}
+        data-selected={isSelected ? "true" : "false"}
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         className="flex items-center gap-1 pr-2 py-1 text-xs hover:bg-gray-50 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400"
-        style={{ paddingLeft: 8 + depth * 14 }}
+        style={{
+          paddingLeft: 8 + depth * 14,
+          backgroundColor: selectedBg,
+          boxShadow: selectedBorder,
+        }}
       >
         <span
           aria-hidden

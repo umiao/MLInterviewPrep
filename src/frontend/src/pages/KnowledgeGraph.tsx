@@ -51,6 +51,7 @@ import {
   computeVisibleNodeIds,
   defaultExpandedSet,
   expandToReveal,
+  expandedSetForTreeNavSelect,
   findSearchMatches,
   nodeIdOf,
   type KgGraphModel,
@@ -157,12 +158,25 @@ function LaneSeparators({ lanes }: { lanes: LaneInfo[] }) {
   return <ViewportPortal>{items}</ViewportPortal>;
 }
 
-interface InnerProps {
-  model: KgGraphModel;
-  registerControls?: (c: { expandAll: () => void; collapseAll: () => void }) => void;
+interface KgControls {
+  expandAll: () => void;
+  collapseAll: () => void;
+  onTreeNavSelect: (id: string) => void;
 }
 
-function KgGraphInner({ model, registerControls }: InnerProps) {
+interface InnerProps {
+  model: KgGraphModel;
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
+  registerControls?: (c: KgControls) => void;
+}
+
+function KgGraphInner({
+  model,
+  selectedId,
+  setSelectedId,
+  registerControls,
+}: InnerProps) {
   const rf = useReactFlow();
   const layout = useKgLayout();
 
@@ -179,7 +193,6 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     }
     return defaultExpandedSet(model);
   });
-  const [selectedId, setSelectedId] = useState<string | null>(initialUrl.nodeId);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rfNodes, setRfNodes] = useState<Node[]>([]);
@@ -187,8 +200,9 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   const [lanes, setLanes] = useState<LaneInfo[]>([]);
   const debounceRef = useRef<number | null>(null);
   const initialFitDone = useRef(false);
-  // Last parent node the user expanded/collapsed — the layout effect centers
-  // the viewport on it after relayout so focus is preserved.
+  // Last node the user expanded/collapsed or selected from TreeNav — the
+  // layout effect centers the viewport on it after relayout so focus is
+  // preserved.
   const lastActivatedRef = useRef<string | null>(null);
   // Hover state removed — caused persistent jitter. See hotfix1-5 history.
 
@@ -239,7 +253,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         return next;
       });
     },
-    [model],
+    [model, setSelectedId],
   );
 
   const expandAll = useCallback(() => {
@@ -252,9 +266,23 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     setExpanded(new Set());
   }, []);
 
+  // Wire TreeNav (KG-UX-09): click in the outline expands all ancestors of the
+  // target (plus itself when it has children) so the node is visible on the
+  // canvas, selects it (opens drawer for leaves), and centers the viewport on
+  // it once the layout effect resolves.
+  const onTreeNavSelect = useCallback(
+    (id: string) => {
+      if (!model.nodesById.has(id)) return;
+      lastActivatedRef.current = id;
+      setExpanded((prev) => expandedSetForTreeNavSelect(model, prev, id));
+      setSelectedId(id);
+    },
+    [model, setSelectedId],
+  );
+
   useEffect(() => {
-    registerControls?.({ expandAll, collapseAll });
-  }, [registerControls, expandAll, collapseAll]);
+    registerControls?.({ expandAll, collapseAll, onTreeNavSelect });
+  }, [registerControls, expandAll, collapseAll, onTreeNavSelect]);
 
   // Global Escape: close drawer + deselect + blur active node.
   useEffect(() => {
@@ -266,7 +294,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [setSelectedId]);
 
   useSyncUrl({
     nodeId: selectedId,
@@ -437,20 +465,31 @@ export default function KnowledgeGraph() {
 
   const model = useMemo(() => (data ? buildGraphModel(data) : null), [data]);
 
-  const controlsRef = useRef<{
-    expandAll: () => void;
-    collapseAll: () => void;
-  } | null>(null);
-  const registerControls = useCallback(
-    (c: { expandAll: () => void; collapseAll: () => void }) => {
-      controlsRef.current = c;
-    },
-    [],
-  );
+  // selectedId is lifted here so both TreeNav (for row highlight) and
+  // KgGraphInner (for drawer + node selection state) read the same value.
+  const initialUrlNodeId = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return readUrlState(window.location.search).nodeId;
+  }, []);
+  const [selectedId, setSelectedId] = useState<string | null>(initialUrlNodeId);
+
+  const controlsRef = useRef<KgControls | null>(null);
+  const registerControls = useCallback((c: KgControls) => {
+    controlsRef.current = c;
+  }, []);
+  const handleTreeNavSelect = useCallback((id: string) => {
+    controlsRef.current?.onTreeNavSelect(id);
+  }, []);
 
   return (
     <div data-testid="kg-page" className="flex h-[calc(100vh-3rem)] gap-3">
-      {model && <TreeNav model={model} />}
+      {model && (
+        <TreeNav
+          model={model}
+          onSelect={handleTreeNavSelect}
+          selectedId={selectedId}
+        />
+      )}
       <div className="flex flex-col flex-1 min-w-0">
         <header className="flex items-center justify-between gap-4 mb-3">
           <div>
@@ -498,7 +537,12 @@ export default function KnowledgeGraph() {
         >
           {model && (
             <ReactFlowProvider>
-              <KgGraphInner model={model} registerControls={registerControls} />
+              <KgGraphInner
+                model={model}
+                selectedId={selectedId}
+                setSelectedId={setSelectedId}
+                registerControls={registerControls}
+              />
             </ReactFlowProvider>
           )}
         </div>

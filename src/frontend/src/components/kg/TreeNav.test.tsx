@@ -258,4 +258,43 @@ describe("TreeNav rendering", () => {
     // Bar track testid present on pillar1
     expect(html).toContain(`data-testid="kg-tree-bar-${nodeIdOf(1)}"`);
   });
+
+  it("marks the selected row via data-selected and aria-selected", () => {
+    const m = buildGraphModel(SAMPLE);
+    const html = renderToStaticMarkup(
+      <TreeNav
+        model={m}
+        initialExpanded={new Set([nodeIdOf(1)])}
+        selectedId={nodeIdOf(2)}
+      />,
+    );
+    // Row n2 is selected
+    expect(html).toMatch(
+      new RegExp(
+        `data-testid="kg-tree-row-${nodeIdOf(2)}"[^>]*data-selected="true"`,
+      ),
+    );
+    // Row n1 is NOT selected
+    expect(html).toMatch(
+      new RegExp(
+        `data-testid="kg-tree-row-${nodeIdOf(1)}"[^>]*data-selected="false"`,
+      ),
+    );
+    // aria-selected only set when selected
+    expect(html).toContain('aria-selected="true"');
+  });
+
+  it("leaves data-selected='false' on every row when selectedId is null", () => {
+    const m = buildGraphModel(SAMPLE);
+    const html = renderToStaticMarkup(<TreeNav model={m} selectedId={null} />);
+    // Every row is data-selected="false"
+    for (const id of [nodeIdOf(1), nodeIdOf(4)]) {
+      expect(html).toMatch(
+        new RegExp(
+          `data-testid="kg-tree-row-${id}"[^>]*data-selected="false"`,
+        ),
+      );
+    }
+    expect(html).not.toContain('aria-selected="true"');
+  });
 });

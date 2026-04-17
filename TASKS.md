@@ -9,23 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-497: KG-UX-09: TreeNav click -> expand ancestors + setCenter on canvas
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-496
-- **Description**: Wire TreeNav (KG-UX-08) to the canvas. Clicking an entry in TreeNav should: (1) setExpanded to include all ancestors of clicked id via expandToReveal (already in kgGraph.helpers), (2) setSelectedId = clicked id, (3) after layout effect resolves, rf.setCenter to the node (reuse lastActivatedRef mechanism from KG-UX-02). Leaf click additionally opens FrameworkNodeDrawer (same as canvas click).
-
-Files: src/frontend/src/pages/KnowledgeGraph.tsx (pass handleActivate-equivalent to TreeNav), src/frontend/src/components/kg/TreeNav.tsx (onSelect prop wiring)
-
-Acceptance:
-1. Click pillar in TreeNav -> canvas expands that pillar and centers it
-2. Click category in TreeNav -> auto-expands its pillar ancestor + category + centers
-3. Click leaf in TreeNav -> expands all ancestors + centers canvas + opens drawer
-4. Current zoom level preserved across setCenter
-5. TreeNav highlights the currently-selected entry (selectedId sync both ways)
-6. Build + vitest pass; add integration test: click deep leaf in TreeNav -> canvas visible set contains all its ancestors
-7. Smoke test: click "Diffusion Models" in TreeNav -> drawer opens
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-498: KG-CN-01: Rewrite node descriptions to CN narration + full English terms
@@ -153,6 +136,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
 - [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
+- [x] **2026-04-17** -- T-P0-497: KG-UX-09: TreeNav click -> expand ancestors + setCenter on canvas. Wire TreeNav (KG-UX-08) to the canvas. Clicking an entry in TreeNav should: (1) setExpanded to include all ancestors of 
 - [x] **2026-04-17** -- T-P0-496: KG-UX-08: Left TreeNav panel (3-level, replaces pillar badges). Current top-header pillar badges all call expandAll() - functionally useless. Replace with a left-side collapsible TreeN
 - [x] **2026-04-17** -- T-P0-495: KG-UX-07: Limit pan range (translateExtent) + zoom bounds. Pan range is unlimited; user can drag canvas into empty space far outside graph bbox. Fix: compute bbox from all cached 
 - [x] **2026-04-17** -- T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts. Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.

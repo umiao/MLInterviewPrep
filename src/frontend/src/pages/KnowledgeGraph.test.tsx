@@ -12,6 +12,7 @@ import {
   computeVisibleNodeIds,
   defaultExpandedSet,
   expandToReveal,
+  expandedSetForTreeNavSelect,
   findSearchMatches,
   importanceScaleFor,
   neighborsOfHover,
@@ -803,5 +804,63 @@ describe("KnowledgeGraph page (initial render)", () => {
     expect(html).toContain('data-testid="kg-collapse-all"');
     expect(html).toContain("Expand All");
     expect(html).toContain("Collapse All");
+  });
+});
+
+describe("expandedSetForTreeNavSelect (KG-UX-09)", () => {
+  it("clicking a deep leaf expands every ancestor so the leaf becomes visible", () => {
+    const m = buildGraphModel(SAMPLE);
+    const base = defaultExpandedSet(m); // pillars only -> leaf + category hidden
+    const visibleBefore = computeVisibleNodeIds(m, base);
+    expect(visibleBefore.has(nodeIdOf(3))).toBe(false);
+    // Click the deep leaf n3
+    const next = expandedSetForTreeNavSelect(m, base, nodeIdOf(3));
+    // Ancestors (n1 pillar, n2 category) must be in the expanded set
+    expect(next.has(nodeIdOf(1))).toBe(true);
+    expect(next.has(nodeIdOf(2))).toBe(true);
+    // The leaf itself is NOT added (leaves do not expand a subtree)
+    expect(next.has(nodeIdOf(3))).toBe(false);
+    // After applying the new expanded set, the leaf is visible on the canvas
+    const visibleAfter = computeVisibleNodeIds(m, next);
+    expect(visibleAfter.has(nodeIdOf(1))).toBe(true);
+    expect(visibleAfter.has(nodeIdOf(2))).toBe(true);
+    expect(visibleAfter.has(nodeIdOf(3))).toBe(true);
+  });
+
+  it("clicking a category expands its pillar ancestor AND the category itself", () => {
+    const m = buildGraphModel(SAMPLE);
+    const base = new Set<string>(); // start fully collapsed
+    const next = expandedSetForTreeNavSelect(m, base, nodeIdOf(2));
+    expect(next.has(nodeIdOf(1))).toBe(true); // pillar ancestor
+    expect(next.has(nodeIdOf(2))).toBe(true); // category itself (has children)
+    // Leaves under the category should be revealed now
+    const visible = computeVisibleNodeIds(m, next);
+    expect(visible.has(nodeIdOf(3))).toBe(true);
+  });
+
+  it("clicking a pillar adds it to the expanded set (exposes its categories)", () => {
+    const m = buildGraphModel(SAMPLE);
+    const base = new Set<string>();
+    const next = expandedSetForTreeNavSelect(m, base, nodeIdOf(1));
+    expect(next.has(nodeIdOf(1))).toBe(true);
+    const visible = computeVisibleNodeIds(m, next);
+    expect(visible.has(nodeIdOf(2))).toBe(true); // category becomes visible
+  });
+
+  it("preserves existing expanded entries and is idempotent", () => {
+    const m = buildGraphModel(SAMPLE);
+    const base = new Set([nodeIdOf(4)]); // pillar2 seeded expanded
+    const first = expandedSetForTreeNavSelect(m, base, nodeIdOf(3));
+    expect(first.has(nodeIdOf(4))).toBe(true);
+    const second = expandedSetForTreeNavSelect(m, first, nodeIdOf(3));
+    expect([...second].sort()).toEqual([...first].sort());
+  });
+
+  it("unknown ids return a copy of the base expanded set", () => {
+    const m = buildGraphModel(SAMPLE);
+    const base = new Set([nodeIdOf(1)]);
+    const next = expandedSetForTreeNavSelect(m, base, "n999");
+    expect(next).not.toBe(base); // new set (defensive copy)
+    expect([...next]).toEqual([nodeIdOf(1)]);
   });
 });

@@ -304,6 +304,29 @@ export function expandToReveal(
   return next;
 }
 
+/**
+ * Expand set that makes a TreeNav-selected node visible on the canvas.
+ *
+ * - Every ancestor is expanded so the target becomes reachable.
+ * - The target itself is also expanded iff it has children (so its own
+ *   subtree opens). Leaves and zero-children categories are leaf-like and
+ *   stay unexpanded — they open a drawer instead.
+ */
+export function expandedSetForTreeNavSelect(
+  model: KgGraphModel,
+  baseExpanded: Set<string>,
+  id: string,
+): Set<string> {
+  const meta = model.nodesById.get(id);
+  if (!meta) return new Set(baseExpanded);
+  const isLeafLike =
+    meta.kind === "leaf" ||
+    (meta.kind === "category" && meta.childCount === 0);
+  const next = expandToReveal(model, new Set([id]), baseExpanded);
+  if (!isLeafLike) next.add(id);
+  return next;
+}
+
 export const PILLAR_COLORS: Record<string, string> = Object.fromEntries(
   Object.entries(PILLAR_STYLES).map(([k, v]) => [k, v.border]),
 );
