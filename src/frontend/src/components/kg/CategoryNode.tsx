@@ -2,6 +2,12 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
 import { LAYOUT_CONFIG, styleForPillar } from "./kgStyles";
+import {
+  COMPLETENESS_FULL,
+  CompletenessArc,
+  STUB_THRESHOLD,
+  StubBadge,
+} from "./CompletenessArc";
 
 export interface CategoryNodeData extends Record<string, unknown> {
   meta: NodeMeta;
@@ -21,6 +27,9 @@ function CategoryNodeInner({ id, data }: NodeProps) {
   const { meta, isExpanded, isSelected, isMatch, dimmed, isNeighborOfHover, onActivate } = d;
   const style = styleForPillar(meta.pillar);
   const isHub = meta.edgeCount > HUB_EDGE_THRESHOLD;
+  const isLeafLike = meta.childCount === 0;
+  const isStub = meta.contentLength < STUB_THRESHOLD;
+  const completenessFraction = meta.contentLength / COMPLETENESS_FULL;
   const ringClass = isSelected
     ? "ring-2 ring-blue-500 ring-offset-2"
     : isMatch
@@ -34,14 +43,18 @@ function CategoryNodeInner({ id, data }: NodeProps) {
       onActivate?.(id);
     }
   };
+  const ariaLabel = isLeafLike
+    ? `${meta.title} (${meta.pillarName})`
+    : `${meta.title}, ${isExpanded ? "expanded" : "collapsed"}, ${meta.childCount} children`;
   return (
     <div
       data-testid="kg-category-node"
       data-hub={isHub ? "true" : "false"}
+      data-leaf-like={isLeafLike ? "true" : "false"}
       tabIndex={0}
       role="button"
-      aria-label={`${meta.title}, ${isExpanded ? "expanded" : "collapsed"}, ${meta.childCount} children`}
-      aria-expanded={isExpanded}
+      aria-label={ariaLabel}
+      aria-expanded={isLeafLike ? undefined : isExpanded}
       onKeyDown={handleKeyDown}
       className={`relative rounded-lg bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
       style={{
@@ -56,21 +69,33 @@ function CategoryNodeInner({ id, data }: NodeProps) {
       }}
     >
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <div className="flex items-center justify-between h-full px-3">
+      <div className="flex items-center justify-between h-full px-3 gap-2">
         <span
-          className="line-clamp-2 break-words leading-tight text-[15px] font-semibold text-gray-800"
+          className="line-clamp-2 break-words leading-tight text-[15px] font-semibold text-gray-800 min-w-0"
           title={meta.title}
         >
           {meta.title}
         </span>
-        <span className="flex items-center gap-1 ml-2 text-[10px] text-gray-500">
-          <span
-            className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-            style={{ backgroundColor: style.bg, color: style.border }}
-          >
-            {meta.childCount}
-          </span>
-          <span aria-hidden>{isExpanded ? "v" : ">"}</span>
+        <span className="flex items-center gap-1 shrink-0 text-[10px] text-gray-500">
+          {isStub && <StubBadge />}
+          {isLeafLike ? (
+            <span aria-label="Content completeness">
+              <CompletenessArc
+                fraction={completenessFraction}
+                color={style.border}
+              />
+            </span>
+          ) : (
+            <>
+              <span
+                className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+                style={{ backgroundColor: style.bg, color: style.border }}
+              >
+                {meta.childCount}
+              </span>
+              <span aria-hidden>{isExpanded ? "v" : ">"}</span>
+            </>
+          )}
         </span>
       </div>
       <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />

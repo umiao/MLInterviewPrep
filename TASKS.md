@@ -11,24 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-489
-- **Description**: 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing - looks broken. Also ~34 content-empty leaves need visible stub marker.
-
-Files: src/frontend/src/pages/KnowledgeGraph.tsx, CategoryNode.tsx, LeafNode.tsx
-Changes:
-- In handleActivate: if meta.kind==category AND childCount==0 -> treat as leaf (setSelectedId -> open drawer)
-- CategoryNode: hide v/> chevron when childCount==0; show same completeness-arc indicator as leaf
-- Add small "stub" pill (text "stub", gray bg) in header when contentLength < 2000
-AC:
-1. Click "SQL Fundamentals" (id=191) -> FrameworkNodeDrawer opens
-2. Click "Data Structures" (childCount>0) -> still expands as category
-3. Nodes with contentLength<2000 show "stub" badge
-4. Build + vitest pass
-5. Smoke test: all 7 zero-child cats behave as leaves
-
 #### T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked
 - **Priority**: P1
 - **Complexity**: L
@@ -152,6 +134,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
 - [x] **2026-04-17** -- T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts. Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.
 - [x] **2026-04-17** -- T-P0-488: KG-UX-02: Preserve focus on expand/collapse (setCenter). Clicking expand reshuffles layout and user loses focus on the clicked node. Fix: after layoutAll(), if a node was just a

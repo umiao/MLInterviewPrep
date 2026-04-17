@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
+import { ReactFlowProvider } from "@xyflow/react";
 import {
   allParentIds,
   buildGraphModel,
@@ -20,6 +21,8 @@ import {
   readUrlState,
   writeUrlState,
 } from "../components/kg/useKgUrlState";
+import CategoryNode from "../components/kg/CategoryNode";
+import LeafNode from "../components/kg/LeafNode";
 
 vi.mock("../utils/api", () => ({
   api: {
@@ -348,6 +351,153 @@ describe("URL state", () => {
 
   it("returns empty string when state is empty", () => {
     expect(writeUrlState({ nodeId: null, expanded: null })).toBe("");
+  });
+});
+
+function renderNode(element: React.ReactNode): string {
+  return renderToStaticMarkup(<ReactFlowProvider>{element}</ReactFlowProvider>);
+}
+
+function makeCategoryMeta(overrides: Partial<{
+  childCount: number;
+  contentLength: number;
+  title: string;
+}> = {}) {
+  return {
+    id: nodeIdOf(100),
+    rawId: 100,
+    kind: "category" as const,
+    pillar: "pillar1",
+    pillarName: "Coding & Algorithms",
+    title: overrides.title ?? "Category Title",
+    depth: 1,
+    parentId: nodeIdOf(1),
+    contentLength: overrides.contentLength ?? 500,
+    path: "pillar1.x",
+    childCount: overrides.childCount ?? 3,
+    edgeCount: 0,
+    importanceScale: 1.0,
+  };
+}
+
+function makeLeafMeta(overrides: Partial<{ contentLength: number }> = {}) {
+  return {
+    id: nodeIdOf(200),
+    rawId: 200,
+    kind: "leaf" as const,
+    pillar: "pillar1",
+    pillarName: "Coding & Algorithms",
+    title: "Leaf Title",
+    depth: 2,
+    parentId: nodeIdOf(100),
+    contentLength: overrides.contentLength ?? 500,
+    path: "pillar1.x.y",
+    childCount: 0,
+    edgeCount: 0,
+    importanceScale: 1.0,
+  };
+}
+
+describe("CategoryNode zero-children behavior", () => {
+  it("renders child-count pill and chevron for category with children", () => {
+    const data = {
+      meta: makeCategoryMeta({ childCount: 5, contentLength: 9000 }),
+      isExpanded: false,
+      isSelected: false,
+      isMatch: false,
+      dimmed: false,
+    };
+    const html = renderNode(
+      <CategoryNode id="n100" type="category" data={data} dragging={false}
+        isConnectable={false} positionAbsoluteX={0} positionAbsoluteY={0}
+        selected={false} selectable={false} deletable={false} draggable={false}
+        zIndex={0} />,
+    );
+    expect(html).toContain('data-leaf-like="false"');
+    expect(html).toContain("aria-expanded");
+    // chevron rendered
+    expect(html).toMatch(/&gt;|v/);
+    // no completeness arc aria-label
+    expect(html).not.toContain("Content completeness");
+    // no stub badge (9000 > 2000)
+    expect(html).not.toContain('data-testid="kg-stub-badge"');
+  });
+
+  it("renders completeness arc and hides chevron when childCount===0", () => {
+    const data = {
+      meta: makeCategoryMeta({ childCount: 0, contentLength: 500, title: "SQL Fundamentals" }),
+      isExpanded: false,
+      isSelected: false,
+      isMatch: false,
+      dimmed: false,
+    };
+    const html = renderNode(
+      <CategoryNode id="n191" type="category" data={data} dragging={false}
+        isConnectable={false} positionAbsoluteX={0} positionAbsoluteY={0}
+        selected={false} selectable={false} deletable={false} draggable={false}
+        zIndex={0} />,
+    );
+    expect(html).toContain('data-leaf-like="true"');
+    // aria-expanded omitted for leaf-like categories
+    expect(html).not.toContain("aria-expanded");
+    expect(html).toContain("Content completeness");
+    // stub badge present (500 < 2000)
+    expect(html).toContain('data-testid="kg-stub-badge"');
+    // aria-label should NOT contain "expanded/collapsed" wording
+    expect(html).toContain('aria-label="SQL Fundamentals (Coding &amp; Algorithms)"');
+  });
+
+  it("omits stub badge when contentLength >= 2000", () => {
+    const data = {
+      meta: makeCategoryMeta({ childCount: 0, contentLength: 3000 }),
+      isExpanded: false,
+      isSelected: false,
+      isMatch: false,
+      dimmed: false,
+    };
+    const html = renderNode(
+      <CategoryNode id="n100" type="category" data={data} dragging={false}
+        isConnectable={false} positionAbsoluteX={0} positionAbsoluteY={0}
+        selected={false} selectable={false} deletable={false} draggable={false}
+        zIndex={0} />,
+    );
+    expect(html).not.toContain('data-testid="kg-stub-badge"');
+  });
+});
+
+describe("LeafNode stub badge", () => {
+  it("renders stub badge when contentLength < 2000", () => {
+    const data = {
+      meta: makeLeafMeta({ contentLength: 100 }),
+      isExpanded: false,
+      isSelected: false,
+      isMatch: false,
+      dimmed: false,
+    };
+    const html = renderNode(
+      <LeafNode id="n200" type="leaf" data={data} dragging={false}
+        isConnectable={false} positionAbsoluteX={0} positionAbsoluteY={0}
+        selected={false} selectable={false} deletable={false} draggable={false}
+        zIndex={0} />,
+    );
+    expect(html).toContain('data-testid="kg-stub-badge"');
+  });
+
+  it("omits stub badge when contentLength >= 2000", () => {
+    const data = {
+      meta: makeLeafMeta({ contentLength: 5000 }),
+      isExpanded: false,
+      isSelected: false,
+      isMatch: false,
+      dimmed: false,
+    };
+    const html = renderNode(
+      <LeafNode id="n200" type="leaf" data={data} dragging={false}
+        isConnectable={false} positionAbsoluteX={0} positionAbsoluteY={0}
+        selected={false} selectable={false} deletable={false} draggable={false}
+        zIndex={0} />,
+    );
+    expect(html).not.toContain('data-testid="kg-stub-badge"');
   });
 });
 

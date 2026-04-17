@@ -2,6 +2,12 @@ import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
 import { LAYOUT_CONFIG, styleForPillar } from "./kgStyles";
+import {
+  COMPLETENESS_FULL,
+  CompletenessArc,
+  STUB_THRESHOLD,
+  StubBadge,
+} from "./CompletenessArc";
 
 export interface LeafNodeData extends Record<string, unknown> {
   meta: NodeMeta;
@@ -14,69 +20,7 @@ export interface LeafNodeData extends Record<string, unknown> {
   onActivate?: (id: string) => void;
 }
 
-const COMPLETENESS_FULL = 10000;
-const STUB_THRESHOLD = 2000;
 const HUB_EDGE_THRESHOLD = 10;
-
-/**
- * SVG ring with a partial arc fill, used as the completeness indicator in
- * the leaf node's top-right corner. Empty -> outline only; partial -> arc;
- * full -> filled disc with checkmark.
- */
-function CompletenessArc({
-  fraction,
-  color,
-}: {
-  fraction: number;
-  color: string;
-}) {
-  const size = 14;
-  const r = 5;
-  const cx = size / 2;
-  const cy = size / 2;
-  const circumference = 2 * Math.PI * r;
-  const clamped = Math.max(0, Math.min(1, fraction));
-  if (clamped >= 1) {
-    return (
-      <svg width={size} height={size} aria-hidden>
-        <circle cx={cx} cy={cy} r={r} fill={color} />
-        <path
-          d={`M${cx - 2.2} ${cy + 0.2} L${cx - 0.6} ${cy + 1.8} L${cx + 2.4} ${cy - 1.6}`}
-          stroke="white"
-          strokeWidth={1.4}
-          fill="none"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    );
-  }
-  return (
-    <svg width={size} height={size} aria-hidden>
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill="none"
-        stroke="#e2e8f0"
-        strokeWidth={1.5}
-      />
-      {clamped > 0 && (
-        <circle
-          cx={cx}
-          cy={cy}
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth={1.5}
-          strokeDasharray={`${circumference * clamped} ${circumference}`}
-          transform={`rotate(-90 ${cx} ${cy})`}
-          strokeLinecap="round"
-        />
-      )}
-    </svg>
-  );
-}
 
 function LeafNodeInner({ id, data }: NodeProps) {
   const d = data as LeafNodeData;
@@ -125,18 +69,21 @@ function LeafNodeInner({ id, data }: NodeProps) {
       }}
     >
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <div className="flex items-center justify-between h-full px-2.5">
+      <div className="flex items-center justify-between h-full px-2.5 gap-1.5">
         <span
-          className="line-clamp-2 break-words leading-tight text-[14px] font-medium text-gray-700 pr-2"
+          className="line-clamp-2 break-words leading-tight text-[14px] font-medium text-gray-700 min-w-0"
           title={meta.title}
         >
           {meta.title}
         </span>
-        <span className="shrink-0" aria-label="Content completeness">
-          <CompletenessArc
-            fraction={completenessFraction}
-            color={style.border}
-          />
+        <span className="flex items-center gap-1 shrink-0">
+          {isStub && <StubBadge />}
+          <span aria-label="Content completeness">
+            <CompletenessArc
+              fraction={completenessFraction}
+              color={style.border}
+            />
+          </span>
         </span>
       </div>
       <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />

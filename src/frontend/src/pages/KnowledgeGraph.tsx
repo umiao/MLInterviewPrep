@@ -177,7 +177,9 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     (id: string) => {
       const meta = model.nodesById.get(id);
       if (!meta) return;
-      if (meta.kind === "leaf") {
+      // Leaves and 0-children categories behave identically: open the drawer
+      // instead of toggling expansion, since there is nothing to expand.
+      if (meta.kind === "leaf" || (meta.kind === "category" && meta.childCount === 0)) {
         setSelectedId(id);
         return;
       }
