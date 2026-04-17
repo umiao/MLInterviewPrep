@@ -9,6 +9,7 @@ import {
   defaultExpandedSet,
   expandToReveal,
   findSearchMatches,
+  importanceScaleFor,
   nodeIdOf,
   type KgGraphResponse,
 } from "./kgGraph.helpers";
@@ -186,6 +187,66 @@ describe("findSearchMatches", () => {
     const m = buildGraphModel(SAMPLE);
     expect(findSearchMatches(m, "")).toEqual(new Set());
     expect(findSearchMatches(m, "   ")).toEqual(new Set());
+  });
+});
+
+describe("importanceScaleFor", () => {
+  it("returns 1.0 for low connectivity", () => {
+    expect(importanceScaleFor(0)).toBe(1.0);
+    expect(importanceScaleFor(5)).toBe(1.0);
+  });
+
+  it("returns 1.2 for moderate connectivity (>5)", () => {
+    expect(importanceScaleFor(6)).toBe(1.2);
+    expect(importanceScaleFor(10)).toBe(1.2);
+  });
+
+  it("returns 1.5 for hub nodes (>10)", () => {
+    expect(importanceScaleFor(11)).toBe(1.5);
+    expect(importanceScaleFor(50)).toBe(1.5);
+  });
+});
+
+describe("buildGraphModel edge_count -> importanceScale", () => {
+  it("derives edgeCount + importanceScale from KgNode payload", () => {
+    const data: KgGraphResponse = {
+      nodes: [
+        {
+          id: 1,
+          kind: "framework_node",
+          pillar: "pillar1",
+          path: "pillar1",
+          title: "P",
+          depth: 0,
+          parent_id: null,
+          content_length: 0,
+          edge_count: 12,
+        },
+        {
+          id: 2,
+          kind: "framework_node",
+          pillar: "pillar1",
+          path: "pillar1.x",
+          title: "X",
+          depth: 2,
+          parent_id: 1,
+          content_length: 0,
+          edge_count: 7,
+        },
+      ],
+      edges: [],
+    };
+    const m = buildGraphModel(data);
+    expect(m.nodesById.get(nodeIdOf(1))!.edgeCount).toBe(12);
+    expect(m.nodesById.get(nodeIdOf(1))!.importanceScale).toBe(1.5);
+    expect(m.nodesById.get(nodeIdOf(2))!.edgeCount).toBe(7);
+    expect(m.nodesById.get(nodeIdOf(2))!.importanceScale).toBe(1.2);
+  });
+
+  it("defaults edgeCount to 0 when payload omits edge_count", () => {
+    const m = buildGraphModel(SAMPLE);
+    expect(m.nodesById.get(nodeIdOf(1))!.edgeCount).toBe(0);
+    expect(m.nodesById.get(nodeIdOf(1))!.importanceScale).toBe(1.0);
   });
 });
 

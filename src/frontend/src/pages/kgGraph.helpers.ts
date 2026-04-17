@@ -14,6 +14,7 @@ export interface KgNode {
   depth: number;
   parent_id: number | null;
   content_length: number;
+  edge_count?: number;
 }
 
 export interface KgEdge {
@@ -43,6 +44,18 @@ export interface NodeMeta {
   contentLength: number;
   path: string;
   childCount: number;
+  edgeCount: number;
+  importanceScale: number;
+}
+
+/**
+ * Map concept-link edge count to a discrete size multiplier.
+ * Spec: 1.0x base, 1.2x when >5 edges, 1.5x when >10.
+ */
+export function importanceScaleFor(edgeCount: number): number {
+  if (edgeCount > 10) return 1.5;
+  if (edgeCount > 5) return 1.2;
+  return 1.0;
 }
 
 export interface KgGraphModel {
@@ -83,6 +96,7 @@ export function buildGraphModel(data: KgGraphResponse): KgGraphModel {
   for (const n of data.nodes) {
     const id = nodeIdOf(n.id);
     const parentId = n.parent_id != null ? nodeIdOf(n.parent_id) : null;
+    const edgeCount = n.edge_count ?? 0;
     const meta: NodeMeta = {
       id,
       rawId: n.id,
@@ -95,6 +109,8 @@ export function buildGraphModel(data: KgGraphResponse): KgGraphModel {
       contentLength: n.content_length,
       path: n.path,
       childCount: childCounts.get(id) ?? 0,
+      edgeCount,
+      importanceScale: importanceScaleFor(edgeCount),
     };
     nodesById.set(id, meta);
     if (meta.kind === "pillar") pillarIds.push(id);

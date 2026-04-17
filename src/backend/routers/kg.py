@@ -57,6 +57,22 @@ def get_kg_graph(
     q = db.query(FrameworkNode).order_by(FrameworkNode.depth, FrameworkNode.id)
     rows = q.limit(limit).all()
 
+    try:
+        rows_cl = db.execute(
+            text(
+                "SELECT src_kind, src_id, dst_kind, dst_id, relation "
+                "FROM concept_links "
+                "WHERE src_kind = 'framework_node' AND dst_kind = 'framework_node'"
+            )
+        ).fetchall()
+    except OperationalError:
+        rows_cl = []
+
+    edge_count_by_id: dict[int, int] = {}
+    for r in rows_cl:
+        edge_count_by_id[r[1]] = edge_count_by_id.get(r[1], 0) + 1
+        edge_count_by_id[r[3]] = edge_count_by_id.get(r[3], 0) + 1
+
     node_payload: list[dict[str, Any]] = []
     emitted_ids: set[int] = set()
     for n in rows:
@@ -73,21 +89,12 @@ def get_kg_graph(
                 "depth": n.depth,
                 "parent_id": n.parent_id,
                 "content_length": len(n.description) if n.description else 0,
+                "edge_count": edge_count_by_id.get(n.id, 0),
             }
         )
         emitted_ids.add(n.id)
 
     edge_payload: list[dict[str, Any]] = []
-    try:
-        rows_cl = db.execute(
-            text(
-                "SELECT src_kind, src_id, dst_kind, dst_id, relation "
-                "FROM concept_links "
-                "WHERE src_kind = 'framework_node' AND dst_kind = 'framework_node'"
-            )
-        ).fetchall()
-    except OperationalError:
-        rows_cl = []
     for r in rows_cl:
         if r[1] in emitted_ids and r[3] in emitted_ids:
             edge_payload.append(

@@ -125,6 +125,56 @@ def test_kg_graph_uses_real_concept_links_when_present(
     )
 
 
+def test_kg_graph_node_payload_includes_edge_count(test_client, db_session, db_engine):
+    """Each node payload includes edge_count derived from concept_links."""
+    a = _seed_node(db_session, title="A", path="pillar1.a", depth=1)
+    b = _seed_node(db_session, title="B", path="pillar1.b", depth=1)
+    c = _seed_node(db_session, title="C", path="pillar1.c", depth=1)
+
+    with db_engine.begin() as conn:
+        conn.execute(
+            text(
+                "CREATE TABLE IF NOT EXISTS concept_links ("
+                "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                "  src_kind TEXT NOT NULL,"
+                "  src_id INTEGER NOT NULL,"
+                "  dst_kind TEXT NOT NULL,"
+                "  dst_id INTEGER NOT NULL,"
+                "  relation TEXT NOT NULL,"
+                "  weight REAL DEFAULT 1.0,"
+                "  note TEXT,"
+                "  created_at TEXT DEFAULT (datetime('now'))"
+                ")"
+            )
+        )
+        for s, d in [(a.id, b.id), (a.id, c.id), (b.id, c.id)]:
+            conn.execute(
+                text(
+                    "INSERT INTO concept_links "
+                    "(src_kind, src_id, dst_kind, dst_id, relation) "
+                    "VALUES ('framework_node', :s, 'framework_node', :d, 'see_also')"
+                ),
+                {"s": s, "d": d},
+            )
+
+    resp = test_client.get("/api/kg/graph")
+    assert resp.status_code == 200
+    counts = {n["id"]: n["edge_count"] for n in resp.json()["nodes"]}
+    # a participates in 2 edges (a->b, a->c); b in 2 (a->b, b->c); c in 2 (a->c, b->c)
+    assert counts[a.id] == 2
+    assert counts[b.id] == 2
+    assert counts[c.id] == 2
+
+
+def test_kg_graph_node_payload_edge_count_zero_when_no_links(test_client, db_session):
+    """When concept_links is empty, every node has edge_count == 0."""
+    n1 = _seed_node(db_session, title="X", path="pillar1.x", depth=1)
+    resp = test_client.get("/api/kg/graph")
+    assert resp.status_code == 200
+    nodes = {n["id"]: n for n in resp.json()["nodes"]}
+    assert nodes[n1.id]["edge_count"] == 0
+
+
 def test_kg_graph_pillar_filter(test_client, db_session):
     """?pillars=pillar1 limits nodes to that pillar."""
     _seed_node(db_session, title="Coding", path="pillar1", depth=0)

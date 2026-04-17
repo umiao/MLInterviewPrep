@@ -23,9 +23,16 @@ const BASE_OPTS: Record<string, string> = {
 };
 
 function dimensionsFor(meta: NodeMeta): { width: number; height: number } {
-  if (meta.kind === "pillar") return LAYOUT_CONFIG.pillarNode;
-  if (meta.kind === "category") return LAYOUT_CONFIG.categoryNode;
-  return LAYOUT_CONFIG.leafNode;
+  const base =
+    meta.kind === "pillar"
+      ? LAYOUT_CONFIG.pillarNode
+      : meta.kind === "category"
+        ? LAYOUT_CONFIG.categoryNode
+        : LAYOUT_CONFIG.leafNode;
+  // Importance sizing only applies to leaves; pillars/categories keep base size
+  // to preserve the layered rhythm.
+  const scale = meta.kind === "leaf" ? meta.importanceScale : 1;
+  return { width: base.width * scale, height: base.height * scale };
 }
 
 export interface LayoutResult {

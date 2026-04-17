@@ -9,77 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-485: [KG-VIZ-R02] Visual encoding: palette + importance/completeness indicators + polish
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-484
-- **Description**: Visual design pass after R01 migration. Adds information-dense encoding beyond just pillar color.
-
-## Pillar Color Palette (curated, Tailwind-derived)
-  Coding & Algorithms          -> slate-600 (#475569) border + slate-50 bg
-  ML Fundamentals & Theory     -> amber-600 (#d97706) border + amber-50 bg
-  ML System Design             -> emerald-600 (#059669) border + emerald-50 bg
-  Applied ML & Domain-Specific -> sky-600 (#0284c7) border + sky-50 bg
-  ML Infrastructure & MLOps    -> violet-600 (#7c3aed) border + violet-50 bg
-  Deep Learning & LLM          -> rose-600 (#e11d48) border + rose-50 bg
-  Math & Statistics             -> teal-600 (#0d9488) border + teal-50 bg
-  Behavioral & Leadership      -> orange-600 (#ea580c) border + orange-50 bg
-
-## Visual Encoding Beyond Color (per user review)
-Color is already bound to pillar. THREE additional encodings:
-
-1. IMPORTANCE (node size):
-   - Base size 1.0x (most nodes)
-   - 1.2x for nodes with >5 concept_links edges (moderate connectivity)
-   - 1.5x for nodes with >10 edges (hub nodes)
-   - Subtle variation; must not break layered rhythm
-   - Size computed from backend data (add edge_count to /api/kg/graph node payload)
-
-2. COMPLETENESS (corner arc indicator):
-   - iOS-style small circular arc in top-right corner of each leaf node
-   - Arc fill = content_length / 10000 (capped at 100%)
-   - Empty (0%): thin ring outline only
-   - Partial: partial arc fill in pillar color
-   - Full (>10000 chars): complete filled ring + subtle checkmark
-   - Stub nodes (<2000 chars): dashed border on the whole node card (additional cue)
-
-3. CONNECTIVITY (thicker border) — P1 DEFERRED:
-   - Hub nodes (>10 edges) get 2px border instead of 1px
-   - Defer to R03 to avoid overloading this task
-
-## Node Component Specs
-- PillarNode (semi-expanded): 240x48px, rounded-xl, left-4px colored border, white bg, shadow-md, title bold 15px + "(N)" count. Chevron for expand/collapse.
-- CategoryNode: 200x40px, rounded-lg, border-l-2 colored, white bg, shadow-sm, 13px semi-bold. Child count badge.
-- LeafNode: 180x36px (base, scales with importance), rounded-md, border-l-2, white bg, 12px. Corner arc indicator. Dashed border if stub.
-- Selected: ring-2 ring-blue-500 ring-offset-2
-- Hover: shadow-lg transition-shadow duration-150
-
-## Edge Design
-- Parent: stroke #cbd5e1, strokeWidth 1.5, smooth step, no arrow
-- Cross-links: stroke by relation color, strokeWidth 1, default opacity 0.3, animated on hover
-
-## Background + Minimap
-- React Flow Background: dots variant, gap=20, color=#f1f5f9
-- Canvas bg: white
-- MiniMap: bottom-right, 150x100px, node colors match pillar
-
-## Backend Change (small)
-- Add `edge_count` field to /api/kg/graph node response: COUNT of concept_links rows where node is src or dst. Used for importance sizing.
-
-## Acceptance Criteria
-1. 8 pillar colors match spec (not generic rainbow)
-2. Node size varies by importance (1.0x/1.2x/1.5x) — visually apparent but not jarring
-3. Corner arc shows completeness on leaf nodes
-4. Stub nodes (<2000 chars) have dashed border
-5. Hover/selected states smooth
-6. MiniMap with pillar colors
-7. Background dots
-8. Before/after Playwright screenshots saved to logs/
-9. npm run build 0 TS errors
-10. Commit: [KG-VIZ-R02] Visual encoding: palette + importance sizing + completeness arc
-
-DEPENDS ON: T-P0-484 (React Flow migration)
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight
@@ -219,6 +148,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-17** -- T-P0-485: [KG-VIZ-R02] Visual encoding: palette + importance/completeness indicators + polish. Visual design pass after R01 migration. Adds information-dense encoding beyond just pillar color.
 - [x] **2026-04-17** -- T-P0-484: [KG-VIZ-R01] React Flow + ELK.js LR mind-map + incremental layout + URL state. FULL REWRITE of /kg. Remove Cytoscape.js, adopt React Flow + ELK.js for LR mind-map.
 - [x] **2026-04-16** -- T-P2-469: [QIdx-C1] Harden LC import scripts to set family. Harden LC import scripts so new rows no longer default to family=NULL silently.
 - [x] **2026-04-16** -- T-P2-460: [Pinterest-SD] Responsible AI / Inclusive AI + model monitoring & retraining playbook. Gap: Pinterest brands on 'Inclusive AI' (skin-tone-fair visual search case study) but no prep doc covers it. Bundle with
