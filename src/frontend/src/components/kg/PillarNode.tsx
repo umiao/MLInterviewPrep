@@ -43,7 +43,7 @@ function PillarNodeInner({ id, data }: NodeProps) {
       aria-label={`${meta.pillarName} pillar, ${isExpanded ? "expanded" : "collapsed"}`}
       aria-expanded={isExpanded}
       onKeyDown={handleKeyDown}
-      className={`relative rounded-xl bg-white shadow-md transition-shadow hover:shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
+      className={`relative rounded-xl bg-white shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
       style={{
         width: 240,
         height: 48,

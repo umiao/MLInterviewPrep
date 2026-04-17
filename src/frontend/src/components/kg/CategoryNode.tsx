@@ -43,7 +43,7 @@ function CategoryNodeInner({ id, data }: NodeProps) {
       aria-label={`${meta.title}, ${isExpanded ? "expanded" : "collapsed"}, ${meta.childCount} children`}
       aria-expanded={isExpanded}
       onKeyDown={handleKeyDown}
-      className={`relative rounded-lg bg-white shadow-sm transition-shadow hover:shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
+      className={`relative rounded-lg bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
       style={{
         width: 200,
         height: 40,

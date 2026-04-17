@@ -112,7 +112,7 @@ function LeafNodeInner({ id, data }: NodeProps) {
       role="button"
       aria-label={`${meta.title} (${meta.pillarName})`}
       onKeyDown={handleKeyDown}
-      className={`relative rounded-md bg-white shadow-sm transition-shadow hover:shadow-md cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
+      className={`relative rounded-md bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
       style={{
         width,
         height,

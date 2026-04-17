@@ -476,7 +476,11 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         nodesDraggable={false}
         nodesConnectable={false}
         edgesReconnectable={false}
-        elementsSelectable
+        elementsSelectable={false}
+        selectNodesOnDrag={false}
+        selectionOnDrag={false}
+        panOnDrag={[1, 2]}
+        zoomOnDoubleClick={false}
         onNodeClick={handleNodeClick}
         onNodeMouseEnter={handleNodeEnter}
         onNodeMouseLeave={handleNodeLeave}
