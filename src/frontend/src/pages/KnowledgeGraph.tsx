@@ -36,6 +36,7 @@ import {
 } from "../components/kg/useKgUrlState";
 import {
   EDGE_STYLES,
+  LAYOUT_CONFIG,
   PILLAR_STYLES,
   styleForPillar,
 } from "../components/kg/kgStyles";
@@ -138,6 +139,9 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   const [rfEdges, setRfEdges] = useState<Edge[]>([]);
   const debounceRef = useRef<number | null>(null);
   const initialFitDone = useRef(false);
+  // Last parent node the user expanded/collapsed — the layout effect centers
+  // the viewport on it after relayout so focus is preserved.
+  const lastActivatedRef = useRef<string | null>(null);
   // Hover state removed — caused persistent jitter. See hotfix1-5 history.
 
   useEffect(() => {
@@ -177,6 +181,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         setSelectedId(id);
         return;
       }
+      lastActivatedRef.current = id;
       setExpanded((prev) => {
         const next = new Set(prev);
         if (next.has(id)) next.delete(id);
@@ -188,10 +193,12 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   );
 
   const expandAll = useCallback(() => {
+    lastActivatedRef.current = null;
     setExpanded(allParentIds(model));
   }, [model]);
 
   const collapseAll = useCallback(() => {
+    lastActivatedRef.current = null;
     setExpanded(new Set());
   }, []);
 
@@ -252,6 +259,28 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
           rf.fitView({ padding: 0.1, duration: 300 });
           initialFitDone.current = true;
         });
+      } else if (lastActivatedRef.current) {
+        const focusId = lastActivatedRef.current;
+        lastActivatedRef.current = null;
+        const pos = layout.getPosition(focusId);
+        const meta = model.nodesById.get(focusId);
+        if (pos && meta) {
+          const base =
+            meta.kind === "pillar"
+              ? LAYOUT_CONFIG.pillarNode
+              : meta.kind === "category"
+                ? LAYOUT_CONFIG.categoryNode
+                : LAYOUT_CONFIG.leafNode;
+          const scale = meta.kind === "leaf" ? meta.importanceScale : 1;
+          const w = base.width * scale;
+          const h = base.height * scale;
+          requestAnimationFrame(() => {
+            rf.setCenter(pos.x + w / 2, pos.y + h / 2, {
+              duration: 400,
+              zoom: rf.getZoom(),
+            });
+          });
+        }
       }
     })();
     return () => {

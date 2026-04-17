@@ -387,3 +387,11 @@
 - **Sanity check result**: npm run build: 0 TS errors (1.12s); vitest: 67/67 pass.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-487 --status completed`
+
+
+## 2026-04-17 10:34 -- [T-P0-488] KG-UX-02: Preserve focus on expand/collapse
+- **What I did**: Added a `lastActivatedRef` in KnowledgeGraph.tsx set inside `handleActivate` when the user clicks a pillar/category (leaf clicks still only select). After the structural layout effect awaits `layout.layoutAll` and repopulates React Flow nodes, if the initial fitView has already happened and a last-activated id is pending, it calls `rf.setCenter(pos.x + w/2, pos.y + h/2, { duration: 400, zoom: rf.getZoom() })` on the next animation frame — node width/height derived from `LAYOUT_CONFIG.{pillar,category,leaf}Node` and `meta.importanceScale` for leaves. The ref is cleared once consumed so subsequent unrelated layouts (search, URL-state rehydration) do not steal the viewport. `expandAll` / `collapseAll` also clear the ref so the bulk toggles do not re-center on a stale node.
+- **Deliverables**: src/frontend/src/pages/KnowledgeGraph.tsx (+28/-0).
+- **Sanity check result**: `npm run build` succeeds (1.06s, 0 TS errors); `npx vitest run` 67/67 pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-488 --status completed`
