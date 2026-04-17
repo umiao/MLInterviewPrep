@@ -10,6 +10,7 @@ import {
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
+  ViewportPortal,
   useReactFlow,
   type Edge,
   type Node,
@@ -36,10 +37,12 @@ import {
 } from "../components/kg/useKgUrlState";
 import {
   EDGE_STYLES,
+  LANE_SEPARATOR_STYLE,
   LAYOUT_CONFIG,
   PILLAR_STYLES,
   styleForPillar,
 } from "../components/kg/kgStyles";
+import type { LaneInfo } from "../components/kg/useKgLayout";
 import {
   allParentIds,
   buildGraphModel,
@@ -110,6 +113,40 @@ function minimapColor(node: Node): string {
   return styleForPillar(meta?.pillar).border;
 }
 
+/**
+ * Horizontal dashed separators between adjacent pillar lanes. Rendered inside
+ * the ReactFlow viewport so they pan/zoom with the graph. Each separator sits
+ * at the midpoint of the gap between two lanes and spans the widest lane.
+ */
+function LaneSeparators({ lanes }: { lanes: LaneInfo[] }) {
+  if (lanes.length < 2) return null;
+  const maxWidth = lanes.reduce((m, l) => Math.max(m, l.width), 0);
+  const items: React.ReactNode[] = [];
+  for (let i = 0; i < lanes.length - 1; i += 1) {
+    const top = lanes[i];
+    const bottom = lanes[i + 1];
+    const y = (top.yEnd + bottom.yStart) / 2;
+    const width = Math.max(top.width, bottom.width, maxWidth);
+    items.push(
+      <div
+        key={`lane-sep-${top.pillar}-${bottom.pillar}`}
+        data-testid={`kg-lane-separator-${top.pillar}`}
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: -LAYOUT_CONFIG.laneGap / 2,
+          top: y,
+          width: width + LAYOUT_CONFIG.laneGap,
+          height: 0,
+          borderTop: `${LANE_SEPARATOR_STYLE.widthPx}px dashed ${LANE_SEPARATOR_STYLE.color}`,
+          pointerEvents: "none",
+        }}
+      />,
+    );
+  }
+  return <ViewportPortal>{items}</ViewportPortal>;
+}
+
 interface InnerProps {
   model: KgGraphModel;
   registerControls?: (c: { expandAll: () => void; collapseAll: () => void }) => void;
@@ -137,6 +174,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rfNodes, setRfNodes] = useState<Node[]>([]);
   const [rfEdges, setRfEdges] = useState<Edge[]>([]);
+  const [lanes, setLanes] = useState<LaneInfo[]>([]);
   const debounceRef = useRef<number | null>(null);
   const initialFitDone = useRef(false);
   // Last parent node the user expanded/collapsed — the layout effect centers
@@ -256,6 +294,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
           buildReactFlowEdges(model, visibleIds, null),
         ),
       );
+      setLanes(layout.getLanes());
       if (!initialFitDone.current) {
         requestAnimationFrame(() => {
           rf.fitView({ padding: 0.1, duration: 300 });
@@ -361,6 +400,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         <Background variant={BackgroundVariant.Dots} gap={20} color="#f1f5f9" />
         <Controls position="bottom-right" showInteractive={false} />
         <MiniMap nodeColor={minimapColor} pannable zoomable />
+        <LaneSeparators lanes={lanes} />
       </ReactFlow>
       {/* Hover tooltip removed — caused persistent jitter. Info shown on click via drawer. */}
       <FrameworkNodeDrawer

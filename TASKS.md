@@ -11,25 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P0-488, T-P0-489
-- **Description**: Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to swimlane: each pillar gets its own horizontal lane, laid out independently; lanes stack vertically.
-
-Files: src/frontend/src/components/kg/useKgLayout.ts, kgStyles.ts, KnowledgeGraph.tsx
-Changes:
-- layoutAll rewrite: group visible nodes by pillar (via nodesById.get(id).pillar). For each pillar: run ELK layered RIGHT on just that subtree, capture bbox.
-- Stack lanes: lane_i.y_offset = sum(lane_[0..i-1].height) + gap(60px). Apply offset to cached positions.
-- Draw lane separators: in KnowledgeGraph.tsx add an SVG overlay layer (or React Flow custom node at lane boundary) rendering dashed 1px #e2e8f0 line between adjacent lanes.
-- Sort pillars by their numeric key (pillar1..pillar8) for stable order
-AC:
-1. Expanding Pillar A does NOT move any node in Pillar B-H (verify via console logging cached positions)
-2. 8 lanes visible top-to-bottom when all pillars have nodes
-3. Dashed separator lines between lanes
-4. Build + vitest pass
-5. Smoke test: visually "one row per topic"; expand/collapse multiple pillars - other lanes stay put
-
 ### P2 -- Nice to Have
 
 #### T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish
@@ -134,6 +115,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
 - [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
 - [x] **2026-04-17** -- T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts. Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.

@@ -43,6 +43,13 @@ export const LAYOUT_CONFIG = {
   pillarNode: { width: 280, height: 60 },
   categoryNode: { width: 260, height: 54 },
   leafNode: { width: 240, height: 48 },
+  laneGap: 60,
+};
+
+export const LANE_SEPARATOR_STYLE = {
+  color: "#e2e8f0",
+  widthPx: 1,
+  dash: "6 4",
 };
 
 export const EDGE_STYLES = {

@@ -23,6 +23,12 @@ import {
 } from "../components/kg/useKgUrlState";
 import CategoryNode from "../components/kg/CategoryNode";
 import LeafNode from "../components/kg/LeafNode";
+import {
+  groupVisibleByPillar,
+  pillarSortKey,
+  stackLanes,
+} from "../components/kg/useKgLayout";
+import { LAYOUT_CONFIG } from "../components/kg/kgStyles";
 
 vi.mock("../utils/api", () => ({
   api: {
@@ -498,6 +504,191 @@ describe("LeafNode stub badge", () => {
         zIndex={0} />,
     );
     expect(html).not.toContain('data-testid="kg-stub-badge"');
+  });
+});
+
+describe("swimlane: groupVisibleByPillar", () => {
+  it("groups visible node ids by each node's pillar key", () => {
+    const m = buildGraphModel(SAMPLE);
+    const visible = new Set([nodeIdOf(1), nodeIdOf(2), nodeIdOf(4)]);
+    const groups = groupVisibleByPillar(m, visible);
+    expect(groups.get("pillar1")).toEqual(new Set([nodeIdOf(1), nodeIdOf(2)]));
+    expect(groups.get("pillar2")).toEqual(new Set([nodeIdOf(4)]));
+  });
+
+  it("buckets missing/unknown pillars under the unassigned sentinel", () => {
+    const data: KgGraphResponse = {
+      nodes: [
+        {
+          id: 99,
+          kind: "framework_node",
+          pillar: null,
+          path: "x",
+          title: "Orphan",
+          depth: 0,
+          parent_id: null,
+          content_length: 0,
+        },
+      ],
+      edges: [],
+    };
+    const m = buildGraphModel(data);
+    const groups = groupVisibleByPillar(m, new Set([nodeIdOf(99)]));
+    expect(groups.size).toBe(1);
+    const [[key, ids]] = [...groups.entries()];
+    expect(key).not.toMatch(/^pillar\d+$/);
+    expect(ids).toEqual(new Set([nodeIdOf(99)]));
+  });
+});
+
+describe("swimlane: pillarSortKey", () => {
+  it("sorts pillar1..pillar8 by numeric suffix", () => {
+    const keys = ["pillar3", "pillar1", "pillar8", "pillar2"];
+    keys.sort((a, b) => pillarSortKey(a) - pillarSortKey(b));
+    expect(keys).toEqual(["pillar1", "pillar2", "pillar3", "pillar8"]);
+  });
+
+  it("pushes unknown/non-matching keys to the end", () => {
+    const keys = ["pillar5", "other", "pillar1"];
+    keys.sort((a, b) => pillarSortKey(a) - pillarSortKey(b));
+    expect(keys).toEqual(["pillar1", "pillar5", "other"]);
+  });
+});
+
+describe("swimlane: stackLanes", () => {
+  it("stacks lanes vertically with gap and produces absolute positions", () => {
+    const pillarLayouts = new Map([
+      [
+        "pillar1",
+        {
+          positions: new Map([
+            ["n1", { x: 0, y: 0 }],
+            ["n2", { x: 100, y: 20 }],
+          ]),
+          width: 300,
+          height: 50,
+        },
+      ],
+      [
+        "pillar2",
+        {
+          positions: new Map([["n3", { x: 0, y: 0 }]]),
+          width: 200,
+          height: 40,
+        },
+      ],
+    ]);
+    const { positions, lanes } = stackLanes(
+      pillarLayouts,
+      ["pillar1", "pillar2"],
+      LAYOUT_CONFIG.laneGap,
+    );
+    expect(lanes).toHaveLength(2);
+    expect(lanes[0]).toMatchObject({ pillar: "pillar1", yStart: 0, yEnd: 50 });
+    expect(lanes[1]).toMatchObject({
+      pillar: "pillar2",
+      yStart: 50 + LAYOUT_CONFIG.laneGap,
+      yEnd: 50 + LAYOUT_CONFIG.laneGap + 40,
+    });
+    // pillar1 nodes untouched
+    expect(positions.get("n1")).toEqual({ x: 0, y: 0 });
+    expect(positions.get("n2")).toEqual({ x: 100, y: 20 });
+    // pillar2 node offset by pillar1.height + gap
+    expect(positions.get("n3")).toEqual({
+      x: 0,
+      y: 50 + LAYOUT_CONFIG.laneGap,
+    });
+  });
+
+  it("skips empty pillar lanes without leaving a gap in the stack", () => {
+    const pillarLayouts = new Map([
+      [
+        "pillar1",
+        {
+          positions: new Map<string, { x: number; y: number }>(),
+          width: 0,
+          height: 0,
+        },
+      ],
+      [
+        "pillar2",
+        {
+          positions: new Map([["n3", { x: 0, y: 0 }]]),
+          width: 200,
+          height: 40,
+        },
+      ],
+    ]);
+    const { lanes } = stackLanes(
+      pillarLayouts,
+      ["pillar1", "pillar2"],
+      LAYOUT_CONFIG.laneGap,
+    );
+    expect(lanes).toHaveLength(1);
+    expect(lanes[0]).toMatchObject({ pillar: "pillar2", yStart: 0 });
+  });
+
+  it("preserves in-lane relative positions across re-stacks: Pillar A growing does NOT move Pillar B nodes within their lane", () => {
+    // Snapshot 1: Pillar 1 has just one category
+    const snap1 = new Map([
+      [
+        "pillar1",
+        {
+          positions: new Map([
+            ["n1", { x: 0, y: 0 }],
+            ["n2", { x: 100, y: 20 }],
+          ]),
+          width: 300,
+          height: 60,
+        },
+      ],
+      [
+        "pillar2",
+        {
+          positions: new Map([
+            ["n3", { x: 0, y: 0 }],
+            ["n4", { x: 120, y: 30 }],
+          ]),
+          width: 320,
+          height: 70,
+        },
+      ],
+    ]);
+    // Snapshot 2: Pillar 1 taller (simulating expansion) but pillar2 unchanged
+    const snap2 = new Map([
+      [
+        "pillar1",
+        {
+          positions: new Map([
+            ["n1", { x: 0, y: 0 }],
+            ["n2", { x: 100, y: 20 }],
+            ["n5", { x: 200, y: 40 }],
+          ]),
+          width: 400,
+          height: 140, // grew
+        },
+      ],
+      [
+        "pillar2",
+        // Same object reference -> identical relative positions
+        snap1.get("pillar2")!,
+      ],
+    ]);
+    const r1 = stackLanes(snap1, ["pillar1", "pillar2"], LAYOUT_CONFIG.laneGap);
+    const r2 = stackLanes(snap2, ["pillar1", "pillar2"], LAYOUT_CONFIG.laneGap);
+
+    // Pillar 2 lane relative positions (pos - yStart of its lane) must match exactly
+    const p2Start1 = r1.lanes[1].yStart;
+    const p2Start2 = r2.lanes[1].yStart;
+    const n3Rel1 = r1.positions.get("n3")!.y - p2Start1;
+    const n4Rel1 = r1.positions.get("n4")!.y - p2Start1;
+    const n3Rel2 = r2.positions.get("n3")!.y - p2Start2;
+    const n4Rel2 = r2.positions.get("n4")!.y - p2Start2;
+    expect(n3Rel1).toBe(n3Rel2);
+    expect(n4Rel1).toBe(n4Rel2);
+    // x is unchanged across re-stacks
+    expect(r1.positions.get("n3")!.x).toBe(r2.positions.get("n3")!.x);
+    expect(r1.positions.get("n4")!.x).toBe(r2.positions.get("n4")!.x);
   });
 });
 
