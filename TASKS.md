@@ -9,111 +9,114 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-484: [KG-VIZ-R01] Migrate /kg from Cytoscape to React Flow + ELK.js (LR mind-map)
+#### T-P0-484: [KG-VIZ-R01] React Flow + ELK.js LR mind-map + incremental layout + URL state
 - **Priority**: P0
 - **Complexity**: M
 - **Depends on**: None
-- **Description**: COMPLETE REWRITE of /kg visualization. Remove Cytoscape.js, adopt React Flow + ELK.js for a left-to-right mind-map layout.
+- **Description**: FULL REWRITE of /kg. Remove Cytoscape.js, adopt React Flow + ELK.js for LR mind-map.
 
-READ-ONLY POLICY: The KG page is a VIEWER only. No user drag-n-drop, no rearranging, no editing. All structural changes happen through Claude (task_db / seed scripts). React Flow's interactiveElements, nodesDraggable, nodesConnectable, edgesUpdatable all set to FALSE. Only pan/zoom + click-to-view allowed.
+## Core Architecture Decisions (user-reviewed)
+- READ-ONLY viewer: nodesDraggable=false, nodesConnectable=false, edgesUpdatable=false
+- ELK layered direction='RIGHT' (LR mind-map)
+- INCREMENTAL LAYOUT: first load = full ELK pass, cache all node positions. Expand/collapse = local sub-tree layout only (parent coords locked). Use ELK `interactiveLayout: true` or compute sub-graph independently relative to parent. This preserves spatial memory.
+- DEFAULT SEMI-EXPANDED: pillar + category (depth 0+1) visible on load, leaves (depth 2+) collapsed. ~40-80 nodes on first screen showing skeleton.
+- Desktop-first. No mobile layout. Existing FrameworkTreeView serves as a11y / mobile fallback (already exists, keep it).
 
-CURRENT STATE (files to replace):
-- src/frontend/src/pages/KnowledgeGraph.tsx (Cytoscape imperative init, ~100 lines)
-- src/frontend/src/pages/kgGraph.helpers.ts (Cytoscape ElementDefinition builder)
-- Backend src/backend/routers/kg.py stays unchanged (GET /api/kg/graph returns nodes+edges)
+## Dependencies
+REMOVE: cytoscape, cytoscape-dagre, @types/cytoscape
+ADD: @xyflow/react (v12+), elkjs
 
-DEPENDENCY CHANGES:
-- REMOVE: cytoscape, cytoscape-dagre, @types/cytoscape
-- ADD: @xyflow/react (React Flow v12+), elkjs (ELK WASM layout engine)
-- Optional: @xyflow/react already includes Minimap, Controls, Background components
+## Layout Details
+- 8 pillar roots (depth=0) in leftmost column
+- ~40 category nodes (depth=1) in second column (visible by default)
+- ~150 leaf nodes (depth=2+) collapsed behind category pills
+- Click category -> expand to show its leaf children (local layout, parent stays put)
+- rankSep ~150px, nodeSep ~40px
+- fitView({ padding: 0.1 }) on initial load
+- Edge routing: ELK orthogonal routing minimizes crossings
 
-LAYOUT:
-- ELK layered algorithm with direction='RIGHT' (left-to-right)
-- Root nodes (8 pillars, depth=0) on the leftmost column
-- Category nodes (depth=1) as second column
-- Leaf nodes (depth=2+) as third+ column
-- Edge routing: ELK handles orthogonal edge routing to minimize crossings
-- rankSep ~150px (horizontal gap between columns), nodeSep ~40px (vertical gap)
-- After layout, call reactFlowInstance.fitView({ padding: 0.1 }) for auto-fit on load
+## Pillar Grouping
+- Each pillar is a React Flow GROUP NODE with styled background container
+- Children render INSIDE the group (parent field in React Flow node data)
+- Group has colored left-border (4px) + light tint background + rounded corners
+- Human-readable names from DB: Coding & Algorithms / ML Fundamentals & Theory / ML System Design / Applied ML & Domain-Specific / ML Infrastructure & MLOps / Deep Learning & LLM / Math & Statistics / Behavioral & Leadership
 
-NODE HIERARCHY (from verified DB query):
-- 8 pillar roots: Coding & Algorithms / ML Fundamentals & Theory / ML System Design / Applied ML & Domain-Specific / ML Infrastructure & MLOps / Deep Learning & LLM Specialization / Math & Statistics Foundations / Behavioral & Leadership
-- ~40 category nodes (depth=1)
-- ~150 leaf nodes (depth=2+)
-- Parent-child edges from framework_nodes.parent_id field
+## Custom Node Components (Tailwind)
+- PillarNode: group header, title + node count + expand/collapse chevron
+- CategoryNode: medium card, title + child count, click to expand leaves
+- LeafNode: compact card, title + click to open drawer
+- All: rounded-lg, shadow-sm, font-medium text-sm (14px), max-w-[200px]
+- Selected: ring-2 ring-blue-500
 
-PILLAR GROUPING:
-- Each pillar is a React Flow GROUP NODE (type='group') with styled background
-- Children of each pillar rendered INSIDE the group (parent field set in React Flow node data)
-- Group node has colored left border (4px), light-tinted background, rounded corners
-- Group header shows: pillar icon/emoji-free label + "(N nodes)" count
-- DEFAULT STATE: collapsed (only pillar group node visible as a pill/card)
-- Expand on click: shows category → leaf tree inside the group
+## Edge Styling
+- 'parent' edges: solid #cbd5e1 (slate-300), 1.5px, smooth step path, no arrow
+- 'canonical' edges: solid #16a34a (green-600), 2px, animated dash, small arrow
+- 'see_also' / 'drill' / others: DEFAULT opacity 0.3, no legend toggle. On hover of a node, highlight all connected edges to full opacity.
+- Cross-pillar edges visible only when BOTH endpoint pillars/categories are expanded
 
-CUSTOM NODE COMPONENTS (React TSX with Tailwind):
-- PillarNode: group header with title + node count + expand/collapse toggle + progress bar
-- CategoryNode: medium card with title + child count
-- LeafNode: compact card with title + content_length indicator (thin bar) + click handler
-- All nodes: rounded-lg, shadow-sm, border, font-medium text-sm (14px), max-w-[200px]
-- Selected node: ring-2 ring-blue-500
+## Search Interaction (must be well-defined)
+Search box (top-right): on typing:
+1. Auto-expand any collapsed pillar/category containing matches
+2. Zoom + pan to center on first match
+3. Highlight matching nodes (ring-2 ring-yellow-400)
+4. Non-matching nodes: opacity 0.2 (not hidden)
+5. Clear search: restore original expand state + fitView
+6. Debounce 300ms on keystroke
 
-EDGE STYLING:
-- 'parent' edges: solid gray (#94a3b8), 1.5px, bezier, no arrow
-- 'canonical' edges: solid green (#16a34a), 2px, animated dash, small arrow
-- 'see_also' edges: dashed blue (#3b82f6), 1px
-- 'drill' edges: dotted purple (#8b5cf6), 1px
-- Cross-pillar edges only visible when BOTH endpoint pillars are expanded
+## URL State / Deep Linking (from day 1)
+- URL params: `?node={id}&expanded={pillar1,pillar2.supervised_learning,...}`
+- On load: parse URL, expand specified paths, select + zoom to node if specified
+- On node click / expand: update URL via replaceState (no history spam)
+- Enables sharing "look at this concept" links
 
-INTERACTIONS:
-- Click leaf/category node -> open FrameworkNodeDrawer (reuse existing, right side slide-over)
-- Click pillar group -> toggle expand/collapse
-- Pan: mouse drag on background
-- Zoom: scroll wheel
-- Auto-fit on load: fitView()
-- Search box (top-right): filters nodes by title; non-matching nodes hidden (not just dimmed)
+## Performance Targets
+- First render (201 nodes, semi-expanded): <1s
+- Pan/zoom: 60fps
+- Expand/collapse: <200ms (local layout only)
+- Ceiling: 500 nodes still usable (progressive loading deferred to P1 if needed)
 
-FILES TO CREATE/MODIFY:
+## Files
 - src/frontend/src/pages/KnowledgeGraph.tsx — full rewrite
-- src/frontend/src/pages/kgGraph.helpers.ts — rewrite for React Flow node/edge format
-- src/frontend/src/components/kg/PillarNode.tsx — custom pillar group component
-- src/frontend/src/components/kg/ConceptNode.tsx — custom leaf/category component
-- src/frontend/src/components/kg/kgStyles.ts — color palette + ELK config
+- src/frontend/src/pages/kgGraph.helpers.ts — rewrite for React Flow format
+- src/frontend/src/components/kg/PillarNode.tsx
+- src/frontend/src/components/kg/CategoryNode.tsx
+- src/frontend/src/components/kg/LeafNode.tsx
+- src/frontend/src/components/kg/useKgLayout.ts — ELK layout hook with caching + incremental
+- src/frontend/src/components/kg/kgStyles.ts — palette + config
+- src/frontend/src/components/kg/useKgUrlState.ts — URL sync hook
 - package.json — dep changes
 
-ACCEPTANCE CRITERIA:
-1. /kg renders 201 nodes in LEFT-TO-RIGHT tree layout (not top-down, not flat line)
-2. 8 pillar groups visible with human-readable titles (from DB, NOT "pillar1")
-3. Default: all pillars collapsed (8 pill cards in a column on left)
-4. Click pillar -> expands to show category→leaf subtree flowing rightward
-5. Click any leaf/category -> FrameworkNodeDrawer opens from right
-6. concept_links edges rendered between nodes (canonical=green, see_also=blue)
-7. Cross-pillar edges visible when both pillars expanded
-8. Search filters by title
-9. fitView on load — no manual zoom needed to see content
-10. nodesDraggable=false, nodesConnectable=false (read-only)
-11. npm run build 0 TS errors
-12. frontend vitest passes (update/add KG tests)
-13. Bundle delta: cytoscape removal ~-107KB, React Flow addition ~+40KB + ELK ~+200KB (net ~+130KB acceptable)
-14. Playwright screenshot shows readable LR mind-map (take screenshot in test or commit message)
-15. Commit: [KG-VIZ-R01] Migrate /kg to React Flow + ELK.js LR mind-map
+## Acceptance Criteria
+1. /kg renders LR mind-map (not flat line, not top-down)
+2. Default: 8 pillars + ~40 categories visible (semi-expanded), leaves collapsed
+3. Expand category -> leaves appear to right, parent stays in place (incremental layout)
+4. Click leaf -> FrameworkNodeDrawer opens from right
+5. Search auto-expands + zooms + highlights matches
+6. URL reflects selected node + expanded state; reloading URL restores view
+7. Edges: parent=gray solid, canonical=green animated, others=faded 0.3 opacity
+8. Hover node -> connected edges highlight to full opacity
+9. Read-only: no drag, no connect, no edit
+10. fitView on load; first render <1s
+11. npm run build 0 TS errors; vitest passes
+12. Playwright screenshot saved to logs/ showing readable LR tree
+13. Commit: [KG-VIZ-R01] React Flow + ELK.js LR mind-map with incremental layout + URL state
 
-NON-GOALS:
-- No user editing / drag-n-drop / add-node UI
-- No 3D visualization
-- No force-directed layout (use ELK layered only)
-- No company-lens filter (defer to R04)
-- Do not touch backend /api/kg/graph endpoint
-- Do not remove FrameworkTreeView or FrameworkTreemap pages
+## Non-Goals
+- No user editing / drag-n-drop / add-node UI (all changes through Claude)
+- No force-directed layout (ELK layered only)
+- No mobile-specific layout (desktop-first; FrameworkTreeView is mobile fallback)
+- No Learning Path overlay (defer; reserve path_id field for future)
+- No edge legend toggle / pillar filter buttons (cut per review)
+- Do NOT remove FrameworkTreeView or FrameworkTreemap pages
+- Do NOT touch backend /api/kg/graph
 
-#### T-P0-485: [KG-VIZ-R02] Visual design system: pillar palette + node components + collapsed defaults
+#### T-P0-485: [KG-VIZ-R02] Visual encoding: palette + importance/completeness indicators + polish
 - **Priority**: P0
 - **Complexity**: S
 - **Depends on**: T-P0-484
-- **Description**: Polish the visual design of /kg after R01 migration lands. This task focuses on aesthetics, not functionality.
+- **Description**: Visual design pass after R01 migration. Adds information-dense encoding beyond just pillar color.
 
-PILLAR COLOR PALETTE (curated, not generic rainbow):
-Proposed mapping (Tailwind-derived, high contrast, colorblind-friendly pairs):
-
+## Pillar Color Palette (curated, Tailwind-derived)
   Coding & Algorithms          -> slate-600 (#475569) border + slate-50 bg
   ML Fundamentals & Theory     -> amber-600 (#d97706) border + amber-50 bg
   ML System Design             -> emerald-600 (#059669) border + emerald-50 bg
@@ -123,90 +126,114 @@ Proposed mapping (Tailwind-derived, high contrast, colorblind-friendly pairs):
   Math & Statistics             -> teal-600 (#0d9488) border + teal-50 bg
   Behavioral & Leadership      -> orange-600 (#ea580c) border + orange-50 bg
 
-NODE DESIGN SPEC:
-- PillarNode (collapsed): 240x48px, rounded-xl, left-4px colored border, white bg, shadow-md. Title bold 15px + "(N)" count right-aligned. Chevron-right icon for expand hint.
-- PillarNode (expanded): same header + colored bg-{pillar}-50 container wrapping children
-- CategoryNode: 200x40px, rounded-lg, border-l-2 colored, white bg, shadow-sm. Title 13px semi-bold. Count badge "(N leaves)".
-- LeafNode: 180x36px, rounded-md, border-l-2 colored, white bg. Title 12px. Bottom thin progress bar (content_length / 10000 capped at 100%). If content_length < 2000: ghost/dashed border (stub indicator).
-- Selected node: ring-2 ring-blue-500 ring-offset-2
+## Visual Encoding Beyond Color (per user review)
+Color is already bound to pillar. THREE additional encodings:
+
+1. IMPORTANCE (node size):
+   - Base size 1.0x (most nodes)
+   - 1.2x for nodes with >5 concept_links edges (moderate connectivity)
+   - 1.5x for nodes with >10 edges (hub nodes)
+   - Subtle variation; must not break layered rhythm
+   - Size computed from backend data (add edge_count to /api/kg/graph node payload)
+
+2. COMPLETENESS (corner arc indicator):
+   - iOS-style small circular arc in top-right corner of each leaf node
+   - Arc fill = content_length / 10000 (capped at 100%)
+   - Empty (0%): thin ring outline only
+   - Partial: partial arc fill in pillar color
+   - Full (>10000 chars): complete filled ring + subtle checkmark
+   - Stub nodes (<2000 chars): dashed border on the whole node card (additional cue)
+
+3. CONNECTIVITY (thicker border) — P1 DEFERRED:
+   - Hub nodes (>10 edges) get 2px border instead of 1px
+   - Defer to R03 to avoid overloading this task
+
+## Node Component Specs
+- PillarNode (semi-expanded): 240x48px, rounded-xl, left-4px colored border, white bg, shadow-md, title bold 15px + "(N)" count. Chevron for expand/collapse.
+- CategoryNode: 200x40px, rounded-lg, border-l-2 colored, white bg, shadow-sm, 13px semi-bold. Child count badge.
+- LeafNode: 180x36px (base, scales with importance), rounded-md, border-l-2, white bg, 12px. Corner arc indicator. Dashed border if stub.
+- Selected: ring-2 ring-blue-500 ring-offset-2
 - Hover: shadow-lg transition-shadow duration-150
 
-EDGE DESIGN:
-- Parent edges: stroke #cbd5e1 (slate-300), strokeWidth 1.5, no arrow, smooth step path
-- Cross-link edges: stroke by relation color (green/blue/purple per R01), strokeWidth 1, animated=true (moving dash), markerEnd small arrow
+## Edge Design
+- Parent: stroke #cbd5e1, strokeWidth 1.5, smooth step, no arrow
+- Cross-links: stroke by relation color, strokeWidth 1, default opacity 0.3, animated on hover
 
-TYPOGRAPHY:
-- All node text: Inter or system-ui, antialiased
-- No CJK in node labels (all pillar/category/leaf titles are English in DB)
-- Search input: rounded-lg, border, px-3 py-2, placeholder "Search nodes..."
+## Background + Minimap
+- React Flow Background: dots variant, gap=20, color=#f1f5f9
+- Canvas bg: white
+- MiniMap: bottom-right, 150x100px, node colors match pillar
 
-BACKGROUND:
-- React Flow Background component: dots variant, gap=20, color=#f1f5f9 (slate-100)
-- Canvas bg: white (#ffffff)
+## Backend Change (small)
+- Add `edge_count` field to /api/kg/graph node response: COUNT of concept_links rows where node is src or dst. Used for importance sizing.
 
-MINIMAP:
-- React Flow MiniMap component, bottom-right corner, 150x100px
-- Node colors match pillar colors
+## Acceptance Criteria
+1. 8 pillar colors match spec (not generic rainbow)
+2. Node size varies by importance (1.0x/1.2x/1.5x) — visually apparent but not jarring
+3. Corner arc shows completeness on leaf nodes
+4. Stub nodes (<2000 chars) have dashed border
+5. Hover/selected states smooth
+6. MiniMap with pillar colors
+7. Background dots
+8. Before/after Playwright screenshots saved to logs/
+9. npm run build 0 TS errors
+10. Commit: [KG-VIZ-R02] Visual encoding: palette + importance sizing + completeness arc
 
-ACCEPTANCE CRITERIA:
-1. Pillar colors match spec (not generic rainbow)
-2. Collapsed pillar pills are visually distinct and readable
-3. Stub nodes (content < 2000 chars) have visual indicator (dashed border or ghost style)
-4. Hover/selected states smooth and visible
-5. MiniMap renders in corner with correct pillar colors
-6. Background dots visible
-7. Screenshot comparison: before (flat line) vs after (LR tree with polish) — save both to logs/
-8. Commit: [KG-VIZ-R02] Visual design: pillar palette, node polish, collapsed defaults
-
-DEPENDS ON: KG-VIZ-R01 (React Flow migration must land first)
+DEPENDS ON: T-P0-484 (React Flow migration)
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-486: [KG-VIZ-R03] Interaction refinements: tooltip, legend, keyboard nav, edge toggle
+#### T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: T-P0-485
-- **Description**: Post-polish interaction improvements for /kg.
+- **Description**: Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortcuts).
 
-FEATURES:
-1. HOVER TOOLTIP: On node hover, show floating tooltip (absolute positioned div) with:
-   - Title (bold)
-   - Pillar name (colored badge)
-   - Content length: "8,234 chars" or "Stub (empty)" if < 100
-   - "Click to view details"
-   - Tooltip disappears on mouse leave, positioned above node
+## Features
 
-2. EDGE TYPE LEGEND: Small legend panel (bottom-left, semi-transparent bg):
-   - Line samples + labels for each edge type: Parent / Canonical / See Also / Drill / Absorbed From
-   - Toggleable: click edge type to show/hide those edges
+1. HOVER TOOLTIP:
+   - Floating div positioned above node on mouseenter
+   - Content: Title (bold) / Pillar name (colored badge) / Content: "8,234 chars" or "Stub" / "Click to view"
+   - Disappears on mouseleave
+   - Z-index above edges
 
-3. KEYBOARD NAVIGATION:
-   - Tab: cycle through nodes in tree order
-   - Enter on focused node: open drawer
-   - Escape: close drawer, deselect node
-   - +/-: zoom in/out
-   - 0: fitView (reset zoom)
+2. KEYBOARD NAVIGATION (a11y baseline):
+   - Tab: cycle through visible nodes in tree order (left-to-right, top-to-bottom)
+   - Enter on focused node: open FrameworkNodeDrawer
+   - Escape: close drawer + deselect
+   - Cut: +/-/0 zoom shortcuts (not a11y critical)
 
-4. EXPAND/COLLAPSE ALL:
-   - Button in header: "Expand All" / "Collapse All" toggle
-   - Ctrl+E shortcut
+3. EXPAND / COLLAPSE ALL:
+   - Button in page header: "Expand All" / "Collapse All"
+   - Updates URL state accordingly
+   - Re-runs incremental layout for newly visible subtrees
 
-5. PILLAR FILTER:
-   - Row of pillar toggle buttons below search
-   - Click to hide/show entire pillar (useful when focusing on one domain)
-   - Active pillars have filled colored badge, inactive are grayed outline
+4. HOVER EDGE HIGHLIGHT:
+   - On hover any node: all edges connected to that node go from opacity 0.3 -> 1.0
+   - Connected neighbor nodes get subtle highlight (ring-1 ring-gray-300)
+   - On mouseleave: revert
 
-ACCEPTANCE CRITERIA:
-1. Hover tooltip shows on any node with correct info
-2. Edge legend toggles work (hiding canonical edges hides green lines)
-3. Tab + Enter keyboard flow works end-to-end
-4. Expand/Collapse All button works
-5. Pillar filter buttons correctly hide/show subtrees + re-layout
+5. CONNECTIVITY BORDER (deferred from R02):
+   - Nodes with >10 concept_links edges get 2px border (hub indicator)
+
+## NOT in scope (per review)
+- Edge legend toggle with checkboxes — CUT (replaced by hover highlight)
+- Pillar filter buttons — CUT
+- +/-/0 zoom shortcuts — CUT
+- Learning Path overlay — DEFERRED (reserve path_id field only)
+- Progressive loading — DEFERRED to future task if node count exceeds 500
+- Mobile layout — desktop-first declared
+
+## Acceptance Criteria
+1. Tooltip shows on hover with correct content
+2. Tab/Enter/Escape keyboard flow works
+3. Expand/Collapse All button toggles all pillars
+4. Edge hover highlight works (0.3 -> 1.0 on connected edges)
+5. Hub nodes (>10 edges) have thicker border
 6. npm run build 0 TS errors
-7. Commit: [KG-VIZ-R03] Interaction refinements: tooltip, legend, keyboard, pillar filter
+7. Commit: [KG-VIZ-R03] Interactions: tooltip, keyboard a11y, expand-all, hover highlight
 
-DEPENDS ON: KG-VIZ-R02 (visual design must land first)
-NON-GOALS: No user editing. No export (SVG/PNG). No undo/redo.
+DEPENDS ON: T-P0-485
 
 ### P2 -- Nice to Have
 
