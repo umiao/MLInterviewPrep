@@ -15,6 +15,14 @@ import {
   type NodeMouseHandler,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+
+// Override React Flow's cursor management to prevent flicker between
+// grab/pointer icons when hovering nodes. Nodes set their own cursor-pointer.
+const KG_STYLE_OVERRIDES = `
+.kg-canvas .react-flow__pane { cursor: grab !important; }
+.kg-canvas .react-flow__pane:active { cursor: grabbing !important; }
+.kg-canvas .react-flow__node { cursor: pointer !important; }
+`;
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
@@ -293,37 +301,13 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   });
 
   // ---- STRUCTURAL LAYOUT (runs on mount + expand/collapse) ----
-  // Only depends on model, visibleIds, effectiveExpanded. Does NOT depend on
-  // hover/selection state — those are handled by a lightweight updater below.
+  // Full ELK re-layout on every visible-set change. With <500 nodes this
+  // completes in <200ms. Full re-layout prevents overlap between pillar
+  // subtrees that the previous incremental approach caused.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      if (!initialFitDone.current) {
-        // First mount: full ELK pass.
-        await layout.layoutAll(model, visibleIds);
-      } else {
-        // Incremental: layout only newly-visible nodes relative to parent.
-        const missing = [...visibleIds].filter(
-          (id) => !layout.getPosition(id),
-        );
-        if (missing.length > 0) {
-          const parents = new Set<string>();
-          for (const id of missing) {
-            const parent = model.nodesById.get(id)?.parentId;
-            if (parent) parents.add(parent);
-          }
-          for (const parentId of parents) {
-            const siblingAndSelf = new Set<string>([parentId]);
-            for (const kid of model.childrenOf.get(parentId) ?? []) {
-              if (visibleIds.has(kid)) siblingAndSelf.add(kid);
-            }
-            await layout.layoutSubset(model, siblingAndSelf, {
-              anchorId: parentId,
-            });
-            if (cancelled) return;
-          }
-        }
-      }
+      await layout.layoutAll(model, visibleIds);
       if (cancelled) return;
       const base = buildReactFlowNodes(
         model,
@@ -459,6 +443,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
 
   return (
     <>
+      <style dangerouslySetInnerHTML={{ __html: KG_STYLE_OVERRIDES }} />
       <div className="absolute top-2 right-2 z-10">
         <input
           type="search"
@@ -479,12 +464,13 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         elementsSelectable={false}
         selectNodesOnDrag={false}
         selectionOnDrag={false}
-        panOnDrag={[1, 2]}
+        panOnDrag
         zoomOnDoubleClick={false}
         onNodeClick={handleNodeClick}
         onNodeMouseEnter={handleNodeEnter}
         onNodeMouseLeave={handleNodeLeave}
         proOptions={{ hideAttribution: true }}
+        className="kg-canvas"
       >
         <Background variant={BackgroundVariant.Dots} gap={20} color="#f1f5f9" />
         <MiniMap nodeColor={minimapColor} pannable zoomable />
