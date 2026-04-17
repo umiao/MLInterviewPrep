@@ -5,45 +5,6 @@
 
 ## In Progress
 
-#### T-P1-475: [KG-G-01] Translate 11 Google R1 drill docs to Chinese (company_documents 55,56,60-65,67-69)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Target 11 drill docs currently in English (or largely English with some Chinese tech terms). User wants Chinese-first prose per project convention.
-
-EXACT 11 DOCS (verified via DB query):
-  55 Regularization Deep Dive (8396 chars)
-  56 Bias-Variance + Overfitting Diagnosis Drill (7166 chars)
-  60 LambdaRank / LambdaMART Drill (8910 chars)
-  61 NDCG / MAP / MRR + Position Bias Drill (11651 chars)
-  62 Calibration Drill (11631 chars)
-  63 IPS / Counterfactual Eval / Debiased NDCG Drill (14681 chars)
-  64 Two-Tower Retrieval Deep Dive (17251 chars)
-  65 Multi-Objective Ranking DPP/MMR + Etsy Diversity (22011 chars)
-  67 A/B Test Rigor Drill: Sample Size/SRM/CUPED/Novelty (13752 chars)
-  68 Feature Drift Drill: PSI/KL/JS/KS (15163 chars)
-  69 Train-Serve Skew/Leakage/Temporal Split Drill (22121 chars)
-
-TRANSLATION RULES (per project memory feedback_lc_notes_chinese):
-- Chinese prose throughout.
-- Keep English: code blocks, algorithm names (LambdaRank, NDCG@k), complexity notation (O(log n)), paper titles, variable names.
-- Keep English Glossary terms in parenthesis: e.g. '位置偏差 (Position Bias)'.
-- Math via $...$ inline and $$...$$ display; double-check LaTeX renders.
-
-IMPLEMENTATION (split into 3 sub-commits for safety):
-- Batch 1 (small, 4 docs): 55, 56, 60, 61
-- Batch 2 (mid, 4 docs): 62, 63, 64, 67
-- Batch 3 (large, 3 docs): 65, 68, 69
-- Each batch: one idempotent seeder script, sentinel marker '<!-- CN_TRANSLATED_20260416 -->' appended at bottom.
-
-ACCEPTANCE CRITERIA:
-1. After each batch, the relevant docs have CJK char ratio >= 60% of prose tokens.
-2. Re-run each batch prints [UNCHANGED].
-3. Original content preserved in archive/pre_kg/YYYYMMDD/google_r1_en_snapshot/ as backup (plain markdown export of pre-translation text).
-4. Commits: [T-KG-G-01a] Translate Google R1 drills batch 1 (55/56/60/61) / [T-KG-G-01b] batch 2 / [T-KG-G-01c] batch 3
-
-NON-GOALS: Do NOT touch doc 57 (Staging 13 Flashcards -- already Chinese); do NOT auto-generate via LLM prompt chain without diff review.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -191,3 +152,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
 - [x] **2026-04-16** -- T-P1-482: [DOCS-03] Move intermediate / generated / audits / synced into docs/staging/. Per DOCS-01 convention, move 274 generated system design fragments + audits/ + synced/ + analysis/ into docs/staging/ wi
 - [x] **2026-04-16** -- T-P1-481: [DOCS-02] Migrate top-level company prep files to docs/company/<slug>/. Per proposed convention (DOCS-01), move 34 top-level company prep files into docs/company/<slug>/ subdirs.
+- [x] **2026-04-16** -- T-P1-475: [KG-G-01] Translate 11 Google R1 drill docs to Chinese (company_documents 55,56,60-65,67-69). Target 11 drill docs currently in English (or largely English with some Chinese tech terms). User wants Chinese-first pr
