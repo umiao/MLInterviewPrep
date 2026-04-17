@@ -12,7 +12,6 @@ import {
   useReactFlow,
   type Edge,
   type Node,
-  type NodeMouseHandler,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -48,7 +47,6 @@ import {
   defaultExpandedSet,
   expandToReveal,
   findSearchMatches,
-  neighborsOfHover,
   nodeIdOf,
   type KgGraphModel,
   type KgGraphResponse,
@@ -60,76 +58,6 @@ const NODE_TYPES = {
   category: CategoryNode,
   leaf: LeafNode,
 };
-
-/**
- * Tooltip rendered OUTSIDE the ReactFlow canvas (portal-level) so it never
- * affects node DOM dimensions / ResizeObserver. Positioned using
- * flowToScreenPosition from the hovered node's cached layout coordinates.
- */
-function PortalTooltip({
-  hoveredId,
-  model,
-  layout: layoutHook,
-  rf,
-}: {
-  hoveredId: string | null;
-  model: KgGraphModel;
-  layout: ReturnType<typeof useKgLayout>;
-  rf: ReturnType<typeof useReactFlow>;
-}) {
-  if (!hoveredId) return null;
-  const meta = model.nodesById.get(hoveredId);
-  if (!meta) return null;
-  const pos = layoutHook.getPosition(hoveredId);
-  if (!pos) return null;
-  const style = styleForPillar(meta.pillar);
-  // Convert flow coordinates to screen coordinates for the tooltip.
-  let screenX = 0;
-  let screenY = 0;
-  try {
-    const screen = rf.flowToScreenPosition({ x: pos.x, y: pos.y });
-    screenX = screen.x;
-    screenY = screen.y;
-  } catch {
-    return null;
-  }
-  const contentLabel =
-    meta.contentLength === 0
-      ? "Empty"
-      : meta.contentLength < 2000
-        ? `Stub (${meta.contentLength.toLocaleString()} chars)`
-        : `${meta.contentLength.toLocaleString()} chars`;
-  const actionHint =
-    meta.kind === "leaf"
-      ? "Click to view"
-      : "Click to expand/collapse";
-  return (
-    <div
-      role="tooltip"
-      className="fixed z-[9999] pointer-events-none"
-      style={{ left: screenX, top: screenY - 8, transform: "translate(-50%, -100%)" }}
-    >
-      <div className="rounded-md bg-gray-900 text-white shadow-lg px-3 py-2 text-[11px] leading-snug min-w-[200px]">
-        <div className="font-semibold text-[12px] truncate">{meta.title}</div>
-        <div className="mt-1 flex items-center gap-1.5">
-          <span
-            className="inline-block rounded px-1.5 py-0.5 text-[10px] font-medium"
-            style={{ backgroundColor: style.bg, color: style.border }}
-          >
-            {meta.pillarName}
-          </span>
-          <span className="text-gray-300">{contentLabel}</span>
-        </div>
-        {meta.edgeCount > 0 && (
-          <div className="mt-0.5 text-gray-400">
-            {meta.edgeCount} concept link{meta.edgeCount === 1 ? "" : "s"}
-          </div>
-        )}
-        <div className="mt-1 text-gray-400 italic">{actionHint}</div>
-      </div>
-    </div>
-  );
-}
 
 function edgeStyleFor(relation: string, highlighted: boolean) {
   const base =
@@ -203,17 +131,13 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     return defaultExpandedSet(model);
   });
   const [selectedId, setSelectedId] = useState<string | null>(initialUrl.nodeId);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [rfNodes, setRfNodes] = useState<Node[]>([]);
   const [rfEdges, setRfEdges] = useState<Edge[]>([]);
   const debounceRef = useRef<number | null>(null);
   const initialFitDone = useRef(false);
-  // Refs mirror hoveredId/hoveredNeighbors so the structural layout effect
-  // can read them without depending on them (avoids flicker on hover).
-  const hoveredIdRef = useRef<string | null>(null);
-  const hoveredNeighborsRef = useRef<Set<string>>(new Set());
+  // Hover state removed — caused persistent jitter. See hotfix1-5 history.
 
   useEffect(() => {
     if (debounceRef.current != null) window.clearTimeout(debounceRef.current);
@@ -241,13 +165,8 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     [model, effectiveExpanded],
   );
 
-  const hoveredNeighbors = useMemo(
-    () => neighborsOfHover(model, visibleIds, hoveredId),
-    [model, visibleIds, hoveredId],
-  );
-  // Keep refs in sync for the structural layout effect to read without depending.
-  hoveredIdRef.current = hoveredId;
-  hoveredNeighborsRef.current = hoveredNeighbors;
+  // Hover effects disabled — they caused persistent jitter via React Flow
+  // ResizeObserver / cursor management conflicts. Tooltip shows on click instead.
 
   const handleActivate = useCallback(
     (id: string) => {
@@ -317,8 +236,6 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         searchMatches,
         searchMatches.size > 0,
         {
-          hoveredId: hoveredIdRef.current,
-          hoveredNeighbors: hoveredNeighborsRef.current,
           onActivate: handleActivate,
         },
       );
@@ -326,7 +243,7 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
       setRfNodes(positioned);
       setRfEdges(
         decorateEdges(
-          buildReactFlowEdges(model, visibleIds, hoveredIdRef.current),
+          buildReactFlowEdges(model, visibleIds, null),
         ),
       );
       if (!initialFitDone.current) {
@@ -342,75 +259,19 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [model, visibleIds, effectiveExpanded, searchMatches]);
 
-  // ---- LIGHTWEIGHT VISUAL UPDATE (hover / selection) ----
-  // Only creates new object references for nodes/edges whose state actually
-  // changed. Nodes that didn't change keep the same reference → React Flow
-  // skips re-rendering them. This prevents the "all nodes flicker on hover" bug.
-  const prevHoverRef = useRef<{
-    hoveredId: string | null;
-    neighbors: Set<string>;
-    selectedId: string | null;
-  }>({ hoveredId: null, neighbors: new Set(), selectedId: null });
-
+  // Selection-only update: when user clicks a leaf, mark it selected.
+  // No hover effects (removed due to persistent jitter — see hotfix history).
   useEffect(() => {
     if (!initialFitDone.current) return;
-    const prev = prevHoverRef.current;
-    // Collect IDs of nodes whose visual state actually changed.
-    const dirtyIds = new Set<string>();
-    if (prev.hoveredId !== hoveredId) {
-      if (prev.hoveredId) dirtyIds.add(prev.hoveredId);
-      if (hoveredId) dirtyIds.add(hoveredId);
-    }
-    if (prev.selectedId !== selectedId) {
-      if (prev.selectedId) dirtyIds.add(prev.selectedId);
-      if (selectedId) dirtyIds.add(selectedId);
-    }
-    // Add nodes whose neighbor-of-hover status changed.
-    for (const id of hoveredNeighbors) {
-      if (!prev.neighbors.has(id)) dirtyIds.add(id);
-    }
-    for (const id of prev.neighbors) {
-      if (!hoveredNeighbors.has(id)) dirtyIds.add(id);
-    }
-    prevHoverRef.current = {
-      hoveredId,
-      neighbors: hoveredNeighbors,
-      selectedId,
-    };
-    if (dirtyIds.size > 0) {
-      setRfNodes((nodes) =>
-        nodes.map((n) => {
-          if (!dirtyIds.has(n.id)) return n; // same ref → no re-render
-          return {
-            ...n,
-            data: {
-              ...n.data,
-              isSelected: selectedId === n.id,
-              isHovered: hoveredId === n.id,
-              isNeighborOfHover: hoveredNeighbors.has(n.id),
-            },
-          };
-        }),
-      );
-    }
-    // Edges: only update if hover target changed.
-    if (prev.hoveredId !== hoveredId) {
-      setRfEdges((edges) =>
-        edges.map((e) => {
-          const relation = (e.data?.relation as string) ?? "parent";
-          const src = e.source;
-          const dst = e.target;
-          const wasHighlighted =
-            prev.hoveredId != null &&
-            (src === prev.hoveredId || dst === prev.hoveredId);
-          const nowHighlighted =
-            hoveredId != null && (src === hoveredId || dst === hoveredId);
-          if (wasHighlighted === nowHighlighted) return e; // same ref
-          return { ...e, style: edgeStyleFor(relation, nowHighlighted) };
-        }),
-      );
-    }
-  }, [hoveredId, hoveredNeighbors, selectedId]);
+    setRfNodes((nodes) =>
+      nodes.map((n) => {
+        const wasSelected = Boolean((n.data as Record<string, unknown>).isSelected);
+        const nowSelected = selectedId === n.id;
+        if (wasSelected === nowSelected) return n;
+        return { ...n, data: { ...n.data, isSelected: nowSelected } };
+      }),
+    );
+  }, [selectedId]);
 
   // Auto-zoom + pan to first search match.
   useEffect(() => {
@@ -422,19 +283,12 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchMatches]);
 
-  const handleNodeClick: NodeMouseHandler = useCallback(
-    (_evt, node) => {
+  const handleNodeClick = useCallback(
+    (_evt: React.MouseEvent, node: Node) => {
       handleActivate(node.id);
     },
     [handleActivate],
   );
-
-  const handleNodeEnter: NodeMouseHandler = useCallback((_e, n) => {
-    setHoveredId(n.id);
-  }, []);
-  const handleNodeLeave: NodeMouseHandler = useCallback(() => {
-    setHoveredId(null);
-  }, []);
 
   const selectedRawId =
     selectedId && /^n\d+$/.test(selectedId)
@@ -464,18 +318,17 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         elementsSelectable={false}
         selectNodesOnDrag={false}
         selectionOnDrag={false}
-        panOnDrag
+        panOnDrag={false}
+        panOnScroll
         zoomOnDoubleClick={false}
         onNodeClick={handleNodeClick}
-        onNodeMouseEnter={handleNodeEnter}
-        onNodeMouseLeave={handleNodeLeave}
         proOptions={{ hideAttribution: true }}
         className="kg-canvas"
       >
         <Background variant={BackgroundVariant.Dots} gap={20} color="#f1f5f9" />
         <MiniMap nodeColor={minimapColor} pannable zoomable />
       </ReactFlow>
-      <PortalTooltip hoveredId={hoveredId} model={model} layout={layout} rf={rf} />
+      {/* Hover tooltip removed — caused persistent jitter. Info shown on click via drawer. */}
       <FrameworkNodeDrawer
         nodeId={selectedRawId}
         onClose={() => setSelectedId(null)}
