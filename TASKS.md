@@ -5,12 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
-### P1 -- Should Have (agentic intelligence)
-
 #### T-P1-475: [KG-G-01] Translate 11 Google R1 drill docs to Chinese (company_documents 55,56,60-65,67-69)
 - **Priority**: P1
 - **Complexity**: L
@@ -49,6 +43,12 @@ ACCEPTANCE CRITERIA:
 4. Commits: [T-KG-G-01a] Translate Google R1 drills batch 1 (55/56/60/61) / [T-KG-G-01b] batch 2 / [T-KG-G-01c] batch 3
 
 NON-GOALS: Do NOT touch doc 57 (Staging 13 Flashcards -- already Chinese); do NOT auto-generate via LLM prompt chain without diff review.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
+
+### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-483: [KG-VIZ-01] /kg visualization POC: Cytoscape.js + dagre (user-picked)
 - **Priority**: P1
