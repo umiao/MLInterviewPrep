@@ -20,6 +20,7 @@ import BehavioralQuestions from "./pages/BehavioralQuestions";
 import BehavioralThemePage from "./pages/BehavioralThemePage";
 import QuickIndex from "./pages/QuickIndex";
 import BakingStudio from "./pages/BakingStudio";
+import KnowledgeGraph from "./pages/KnowledgeGraph";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -45,6 +46,7 @@ export default function App() {
                 <Route path="framework" element={<Framework />} />
                 <Route path="framework/:nodeId" element={<Framework />} />
                 <Route path="framework/:nodeId/notes" element={<FrameworkNotesPage />} />
+                <Route path="kg" element={<KnowledgeGraph />} />
                 <Route path="system-design" element={<SystemDesignList />} />
                 <Route path="system-design/:slug" element={<SystemDesignDetail />} />
                 <Route path="behavioral" element={<BehavioralQuestions />} />

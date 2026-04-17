@@ -11,55 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-483: [KG-VIZ-01] /kg visualization POC: Cytoscape.js + dagre (user-picked)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: User-picked Cytoscape.js (over React Flow / D3-Force / Sigma / vis-network). POC scope below.
-
-DEPENDENCIES TO ADD (src/frontend/package.json):
-- cytoscape
-- react-cytoscapejs
-- cytoscape-dagre (dagre layout adapter)
-- cytoscape-expand-collapse (optional but highly recommended for pillar collapse; add if bundle budget allows)
-- @types/cytoscape (types)
-
-BACKEND API (new endpoint):
-- GET /api/kg/graph returns: {nodes: [{id, kind, pillar, path, title, content_length}], edges: [{src_kind, src_id, dst_kind, dst_id, relation}]}
-- Nodes source: framework_nodes + (later) company_documents. For POC, emit framework_nodes only.
-- Edges source: concept_links table (requires KG-P1-01 completed).
-- Implement in src/backend/app/routers/kg.py (new file) with tests under src/backend/tests/test_kg_router.py.
-
-FRONTEND ROUTE (new):
-- src/frontend/src/pages/KnowledgeGraph.tsx renders full-viewport Cytoscape canvas.
-- Register in App.tsx / router: path='/kg'.
-- Layout: dagre (rankDir='TB') for pillar hierarchy; force fallback for cross-pillar concept_links.
-- Interactions: pan/zoom, click node -> open FrameworkNodeDrawer (reuse existing component), search box filters by title.
-- Styling: pillar colors via CSS-in-Cytoscape-style; Tailwind only for surrounding UI (header, search, legend).
-
-POC SCOPE (smaller than full build):
-- Support 30-50 framework_nodes (any pillar subset) + 10 synthetic concept_links if DB table empty.
-- Pillar grouping visible; click expands/collapses pillar.
-- FrameworkNodeDrawer opens on click.
-- Search filter works.
-
-ACCEPTANCE CRITERIA:
-1. /kg route accessible and renders without layout flicker.
-2. Bundle size delta under 200 KB gzip (cytoscape + dagre + react wrapper).
-3. npm run build passes 0 TS errors.
-4. Frontend vitest: add at least 1 test hitting KnowledgeGraph.tsx mounted + mocked /api/kg/graph.
-5. Backend: /api/kg/graph returns 200 with nodes + edges schema validated.
-6. Smoke: manually opened page shows 30+ nodes grouped by pillar, click opens drawer.
-7. Commit: [KG-VIZ-01] /kg POC: Cytoscape.js + dagre (framework_nodes + concept_links)
-
-DEPENDS ON: KG-P1-01 (concept_links table; without this, edges source is empty and we ship POC with synthetic edges). Best to run AFTER KG-P1-01 to use real edges.
-
-NON-GOALS:
-- No Company lens / filter in POC (defer to VIZ-02).
-- No orphan detection view (defer).
-- No 3D / force-only layout (dagre is primary).
-- Do NOT remove FrameworkTreeView or FrameworkTreemap -- keep as complementary 2D views.
-
 ### P2 -- Nice to Have
 
 ### P3 -- Stretch Goals
@@ -150,6 +101,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-16** -- T-P2-459: [Pinterest-SD] Multimodal unsafe content detection + query expansion recall boost. Gap: two known Pinterest SD interview prompts -- neither has a dedicated doc. (1) Unsafe content (image+text multimodal)
 - [x] **2026-04-16** -- T-P2-458: [Pinterest-Gen] GAN / VAE / Diffusion contrast one-pager + Pinterest use cases. Gap: no generative-model contrast at pitch level. Pinterest angle (visual content): pin generation, style transfer for b
 - [x] **2026-04-16** -- T-P2-439: [DEBT] MLInterviewPrep: requirements.txt has scraper deps in wrong section. beautifulsoup4==4.12.2 and playwright==1.58.0 are in [project.optional-dependencies].scraper in pyproject.toml but appea
+- [x] **2026-04-16** -- T-P1-483: [KG-VIZ-01] /kg visualization POC: Cytoscape.js + dagre (user-picked). User-picked Cytoscape.js (over React Flow / D3-Force / Sigma / vis-network). POC scope below.
 - [x] **2026-04-16** -- T-P1-482: [DOCS-03] Move intermediate / generated / audits / synced into docs/staging/. Per DOCS-01 convention, move 274 generated system design fragments + audits/ + synced/ + analysis/ into docs/staging/ wi
 - [x] **2026-04-16** -- T-P1-481: [DOCS-02] Migrate top-level company prep files to docs/company/<slug>/. Per proposed convention (DOCS-01), move 34 top-level company prep files into docs/company/<slug>/ subdirs.
 - [x] **2026-04-16** -- T-P1-475: [KG-G-01] Translate 11 Google R1 drill docs to Chinese (company_documents 55,56,60-65,67-69). Target 11 drill docs currently in English (or largely English with some Chinese tech terms). User wants Chinese-first pr
