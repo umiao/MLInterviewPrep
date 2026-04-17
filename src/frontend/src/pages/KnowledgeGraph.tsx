@@ -289,31 +289,73 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
   }, [model, visibleIds, effectiveExpanded, searchMatches]);
 
   // ---- LIGHTWEIGHT VISUAL UPDATE (hover / selection) ----
-  // Updates node data and edge styles in-place without re-running layout.
-  // Uses refs for hover state to avoid triggering the structural effect above.
+  // Only creates new object references for nodes/edges whose state actually
+  // changed. Nodes that didn't change keep the same reference → React Flow
+  // skips re-rendering them. This prevents the "all nodes flicker on hover" bug.
+  const prevHoverRef = useRef<{
+    hoveredId: string | null;
+    neighbors: Set<string>;
+    selectedId: string | null;
+  }>({ hoveredId: null, neighbors: new Set(), selectedId: null });
+
   useEffect(() => {
     if (!initialFitDone.current) return;
-    setRfNodes((prev) =>
-      prev.map((n) => ({
-        ...n,
-        data: {
-          ...n.data,
-          isSelected: selectedId === n.id,
-          isHovered: hoveredId === n.id,
-          isNeighborOfHover: hoveredNeighbors.has(n.id),
-        },
-      })),
-    );
-    setRfEdges((prev) =>
-      prev.map((e) => {
-        const relation = (e.data?.relation as string) ?? "parent";
-        const src = e.source;
-        const dst = e.target;
-        const highlighted =
-          hoveredId != null && (src === hoveredId || dst === hoveredId);
-        return { ...e, style: edgeStyleFor(relation, highlighted) };
-      }),
-    );
+    const prev = prevHoverRef.current;
+    // Collect IDs of nodes whose visual state actually changed.
+    const dirtyIds = new Set<string>();
+    if (prev.hoveredId !== hoveredId) {
+      if (prev.hoveredId) dirtyIds.add(prev.hoveredId);
+      if (hoveredId) dirtyIds.add(hoveredId);
+    }
+    if (prev.selectedId !== selectedId) {
+      if (prev.selectedId) dirtyIds.add(prev.selectedId);
+      if (selectedId) dirtyIds.add(selectedId);
+    }
+    // Add nodes whose neighbor-of-hover status changed.
+    for (const id of hoveredNeighbors) {
+      if (!prev.neighbors.has(id)) dirtyIds.add(id);
+    }
+    for (const id of prev.neighbors) {
+      if (!hoveredNeighbors.has(id)) dirtyIds.add(id);
+    }
+    prevHoverRef.current = {
+      hoveredId,
+      neighbors: hoveredNeighbors,
+      selectedId,
+    };
+    if (dirtyIds.size > 0) {
+      setRfNodes((nodes) =>
+        nodes.map((n) => {
+          if (!dirtyIds.has(n.id)) return n; // same ref → no re-render
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              isSelected: selectedId === n.id,
+              isHovered: hoveredId === n.id,
+              isNeighborOfHover: hoveredNeighbors.has(n.id),
+            },
+          };
+        }),
+      );
+    }
+    // Edges: only update if hover target changed.
+    if (prev.hoveredId !== hoveredId) {
+      setRfEdges((edges) =>
+        edges.map((e) => {
+          const relation = (e.data?.relation as string) ?? "parent";
+          const src = e.source;
+          const dst = e.target;
+          const wasHighlighted =
+            prev.hoveredId != null &&
+            (src === prev.hoveredId || dst === prev.hoveredId);
+          const nowHighlighted =
+            hoveredId != null && (src === hoveredId || dst === hoveredId);
+          if (wasHighlighted === nowHighlighted) return e; // same ref
+          return { ...e, style: edgeStyleFor(relation, nowHighlighted) };
+        }),
+      );
+    }
   }, [hoveredId, hoveredNeighbors, selectedId]);
 
   // Auto-zoom + pan to first search match.
@@ -369,8 +411,6 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         onNodeMouseEnter={handleNodeEnter}
         onNodeMouseLeave={handleNodeLeave}
         proOptions={{ hideAttribution: true }}
-        fitView
-        fitViewOptions={{ padding: 0.1 }}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} color="#f1f5f9" />
         <MiniMap nodeColor={minimapColor} pannable zoomable />
