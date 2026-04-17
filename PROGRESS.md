@@ -351,3 +351,9 @@
 - **Sanity check result**: npm run build 0 TS errors (built in 1.06s); vitest 67/67 pass; Playwright screenshot saved (logs/kg_flicker_fix_test.png) confirms stable layout.
 - **Status**: [DONE] — fix committed, awaiting user browser verification.
 - **Request**: No task_db change — this was an adhoc hotfix, not a planned task.
+## 2026-04-17 07:55 -- [KG-VIZ-hotfix2] Second flicker fix: fitView prop removal + surgical dirty-set updates
+- **What I did**: User reported hover jitter still severe after first fix. Found two remaining causes: (1) `fitView` prop on ReactFlow component fires viewport recalculation on every node data change — removed it, now fitView only called once manually after initial layout via `rf.fitView()`. (2) Visual update effect was spreading new objects for ALL 40-80 nodes on each hover — replaced with dirty-set logic that only creates new references for nodes whose hover/selection state actually changed (typically 2-5 nodes). Unchanged nodes keep same reference, React Flow skips re-rendering them. Same pattern applied to edges (only update when hover target changes, not on every neighbor set recompute). Also investigated WinError 10013 port 8000 — confirmed not occupied (netstat + PowerShell), transient Windows issue, user advised to restart dev server.
+- **Deliverables**: KnowledgeGraph.tsx modified (+65/-25 lines), commit c13a36d. Port diagnosis provided.
+- **Sanity check result**: npm run build 0 TS errors (1.06s); vitest 67/67 pass. Static Playwright screenshot stable. Live browser hover verification pending user feedback.
+- **Status**: [PARTIAL] — code fix committed + tested, awaiting user browser confirmation that jitter is resolved. Port 8000 error diagnosed as transient.
+- **Request**: No task_db change — continuation of adhoc hotfix.
