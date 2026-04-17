@@ -9,9 +9,97 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-488: KG-UX-02: Preserve focus on expand/collapse (setCenter)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Clicking expand reshuffles layout and user loses focus on the clicked node. Fix: after layoutAll(), if a node was just activated, rf.setCenter(pos.x+w/2, pos.y+h/2, { duration: 400, zoom: current zoom }).
+
+Files: src/frontend/src/pages/KnowledgeGraph.tsx, src/frontend/src/components/kg/useKgLayout.ts
+AC:
+1. Track last-activated node id in state; pass to layout effect
+2. After layoutAll resolves, call rf.setCenter on that node
+3. Current zoom level preserved (no auto fit)
+4. npm run build passes
+5. Smoke test: expand Pillar, then a deep Category - viewport stays centered on the just-clicked node
+
+#### T-P0-489: KG-UX-03: Multi-line titles, wider nodes, bigger fonts
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Titles up to 82 chars get truncated. Fix: line-clamp-2, wider boxes, larger fonts.
+
+Files: src/frontend/src/components/kg/kgStyles.ts, PillarNode.tsx, CategoryNode.tsx, LeafNode.tsx
+Changes:
+- LAYOUT_CONFIG.pillarNode: {w:280, h:60}; categoryNode: {w:260, h:54}; leafNode: {w:240, h:48}
+- truncate -> line-clamp-2 + break-words on title spans
+- Fonts: pillar text-[17px] font-bold; category text-[15px] font-semibold; leaf text-[14px] font-medium
+- Subtitle (categories count / content arc) still single-line
+AC:
+1. id=196 (82-char title) shows 2 lines, no truncation
+2. line-clamp-2 truncates longer still
+3. Build passes
+4. Smoke test: /kg, all pillar/category titles readable; no text overflow outside border
+
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-489
+- **Description**: 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing - looks broken. Also ~34 content-empty leaves need visible stub marker.
+
+Files: src/frontend/src/pages/KnowledgeGraph.tsx, CategoryNode.tsx, LeafNode.tsx
+Changes:
+- In handleActivate: if meta.kind==category AND childCount==0 -> treat as leaf (setSelectedId -> open drawer)
+- CategoryNode: hide v/> chevron when childCount==0; show same completeness-arc indicator as leaf
+- Add small "stub" pill (text "stub", gray bg) in header when contentLength < 2000
+AC:
+1. Click "SQL Fundamentals" (id=191) -> FrameworkNodeDrawer opens
+2. Click "Data Structures" (childCount>0) -> still expands as category
+3. Nodes with contentLength<2000 show "stub" badge
+4. Build + vitest pass
+5. Smoke test: all 7 zero-child cats behave as leaves
+
+#### T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P0-488, T-P0-489
+- **Description**: Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to swimlane: each pillar gets its own horizontal lane, laid out independently; lanes stack vertically.
+
+Files: src/frontend/src/components/kg/useKgLayout.ts, kgStyles.ts, KnowledgeGraph.tsx
+Changes:
+- layoutAll rewrite: group visible nodes by pillar (via nodesById.get(id).pillar). For each pillar: run ELK layered RIGHT on just that subtree, capture bbox.
+- Stack lanes: lane_i.y_offset = sum(lane_[0..i-1].height) + gap(60px). Apply offset to cached positions.
+- Draw lane separators: in KnowledgeGraph.tsx add an SVG overlay layer (or React Flow custom node at lane boundary) rendering dashed 1px #e2e8f0 line between adjacent lanes.
+- Sort pillars by their numeric key (pillar1..pillar8) for stable order
+AC:
+1. Expanding Pillar A does NOT move any node in Pillar B-H (verify via console logging cached positions)
+2. 8 lanes visible top-to-bottom when all pillars have nodes
+3. Dashed separator lines between lanes
+4. Build + vitest pass
+5. Smoke test: visually "one row per topic"; expand/collapse multiple pillars - other lanes stay put
+
 ### P2 -- Nice to Have
+
+#### T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P1-491
+- **Description**: Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap aesthetic.
+
+Files: src/frontend/src/pages/KnowledgeGraph.tsx, kgStyles.ts, kgGraph.helpers.ts
+Changes:
+- buildReactFlowEdges: for parent relation, type="default" (bezier). Keep canonical animated.
+- edgeStyleFor: parent edges stroke = styleForPillar(sourcePillarOfEdge).border with 0.7 opacity; strokeWidth: 2. Need pillar lookup in edgeStyleFor (pass src metadata via edge.data.sourcePillar).
+- LAYOUT_CONFIG: rankSep 150 -> 180; nodeSep 40 -> 20 (tighter vertical, wider horizontal)
+- Confirm visual: connecting lines to pillar1 nodes are slate gray, pillar6 nodes are rose, etc.
+AC:
+1. Parent edges render as smooth bezier curves
+2. Edge color matches source-pillar color
+3. Node vertical density increased; horizontal rhythm wider
+4. Build + vitest pass
+5. Smoke test: visually pleasing - no overlapping edges, clear color coding per topic lane
 
 ### P3 -- Stretch Goals
 
@@ -97,6 +185,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 446 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
+- [x] **2026-04-17** -- T-P0-487: KG-UX-01: Restore pan-drag and add Controls panel. Canvas is unpannable after zoom. Fix: panOnDrag=true, panOnScroll=false, zoomOnScroll=true. Add <Controls> (zoom in/out/
 - [x] **2026-04-17** -- T-P0-485: [KG-VIZ-R02] Visual encoding: palette + importance/completeness indicators + polish. Visual design pass after R01 migration. Adds information-dense encoding beyond just pillar color.
 - [x] **2026-04-17** -- T-P0-484: [KG-VIZ-R01] React Flow + ELK.js LR mind-map + incremental layout + URL state. FULL REWRITE of /kg. Remove Cytoscape.js, adopt React Flow + ELK.js for LR mind-map.
 - [x] **2026-04-16** -- T-P2-469: [QIdx-C1] Harden LC import scripts to set family. Harden LC import scripts so new rows no longer default to family=NULL silently.

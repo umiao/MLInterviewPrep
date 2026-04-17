@@ -381,3 +381,9 @@
 - **Sanity check result**: npm run build 0 TS errors; vitest 67/67 pass. No hover state changes = zero re-renders on mouse movement = no jitter possible.
 - **Status**: [PARTIAL] — fix committed, awaiting user browser confirmation that jitter is fully eliminated.
 - **Request**: No task_db change — final adhoc hotfix in the KG VIZ jitter series (hotfixes 1-6).
+## 2026-04-17 10:30 -- [T-P0-487] KG-UX-01: Restore pan-drag and add Controls panel
+- **What I did**: After hotfix6 adopted panOnScroll (scroll wheel = pan, Ctrl+scroll = zoom), user requested the standard mindmap interaction model back. Restored left-click-drag pan (`panOnDrag`), wheel zoom (`zoomOnScroll`, `panOnScroll={false}`, `zoomOnDoubleClick={false}` unchanged). Added React Flow `<Controls position="bottom-right" showInteractive={false} />` with the stock zoom-in / zoom-out / fit-view triptych so users can reset the viewport without a mouse wheel. CSS cursor overrides (grab on pane, pointer on node) already in place and remain correct under left-drag pan. `nodesDraggable={false}` plus `elementsSelectable={false}` keep node clicks from initiating pan.
+- **Deliverables**: src/frontend/src/pages/KnowledgeGraph.tsx (+3/-2).
+- **Sanity check result**: npm run build: 0 TS errors (1.12s); vitest: 67/67 pass.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-487 --status completed`

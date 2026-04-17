@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 430 completed tasks archived as of latest archival.
+> 446 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -603,3 +603,31 @@ When the user switches to `source_type=custom`, ren
 - [x] **2026-04-16** -- T-P1-462: [QIdx-A1] Backfill family on 11 ungrouped LC_PROBLEMS. BACKFILL family on 11 LC problems whose cards currently render in the label-less flat grid at the bottom of QuickIndex L
 - [x] **2026-04-16** -- T-P1-463: [QIdx-A2] QuickIndex.tsx: dynamic family-based grouping. REFACTOR src/frontend/src/pages/QuickIndex.tsx to render LC problems grouped by family, eliminating the current label-le
 - [x] **2026-04-16** -- T-P2-437: [SYNC] Propagate 4 new MLInterviewPrep lessons to helixos LESSONS.md. 4 lessons from MLInterviewPrep (2026-04-10 to 2026-04-15) not yet in helixos LESSONS.md. All apply to helixos. (1) 2026-
+- [x] **2026-04-16** -- T-P0-470: [KG-P1-01] Create concept_links table + migration. Create new table `concept_links` in data/mle_prep.db for structured cross-references between concepts (framework_nodes) 
+- [x] **2026-04-16** -- T-P0-471: [KG-P1-02] Deploy doc_kind taxonomy: canonical_hub / composition / drill. Current `company_documents.doc_kind` CHECK accepts: prep_note, hub_doc, card_index. KG design calls for richer taxonomy:
+- [x] **2026-04-16** -- T-P0-472: [KG-P1-03] Markdown '正典' (canonical) link convention + POC patch on 2 framework_nodes. Establish canonical cross-ref syntax so future docs link to framework_nodes uniformly, enabling future scraping into con
+- [x] **2026-04-16** -- T-P0-473: [KG-P2-01] Consolidate Bias-Variance as canonical_hub (Google doc 56 + node). Phase 2 first real canonical hub. Target: unify the Bias-Variance treatment into ONE framework_node as canonical authori
+- [x] **2026-04-16** -- T-P0-474: [KG-P2-02] Consolidate Regularization as second canonical_hub (extends node 195). Phase 2 second canonical hub. User-picked (over Optimizer / Class Imbalance / Eval Metrics). Target: unify Regularizatio
+- [x] **2026-04-16** -- T-P0-476: [KG-M-00] Generate per-concept coverage checklist (human review format) for 合集 docs 19/21/22/27. FIRST step of 合集 migration. Per user instruction, we do NOT auto-deprecate. Produce a per-doc, per-concept checklist so 
+- [x] **2026-04-16** -- T-P0-477: [KG-M-01] CRITICAL: Migrate Doc 19 Diffusion Models (sole source) to framework_node + standalone. Doc 19 'Adobe MLE Prep All-in-One' contains Diffusion Models content (DDPM, DDIM, CFG, CLIP, SDE/ODE) that prior audit f
+- [x] **2026-04-16** -- T-P0-478: [KG-M-02] CRITICAL: Migrate Doc 19 RoPE + Long Context (sole source) to framework_node. Sibling of KG-M-01. Doc 19 RoPE + Long Context section is sole source.
+
+SCOPE: Same pattern as KG-M-01 but for RoPE / lo
+- [x] **2026-04-16** -- T-P0-480: [DOCS-01] Write docs/ filing convention proposal (no file moves yet). Prior audit: docs/ has 365 files, 6 content categories mixed together, 3 mess examples. Propose a 6-subdir convention be
+- [x] **2026-04-16** -- T-P1-464: [QIdx-B1] LC 895 Maximum Frequency Stack: Chinese solution notes. Write Chinese solution notes for LC 895 Maximum Frequency Stack and mark completed.
+
+CURRENT STATE (verified via DB quer
+- [x] **2026-04-16** -- T-P1-465: [QIdx-B2] LC 1146 Snapshot Array: Chinese solution notes. Write Chinese solution notes for LC 1146 Snapshot Array and mark completed.
+
+CURRENT STATE (verified): leetcode_id=1146,
+- [x] **2026-04-16** -- T-P1-466: [QIdx-B3] LC 1825 Finding MK Average: Chinese solution notes. Write Chinese solution notes for LC 1825 Finding MK Average and mark completed.
+
+CURRENT STATE: leetcode_id=1825, family
+- [x] **2026-04-16** -- T-P1-467: [QIdx-B4] LC 1845 Seat Reservation Manager: Chinese solution notes. Write Chinese solution notes for LC 1845 Seat Reservation Manager and mark completed.
+
+CURRENT STATE (verified): leetcod
+- [x] **2026-04-16** -- T-P1-468: [QIdx-B5] LC 362 Design Hit Counter: expand notes. Expand thin notes for LC 362 Design Hit Counter to full solution + mark completed.
+
+CURRENT STATE: leetcode_id=362, fami
+- [x] **2026-04-16** -- T-P1-479: [KG-M-03] Delete Doc 29 Adobe ML Fundamentals (byte-identical duplicate of Doc 28). Prior audit confirmed doc 29 (Adobe) and doc 28 (Uber) both titled 'ML Fundamentals From-Scratch' are 151,774 chars each
+- [x] **2026-04-16** -- T-P2-438: [DEBT] MLInterviewPrep: httpx duplicated in pyproject.toml main + dev groups. pyproject.toml lists httpx==0.27.2 in both [project].dependencies (main) and [project.optional-dependencies].dev. This i

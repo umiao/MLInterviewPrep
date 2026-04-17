@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Background,
   BackgroundVariant,
+  Controls,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
@@ -318,14 +319,16 @@ function KgGraphInner({ model, registerControls }: InnerProps) {
         elementsSelectable={false}
         selectNodesOnDrag={false}
         selectionOnDrag={false}
-        panOnDrag={false}
-        panOnScroll
+        panOnDrag
+        panOnScroll={false}
+        zoomOnScroll
         zoomOnDoubleClick={false}
         onNodeClick={handleNodeClick}
         proOptions={{ hideAttribution: true }}
         className="kg-canvas"
       >
         <Background variant={BackgroundVariant.Dots} gap={20} color="#f1f5f9" />
+        <Controls position="bottom-right" showInteractive={false} />
         <MiniMap nodeColor={minimapColor} pannable zoomable />
       </ReactFlow>
       {/* Hover tooltip removed — caused persistent jitter. Info shown on click via drawer. */}
