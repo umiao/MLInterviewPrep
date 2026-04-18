@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from framework_nodes descriptions, breaking tests/test_bias_variance_canonical_hub.py. Node 67 was manually repaired on 2026-04-18. Root cause fix: update rewrite_nodes_to_cn.py to detect and preserve leading HTML comments (doc_kind, canonical_topic, KG_* sentinels) when regenerating CN narration. Re-audit all 158 rewritten nodes for other stripped markers.
-
 ### P2 -- Nice to Have
 
 #### T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section
@@ -138,6 +132,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
 - [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem
 - [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem
 - [x] **2026-04-18** -- T-P1-499: [SYNC] Fix settings.json: replace bare python with /c/Anaconda/python.exe. All 8 hook commands in .claude/settings.json use bare python instead of /c/Anaconda/python.exe. This violates the CLAUDE
