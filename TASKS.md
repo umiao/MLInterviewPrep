@@ -11,37 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Problem
-User reports: default zoom when entering /kg page is too small — hard to read nodes. Current: KnowledgeGraph.tsx:338 calls `rf.fitView({ padding: 0.1, duration: 300 })` which zooms out to fit the entire swimlane layout. With wide pillar-per-lane layout the nodes become tiny. Additionally, deep-linking via `?node=n42` does fitView first then setCenter, causing a visible zoom-out-then-zoom-in jitter.
-
-## Solution
-
-### Part A: Cap initial fitView zoom
-Change KnowledgeGraph.tsx:338 from:
-```
-rf.fitView({ padding: 0.1, duration: 300 });
-```
-to:
-```
-rf.fitView({ padding: 0.15, maxZoom: 1.0, duration: 300 });
-```
-Rationale: `maxZoom: 1.0` prevents zoom-out to fit huge graphs; `padding: 0.15` gives slight breathing room. React Flow's `minZoom=0.2, maxZoom=2.0` bounds still apply.
-
-### Part B: Deeplink direct-focus (skip fitView)
-When `?node=<id>` is present in URL on mount, skip the initial fitView entirely and go straight to setCenter on that node at `zoom: 1.0`. Implementation: read URL state in the initialFitDone branch (L336-340) — if a target node is parseable from URL, setCenter to its position instead of fitView.
-
-## Acceptance Criteria
-- [ ] Journey: load /kg cold (no URL params) → nodes are readable (not shrunk to fit). Pillar node titles legible without manual zoom-in.
-- [ ] Journey: load /kg?node=n42 → viewport centers directly on id=42 at zoom 1.0, no visible fitView zoom-out first
-- [ ] Journey: load /kg?node=n42 with expanded ancestors in URL → expansion + focus both work, node visible on mount
-- [ ] Journey: no regression — clicking a pillar header still expands + centers correctly
-- [ ] `npm run build` 0 TS errors
-- [ ] Manually verify in browser: both cold-load and deeplink cases
-
 #### T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers
 - **Priority**: P1
 - **Complexity**: S
@@ -169,6 +138,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem
 - [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem
 - [x] **2026-04-18** -- T-P1-499: [SYNC] Fix settings.json: replace bare python with /c/Anaconda/python.exe. All 8 hook commands in .claude/settings.json use bare python instead of /c/Anaconda/python.exe. This violates the CLAUDE
 - [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae

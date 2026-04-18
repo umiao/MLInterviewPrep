@@ -67,6 +67,10 @@ import {
   type NodeMeta,
 } from "./kgGraph.helpers";
 
+// Default zoom cap for initial view and deeplink focus. Prevents the wide
+// swimlane layout from shrinking nodes to illegibility on cold load.
+const INITIAL_ZOOM_CAP = 1.0;
+
 const NODE_TYPES = {
   pillar: PillarNode,
   category: CategoryNode,
@@ -194,12 +198,16 @@ function KgGraphInner({
   );
 
   const [expanded, setExpanded] = useState<Set<string>>(() => {
+    let base = defaultExpandedSet(model);
     if (initialUrl.expanded) {
-      const base = defaultExpandedSet(model);
       for (const id of initialUrl.expanded) base.add(id);
-      return base;
     }
-    return defaultExpandedSet(model);
+    // Auto-expand ancestors of a deeplinked node so it is visible on mount
+    // even when the URL omits ?expanded=... (supports plain ?node=nX links).
+    if (initialUrl.nodeId && model.nodesById.has(initialUrl.nodeId)) {
+      base = expandToReveal(model, new Set([initialUrl.nodeId]), base);
+    }
+    return base;
   });
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -384,10 +392,38 @@ function KgGraphInner({
       );
       setLanes(layout.getLanes());
       if (!initialFitDone.current) {
-        requestAnimationFrame(() => {
-          rf.fitView({ padding: 0.1, duration: 300 });
-          initialFitDone.current = true;
-        });
+        // Deeplink direct-focus: when ?node=<id> is present, setCenter on it
+        // at zoom 1.0 instead of fitView — eliminates visible zoom-out-then-
+        // zoom-in jitter. Falls back to fitView if the node is missing or
+        // has no layout position.
+        const deeplinkId = initialUrl.nodeId;
+        const deeplinkMeta = deeplinkId ? model.nodesById.get(deeplinkId) : undefined;
+        const deeplinkPos = deeplinkId ? layout.getPosition(deeplinkId) : null;
+        if (deeplinkId && deeplinkMeta && deeplinkPos) {
+          const nodeBase =
+            deeplinkMeta.kind === "pillar"
+              ? LAYOUT_CONFIG.pillarNode
+              : deeplinkMeta.kind === "category"
+                ? LAYOUT_CONFIG.categoryNode
+                : LAYOUT_CONFIG.leafNode;
+          const scale = deeplinkMeta.kind === "leaf" ? deeplinkMeta.importanceScale : 1;
+          const w = nodeBase.width * scale;
+          const h = nodeBase.height * scale;
+          requestAnimationFrame(() => {
+            rf.setCenter(deeplinkPos.x + w / 2, deeplinkPos.y + h / 2, {
+              zoom: INITIAL_ZOOM_CAP,
+              duration: 300,
+            });
+            initialFitDone.current = true;
+          });
+        } else {
+          // Cold load: cap zoom at 1.0 so pillar/category titles stay legible
+          // (wide swimlane layout otherwise shrinks nodes to fit).
+          requestAnimationFrame(() => {
+            rf.fitView({ padding: 0.15, maxZoom: INITIAL_ZOOM_CAP, duration: 300 });
+            initialFitDone.current = true;
+          });
+        }
       } else if (lastActivatedRef.current) {
         const focusId = lastActivatedRef.current;
         lastActivatedRef.current = null;
