@@ -25,6 +25,10 @@ const LC_PROBLEMS: {
   { dbId: 29, lcId: 235, title: "Lowest Common Ancestor of a BST", family: "tree_lca" },
   { dbId: 38, lcId: 212, title: "Word Search II", family: "trie_multiword" },
   { dbId: 10, lcId: 15, title: "3Sum", family: "two_pointers_target" },
+  { dbId: 303, lcId: 28, title: "Find the Index of the First Occurrence in a String", family: "string_matching_kmp" },
+  { dbId: 344, lcId: 214, title: "Shortest Palindrome", family: "string_matching_kmp" },
+  { dbId: 672, lcId: 686, title: "Repeated String Match", family: "string_matching_kmp" },
+  { dbId: 352, lcId: 796, title: "Rotate String", family: "string_matching_kmp" },
   { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries", family: "offline_queries_dsu" },
   { dbId: 216, lcId: 2791, title: "Palindrome Paths in Tree", family: "tree_dp_rerooting" },
   { dbId: 183, lcId: 2858, title: "Min Edge Reversals", family: "tree_dp_rerooting" },
@@ -40,6 +44,7 @@ const FAMILY_LABELS: Record<string, string> = {
   tree_lca: "Tree: LCA",
   trie_multiword: "Trie: Multi-word Search",
   two_pointers_target: "Two-Pointers Target Sum",
+  string_matching_kmp: "String Matching (KMP family)",
   offline_queries_dsu: "Offline Queries + DSU",
   tree_dp_rerooting: "Tree DP / Rerooting",
 };
