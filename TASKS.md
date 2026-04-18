@@ -11,7 +11,108 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Problem
+Clicking L1/L2 organizational nodes (e.g. id=1 Coding & Algorithms) opens an empty drawer because the current handleActivate() only checks node kind/childCount, not whether description has content. DB survey (2026-04-18): 8/8 L1 + 34/41 L2 have empty description; 0 borderline stub cases (<30 chars).
+
+## Solution: tri-state click behavior (replaces current leaf-vs-category check)
+
+| Node content | Children | Click behavior |
+|---|---|---|
+| has content | any | open drawer (current behavior) |
+| no content | 0 | focus animation only (NEW — no drawer) |
+| no content | >0, collapsed | expand (current behavior) |
+| no content | >0, expanded | collapse (NEW explicit — currently no-op) |
+
+## Deliverables
+1. New util `src/frontend/src/components/framework/hasContent.ts` exporting `hasContent(node): boolean`. Implementation: `node.content_length > 0`. This is the ONLY source of truth for "has drawer content". Add small unit test.
+2. Refactor `handleActivate()` in `src/frontend/src/pages/KnowledgeGraph.tsx` to use `hasContent()` and implement the tri-state matrix above.
+3. Focus animation for no-content leaf case:
+   - `rf.setCenter(cx, cy, { zoom: Math.max(rf.getZoom(), 1.0), duration: 200 })` — preserves user's current zoom if already >=1.0, only zooms IN never OUT
+   - CSS pulse keyframe animation on target node (200-300ms ring expansion) applied via temporary class — zoom-independent feedback so even no-op setCenter gives visible confirmation
+4. Hover affordance: empty-description nodes set title attribute to "无内容 · 点击聚焦" (so cursor tooltip appears). No visual style change.
+
+## Acceptance Criteria
+- [ ] Unit test: `hasContent({content_length: 0})` → false; `hasContent({content_length: 1})` → true
+- [ ] Journey: click id=1 Coding & Algorithms (L1 empty) → no drawer, node pulses, viewport centers on it
+- [ ] Journey: click an empty L2 category with children (collapsed) → expands, no drawer
+- [ ] Journey: click same empty L2 category again (now expanded) → collapses, no drawer
+- [ ] Journey: click any L3 leaf (e.g. id=42 STAR) → drawer opens with content as before
+- [ ] Journey: hover over empty node → cursor tooltip shows "无内容 · 点击聚焦"
+- [ ] `npm run build` 0 TS errors
+- [ ] Manually verify in browser at http://localhost:5173/kg: all 4 journeys above
+
+#### T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Problem
+User reports: default zoom when entering /kg page is too small — hard to read nodes. Current: KnowledgeGraph.tsx:338 calls `rf.fitView({ padding: 0.1, duration: 300 })` which zooms out to fit the entire swimlane layout. With wide pillar-per-lane layout the nodes become tiny. Additionally, deep-linking via `?node=n42` does fitView first then setCenter, causing a visible zoom-out-then-zoom-in jitter.
+
+## Solution
+
+### Part A: Cap initial fitView zoom
+Change KnowledgeGraph.tsx:338 from:
+```
+rf.fitView({ padding: 0.1, duration: 300 });
+```
+to:
+```
+rf.fitView({ padding: 0.15, maxZoom: 1.0, duration: 300 });
+```
+Rationale: `maxZoom: 1.0` prevents zoom-out to fit huge graphs; `padding: 0.15` gives slight breathing room. React Flow's `minZoom=0.2, maxZoom=2.0` bounds still apply.
+
+### Part B: Deeplink direct-focus (skip fitView)
+When `?node=<id>` is present in URL on mount, skip the initial fitView entirely and go straight to setCenter on that node at `zoom: 1.0`. Implementation: read URL state in the initialFitDone branch (L336-340) — if a target node is parseable from URL, setCenter to its position instead of fitView.
+
+## Acceptance Criteria
+- [ ] Journey: load /kg cold (no URL params) → nodes are readable (not shrunk to fit). Pillar node titles legible without manual zoom-in.
+- [ ] Journey: load /kg?node=n42 → viewport centers directly on id=42 at zoom 1.0, no visible fitView zoom-out first
+- [ ] Journey: load /kg?node=n42 with expanded ancestors in URL → expansion + focus both work, node visible on mount
+- [ ] Journey: no regression — clicking a pillar header still expands + centers correctly
+- [ ] `npm run build` 0 TS errors
+- [ ] Manually verify in browser: both cold-load and deeplink cases
+
 ### P2 -- Nice to Have
+
+#### T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template placeholder with CUSTOMIZE comment; the second is the actual content block. The duplicate adds confusion and could cause readers to miss updates if only one is maintained.
+
+Fix: Remove the first placeholder Key Constraints section (lines 15-18 with the CUSTOMIZE comment). Keep the second, complete Key Constraints section.
+
+AC: CLAUDE.md has exactly one ## Key Constraints section.
+
+#### T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-501
+- **Description**: ## Problem
+Before this cleanup, 'does a node have drawer content?' could be answered multiple ways (content_length === 0, description field non-empty, etc). Without a single chokepoint, future changes to the content-presence rule (e.g. adding is_stub field, lazy-loading) would require hunting all call sites.
+
+## Depends on
+T-P1-501 (KG-UX-10) — which introduces `hasContent(node)` util. This task migrates existing scattered checks to it.
+
+## Deliverables
+1. Audit all frontend TS/TSX files for direct `content_length` comparisons or description-presence checks:
+   - `grep -rn 'content_length' src/frontend/src/` — expected hits in CompletenessArc.tsx (stub border logic), possibly others
+   - `grep -rn '\.description' src/frontend/src/components/` — check any "is it empty?" style checks
+2. Migrate each call site to import and use `hasContent()` from KG-UX-10's util. If a call site needs the inverse, use `!hasContent(node)` — do NOT invert by touching content_length directly.
+3. Add LESSONS.md entry documenting the convention (under ML-prep project LESSONS.md):
+   - Title: "`hasContent(node)` is the only sanctioned content-presence check"
+   - Body: rule + why (future-proofing for is_stub / lazy-load), how to apply (always import util, never raw content_length === 0 in consumers)
+
+## Acceptance Criteria
+- [ ] `grep -rn 'content_length === 0' src/frontend/src/` returns 0 results outside `hasContent.ts`
+- [ ] `grep -rn 'content_length > 0' src/frontend/src/` returns 0 results outside `hasContent.ts`
+- [ ] All prior call sites import and use `hasContent()`
+- [ ] LESSONS.md entry added with rule + why + how-to-apply
+- [ ] `npm run build` 0 TS errors
 
 ### P3 -- Stretch Goals
 
@@ -96,6 +197,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-18** -- T-P1-499: [SYNC] Fix settings.json: replace bare python with /c/Anaconda/python.exe. All 8 hook commands in .claude/settings.json use bare python instead of /c/Anaconda/python.exe. This violates the CLAUDE
 - [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae
 - [x] **2026-04-17** -- T-P1-498: KG-CN-01: Rewrite node descriptions to CN narration + full English terms. Rewrite framework_nodes.description to Chinese narration + English full-expansion terms. Pilot on 4 nodes validated qual
 - [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw

@@ -457,3 +457,21 @@
 - **Sanity check result**: `python scripts/rewrite_nodes_to_cn.py --dry-run` shows 155 remaining candidates (159 original - 4 pilot), exits in ~0.2s. Re-running without args exits fast when no candidates remain (AC7 idempotent guard). `--limit 3` successfully processed 3 nodes in 398s total (avg 133s/node including ~2-5min for the largest). All 4 pilot rewrites pass structure hash invariants (code-fence count, $$ count, heading count preserved).
 - **Status**: [PARTIAL] -- 4/159 nodes rewritten. Remaining 155 nodes need a full batch run (estimated 2.5-3.5h at avg ~60-90s/node with haiku, longer for the ~6 sonnet-routed nodes >12000 chars). Script is idempotent and resume-safe; kicking off `python scripts/rewrite_nodes_to_cn.py` (no args) will process the remaining candidates and is safe to restart at any point. AC#3 (post-run zh_ratio >= 0.4 for all content_length>500) needs user decision -- see observation above; current interpretation treats narration-style (not character-ratio) as the success criterion.
 - **Request**: keep T-P1-498 active for the remaining 155-node batch; or close T-P1-498 and create T-P1-499 for the bulk run after AC#3 resolution.
+
+## 2026-04-18 10:39 -- [PLANNING] KG drawer UX batch: KG-UX-10/12/14 staged
+- **What I did**: DB survey of framework_nodes.description found 8/8 L1 + 34/41 L2 empty (0 stub borderline cases), confirming "empty drawer on L1/L2 click" as the root UX bug. Drafted plan, absorbed user's reviewer critique (adopted tri-state click matrix + hasContent util upgrade, rejected proposed node.type field per YAGNI, deferred visited-breadcrumb UX-11 for observation). Pushed back on reviewer's `zoom: 1.2` magic number -- replaced with `Math.max(getZoom(), 1.0)` + CSS pulse animation for zoom-independent feedback. Added new KG-UX-14 to cap initial fitView zoom (user reported default /kg entry zoom too small).
+- **Deliverables**: 3 tasks staged via task_db.py:
+  - T-P1-501 KG-UX-10: tri-state drawer click + hasContent util + pulse (P1/S, no deps)
+  - T-P1-502 KG-UX-14: initial fitView maxZoom cap + URL deeplink direct-focus (P1/S, no deps)
+  - T-P2-503 KG-UX-12: audit/migrate scattered content_length checks + LESSONS (P2/S, depends on 501)
+  TASKS.md regenerated.
+- **Sanity check result**: Task planning only -- no code changes. ACs include journey-level smoke tests per CLAUDE.md planning rules.
+- **Status**: [PLANNED] -- user approved, handing off to autonomous_run.sh.
+- **Request**: no task status change; launching runner next.
+
+## 2026-04-18 -- [T-P1-499] Verify settings.json already uses absolute Anaconda python path
+- **What I did**: Investigated T-P1-499 (claim: all 8 hooks in settings.json use bare python). Grep + full-file read confirmed settings.json already uses `/c/Anaconda/python.exe` for every hook command (PreToolUse, PostToolUse, Stop, SessionStart) and `setup_python_env.sh` is present as the first SessionStart hook. Git log shows the fix landed in commit bc22e4d prior to this task being filed. Smoke-tested by invoking `block_dangerous.py` through the absolute python path -- exit 0, no Windows Store stub exit 49. Task description is stale; no code changes needed.
+- **Deliverables**: None (verified state already matches AC). Closed task T-P1-499 and regenerated TASKS.md.
+- **Sanity check result**: (a) `grep '"python' .claude/settings.json` -> no matches. (b) `/c/Anaconda/python.exe block_dangerous.py < /dev/null` -> `{"ok": true}` exit 0. (c) `setup_python_env.sh` exists, contents correct (exports Anaconda into CLAUDE_ENV_FILE). All three AC clauses satisfied.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-499 --status completed` (already applied).
