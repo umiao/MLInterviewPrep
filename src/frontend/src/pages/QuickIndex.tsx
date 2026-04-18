@@ -29,6 +29,7 @@ const LC_PROBLEMS: {
   { dbId: 344, lcId: 214, title: "Shortest Palindrome", family: "string_matching_kmp" },
   { dbId: 672, lcId: 686, title: "Repeated String Match", family: "string_matching_kmp" },
   { dbId: 352, lcId: 796, title: "Rotate String", family: "string_matching_kmp" },
+  { dbId: 1091, lcId: 1392, title: "Longest Happy Prefix", family: "string_matching_kmp" },
   { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries", family: "offline_queries_dsu" },
   { dbId: 216, lcId: 2791, title: "Palindrome Paths in Tree", family: "tree_dp_rerooting" },
   { dbId: 183, lcId: 2858, title: "Min Edge Reversals", family: "tree_dp_rerooting" },
