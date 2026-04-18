@@ -11,6 +11,51 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-506: KG-UX-15: Category node expanded/collapsed visual distinction (saturation + chevron)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Problem
+After KG-UX-10/14 shipped, canvas category nodes have NO visual difference between expanded and collapsed states. User must click to learn state — the feedback loop is "do it and see" rather than "see and decide". TreeNav already uses chevrons (▸/▾); canvas should match.
+
+## Solution: dual-channel (saturation + icon) so color-blind users still get the distinction
+
+| State | Background | Border | Corner badge (top-right) |
+|---|---|---|---|
+| Collapsed | pillar bg color @ **30% opacity** (softened tint over white) | pillar border @ 1px solid | `▸ N` where N = childCount, pillar-colored text |
+| Expanded | pillar bg color @ **100% opacity** (full saturation) | pillar border @ 2px solid | `▾` only (no count — children are visible in canvas) |
+
+Transition: `transition: background 0.2s, border-width 0.2s` — matches the pulse animation language introduced in KG-UX-10.
+
+## Scope
+- **Applies only to category nodes** (`kind === "category"`). Pillar and leaf nodes unchanged.
+- Pillar nodes stay at current full-saturation rendering (conceptually always "expanded" — lane is visible).
+- Leaf nodes unchanged (no expand/collapse state exists).
+
+## Implementation
+1. In `KnowledgeGraph.tsx` node data builder (or equivalent in `kgGraph.helpers.ts`), pass `isExpanded: boolean` to category node data (derive from effectiveExpanded set).
+2. In `CategoryNode.tsx`:
+   - Read `data.isExpanded`
+   - Conditionally apply saturation class (e.g. via `style.background` interpolation, or two Tailwind classes toggled)
+   - Render corner badge: `▸ {childCount}` when collapsed (tilt-aware positioning: top-right, 4px inset); `▾` when expanded
+   - `transition` for smooth state change
+3. In `kgStyles.ts`: add helper if needed to produce the 30%-opacity variant of each pillar color (e.g. `styleForPillar(pillar, { collapsed: true })` returns muted variant). Do NOT hardcode in CategoryNode — keep color logic in kgStyles.
+4. Verify no conflict with:
+   - Selection ring (`ring-2 ring-blue-500`) — coexists independently
+   - Search-match ring (`ring-2 ring-yellow-400`) — coexists
+   - Dimmed opacity (`opacity-20`) — coexists (dimmed wins visually, which is correct)
+   - CompletenessArc stub indicator on right side — place new chevron badge at TOP-right to avoid collision
+
+## Acceptance Criteria
+- [ ] Journey: load /kg cold → all collapsed categories show muted bg + `▸ N` badge with correct child count
+- [ ] Journey: click a collapsed category (with children) → bg saturates to full pillar color, badge becomes `▾`, 0.2s transition visible
+- [ ] Journey: click same category again → state reverses, 0.2s transition visible
+- [ ] Journey: color-blind simulation (use browser devtools "achromatopsia" filter): expanded vs collapsed still distinguishable via chevron + border thickness
+- [ ] Journey: no regression — selected ring, search-match ring, CompletenessArc all still render correctly on category nodes in both states
+- [ ] Unit test: snapshot or data-attr test for category node in each of (collapsed no-children, collapsed with children, expanded with children)
+- [ ] `npm run build` 0 TS errors
+- [ ] `npm test` all green
+
 ### P2 -- Nice to Have
 
 ### P3 -- Stretch Goals
@@ -98,6 +143,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
+- [x] **2026-04-18** -- T-P1-505: KG-UX-16: Cold-load defaults to first pillar at zoom 1.0 (not fitView all). ## Problem
 - [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
 - [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem
 - [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem

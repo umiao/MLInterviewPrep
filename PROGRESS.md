@@ -534,3 +534,12 @@
 - **Sanity check result**: `grep -rn 'content_length === 0' src/frontend/src/` -> 0 matches. `grep -rn 'content_length > 0' src/frontend/src/` -> 0 matches. `npm run build` in src/frontend -> success, 0 TS errors, `built in 1.04s`.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-503 --status completed`
+
+
+## 2026-04-18 12:52 -- [T-P1-505] KG-UX-16: Cold-load centers on first pillar at zoom 1.0
+- **What I did**: Replaced the cold-load `rf.fitView({ padding: 0.15, maxZoom: INITIAL_ZOOM_CAP })` call in `KnowledgeGraph.tsx` with `rf.setCenter(firstPillarPos + pillarNode/2, { zoom: 1.0, duration: 300 })` targeting `model.pillarIds[0]`. `maxZoom` on fitView only caps the computed fit-zoom — with a wide swimlane layout requiring ~0.35 to fit all 8 pillars, nodes were illegibly small on load. Now the viewport lands on the first pillar at 100% zoom; users scroll/pan or use the built-in React Flow fit-view control (still rendered at bottom-right via `<Controls />`) to see the full graph. Deeplink branch (UX-14) above is untouched, so `?node=<id>` still wins. Added a pillar-missing fallback that retains the original fitView behavior as a safety net.
+- **Deliverables**:
+  - MODIFIED `src/frontend/src/pages/KnowledgeGraph.tsx` lines ~419-444: cold-load else-branch rewrites.
+- **Sanity check result**: `npm run build` -> 0 TS errors, built in 1.07s. `npm test -- --run` -> 109/109 green across 6 files (no cold-load-viewport test existed; none broke). Expand All button still works (it just mutates `expanded`; initial-fit guard prevents it from re-firing, matching existing behavior).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-505 --status completed`

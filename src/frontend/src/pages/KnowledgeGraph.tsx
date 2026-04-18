@@ -417,12 +417,31 @@ function KgGraphInner({
             initialFitDone.current = true;
           });
         } else {
-          // Cold load: cap zoom at 1.0 so pillar/category titles stay legible
-          // (wide swimlane layout otherwise shrinks nodes to fit).
-          requestAnimationFrame(() => {
-            rf.fitView({ padding: 0.15, maxZoom: INITIAL_ZOOM_CAP, duration: 300 });
-            initialFitDone.current = true;
-          });
+          // Cold load: focus on the first pillar at zoom 1.0 rather than
+          // fitView-all. maxZoom only caps fit-computed zoom — a wide swimlane
+          // would still drop to ~0.35, leaving nodes unreadable. Centering on
+          // pillarIds[0] lets the user scroll/pan to reach the rest.
+          const firstPillarId = model.pillarIds[0];
+          const firstPillarPos = firstPillarId
+            ? layout.getPosition(firstPillarId)
+            : null;
+          if (firstPillarId && firstPillarPos) {
+            const w = LAYOUT_CONFIG.pillarNode.width;
+            const h = LAYOUT_CONFIG.pillarNode.height;
+            requestAnimationFrame(() => {
+              rf.setCenter(
+                firstPillarPos.x + w / 2,
+                firstPillarPos.y + h / 2,
+                { zoom: INITIAL_ZOOM_CAP, duration: 300 },
+              );
+              initialFitDone.current = true;
+            });
+          } else {
+            requestAnimationFrame(() => {
+              rf.fitView({ padding: 0.15, maxZoom: INITIAL_ZOOM_CAP, duration: 300 });
+              initialFitDone.current = true;
+            });
+          }
         }
       } else if (lastActivatedRef.current) {
         const focusId = lastActivatedRef.current;
