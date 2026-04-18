@@ -13,16 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template placeholder with CUSTOMIZE comment; the second is the actual content block. The duplicate adds confusion and could cause readers to miss updates if only one is maintained.
-
-Fix: Remove the first placeholder Key Constraints section (lines 15-18 with the CUSTOMIZE comment). Keep the second, complete Key Constraints section.
-
-AC: CLAUDE.md has exactly one ## Key Constraints section.
-
 #### T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry
 - **Priority**: P2
 - **Complexity**: S
@@ -132,6 +122,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
 - [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
 - [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem
 - [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem

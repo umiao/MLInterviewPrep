@@ -12,11 +12,6 @@
 - pytest (testing)
 - ruff (linting)
 
-## Key Constraints
-<!-- CUSTOMIZE: Add your project-specific constraints -->
-- All API keys and cookies from .env, never hardcoded
-- Every function must have type hints and docstring
-
 ## File Structure
 <!-- CUSTOMIZE: Describe your project's directory layout -->
 - `src/` - Source code
@@ -48,10 +43,6 @@
 - Use ruff for linting
 - Type checking: mypy
 - Test: pytest
-- **Study Note Generation**: Use `StudyNoteBuilder` from `scripts/study_note_builder.py`.
-  Use `FormulaBlock` for all display math. Builder validates structure (sections,
-  prerequisites, term registry, formula blocks) and catches orphan `$` signs.
-  Never write study note content as raw f-strings or string concatenation.
 - **Regression tests**: When fixing a bug, always add a regression test
 - **No emoji**: Never use emoji characters in code, docs, configs, or hook output.
   Use ASCII text tags (e.g., [DONE], [FAIL], [WARN]) instead.
@@ -83,9 +74,6 @@
   A PreToolUse hook blocks any Write/Edit targeting TASKS.md.
 - **Task IDs are auto-generated.** Never invent IDs manually.
   Use `task_db.py add --title "..." --priority P0` and the system assigns the next ID.
-- **Never write study note content as raw strings.** Use `StudyNoteBuilder` from
-  `scripts/study_note_builder.py`. Raw f-strings bypass validation (orphan `$`,
-  missing prerequisites, unregistered terms) and produce inconsistent formatting.
 - **For batch operations**: use `task_db.py batch --commands '[...]'` to wrap multiple
   commands atomically.
 
@@ -115,17 +103,6 @@
   and config between the two.  Every delta is a finding.  Do NOT skip to
   output-format analysis or external doc research before completing this diff.
   Analysis of "why" comes AFTER identifying "what's different."
-- **Side-effect verification must go through the consumer, not the producer.**
-  After DB seed/insert, verify via API `curl` (the consumer), not via direct
-  `SELECT` (the producer).  INSERT success does not mean the data is visible
-  through the API layer -- ORM filters, serialization, and caching can all
-  hide rows.  The same principle applies to any write: verify the read path.
-- **Validation must use the production build path.** Use `npm run build`
-  (which runs `tsc -b && vite build`) for TypeScript checks, not
-  `tsc --noEmit`.  `tsc -b` enforces stricter project-reference and
-  declaration-emit rules that `tsc --noEmit` skips.  A file that passes
-  `--noEmit` can still fail the production build.  General rule: the
-  validation surface must be isomorphic to the production path.
 
 ### Task Planning Mode
 When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":
@@ -209,23 +186,6 @@ recent progress, and lessons. Trust its output at session start.
   {"task": "T-XX-N", "subtasks": [{"name": "...", "done": false}],
    "last_working_file": "src/...", "last_working_line": 42}
   ```
-
-### Multi-Task Execution Rule
-When the user approves a plan with multiple tasks, **always** delegate execution to
-`scripts/autonomous_run.sh` (serial, one task per session). **Never** execute multiple
-tasks sequentially in the main conversation context. The main context should only:
-1. Plan tasks (add to task_db)
-2. Launch `autonomous_run.sh`
-3. Report results when complete
-
-This prevents context window exhaustion and shared state corruption.
-
-### Commit Rule (applies to ALL sessions including autonomous)
-Every session that modifies files **must** commit changes before exiting.
-- Use the standard commit format: `[T-XX-N] Brief English description`
-- Stage only relevant files (no `.env`, no credentials)
-- This applies to autonomous_run.sh sessions, main context sessions, and any ad-hoc work
-- If a session performs substantive work but exits without committing, that is a bug
 
 ### Autonomous Mode
 When triggered via `scripts/autonomous_run.sh`, read `docs/workflow/autonomous.md` for

@@ -11,11 +11,6 @@
 - pytest (testing)
 - ruff (linting)
 
-## Key Constraints
-<!-- CUSTOMIZE: Add your project-specific constraints -->
-- All API keys and cookies from .env, never hardcoded
-- Every function must have type hints and docstring
-
 ## File Structure
 <!-- CUSTOMIZE: Describe your project's directory layout -->
 - `src/` - Source code

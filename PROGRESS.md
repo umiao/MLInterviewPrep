@@ -514,3 +514,13 @@
 - **Sanity check result**: `pytest tests/test_bias_variance_canonical_hub.py tests/test_doc_kind_taxonomy.py -v` -> 18/18 pass (all canonical_hub + doc_kind taxonomy tests green). `restore_stripped_html_comments.py` second invocation prints `Nothing to restore` (idempotent). Spot-checked affected nodes via direct DB read: all 7 now show the canonical-order comment block at the top followed by the CN body, length deltas consistent (+40 to +117 bytes per restored comment). Splitter tested inline with 6 edge cases (multi-comment canonical hub, single StudyNoteBuilder, no leading, empty, comments+extra blank lines, inline comment in middle) -- all round-trip cleanly.
 - **Status**: [DONE] -- root cause patched in rewrite script (future runs will preserve sentinels), 7 known stripped nodes restored, full test suite for the affected invariant passes.
 - **Request**: `task_db.py update T-P1-504 --status completed`
+
+
+## 2026-04-18 11:09 -- [T-P2-500] Remove duplicate Key Constraints section from CLAUDE.md
+- **What I did**: CLAUDE.md is auto-generated from `CLAUDE.md.local` + `shared/claude_md_shared.md` via `sync.py`. The duplicate arose because `CLAUDE.md.local` carried a template placeholder `## Key Constraints` block (with `CUSTOMIZE` comment) and `shared/claude_md_shared.md` also opens with a canonical `## Key Constraints` block -- both contained the same two bullets, so concatenation produced two identical sections. Removed the template placeholder section from `CLAUDE.md.local` leaving the canonical one from shared content. Re-ran `/c/Anaconda/python.exe sync.py --target . --claude-md-only` to regenerate `CLAUDE.md`.
+- **Deliverables**:
+  - MODIFIED `CLAUDE.md.local`: removed template placeholder Key Constraints block (the 5 lines with `CUSTOMIZE` comment + two bullets).
+  - REGENERATED `CLAUDE.md` via sync.py.
+- **Sanity check result**: `grep -n '^## Key Constraints' CLAUDE.md` -> exactly one match at line 29 (AC met). Surrounding section flow (Tech Stack -> File Structure -> Invariants -> Key Constraints -> Git Conventions) verified by reading the first 45 lines back.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-500 --status completed`
