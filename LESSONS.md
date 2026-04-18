@@ -167,3 +167,16 @@
 - **Detection**: after adding tasks intended for a sub-project, verify `cd <subproject> && python .claude/hooks/task_db.py list --status active` shows them. If not, planting was mis-scoped.
 - **Related**: scripts/migrate_active_tasks_to_mlp_20260416.py (this session's one-shot migration tool); commits 98d6cc4 (root) + 1022be8 (MLP).
 - **Tags**: #orchestrator #task-db #multi-repo #session-scoping #silent-failure
+
+### [2026-04-17] Claude Code usage limit breaks long `claude -p` batch scripts
+- **Context**: `scripts/rewrite_nodes_to_cn.py` uses `claude -p` subprocess ~150 times to rewrite KG nodes. Phase A, A2, B ran cleanly (30+33+29=92 calls). Phase C hit the Claude Code subscription limit at call ~10; remaining 30 calls returned `api_error_status=429` with `{"result":"You've hit your limit · resets 7pm (America/Los_Angeles)"}` — NON-ZERO stdout, NOT stderr, `rc=1`.
+- **What I learned**:
+  1. `claude -p` usage is subject to the user's Claude Code subscription cap, reset daily at 7pm PT.
+  2. The 429 response is JSON-formed and has `is_error: true` + `api_error_status: 429` + result string "You've hit your limit". Script parsed fine as JSON — the old RuntimeError triggered on rc=1 only.
+  3. A batch of ~90-130 calls seems to exhaust one day's allowance.
+- **Fix pattern**:
+  1. Script should detect 429 pattern in result and either (a) sleep until next 7pm PT or (b) fail fast with clear "usage limit hit" message instead of generic RuntimeError.
+  2. For long batch jobs: split into sub-200-call chunks, run across multiple days, or budget against actual measured cost-per-call.
+  3. When resuming after limit reset, idempotency + history-table gating is essential — we would have re-done work otherwise.
+- **Related task**: T-P1-498 KG-CN-01
+- **Tags**: #claude-code #usage-limits #batch-scripts #429-retry
