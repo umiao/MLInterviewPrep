@@ -475,3 +475,10 @@
 - **Sanity check result**: (a) `grep '"python' .claude/settings.json` -> no matches. (b) `/c/Anaconda/python.exe block_dangerous.py < /dev/null` -> `{"ok": true}` exit 0. (c) `setup_python_env.sh` exists, contents correct (exports Anaconda into CLAUDE_ENV_FILE). All three AC clauses satisfied.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-499 --status completed` (already applied).
+
+## 2026-04-18 -- [T-P1-499 addendum] Repair canonical_hub markers stripped by CN rewrite
+- **What I did**: Stop-hook test_check surfaced a pre-existing regression in tests/test_bias_variance_canonical_hub.py (unrelated to T-P1-499): the CN-narration rewrite (commit 295ada1) regenerated framework_node id=67 without preserving the HTML metadata block (`<!-- doc_kind: canonical_hub -->`, `<!-- canonical_topic: bias_variance -->`, sentinel `<!-- KG_P2_01_BIAS_VARIANCE_20260416 -->`) that consolidate_bias_variance_20260416.py originally seeded. Re-running the original consolidate script would have overwritten the new CN body, so I wrote `scripts/_repair_bias_variance_markers_20260418.py` (idempotent, sentinel-guarded) that re-prepends the three marker lines while preserving the CN content. Ran against data/mle_prep.db -- node 67 length went 9295 -> 9369, all 11 tests in test_bias_variance_canonical_hub.py now pass (previously 1/11 failing, pytest stopping early). Filed T-P1-504 for the root cause (rewrite_nodes_to_cn.py needs to detect/preserve leading HTML comments across all 158 nodes).
+- **Deliverables**: `scripts/_repair_bias_variance_markers_20260418.py` (new, 68 lines). New follow-up task T-P1-504.
+- **Sanity check result**: `pytest tests/test_bias_variance_canonical_hub.py` -> 11 passed. Re-running the repair script prints `[UNCHANGED] node 67 already has sentinel` (idempotent).
+- **Status**: [DONE] for node 67. Root cause fix tracked under T-P1-504.
+- **Request**: No new task status change beyond T-P1-499 (already completed) and T-P1-504 (newly filed).

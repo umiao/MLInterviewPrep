@@ -76,6 +76,12 @@ When `?node=<id>` is present in URL on mount, skip the initial fitView entirely 
 - [ ] `npm run build` 0 TS errors
 - [ ] Manually verify in browser: both cold-load and deeplink cases
 
+#### T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from framework_nodes descriptions, breaking tests/test_bias_variance_canonical_hub.py. Node 67 was manually repaired on 2026-04-18. Root cause fix: update rewrite_nodes_to_cn.py to detect and preserve leading HTML comments (doc_kind, canonical_topic, KG_* sentinels) when regenerating CN narration. Re-audit all 158 rewritten nodes for other stripped markers.
+
 ### P2 -- Nice to Have
 
 #### T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section
