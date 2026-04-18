@@ -424,8 +424,9 @@ describe("CategoryNode zero-children behavior", () => {
     );
     expect(html).toContain('data-leaf-like="false"');
     expect(html).toContain("aria-expanded");
-    // chevron rendered
-    expect(html).toMatch(/&gt;|v/);
+    // corner chevron badge renders collapsed glyph + child count
+    expect(html).toContain('data-testid="kg-category-chevron"');
+    expect(html).toMatch(/\u25B8\s*5/);
     // no completeness arc aria-label
     expect(html).not.toContain("Content completeness");
     // no stub badge (9000 > 2000)
@@ -471,6 +472,79 @@ describe("CategoryNode zero-children behavior", () => {
         zIndex={0} />,
     );
     expect(html).not.toContain('data-testid="kg-stub-badge"');
+  });
+});
+
+describe("CategoryNode KG-UX-15 expanded/collapsed visual distinction", () => {
+  function renderCategory(args: {
+    isExpanded: boolean;
+    childCount?: number;
+    contentLength?: number;
+  }): string {
+    const data = {
+      meta: makeCategoryMeta({
+        childCount: args.childCount ?? 4,
+        contentLength: args.contentLength ?? 9000,
+      }),
+      isExpanded: args.isExpanded,
+      isSelected: false,
+      isMatch: false,
+      dimmed: false,
+    };
+    return renderNode(
+      <CategoryNode id="n100" type="category" data={data} dragging={false}
+        isConnectable={false} positionAbsoluteX={0} positionAbsoluteY={0}
+        selected={false} selectable={false} deletable={false} draggable={false}
+        zIndex={0} />,
+    );
+  }
+
+  it("collapsed non-leaf category shows chevron with child count", () => {
+    const html = renderCategory({ isExpanded: false, childCount: 4 });
+    expect(html).toContain('data-expanded="false"');
+    expect(html).toContain('data-testid="kg-category-chevron"');
+    expect(html).toMatch(/\u25B8\s*4/);
+    expect(html).not.toContain("\u25BE");
+  });
+
+  it("expanded non-leaf category shows down-chevron without count", () => {
+    const html = renderCategory({ isExpanded: true, childCount: 4 });
+    expect(html).toContain('data-expanded="true"');
+    expect(html).toContain('data-testid="kg-category-chevron"');
+    expect(html).toContain("\u25BE");
+    // collapsed glyph should not appear when expanded
+    expect(html).not.toContain("\u25B8");
+  });
+
+  it("leaf-like category (childCount=0) has no chevron badge and no expand data attr", () => {
+    const html = renderCategory({ isExpanded: false, childCount: 0, contentLength: 3000 });
+    expect(html).toContain('data-leaf-like="true"');
+    expect(html).not.toContain('data-testid="kg-category-chevron"');
+    // data-expanded attribute is omitted for leaf-like
+    expect(html).not.toMatch(/data-expanded="(true|false)"/);
+  });
+
+  it("border-left thickness differs between collapsed (1px) and expanded (2px) for non-hub", () => {
+    const collapsed = renderCategory({ isExpanded: false });
+    const expanded = renderCategory({ isExpanded: true });
+    expect(collapsed).toMatch(/border-left:\s*1px solid/);
+    expect(expanded).toMatch(/border-left:\s*2px solid/);
+  });
+
+  it("expanded category uses full pillar bg; collapsed uses muted bg", () => {
+    const collapsed = renderCategory({ isExpanded: false });
+    const expanded = renderCategory({ isExpanded: true });
+    // pillar1 full bg is #f8fafc. Muted (30% over white) is brighter.
+    expect(expanded).toContain("background-color:#f8fafc");
+    expect(collapsed).not.toContain("background-color:#f8fafc");
+    // muted value is a hex color
+    expect(collapsed).toMatch(/background-color:#[0-9a-f]{6}/);
+  });
+
+  it("includes background-color and border-left-width in the transition property", () => {
+    const html = renderCategory({ isExpanded: false });
+    expect(html).toMatch(/transition:[^"]*background-color[^"]*0\.2s/);
+    expect(html).toMatch(/transition:[^"]*border-left-width[^"]*0\.2s/);
   });
 });
 

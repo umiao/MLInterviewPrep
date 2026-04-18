@@ -26,12 +26,23 @@ const EMPTY_FOCUS_TOOLTIP = "\u65E0\u5185\u5BB9 \u00B7 \u70B9\u51FB\u805A\u7126"
 
 const HUB_EDGE_THRESHOLD = 10;
 
+// KG-UX-15 corner badge glyphs. U+25B8 / U+25BE match the TreeNav chevrons
+// so the outline view and canvas speak the same visual language.
+const CHEVRON_COLLAPSED = "\u25B8";
+const CHEVRON_EXPANDED = "\u25BE";
+
 function CategoryNodeInner({ id, data }: NodeProps) {
   const d = data as CategoryNodeData;
   const { meta, isExpanded, isSelected, isMatch, dimmed, isNeighborOfHover, isPulsing, onActivate } = d;
-  const style = styleForPillar(meta.pillar);
-  const isHub = meta.edgeCount > HUB_EDGE_THRESHOLD;
   const isLeafLike = meta.childCount === 0;
+  // Leaf-like categories never expand, so they always use the full-saturation
+  // style — the collapsed/expanded distinction (KG-UX-15) is meaningful only
+  // for categories that own children.
+  const style = styleForPillar(meta.pillar, {
+    collapsed: !isLeafLike && !isExpanded,
+  });
+  const fullStyle = styleForPillar(meta.pillar);
+  const isHub = meta.edgeCount > HUB_EDGE_THRESHOLD;
   const isStub = meta.contentLength < STUB_THRESHOLD;
   const completenessFraction = meta.contentLength / COMPLETENESS_FULL;
   // Empty + 0 children falls into the focus-animation branch of the
@@ -55,30 +66,49 @@ function CategoryNodeInner({ id, data }: NodeProps) {
   const ariaLabel = isLeafLike
     ? `${meta.title} (${meta.pillarName})`
     : `${meta.title}, ${isExpanded ? "expanded" : "collapsed"}, ${meta.childCount} children`;
+  // Non-hub left-border thickness carries the expand state as the
+  // color-blind-safe companion channel to saturation + chevron. Hub
+  // categories keep their 4px emphasized border regardless of state.
+  const borderLeftWidth = isHub ? 4 : isExpanded ? 2 : 1;
   return (
     <div
       data-testid="kg-category-node"
       data-hub={isHub ? "true" : "false"}
       data-leaf-like={isLeafLike ? "true" : "false"}
+      data-expanded={isLeafLike ? undefined : isExpanded ? "true" : "false"}
       data-empty-focus={isEmptyFocus ? "true" : "false"}
       tabIndex={0}
       role="button"
       aria-label={ariaLabel}
       aria-expanded={isLeafLike ? undefined : isExpanded}
       onKeyDown={handleKeyDown}
-      className={`relative rounded-lg bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}${pulseClass}`}
+      className={`relative rounded-lg shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}${pulseClass}`}
       style={{
         width: LAYOUT_CONFIG.categoryNode.width,
         height: LAYOUT_CONFIG.categoryNode.height,
         contain: "size",
-        borderLeft: `${isHub ? 4 : 2}px solid ${style.border}`,
-        borderTop: isHub ? `2px solid ${style.border}` : undefined,
-        borderRight: isHub ? `2px solid ${style.border}` : undefined,
-        borderBottom: isHub ? `2px solid ${style.border}` : undefined,
+        backgroundColor: isLeafLike ? "#ffffff" : style.bg,
+        borderLeft: `${borderLeftWidth}px solid ${fullStyle.border}`,
+        borderTop: isHub ? `2px solid ${fullStyle.border}` : undefined,
+        borderRight: isHub ? `2px solid ${fullStyle.border}` : undefined,
+        borderBottom: isHub ? `2px solid ${fullStyle.border}` : undefined,
         opacity: dimmed ? 0.2 : 1,
+        transition: "background-color 0.2s ease, border-left-width 0.2s ease",
       }}
     >
       <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
+      {!isLeafLike && (
+        <span
+          data-testid="kg-category-chevron"
+          aria-hidden
+          className="absolute top-1 right-1 text-[11px] font-semibold leading-none select-none pointer-events-none"
+          style={{ color: fullStyle.border }}
+        >
+          {isExpanded
+            ? CHEVRON_EXPANDED
+            : `${CHEVRON_COLLAPSED} ${meta.childCount}`}
+        </span>
+      )}
       <div className="flex items-center justify-between h-full px-3 gap-2">
         <span
           className="line-clamp-2 break-words leading-tight text-[15px] font-semibold text-gray-800 min-w-0"
@@ -88,23 +118,13 @@ function CategoryNodeInner({ id, data }: NodeProps) {
         </span>
         <span className="flex items-center gap-1 shrink-0 text-[10px] text-gray-500">
           {isStub && <StubBadge />}
-          {isLeafLike ? (
+          {isLeafLike && (
             <span aria-label="Content completeness">
               <CompletenessArc
                 fraction={completenessFraction}
-                color={style.border}
+                color={fullStyle.border}
               />
             </span>
-          ) : (
-            <>
-              <span
-                className="rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                style={{ backgroundColor: style.bg, color: style.border }}
-              >
-                {meta.childCount}
-              </span>
-              <span aria-hidden>{isExpanded ? "v" : ">"}</span>
-            </>
           )}
         </span>
       </div>

@@ -543,3 +543,14 @@
 - **Sanity check result**: `npm run build` -> 0 TS errors, built in 1.07s. `npm test -- --run` -> 109/109 green across 6 files (no cold-load-viewport test existed; none broke). Expand All button still works (it just mutates `expanded`; initial-fit guard prevents it from re-firing, matching existing behavior).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-505 --status completed`
+
+
+## 2026-04-18 13:00 -- [T-P1-506] KG-UX-15: Category node expanded/collapsed visual distinction
+- **What I did**: Added dual-channel (saturation + chevron + border width) indicator to canvas category nodes so users can see expand state without clicking. Extended `styleForPillar(pillar, { collapsed: true })` with a new `StyleOptions` param that returns the pillar bg blended over white at 30% alpha (helper `mutedBgVariant` parses `#rrggbb` and mixes each channel). In `CategoryNode.tsx`: background-color now toggles between the muted and full pillar bg (leaf-like categories stay white since they never expand), left-border thickness is 1px collapsed / 2px expanded / 4px hub, and a new top-right corner chevron badge replaces the old inline count+arrow -- collapsed shows `U+25B8 N` (child count), expanded shows `U+25BE` alone. Glyphs match TreeNav's chevrons so outline + canvas speak the same language. Added `transition: background-color 0.2s, border-left-width 0.2s` for a smooth state change, plus `data-expanded` test hook.
+- **Deliverables**:
+  - MODIFIED `src/frontend/src/components/kg/kgStyles.ts`: new `StyleOptions` type, `mutedBgVariant` helper, `styleForPillar` overload accepting `{ collapsed: true }`.
+  - MODIFIED `src/frontend/src/components/kg/CategoryNode.tsx`: corner chevron badge, saturation toggle, variable border width, transition.
+  - MODIFIED `src/frontend/src/pages/KnowledgeGraph.test.tsx`: updated one existing assertion (chevron glyph check) and added 6 KG-UX-15 tests covering collapsed badge + count, expanded badge, leaf-like no-badge, border thickness, bg saturation, and transition property.
+- **Sanity check result**: `npm run build` -> 0 TS errors, built in 1.08s. `npm test -- --run` -> 115/115 green across 6 files (+6 new, 0 regressions). Leaf-like branch (childCount=0) still renders CompletenessArc + StubBadge unchanged. Hub left-border still 4px regardless of state.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-506 --status completed`

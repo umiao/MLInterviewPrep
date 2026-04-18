@@ -25,9 +25,43 @@ const FALLBACK_STYLE: PillarStyle = {
   name: "Other",
 };
 
-export function styleForPillar(pillar: string | null | undefined): PillarStyle {
-  if (!pillar) return FALLBACK_STYLE;
-  return PILLAR_STYLES[pillar] ?? FALLBACK_STYLE;
+export interface StyleOptions {
+  // When true, returns the muted (30% over white) variant of the pillar
+  // background. Used by collapsed category nodes so the canvas shows an
+  // at-a-glance saturation contrast between expanded and collapsed state
+  // (KG-UX-15). Color is the dual-channel companion to border thickness +
+  // chevron so color-blind users still see the distinction.
+  collapsed?: boolean;
+}
+
+// Blend a #rrggbb hex color with white at the given opacity. Returns #rrggbb.
+// Falls back to the input string if the format is unrecognised.
+function mutedBgVariant(hex: string, alpha = 0.3): string {
+  const m = hex.match(/^#([0-9a-fA-F]{6})$/);
+  if (!m) return hex;
+  const int = parseInt(m[1], 16);
+  const r = (int >> 16) & 0xff;
+  const g = (int >> 8) & 0xff;
+  const b = int & 0xff;
+  const mix = (channel: number) =>
+    Math.round(alpha * channel + (1 - alpha) * 255);
+  const rr = mix(r).toString(16).padStart(2, "0");
+  const gg = mix(g).toString(16).padStart(2, "0");
+  const bb = mix(b).toString(16).padStart(2, "0");
+  return `#${rr}${gg}${bb}`;
+}
+
+export function styleForPillar(
+  pillar: string | null | undefined,
+  options?: StyleOptions,
+): PillarStyle {
+  const base = pillar
+    ? (PILLAR_STYLES[pillar] ?? FALLBACK_STYLE)
+    : FALLBACK_STYLE;
+  if (options?.collapsed) {
+    return { ...base, bg: mutedBgVariant(base.bg) };
+  }
+  return base;
 }
 
 export function colorForPillar(pillar: string | null | undefined): string {
