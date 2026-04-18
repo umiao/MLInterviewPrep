@@ -10,6 +10,7 @@ import {
   buildReactFlowNodes,
   colorForPillar,
   computeVisibleNodeIds,
+  decideActivation,
   defaultExpandedSet,
   expandToReveal,
   expandedSetForTreeNavSelect,
@@ -881,18 +882,64 @@ describe("KnowledgeGraph page (initial render)", () => {
   });
 });
 
-describe("expandedSetForTreeNavSelect (KG-UX-09)", () => {
-  it("clicking a deep leaf expands every ancestor so the leaf becomes visible", () => {
+describe("decideActivation (KG-UX-10 + KG-UX-17 shared policy)", () => {
+  it("returns 'open-drawer' for any node whose hasContent() is true", () => {
+    expect(decideActivation(makeLeafMeta({ contentLength: 100 }))).toBe(
+      "open-drawer",
+    );
+    expect(
+      decideActivation(makeCategoryMeta({ contentLength: 500, childCount: 3 })),
+    ).toBe("open-drawer");
+    // Even a hub-like category with both content AND children opens drawer.
+    expect(
+      decideActivation(
+        makeCategoryMeta({ contentLength: 9000, childCount: 12 }),
+      ),
+    ).toBe("open-drawer");
+  });
+
+  it("returns 'focus-pulse' for an empty node with zero children (leaf-like)", () => {
+    expect(decideActivation(makeLeafMeta({ contentLength: 0 }))).toBe(
+      "focus-pulse",
+    );
+    expect(
+      decideActivation(makeCategoryMeta({ contentLength: 0, childCount: 0 })),
+    ).toBe("focus-pulse");
+  });
+
+  it("returns 'toggle-expand' for an empty node with children (parent-like)", () => {
+    expect(
+      decideActivation(makeCategoryMeta({ contentLength: 0, childCount: 4 })),
+    ).toBe("toggle-expand");
+  });
+
+  // KG-UX-17 regression guard: TreeNav click flowing through `activateNode`
+  // (which dispatches on `decideActivation`) must NEVER hit the open-drawer
+  // branch for an empty-content node — only that branch calls setSelectedId.
+  it("(regression) NEVER returns 'open-drawer' for hasContent()=false nodes", () => {
+    const candidates = [
+      makeLeafMeta({ contentLength: 0 }),
+      makeCategoryMeta({ contentLength: 0, childCount: 0 }),
+      makeCategoryMeta({ contentLength: 0, childCount: 4 }),
+    ];
+    for (const meta of candidates) {
+      expect(decideActivation(meta)).not.toBe("open-drawer");
+    }
+  });
+});
+
+describe("expandedSetForTreeNavSelect (KG-UX-09 + KG-UX-17 ancestor-only)", () => {
+  it("clicking a deep leaf expands every strict ancestor so the leaf becomes visible", () => {
     const m = buildGraphModel(SAMPLE);
     const base = defaultExpandedSet(m); // pillars only -> leaf + category hidden
     const visibleBefore = computeVisibleNodeIds(m, base);
     expect(visibleBefore.has(nodeIdOf(3))).toBe(false);
     // Click the deep leaf n3
     const next = expandedSetForTreeNavSelect(m, base, nodeIdOf(3));
-    // Ancestors (n1 pillar, n2 category) must be in the expanded set
+    // Strict ancestors (n1 pillar, n2 category) must be in the expanded set
     expect(next.has(nodeIdOf(1))).toBe(true);
     expect(next.has(nodeIdOf(2))).toBe(true);
-    // The leaf itself is NOT added (leaves do not expand a subtree)
+    // The leaf itself is NOT added (leaves never expand a subtree)
     expect(next.has(nodeIdOf(3))).toBe(false);
     // After applying the new expanded set, the leaf is visible on the canvas
     const visibleAfter = computeVisibleNodeIds(m, next);
@@ -901,24 +948,27 @@ describe("expandedSetForTreeNavSelect (KG-UX-09)", () => {
     expect(visibleAfter.has(nodeIdOf(3))).toBe(true);
   });
 
-  it("clicking a category expands its pillar ancestor AND the category itself", () => {
+  it("clicking a category reveals only its strict ancestors; activateNode handles the target", () => {
     const m = buildGraphModel(SAMPLE);
     const base = new Set<string>(); // start fully collapsed
     const next = expandedSetForTreeNavSelect(m, base, nodeIdOf(2));
-    expect(next.has(nodeIdOf(1))).toBe(true); // pillar ancestor
-    expect(next.has(nodeIdOf(2))).toBe(true); // category itself (has children)
-    // Leaves under the category should be revealed now
+    // Strict ancestor of n2 is n1 only
+    expect(next.has(nodeIdOf(1))).toBe(true);
+    // The target itself MUST NOT be added — activateNode toggles it.
+    expect(next.has(nodeIdOf(2))).toBe(false);
+    // Leaves under the (still-collapsed) category remain hidden until
+    // activateNode flips n2 into the expanded set.
     const visible = computeVisibleNodeIds(m, next);
-    expect(visible.has(nodeIdOf(3))).toBe(true);
+    expect(visible.has(nodeIdOf(3))).toBe(false);
   });
 
-  it("clicking a pillar adds it to the expanded set (exposes its categories)", () => {
+  it("clicking a pillar adds nothing (no strict ancestors); activateNode toggles it", () => {
     const m = buildGraphModel(SAMPLE);
     const base = new Set<string>();
     const next = expandedSetForTreeNavSelect(m, base, nodeIdOf(1));
-    expect(next.has(nodeIdOf(1))).toBe(true);
-    const visible = computeVisibleNodeIds(m, next);
-    expect(visible.has(nodeIdOf(2))).toBe(true); // category becomes visible
+    // Pillar has no parents, so the helper produces an empty set (defensive copy).
+    expect(next.has(nodeIdOf(1))).toBe(false);
+    expect(next.size).toBe(0);
   });
 
   it("preserves existing expanded entries and is idempotent", () => {

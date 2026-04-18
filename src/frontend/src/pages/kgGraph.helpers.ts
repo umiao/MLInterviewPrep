@@ -3,6 +3,7 @@
 // node kinds and derives expand state.
 
 import type { Edge, Node } from "@xyflow/react";
+import { hasContent } from "../components/framework/hasContent";
 import { PILLAR_STYLES, styleForPillar } from "../components/kg/kgStyles";
 
 export interface KgNode {
@@ -305,12 +306,13 @@ export function expandToReveal(
 }
 
 /**
- * Expand set that makes a TreeNav-selected node visible on the canvas.
+ * Expand set that makes a TreeNav-selected node REACHABLE on the canvas.
  *
- * - Every ancestor is expanded so the target becomes reachable.
- * - The target itself is also expanded iff it has children (so its own
- *   subtree opens). Leaves and zero-children categories are leaf-like and
- *   stay unexpanded — they open a drawer instead.
+ * Reveals every strict ancestor of the target. The target itself is NOT
+ * added — the activate decision (drawer / focus-pulse / toggle) is the
+ * caller's responsibility (see `activateNode` in KnowledgeGraph.tsx). This
+ * lets one tri-state policy govern both canvas and TreeNav click paths
+ * (KG-UX-17).
  */
 export function expandedSetForTreeNavSelect(
   model: KgGraphModel,
@@ -319,12 +321,28 @@ export function expandedSetForTreeNavSelect(
 ): Set<string> {
   const meta = model.nodesById.get(id);
   if (!meta) return new Set(baseExpanded);
-  const isLeafLike =
-    meta.kind === "leaf" ||
-    (meta.kind === "category" && meta.childCount === 0);
-  const next = expandToReveal(model, new Set([id]), baseExpanded);
-  if (!isLeafLike) next.add(id);
-  return next;
+  return expandToReveal(model, new Set([id]), baseExpanded);
+}
+
+/**
+ * Tri-state activation policy shared by canvas click and TreeNav click
+ * (KG-UX-10 + KG-UX-17). hasContent() is the single source of truth for
+ * "does this node have drawer content?" — never compare contentLength
+ * directly here.
+ *
+ *   has content          -> "open-drawer"     (set selected node)
+ *   no content + leaf    -> "focus-pulse"     (recenter + ring animation)
+ *   no content + parent  -> "toggle-expand"   (expand or collapse subtree)
+ */
+export type ActivationDecision =
+  | "open-drawer"
+  | "focus-pulse"
+  | "toggle-expand";
+
+export function decideActivation(meta: NodeMeta): ActivationDecision {
+  if (hasContent(meta)) return "open-drawer";
+  if (meta.childCount === 0) return "focus-pulse";
+  return "toggle-expand";
 }
 
 export const PILLAR_COLORS: Record<string, string> = Object.fromEntries(

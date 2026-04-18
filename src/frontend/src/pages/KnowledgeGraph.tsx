@@ -34,7 +34,6 @@ const KG_STYLE_OVERRIDES = `
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
-import { hasContent } from "../components/framework/hasContent";
 import PillarNode from "../components/kg/PillarNode";
 import CategoryNode from "../components/kg/CategoryNode";
 import LeafNode from "../components/kg/LeafNode";
@@ -57,6 +56,7 @@ import {
   buildReactFlowEdges,
   buildReactFlowNodes,
   computeVisibleNodeIds,
+  decideActivation,
   defaultExpandedSet,
   expandToReveal,
   expandedSetForTreeNavSelect,
@@ -284,35 +284,36 @@ function KgGraphInner({
     [layout, model, rf],
   );
 
-  // Tri-state click (KG-UX-10). hasContent() is the ONLY source of truth for
-  // "does this node have drawer content?" — do not compare content_length
-  // directly here.
-  //   has content                 -> open drawer
-  //   no content + 0 children     -> focus animation only (no drawer)
-  //   no content + >0 collapsed   -> expand
-  //   no content + >0 expanded    -> collapse
-  const handleActivate = useCallback(
+  // Tri-state activation policy (KG-UX-10 + KG-UX-17). The decision lives in
+  // `decideActivation` (pure, in kgGraph.helpers.ts) so both click paths
+  // (canvas `handleActivate` and outline `onTreeNavSelect`) share one
+  // policy. Side-effects (drawer/focus/expand) are wired here.
+  const activateNode = useCallback(
     (id: string) => {
       const meta = model.nodesById.get(id);
       if (!meta) return;
-      if (hasContent(meta)) {
-        setSelectedId(id);
-        return;
+      switch (decideActivation(meta)) {
+        case "open-drawer":
+          setSelectedId(id);
+          return;
+        case "focus-pulse":
+          focusOnNode(id);
+          return;
+        case "toggle-expand":
+          lastActivatedRef.current = id;
+          setExpanded((prev) => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
+            return next;
+          });
+          return;
       }
-      if (meta.childCount === 0) {
-        focusOnNode(id);
-        return;
-      }
-      lastActivatedRef.current = id;
-      setExpanded((prev) => {
-        const next = new Set(prev);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        return next;
-      });
     },
     [model, setSelectedId, focusOnNode],
   );
+
+  const handleActivate = activateNode;
 
   const expandAll = useCallback(() => {
     lastActivatedRef.current = null;
@@ -324,18 +325,20 @@ function KgGraphInner({
     setExpanded(new Set());
   }, []);
 
-  // Wire TreeNav (KG-UX-09): click in the outline expands all ancestors of the
-  // target (plus itself when it has children) so the node is visible on the
-  // canvas, selects it (opens drawer for leaves), and centers the viewport on
-  // it once the layout effect resolves.
+  // Wire TreeNav (KG-UX-09 + KG-UX-17): outline click first reveals every
+  // strict ancestor of the target so the row is reachable on the canvas,
+  // then delegates the final action (drawer / focus-pulse / toggle) to the
+  // shared `activateNode` policy. lastActivatedRef is set unconditionally so
+  // the layout effect re-centers the viewport on the row even when
+  // activateNode opens a drawer (canvas may have been scrolled away).
   const onTreeNavSelect = useCallback(
     (id: string) => {
       if (!model.nodesById.has(id)) return;
       lastActivatedRef.current = id;
       setExpanded((prev) => expandedSetForTreeNavSelect(model, prev, id));
-      setSelectedId(id);
+      activateNode(id);
     },
-    [model, setSelectedId],
+    [model, activateNode],
   );
 
   useEffect(() => {

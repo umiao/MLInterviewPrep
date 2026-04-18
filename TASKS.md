@@ -98,6 +98,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
+- [x] **2026-04-18** -- T-P1-507: KG-UX-17: TreeNav click must honor hasContent gate (extract activateNode helper). ## Problem
 - [x] **2026-04-18** -- T-P1-506: KG-UX-15: Category node expanded/collapsed visual distinction (saturation + chevron). ## Problem
 - [x] **2026-04-18** -- T-P1-505: KG-UX-16: Cold-load defaults to first pillar at zoom 1.0 (not fitView all). ## Problem
 - [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
