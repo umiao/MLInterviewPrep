@@ -19,14 +19,22 @@ import "@xyflow/react/dist/style.css";
 
 // Override React Flow's cursor management to prevent flicker between
 // grab/pointer icons when hovering nodes. Nodes set their own cursor-pointer.
+// Pulse animation is used as zoom-independent focus feedback when clicking a
+// content-less leaf (see KG-UX-10 tri-state click behavior).
 const KG_STYLE_OVERRIDES = `
 .kg-canvas .react-flow__pane { cursor: grab !important; }
 .kg-canvas .react-flow__pane:active { cursor: grabbing !important; }
 .kg-canvas .react-flow__node { cursor: pointer !important; }
+@keyframes kg-node-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.55); }
+  100% { box-shadow: 0 0 0 14px rgba(59, 130, 246, 0); }
+}
+.kg-node-pulse { animation: kg-node-pulse 300ms ease-out; }
 `;
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
+import { hasContent } from "../components/framework/hasContent";
 import PillarNode from "../components/kg/PillarNode";
 import CategoryNode from "../components/kg/CategoryNode";
 import LeafNode from "../components/kg/LeafNode";
@@ -198,7 +206,9 @@ function KgGraphInner({
   const [rfNodes, setRfNodes] = useState<Node[]>([]);
   const [rfEdges, setRfEdges] = useState<Edge[]>([]);
   const [lanes, setLanes] = useState<LaneInfo[]>([]);
+  const [pulseId, setPulseId] = useState<string | null>(null);
   const debounceRef = useRef<number | null>(null);
+  const pulseTimerRef = useRef<number | null>(null);
   const initialFitDone = useRef(false);
   // Last node the user expanded/collapsed or selected from TreeNav — the
   // layout effect centers the viewport on it after relayout so focus is
@@ -235,14 +245,54 @@ function KgGraphInner({
   // Hover effects disabled — they caused persistent jitter via React Flow
   // ResizeObserver / cursor management conflicts. Tooltip shows on click instead.
 
+  // Zoom-independent focus feedback for content-less leaves: center the
+  // viewport on the node (never zooming OUT — only IN if current zoom <1.0)
+  // and flash a 300ms pulse ring so the action is visible even when setCenter
+  // is a near no-op.
+  const focusOnNode = useCallback(
+    (id: string) => {
+      const pos = layout.getPosition(id);
+      const meta = model.nodesById.get(id);
+      if (!pos || !meta) return;
+      const base =
+        meta.kind === "pillar"
+          ? LAYOUT_CONFIG.pillarNode
+          : meta.kind === "category"
+            ? LAYOUT_CONFIG.categoryNode
+            : LAYOUT_CONFIG.leafNode;
+      const scale = meta.kind === "leaf" ? meta.importanceScale : 1;
+      const w = base.width * scale;
+      const h = base.height * scale;
+      rf.setCenter(pos.x + w / 2, pos.y + h / 2, {
+        zoom: Math.max(rf.getZoom(), 1.0),
+        duration: 200,
+      });
+      setPulseId(id);
+      if (pulseTimerRef.current != null) window.clearTimeout(pulseTimerRef.current);
+      pulseTimerRef.current = window.setTimeout(() => {
+        setPulseId((prev) => (prev === id ? null : prev));
+      }, 320);
+    },
+    [layout, model, rf],
+  );
+
+  // Tri-state click (KG-UX-10). hasContent() is the ONLY source of truth for
+  // "does this node have drawer content?" — do not compare content_length
+  // directly here.
+  //   has content                 -> open drawer
+  //   no content + 0 children     -> focus animation only (no drawer)
+  //   no content + >0 collapsed   -> expand
+  //   no content + >0 expanded    -> collapse
   const handleActivate = useCallback(
     (id: string) => {
       const meta = model.nodesById.get(id);
       if (!meta) return;
-      // Leaves and 0-children categories behave identically: open the drawer
-      // instead of toggling expansion, since there is nothing to expand.
-      if (meta.kind === "leaf" || (meta.kind === "category" && meta.childCount === 0)) {
+      if (hasContent(meta)) {
         setSelectedId(id);
+        return;
+      }
+      if (meta.childCount === 0) {
+        focusOnNode(id);
         return;
       }
       lastActivatedRef.current = id;
@@ -253,7 +303,7 @@ function KgGraphInner({
         return next;
       });
     },
-    [model, setSelectedId],
+    [model, setSelectedId, focusOnNode],
   );
 
   const expandAll = useCallback(() => {
@@ -381,6 +431,25 @@ function KgGraphInner({
       }),
     );
   }, [selectedId]);
+
+  // Pulse-only update: patch isPulsing onto node data without re-running ELK.
+  useEffect(() => {
+    setRfNodes((nodes) =>
+      nodes.map((n) => {
+        const wasPulsing = Boolean((n.data as Record<string, unknown>).isPulsing);
+        const nowPulsing = pulseId === n.id;
+        if (wasPulsing === nowPulsing) return n;
+        return { ...n, data: { ...n.data, isPulsing: nowPulsing } };
+      }),
+    );
+  }, [pulseId]);
+
+  // Clean up pending pulse timer on unmount.
+  useEffect(() => {
+    return () => {
+      if (pulseTimerRef.current != null) window.clearTimeout(pulseTimerRef.current);
+    };
+  }, []);
 
   // Auto-zoom + pan to first search match.
   useEffect(() => {

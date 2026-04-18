@@ -11,40 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Problem
-Clicking L1/L2 organizational nodes (e.g. id=1 Coding & Algorithms) opens an empty drawer because the current handleActivate() only checks node kind/childCount, not whether description has content. DB survey (2026-04-18): 8/8 L1 + 34/41 L2 have empty description; 0 borderline stub cases (<30 chars).
-
-## Solution: tri-state click behavior (replaces current leaf-vs-category check)
-
-| Node content | Children | Click behavior |
-|---|---|---|
-| has content | any | open drawer (current behavior) |
-| no content | 0 | focus animation only (NEW — no drawer) |
-| no content | >0, collapsed | expand (current behavior) |
-| no content | >0, expanded | collapse (NEW explicit — currently no-op) |
-
-## Deliverables
-1. New util `src/frontend/src/components/framework/hasContent.ts` exporting `hasContent(node): boolean`. Implementation: `node.content_length > 0`. This is the ONLY source of truth for "has drawer content". Add small unit test.
-2. Refactor `handleActivate()` in `src/frontend/src/pages/KnowledgeGraph.tsx` to use `hasContent()` and implement the tri-state matrix above.
-3. Focus animation for no-content leaf case:
-   - `rf.setCenter(cx, cy, { zoom: Math.max(rf.getZoom(), 1.0), duration: 200 })` — preserves user's current zoom if already >=1.0, only zooms IN never OUT
-   - CSS pulse keyframe animation on target node (200-300ms ring expansion) applied via temporary class — zoom-independent feedback so even no-op setCenter gives visible confirmation
-4. Hover affordance: empty-description nodes set title attribute to "无内容 · 点击聚焦" (so cursor tooltip appears). No visual style change.
-
-## Acceptance Criteria
-- [ ] Unit test: `hasContent({content_length: 0})` → false; `hasContent({content_length: 1})` → true
-- [ ] Journey: click id=1 Coding & Algorithms (L1 empty) → no drawer, node pulses, viewport centers on it
-- [ ] Journey: click an empty L2 category with children (collapsed) → expands, no drawer
-- [ ] Journey: click same empty L2 category again (now expanded) → collapses, no drawer
-- [ ] Journey: click any L3 leaf (e.g. id=42 STAR) → drawer opens with content as before
-- [ ] Journey: hover over empty node → cursor tooltip shows "无内容 · 点击聚焦"
-- [ ] `npm run build` 0 TS errors
-- [ ] Manually verify in browser at http://localhost:5173/kg: all 4 journeys above
-
 #### T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus
 - **Priority**: P1
 - **Complexity**: S
@@ -203,6 +169,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem
 - [x] **2026-04-18** -- T-P1-499: [SYNC] Fix settings.json: replace bare python with /c/Anaconda/python.exe. All 8 hook commands in .claude/settings.json use bare python instead of /c/Anaconda/python.exe. This violates the CLAUDE
 - [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae
 - [x] **2026-04-17** -- T-P1-498: KG-CN-01: Rewrite node descriptions to CN narration + full English terms. Rewrite framework_nodes.description to Chinese narration + English full-expansion terms. Pilot on 4 nodes validated qual

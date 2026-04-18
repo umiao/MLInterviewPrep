@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import type { NodeMeta } from "../../pages/kgGraph.helpers";
+import { hasContent } from "../framework/hasContent";
 import { LAYOUT_CONFIG, styleForPillar } from "./kgStyles";
 import {
   COMPLETENESS_FULL,
@@ -17,14 +18,17 @@ export interface LeafNodeData extends Record<string, unknown> {
   dimmed: boolean;
   isHovered?: boolean;
   isNeighborOfHover?: boolean;
+  isPulsing?: boolean;
   onActivate?: (id: string) => void;
 }
+
+const EMPTY_FOCUS_TOOLTIP = "\u65E0\u5185\u5BB9 \u00B7 \u70B9\u51FB\u805A\u7126";
 
 const HUB_EDGE_THRESHOLD = 10;
 
 function LeafNodeInner({ id, data }: NodeProps) {
   const d = data as LeafNodeData;
-  const { meta, isSelected, isMatch, dimmed, isNeighborOfHover, onActivate } = d;
+  const { meta, isSelected, isMatch, dimmed, isNeighborOfHover, isPulsing, onActivate } = d;
   const style = styleForPillar(meta.pillar);
   const isHub = meta.edgeCount > HUB_EDGE_THRESHOLD;
   const ringClass = isSelected
@@ -41,6 +45,10 @@ function LeafNodeInner({ id, data }: NodeProps) {
   const height = base.height * meta.importanceScale;
   const leftBorderWidth = isHub ? 3 : 2;
   const sideBorder = isHub ? `2px solid ${style.border}` : isStub ? `1px dashed ${style.border}` : undefined;
+  // Leaves always have childCount 0, so an empty leaf falls into the
+  // "focus animation" branch of the KG-UX-10 tri-state click matrix.
+  const isEmptyFocus = !hasContent(meta) && meta.childCount === 0;
+  const pulseClass = isPulsing ? " kg-node-pulse" : "";
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -52,11 +60,12 @@ function LeafNodeInner({ id, data }: NodeProps) {
       data-testid="kg-leaf-node"
       data-importance={meta.importanceScale.toFixed(2)}
       data-hub={isHub ? "true" : "false"}
+      data-empty-focus={isEmptyFocus ? "true" : "false"}
       tabIndex={0}
       role="button"
       aria-label={`${meta.title} (${meta.pillarName})`}
       onKeyDown={handleKeyDown}
-      className={`relative rounded-md bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}`}
+      className={`relative rounded-md bg-white shadow-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-400 ${ringClass}${pulseClass}`}
       style={{
         width,
         height,
@@ -72,7 +81,7 @@ function LeafNodeInner({ id, data }: NodeProps) {
       <div className="flex items-center justify-between h-full px-2.5 gap-1.5">
         <span
           className="line-clamp-2 break-words leading-tight text-[14px] font-medium text-gray-700 min-w-0"
-          title={meta.title}
+          title={isEmptyFocus ? EMPTY_FOCUS_TOOLTIP : meta.title}
         >
           {meta.title}
         </span>
@@ -101,6 +110,7 @@ export default memo(LeafNodeInner, (prev, next) => {
     p.isExpanded === n.isExpanded &&
     p.isMatch === n.isMatch &&
     p.dimmed === n.dimmed &&
+    p.isPulsing === n.isPulsing &&
     p.meta.id === n.meta.id
   );
 });
