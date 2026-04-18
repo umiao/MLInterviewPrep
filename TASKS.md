@@ -13,32 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-501
-- **Description**: ## Problem
-Before this cleanup, 'does a node have drawer content?' could be answered multiple ways (content_length === 0, description field non-empty, etc). Without a single chokepoint, future changes to the content-presence rule (e.g. adding is_stub field, lazy-loading) would require hunting all call sites.
-
-## Depends on
-T-P1-501 (KG-UX-10) — which introduces `hasContent(node)` util. This task migrates existing scattered checks to it.
-
-## Deliverables
-1. Audit all frontend TS/TSX files for direct `content_length` comparisons or description-presence checks:
-   - `grep -rn 'content_length' src/frontend/src/` — expected hits in CompletenessArc.tsx (stub border logic), possibly others
-   - `grep -rn '\.description' src/frontend/src/components/` — check any "is it empty?" style checks
-2. Migrate each call site to import and use `hasContent()` from KG-UX-10's util. If a call site needs the inverse, use `!hasContent(node)` — do NOT invert by touching content_length directly.
-3. Add LESSONS.md entry documenting the convention (under ML-prep project LESSONS.md):
-   - Title: "`hasContent(node)` is the only sanctioned content-presence check"
-   - Body: rule + why (future-proofing for is_stub / lazy-load), how to apply (always import util, never raw content_length === 0 in consumers)
-
-## Acceptance Criteria
-- [ ] `grep -rn 'content_length === 0' src/frontend/src/` returns 0 results outside `hasContent.ts`
-- [ ] `grep -rn 'content_length > 0' src/frontend/src/` returns 0 results outside `hasContent.ts`
-- [ ] All prior call sites import and use `hasContent()`
-- [ ] LESSONS.md entry added with rule + why + how-to-apply
-- [ ] `npm run build` 0 TS errors
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -122,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
 - [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
 - [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem

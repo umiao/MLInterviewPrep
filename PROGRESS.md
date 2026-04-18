@@ -524,3 +524,13 @@
 - **Sanity check result**: `grep -n '^## Key Constraints' CLAUDE.md` -> exactly one match at line 29 (AC met). Surrounding section flow (Tech Stack -> File Structure -> Invariants -> Key Constraints -> Git Conventions) verified by reading the first 45 lines back.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-500 --status completed`
+
+
+## 2026-04-18 12:00 -- [T-P2-503] KG-UX-12: Audit content_length checks + LESSONS entry
+- **What I did**: Audited all frontend TS/TSX for direct `content_length` / `contentLength` comparisons that answer "does this node have drawer content?". Found that T-P1-501 (KG-UX-10) already migrated the three real consumers -- `KnowledgeGraph.tsx` `handleActivate` (tri-state click), `LeafNode.tsx` `isEmptyFocus`, and `CategoryNode.tsx` `isEmptyFocus` -- to `hasContent(meta)` at landing time. Remaining `contentLength` references (`< STUB_THRESHOLD` in LeafNode/CategoryNode, `/ COMPLETENESS_FULL` arc fraction, `/ maxContentLength` TreeNav bar fill, `> max` in `maxContentLengthOf`) are display/threshold math that legitimately reads the raw number -- NOT content-presence checks, so they stay put. AC `grep 'content_length === 0\|content_length > 0'` outside hasContent.ts -> 0 hits confirmed. Added LESSONS.md entry codifying the convention (rule + why + how-to-apply + audit sentinel) so future consumers won't drift.
+- **Deliverables**:
+  - MODIFIED `LESSONS.md`: new entry "[2026-04-18] `hasContent(node)` is the only sanctioned content-presence check" (~20 lines).
+  - No code migrations needed: T-P1-501 already routed all behavioral consumers through the util.
+- **Sanity check result**: `grep -rn 'content_length === 0' src/frontend/src/` -> 0 matches. `grep -rn 'content_length > 0' src/frontend/src/` -> 0 matches. `npm run build` in src/frontend -> success, 0 TS errors, `built in 1.04s`.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-503 --status completed`

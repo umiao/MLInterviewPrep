@@ -180,3 +180,15 @@
   3. When resuming after limit reset, idempotency + history-table gating is essential — we would have re-done work otherwise.
 - **Related task**: T-P1-498 KG-CN-01
 - **Tags**: #claude-code #usage-limits #batch-scripts #429-retry
+
+### [2026-04-18] `hasContent(node)` is the only sanctioned content-presence check
+- **Context**: KG-UX-10 (T-P1-501) introduced tri-state click behavior: empty-content nodes skip the drawer and either expand children or play a focus animation. "Empty content" was initially going to be `node.content_length === 0` sprinkled across consumers — fast to write, impossible to evolve safely.
+- **What I learned**: Once a predicate ("does this node have drawer content?") has product meaning — gating UX branches, keyboard a11y, badges — it MUST live behind a single util. Scattered `content_length === 0` / `> 0` / `description &&` checks at 4+ call sites means the day we add `is_stub`, enable lazy loading of descriptions, or change the empty-sentinel from 0 to null, we must hunt every site and hope we find them all. Class of bug: drawer opens on empty node in one place but not another; keyboard Enter on empty leaf plays focus animation but screen-reader label says "click to open".
+- **Rule**: `hasContent(node)` from `src/frontend/src/components/framework/hasContent.ts` is the ONLY sanctioned way to answer "does this node have drawer content?". It accepts both API raw shape (`{content_length}`) and in-app `NodeMeta` shape (`{contentLength}`), so consumers never reshape.
+- **How to apply**:
+  1. New consumer needs "is this node empty?" → import `hasContent` and call `hasContent(node)` or `!hasContent(node)`. Never write `content_length === 0`, `content_length > 0`, or `!node.description` as a substitute.
+  2. Display/threshold math (stub badge at `< 2000`, arc fraction = `contentLength / COMPLETENESS_FULL`, bar fill) is NOT a content-presence check — it legitimately reads `contentLength` directly. Keep these out of `hasContent`.
+  3. If the presence rule changes (e.g. add `is_stub`, switch to lazy-loaded description), update `hasContent.ts` only. Callers need no change.
+  4. Audit sentinel: `grep -rn 'content_length === 0\|content_length > 0' src/frontend/src/` must return 0 matches outside `hasContent.ts`.
+- **Related task**: T-P2-503 (migration + lesson), T-P1-501 (introduced util)
+- **Tags**: #frontend #kg #source-of-truth #predicate-util #future-proofing
