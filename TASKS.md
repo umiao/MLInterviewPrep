@@ -11,68 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-519
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=95 Fraud & Trust Safety. V1 ~5040 chars, standard 8-heading skeleton.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2. Abort on failure.
-
-## Domain-specific focus for id=95 (Fraud & Trust Safety)
-- Capacity: transaction-heavy products (Stripe/Square/banking), 10-100K TPS transaction classification, p99 <50ms, extreme class imbalance (<0.1% positive)
-- Service split: Feature Extraction / Rule Engine (deterministic) / ML Classifier (learned) / Decision Aggregator / Human Review Queue / Feedback Loop
-- Tech choices (Rule 3 ≥3 alt + Rule 7): supervised (GBDT/XGBoost vs DNN vs graph-based like GraphSAGE); unsupervised (Isolation Forest vs autoencoder vs clustering); graph features (GNN vs hand-crafted vs subgraph matching); calibration under extreme imbalance; rule engine (Drools vs home-grown DSL vs learned rules); feedback loop (active learning vs auto-labeling vs human-in-loop)
-- Key follow-ups: label delay (fraud ground truth takes days-weeks), concept drift (fraudsters adapt), explanability for human reviewers + regulators (SHAP/LIME/counterfactual), adversarial robustness, data sparsity for new user segments, privacy (GDPR) + fairness constraints
-
-## Deliverables
-`scripts/seed_node_95_fraud_v2_20260419.py` idempotent.
-
-## Length target V1 ~5040 → V2 12000-17000 chars.
-
-## Acceptance Criteria
-Standard A.1.v2 gates.
-
-#### T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Context
-Google R1 **rescheduled** (not past). Events per interview_events:
-- Mon 2026-04-20 10:00 AM PT — Google Champion Mock Coding (60min, Meet)
-- Tue 2026-04-21 11:15 AM PT — Real R1 #1 ML Basics (45min)
-- Tue 2026-04-21 13:15 PM PT — Real R1 #2 BQ/G&L (45min)
-
-## User scope guardrails (IMPORTANT — do not exceed)
-1. **Do NOT archive / delete / deprecate any existing doc.** Past-dated prep materials remain first-class assets. Even id=38 Recruiter-Call prep is kept intact.
-2. **Do NOT attempt KG integration in this pass.** KG unification is a separate future scope.
-3. Scope is narrow content dedupe, not restructure.
-
-## 3 overlapping docs
-- id=38 'Recruiter Call Prep' (5261 chars, 4/9) — ML paradigm + G&L bucket primer. KEEP AS-IS.
-- id=51 'Google 2026-04-17 Interview Prep Note' (5675 chars) — schedule + day-of logistics. KEEP, but refresh dates.
-- id=53 'Google 2026-04-17 Prep Hub' (3577 chars) — cross-refs db://51 + duplicates schedule table. EDIT: remove duplicated schedule block, rely on db://51 link.
-
-## Scope (narrow, reversible)
-1. Edit id=53: strip its schedule table, leave a single-line summary + db://51 link. Keep Round 1/2 TL;DR + drill links.
-2. Edit id=51: refresh schedule table to 4/20 mock + 4/21 R1 x2 with correct PT times. Keep day-of logistics.
-3. Edit id=53: update the file-date reference from '2026-04-17' to '2026-04-20/21 (rescheduled)' in header.
-4. id=38 unchanged (no date stamp edits).
-
-## Deliverables
-- `scripts/seed_google_prep_dedupe_20260419.py` idempotent UPSERT (only id=51, id=53 touched).
-- Verification: frontend /companies/3/prep opened; no duplicate schedule across 38/51/53; all db:// links resolve.
-
-## Acceptance Criteria
-- [ ] id=38 byte-identical before/after (not touched)
-- [ ] id=51 schedule block now lists 4/20 mock + 4/21 R1 x2 PT
-- [ ] id=53 no longer duplicates id=51 schedule (diff reduces ~1K chars)
-- [ ] No doc deleted, no doc_kind changed to 'deprecated' or similar
-- [ ] Seed idempotent (second run = 0 writes)
-- [ ] Manual smoke: /companies/3/prep renders 17 docs, no broken links
-
 #### T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN)
 - **Priority**: P1
 - **Complexity**: M
@@ -169,6 +107,30 @@ Light rewrite pass, not V2 rebuild:
 - [ ] Seed script idempotent (second run → 0 updates)
 - [ ] Frontend /companies/3/prep doc list still shows all 12 with same titles
 
+#### T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=95 Fraud & Trust Safety. V1 ~5040 chars, standard 8-heading skeleton.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2. Abort on failure.
+
+## Domain-specific focus for id=95 (Fraud & Trust Safety)
+- Capacity: transaction-heavy products (Stripe/Square/banking), 10-100K TPS transaction classification, p99 <50ms, extreme class imbalance (<0.1% positive)
+- Service split: Feature Extraction / Rule Engine (deterministic) / ML Classifier (learned) / Decision Aggregator / Human Review Queue / Feedback Loop
+- Tech choices (Rule 3 ≥3 alt + Rule 7): supervised (GBDT/XGBoost vs DNN vs graph-based like GraphSAGE); unsupervised (Isolation Forest vs autoencoder vs clustering); graph features (GNN vs hand-crafted vs subgraph matching); calibration under extreme imbalance; rule engine (Drools vs home-grown DSL vs learned rules); feedback loop (active learning vs auto-labeling vs human-in-loop)
+- Key follow-ups: label delay (fraud ground truth takes days-weeks), concept drift (fraudsters adapt), explanability for human reviewers + regulators (SHAP/LIME/counterfactual), adversarial robustness, data sparsity for new user segments, privacy (GDPR) + fairness constraints
+
+## Deliverables
+`scripts/seed_node_95_fraud_v2_20260419.py` idempotent.
+
+## Length target V1 ~5040 → V2 12000-17000 chars.
+
+## Acceptance Criteria
+Standard A.1.v2 gates.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -253,6 +215,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete). ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2. ## Context
