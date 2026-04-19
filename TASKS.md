@@ -5,6 +5,58 @@
 
 ## In Progress
 
+#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-514, T-P0-519
+- **Description**: ## Context — ITERATION 2
+First iteration (commit 004e351, docs/mlsd_pilot_92_s2_20260418.md) passed regex gates + Gate 10 LLM-judge but user review found the RULES too lax: only 1-2 alternatives per tech-choice, implicit choices (WebSocket, sticky-session) bypassed triage, length under-delivers depth. T-P0-519 tightens A.1 to A.1.v2 with Rule 3 (≥3 alternatives + why-not each), Rule 6 (implicit choices caught by writer discipline), Rule 7 (≥3 preemptive follow-ups per choice), expanded Gate 9 regex + new Gate 12. This task re-pilots §2 of id=92 under the tightened rules.
+
+Iteration-1 pilot doc is PRESERVED as evidence — DO NOT delete `docs/mlsd_pilot_92_s2_20260418.md`. This task writes to a DIFFERENT file: `docs/mlsd_pilot_92_s2_v2_20260418.md`.
+
+## CRITICAL — this task does NOT mark itself completed
+Same as iteration-1: autonomous session leaves `status=in_progress` after producing the pilot. Human reviews in Discord and manually flips to completed after approval — that's what unblocks T-P0-515/516.
+
+## Scope — re-rewrite ONLY §2 of id=92 under A.1.v2 (tightened) rules
+
+Steps:
+1. Load id=92 V1 content (9727 chars, commit 589dad8), extract §2 (same as iteration-1)
+2. Rewrite §2 under:
+   - A.1 original rules (Section Contract, Acronym per-section, Specificity boundaries, Patch-ban)
+   - A.1.v2 amendments from T-P0-519:
+     - Rule 3 upgraded: ≥3 alternatives + why-not each + switch-trigger (pick + reason + 3 alternatives with explicit why-not + trigger)
+     - Rule 6: scan for IMPLICIT tech choices (product/protocol names in prose) — at minimum must triage: `Redis GEO`, `Redis` (hot), `PostgreSQL`, `Cassandra`, `Kafka`, `S3`, `WebSocket`, `sticky session`, `load balancer`
+     - Rule 7: every tech-choice gets "**常见追问**" footnote with ≥3 preemptive Q&As
+   - Gate 12 (≥3 alternatives required per choice, regex-auditable)
+3. Expected length: iteration-1 §2 was 1861 chars. Iteration-2 §2 target **4500-6000 chars** (roughly 2.5-3× due to richer triage + follow-up footnotes)
+4. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on new §2 content — must PASS gates 7/8/9/11/12
+5. Run `scripts/llm_judge_mlsd.py --v1-text <iter1 §2> --v2-text <iter2 §2>` — iter-2 must STRICTLY improve on all 4 dimensions (readability / triage / density / follow-up preemption)
+6. Write `docs/mlsd_pilot_92_s2_v2_20260418.md`:
+   - Iter-1 §2 (from `docs/mlsd_pilot_92_s2_20260418.md` §2 block) as "previous version"
+   - Iter-2 §2 rewrite
+   - side-by-side diff highlighting: new alternatives added, follow-up footnotes, length delta
+   - regex audit report (5 gates: 7/8/9/11/12)
+   - LLM-judge 4-dimension scores with rationale
+   - writer observations on A.1.v2 rules (ambiguity/edge cases)
+7. Commit the pilot doc + PROGRESS.md entry
+8. Leave task status `in_progress` — human approves, flips to completed
+
+## Deliverables
+- `docs/mlsd_pilot_92_s2_v2_20260418.md` — iter-2 pilot artifact
+- Iteration-1 pilot doc preserved untouched
+- No DB mutations on framework_nodes
+
+## Acceptance Criteria
+- [ ] `docs/mlsd_pilot_92_s2_v2_20260418.md` exists with all 5 sections (iter-1 §2, iter-2 §2, diff, audit report, LLM-judge, observations)
+- [ ] Iter-2 §2 length 4500-6000 chars
+- [ ] Passes regex gates 7/8/9/11/12 (all 5 including new Gate 12)
+- [ ] Gate 10 LLM-judge: iter-2 STRICTLY > iter-1 on ALL 4 dimensions (new 4th: follow-up preemption)
+- [ ] Every named tech-choice in iter-2 §2 has ≥3 alternatives with explicit why-not each
+- [ ] Every named tech-choice has `**常见追问**` block with ≥3 Q&As
+- [ ] Iteration-1 pilot doc `docs/mlsd_pilot_92_s2_20260418.md` UNCHANGED
+- [ ] PROGRESS.md entry appended; session_state.json notes all_done=false (518 still in_progress)
+- [ ] **Task status remains `in_progress`** — do NOT auto-complete
+
 #### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
 - **Priority**: P2
 - **Complexity**: M
@@ -161,58 +213,6 @@ V1 = 19457 chars. V2 target = 23000-28000 chars (+20-45% from added prose + tria
 - [ ] history row captures 19457-char V1
 - [ ] `npm run build` green
 - [ ] Manual smoke: /kg?node=n198 reads as coherent narrative
-
-#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-514, T-P0-519
-- **Description**: ## Context — ITERATION 2
-First iteration (commit 004e351, docs/mlsd_pilot_92_s2_20260418.md) passed regex gates + Gate 10 LLM-judge but user review found the RULES too lax: only 1-2 alternatives per tech-choice, implicit choices (WebSocket, sticky-session) bypassed triage, length under-delivers depth. T-P0-519 tightens A.1 to A.1.v2 with Rule 3 (≥3 alternatives + why-not each), Rule 6 (implicit choices caught by writer discipline), Rule 7 (≥3 preemptive follow-ups per choice), expanded Gate 9 regex + new Gate 12. This task re-pilots §2 of id=92 under the tightened rules.
-
-Iteration-1 pilot doc is PRESERVED as evidence — DO NOT delete `docs/mlsd_pilot_92_s2_20260418.md`. This task writes to a DIFFERENT file: `docs/mlsd_pilot_92_s2_v2_20260418.md`.
-
-## CRITICAL — this task does NOT mark itself completed
-Same as iteration-1: autonomous session leaves `status=in_progress` after producing the pilot. Human reviews in Discord and manually flips to completed after approval — that's what unblocks T-P0-515/516.
-
-## Scope — re-rewrite ONLY §2 of id=92 under A.1.v2 (tightened) rules
-
-Steps:
-1. Load id=92 V1 content (9727 chars, commit 589dad8), extract §2 (same as iteration-1)
-2. Rewrite §2 under:
-   - A.1 original rules (Section Contract, Acronym per-section, Specificity boundaries, Patch-ban)
-   - A.1.v2 amendments from T-P0-519:
-     - Rule 3 upgraded: ≥3 alternatives + why-not each + switch-trigger (pick + reason + 3 alternatives with explicit why-not + trigger)
-     - Rule 6: scan for IMPLICIT tech choices (product/protocol names in prose) — at minimum must triage: `Redis GEO`, `Redis` (hot), `PostgreSQL`, `Cassandra`, `Kafka`, `S3`, `WebSocket`, `sticky session`, `load balancer`
-     - Rule 7: every tech-choice gets "**常见追问**" footnote with ≥3 preemptive Q&As
-   - Gate 12 (≥3 alternatives required per choice, regex-auditable)
-3. Expected length: iteration-1 §2 was 1861 chars. Iteration-2 §2 target **4500-6000 chars** (roughly 2.5-3× due to richer triage + follow-up footnotes)
-4. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on new §2 content — must PASS gates 7/8/9/11/12
-5. Run `scripts/llm_judge_mlsd.py --v1-text <iter1 §2> --v2-text <iter2 §2>` — iter-2 must STRICTLY improve on all 4 dimensions (readability / triage / density / follow-up preemption)
-6. Write `docs/mlsd_pilot_92_s2_v2_20260418.md`:
-   - Iter-1 §2 (from `docs/mlsd_pilot_92_s2_20260418.md` §2 block) as "previous version"
-   - Iter-2 §2 rewrite
-   - side-by-side diff highlighting: new alternatives added, follow-up footnotes, length delta
-   - regex audit report (5 gates: 7/8/9/11/12)
-   - LLM-judge 4-dimension scores with rationale
-   - writer observations on A.1.v2 rules (ambiguity/edge cases)
-7. Commit the pilot doc + PROGRESS.md entry
-8. Leave task status `in_progress` — human approves, flips to completed
-
-## Deliverables
-- `docs/mlsd_pilot_92_s2_v2_20260418.md` — iter-2 pilot artifact
-- Iteration-1 pilot doc preserved untouched
-- No DB mutations on framework_nodes
-
-## Acceptance Criteria
-- [ ] `docs/mlsd_pilot_92_s2_v2_20260418.md` exists with all 5 sections (iter-1 §2, iter-2 §2, diff, audit report, LLM-judge, observations)
-- [ ] Iter-2 §2 length 4500-6000 chars
-- [ ] Passes regex gates 7/8/9/11/12 (all 5 including new Gate 12)
-- [ ] Gate 10 LLM-judge: iter-2 STRICTLY > iter-1 on ALL 4 dimensions (new 4th: follow-up preemption)
-- [ ] Every named tech-choice in iter-2 §2 has ≥3 alternatives with explicit why-not each
-- [ ] Every named tech-choice has `**常见追问**` block with ≥3 Q&As
-- [ ] Iteration-1 pilot doc `docs/mlsd_pilot_92_s2_20260418.md` UNCHANGED
-- [ ] PROGRESS.md entry appended; session_state.json notes all_done=false (518 still in_progress)
-- [ ] **Task status remains `in_progress`** — do NOT auto-complete
 
 ### P1 -- Should Have (agentic intelligence)
 
