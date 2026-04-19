@@ -9,52 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-514, T-P0-518, T-P0-519
-- **Description**: ## Context
-Parallel counterpart to T-P0-515 — same execution model and gates, applied to id=198 Rec System. Depends on T-P0-514 (rules + tools) AND T-P0-518 (pilot approved). id=198 V1 (commit 8d8fd17, 19457 chars) is acronym-dense (every ML term is one) so Rule 2 (per-section first-occurrence expansion) will add more overhead than in id=92.
-
-**Same critical caveat as 515**: does NOT auto-start after 518 completes. User approves pilot in Discord, then this task unblocks logically.
-
-## Execution mode — SECTION-BY-SECTION
-
-Identical to T-P0-515's mode. For each section §0, §1, §2, §2b, §3-§10 (existing ML sections), §11, §11a, §11b, §12, §12b:
-1. Apply 4 Writing Discipline rules
-2. Audit that section (gates 7/8/9/11)
-3. LLM-judge that section (gate 10 — V2 > V1 strictly)
-4. Abort on failure, log to `logs/worked_198_v2_fail.md`, do not advance
-
-## Section-specific focus (same as previous spec)
-1. §0 Time Budget — add prose explaining how to use it in a rec-system round
-2. §1 Problem Framing — convert bullets to narrative with bridges
-3. §2b Capacity Estimation — each number needs "drives X decision" woven in
-4. §3-§10 existing ML content — light touch: add thesis opening + bridge closing, leave dense ML intact
-5. §11a/11b Serving Architecture — prose intro before each table
-6. §12b L5 Tradeoff Table — prose sentence above each row explaining why the choice matters
-7. Tech-choices (ScaNN, HNSW, IVF-PQ, MoE, MMR, DPP, DCN-v2, DLRM, ESMM, MMoE, Faiss, Milvus, Pinecone, Kafka, Flink) — all get Rule 3 triage shape or move to "alternatives considered" footnote
-8. Acronyms — per-section first-occurrence expansion (Rule 2)
-
-## Deliverables
-Idempotent seed script `scripts/seed_node_198_rec_v2_20260418.py` — same pattern as 515's seed: DB backup + history + section-by-section audit loop + final full-doc gates + UPDATE id=198.
-
-## Length target
-V1 = 19457 chars. V2 target = 23000-28000 chars (+20-45% from added prose + triage expansions; larger headroom than 92-V2 because 198 is acronym-denser)
-
-## Acceptance Criteria
-- [ ] Upstream block: T-P0-518 done + user approval in Discord
-- [ ] id=198 description: 23000-28000 chars
-- [ ] ALL 10 Quality Gates pass (per-section + full-document)
-- [ ] All 18 sections (§0-§12 + subsections) have Section Contract structure
-- [ ] Every tech-choice (ScaNN/HNSW/IVF-PQ/MoE/MMR/DPP/DCN-v2/DLRM/ESMM/MMoE/Faiss/Milvus/Pinecone/Kafka/Flink — that's 15 distinct products) has Rule 3 triage shape with 4 elements in prose
-- [ ] Every section's first-occurrence acronym is expanded per Rule 2
-- [ ] Gate 10 LLM-judge: V2 strictly > V1 per-section AND full-doc
-- [ ] All V1 ML content preserved (grep checkpoints: "two-tower", "log-Q softmax", "HNSW", "ScaNN", "MMoE", "DCN-v2", "MMR", "DPP", "PSI", "CUPED", "delayed feedback", "ESMM" — all present)
-- [ ] history row captures 19457-char V1
-- [ ] `npm run build` green
-- [ ] Manual smoke: /kg?node=n198 reads as coherent narrative
-
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
@@ -144,6 +98,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
 - [x] **2026-04-19** -- T-P1-520: T-LC-399-NOTES: Add LC 399 Evaluate Division double-solution notes + mark completed + link framework. ## Context
+- [x] **2026-04-19** -- T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules. ## Context
 - [x] **2026-04-19** -- T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete). ## Context
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
