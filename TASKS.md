@@ -11,30 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-519
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=94 Computer Vision Systems. V1 ~5174 chars, standard 8-heading skeleton.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2. Abort on failure.
-
-## Domain-specific focus for id=94 (Computer Vision)
-- Capacity: image-upload-heavy products (Pinterest / Instagram / Snapchat), millions of uploads/day, ~1-10K QPS image understanding, p99 <200ms
-- Service split: Image Preprocessor / Feature Extractor (CNN/ViT) / Task-specific Head (classification/detection/segmentation) / Post-processor / Moderation Filter
-- Tech choices (Rule 3 ≥3 alt + Rule 7): backbone (ResNet vs EfficientNet vs ViT vs ConvNeXt vs Swin); detection (YOLO vs Faster R-CNN vs DETR vs RT-DETR); segmentation (Mask R-CNN vs U-Net vs SAM vs Mask2Former); CLIP-style multi-modal (CLIP vs SigLIP vs OpenCLIP vs EVA-CLIP); deployment (ONNX vs TensorRT vs CoreML vs TFLite for mobile); compression (pruning vs quantization vs distillation)
-- Key follow-ups: on-device vs server inference tradeoff, thumbnail vs full-res, OCR pipelines, face detection vs recognition (privacy), adversarial robustness, batch inference scheduling
-
-## Deliverables
-`scripts/seed_node_94_cv_v2_20260419.py` idempotent.
-
-## Length target V1 ~5174 → V2 12000-17000 chars.
-
-## Acceptance Criteria
-Standard A.1.v2 gates.
-
 #### T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2
 - **Priority**: P1
 - **Complexity**: M
@@ -59,6 +35,97 @@ SECTION-BY-SECTION per A.1.v2. Abort on failure.
 ## Acceptance Criteria
 Standard A.1.v2 gates.
 
+#### T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Context
+Google R1 **rescheduled** (not past). Events per interview_events:
+- Mon 2026-04-20 10:00 AM PT — Google Champion Mock Coding (60min, Meet)
+- Tue 2026-04-21 11:15 AM PT — Real R1 #1 ML Basics (45min)
+- Tue 2026-04-21 13:15 PM PT — Real R1 #2 BQ/G&L (45min)
+
+## User scope guardrails (IMPORTANT — do not exceed)
+1. **Do NOT archive / delete / deprecate any existing doc.** Past-dated prep materials remain first-class assets. Even id=38 Recruiter-Call prep is kept intact.
+2. **Do NOT attempt KG integration in this pass.** KG unification is a separate future scope.
+3. Scope is narrow content dedupe, not restructure.
+
+## 3 overlapping docs
+- id=38 'Recruiter Call Prep' (5261 chars, 4/9) — ML paradigm + G&L bucket primer. KEEP AS-IS.
+- id=51 'Google 2026-04-17 Interview Prep Note' (5675 chars) — schedule + day-of logistics. KEEP, but refresh dates.
+- id=53 'Google 2026-04-17 Prep Hub' (3577 chars) — cross-refs db://51 + duplicates schedule table. EDIT: remove duplicated schedule block, rely on db://51 link.
+
+## Scope (narrow, reversible)
+1. Edit id=53: strip its schedule table, leave a single-line summary + db://51 link. Keep Round 1/2 TL;DR + drill links.
+2. Edit id=51: refresh schedule table to 4/20 mock + 4/21 R1 x2 with correct PT times. Keep day-of logistics.
+3. Edit id=53: update the file-date reference from '2026-04-17' to '2026-04-20/21 (rescheduled)' in header.
+4. id=38 unchanged (no date stamp edits).
+
+## Deliverables
+- `scripts/seed_google_prep_dedupe_20260419.py` idempotent UPSERT (only id=51, id=53 touched).
+- Verification: frontend /companies/3/prep opened; no duplicate schedule across 38/51/53; all db:// links resolve.
+
+## Acceptance Criteria
+- [ ] id=38 byte-identical before/after (not touched)
+- [ ] id=51 schedule block now lists 4/20 mock + 4/21 R1 x2 PT
+- [ ] id=53 no longer duplicates id=51 schedule (diff reduces ~1K chars)
+- [ ] No doc deleted, no doc_kind changed to 'deprecated' or similar
+- [ ] Seed idempotent (second run = 0 writes)
+- [ ] Manual smoke: /companies/3/prep renders 17 docs, no broken links
+
+#### T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Context
+Google R1 ML Basics interview 2026-04-21 11:15 AM PT. id=52 is a 9509-char one-page gist covering Google-family DNN recommender/search papers (YouTube DNN, Wide&Deep, DLRM, Two-Tower, etc). **0% Chinese prose** — pure English, violates content_style memory requiring CN narration + EN terms.
+
+## Writing discipline
+Follow `feedback_content_style_cn_en` memory:
+- Prose narration in Chinese by default
+- English technical terms preserved, first occurrence per section uses `**English** (acronym, 中文)` format, e.g. `**Wide & Deep** (W&D, 宽深模型)`
+- Code / math / metric notation stay English
+- Target ≥60% CJK/(CJK+EN-alpha) on prose lines (stripping code fences)
+
+## Scope
+Keep structure (Papers enumerated with What / Why-mattered / Architecture / Gotcha). Rewrite only the prose sentences. Do NOT change paper list, do NOT introduce new papers.
+
+## Deliverables
+- `scripts/seed_node_doc52_cn_20260419.py` idempotent UPSERT
+- Length target: ~9500 chars → 10000-13000 chars (CN expansion acceptable)
+- Title stays English (no title rewrite)
+
+## Acceptance Criteria
+- [ ] CN-prose ratio ≥60% via `scripts/_verify_cn_prose_ratio.py`
+- [ ] All original papers present (YouTube DNN, Wide&Deep, DLRM, Two-Tower, YouTube retrieval v2, PinnerSage, etc — diff against V1)
+- [ ] First-occurrence English-acronym-Chinese triplet format applied per section
+- [ ] Frontend /companies/3/prep renders doc 52 without escape issues
+
+#### T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Context
+Google R1 ML Basics 2026-04-21 11:15 AM PT. id=57 is a 12123-char StudyNoteBuilder-generated doc with 13 flashcards (2-min oral answers) covering ML staging fundamentals: loss/regularization/BN/LN/SGNS/GBDT/etc. **0% Chinese prose**.
+
+## Writing discipline
+Same as T-GOOG-CN-52 (see `feedback_content_style_cn_en` memory). Use StudyNoteBuilder with Chinese mode if available (see `feedback_math_formatting` memory — math `$$`/$ works).
+
+## Scope
+- Keep all 13 flashcard topics intact (GBDT, BN, LN, SGNS, Contrastive Loss, Skip-gram, etc)
+- Each card: 2-min oral answer in Chinese prose, English terms preserved, math English
+- Preserve Prerequisites + Key Terms sections but rewrite explanations in Chinese
+
+## Deliverables
+- `scripts/seed_node_doc57_cn_20260419.py` idempotent UPSERT (or regen via StudyNoteBuilder CN-mode if supported — check builder code first)
+- Length target: 12K → 13000-16000 chars
+
+## Acceptance Criteria
+- [ ] CN-prose ratio ≥60%
+- [ ] All 13 flashcards present (diff title list against V1)
+- [ ] Key Terms section intact (English term + Chinese gloss)
+- [ ] Frontend renders without math $ escape corruption
+
 ### P2 -- Nice to Have
 
 #### T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack
@@ -72,6 +139,35 @@ Standard A.1.v2 gates.
 3. Third invariant has placeholder: Add your domain-specific invariants here
 
 AC: CLAUDE.md.local Project Overview describes the ML interview prep platform in 2-3 sentences. Tech Stack lists all major dependencies. Third invariant is filled with a real domain rule (e.g., DB content must have a git-tracked seed source of truth). CLAUDE.md regenerated from .local after edits.
+
+#### T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%)
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Context
+Google R1 ML Basics 2026-04-21. 11 drill docs (id=55, 56, 60-69) + 1 bridge doc (id=72) currently 30-47% CN prose (mid-range violation). User asked whether to include id=72 — including.
+
+Per-doc char counts: id=55 3206, id=56 3076, id=60 6161, id=61 7851, id=62 6875, id=63 8776, id=64 9740, id=65 12160, id=67 9124, id=68 9286, id=69 11098, id=72 7387. Total ~95K chars. id=69 already 55.6% (no rewrite needed), drop from batch → 11 docs, ~84K chars.
+
+## Writing discipline
+Same `feedback_content_style_cn_en`. Target ≥50% CN prose (lower than 531/532 because drills have heavier formula/code content).
+
+## Scope
+Light rewrite pass, not V2 rebuild:
+- Prose paragraphs: CN-ify
+- Formulas / code / pseudocode: English untouched
+- Tables: header EN, cell prose CN
+- Preserve all existing structure (headings, examples, talking points)
+
+## Deliverables
+- ONE seed script `scripts/seed_google_drills_cn_batch_20260419.py` handling all 12 docs (idempotent, per-doc hash-check skip)
+- Run `scripts/_verify_cn_prose_ratio.py` on all 12 after seed; all must report ≥50%
+
+## Acceptance Criteria
+- [ ] All 12 drill docs pass ≥50% CN
+- [ ] No drill-topic content lost (checklist: doc-by-doc heading diff pre/post)
+- [ ] Seed script idempotent (second run → 0 updates)
+- [ ] Frontend /companies/3/prep doc list still shows all 12 with same titles
 
 ### P3 -- Stretch Goals
 
@@ -157,6 +253,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2. ## Context
