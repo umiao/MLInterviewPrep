@@ -8,6 +8,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import { slugify, type TocHeading } from "../../utils/slugify";
+import { calloutClass, getCalloutKindFromHast, type HastLike } from "./markdownCallout";
 
 interface MarkdownPreviewProps {
   markdown: string;
@@ -186,6 +187,14 @@ export default function MarkdownPreview({
                 {children}
               </code>
             );
+          },
+          blockquote: ({ children, className, node: _node, ...props }) => {
+            const kind = getCalloutKindFromHast(_node as unknown as HastLike);
+            if (!kind) {
+              return <blockquote className={className} {...props}>{children}</blockquote>;
+            }
+            const merged = [calloutClass(kind), className].filter(Boolean).join(" ");
+            return <blockquote className={merged} data-callout={kind} {...props}>{children}</blockquote>;
           },
           li: ({ children, className, node: _node, ...props }) => {
             if (!className?.includes("task-list-item")) {

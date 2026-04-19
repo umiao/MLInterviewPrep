@@ -5,6 +5,107 @@
 
 ## In Progress
 
+#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-514
+- **Description**: ## Context
+Blocking gate between T-P0-514 (Writing Discipline rules published) and T-P0-515/516 (full V2 rewrites). Reviewer insight 2026-04-18: "514's GOOD/BAD examples ARE the prompt corpus for 515/516 — if 514 is weak, V2 copies the weakness 20x." This pilot validates the rules on ONE section before committing to full rewrites.
+
+## CRITICAL — this task does NOT mark itself completed
+
+The autonomous session executing this task MUST leave `status=in_progress` after producing the pilot artifact. DO NOT run `task_db.py update T-P0-518 --status completed` from the session. The human reviews the pilot doc in Discord and flips status to `completed` manually after approval — that's what unblocks T-P0-515 and T-P0-516.
+
+If the session marks itself completed automatically, the runner will incorrectly unblock the downstream V2 rewrites before human approval. To prevent this, write the pilot artifact + PROGRESS.md entry + session_state.json update, then STOP without the status update — this is a deviation from the normal exit protocol for one task only.
+
+## Scope — rewrite ONLY §2 of id=92 Marketplace
+
+Use all Writing Discipline rules from id=18 Appendix A.1 (produced by T-P0-514). Target ONLY the existing §2 "Capacity Estimation" section of id=92 (current V1 content from commit 589dad8). Do NOT touch other sections, do NOT update the DB.
+
+### Steps
+1. Load current id=92 description (V1, 9727 chars from commit 589dad8)
+2. Extract §2 Capacity Estimation block (content between `## 2.` heading and `## 3.` heading)
+3. Rewrite §2 ONLY, applying all 4 Writing Discipline rules (Section Contract, Acronym per-section, Triage 4-element, Specificity discipline) AND the patch-style ban
+4. Use the callout convention locked in T-P0-514 (`> **GOOD**:` / `> **BAD**:` / `> **NOTE**:`) if illustrating anything
+5. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on the NEW §2 content
+6. Run `scripts/llm_judge_mlsd.py --v1-text <extracted V1 §2> --v2-text <new §2>` — all three dimensions must show strict improvement
+7. Write `docs/mlsd_pilot_92_s2_20260418.md` with:
+   - V1 §2 original (verbatim)
+   - New §2 rewrite (verbatim)
+   - Regex audit report (all 4 gates for the new §2)
+   - LLM-judge scores with rationale notes
+   - Any observations from the writer about rule ambiguity or edge cases
+8. Commit `docs/mlsd_pilot_92_s2_20260418.md` + PROGRESS.md entry
+9. Leave task status as `in_progress` — human completes it after Discord approval
+
+## Deliverables
+- `docs/mlsd_pilot_92_s2_20260418.md` — side-by-side + audit + LLM-judge
+- No DB mutations on framework_nodes (that's 515's job, after approval)
+- Task stays `in_progress`, waiting for human explicit unblock
+
+## Acceptance Criteria
+- [ ] `docs/mlsd_pilot_92_s2_20260418.md` exists with all 5 content requirements
+- [ ] New §2 passes regex gates 7/8/9/11 (per section)
+- [ ] New §2 scores strictly higher than V1 §2 on ALL three LLM-judge dimensions (pass verdict from llm_judge_mlsd.py)
+- [ ] Pilot doc committed; PROGRESS.md entry appended; `.claude/session_state.json` notes last_task=T-P0-518 + all_done=false (518 still in_progress)
+- [ ] **Task status is `in_progress`, NOT `completed`** — waiting for human review
+- [ ] If pilot FAILS any gate or LLM-judge doesn't improve: status=`blocked` with diagnostic; task specs iteration on T-P0-514 rules before retry
+
+#### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Context
+Drawer-layer rendering polish, parallel to content V2 tasks. Independent of 514/515/516/518 — can run first, in parallel, or last. User flagged "排版不够精细，可读性不是很强，缺缩进着色" in the MLSD gold review (2026-04-18).
+
+**IMPORTANT — callout contract locked by T-P0-514**: The three callout forms this task must style are EXACTLY:
+- `> **GOOD**: …`  → green left-border + light-green background tint
+- `> **BAD**: …`   → red left-border + light-red background tint
+- `> **NOTE**: …`  → blue left-border + light-blue background tint
+
+No emoji variants, no `✅/❌`, no `**GOOD example**`. Exact literal match required. This is a contract — 514/515/516/518 content all use these three forms only.
+
+## Audit first, then fix
+
+Step 1 — audit `FrameworkNodeDrawer.tsx` and its `MarkdownPreview` to confirm current state of:
+- `remark-gfm` (tables, task lists, strikethrough, autolinks)
+- `rehype-raw` (raw HTML pass-through, needed for `<mark>` or `<span class>`)
+- `remark-math` + `rehype-katex` (math — should be present already from existing formulas)
+- Custom blockquote renderer (for callouts)
+- Syntax highlighting (existing via `react-syntax-highlighter`)
+
+Step 2 — fix gaps:
+1. **Callout styling (PRIMARY DELIVERABLE)**: Implement a custom rehype/remark transform or react-markdown component override for blockquote. Detect `> **GOOD**:` / `> **BAD**:` / `> **NOTE**:` literal prefixes and apply corresponding CSS classes (`.callout-good`, `.callout-bad`, `.callout-note`). Other blockquotes render default. Test on id=18 drawer once T-P0-514's Appendix A.1 lands.
+2. **GFM enable**: ensure tables with alignment (`| :---: |`) render correctly, horizontal scroll on narrow drawers
+3. **Inline code contrast**: give `` `inline code` `` a distinct background tint + monospace
+4. **Nested list indentation**: 3+ level nested bullets render with clear visual hierarchy
+5. **Section spacing**: more breathing room between `## ` sections
+
+## Scope discipline
+- Drawer-only changes
+- No content mutations (that's 515/516/518)
+- No changes to KG canvas, TreeNav, or any page outside the drawer component
+
+## Deliverables
+1. Audit findings as a brief note in the autonomous session's PROGRESS.md entry
+2. Updates to `src/frontend/src/components/framework/FrameworkNodeDrawer.tsx` and its markdown renderer
+3. If a new remark/rehype plugin is introduced, add it to `package.json` deps and TS types
+4. Regression tests (snapshot or DOM-assertion) covering: callout rendering (3 types), table alignment, inline code, nested list
+
+## Acceptance Criteria
+- [ ] Audit findings documented (in session PROGRESS.md)
+- [ ] `> **GOOD**: …` renders with green left-border + light-green background
+- [ ] `> **BAD**: …` renders with red left-border + light-red background
+- [ ] `> **NOTE**: …` renders with blue left-border + light-blue background
+- [ ] Other blockquotes (no matching prefix) render default (fallback)
+- [ ] Tables with `:---:` alignment render correctly; narrow drawers get horizontal scroll
+- [ ] Inline code has distinct background + monospace (test on id=18 once it has Appendix A.1)
+- [ ] Nested lists 3+ levels render with visible indentation tiers
+- [ ] Regression: id=18, id=92, id=198 drawers all render cleanly — no broken formatting, math intact, code fences intact
+- [ ] `npm run build` 0 TS errors
+- [ ] `npm test` all green (may add new tests for callout rendering)
+- [ ] Manual smoke: open all three drawers — visual polish noticeably improved
+
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -107,110 +208,9 @@ V1 = 19457 chars. V2 target = 23000-28000 chars (+20-45% from added prose + tria
 - [ ] `npm run build` green
 - [ ] Manual smoke: /kg?node=n198 reads as coherent narrative
 
-#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-514
-- **Description**: ## Context
-Blocking gate between T-P0-514 (Writing Discipline rules published) and T-P0-515/516 (full V2 rewrites). Reviewer insight 2026-04-18: "514's GOOD/BAD examples ARE the prompt corpus for 515/516 — if 514 is weak, V2 copies the weakness 20x." This pilot validates the rules on ONE section before committing to full rewrites.
-
-## CRITICAL — this task does NOT mark itself completed
-
-The autonomous session executing this task MUST leave `status=in_progress` after producing the pilot artifact. DO NOT run `task_db.py update T-P0-518 --status completed` from the session. The human reviews the pilot doc in Discord and flips status to `completed` manually after approval — that's what unblocks T-P0-515 and T-P0-516.
-
-If the session marks itself completed automatically, the runner will incorrectly unblock the downstream V2 rewrites before human approval. To prevent this, write the pilot artifact + PROGRESS.md entry + session_state.json update, then STOP without the status update — this is a deviation from the normal exit protocol for one task only.
-
-## Scope — rewrite ONLY §2 of id=92 Marketplace
-
-Use all Writing Discipline rules from id=18 Appendix A.1 (produced by T-P0-514). Target ONLY the existing §2 "Capacity Estimation" section of id=92 (current V1 content from commit 589dad8). Do NOT touch other sections, do NOT update the DB.
-
-### Steps
-1. Load current id=92 description (V1, 9727 chars from commit 589dad8)
-2. Extract §2 Capacity Estimation block (content between `## 2.` heading and `## 3.` heading)
-3. Rewrite §2 ONLY, applying all 4 Writing Discipline rules (Section Contract, Acronym per-section, Triage 4-element, Specificity discipline) AND the patch-style ban
-4. Use the callout convention locked in T-P0-514 (`> **GOOD**:` / `> **BAD**:` / `> **NOTE**:`) if illustrating anything
-5. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on the NEW §2 content
-6. Run `scripts/llm_judge_mlsd.py --v1-text <extracted V1 §2> --v2-text <new §2>` — all three dimensions must show strict improvement
-7. Write `docs/mlsd_pilot_92_s2_20260418.md` with:
-   - V1 §2 original (verbatim)
-   - New §2 rewrite (verbatim)
-   - Regex audit report (all 4 gates for the new §2)
-   - LLM-judge scores with rationale notes
-   - Any observations from the writer about rule ambiguity or edge cases
-8. Commit `docs/mlsd_pilot_92_s2_20260418.md` + PROGRESS.md entry
-9. Leave task status as `in_progress` — human completes it after Discord approval
-
-## Deliverables
-- `docs/mlsd_pilot_92_s2_20260418.md` — side-by-side + audit + LLM-judge
-- No DB mutations on framework_nodes (that's 515's job, after approval)
-- Task stays `in_progress`, waiting for human explicit unblock
-
-## Acceptance Criteria
-- [ ] `docs/mlsd_pilot_92_s2_20260418.md` exists with all 5 content requirements
-- [ ] New §2 passes regex gates 7/8/9/11 (per section)
-- [ ] New §2 scores strictly higher than V1 §2 on ALL three LLM-judge dimensions (pass verdict from llm_judge_mlsd.py)
-- [ ] Pilot doc committed; PROGRESS.md entry appended; `.claude/session_state.json` notes last_task=T-P0-518 + all_done=false (518 still in_progress)
-- [ ] **Task status is `in_progress`, NOT `completed`** — waiting for human review
-- [ ] If pilot FAILS any gate or LLM-judge doesn't improve: status=`blocked` with diagnostic; task specs iteration on T-P0-514 rules before retry
-
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
-
-#### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Context
-Drawer-layer rendering polish, parallel to content V2 tasks. Independent of 514/515/516/518 — can run first, in parallel, or last. User flagged "排版不够精细，可读性不是很强，缺缩进着色" in the MLSD gold review (2026-04-18).
-
-**IMPORTANT — callout contract locked by T-P0-514**: The three callout forms this task must style are EXACTLY:
-- `> **GOOD**: …`  → green left-border + light-green background tint
-- `> **BAD**: …`   → red left-border + light-red background tint
-- `> **NOTE**: …`  → blue left-border + light-blue background tint
-
-No emoji variants, no `✅/❌`, no `**GOOD example**`. Exact literal match required. This is a contract — 514/515/516/518 content all use these three forms only.
-
-## Audit first, then fix
-
-Step 1 — audit `FrameworkNodeDrawer.tsx` and its `MarkdownPreview` to confirm current state of:
-- `remark-gfm` (tables, task lists, strikethrough, autolinks)
-- `rehype-raw` (raw HTML pass-through, needed for `<mark>` or `<span class>`)
-- `remark-math` + `rehype-katex` (math — should be present already from existing formulas)
-- Custom blockquote renderer (for callouts)
-- Syntax highlighting (existing via `react-syntax-highlighter`)
-
-Step 2 — fix gaps:
-1. **Callout styling (PRIMARY DELIVERABLE)**: Implement a custom rehype/remark transform or react-markdown component override for blockquote. Detect `> **GOOD**:` / `> **BAD**:` / `> **NOTE**:` literal prefixes and apply corresponding CSS classes (`.callout-good`, `.callout-bad`, `.callout-note`). Other blockquotes render default. Test on id=18 drawer once T-P0-514's Appendix A.1 lands.
-2. **GFM enable**: ensure tables with alignment (`| :---: |`) render correctly, horizontal scroll on narrow drawers
-3. **Inline code contrast**: give `` `inline code` `` a distinct background tint + monospace
-4. **Nested list indentation**: 3+ level nested bullets render with clear visual hierarchy
-5. **Section spacing**: more breathing room between `## ` sections
-
-## Scope discipline
-- Drawer-only changes
-- No content mutations (that's 515/516/518)
-- No changes to KG canvas, TreeNav, or any page outside the drawer component
-
-## Deliverables
-1. Audit findings as a brief note in the autonomous session's PROGRESS.md entry
-2. Updates to `src/frontend/src/components/framework/FrameworkNodeDrawer.tsx` and its markdown renderer
-3. If a new remark/rehype plugin is introduced, add it to `package.json` deps and TS types
-4. Regression tests (snapshot or DOM-assertion) covering: callout rendering (3 types), table alignment, inline code, nested list
-
-## Acceptance Criteria
-- [ ] Audit findings documented (in session PROGRESS.md)
-- [ ] `> **GOOD**: …` renders with green left-border + light-green background
-- [ ] `> **BAD**: …` renders with red left-border + light-red background
-- [ ] `> **NOTE**: …` renders with blue left-border + light-blue background
-- [ ] Other blockquotes (no matching prefix) render default (fallback)
-- [ ] Tables with `:---:` alignment render correctly; narrow drawers get horizontal scroll
-- [ ] Inline code has distinct background + monospace (test on id=18 once it has Appendix A.1)
-- [ ] Nested lists 3+ levels render with visible indentation tiers
-- [ ] Regression: id=18, id=92, id=198 drawers all render cleanly — no broken formatting, math intact, code fences intact
-- [ ] `npm run build` 0 TS errors
-- [ ] `npm test` all green (may add new tests for callout rendering)
-- [ ] Manual smoke: open all three drawers — visual polish noticeably improved
 
 ### P3 -- Stretch Goals
 

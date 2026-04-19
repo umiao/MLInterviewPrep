@@ -129,6 +129,101 @@ body {
   color: #1d4ed8;
 }
 
+/* ---- Drawer Markdown Callouts (T-P0-514 contract) ----
+   Locked literal forms:
+     > **GOOD**: ...   green left-border + light-green background tint
+     > **BAD**:  ...   red   left-border + light-red   background tint
+     > **NOTE**: ...   blue  left-border + light-blue  background tint
+   Selectors target both `.prose` (Tailwind typography wrapper used by
+   MarkdownPreview) and `.prep-prose` (prep-notes wrapper) so the same
+   blockquote override applies wherever MarkdownPreview is mounted. */
+
+.prose blockquote.callout,
+.prep-prose blockquote.callout {
+  margin: 1em 0;
+  padding: 0.75em 1em;
+  border-left: 4px solid #9ca3af;
+  border-radius: 0 0.375rem 0.375rem 0;
+  font-style: normal;
+  quotes: none;
+}
+
+.prose blockquote.callout::before,
+.prose blockquote.callout::after,
+.prep-prose blockquote.callout::before,
+.prep-prose blockquote.callout::after {
+  content: none;
+}
+
+.prose blockquote.callout > p,
+.prep-prose blockquote.callout > p {
+  margin: 0.25em 0;
+  font-style: normal;
+}
+
+.prose blockquote.callout-good,
+.prep-prose blockquote.callout-good {
+  border-left-color: #16a34a;
+  background-color: #f0fdf4;
+  color: #14532d;
+}
+
+.prose blockquote.callout-bad,
+.prep-prose blockquote.callout-bad {
+  border-left-color: #dc2626;
+  background-color: #fef2f2;
+  color: #7f1d1d;
+}
+
+.prose blockquote.callout-note,
+.prep-prose blockquote.callout-note {
+  border-left-color: #2563eb;
+  background-color: #eff6ff;
+  color: #1e3a8a;
+}
+
+/* ---- Drawer prose polish (KG-UX-18) ---- */
+
+/* Section breathing room: extra margin above each H2 inside drawer prose */
+.prose h2 {
+  margin-top: 1.75em;
+}
+
+/* Inline code: distinct background tint already set via prose-code utility,
+   but enforce monospace + slight border so it pops next to body copy. */
+.prose :where(code):not(pre code) {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  border: 1px solid #e5e7eb;
+}
+
+/* Nested-list indentation tiers: prose default collapses 3+ level nests into
+   indistinguishable blocks. Increase per-level padding so hierarchy is read-
+   able. Selectors are bounded by .prose so we do not affect non-markdown UI. */
+.prose ul ul,
+.prose ol ol,
+.prose ul ol,
+.prose ol ul {
+  padding-left: 1.5em;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+.prose ul ul ul,
+.prose ol ol ol,
+.prose ul ol ul,
+.prose ol ul ol {
+  padding-left: 1.75em;
+}
+
+/* GFM tables in narrow drawers: allow horizontal scroll without breaking
+   the wrapping prose flow. */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  white-space: normal;
+}
+
 /* ---- Acronym Sidebar (always sticky) ---- */
 
 .acronym-sidebar {
