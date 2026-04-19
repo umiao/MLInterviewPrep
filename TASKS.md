@@ -11,34 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Context
-Google R1 ML Basics interview 2026-04-21 11:15 AM PT. id=52 is a 9509-char one-page gist covering Google-family DNN recommender/search papers (YouTube DNN, Wide&Deep, DLRM, Two-Tower, etc). **0% Chinese prose** — pure English, violates content_style memory requiring CN narration + EN terms.
-
-## Writing discipline
-Follow `feedback_content_style_cn_en` memory:
-- Prose narration in Chinese by default
-- English technical terms preserved, first occurrence per section uses `**English** (acronym, 中文)` format, e.g. `**Wide & Deep** (W&D, 宽深模型)`
-- Code / math / metric notation stay English
-- Target ≥60% CJK/(CJK+EN-alpha) on prose lines (stripping code fences)
-
-## Scope
-Keep structure (Papers enumerated with What / Why-mattered / Architecture / Gotcha). Rewrite only the prose sentences. Do NOT change paper list, do NOT introduce new papers.
-
-## Deliverables
-- `scripts/seed_node_doc52_cn_20260419.py` idempotent UPSERT
-- Length target: ~9500 chars → 10000-13000 chars (CN expansion acceptable)
-- Title stays English (no title rewrite)
-
-## Acceptance Criteria
-- [ ] CN-prose ratio ≥60% via `scripts/_verify_cn_prose_ratio.py`
-- [ ] All original papers present (YouTube DNN, Wide&Deep, DLRM, Two-Tower, YouTube retrieval v2, PinnerSage, etc — diff against V1)
-- [ ] First-occurrence English-acronym-Chinese triplet format applied per section
-- [ ] Frontend /companies/3/prep renders doc 52 without escape issues
-
 #### T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN)
 - **Priority**: P1
 - **Complexity**: M
@@ -215,6 +187,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN). ## Context
 - [x] **2026-04-19** -- T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete). ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
