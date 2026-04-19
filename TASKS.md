@@ -9,9 +9,208 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-514, T-P0-518
+- **Description**: ## Context
+Depends on T-P0-514 (Writing Discipline rules + 4 regex gates + LLM-judge) AND T-P0-518 (pilot rewrite of §2 approved by human). V1 of id=92 (commit 589dad8) passes all 6 original mechanical gates but fails the new prose gates. This V2 rewrites the same content under the new rules.
+
+**CRITICAL — this task does NOT auto-start after 518 completes.** The pilot task 518 produces a side-by-side document for human review; user must approve in Discord before this task actually unblocks. Treat the Discord approval as the logical unblock even though the DB-level dependency is already satisfied.
+
+## Execution mode — SECTION-BY-SECTION (not single-pass)
+
+Reviewer insight: single-pass rewrite of a long doc will degrade to patch-style (V1 + filler sentences). To prevent this, execute section-by-section:
+
+1. Load V1 content (9727 chars)
+2. Split V1 into sections by `## ` headings
+3. Use T-P0-518's pilot §2 as the paired-transfer reference (shows the BEFORE state of that one section AND the approved AFTER state). All other sections follow the same transformation pattern.
+4. For each section §0 through §6 + sub-sections (4a, 4b, 4c, 4d), one at a time:
+   a. Apply the 4 Writing Discipline rules (Section Contract, Acronym per-section, Triage 4-element, Specificity discipline)
+   b. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section N` (hypothetical on the new content) on the rewritten section — gates 7/8/9/11
+   c. Run `scripts/llm_judge_mlsd.py` comparing that section's V1 vs new — gate 10, must strictly improve on all 3 dimensions
+   d. If any gate FAILS: abort the task with diagnostic, do NOT continue to next section. Write failure state to `logs/worked_92_v2_fail.md`
+5. Only after ALL sections pass both regex and LLM-judge gates, assemble the full V2 document
+6. Run audits on the FULL document one more time (per-document gates 7/11 + LLM-judge on full doc)
+7. Seed script runs with hash-short-circuit idempotency; DB backup + history row; UPDATE id=92
+
+## Hard rules (preserve V1 intent)
+- All existing ML content (surge pricing formula, ETA decomposition, Hungarian algorithm, H3/S2/GeoHash tradeoff, Pareto frontier, greedy code, VRP formulation, key metrics table) MUST REMAIN
+- §4d "Deep Dive: Domain ML Content" structure from V1 preserved
+- Callout convention from T-P0-514 (`> **GOOD**:` / `> **BAD**:` / `> **NOTE**:`) used whenever inserting examples
+- Length target: 11000-14500 chars (grows from 9727 — +15-50% from prose + triage expansions)
+
+## Deliverables
+Idempotent seed script `scripts/seed_node_92_marketplace_v2_20260418.py`:
+- DB backup + history row (capture V1)
+- Section-by-section audit + LLM-judge loop
+- Final full-document audit + LLM-judge pass required before UPDATE
+- Hash-short-circuit idempotent
+
+## Acceptance Criteria
+- [ ] Upstream block verified: T-P0-518 completed AND human approval confirmed in Discord/PROGRESS.md before this task starts
+- [ ] id=92 description: 11000-14500 chars
+- [ ] ALL 10 Quality Gates pass per-section AND full-document (Gates 1-9, 10, 11 from id=18 Appendix A + A.1)
+- [ ] Every §0-§6 has Section Contract structure (opening ≥ 60 chars prose + closing bridge)
+- [ ] Every tech-choice has Rule 3 triage shape with 4 elements visible in prose (not just in tradeoff table)
+- [ ] Every section's first-occurrence acronym is expanded per Rule 2
+- [ ] Patch-style ban (Gate 11): every section has `prose_lines ≥ bullet_lines`
+- [ ] Gate 10 LLM-judge: V2 strictly > V1 on readability / triage / density per-section AND full-doc
+- [ ] All V1 ML content preserved (grep checkpoints: "surge_multiplier", "Hungarian", "VRP", "Pareto", "H3")
+- [ ] history row captures 9727-char V1
+- [ ] `npm run build` green
+- [ ] Manual smoke: /kg?node=n92 reads as coherent narrative with working GOOD/BAD callouts (if T-P2-517 has landed)
+
+#### T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-514, T-P0-518
+- **Description**: ## Context
+Parallel counterpart to T-P0-515 — same execution model and gates, applied to id=198 Rec System. Depends on T-P0-514 (rules + tools) AND T-P0-518 (pilot approved). id=198 V1 (commit 8d8fd17, 19457 chars) is acronym-dense (every ML term is one) so Rule 2 (per-section first-occurrence expansion) will add more overhead than in id=92.
+
+**Same critical caveat as 515**: does NOT auto-start after 518 completes. User approves pilot in Discord, then this task unblocks logically.
+
+## Execution mode — SECTION-BY-SECTION
+
+Identical to T-P0-515's mode. For each section §0, §1, §2, §2b, §3-§10 (existing ML sections), §11, §11a, §11b, §12, §12b:
+1. Apply 4 Writing Discipline rules
+2. Audit that section (gates 7/8/9/11)
+3. LLM-judge that section (gate 10 — V2 > V1 strictly)
+4. Abort on failure, log to `logs/worked_198_v2_fail.md`, do not advance
+
+## Section-specific focus (same as previous spec)
+1. §0 Time Budget — add prose explaining how to use it in a rec-system round
+2. §1 Problem Framing — convert bullets to narrative with bridges
+3. §2b Capacity Estimation — each number needs "drives X decision" woven in
+4. §3-§10 existing ML content — light touch: add thesis opening + bridge closing, leave dense ML intact
+5. §11a/11b Serving Architecture — prose intro before each table
+6. §12b L5 Tradeoff Table — prose sentence above each row explaining why the choice matters
+7. Tech-choices (ScaNN, HNSW, IVF-PQ, MoE, MMR, DPP, DCN-v2, DLRM, ESMM, MMoE, Faiss, Milvus, Pinecone, Kafka, Flink) — all get Rule 3 triage shape or move to "alternatives considered" footnote
+8. Acronyms — per-section first-occurrence expansion (Rule 2)
+
+## Deliverables
+Idempotent seed script `scripts/seed_node_198_rec_v2_20260418.py` — same pattern as 515's seed: DB backup + history + section-by-section audit loop + final full-doc gates + UPDATE id=198.
+
+## Length target
+V1 = 19457 chars. V2 target = 23000-28000 chars (+20-45% from added prose + triage expansions; larger headroom than 92-V2 because 198 is acronym-denser)
+
+## Acceptance Criteria
+- [ ] Upstream block: T-P0-518 done + user approval in Discord
+- [ ] id=198 description: 23000-28000 chars
+- [ ] ALL 10 Quality Gates pass (per-section + full-document)
+- [ ] All 18 sections (§0-§12 + subsections) have Section Contract structure
+- [ ] Every tech-choice (ScaNN/HNSW/IVF-PQ/MoE/MMR/DPP/DCN-v2/DLRM/ESMM/MMoE/Faiss/Milvus/Pinecone/Kafka/Flink — that's 15 distinct products) has Rule 3 triage shape with 4 elements in prose
+- [ ] Every section's first-occurrence acronym is expanded per Rule 2
+- [ ] Gate 10 LLM-judge: V2 strictly > V1 per-section AND full-doc
+- [ ] All V1 ML content preserved (grep checkpoints: "two-tower", "log-Q softmax", "HNSW", "ScaNN", "MMoE", "DCN-v2", "MMR", "DPP", "PSI", "CUPED", "delayed feedback", "ESMM" — all present)
+- [ ] history row captures 19457-char V1
+- [ ] `npm run build` green
+- [ ] Manual smoke: /kg?node=n198 reads as coherent narrative
+
+#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-514
+- **Description**: ## Context
+Blocking gate between T-P0-514 (Writing Discipline rules published) and T-P0-515/516 (full V2 rewrites). Reviewer insight 2026-04-18: "514's GOOD/BAD examples ARE the prompt corpus for 515/516 — if 514 is weak, V2 copies the weakness 20x." This pilot validates the rules on ONE section before committing to full rewrites.
+
+## CRITICAL — this task does NOT mark itself completed
+
+The autonomous session executing this task MUST leave `status=in_progress` after producing the pilot artifact. DO NOT run `task_db.py update T-P0-518 --status completed` from the session. The human reviews the pilot doc in Discord and flips status to `completed` manually after approval — that's what unblocks T-P0-515 and T-P0-516.
+
+If the session marks itself completed automatically, the runner will incorrectly unblock the downstream V2 rewrites before human approval. To prevent this, write the pilot artifact + PROGRESS.md entry + session_state.json update, then STOP without the status update — this is a deviation from the normal exit protocol for one task only.
+
+## Scope — rewrite ONLY §2 of id=92 Marketplace
+
+Use all Writing Discipline rules from id=18 Appendix A.1 (produced by T-P0-514). Target ONLY the existing §2 "Capacity Estimation" section of id=92 (current V1 content from commit 589dad8). Do NOT touch other sections, do NOT update the DB.
+
+### Steps
+1. Load current id=92 description (V1, 9727 chars from commit 589dad8)
+2. Extract §2 Capacity Estimation block (content between `## 2.` heading and `## 3.` heading)
+3. Rewrite §2 ONLY, applying all 4 Writing Discipline rules (Section Contract, Acronym per-section, Triage 4-element, Specificity discipline) AND the patch-style ban
+4. Use the callout convention locked in T-P0-514 (`> **GOOD**:` / `> **BAD**:` / `> **NOTE**:`) if illustrating anything
+5. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on the NEW §2 content
+6. Run `scripts/llm_judge_mlsd.py --v1-text <extracted V1 §2> --v2-text <new §2>` — all three dimensions must show strict improvement
+7. Write `docs/mlsd_pilot_92_s2_20260418.md` with:
+   - V1 §2 original (verbatim)
+   - New §2 rewrite (verbatim)
+   - Regex audit report (all 4 gates for the new §2)
+   - LLM-judge scores with rationale notes
+   - Any observations from the writer about rule ambiguity or edge cases
+8. Commit `docs/mlsd_pilot_92_s2_20260418.md` + PROGRESS.md entry
+9. Leave task status as `in_progress` — human completes it after Discord approval
+
+## Deliverables
+- `docs/mlsd_pilot_92_s2_20260418.md` — side-by-side + audit + LLM-judge
+- No DB mutations on framework_nodes (that's 515's job, after approval)
+- Task stays `in_progress`, waiting for human explicit unblock
+
+## Acceptance Criteria
+- [ ] `docs/mlsd_pilot_92_s2_20260418.md` exists with all 5 content requirements
+- [ ] New §2 passes regex gates 7/8/9/11 (per section)
+- [ ] New §2 scores strictly higher than V1 §2 on ALL three LLM-judge dimensions (pass verdict from llm_judge_mlsd.py)
+- [ ] Pilot doc committed; PROGRESS.md entry appended; `.claude/session_state.json` notes last_task=T-P0-518 + all_done=false (518 still in_progress)
+- [ ] **Task status is `in_progress`, NOT `completed`** — waiting for human review
+- [ ] If pilot FAILS any gate or LLM-judge doesn't improve: status=`blocked` with diagnostic; task specs iteration on T-P0-514 rules before retry
+
 ### P1 -- Should Have (agentic intelligence)
 
 ### P2 -- Nice to Have
+
+#### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Context
+Drawer-layer rendering polish, parallel to content V2 tasks. Independent of 514/515/516/518 — can run first, in parallel, or last. User flagged "排版不够精细，可读性不是很强，缺缩进着色" in the MLSD gold review (2026-04-18).
+
+**IMPORTANT — callout contract locked by T-P0-514**: The three callout forms this task must style are EXACTLY:
+- `> **GOOD**: …`  → green left-border + light-green background tint
+- `> **BAD**: …`   → red left-border + light-red background tint
+- `> **NOTE**: …`  → blue left-border + light-blue background tint
+
+No emoji variants, no `✅/❌`, no `**GOOD example**`. Exact literal match required. This is a contract — 514/515/516/518 content all use these three forms only.
+
+## Audit first, then fix
+
+Step 1 — audit `FrameworkNodeDrawer.tsx` and its `MarkdownPreview` to confirm current state of:
+- `remark-gfm` (tables, task lists, strikethrough, autolinks)
+- `rehype-raw` (raw HTML pass-through, needed for `<mark>` or `<span class>`)
+- `remark-math` + `rehype-katex` (math — should be present already from existing formulas)
+- Custom blockquote renderer (for callouts)
+- Syntax highlighting (existing via `react-syntax-highlighter`)
+
+Step 2 — fix gaps:
+1. **Callout styling (PRIMARY DELIVERABLE)**: Implement a custom rehype/remark transform or react-markdown component override for blockquote. Detect `> **GOOD**:` / `> **BAD**:` / `> **NOTE**:` literal prefixes and apply corresponding CSS classes (`.callout-good`, `.callout-bad`, `.callout-note`). Other blockquotes render default. Test on id=18 drawer once T-P0-514's Appendix A.1 lands.
+2. **GFM enable**: ensure tables with alignment (`| :---: |`) render correctly, horizontal scroll on narrow drawers
+3. **Inline code contrast**: give `` `inline code` `` a distinct background tint + monospace
+4. **Nested list indentation**: 3+ level nested bullets render with clear visual hierarchy
+5. **Section spacing**: more breathing room between `## ` sections
+
+## Scope discipline
+- Drawer-only changes
+- No content mutations (that's 515/516/518)
+- No changes to KG canvas, TreeNav, or any page outside the drawer component
+
+## Deliverables
+1. Audit findings as a brief note in the autonomous session's PROGRESS.md entry
+2. Updates to `src/frontend/src/components/framework/FrameworkNodeDrawer.tsx` and its markdown renderer
+3. If a new remark/rehype plugin is introduced, add it to `package.json` deps and TS types
+4. Regression tests (snapshot or DOM-assertion) covering: callout rendering (3 types), table alignment, inline code, nested list
+
+## Acceptance Criteria
+- [ ] Audit findings documented (in session PROGRESS.md)
+- [ ] `> **GOOD**: …` renders with green left-border + light-green background
+- [ ] `> **BAD**: …` renders with red left-border + light-red background
+- [ ] `> **NOTE**: …` renders with blue left-border + light-blue background
+- [ ] Other blockquotes (no matching prefix) render default (fallback)
+- [ ] Tables with `:---:` alignment render correctly; narrow drawers get horizontal scroll
+- [ ] Inline code has distinct background + monospace (test on id=18 once it has Appendix A.1)
+- [ ] Nested lists 3+ levels render with visible indentation tiers
+- [ ] Regression: id=18, id=92, id=198 drawers all render cleanly — no broken formatting, math intact, code fences intact
+- [ ] `npm run build` 0 TS errors
+- [ ] `npm test` all green (may add new tests for callout rendering)
+- [ ] Manual smoke: open all three drawers — visual polish noticeably improved
 
 ### P3 -- Stretch Goals
 
@@ -94,26 +293,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 462 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
 - [x] **2026-04-18** -- T-P1-513: T-MLSD-WORKED-198: Upgrade Real-Time Rec System (id=198) with L5 skeleton. ## Context
 - [x] **2026-04-18** -- T-P1-512: T-MLSD-WORKED-92: Upgrade Marketplace & Logistics (id=92) to L5-bar gold standard. ## Context
 - [x] **2026-04-18** -- T-P1-511: T-MLSD-AUDIT-01: Score 10 design problems against L5 framework, produce gap report. ## Context
-- [x] **2026-04-18** -- T-P1-509: KG-CONTENT-02: Add LC 1392 Longest Happy Prefix to KMP family (kmp[n-1] canonical application). ## Context
-- [x] **2026-04-18** -- T-P1-508: KG-CONTENT-01: Add KMP family to Quick Index + expand KMP section in Array/String node (n44). ## Context
-- [x] **2026-04-18** -- T-P1-507: KG-UX-17: TreeNav click must honor hasContent gate (extract activateNode helper). ## Problem
-- [x] **2026-04-18** -- T-P1-506: KG-UX-15: Category node expanded/collapsed visual distinction (saturation + chevron). ## Problem
-- [x] **2026-04-18** -- T-P1-505: KG-UX-16: Cold-load defaults to first pillar at zoom 1.0 (not fitView all). ## Problem
-- [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
-- [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem
-- [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem
-- [x] **2026-04-18** -- T-P1-499: [SYNC] Fix settings.json: replace bare python with /c/Anaconda/python.exe. All 8 hook commands in .claude/settings.json use bare python instead of /c/Anaconda/python.exe. This violates the CLAUDE
-- [x] **2026-04-18** -- T-P0-510: T-MLSD-FRAMEWORK-01: Populate id=18 'System Design Framework' with canonical L5 paradigm. ## Context
-- [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae
-- [x] **2026-04-17** -- T-P1-498: KG-CN-01: Rewrite node descriptions to CN narration + full English terms. Rewrite framework_nodes.description to Chinese narration + English full-expansion terms. Pilot on 4 nodes validated qual
-- [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
-- [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
-- [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
-- [x] **2026-04-17** -- T-P0-497: KG-UX-09: TreeNav click -> expand ancestors + setCenter on canvas. Wire TreeNav (KG-UX-08) to the canvas. Clicking an entry in TreeNav should: (1) setExpanded to include all ancestors of 
+- [x] **2026-04-18** -- T-P0-514: T-MLSD-FRAMEWORK-02: Append Writing Discipline rules to id=18 Appendix A (5 rules + examples + heuristic gates). ## Context

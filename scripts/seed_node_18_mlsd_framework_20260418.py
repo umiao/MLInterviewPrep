@@ -30,8 +30,9 @@ NODE_ID = 18
 TITLE_GUARD = "# ML System Design Framework"
 
 # Length window: Part A ~5-7K + Part B ~1-1.5K = 6500-8500 target.
+# Allow the Appendix A.1 (T-P0-514) suffix to push up to ~12100.
 LEN_MIN = 6500
-LEN_MAX = 8500
+LEN_MAX = 12100
 
 NEW_DESCRIPTION = """# ML System Design Framework (L5 \u901a\u8fc7\u8303\u5f0f)
 
@@ -144,7 +145,7 @@ DAU \u2192 per-user-ops/day \u2192 QPS (avg & peak) \u2192 Storage/day \u2192 Ba
 
 - **CAS (Compare-And-Swap, \u539f\u5b50\u6bd4\u8f83\u4ea4\u6362)**\uff1a\u6d3b\u52a8\u4e0b\u5355\u9632\u91cd / \u9ad8\u5e76\u53d1\u6263\u5e93\u5b58\u3002
 - **Geospatial (\u5730\u7406\u7d22\u5f15)**\uff1aGeohash \u6216 H3 \u5206\u683c\uff1b\u9644\u8fd1\u67e5\u8be2\u7528\u5e73\u65b9\u8fd1\u4f3c + \u5345\u7406\u62d2\u7b5b\u3002
-- **WebSocket fanout**\uff1a\u957f\u8fde\u63a5 push\uff1b\u5206\u5e03\u5f0f\u4f1a\u8bdd\u5b58\u50a8\u7528 Redis\uff1b\u6d88\u8d39\u7aef\u964d\u7ea7\u4e3a long-polling\u3002
+- **WebSocket fanout**\uff1a\u957f\u8fde\u63a5 push\uff1b\u5206\u5e03\u5f0f\u4f1a\u8bdd\u5b58\u50a8\u7528 Redis\uff08\u56e0\u4e3a in-memory + \u8de8\u8282\u70b9\u5171\u4eab + \u4e9a\u6beb\u79d2\uff09\uff1b\u6d88\u8d39\u7aef\u964d\u7ea7\u4e3a long-polling\u3002
 - **Pub/sub fanout**\uff1a\u5199\u6269\u6563 vs \u8bfb\u6269\u6563\uff1bKafka consumer group\uff1b\u53cc\u5199\u4f4e\u4e00\u81f4\u6027\u8d85\u7ea7\u7528\u6237\u3002
 - **Hotspot mitigation (\u70ed\u70b9\u7f13\u89e3)**\uff1a\u672c\u5730\u4e8c\u7ea7\u7f13\u5b58\uff1bkey \u52a0\u540e\u7f00\u6253\u6563\uff1b\u589e\u52a0\u526f\u672c\u7684\u53ea\u8bfb\u526f\u672c\u3002
 
@@ -311,6 +312,13 @@ def main() -> int:
         if old_hash == new_hash:
             print(f"[SKIP] Node {NODE_ID} already at target hash {new_hash[:12]}")
             print(f"[PASS] Current length = {len(NEW_DESCRIPTION)} chars")
+            return 0
+
+        # Tolerate later appendix suffixes (e.g. T-P0-514 Appendix A.1):
+        # if current DB desc starts with our canonical body, leave DB alone.
+        if old_desc is not None and old_desc.startswith(NEW_DESCRIPTION):
+            print(f"[SKIP] Node {NODE_ID} already contains this body as prefix; "
+                  f"a later seed has appended suffixes (len={len(old_desc)})")
             return 0
 
         print(
