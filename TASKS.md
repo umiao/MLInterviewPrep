@@ -11,30 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-519
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=91 Ads & Click Prediction. V1 ~5296 chars with standard 8-heading skeleton.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2, same as T-P0-515/516. Abort on per-section audit or LLM-judge failure.
-
-## Domain-specific focus for id=91 (Ads & Click Prediction)
-- Capacity: Meta/Google-scale, ~100M QPS peak request volume, <30ms p99 serving latency, billions of training events/day
-- Service split: Ad Retrieval / CTR Prediction / CVR Prediction / Bid Optimization / Budget Pacing / Frequency Capping
-- Tech choices (Rule 3 ≥3 alt + Rule 7): LR vs GBDT (XGBoost/LightGBM) vs DNN (DeepFM/DCN-v2/DLRM) vs Wide-and-Deep vs DIN/DIEN attention; calibration (isotonic vs Platt vs conformal); explore-exploit (UCB vs Thompson vs contextual bandits); real-time-bidding (second-price vs first-price vs generalized second-price)
-- Key follow-ups: cold-start ads, click-model confounds (position bias via PAL/EE), delayed conversions, budget optimization, auction fairness, privacy (DP, FLoC/Topics, on-device)
-
-## Deliverables
-Idempotent seed script `scripts/seed_node_91_ads_v2_20260419.py`.
-
-## Length target V1 ~5296 → V2 14000-19000 chars.
-
-## Acceptance Criteria
-Standard A.1.v2 gates (see T-P0-515).
-
 #### T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2
 - **Priority**: P1
 - **Complexity**: M
@@ -255,6 +231,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-523: T-MLSD-WORKED-89-V2: Rewrite id=89 Search & Retrieval Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-522: T-MLSD-WORKED-90-V2: Rewrite id=90 Recommendation Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-520: T-LC-399-NOTES: Add LC 399 Evaluate Division double-solution notes + mark completed + link framework. ## Context
