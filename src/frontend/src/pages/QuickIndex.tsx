@@ -33,6 +33,7 @@ const LC_PROBLEMS: {
   { dbId: 805, lcId: 2503, title: "Max Points From Grid Queries", family: "offline_queries_dsu" },
   { dbId: 216, lcId: 2791, title: "Palindrome Paths in Tree", family: "tree_dp_rerooting" },
   { dbId: 183, lcId: 2858, title: "Min Edge Reversals", family: "tree_dp_rerooting" },
+  { dbId: 227, lcId: 399, title: "Evaluate Division", family: "union_find_weighted" },
 ];
 
 // Render order + display labels for non-Stateful-DS family groups.
@@ -48,6 +49,7 @@ const FAMILY_LABELS: Record<string, string> = {
   string_matching_kmp: "String Matching (KMP family)",
   offline_queries_dsu: "Offline Queries + DSU",
   tree_dp_rerooting: "Tree DP / Rerooting",
+  union_find_weighted: "Weighted Union-Find",
 };
 
 // Stateful data-structure design family (problems.family='stateful_ds_design').
