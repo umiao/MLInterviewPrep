@@ -13,35 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Context
-Google R1 ML Basics 2026-04-21. 11 drill docs (id=55, 56, 60-69) + 1 bridge doc (id=72) currently 30-47% CN prose (mid-range violation). User asked whether to include id=72 — including.
-
-Per-doc char counts: id=55 3206, id=56 3076, id=60 6161, id=61 7851, id=62 6875, id=63 8776, id=64 9740, id=65 12160, id=67 9124, id=68 9286, id=69 11098, id=72 7387. Total ~95K chars. id=69 already 55.6% (no rewrite needed), drop from batch → 11 docs, ~84K chars.
-
-## Writing discipline
-Same `feedback_content_style_cn_en`. Target ≥50% CN prose (lower than 531/532 because drills have heavier formula/code content).
-
-## Scope
-Light rewrite pass, not V2 rebuild:
-- Prose paragraphs: CN-ify
-- Formulas / code / pseudocode: English untouched
-- Tables: header EN, cell prose CN
-- Preserve all existing structure (headings, examples, talking points)
-
-## Deliverables
-- ONE seed script `scripts/seed_google_drills_cn_batch_20260419.py` handling all 12 docs (idempotent, per-doc hash-check skip)
-- Run `scripts/_verify_cn_prose_ratio.py` on all 12 after seed; all must report ≥50%
-
-## Acceptance Criteria
-- [ ] All 12 drill docs pass ≥50% CN
-- [ ] No drill-topic content lost (checklist: doc-by-doc heading diff pre/post)
-- [ ] Seed script idempotent (second run → 0 updates)
-- [ ] Frontend /companies/3/prep doc list still shows all 12 with same titles
-
 #### T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2
 - **Priority**: P2
 - **Complexity**: M
@@ -149,6 +120,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 494 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-19** -- T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%). ## Context
 - [x] **2026-04-19** -- T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack. CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
 - [x] **2026-04-19** -- T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN). ## Context
