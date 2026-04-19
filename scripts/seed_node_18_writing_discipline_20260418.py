@@ -58,7 +58,7 @@ APPENDIX_A1 = """
 > **NOTE**: ...
 ```
 
-- 不允许 emoji 变体（如 ✅ / ❌ / ⚠️）；不允许中文变体（如 `> **好**:`）。
+- 不允许 emoji 变体（如 check-mark / cross-mark / warning-sign 图形符号）；不允许中文变体（如 `> **好**:`）。
 - 如果未来需要新增 callout 种类（例如 `> **WARN**:`），先更新本 appendix，再在内容里使用 —— 顺序不能反。
 
 ### Rule 1 - Section Contract（章节契约，合并原 Rule 1/2）
