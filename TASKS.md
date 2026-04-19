@@ -11,7 +11,193 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-523: T-MLSD-WORKED-89-V2: Rewrite id=89 Search & Retrieval Systems under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe from `docs/mlsd_l5_audit_20260418.md` to id=89 Search & Retrieval Systems. V1 ~5639 chars with standard 8-heading skeleton.
+
+## Execution mode — SECTION-BY-SECTION per A.1.v2 rules (same as T-P0-515/516). Abort on per-section audit or LLM-judge failure.
+
+## Migration per Uniform Recipe
+- PROMOTE existing content to §4 Deep Dives as domain subsections
+- INSERT L5 skeleton §1-§3, §5, §6, Self-Check
+
+## Domain-specific focus for id=89 (Search & Retrieval)
+- Capacity numbers for Google/Pinterest-scale search: ~10B documents, query QPS 30K-100K, p99 latency <100ms
+- Service split: Query Understanding / Inverted Index Shard / Ranker / Rerank / Personalization
+- Tech choices (Rule 3 ≥3 alt + Rule 7 preempt): BM25 vs DPR vs ColBERT vs ANCE; Lucene vs Elasticsearch vs Vespa vs Vald; LightGBM vs BERT reranker vs cross-encoder; inverted index sharding vs replication; query rewriting via LLM vs rules vs learned; spell correction via edit distance vs BERT
+- Common follow-ups: long-tail queries, zero-shot retrieval, hybrid dense+sparse, index compaction, incremental indexing
+
+## Deliverables
+Idempotent seed script `scripts/seed_node_89_search_v2_20260419.py`.
+
+## Length target
+V1 ~5639 → V2 14000-19000 chars.
+
+## Acceptance Criteria (standard A.1.v2 gates — see T-P0-515 spec for full list)
+- [ ] Length in range; 5 regex gates + 4-dim LLM-judge pass; all V1 content preserved; Rule 3 + Rule 7 on all tech-choices; seed idempotent; build green
+
+#### T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=91 Ads & Click Prediction. V1 ~5296 chars with standard 8-heading skeleton.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2, same as T-P0-515/516. Abort on per-section audit or LLM-judge failure.
+
+## Domain-specific focus for id=91 (Ads & Click Prediction)
+- Capacity: Meta/Google-scale, ~100M QPS peak request volume, <30ms p99 serving latency, billions of training events/day
+- Service split: Ad Retrieval / CTR Prediction / CVR Prediction / Bid Optimization / Budget Pacing / Frequency Capping
+- Tech choices (Rule 3 ≥3 alt + Rule 7): LR vs GBDT (XGBoost/LightGBM) vs DNN (DeepFM/DCN-v2/DLRM) vs Wide-and-Deep vs DIN/DIEN attention; calibration (isotonic vs Platt vs conformal); explore-exploit (UCB vs Thompson vs contextual bandits); real-time-bidding (second-price vs first-price vs generalized second-price)
+- Key follow-ups: cold-start ads, click-model confounds (position bias via PAL/EE), delayed conversions, budget optimization, auction fairness, privacy (DP, FLoC/Topics, on-device)
+
+## Deliverables
+Idempotent seed script `scripts/seed_node_91_ads_v2_20260419.py`.
+
+## Length target V1 ~5296 → V2 14000-19000 chars.
+
+## Acceptance Criteria
+Standard A.1.v2 gates (see T-P0-515).
+
+#### T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=97 Generative AI Systems. V1 ~5511 chars, standard 8-heading skeleton.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2 (same as T-P0-515/516). Abort on failure.
+
+## Domain-specific focus for id=97 (Generative AI Systems)
+- Capacity: ChatGPT-scale, ~1M concurrent users, ~100K tokens/s aggregate decode throughput, p99 first-token <1s, p99 inter-token <50ms
+- Service split: Router / Prompt Safety Filter / Retrieval (RAG) / Generation (LLM inference) / Post-processing / Safety Classifier / Usage & Billing
+- Tech choices (Rule 3 ≥3 alt + Rule 7): inference engines (vLLM vs TensorRT-LLM vs SGLang vs llama.cpp); KV cache (paged-attention vs radix-attention vs block-attention); quantization (INT8 vs AWQ vs GPTQ vs FP8); speculative decoding (draft model vs Medusa vs Lookahead); RAG (dense retrieval vs hybrid vs GraphRAG); agent frameworks (ReAct vs Plan-and-Execute vs DSPy)
+- Key follow-ups: streaming token delivery, long-context (100K+), memory/thread persistence, jailbreak defense, hallucination mitigation, cost-per-query optimization, A/B on generation quality (pairwise human judge vs Elo vs LLM-as-judge)
+
+## Deliverables
+`scripts/seed_node_97_genai_v2_20260419.py` idempotent.
+
+## Length target V1 ~5511 → V2 14000-20000 chars.
+
+## Acceptance Criteria
+Standard A.1.v2 gates.
+
+#### T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=96 ML Infrastructure Design. V1 ~5677 chars, standard 8-heading skeleton.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2. Abort on failure.
+
+## Domain-specific focus for id=96 (ML Infrastructure)
+- Capacity: company-scale ML platform, ~100-1000 engineers, ~10K daily training jobs, ~100K daily inference deployments, PB/day feature logs
+- Service split: Experiment Tracking / Feature Store / Training Orchestrator / Model Registry / Deployment Service / Feature Serving / Monitoring / Lineage
+- Tech choices (Rule 3 ≥3 alt + Rule 7): orchestrator (Airflow vs Kubeflow vs Metaflow vs Flyte vs Argo); feature store (Feast vs Tecton vs Hopsworks vs home-grown); model registry (MLflow vs W&B vs home-grown); serving (TorchServe vs TensorFlow Serving vs Triton vs Seldon vs BentoML); distributed training (DDP vs FSDP vs DeepSpeed vs Horovod vs ZeRO); monitoring (EvidentlyAI vs WhyLabs vs Arize vs home-grown drift detection); lineage (DVC vs MLflow vs Pachyderm)
+- Key follow-ups: train-serve skew, feature freshness guarantees, rollback safety, multi-tenancy + quota, GPU cluster autoscaling, model versioning + A/B, offline-online parity, data contract enforcement, observability at scale
+
+## Deliverables
+`scripts/seed_node_96_mlinfra_v2_20260419.py` idempotent.
+
+## Length target V1 ~5677 → V2 15000-22000 chars (this is L5+ signal topic, make it thorough).
+
+## Acceptance Criteria
+Standard A.1.v2 gates.
+
+#### T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=93 NLP & LLM Systems. V1 ~5371 chars, standard 8-heading skeleton.
+
+NOTE: id=93 overlaps with id=97 Generative AI Systems. Keep boundaries: id=93 = general NLP system (tokenization, classification, extraction, MT, summarization pipelines, encoder-only patterns) + LLM as a component. id=97 = LLM-native generation-first systems (ChatGPT-style, RAG, agents). Avoid duplication.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2. Abort on failure.
+
+## Domain-specific focus for id=93 (NLP & LLM Systems)
+- Capacity: encoder-heavy NLP pipelines (classification, NER, sentiment), millions QPS at lower latency (~10-30ms)
+- Service split: Text Preprocessor / Tokenizer / Encoder Inference / Post-processor / Result Aggregator
+- Tech choices (Rule 3 ≥3 alt + Rule 7): tokenizer (BPE vs WordPiece vs Unigram vs SentencePiece); encoder (BERT vs RoBERTa vs DeBERTa vs Electra vs DistilBERT); sequence labeling (CRF vs span-classification vs BIO-tagging); MT (seq2seq transformer vs T5 vs LLM prompting); classification (fine-tune encoder vs zero-shot LLM vs prompted LLM); summarization (abstractive seq2seq vs extractive LLM vs hybrid)
+- Key follow-ups: multi-lingual support, cross-lingual transfer, domain adaptation, label noise handling, inference batching strategies, class-imbalance for production NLP, model distillation for serving
+
+## Deliverables
+`scripts/seed_node_93_nlp_v2_20260419.py` idempotent.
+
+## Length target V1 ~5371 → V2 13000-18000 chars.
+
+## Acceptance Criteria
+Standard A.1.v2 gates.
+
+#### T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=94 Computer Vision Systems. V1 ~5174 chars, standard 8-heading skeleton.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2. Abort on failure.
+
+## Domain-specific focus for id=94 (Computer Vision)
+- Capacity: image-upload-heavy products (Pinterest / Instagram / Snapchat), millions of uploads/day, ~1-10K QPS image understanding, p99 <200ms
+- Service split: Image Preprocessor / Feature Extractor (CNN/ViT) / Task-specific Head (classification/detection/segmentation) / Post-processor / Moderation Filter
+- Tech choices (Rule 3 ≥3 alt + Rule 7): backbone (ResNet vs EfficientNet vs ViT vs ConvNeXt vs Swin); detection (YOLO vs Faster R-CNN vs DETR vs RT-DETR); segmentation (Mask R-CNN vs U-Net vs SAM vs Mask2Former); CLIP-style multi-modal (CLIP vs SigLIP vs OpenCLIP vs EVA-CLIP); deployment (ONNX vs TensorRT vs CoreML vs TFLite for mobile); compression (pruning vs quantization vs distillation)
+- Key follow-ups: on-device vs server inference tradeoff, thumbnail vs full-res, OCR pipelines, face detection vs recognition (privacy), adversarial robustness, batch inference scheduling
+
+## Deliverables
+`scripts/seed_node_94_cv_v2_20260419.py` idempotent.
+
+## Length target V1 ~5174 → V2 12000-17000 chars.
+
+## Acceptance Criteria
+Standard A.1.v2 gates.
+
+#### T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P0-519
+- **Description**: ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=95 Fraud & Trust Safety. V1 ~5040 chars, standard 8-heading skeleton.
+
+## Execution mode
+SECTION-BY-SECTION per A.1.v2. Abort on failure.
+
+## Domain-specific focus for id=95 (Fraud & Trust Safety)
+- Capacity: transaction-heavy products (Stripe/Square/banking), 10-100K TPS transaction classification, p99 <50ms, extreme class imbalance (<0.1% positive)
+- Service split: Feature Extraction / Rule Engine (deterministic) / ML Classifier (learned) / Decision Aggregator / Human Review Queue / Feedback Loop
+- Tech choices (Rule 3 ≥3 alt + Rule 7): supervised (GBDT/XGBoost vs DNN vs graph-based like GraphSAGE); unsupervised (Isolation Forest vs autoencoder vs clustering); graph features (GNN vs hand-crafted vs subgraph matching); calibration under extreme imbalance; rule engine (Drools vs home-grown DSL vs learned rules); feedback loop (active learning vs auto-labeling vs human-in-loop)
+- Key follow-ups: label delay (fraud ground truth takes days-weeks), concept drift (fraudsters adapt), explanability for human reviewers + regulators (SHAP/LIME/counterfactual), adversarial robustness, data sparsity for new user segments, privacy (GDPR) + fairness constraints
+
+## Deliverables
+`scripts/seed_node_95_fraud_v2_20260419.py` idempotent.
+
+## Length target V1 ~5040 → V2 12000-17000 chars.
+
+## Acceptance Criteria
+Standard A.1.v2 gates.
+
 ### P2 -- Nice to Have
+
+#### T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
+
+1. Project Overview section is empty (placeholder: Describe what your project does in 2-3 sentences)
+2. Tech Stack lists only Python/pytest/ruff but project actually uses: FastAPI, SQLAlchemy, Uvicorn, Anthropic SDK, React+TypeScript (frontend), react-flow (KG viz), react-markdown+KaTeX (note rendering), Pydantic, edge-tts, python-docx
+3. Third invariant has placeholder: Add your domain-specific invariants here
+
+AC: CLAUDE.md.local Project Overview describes the ML interview prep platform in 2-3 sentences. Tech Stack lists all major dependencies. Third invariant is filled with a real domain rule (e.g., DB content must have a git-tracked seed source of truth). CLAUDE.md regenerated from .local after edits.
 
 ### P3 -- Stretch Goals
 
@@ -97,6 +283,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-522: T-MLSD-WORKED-90-V2: Rewrite id=90 Recommendation Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-520: T-LC-399-NOTES: Add LC 399 Evaluate Division double-solution notes + mark completed + link framework. ## Context
 - [x] **2026-04-19** -- T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules. ## Context
 - [x] **2026-04-19** -- T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete). ## Context
