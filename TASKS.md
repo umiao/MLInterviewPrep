@@ -13,18 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
-
-1. Project Overview section is empty (placeholder: Describe what your project does in 2-3 sentences)
-2. Tech Stack lists only Python/pytest/ruff but project actually uses: FastAPI, SQLAlchemy, Uvicorn, Anthropic SDK, React+TypeScript (frontend), react-flow (KG viz), react-markdown+KaTeX (note rendering), Pydantic, edge-tts, python-docx
-3. Third invariant has placeholder: Add your domain-specific invariants here
-
-AC: CLAUDE.md.local Project Overview describes the ML interview prep platform in 2-3 sentences. Tech Stack lists all major dependencies. Third invariant is filled with a real domain rule (e.g., DB content must have a git-tracked seed source of truth). CLAUDE.md regenerated from .local after edits.
-
 #### T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%)
 - **Priority**: P2
 - **Complexity**: M
@@ -161,6 +149,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 494 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-19** -- T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack. CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
 - [x] **2026-04-19** -- T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN). ## Context
 - [x] **2026-04-19** -- T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN). ## Context

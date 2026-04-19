@@ -1,30 +1,46 @@
 <!-- Auto-generated: CLAUDE.md.local + shared. Do not edit directly. -->
 # Project Context
 
-<!-- CUSTOMIZE: Replace this section with your project's overview -->
-
 ## Project Overview
-<!-- Describe what your project does in 2-3 sentences -->
+MLInterviewPrep is a personal ML/MLE interview preparation platform: a FastAPI + SQLAlchemy
+backend stores companies, problems, framework nodes (KG), and rich per-company study
+documents; a React + TypeScript frontend renders an interactive knowledge graph, a
+Kanban-style prep board, and Markdown/KaTeX study notes. Content is authored as
+idempotent Python seed scripts (the only sanctioned write path into the DB) and consumed
+during live mock interviews and daily drills.
 
 ## Tech Stack
-<!-- List your core technologies -->
 - Python 3.11+
-- pytest (testing)
-- ruff (linting)
+- FastAPI, Uvicorn (backend API)
+- SQLAlchemy 2.x (ORM, SQLite at `src/backend/mle_prep.db` / `data/mle_prep.db`)
+- Pydantic v2, pydantic-settings (schemas, config)
+- Anthropic SDK (LLM-assisted content drafting)
+- python-docx, edge-tts (document + TTS utilities)
+- httpx, python-multipart, python-dotenv
+- React 19 + TypeScript + Vite (frontend)
+- @xyflow/react + elkjs (KG visualization and layout)
+- @tanstack/react-query (data fetching)
+- react-markdown + rehype-katex + remark-math + remark-gfm (note rendering)
+- react-syntax-highlighter, recharts, @hello-pangea/dnd, Tailwind CSS v4
+- pytest, pytest-asyncio, ruff (backend tests + lint)
+- vitest, eslint, typescript-eslint (frontend tests + lint)
 
 ## File Structure
-<!-- CUSTOMIZE: Describe your project's directory layout -->
-- `src/` - Source code
-- `tests/` - Test files
-- `config/` - Configuration files
-- `data/` - Runtime data (not in git)
+- `src/backend/` - FastAPI app: `main.py`, `config.py`, `database.py`, `models/`, `schemas/`, `routers/`, `services/`, `scraper/`, `seed_data/`
+- `src/frontend/` - React + Vite app (TypeScript)
+- `scripts/` - Idempotent seed scripts (`seed_*.py`), audits, migrations, one-off tools (prefixed `_` for throwaways)
+- `tests/` - pytest suite (backend)
+- `data/` - Runtime data, including `mle_prep.db` (not in git)
+- `docs/` - Workflow specs (autonomous mode, exit protocol, Chinese conversion spec, human input)
+- `logs/` - Audit outputs, before/after snapshots, smoke-test artifacts
+- `shared/` - Cross-project shared hooks, settings, and CLAUDE.md shared content
+- `archive/` - Archived progress log + completed task log
 - `scripts/git-hooks/` - Git hook sources (installed via `scripts/setup-hooks.sh`)
 
 ## Invariants (must always hold, violation = bug)
-<!-- CUSTOMIZE: List your project's invariants. These are checked by /review -->
 1. .env file never tracked by git
 2. No hardcoded secrets in code
-3. <!-- Add your domain-specific invariants here -->
+3. Every DB content row (company_documents, framework_nodes, problems, etc.) must have a git-tracked, idempotent Python seed script as its source of truth. Ad-hoc SQL or manual DB edits are prohibited — the DB is a regenerable projection of the seed scripts, never the source of truth itself.
 
 ## Key Constraints
 - All API keys and cookies from .env, never hardcoded
