@@ -5,52 +5,6 @@
 
 ## In Progress
 
-#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-514
-- **Description**: ## Context
-Blocking gate between T-P0-514 (Writing Discipline rules published) and T-P0-515/516 (full V2 rewrites). Reviewer insight 2026-04-18: "514's GOOD/BAD examples ARE the prompt corpus for 515/516 — if 514 is weak, V2 copies the weakness 20x." This pilot validates the rules on ONE section before committing to full rewrites.
-
-## CRITICAL — this task does NOT mark itself completed
-
-The autonomous session executing this task MUST leave `status=in_progress` after producing the pilot artifact. DO NOT run `task_db.py update T-P0-518 --status completed` from the session. The human reviews the pilot doc in Discord and flips status to `completed` manually after approval — that's what unblocks T-P0-515 and T-P0-516.
-
-If the session marks itself completed automatically, the runner will incorrectly unblock the downstream V2 rewrites before human approval. To prevent this, write the pilot artifact + PROGRESS.md entry + session_state.json update, then STOP without the status update — this is a deviation from the normal exit protocol for one task only.
-
-## Scope — rewrite ONLY §2 of id=92 Marketplace
-
-Use all Writing Discipline rules from id=18 Appendix A.1 (produced by T-P0-514). Target ONLY the existing §2 "Capacity Estimation" section of id=92 (current V1 content from commit 589dad8). Do NOT touch other sections, do NOT update the DB.
-
-### Steps
-1. Load current id=92 description (V1, 9727 chars from commit 589dad8)
-2. Extract §2 Capacity Estimation block (content between `## 2.` heading and `## 3.` heading)
-3. Rewrite §2 ONLY, applying all 4 Writing Discipline rules (Section Contract, Acronym per-section, Triage 4-element, Specificity discipline) AND the patch-style ban
-4. Use the callout convention locked in T-P0-514 (`> **GOOD**:` / `> **BAD**:` / `> **NOTE**:`) if illustrating anything
-5. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on the NEW §2 content
-6. Run `scripts/llm_judge_mlsd.py --v1-text <extracted V1 §2> --v2-text <new §2>` — all three dimensions must show strict improvement
-7. Write `docs/mlsd_pilot_92_s2_20260418.md` with:
-   - V1 §2 original (verbatim)
-   - New §2 rewrite (verbatim)
-   - Regex audit report (all 4 gates for the new §2)
-   - LLM-judge scores with rationale notes
-   - Any observations from the writer about rule ambiguity or edge cases
-8. Commit `docs/mlsd_pilot_92_s2_20260418.md` + PROGRESS.md entry
-9. Leave task status as `in_progress` — human completes it after Discord approval
-
-## Deliverables
-- `docs/mlsd_pilot_92_s2_20260418.md` — side-by-side + audit + LLM-judge
-- No DB mutations on framework_nodes (that's 515's job, after approval)
-- Task stays `in_progress`, waiting for human explicit unblock
-
-## Acceptance Criteria
-- [ ] `docs/mlsd_pilot_92_s2_20260418.md` exists with all 5 content requirements
-- [ ] New §2 passes regex gates 7/8/9/11 (per section)
-- [ ] New §2 scores strictly higher than V1 §2 on ALL three LLM-judge dimensions (pass verdict from llm_judge_mlsd.py)
-- [ ] Pilot doc committed; PROGRESS.md entry appended; `.claude/session_state.json` notes last_task=T-P0-518 + all_done=false (518 still in_progress)
-- [ ] **Task status is `in_progress`, NOT `completed`** — waiting for human review
-- [ ] If pilot FAILS any gate or LLM-judge doesn't improve: status=`blocked` with diagnostic; task specs iteration on T-P0-514 rules before retry
-
 #### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
 - **Priority**: P2
 - **Complexity**: M
@@ -113,7 +67,7 @@ Step 2 — fix gaps:
 #### T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-514, T-P0-518
+- **Depends on**: T-P0-514, T-P0-518, T-P0-519
 - **Description**: ## Context
 Depends on T-P0-514 (Writing Discipline rules + 4 regex gates + LLM-judge) AND T-P0-518 (pilot rewrite of §2 approved by human). V1 of id=92 (commit 589dad8) passes all 6 original mechanical gates but fails the new prose gates. This V2 rewrites the same content under the new rules.
 
@@ -165,7 +119,7 @@ Idempotent seed script `scripts/seed_node_92_marketplace_v2_20260418.py`:
 #### T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-514, T-P0-518
+- **Depends on**: T-P0-514, T-P0-518, T-P0-519
 - **Description**: ## Context
 Parallel counterpart to T-P0-515 — same execution model and gates, applied to id=198 Rec System. Depends on T-P0-514 (rules + tools) AND T-P0-518 (pilot approved). id=198 V1 (commit 8d8fd17, 19457 chars) is acronym-dense (every ML term is one) so Rule 2 (per-section first-occurrence expansion) will add more overhead than in id=92.
 
@@ -207,6 +161,58 @@ V1 = 19457 chars. V2 target = 23000-28000 chars (+20-45% from added prose + tria
 - [ ] history row captures 19457-char V1
 - [ ] `npm run build` green
 - [ ] Manual smoke: /kg?node=n198 reads as coherent narrative
+
+#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-514, T-P0-519
+- **Description**: ## Context — ITERATION 2
+First iteration (commit 004e351, docs/mlsd_pilot_92_s2_20260418.md) passed regex gates + Gate 10 LLM-judge but user review found the RULES too lax: only 1-2 alternatives per tech-choice, implicit choices (WebSocket, sticky-session) bypassed triage, length under-delivers depth. T-P0-519 tightens A.1 to A.1.v2 with Rule 3 (≥3 alternatives + why-not each), Rule 6 (implicit choices caught by writer discipline), Rule 7 (≥3 preemptive follow-ups per choice), expanded Gate 9 regex + new Gate 12. This task re-pilots §2 of id=92 under the tightened rules.
+
+Iteration-1 pilot doc is PRESERVED as evidence — DO NOT delete `docs/mlsd_pilot_92_s2_20260418.md`. This task writes to a DIFFERENT file: `docs/mlsd_pilot_92_s2_v2_20260418.md`.
+
+## CRITICAL — this task does NOT mark itself completed
+Same as iteration-1: autonomous session leaves `status=in_progress` after producing the pilot. Human reviews in Discord and manually flips to completed after approval — that's what unblocks T-P0-515/516.
+
+## Scope — re-rewrite ONLY §2 of id=92 under A.1.v2 (tightened) rules
+
+Steps:
+1. Load id=92 V1 content (9727 chars, commit 589dad8), extract §2 (same as iteration-1)
+2. Rewrite §2 under:
+   - A.1 original rules (Section Contract, Acronym per-section, Specificity boundaries, Patch-ban)
+   - A.1.v2 amendments from T-P0-519:
+     - Rule 3 upgraded: ≥3 alternatives + why-not each + switch-trigger (pick + reason + 3 alternatives with explicit why-not + trigger)
+     - Rule 6: scan for IMPLICIT tech choices (product/protocol names in prose) — at minimum must triage: `Redis GEO`, `Redis` (hot), `PostgreSQL`, `Cassandra`, `Kafka`, `S3`, `WebSocket`, `sticky session`, `load balancer`
+     - Rule 7: every tech-choice gets "**常见追问**" footnote with ≥3 preemptive Q&As
+   - Gate 12 (≥3 alternatives required per choice, regex-auditable)
+3. Expected length: iteration-1 §2 was 1861 chars. Iteration-2 §2 target **4500-6000 chars** (roughly 2.5-3× due to richer triage + follow-up footnotes)
+4. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on new §2 content — must PASS gates 7/8/9/11/12
+5. Run `scripts/llm_judge_mlsd.py --v1-text <iter1 §2> --v2-text <iter2 §2>` — iter-2 must STRICTLY improve on all 4 dimensions (readability / triage / density / follow-up preemption)
+6. Write `docs/mlsd_pilot_92_s2_v2_20260418.md`:
+   - Iter-1 §2 (from `docs/mlsd_pilot_92_s2_20260418.md` §2 block) as "previous version"
+   - Iter-2 §2 rewrite
+   - side-by-side diff highlighting: new alternatives added, follow-up footnotes, length delta
+   - regex audit report (5 gates: 7/8/9/11/12)
+   - LLM-judge 4-dimension scores with rationale
+   - writer observations on A.1.v2 rules (ambiguity/edge cases)
+7. Commit the pilot doc + PROGRESS.md entry
+8. Leave task status `in_progress` — human approves, flips to completed
+
+## Deliverables
+- `docs/mlsd_pilot_92_s2_v2_20260418.md` — iter-2 pilot artifact
+- Iteration-1 pilot doc preserved untouched
+- No DB mutations on framework_nodes
+
+## Acceptance Criteria
+- [ ] `docs/mlsd_pilot_92_s2_v2_20260418.md` exists with all 5 sections (iter-1 §2, iter-2 §2, diff, audit report, LLM-judge, observations)
+- [ ] Iter-2 §2 length 4500-6000 chars
+- [ ] Passes regex gates 7/8/9/11/12 (all 5 including new Gate 12)
+- [ ] Gate 10 LLM-judge: iter-2 STRICTLY > iter-1 on ALL 4 dimensions (new 4th: follow-up preemption)
+- [ ] Every named tech-choice in iter-2 §2 has ≥3 alternatives with explicit why-not each
+- [ ] Every named tech-choice has `**常见追问**` block with ≥3 Q&As
+- [ ] Iteration-1 pilot doc `docs/mlsd_pilot_92_s2_20260418.md` UNCHANGED
+- [ ] PROGRESS.md entry appended; session_state.json notes all_done=false (518 still in_progress)
+- [ ] **Task status remains `in_progress`** — do NOT auto-complete
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -300,4 +306,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-18** -- T-P1-513: T-MLSD-WORKED-198: Upgrade Real-Time Rec System (id=198) with L5 skeleton. ## Context
 - [x] **2026-04-18** -- T-P1-512: T-MLSD-WORKED-92: Upgrade Marketplace & Logistics (id=92) to L5-bar gold standard. ## Context
 - [x] **2026-04-18** -- T-P1-511: T-MLSD-AUDIT-01: Score 10 design problems against L5 framework, produce gap report. ## Context
+- [x] **2026-04-18** -- T-P0-519: T-MLSD-FRAMEWORK-03: Tighten Appendix A.1 — Rule 3 ≥3 alternatives + expanded Gate 9 regex + Rule 6 follow-up preemption + raised length targets. ## Context
 - [x] **2026-04-18** -- T-P0-514: T-MLSD-FRAMEWORK-02: Append Writing Discipline rules to id=18 Appendix A (5 rules + examples + heuristic gates). ## Context

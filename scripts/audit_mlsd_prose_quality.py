@@ -1,6 +1,6 @@
-"""Audit MLSD prose-quality mechanical gates 7/8/9/11 on a framework_node description.
+"""Audit MLSD prose-quality mechanical gates 7/8/9/11/12 on a framework_node description.
 
-Gates enforced (per id=18 Appendix A.1):
+Gates enforced (per id=18 Appendix A.1 + A.1.v2 amendment):
 
   Gate 7 - Prose ratio >= 0.30:
            non_bullet_non_table_lines / non_empty_lines >= 0.30 (document-wide).
@@ -10,10 +10,18 @@ Gates enforced (per id=18 Appendix A.1):
            `#`, `|`, or `>`). There must also be a closing prose sentence
            before the next `##` (any prose line after the last table/bullet).
   Gate 9 - Triage signal presence:
-           Any line containing /\\b(选|使用|用|pick)\\b/ must have /\\b(因为|because)\\b/
-           within 1000 characters downstream in the raw text.
+           Any line containing an expanded triage verb
+           /(选|使用|用|采用|切换到|归到|改用|上|走|挂|[Pp]ick|[Uu]se|[Gg]o with)/
+           followed by a product token (min length 2 so `S2`, `S3`, `FA`, `Go`
+           get caught) must have /因为|because/ within 1000 characters
+           downstream. Blockquotes are scrubbed (illustrative examples).
   Gate 11 - Patch-ban:
            Per `## ` section, prose_line_count >= bullet_line_count.
+  Gate 12 - Triage depth (A.1.v2):
+           For each Gate-9 triage match, the NEXT 2000 characters must contain
+           >=3 bold product names (matching `\\*\\*[A-Z][^*]+\\*\\*`) AND >=3
+           why-not tokens (`但|不用|淘汰|更合适|更适合|why-not`). Enforces
+           Rule 3's >=3-alternative requirement mechanically.
 
 Usage:
     python scripts/audit_mlsd_prose_quality.py --node-id 92
@@ -44,17 +52,33 @@ NUMBERED_H2 = re.compile(r"^## (\d+)\.\s+\S")
 ANY_H2 = re.compile(r"^## ")
 BULLET_PREFIXES = ("- ", "* ", "+ ")
 TABLE_LINE = re.compile(r"^\s*\|")
-# Tech-choice triage detection:
-# Only flags when a trigger verb is followed within ~40 chars by what looks
-# like a tech-product noun (ASCII PascalCase / all-caps token >= 3 chars,
-# optionally bolded with `**`). CJK verbs alone (用户 / 选项) should not trigger.
-# Verbs: 选|使用|用|pick.  Product token: `(?:\*\*)?[A-Z][A-Za-z0-9+/-]{2,}(?:\*\*)?`.
+# Tech-choice triage detection (A.1.v2 - expanded 2026-04-18):
+# Only flags when a trigger verb is followed within ~12 chars by what looks
+# like a tech-product noun (ASCII PascalCase / all-caps token >= 2 chars so
+# short brand names like `S2`, `S3`, `Go`, `Ch`, `FA` get caught), optionally
+# bolded with `**`. Single-char CJK verbs (上/走/挂) only fire when the 12-char
+# gap terminates on an ASCII capital, so plain prose like "上次" or "走查"
+# (CJK-CJK) is not triggered.
+#
+# Verb list (expanded in A.1.v2):
+#   CJK: 选|使用|用|采用|切换到|归到|改用|上|走|挂
+#   EN:  Pick|Use|Go with
 TRIAGE_RE = re.compile(
-    r"(?P<verb>选|使用|用|\b[Pp]ick\b)"
+    r"(?P<verb>选|使用|用|采用|切换到|归到|改用|上|走|挂"
+    r"|\b[Pp]ick\b|\b[Uu]se\b|\b[Gg]o with\b)"
     r"[\s\*\-:：,，。、\(\)（）]{0,12}"
-    r"(?P<prod>(?:\*\*)?[A-Z][A-Za-z0-9+/\-]{2,}(?:\*\*)?)"
+    r"(?P<prod>(?:\*\*)?[A-Z][A-Za-z0-9+/\-]{1,}(?:\*\*)?)"
 )
 TRIAGE_WHY = re.compile(r"(因为|\bbecause\b)", re.IGNORECASE)
+
+# Gate 12 (A.1.v2): per-match depth check.
+# Count bold product names in the 2000-char window following a triage match.
+# Also count why-not tokens: 但 / 不用 / 淘汰 / 更合适 / 更适合 / why-not.
+BOLD_PRODUCT_RE = re.compile(r"\*\*[A-Z][^*]+\*\*")
+WHY_NOT_RE = re.compile(r"但|不用|淘汰|更合适|更适合|why-not", re.IGNORECASE)
+GATE12_WINDOW_CHARS = 2000
+GATE12_MIN_ALTS = 3
+GATE12_MIN_WHYNOT = 3
 
 if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -197,6 +221,36 @@ def gate9_triage_signal(full_text: str) -> list[str]:
     return problems
 
 
+def gate12_triage_depth(full_text: str) -> list[str]:
+    """Per Gate-9 match, next GATE12_WINDOW_CHARS chars must have
+    >=GATE12_MIN_ALTS bold product names AND >=GATE12_MIN_WHYNOT why-not tokens.
+
+    Blockquotes and code fences are scrubbed (same as Gate 9) so illustrative
+    triage examples in `> **GOOD**:` callouts don't trigger the check.
+    """
+    problems: list[str] = []
+    lines = strip_code_blocks(full_text.splitlines())
+    scrubbed = [
+        "" if is_blockquote(l) else l
+        for l in lines
+    ]
+    text = "\n".join(scrubbed)
+    for m in TRIAGE_RE.finditer(text):
+        start = m.start()
+        window = text[start:start + GATE12_WINDOW_CHARS]
+        alt_count = len(BOLD_PRODUCT_RE.findall(window))
+        why_count = len(WHY_NOT_RE.findall(window))
+        if alt_count < GATE12_MIN_ALTS or why_count < GATE12_MIN_WHYNOT:
+            line_no = text.count("\n", 0, start) + 1
+            ctx = text[max(0, start - 20):start + 80].replace("\n", " \u00b6 ")
+            problems.append(
+                f"L{line_no} '{m.group('verb')} {m.group('prod')}' "
+                f"alts={alt_count}/{GATE12_MIN_ALTS} "
+                f"why-not={why_count}/{GATE12_MIN_WHYNOT}: ...{ctx}..."
+            )
+    return problems
+
+
 def gate11_patch_ban(sections: list[tuple[str, list[str]]]) -> list[str]:
     """Per section (any ##), prose_lines >= bullet_lines."""
     problems: list[str] = []
@@ -279,6 +333,7 @@ def main(argv: list[str]) -> int:
     g8 = gate8_section_contract(sections)
     g9 = gate9_triage_signal(desc)
     g11 = gate11_patch_ban(sections)
+    g12 = gate12_triage_depth(desc)
 
     print(f"\n[Gate 7 prose-ratio] {'PASS' if g7_ok else 'FAIL'}: {g7_msg}")
     print(f"\n[Gate 8 section-contract] {'PASS' if not g8 else f'FAIL ({len(g8)})'}")
@@ -292,8 +347,13 @@ def main(argv: list[str]) -> int:
     print(f"\n[Gate 11 patch-ban] {'PASS' if not g11 else f'FAIL ({len(g11)})'}")
     for p in g11:
         print(f"  - {p}")
+    print(f"\n[Gate 12 triage-depth] {'PASS' if not g12 else f'FAIL ({len(g12)})'}")
+    for p in g12[:20]:
+        print(f"  - {p}")
+    if len(g12) > 20:
+        print(f"  ... and {len(g12) - 20} more")
 
-    all_pass = g7_ok and not g8 and not g9 and not g11
+    all_pass = g7_ok and not g8 and not g9 and not g11 and not g12
     print(f"\n=== Overall: {'PASS' if all_pass else 'FAIL'} ===")
 
     if args.report_only:
