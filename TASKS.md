@@ -11,85 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-513: T-MLSD-WORKED-198: Upgrade Real-Time Rec System (id=198) with L5 skeleton
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-510, T-P1-511
-- **Description**: ## Context
-Depends on T-P0-510 (framework + Appendix A template) + T-P1-511 (audit). id=198 "Real-Time Recommendation System Design" already has the richest structure in Pillar 3 (13380 chars, 12 sections covering framing / baselines / two-tower / ranking / re-ranking / training / cold-start / monitoring / rollout / latency / serving / Q&A). It's the SECOND exemplar — demonstrates how the L5 template applies when a problem already has substantive domain content.
-
-## Input material
-- id=18 Appendix A Unified Template (the 11-section required structure + quality gates)
-- Existing id=198 content (12 sections, 13380 chars) — preserve in full
-
-## Rewrite plan — MAP existing sections to template sections, ADD the missing ones
-
-### Mapping existing → template
-| id=18 Appendix A template | id=198 existing section |
-|---|---|
-| 1. Requirements Clarification | Section 1 "Problem Framing & Clarify-First" ← already exists, good |
-| 2. Capacity Estimation | **MISSING** — must add |
-| 3. High-Level Architecture | Section 11 "Serving Architecture" ← exists but needs service-by-SLA breakdown + storage table added |
-| 4. Deep Dives | Sections 2-10 (baselines, two-tower, ranking, cold start, exploration, monitoring, rollout, latency) ← already strong; relabel as Deep Dives 4a-4h |
-| 5. Reliability & Monitoring | Section 8 "Monitoring & Drift Detection" ← exists; add SLO bar + business metrics |
-| 6. Summary & Tradeoffs | **MISSING** — must add a consolidated tradeoff table |
-| Interview Q&A | Section 12 ← exists |
-| Self-Check | existing "Self-Check (面试前必过)" ← exists, good |
-
-### Additions (in order to insert)
-
-**A. Insert new Section "2b. Capacity Estimation" after existing Section 1**
-- 100M DAU rec product
-- Retrieval QPS: 100M × 2 sessions/day × 10 requests/session / 86400 = 23K QPS peak → ×3 peak = 70K QPS
-- Ranking QPS: 70K × 500 candidates / 100 (batched) = 350K ranker invocations
-- Storage: 500M items × 128d float32 = 256GB embeddings → must fit in memory sharded
-- Bandwidth: 70K × 10KB response = 700MB/s aggregate
-- Decision drivers: "256GB embeddings drives ANN-index sharding"; "350K ranker QPS drives GPU inference cluster sizing"
-
-**B. Enhance Section 11 Serving Architecture with service-by-SLA table**
-- Gateway (low latency, high availability)
-- Retrieval Service (p99<20ms, stateless, horizontal)
-- Ranking Service (p99<50ms, GPU, stateful batched)
-- Feature Store Service (p99<10ms, Redis-backed)
-- Embedding Index Service (p99<15ms, sharded ANN)
-- Experiment/Flag Service (cacheable, low SLA)
-- Logging/Event Bus (async, loss-tolerant)
-- Add storage selection table (embeddings→FAISS/ScaNN; hot features→Redis; user profile→PostgreSQL+Redis; event log→Kafka→S3; experiments→Unleash/LaunchDarkly)
-
-**C. Insert new Section "12b. L5 Tradeoff Table" before existing Self-Check**
-At minimum 7 rows: retrieval (two-tower vs ANN-over-all) / ranking (XGBoost vs DNN vs MoE) / cold-start (popularity vs content-based vs MF fallback) / exploration (ε-greedy vs Thompson vs LinUCB) / serving (sync vs streaming) / feature freshness (online vs offline) / model rollout (shadow vs A/B vs bandits). Each row: pick + why + when-to-change.
-
-**D. Extend Section 8 Monitoring with explicit SLO bar**
-- Availability: 99.9% (43m/month budget)
-- Retrieval: p99<30ms, success rate>99.95%
-- E2E: p99<200ms (retrieval + ranking + rerank)
-- CTR guardrail: rollout must not drop CTR >0.5%
-- Embedding drift: KL(online_dist || offline_dist)<0.1 (alert)
-
-**E. Prepend new Section "0. Time Budget" at the top**
-Show 5/5/15/25/5/5 breakdown applied to rec system; map each existing section to which stage
-
-**F. Add "6. Summary & Tradeoffs" as a NEW section between existing 11 and 12**
-Consolidate from the L5 Tradeoff Table + call out un-discussed points (multimodal, long-tail fairness, privacy-preserving personalization)
-
-## Deliverables
-Idempotent seed script `scripts/seed_node_198_rec_l5_20260418.py`:
-- DB backup + history row + UPDATE id=198
-
-## Acceptance Criteria
-- [ ] id=198 description length: 16000-19500 chars (from 13380) — growth from additions A-F
-- [ ] ALL existing 12 sections still present with content unchanged except minor additions
-- [ ] New sections "0. Time Budget", "2b. Capacity Estimation", "12b. L5 Tradeoff Table" all present with substantive content
-- [ ] Section 11 Serving Architecture has service-by-SLA table (≥7 rows) + storage selection table (≥5 rows)
-- [ ] Section 8 has SLO subsection with ≥ 5 concrete SLOs
-- [ ] New Section 6 "Summary & Tradeoffs" is between existing S11 and S12
-- [ ] Description passes ALL Appendix A quality gates from id=18
-- [ ] Self-Check section has 7 checkmarks mapped to id=18 pass-bar
-- [ ] Seed script idempotent
-- [ ] `framework_nodes_description_history` captures pre-update content
-- [ ] `npm run build` green
-- [ ] Manual smoke: /kg?node=n198 renders cleanly; link to id=18 in Prerequisites works; all new tables format correctly
-
 ### P2 -- Nice to Have
 
 ### P3 -- Stretch Goals
@@ -177,6 +98,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
+- [x] **2026-04-18** -- T-P1-513: T-MLSD-WORKED-198: Upgrade Real-Time Rec System (id=198) with L5 skeleton. ## Context
 - [x] **2026-04-18** -- T-P1-512: T-MLSD-WORKED-92: Upgrade Marketplace & Logistics (id=92) to L5-bar gold standard. ## Context
 - [x] **2026-04-18** -- T-P1-511: T-MLSD-AUDIT-01: Score 10 design problems against L5 framework, produce gap report. ## Context
 - [x] **2026-04-18** -- T-P1-509: KG-CONTENT-02: Add LC 1392 Longest Happy Prefix to KMP family (kmp[n-1] canonical application). ## Context
