@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 462 completed tasks archived as of latest archival.
+> 478 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -659,3 +659,28 @@ DEPENDENCIES TO ADD (src/
 - [x] **2026-04-16** -- T-P2-469: [QIdx-C1] Harden LC import scripts to set family. Harden LC import scripts so new rows no longer default to family=NULL silently.
 
 BACKGROUND: Current pipeline adds LC pr
+- [x] **2026-04-17** -- T-P0-497: KG-UX-09: TreeNav click -> expand ancestors + setCenter on canvas. Wire TreeNav (KG-UX-08) to the canvas. Clicking an entry in TreeNav should: (1) setExpanded to include all ancestors of 
+- [x] **2026-04-18** -- T-P0-510: T-MLSD-FRAMEWORK-01: Populate id=18 'System Design Framework' with canonical L5 paradigm. ## Context
+id=18 "System Design Framework" in framework_nodes has description=NULL. It's the L2 category under Pillar 3 
+- [x] **2026-04-17** -- T-P1-486: [KG-VIZ-R03] Interaction: tooltip, keyboard a11y, expand-all, hover edge highlight. Post-polish interaction refinements. Scoped per user review (cut edge legend toggle, pillar filter buttons, +/-/0 shortc
+- [x] **2026-04-17** -- T-P1-490: KG-UX-04: 0-children categories act as leaves; stub badge. 7 depth-1 categories (SQL Fundamentals, OOD SOLID, Diffusion Models, etc.) have 0 children. Expanding them does nothing 
+- [x] **2026-04-17** -- T-P1-491: KG-UX-05: Swimlane layout - per-pillar ELK vertically stacked. Current layered layout stacks 8 pillars in leftmost column causing cross-pillar overlap and visual chaos. Refactor to sw
+- [x] **2026-04-17** -- T-P1-498: KG-CN-01: Rewrite node descriptions to CN narration + full English terms. Rewrite framework_nodes.description to Chinese narration + English full-expansion terms. Pilot on 4 nodes validated qual
+- [x] **2026-04-18** -- T-P1-499: [SYNC] Fix settings.json: replace bare python with /c/Anaconda/python.exe. All 8 hook commands in .claude/settings.json use bare python instead of /c/Anaconda/python.exe. This violates the CLAUDE
+- [x] **2026-04-18** -- T-P1-501: KG-UX-10: Empty-content nodes skip drawer (tri-state click) + hasContent util. ## Problem
+Clicking L1/L2 organizational nodes (e.g. id=1 Coding & Algorithms) opens an empty drawer because the current
+- [x] **2026-04-18** -- T-P1-502: KG-UX-14: Initial fitView maxZoom cap + URL deeplink direct-focus. ## Problem
+User reports: default zoom when entering /kg page is too small — hard to read nodes. Current: KnowledgeGraph.
+- [x] **2026-04-18** -- T-P1-504: Fix rewrite_nodes_to_cn.py: preserve canonical_hub HTML comment markers. CN rewrite (commit 295ada1) stripped HTML comment markers (<!-- doc_kind: canonical_hub -->, sentinel blocks) from frame
+- [x] **2026-04-18** -- T-P1-505: KG-UX-16: Cold-load defaults to first pillar at zoom 1.0 (not fitView all). ## Problem
+KG-UX-14 added `fitView({ padding: 0.15, maxZoom: 1.0 })` on cold load. `maxZoom` only caps the computed fit-
+- [x] **2026-04-18** -- T-P1-506: KG-UX-15: Category node expanded/collapsed visual distinction (saturation + chevron). ## Problem
+After KG-UX-10/14 shipped, canvas category nodes have NO visual difference between expanded and collapsed sta
+- [x] **2026-04-18** -- T-P1-507: KG-UX-17: TreeNav click must honor hasContent gate (extract activateNode helper). ## Problem
+KG-UX-10 added the tri-state drawer gate to `handleActivate` (canvas click path) but `onTreeNavSelect` (left-
+- [x] **2026-04-18** -- T-P1-508: KG-CONTENT-01: Add KMP family to Quick Index + expand KMP section in Array/String node (n44). ## Context
+While reading /kg?node=n44&expanded=n9 (Array / String), the user noted KMP deserves elevation:
+1. Surface KM
+- [x] **2026-04-18** -- T-P1-509: KG-CONTENT-02: Add LC 1392 Longest Happy Prefix to KMP family (kmp[n-1] canonical application). ## Context
+User identified LC 1392 "Longest Happy Prefix" as the purest teaching example of KMP's next-array semantics: 
+- [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae
