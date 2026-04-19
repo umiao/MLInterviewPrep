@@ -11,30 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-519
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=97 Generative AI Systems. V1 ~5511 chars, standard 8-heading skeleton.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2 (same as T-P0-515/516). Abort on failure.
-
-## Domain-specific focus for id=97 (Generative AI Systems)
-- Capacity: ChatGPT-scale, ~1M concurrent users, ~100K tokens/s aggregate decode throughput, p99 first-token <1s, p99 inter-token <50ms
-- Service split: Router / Prompt Safety Filter / Retrieval (RAG) / Generation (LLM inference) / Post-processing / Safety Classifier / Usage & Billing
-- Tech choices (Rule 3 ≥3 alt + Rule 7): inference engines (vLLM vs TensorRT-LLM vs SGLang vs llama.cpp); KV cache (paged-attention vs radix-attention vs block-attention); quantization (INT8 vs AWQ vs GPTQ vs FP8); speculative decoding (draft model vs Medusa vs Lookahead); RAG (dense retrieval vs hybrid vs GraphRAG); agent frameworks (ReAct vs Plan-and-Execute vs DSPy)
-- Key follow-ups: streaming token delivery, long-context (100K+), memory/thread persistence, jailbreak defense, hallucination mitigation, cost-per-query optimization, A/B on generation quality (pairwise human judge vs Elo vs LLM-as-judge)
-
-## Deliverables
-`scripts/seed_node_97_genai_v2_20260419.py` idempotent.
-
-## Length target V1 ~5511 → V2 14000-20000 chars.
-
-## Acceptance Criteria
-Standard A.1.v2 gates.
-
 #### T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2
 - **Priority**: P1
 - **Complexity**: M
@@ -231,6 +207,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-523: T-MLSD-WORKED-89-V2: Rewrite id=89 Search & Retrieval Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-522: T-MLSD-WORKED-90-V2: Rewrite id=90 Recommendation Systems under A.1.v2. ## Context
