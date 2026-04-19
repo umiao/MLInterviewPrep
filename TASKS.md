@@ -11,30 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-519
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=96 ML Infrastructure Design. V1 ~5677 chars, standard 8-heading skeleton.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2. Abort on failure.
-
-## Domain-specific focus for id=96 (ML Infrastructure)
-- Capacity: company-scale ML platform, ~100-1000 engineers, ~10K daily training jobs, ~100K daily inference deployments, PB/day feature logs
-- Service split: Experiment Tracking / Feature Store / Training Orchestrator / Model Registry / Deployment Service / Feature Serving / Monitoring / Lineage
-- Tech choices (Rule 3 ≥3 alt + Rule 7): orchestrator (Airflow vs Kubeflow vs Metaflow vs Flyte vs Argo); feature store (Feast vs Tecton vs Hopsworks vs home-grown); model registry (MLflow vs W&B vs home-grown); serving (TorchServe vs TensorFlow Serving vs Triton vs Seldon vs BentoML); distributed training (DDP vs FSDP vs DeepSpeed vs Horovod vs ZeRO); monitoring (EvidentlyAI vs WhyLabs vs Arize vs home-grown drift detection); lineage (DVC vs MLflow vs Pachyderm)
-- Key follow-ups: train-serve skew, feature freshness guarantees, rollback safety, multi-tenancy + quota, GPU cluster autoscaling, model versioning + A/B, offline-online parity, data contract enforcement, observability at scale
-
-## Deliverables
-`scripts/seed_node_96_mlinfra_v2_20260419.py` idempotent.
-
-## Length target V1 ~5677 → V2 15000-22000 chars (this is L5+ signal topic, make it thorough).
-
-## Acceptance Criteria
-Standard A.1.v2 gates.
-
 #### T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2
 - **Priority**: P1
 - **Complexity**: M
@@ -207,6 +183,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-523: T-MLSD-WORKED-89-V2: Rewrite id=89 Search & Retrieval Systems under A.1.v2. ## Context
