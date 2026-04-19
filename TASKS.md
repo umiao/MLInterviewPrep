@@ -11,32 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-519
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=93 NLP & LLM Systems. V1 ~5371 chars, standard 8-heading skeleton.
-
-NOTE: id=93 overlaps with id=97 Generative AI Systems. Keep boundaries: id=93 = general NLP system (tokenization, classification, extraction, MT, summarization pipelines, encoder-only patterns) + LLM as a component. id=97 = LLM-native generation-first systems (ChatGPT-style, RAG, agents). Avoid duplication.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2. Abort on failure.
-
-## Domain-specific focus for id=93 (NLP & LLM Systems)
-- Capacity: encoder-heavy NLP pipelines (classification, NER, sentiment), millions QPS at lower latency (~10-30ms)
-- Service split: Text Preprocessor / Tokenizer / Encoder Inference / Post-processor / Result Aggregator
-- Tech choices (Rule 3 ≥3 alt + Rule 7): tokenizer (BPE vs WordPiece vs Unigram vs SentencePiece); encoder (BERT vs RoBERTa vs DeBERTa vs Electra vs DistilBERT); sequence labeling (CRF vs span-classification vs BIO-tagging); MT (seq2seq transformer vs T5 vs LLM prompting); classification (fine-tune encoder vs zero-shot LLM vs prompted LLM); summarization (abstractive seq2seq vs extractive LLM vs hybrid)
-- Key follow-ups: multi-lingual support, cross-lingual transfer, domain adaptation, label noise handling, inference batching strategies, class-imbalance for production NLP, model distillation for serving
-
-## Deliverables
-`scripts/seed_node_93_nlp_v2_20260419.py` idempotent.
-
-## Length target V1 ~5371 → V2 13000-18000 chars.
-
-## Acceptance Criteria
-Standard A.1.v2 gates.
-
 #### T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2
 - **Priority**: P1
 - **Complexity**: M
@@ -183,6 +157,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2. ## Context
