@@ -5,61 +5,6 @@
 
 ## In Progress
 
-#### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Context
-Drawer-layer rendering polish, parallel to content V2 tasks. Independent of 514/515/516/518 — can run first, in parallel, or last. User flagged "排版不够精细，可读性不是很强，缺缩进着色" in the MLSD gold review (2026-04-18).
-
-**IMPORTANT — callout contract locked by T-P0-514**: The three callout forms this task must style are EXACTLY:
-- `> **GOOD**: …`  → green left-border + light-green background tint
-- `> **BAD**: …`   → red left-border + light-red background tint
-- `> **NOTE**: …`  → blue left-border + light-blue background tint
-
-No emoji variants, no `✅/❌`, no `**GOOD example**`. Exact literal match required. This is a contract — 514/515/516/518 content all use these three forms only.
-
-## Audit first, then fix
-
-Step 1 — audit `FrameworkNodeDrawer.tsx` and its `MarkdownPreview` to confirm current state of:
-- `remark-gfm` (tables, task lists, strikethrough, autolinks)
-- `rehype-raw` (raw HTML pass-through, needed for `<mark>` or `<span class>`)
-- `remark-math` + `rehype-katex` (math — should be present already from existing formulas)
-- Custom blockquote renderer (for callouts)
-- Syntax highlighting (existing via `react-syntax-highlighter`)
-
-Step 2 — fix gaps:
-1. **Callout styling (PRIMARY DELIVERABLE)**: Implement a custom rehype/remark transform or react-markdown component override for blockquote. Detect `> **GOOD**:` / `> **BAD**:` / `> **NOTE**:` literal prefixes and apply corresponding CSS classes (`.callout-good`, `.callout-bad`, `.callout-note`). Other blockquotes render default. Test on id=18 drawer once T-P0-514's Appendix A.1 lands.
-2. **GFM enable**: ensure tables with alignment (`| :---: |`) render correctly, horizontal scroll on narrow drawers
-3. **Inline code contrast**: give `` `inline code` `` a distinct background tint + monospace
-4. **Nested list indentation**: 3+ level nested bullets render with clear visual hierarchy
-5. **Section spacing**: more breathing room between `## ` sections
-
-## Scope discipline
-- Drawer-only changes
-- No content mutations (that's 515/516/518)
-- No changes to KG canvas, TreeNav, or any page outside the drawer component
-
-## Deliverables
-1. Audit findings as a brief note in the autonomous session's PROGRESS.md entry
-2. Updates to `src/frontend/src/components/framework/FrameworkNodeDrawer.tsx` and its markdown renderer
-3. If a new remark/rehype plugin is introduced, add it to `package.json` deps and TS types
-4. Regression tests (snapshot or DOM-assertion) covering: callout rendering (3 types), table alignment, inline code, nested list
-
-## Acceptance Criteria
-- [ ] Audit findings documented (in session PROGRESS.md)
-- [ ] `> **GOOD**: …` renders with green left-border + light-green background
-- [ ] `> **BAD**: …` renders with red left-border + light-red background
-- [ ] `> **NOTE**: …` renders with blue left-border + light-blue background
-- [ ] Other blockquotes (no matching prefix) render default (fallback)
-- [ ] Tables with `:---:` alignment render correctly; narrow drawers get horizontal scroll
-- [ ] Inline code has distinct background + monospace (test on id=18 once it has Appendix A.1)
-- [ ] Nested lists 3+ levels render with visible indentation tiers
-- [ ] Regression: id=18, id=92, id=198 drawers all render cleanly — no broken formatting, math intact, code fences intact
-- [ ] `npm run build` 0 TS errors
-- [ ] `npm test` all green (may add new tests for callout rendering)
-- [ ] Manual smoke: open all three drawers — visual polish noticeably improved
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -197,6 +142,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
 - [x] **2026-04-19** -- T-P1-520: T-LC-399-NOTES: Add LC 399 Evaluate Division double-solution notes + mark completed + link framework. ## Context
 - [x] **2026-04-19** -- T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete). ## Context
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem

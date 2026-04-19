@@ -62,6 +62,22 @@ describe("MarkdownPreview tables (GFM with alignment)", () => {
     expect(html).toContain("a1");
     expect(html).toContain("b2");
   });
+
+  it("preserves :---: column alignment via inline style on <th>/<td>", () => {
+    // remark-gfm encodes alignment as inline style="text-align:..." on each
+    // cell, which must beat the prose-th:text-left utility class. Lock the
+    // contract so future class refactors do not silently flatten alignment.
+    const md = [
+      "| Center | Right |",
+      "| :---: | ----: |",
+      "| c1 | r1 |",
+    ].join("\n");
+    const html = render(md);
+    expect(html).toMatch(/<th[^>]*style="[^"]*text-align:\s*center/);
+    expect(html).toMatch(/<th[^>]*style="[^"]*text-align:\s*right/);
+    expect(html).toMatch(/<td[^>]*style="[^"]*text-align:\s*center/);
+    expect(html).toMatch(/<td[^>]*style="[^"]*text-align:\s*right/);
+  });
 });
 
 describe("MarkdownPreview inline code and lists", () => {
