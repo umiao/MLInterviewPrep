@@ -5,58 +5,6 @@
 
 ## In Progress
 
-#### T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-514, T-P0-519
-- **Description**: ## Context — ITERATION 2
-First iteration (commit 004e351, docs/mlsd_pilot_92_s2_20260418.md) passed regex gates + Gate 10 LLM-judge but user review found the RULES too lax: only 1-2 alternatives per tech-choice, implicit choices (WebSocket, sticky-session) bypassed triage, length under-delivers depth. T-P0-519 tightens A.1 to A.1.v2 with Rule 3 (≥3 alternatives + why-not each), Rule 6 (implicit choices caught by writer discipline), Rule 7 (≥3 preemptive follow-ups per choice), expanded Gate 9 regex + new Gate 12. This task re-pilots §2 of id=92 under the tightened rules.
-
-Iteration-1 pilot doc is PRESERVED as evidence — DO NOT delete `docs/mlsd_pilot_92_s2_20260418.md`. This task writes to a DIFFERENT file: `docs/mlsd_pilot_92_s2_v2_20260418.md`.
-
-## CRITICAL — this task does NOT mark itself completed
-Same as iteration-1: autonomous session leaves `status=in_progress` after producing the pilot. Human reviews in Discord and manually flips to completed after approval — that's what unblocks T-P0-515/516.
-
-## Scope — re-rewrite ONLY §2 of id=92 under A.1.v2 (tightened) rules
-
-Steps:
-1. Load id=92 V1 content (9727 chars, commit 589dad8), extract §2 (same as iteration-1)
-2. Rewrite §2 under:
-   - A.1 original rules (Section Contract, Acronym per-section, Specificity boundaries, Patch-ban)
-   - A.1.v2 amendments from T-P0-519:
-     - Rule 3 upgraded: ≥3 alternatives + why-not each + switch-trigger (pick + reason + 3 alternatives with explicit why-not + trigger)
-     - Rule 6: scan for IMPLICIT tech choices (product/protocol names in prose) — at minimum must triage: `Redis GEO`, `Redis` (hot), `PostgreSQL`, `Cassandra`, `Kafka`, `S3`, `WebSocket`, `sticky session`, `load balancer`
-     - Rule 7: every tech-choice gets "**常见追问**" footnote with ≥3 preemptive Q&As
-   - Gate 12 (≥3 alternatives required per choice, regex-auditable)
-3. Expected length: iteration-1 §2 was 1861 chars. Iteration-2 §2 target **4500-6000 chars** (roughly 2.5-3× due to richer triage + follow-up footnotes)
-4. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section 2 --report-only` on new §2 content — must PASS gates 7/8/9/11/12
-5. Run `scripts/llm_judge_mlsd.py --v1-text <iter1 §2> --v2-text <iter2 §2>` — iter-2 must STRICTLY improve on all 4 dimensions (readability / triage / density / follow-up preemption)
-6. Write `docs/mlsd_pilot_92_s2_v2_20260418.md`:
-   - Iter-1 §2 (from `docs/mlsd_pilot_92_s2_20260418.md` §2 block) as "previous version"
-   - Iter-2 §2 rewrite
-   - side-by-side diff highlighting: new alternatives added, follow-up footnotes, length delta
-   - regex audit report (5 gates: 7/8/9/11/12)
-   - LLM-judge 4-dimension scores with rationale
-   - writer observations on A.1.v2 rules (ambiguity/edge cases)
-7. Commit the pilot doc + PROGRESS.md entry
-8. Leave task status `in_progress` — human approves, flips to completed
-
-## Deliverables
-- `docs/mlsd_pilot_92_s2_v2_20260418.md` — iter-2 pilot artifact
-- Iteration-1 pilot doc preserved untouched
-- No DB mutations on framework_nodes
-
-## Acceptance Criteria
-- [ ] `docs/mlsd_pilot_92_s2_v2_20260418.md` exists with all 5 sections (iter-1 §2, iter-2 §2, diff, audit report, LLM-judge, observations)
-- [ ] Iter-2 §2 length 4500-6000 chars
-- [ ] Passes regex gates 7/8/9/11/12 (all 5 including new Gate 12)
-- [ ] Gate 10 LLM-judge: iter-2 STRICTLY > iter-1 on ALL 4 dimensions (new 4th: follow-up preemption)
-- [ ] Every named tech-choice in iter-2 §2 has ≥3 alternatives with explicit why-not each
-- [ ] Every named tech-choice has `**常见追问**` block with ≥3 Q&As
-- [ ] Iteration-1 pilot doc `docs/mlsd_pilot_92_s2_20260418.md` UNCHANGED
-- [ ] PROGRESS.md entry appended; session_state.json notes all_done=false (518 still in_progress)
-- [ ] **Task status remains `in_progress`** — do NOT auto-complete
-
 #### T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling)
 - **Priority**: P2
 - **Complexity**: M
@@ -116,58 +64,6 @@ Step 2 — fix gaps:
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-514, T-P0-518, T-P0-519
-- **Description**: ## Context
-Depends on T-P0-514 (Writing Discipline rules + 4 regex gates + LLM-judge) AND T-P0-518 (pilot rewrite of §2 approved by human). V1 of id=92 (commit 589dad8) passes all 6 original mechanical gates but fails the new prose gates. This V2 rewrites the same content under the new rules.
-
-**CRITICAL — this task does NOT auto-start after 518 completes.** The pilot task 518 produces a side-by-side document for human review; user must approve in Discord before this task actually unblocks. Treat the Discord approval as the logical unblock even though the DB-level dependency is already satisfied.
-
-## Execution mode — SECTION-BY-SECTION (not single-pass)
-
-Reviewer insight: single-pass rewrite of a long doc will degrade to patch-style (V1 + filler sentences). To prevent this, execute section-by-section:
-
-1. Load V1 content (9727 chars)
-2. Split V1 into sections by `## ` headings
-3. Use T-P0-518's pilot §2 as the paired-transfer reference (shows the BEFORE state of that one section AND the approved AFTER state). All other sections follow the same transformation pattern.
-4. For each section §0 through §6 + sub-sections (4a, 4b, 4c, 4d), one at a time:
-   a. Apply the 4 Writing Discipline rules (Section Contract, Acronym per-section, Triage 4-element, Specificity discipline)
-   b. Run `scripts/audit_mlsd_prose_quality.py --node-id 92 --section N` (hypothetical on the new content) on the rewritten section — gates 7/8/9/11
-   c. Run `scripts/llm_judge_mlsd.py` comparing that section's V1 vs new — gate 10, must strictly improve on all 3 dimensions
-   d. If any gate FAILS: abort the task with diagnostic, do NOT continue to next section. Write failure state to `logs/worked_92_v2_fail.md`
-5. Only after ALL sections pass both regex and LLM-judge gates, assemble the full V2 document
-6. Run audits on the FULL document one more time (per-document gates 7/11 + LLM-judge on full doc)
-7. Seed script runs with hash-short-circuit idempotency; DB backup + history row; UPDATE id=92
-
-## Hard rules (preserve V1 intent)
-- All existing ML content (surge pricing formula, ETA decomposition, Hungarian algorithm, H3/S2/GeoHash tradeoff, Pareto frontier, greedy code, VRP formulation, key metrics table) MUST REMAIN
-- §4d "Deep Dive: Domain ML Content" structure from V1 preserved
-- Callout convention from T-P0-514 (`> **GOOD**:` / `> **BAD**:` / `> **NOTE**:`) used whenever inserting examples
-- Length target: 11000-14500 chars (grows from 9727 — +15-50% from prose + triage expansions)
-
-## Deliverables
-Idempotent seed script `scripts/seed_node_92_marketplace_v2_20260418.py`:
-- DB backup + history row (capture V1)
-- Section-by-section audit + LLM-judge loop
-- Final full-document audit + LLM-judge pass required before UPDATE
-- Hash-short-circuit idempotent
-
-## Acceptance Criteria
-- [ ] Upstream block verified: T-P0-518 completed AND human approval confirmed in Discord/PROGRESS.md before this task starts
-- [ ] id=92 description: 11000-14500 chars
-- [ ] ALL 10 Quality Gates pass per-section AND full-document (Gates 1-9, 10, 11 from id=18 Appendix A + A.1)
-- [ ] Every §0-§6 has Section Contract structure (opening ≥ 60 chars prose + closing bridge)
-- [ ] Every tech-choice has Rule 3 triage shape with 4 elements visible in prose (not just in tradeoff table)
-- [ ] Every section's first-occurrence acronym is expanded per Rule 2
-- [ ] Patch-style ban (Gate 11): every section has `prose_lines ≥ bullet_lines`
-- [ ] Gate 10 LLM-judge: V2 strictly > V1 on readability / triage / density per-section AND full-doc
-- [ ] All V1 ML content preserved (grep checkpoints: "surge_multiplier", "Hungarian", "VRP", "Pareto", "H3")
-- [ ] history row captures 9727-char V1
-- [ ] `npm run build` green
-- [ ] Manual smoke: /kg?node=n92 reads as coherent narrative with working GOOD/BAD callouts (if T-P2-517 has landed)
-
 #### T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules
 - **Priority**: P0
 - **Complexity**: M
@@ -215,6 +111,129 @@ V1 = 19457 chars. V2 target = 23000-28000 chars (+20-45% from added prose + tria
 - [ ] Manual smoke: /kg?node=n198 reads as coherent narrative
 
 ### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-520: T-LC-399-NOTES: Add LC 399 Evaluate Division double-solution notes + mark completed + link framework
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Context
+LC 399 Evaluate Division already exists in `problems` table (id=227, leetcode_id=399, title="Evaluate Division") but has `is_completed=0`, `notes=NULL`, `framework_node_id=NULL`, `family=NULL`. User shared 2 solutions (Union-Find with weighted edges + BFS-on-graph) on Discord 2026-04-19 with emphasis on the Union-Find formula derivation difficulty and the find-time reverse-order weight update pattern.
+
+## Scope
+Write a Chinese-prose dual-solution note for `problems.notes`, link to the relevant framework node, mark completed. Follow the `feedback_lc_notes_chinese` memory (Chinese prose + English code / algorithm names / complexity).
+
+### User's shared solutions (verbatim, to be preserved in notes)
+
+**Solution 1 — Weighted Union-Find**:
+```python
+class Solution:
+    def calcEquation(self, equations, values, queries):
+        parent, weight, rank = {}, {}, {}
+        def add(x):
+            if x not in parent:
+                parent[x] = x; weight[x] = 1.0; rank[x] = 0
+        def find(x):
+            if parent[x] != x:
+                root = find(parent[x])
+                weight[x] *= weight[parent[x]]   # 路径压缩时把边权累乘
+                parent[x] = root
+            return parent[x]
+        def union(a, b, k):  # a/b = k
+            add(a); add(b)
+            rootA, rootB = find(a), find(b)
+            if rootA == rootB: return
+            if rank[rootA] < rank[rootB]:
+                parent[rootA] = rootB
+                weight[rootA] = k * weight[b] / weight[a]
+            elif rank[rootA] > rank[rootB]:
+                parent[rootB] = rootA
+                weight[rootB] = weight[a] / (k * weight[b])
+            else:
+                parent[rootB] = rootA
+                weight[rootB] = weight[a] / (k * weight[b])
+                rank[rootA] += 1
+        for (a, b), v in zip(equations, values):
+            union(a, b, v)
+        res = []
+        for a, b in queries:
+            if a not in parent or b not in parent or find(a) != find(b):
+                res.append(-1.0)
+            else:
+                res.append(weight[a] / weight[b])
+        return res
+```
+
+**Solution 2 — BFS on weighted graph**:
+```python
+class Solution:
+    def calcEquation(self, equations, values, queries):
+        graph = defaultdict(dict)
+        for (a, b), v in zip(equations, values):
+            graph[a][b] = v
+            graph[b][a] = 1.0 / v
+        res = []
+        for a, b in queries:
+            if a not in graph or b not in graph:
+                res.append(-1.0); continue
+            if a == b:
+                res.append(1.0); continue
+            q = deque([(1.0, a)]); visited = {a}; found = False
+            while q:
+                product, src = q.popleft()
+                for nxt in graph[src]:
+                    if nxt in visited: continue
+                    visited.add(nxt)
+                    new_val = product * graph[src][nxt]
+                    if nxt == b:
+                        res.append(new_val); found = True; break
+                    q.append((new_val, nxt))
+                if found: break
+            if not found: res.append(-1.0)
+        return res
+```
+
+## Notes content requirements (Chinese-prose, English-code)
+
+The `problems.notes` Markdown must cover:
+
+1. **问题本质**: 把 `a/b=k` 建模成图/并查集的一条边，查询 `x/y` 是问 x 到 y 的路径累乘权重。这是"带权并查集"和"图上路径查询"的双模板题。
+
+2. **双解对照**:
+   - Union-Find 版本更优（均摊 O(α(n))），但权重公式推导是难点
+   - BFS 版本更直观、代码短，适合面试现场讲思路；复杂度 O(Q·(V+E))
+
+3. **Union-Find 权重推导** (用户强调的难点):
+   - `find(x)` 路径压缩时：`x → parent[x] → root`，原本 `x/parent[x] = weight[x]`、`parent[x]/root = weight[parent[x]]`，合并后 `x/root = weight[x] * weight[parent[x]]`，所以 `weight[x] *= weight[parent[x]]`。**必须 reverse 顺序递归——先把 parent 连到 root 再更新 x，否则 weight[parent[x]] 还没被 compress**。
+   - `union(a, b, k)` 把 rootA 挂到 rootB 下时：已知 `a/rootA = weight[a]`、`b/rootB = weight[b]`、`a/b = k`，推 `rootA/rootB = (a/rootA)⁻¹ * (a/b) * (b/rootB) = (1/weight[a]) * k * weight[b] = k * weight[b] / weight[a]`。
+
+4. **BFS 关键**: 建无向图时把反向边 `1/v` 也加；查询时 product 累乘到目标节点。
+
+5. **复杂度对比表** (Markdown table).
+
+6. **常见陷阱**:
+   - 查询的节点不在 `parent`/`graph` 里直接返回 -1.0
+   - a==b 且都存在时返回 1.0（注意单独判，BFS 会漏）
+   - 除零不会发生（题目保证 values 非零）
+   - Union-Find rank 合并时不能写反（否则鼓包）
+
+## Deliverables
+Idempotent seed script `scripts/seed_lc_399_notes_20260419.py`:
+- DB backup timestamped
+- UPDATE `problems` WHERE leetcode_id=399 SET `is_completed=1`, `notes=<Chinese-prose notes>`, `family='union_find_weighted'` (and add family to QuickIndex FAMILY_LABELS if not exists)
+- Optionally `framework_node_id=51` (Union-Find) — use 51 since weighted UF is the more distinctive technique here
+- Hash-check idempotent (second run: "notes unchanged")
+
+Also update `src/frontend/src/pages/QuickIndex.tsx` if `union_find_weighted` is a new family:
+- Add FAMILY_LABELS entry: `union_find_weighted: "Weighted Union-Find"`
+- Add LC_PROBLEMS entry for LC 399 with dbId=227
+
+## Acceptance Criteria
+- [ ] `scripts/seed_lc_399_notes_20260419.py` exists, idempotent
+- [ ] `problems` row for leetcode_id=399: `is_completed=1`, `notes` non-empty (~1500+ chars), `family='union_find_weighted'`, `framework_node_id=51`
+- [ ] QuickIndex shows new "Weighted Union-Find" family with LC 399 (if new family added)
+- [ ] Notes include BOTH solutions verbatim + the Union-Find weight-derivation explanation + BFS walkthrough + complexity comparison + pitfalls
+- [ ] `npm run build` 0 TS errors
+- [ ] Manual smoke: /quick-index?section=lc → click LC 399 → ProblemDrawer opens with the Chinese-prose notes rendered
 
 ### P2 -- Nice to Have
 
@@ -301,10 +320,12 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 478 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-19** -- T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete). ## Context
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
 - [x] **2026-04-18** -- T-P1-513: T-MLSD-WORKED-198: Upgrade Real-Time Rec System (id=198) with L5 skeleton. ## Context
 - [x] **2026-04-18** -- T-P1-512: T-MLSD-WORKED-92: Upgrade Marketplace & Logistics (id=92) to L5-bar gold standard. ## Context
 - [x] **2026-04-18** -- T-P1-511: T-MLSD-AUDIT-01: Score 10 design problems against L5 framework, produce gap report. ## Context
 - [x] **2026-04-18** -- T-P0-519: T-MLSD-FRAMEWORK-03: Tighten Appendix A.1 — Rule 3 ≥3 alternatives + expanded Gate 9 regex + Rule 6 follow-up preemption + raised length targets. ## Context
+- [x] **2026-04-18** -- T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate. ## Context — ITERATION 2
 - [x] **2026-04-18** -- T-P0-514: T-MLSD-FRAMEWORK-02: Append Writing Discipline rules to id=18 Appendix A (5 rules + examples + heuristic gates). ## Context

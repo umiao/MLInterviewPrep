@@ -34,6 +34,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+if sys.platform == "win32" and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 DEFAULT_MODEL = "claude-sonnet-4-6"
 PER_CALL_TIMEOUT_S = 600
 
@@ -72,10 +76,12 @@ def call_claude(v1_text: str, v2_text: str, model: str) -> dict:
         f"{v2_text}\n"
         "--- V2 END ---"
     )
+    # Pipe the prompt via stdin so payloads >8K chars don't exceed the
+    # Windows CreateProcess command-line limit (encountered on full-doc
+    # V1 vs V2 judging where the combined text runs ~35K chars).
     cmd = [
         "claude",
         "-p",
-        user_prompt,
         "--model",
         model,
         "--system-prompt",
@@ -90,6 +96,7 @@ def call_claude(v1_text: str, v2_text: str, model: str) -> dict:
     ]
     result = subprocess.run(
         cmd,
+        input=user_prompt,
         capture_output=True,
         text=True,
         encoding="utf-8",
