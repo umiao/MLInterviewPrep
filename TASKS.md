@@ -11,7 +11,88 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
+#### T-P1-535: T-GOOG-REORG-SLIM51: Slim id=51 by replacing Round 1 ML-dims + Round 2 G&L-attrs with db://38 refs (~6213→~4500 chars)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Context
+id=51 (Interview Prep Note) currently duplicates content from id=38 (Recruiter Call Prep):
+- §Round 1 > '面试官期待的维度 (来自 recruiter call)' 1-4 bullets match id=38 §Recruiter Call 关键要点 > ML Domain 考察方向 1-4
+- §Round 2 > 'Google Hiring Attributes 4 表格' overlaps id=38 §G&L 考察方向 1-3
+
+Per user's reorg direction: id=38 preserved byte-identical, id=51 becomes slim live-execution doc.
+
+## Scope
+Edit company_documents id=51 content only:
+1. Replace Round 1 §'面试官期待的维度' subsection with short paragraph:
+   > 📖 四个考察维度详见 [Recruiter Call Prep](db://38) §ML Domain Interview 考察方向
+2. Replace Round 2 §'Google 的 Hiring Attributes (4 条)' table with:
+   > 📖 4 Hiring Attributes + 5 Googleyness 子信号详见 [Recruiter Call Prep](db://38) §G&L 考察方向
+3. Keep everything else untouched: 日程, Day-of Logistics, 深度问答准备, 快速复习 pointer, 开场自我介绍, Story Short-list, Last-minute 心态.
+
+id=38 MUST be byte-identical (verify sha256 pre/post).
+
+## Deliverables
+- scripts/seed_google_prep_slim51_20260419.py idempotent, sentinel-gated
+- id=51 final 4200-4800 chars
+
+## Acceptance Criteria
+- [ ] id=51 length in target range
+- [ ] id=38 sha256 unchanged
+- [ ] Both db://38 references resolve
+- [ ] 日程 table (4/20 mock + 4/21 R1 x2) preserved exactly
+- [ ] Story Short-list + bq_improved_stories.md links preserved
+- [ ] Second seed run = 0 writes
+
 ### P2 -- Nice to Have
+
+#### T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Context
+Flat list on /companies/3/prep doesn't visually group docs by topic. Add title prefix so alphabetical sort auto-buckets.
+
+## Scope
+UPDATE company_documents.title ONLY (content untouched). 14 docs + buckets:
+
+**Quick-review** (2):
+- id=52 'Google DNN / Key Papers Gist' → '[R1/Quick] Google DNN / Key Papers Gist'
+- id=57 'Staging 13 Flashcards (Google R1 Prep)' → '[R1/Quick] Staging 13 Flashcards'
+
+**Fundamentals** (2):
+- id=55 → '[R1/Fund] Regularization Deep Dive'
+- id=56 → '[R1/Fund] Bias-Variance + Overfitting Diagnosis'
+
+**Ranking losses & metrics** (3):
+- id=60 → '[R1/Rank] LambdaRank / LambdaMART'
+- id=61 → '[R1/Rank] NDCG / MAP / MRR + Position Bias'
+- id=65 → '[R1/Rank] Multi-Objective Ranking (DPP / MMR)'
+
+**Calibration & eval** (3):
+- id=62 → '[R1/Eval] Calibration: Platt / Isotonic / Temperature'
+- id=63 → '[R1/Eval] IPS / Counterfactual / Debiased NDCG'
+- id=67 → '[R1/Eval] A/B Test Rigor: Sample Size / SRM / CUPED'
+
+**Retrieval & embeddings** (2):
+- id=72 → '[R1/Retr] MF to Two-Tower Bridge'
+- id=64 → '[R1/Retr] Two-Tower Retrieval Deep Dive'
+
+**Production gotchas** (2):
+- id=68 → '[R1/Prod] Feature Drift: PSI / KL / JS / KS'
+- id=69 → '[R1/Prod] Train-Serve Skew / Leakage / Temporal Split'
+
+Tier-1/Tier-2 (id=38, 51, 53) titles UNCHANGED.
+
+## Deliverables
+- scripts/seed_google_prep_title_prefix_20260419.py idempotent
+- 14 title UPDATEs; content column untouched
+
+## Acceptance Criteria
+- [ ] 14 titles match expected pattern [R1/<bucket>] <slimmed title>
+- [ ] Second seed run = 0 writes
+- [ ] Original 3 prep_note/hub titles (id=38/51/53) unchanged
+- [ ] /companies/3/prep doc drawer shows buckets visually grouped (alphabetical sort within brackets)
 
 ### P3 -- Stretch Goals
 
@@ -99,6 +180,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%). ## Context
 - [x] **2026-04-19** -- T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack. CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+- [x] **2026-04-19** -- T-P1-534: T-GOOG-REORG-HUB: Rewrite id=53 Prep Hub to pure 3-tier navigation index (~3558→~700 chars). ## Context
 - [x] **2026-04-19** -- T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN). ## Context
 - [x] **2026-04-19** -- T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN). ## Context
 - [x] **2026-04-19** -- T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete). ## Context
