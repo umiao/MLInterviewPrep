@@ -13,30 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Context
-Depends on T-P0-519. Apply Uniform Migration Recipe to id=95 Fraud & Trust Safety. V1 ~5040 chars, standard 8-heading skeleton.
-
-## Execution mode
-SECTION-BY-SECTION per A.1.v2. Abort on failure.
-
-## Domain-specific focus for id=95 (Fraud & Trust Safety)
-- Capacity: transaction-heavy products (Stripe/Square/banking), 10-100K TPS transaction classification, p99 <50ms, extreme class imbalance (<0.1% positive)
-- Service split: Feature Extraction / Rule Engine (deterministic) / ML Classifier (learned) / Decision Aggregator / Human Review Queue / Feedback Loop
-- Tech choices (Rule 3 ≥3 alt + Rule 7): supervised (GBDT/XGBoost vs DNN vs graph-based like GraphSAGE); unsupervised (Isolation Forest vs autoencoder vs clustering); graph features (GNN vs hand-crafted vs subgraph matching); calibration under extreme imbalance; rule engine (Drools vs home-grown DSL vs learned rules); feedback loop (active learning vs auto-labeling vs human-in-loop)
-- Key follow-ups: label delay (fraud ground truth takes days-weeks), concept drift (fraudsters adapt), explanability for human reviewers + regulators (SHAP/LIME/counterfactual), adversarial robustness, data sparsity for new user segments, privacy (GDPR) + fairness constraints
-
-## Deliverables
-`scripts/seed_node_95_fraud_v2_20260419.py` idempotent.
-
-## Length target V1 ~5040 → V2 12000-17000 chars.
-
-## Acceptance Criteria
-Standard A.1.v2 gates.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -126,5 +102,6 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN). ## Context
 - [x] **2026-04-19** -- T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN). ## Context
 - [x] **2026-04-19** -- T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete). ## Context
+- [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
