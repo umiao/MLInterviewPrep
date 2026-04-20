@@ -9,21 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-542: [T-MLF-05] T2 content fill Cat 5 (6 Q: Attention & Transformer)
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-541
-- **Description**: Write description markdown for 6 leaves:
-  #15 Self-Attention Complexity (merge with its linear-attention deep-dive subsection)
-  #16 Scaled Dot-Product (why /√d)
-  #17 MHA/MQA/GQA — REBUILD the comparison table (original is collapsed in attachment)
-  #18 Position Encoding (Sinusoidal/Learned/RoPE/ALiBi)
-  #19 KV Cache — FIX the LLaMA-2-7B memory formula (original is mis-formatted)
-  #20 Pre-norm vs Post-norm
-
-T2 = polish: full acronym expansion (SSM, HBM, SRAM, RoPE, ALiBi, NTK, YaRN, QK-Norm, µP) + format-bug fixes.
-Via scripts/seed_ml_fundamentals_content_cat5.py (idempotent).
-
 #### T-P0-543: [T-MLF-06a] [BARRIER] T3 Y-depth #21 SFT/RLHF/DPO (calibration session)
 - **Priority**: P0
 - **Complexity**: M
@@ -218,6 +203,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P0-548: [T-MLF-08] Sidebar navItem + route wiring. Edit src/frontend/src/components/Sidebar.tsx:
 - [x] **2026-04-19** -- T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link. Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
+- [x] **2026-04-19** -- T-P0-542: [T-MLF-05] T2 content fill Cat 5 (6 Q: Attention & Transformer). Write description markdown for 6 leaves:
 - [x] **2026-04-19** -- T-P0-541: [T-MLF-04] T1 content fill Cat 3-4 (7 Q: Unsupervised + DL Training). Write description markdown for 7 leaves per the canonical template (from gamma_barrier):
 - [x] **2026-04-19** -- T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet. BARRIER TASK: runner MUST stop here pending user review. Steps:
 - [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
