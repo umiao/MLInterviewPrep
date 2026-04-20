@@ -414,3 +414,11 @@
 - **Sanity check result**: All user critiques cross-checked against workspace constraints (CLAUDE.md serial-execution rule + memory feedback_serial_execution confirmed parallel push-back). Re-read attachment lines 1691-1717 to validate #25 upgrade call (~60% Y coverage justifies Y-tier lift at ~35min cost). Revised task time budget: 8h pure work × 1.6 session-overhead = ~5h wall-clock.
 - **Status**: [AWAITING-REVIEW-v2]
 - **Next**: On user final ack -> `task_db.py batch` with 13 task specs + depends_on chain including two explicit barriers (after γ.5 and after ζ₁) for manual mid-checkpoint review -> `scripts/autonomous_run.sh`.
+
+## 2026-04-20 -- [T-P0-537] [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq)
+- **What I did**: Parsed the 85KB high-freq ML attachment at `inbox/1776657806963-1495635943351128184.txt` (lines 22-1796) into `data/ml_fundamentals_inventory.yaml`. 27 items keyed by stable `id` 1..27, each with `slug`, `category` (classical_ml/eval_data/unsupervised/dl_training/attention_transformer/llm_stats), `tier` (T1 cleanup workload / T2 moderate / T3 deep — decoupled from freq per v2 plan), `interview_freq` (high/mid/low — orthogonal), `line_range` (source slice), bilingual titles, `acronyms_to_expand` (drawing from feedback_content_style_cn_en — e.g., DPO, SwiGLU, FWER, BH, SMOTE), and per-item `cleanup_notes` noting the LaTeX/Unicode double-render pattern to dedupe plus section-specific fixes (RoPE rotation identity, Switch aux loss formula, Chinchilla 20 tokens/param correction, etc.).
+- **Deliverables**:
+  - `data/ml_fundamentals_inventory.yaml` (new, 348 lines)
+- **Sanity check result**: Validation script confirmed all 4 ACs: (1) file parses as valid YAML, (2) exactly 27 items with contiguous ids 1..27, (3) CE/KL (id=14, slug=`cross-entropy-kl-divergence`) landed in `classical_ml` not `eval_data` per v2 plan, (4) `interview_freq` present + valid on every row. Category distribution: classical_ml=5, eval_data=2, unsupervised=2, dl_training=5, attention_transformer=6, llm_stats=7 (=27). Tier distribution: T1=14, T2=6, T3=7 matches the Task 3/4/5/6 fill-batch splits. Slugs unique; line_ranges monotonic non-overlapping over source.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-537 --status completed`

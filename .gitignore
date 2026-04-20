@@ -22,7 +22,9 @@ dist/
 build/
 
 # Data (runtime data not tracked)
-data/
+data/*
+# ...except authoring-source inventories that drive idempotent seed scripts
+!data/ml_fundamentals_inventory.yaml
 
 # IDE
 .vscode/

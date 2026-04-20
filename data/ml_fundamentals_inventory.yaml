@@ -1,0 +1,457 @@
+# ML Fundamentals Portal — Inventory (27 high-frequency questions)
+#
+# Source: C:/Users/Shenghui Xu/.claude/channels/discord/inbox/
+#         1776657806963-1495635943351128184.txt (lines 22-1796)
+# Schema:
+#   - id:              1..27 (stable; matches numbering in T-MLF-06a/b/c/d specs)
+#   - slug:            kebab-case, URL-safe identifier
+#   - category:        classical_ml | eval_data | unsupervised | dl_training |
+#                      attention_transformer | llm_stats
+#   - tier:            T1 | T2 | T3  (cleanup workload: T1 = minor polish,
+#                      T2 = moderate reformat, T3 = deep expansion/rewrite)
+#   - interview_freq:  high | mid | low  (orthogonal to tier; how often asked)
+#   - line_range:      [start, end]  (slice of the source attachment)
+#   - title_zh:        Chinese primary title (narration language)
+#   - title_en:        English canonical title (for search + URL fallback)
+#   - acronyms_to_expand: list of acronyms that must be fully expanded on
+#                         first mention per feedback_content_style_cn_en
+#   - cleanup_notes:   string describing required edits for this item
+#
+# Category breakdown (decoupled tier vs freq, per plan v2):
+#   classical_ml          (5): #1 #2 #3 #4 #14   [CE/KL moved here from eval_data]
+#   eval_data             (2): #5 #6
+#   unsupervised          (2): #7 #8
+#   dl_training           (5): #9 #10 #11 #12 #13
+#   attention_transformer (6): #15 #16 #17 #18 #19 #20
+#   llm_stats             (7): #21 #22 #23 #24 #25 #26 #27
+#
+# Tier assignment (cleanup workload, per v2 plan Tasks 3-6):
+#   T1 (14 items): all of classical_ml + eval_data + unsupervised + dl_training
+#   T2  (6 items): attention_transformer
+#   T3  (7 items): llm_stats  (Y-depth: #21/#22/#25; X-depth: #23/#24/#26/#27)
+
+items:
+  - id: 1
+    slug: bias-variance-tradeoff
+    category: classical_ml
+    tier: T1
+    interview_freq: high
+    line_range: [22, 75]
+    title_zh: Bias-Variance 权衡
+    title_en: Bias-Variance Tradeoff
+    acronyms_to_expand: [MSE, IID]
+    cleanup_notes: >-
+      Dedupe LaTeX/Unicode double-render in expectations and variance
+      formulas; clarify that the "tradeoff" holds only in the classical
+      under-parameterized regime (double-descent caveat); keep the
+      add-and-subtract f-bar derivation step.
+
+  - id: 2
+    slug: l1-vs-l2-regularization
+    category: classical_ml
+    tier: T1
+    interview_freq: high
+    line_range: [77, 208]
+    title_zh: L1 vs L2 正则化
+    title_en: L1 vs L2 Regularization
+    acronyms_to_expand: [MAP, MLE, KKT]
+    cleanup_notes: >-
+      Dedupe LaTeX/Unicode formula twins; preserve both subgradient view
+      (why L1 can land on zero) and geometric view (L1 ball corners vs
+      L2 ball tangency); connect to Laplace/Gaussian prior via MAP.
+
+  - id: 3
+    slug: logistic-regression-loss
+    category: classical_ml
+    tier: T1
+    interview_freq: high
+    line_range: [210, 283]
+    title_zh: Logistic Regression 损失函数
+    title_en: Logistic Regression Loss
+    acronyms_to_expand: [CE, MLE, SGD, BCE]
+    cleanup_notes: >-
+      Dedupe formula twins; keep both derivations (MLE of Bernoulli ->
+      NLL == BCE, and sigmoid + cross-entropy cancels into clean
+      gradient p - y); note why squared loss is non-convex here.
+
+  - id: 4
+    slug: gbdt-vs-rf-xgboost
+    category: classical_ml
+    tier: T1
+    interview_freq: high
+    line_range: [284, 360]
+    title_zh: GBDT vs Random Forest + XGBoost 改进
+    title_en: GBDT vs Random Forest + XGBoost Improvements
+    acronyms_to_expand: [GBDT, RF, XGBoost, LightGBM, OOB]
+    cleanup_notes: >-
+      Dedupe LaTeX twins; keep bias-variance framing (RF reduces
+      variance via bagging, GBDT reduces bias via sequential residual
+      fitting); enumerate XGBoost deltas (2nd-order Taylor, regularized
+      objective, sparsity-aware split, histogram binning).
+
+  - id: 5
+    slug: class-imbalance-handling
+    category: eval_data
+    tier: T1
+    interview_freq: high
+    line_range: [361, 444]
+    title_zh: 类别不平衡处理
+    title_en: Class Imbalance Handling
+    acronyms_to_expand: [SMOTE, AUC, PR, ROC]
+    cleanup_notes: >-
+      Dedupe formula twins; structure by three lever categories
+      (data-level resampling, algorithm-level cost/weights, metric
+      choice); flag that accuracy is the wrong metric and why
+      PR-AUC > ROC-AUC at high imbalance.
+
+  - id: 6
+    slug: auc-vs-pr-curve
+    category: eval_data
+    tier: T1
+    interview_freq: high
+    line_range: [446, 533]
+    title_zh: AUC 与 PR 曲线
+    title_en: AUC vs PR Curve
+    acronyms_to_expand: [AUC, PR, ROC, TPR, FPR, TNR, PPV]
+    cleanup_notes: >-
+      Dedupe LaTeX twins; clarify AUC's rank-based interpretation
+      (P(score_pos > score_neg)); explain why PR curve is the right
+      choice under heavy class imbalance.
+
+  - id: 7
+    slug: k-means-assumptions-and-failures
+    category: unsupervised
+    tier: T1
+    interview_freq: high
+    line_range: [534, 600]
+    title_zh: K-means 假设与失败场景
+    title_en: K-means Assumptions and Failure Modes
+    acronyms_to_expand: [WCSS, GMM]
+    cleanup_notes: >-
+      Dedupe formula twins; enumerate failure modes (non-spherical
+      clusters, varying densities, anisotropic shapes, elongated
+      clusters); contrast with GMM (soft assignment + full covariance)
+      and DBSCAN (density-based, no k).
+
+  - id: 8
+    slug: em-and-gmm
+    category: unsupervised
+    tier: T1
+    interview_freq: mid
+    line_range: [601, 714]
+    title_zh: EM + GMM
+    title_en: EM Algorithm with GMM
+    acronyms_to_expand: [EM, GMM, ELBO, KL, MLE]
+    cleanup_notes: >-
+      Dedupe LaTeX twins; preserve compact version (E-step computes
+      posterior responsibilities, M-step does weighted MLE; ELBO
+      decomposition with KL gap); note K-means as hard-assignment
+      limiting case of GMM.
+
+  - id: 9
+    slug: batchnorm-vs-layernorm
+    category: dl_training
+    tier: T1
+    interview_freq: high
+    line_range: [716, 786]
+    title_zh: BatchNorm vs LayerNorm
+    title_en: BatchNorm vs LayerNorm
+    acronyms_to_expand: [BN, LN, RMSNorm, EMA]
+    cleanup_notes: >-
+      Dedupe formula twins; clarify normalization axes (BN over batch
+      dim per channel; LN over feature dim per sample); explain why
+      LN wins for Transformers (sequence-length invariance, no
+      train/infer stats divergence); mention RMSNorm (LLaMA) drops
+      mean-centering.
+
+  - id: 10
+    slug: adam-vs-sgd-adamw
+    category: dl_training
+    tier: T1
+    interview_freq: high
+    line_range: [787, 859]
+    title_zh: Adam vs SGD + AdamW
+    title_en: Adam vs SGD and AdamW
+    acronyms_to_expand: [SGD, Adam, AdamW, EMA]
+    cleanup_notes: >-
+      Dedupe formula twins; preserve Adam derivation (1st/2nd moment
+      EMA + bias correction); explain AdamW's decoupled weight decay
+      fix (why Adam + L2 != weight decay when adaptive lr is
+      applied); note when SGD + momentum still beats Adam (CV, sharp
+      minima argument).
+
+  - id: 11
+    slug: vanishing-exploding-gradient
+    category: dl_training
+    tier: T1
+    interview_freq: mid
+    line_range: [861, 943]
+    title_zh: 梯度消失 / 爆炸
+    title_en: Vanishing / Exploding Gradient
+    acronyms_to_expand: [ReLU, RNN, LSTM, GRU, ResNet]
+    cleanup_notes: >-
+      Dedupe formula twins; keep causal chain (chain-rule product of
+      Jacobian norms); enumerate mitigations (ReLU family, careful
+      init like Xavier/He, residual/skip connections, gradient
+      clipping, gated RNNs LSTM/GRU).
+
+  - id: 12
+    slug: dropout
+    category: dl_training
+    tier: T1
+    interview_freq: mid
+    line_range: [944, 993]
+    title_zh: Dropout
+    title_en: Dropout
+    acronyms_to_expand: []
+    cleanup_notes: >-
+      Dedupe LaTeX twins; clarify inverted-dropout scaling (divide
+      by keep_prob at train time so inference stays identity);
+      explain ensemble/co-adaptation intuition; note that Dropout is
+      a form of stochastic regularization, not used in residual
+      Transformers at attention layer typically.
+
+  - id: 13
+    slug: activation-function-evolution
+    category: dl_training
+    tier: T1
+    interview_freq: mid
+    line_range: [994, 1087]
+    title_zh: 激活函数演进
+    title_en: Activation Function Evolution
+    acronyms_to_expand: [ReLU, GELU, SiLU, Swish, ELU, PReLU, SwiGLU, GLU]
+    cleanup_notes: >-
+      Dedupe formula twins; keep progression (Sigmoid/Tanh ->
+      ReLU/variants -> GELU/SiLU -> SwiGLU/GLU families);
+      pinpoint why smoothness + non-monotonicity help in
+      Transformers; note LLaMA/PaLM use SwiGLU.
+
+  - id: 14
+    slug: cross-entropy-kl-divergence
+    category: classical_ml
+    tier: T1
+    interview_freq: high
+    line_range: [1089, 1207]
+    title_zh: Cross-Entropy 与 KL Divergence
+    title_en: Cross-Entropy and KL Divergence
+    acronyms_to_expand: [CE, KL, NLL, JS, MLE]
+    cleanup_notes: >-
+      Dedupe formula twins; keep the three-concept triangle
+      (Entropy H(P), Cross-Entropy H(P,Q), KL = H(P,Q) - H(P));
+      show why min-CE <=> min-KL when P fixed (MLE connection);
+      compare KL asymmetry vs symmetric JS divergence.
+
+  - id: 15
+    slug: self-attention-complexity-optimization
+    category: attention_transformer
+    tier: T2
+    interview_freq: high
+    line_range: [1208, 1443]
+    title_zh: Self-Attention 复杂度与优化
+    title_en: Self-Attention Complexity and Optimizations
+    acronyms_to_expand: [FLOP, FLOPs, HBM, SRAM, GPU, FA, FlashAttention, ELU]
+    cleanup_notes: >-
+      Long section needing moderate reformat. Dedupe formula twins
+      across derivation; structurally separate (1) standard O(N^2 d)
+      quadratic bound, (2) FlashAttention IO-aware tiling (same
+      math, better memory access), (3) Linear Attention / Performer
+      kernel-feature approximations. Expand FlashAttention and HBM
+      on first mention.
+
+  - id: 16
+    slug: scaled-dot-product-attention
+    category: attention_transformer
+    tier: T2
+    interview_freq: high
+    line_range: [1445, 1511]
+    title_zh: Scaled Dot-Product Attention
+    title_en: Scaled Dot-Product Attention
+    acronyms_to_expand: [QK, LN, RMSNorm, muP]
+    cleanup_notes: >-
+      Moderate reformat. Dedupe formula twins; keep variance
+      derivation (Var(q.k) = d under unit-variance components ->
+      scale by sqrt(d_k) to restore Var=1); clarify why sqrt(d)
+      not d (normalize std, not variance); note QK-Norm (Gemma)
+      as further stabilization.
+
+  - id: 17
+    slug: mha-mqa-gqa
+    category: attention_transformer
+    tier: T2
+    interview_freq: high
+    line_range: [1513, 1533]
+    title_zh: MHA / MQA / GQA 多头注意力权衡
+    title_en: MHA vs MQA vs GQA
+    acronyms_to_expand: [MHA, MQA, GQA, KV]
+    cleanup_notes: >-
+      Moderate reformat. Source is a terse table — expand to prose
+      paragraphs. Dedupe inline formulas; explain why bottleneck is
+      KV-cache (not Q) during decode; quantify memory savings
+      (MHA xh, GQA xg, MQA x1); cite LLaMA-2 70B / Mixtral using
+      GQA with g=8.
+
+  - id: 18
+    slug: positional-encoding
+    category: attention_transformer
+    tier: T2
+    interview_freq: mid
+    line_range: [1535, 1564]
+    title_zh: 位置编码：Sinusoidal / Learned / RoPE / ALiBi
+    title_en: Positional Encoding (Sinusoidal, Learned, RoPE, ALiBi)
+    acronyms_to_expand: [RoPE, ALiBi, NTK, YaRN, PE]
+    cleanup_notes: >-
+      Moderate reformat. Dedupe LaTeX twins; keep the RoPE
+      rotation-invariance identity (inner-product depends only on
+      relative position n-m); explain ALiBi linear distance bias;
+      note why RoPE is mainstream (multiplicative, preserves norm,
+      extends with NTK-aware / YaRN).
+
+  - id: 19
+    slug: kv-cache
+    category: attention_transformer
+    tier: T2
+    interview_freq: mid
+    line_range: [1565, 1598]
+    title_zh: KV cache 原理与显存
+    title_en: KV Cache — Mechanics and Memory Cost
+    acronyms_to_expand: [KV, HBM, MHA, MQA, GQA]
+    cleanup_notes: >-
+      Moderate reformat. Dedupe formula twins; clarify prefill
+      (O(N^2 d)) vs decode (O(Nd)) phases; walk through the
+      memory formula 2 x L x N x n_kv_head x d_head x bytes with
+      LLaMA-2-7B worked example (~2 GB at 4K context).
+
+  - id: 20
+    slug: pre-norm-vs-post-norm
+    category: attention_transformer
+    tier: T2
+    interview_freq: low
+    line_range: [1599, 1610]
+    title_zh: Pre-norm vs Post-norm
+    title_en: Pre-norm vs Post-norm
+    acronyms_to_expand: [LN, RMSNorm]
+    cleanup_notes: >-
+      Moderate reformat; very short source paragraph needs
+      expansion. Dedupe formula twins; explain why pre-norm gives
+      clean identity residual path (stable deep stacking, no
+      warmup needed); document known downside (residual-stream
+      norm growth, final LN required); note LLaMA/GPT/PaLM all
+      pre-norm with RMSNorm.
+
+  - id: 21
+    slug: sft-rlhf-dpo
+    category: llm_stats
+    tier: T3
+    interview_freq: high
+    line_range: [1611, 1628]
+    title_zh: SFT / RLHF / DPO 目标函数
+    title_en: SFT / RLHF / DPO Objectives
+    acronyms_to_expand: [SFT, RLHF, DPO, PPO, RM, KL, MLE]
+    cleanup_notes: >-
+      Y-depth: deep expansion + calibration. Dedupe formula twins;
+      derive DPO closed-form step-by-step (KL-constrained optimum
+      gives pi* ∝ pi_ref * exp(r/beta), invert for r, substitute
+      into Bradley-Terry, Z(x) cancels in pairwise diff); explain
+      why ref model is still needed (KL anchor) but RM is not.
+
+  - id: 22
+    slug: moe-routing-load-balancing
+    category: llm_stats
+    tier: T3
+    interview_freq: mid
+    line_range: [1629, 1655]
+    title_zh: MoE routing 与 load balancing loss
+    title_en: MoE Routing and Load-Balancing Loss
+    acronyms_to_expand: [MoE, TopK]
+    cleanup_notes: >-
+      Y-depth: deep expansion. Dedupe formula twins; walk through
+      Switch Transformer aux loss L_aux = alpha * N * sum(f_i * P_i)
+      (f_i = token fraction, P_i = mean router prob); explain why
+      f*P product penalizes correlated overuse; note capacity
+      factor + token dropping. Contrast Switch (k=1) vs Mixtral
+      (k=2).
+
+  - id: 23
+    slug: tokenization-bpe-wordpiece-sentencepiece
+    category: llm_stats
+    tier: T3
+    interview_freq: mid
+    line_range: [1656, 1669]
+    title_zh: Tokenization：BPE / WordPiece / SentencePiece
+    title_en: Tokenization (BPE, WordPiece, SentencePiece)
+    acronyms_to_expand: [BPE, LM, PMI]
+    cleanup_notes: >-
+      X-depth: moderate expansion (batch task). Source is compact
+      bulleted list, expand to prose. Explain merge criterion
+      diff (BPE = frequency; WordPiece = likelihood increase ~=
+      pointwise mutual info; SentencePiece = tool that handles raw
+      bytes, no whitespace presegmentation, supports BPE or
+      unigram LM); note LLaMA uses SentencePiece-BPE, T5 uses
+      SentencePiece-unigram.
+
+  - id: 24
+    slug: scaling-law-chinchilla
+    category: llm_stats
+    tier: T3
+    interview_freq: low
+    line_range: [1670, 1690]
+    title_zh: Scaling law：Chinchilla 修正 Kaplan
+    title_en: Scaling Law (Chinchilla vs Kaplan)
+    acronyms_to_expand: [FLOP, LR]
+    cleanup_notes: >-
+      X-depth: moderate expansion. Dedupe formula twins; explain
+      Kaplan's N ∝ C^0.73, D ∝ C^0.27 conclusion vs Chinchilla's
+      corrected N ∝ C^0.5, D ∝ C^0.5 (~20 tokens/param); pinpoint
+      Kaplan's methodology bug (fixed LR schedule undertrained
+      small models); note GPT-3 was undertrained, LLaMA-3 pushes
+      to 1875 tokens/param factoring inference cost.
+
+  - id: 25
+    slug: mle-vs-map
+    category: llm_stats
+    tier: T3
+    interview_freq: high
+    line_range: [1691, 1717]
+    title_zh: MLE vs MAP
+    title_en: MLE vs MAP Estimation
+    acronyms_to_expand: [MLE, MAP]
+    cleanup_notes: >-
+      Y-depth (upgraded from X->Y because source already has
+      ~60% Y coverage). Dedupe formula twins; explicit
+      prior <-> regularizer mapping (Gaussian -> L2/ridge,
+      lambda = 1/(2*sigma^2); Laplace -> L1/lasso); note
+      limit behavior (n -> inf, likelihood dominates, MAP -> MLE).
+
+  - id: 26
+    slug: clt-vs-lln
+    category: llm_stats
+    tier: T3
+    interview_freq: mid
+    line_range: [1718, 1738]
+    title_zh: 中心极限定理 vs 大数定律
+    title_en: Central Limit Theorem vs Law of Large Numbers
+    acronyms_to_expand: [CLT, LLN, IID]
+    cleanup_notes: >-
+      X-depth: moderate expansion. Dedupe formula twins; contrast
+      modes of convergence (LLN: pointwise/almost-sure to mu;
+      CLT: distributional to normal with 1/sqrt(n) rate); memorable
+      framing "LLN says bias vanishes, CLT says variance decays
+      at 1/sqrt(n) with Gaussian shape". Motivate why both are
+      needed for CIs and hypothesis tests.
+
+  - id: 27
+    slug: ab-test-pvalue-sample-size-multiple-testing
+    category: llm_stats
+    tier: T3
+    interview_freq: mid
+    line_range: [1739, 1776]
+    title_zh: A/B test：p-value、样本量、多重检验
+    title_en: A/B Test (p-value, Sample Size, Multiple Testing)
+    acronyms_to_expand: [MDE, FWER, FDR, BH, CI]
+    cleanup_notes: >-
+      X-depth: moderate expansion. Dedupe formula twins; call out
+      p-value misconceptions (NOT P(H0|data), NOT P(result is by
+      chance)); keep sample-size formulas (two-means and
+      two-proportions) with power/alpha/MDE/variance inputs;
+      contrast multiple-testing corrections (Bonferroni/Holm
+      control FWER, BH controls FDR for large-scale exploration).

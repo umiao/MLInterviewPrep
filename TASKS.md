@@ -9,26 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943351128184.txt (lines 22-1796) into data/ml_fundamentals_inventory.yaml.
-
-Schema per item:
-  - id: 1..27
-  - slug: kebab-case
-  - category: classical_ml | eval_data | unsupervised | dl_training | attention_transformer | llm_stats
-  - tier: T1 | T2 | T3  (cleanup workload)
-  - interview_freq: high | mid | low
-  - line_range: [start, end]
-  - title_zh: ...
-  - title_en: ...
-  - acronyms_to_expand: [GELU, ...]
-  - cleanup_notes: str
-
-AC: yaml file committed; 27 items; CE/KL is in classical_ml (not eval_data); interview_freq present on every row.
-
 #### T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs
 - **Priority**: P0
 - **Complexity**: S
@@ -315,3 +295,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
+- [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943
