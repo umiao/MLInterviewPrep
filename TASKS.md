@@ -11,26 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-553
-- **Description**: Create src/frontend/src/components/ui/GoldenToggleButton.tsx:
-  Props: { itemType: 'framework_node' | 'behavioral_example' | 'company_document', itemId: number, isGolden: boolean, className?: string }
-  Renders an outlined star (not golden) or filled orange star (golden). Click toggles via useMutation + api.put to the matching endpoint (routing by itemType).
-  Optimistic UI: toggle icon immediately, then invalidate the parent query on success. On error: revert + toast.
-  React-query invalidation keys MUST cover all 3 consumers (add conditionally by itemType):
-    - framework_node: ['framework', 'tree'], ['framework', 'node', itemId]
-    - behavioral_example: ['behavioral', 'examples'], ['behavioral', 'example', itemId]
-    - company_document: ['companies', <companyId>], ['companies', 'document', itemId]  -- may need to pass companyId as an extra prop; check existing drawer interfaces first
-  Toast: 'Marked as golden' / 'Removed golden mark'.
-
-Color palette (fixed, inline Tailwind, NO tailwind.config changes):
-  Inactive: text-gray-300 hover:text-gray-400 (outlined star)
-  Active: text-orange-500 (filled star) — matches T-GOLD-04's palette
-
-AC: component renders + clicks + mutates + toasts in Storybook/manual smoke; 3 invalidation keys verified via React DevTools; `npm run build` clean.
-
 #### T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists
 - **Priority**: P1
 - **Complexity**: S
@@ -229,6 +209,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens. Create src/frontend/src/components/ui/GoldenToggleButton.tsx:
 - [x] **2026-04-20** -- T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true. Extend three existing PUT endpoints (do NOT add new ones):
 - [x] **2026-04-20** -- T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md. Add curation columns to three tables (single Alembic migration or one-shot Python migration script under scripts/ -- fol
 - [x] **2026-04-20** -- T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions. Walk each of 27 leaf descriptions and verify:
