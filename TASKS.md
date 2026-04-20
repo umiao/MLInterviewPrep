@@ -95,21 +95,6 @@ Via scripts/seed_ml_fundamentals_content_q25.py (idempotent).
 
 Via scripts/seed_ml_fundamentals_content_q2324_2627.py (idempotent).
 
-#### T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-546
-- **Description**: Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
-  - Top tab bar: 6 categories (classical_ml, eval_data, unsupervised, dl_training, attention_transformer, llm_stats)
-  - URL state: ?cat=<cat_slug>&slug=<question_slug>
-  - Each category: grid of cards (title_zh / title_en / interview_freq badge)
-  - Card click → FrameworkNodeDrawer opens with that leaf's description
-  - Deep-link behavior: on page load, if ?slug= present, auto-open drawer; closing drawer clears slug from URL; changing tab preserves slug if valid in new cat else clears
-  - Footer cross-link: '延伸: MLSD pillar' + '/quick-index?section=ml'
-
-Route added in App.tsx: '/ml-fundamentals'.
-AC: build passes (npm run build); all 27 drawers open; URL deep-link shared across reload.
-
 #### T-P0-548: [T-MLF-08] Sidebar navItem + route wiring
 - **Priority**: P0
 - **Complexity**: S
@@ -124,7 +109,7 @@ AC: sidebar shows new item at correct position; clicking navigates to /ml-fundam
 #### T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers
 - **Priority**: P1
 - **Complexity**: S
-- **Depends on**: T-P0-548
+- **Depends on**: T-P0-546
 - **Description**: Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smoke.md.
 
 Per drawer: {slug, KaTeX OK y/n, GFM table OK y/n, callout render OK y/n, notes}.
@@ -265,6 +250,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
+- [x] **2026-04-19** -- T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link. Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
 - [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
 - [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
 - [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943
