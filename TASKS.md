@@ -96,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-563: Bias-Variance node 209 (ML Fundamentals leaf): append 5 interview follow-ups. Per user Discord 2026-04-20: correctly target the ml-fundamentals/classical_ml/bias-variance-tradeoff leaf (not pillar2 
 - [x] **2026-04-20** -- T-P2-561: [T-GOLD-09] Golden Collection aggregator page (backend /golden endpoint + frontend page). Backend: add GET /golden router endpoint that unions rows from the 3 tables where is_golden=true, normalized into a unif
 - [x] **2026-04-20** -- T-P2-560: [T-GOLD-08] Company docs integration: drawer toggle + card visuals (no filter on index pages). Add <GoldenToggleButton itemType='company_document' /> to whatever view renders a company_document in full (prep note pa
 - [x] **2026-04-20** -- T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter. Execute the plan from T-GOLD-07a. Expected work surface:
