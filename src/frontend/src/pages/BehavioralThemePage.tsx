@@ -8,6 +8,9 @@ import type {
 } from "../types/behavioral";
 import SlideOverPanel from "../components/ui/SlideOverPanel";
 import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent";
+import GoldenToggleButton from "../components/ui/GoldenToggleButton";
+import GoldenBadge from "../components/ui/GoldenBadge";
+import { goldenCardClass } from "../utils/goldenStyle";
 import { useReturnPath } from "../hooks/useReturnPath";
 import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 
@@ -26,9 +29,7 @@ export default function BehavioralThemePage() {
   const returnUrl = useReturnPath("/quick-index?section=bq");
   useRouteScrollRestore();
 
-  const [activeExample, setActiveExample] = useState<BehavioralExample | null>(
-    null,
-  );
+  const [activeExampleId, setActiveExampleId] = useState<string | null>(null);
 
   const { data: themes } = useQuery<BehavioralThemeSummary[]>({
     queryKey: ["behavioral-themes"],
@@ -51,6 +52,10 @@ export default function BehavioralThemePage() {
       api.get("/behavioral/questions", { params: { theme: slug } }),
     enabled: !!slug,
   });
+
+  const activeExample = activeExampleId
+    ? examples?.find((e) => e.example_id === activeExampleId) ?? null
+    : null;
 
   return (
     <div className="max-w-6xl mx-auto py-6 px-4">
@@ -94,7 +99,7 @@ export default function BehavioralThemePage() {
               <ExampleCard
                 key={ex.example_id}
                 example={ex}
-                onClick={() => setActiveExample(ex)}
+                onClick={() => setActiveExampleId(ex.example_id)}
               />
             ))}
           </div>
@@ -125,8 +130,20 @@ export default function BehavioralThemePage() {
       {/* Drawer */}
       <SlideOverPanel
         open={activeExample !== null}
-        onClose={() => setActiveExample(null)}
+        onClose={() => setActiveExampleId(null)}
         title={activeExample?.title ?? ""}
+        headerActions={
+          activeExample ? (
+            <GoldenToggleButton
+              itemType="behavioral_example"
+              itemId={activeExample.id}
+              isGolden={Boolean(activeExample.is_golden)}
+            />
+          ) : null
+        }
+        headerAccentClassName={
+          activeExample?.is_golden ? "border-t-2 border-t-orange-300" : ""
+        }
       >
         {activeExample && <ExampleDrawerContent example={activeExample} />}
       </SlideOverPanel>
@@ -143,16 +160,23 @@ function ExampleCard({
 }) {
   const pitch = example.cn_elevator_pitch;
   const pitchParts = pitch ? parsePitch(pitch) : null;
+  const isGolden = Boolean(example.is_golden);
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-left w-full p-4 rounded-lg border border-gray-200 bg-white hover:border-blue-400 hover:shadow-md transition-all"
+      className={
+        "text-left w-full p-4 rounded-lg border border-gray-200 bg-white hover:border-blue-400 hover:shadow-md transition-all " +
+        goldenCardClass(isGolden)
+      }
     >
-      <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
-        {example.example_id}
-      </span>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+          {example.example_id}
+        </span>
+        <GoldenBadge golden={isGolden} />
+      </div>
       <div className="mt-2 font-medium text-gray-800 text-sm leading-snug">
         {example.title}
       </div>

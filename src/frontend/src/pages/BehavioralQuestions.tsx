@@ -7,6 +7,9 @@ import StoryMapView from "../components/behavioral/StoryMapView";
 import SlideOverPanel from "../components/ui/SlideOverPanel";
 import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent";
 import ThemeFilterSidebar from "../components/behavioral/ThemeFilterSidebar";
+import GoldenToggleButton from "../components/ui/GoldenToggleButton";
+import GoldenBadge from "../components/ui/GoldenBadge";
+import { goldenCardClass } from "../utils/goldenStyle";
 import type {
   BehavioralExample,
   BehavioralThemeSummary,
@@ -183,6 +186,7 @@ function ExampleCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const needsInput = example.title.startsWith("[NEEDS-INPUT]");
+  const isGolden = Boolean(example.is_golden);
 
   return (
     <div
@@ -191,7 +195,7 @@ function ExampleCard({
         needsInput
           ? "border-amber-300 hover:border-amber-500 bg-amber-50/30"
           : "border-gray-200 hover:border-blue-400"
-      }`}
+      } ${goldenCardClass(isGolden)}`}
     >
       <div
         className="flex items-center justify-between cursor-pointer select-none"
@@ -201,6 +205,7 @@ function ExampleCard({
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">{example.example_id}</span>
             <h4 className="text-gray-900 font-bold text-base">{example.title}</h4>
+            <GoldenBadge golden={isGolden} />
             {needsInput && (
               <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
                 Needs Input
@@ -336,6 +341,7 @@ function QuestionRow({
   onExampleClick,
   selectedThemes,
   onThemePillClick,
+  goldenOnly,
 }: {
   question: BehavioralQuestion;
   examples: BehavioralExample[];
@@ -344,9 +350,12 @@ function QuestionRow({
   onExampleClick: (exampleId: string) => void;
   selectedThemes: Set<string>;
   onThemePillClick: (slug: string) => void;
+  goldenOnly: boolean;
 }) {
-  const linkedExamples = examples.filter((ex) =>
-    ex.linked_questions.some((lq) => lq.question_id === question.question_id)
+  const linkedExamples = examples.filter(
+    (ex) =>
+      ex.linked_questions.some((lq) => lq.question_id === question.question_id) &&
+      (!goldenOnly || ex.is_golden)
   );
   const themeTags = question.theme_tags ?? [];
   const MAX_VISIBLE_THEMES = 5;
@@ -486,6 +495,7 @@ function QuestionRow({
                   >
                     {ex.title}
                   </button>
+                  <GoldenBadge golden={Boolean(ex.is_golden)} />
                   {exNeedsInput && (
                     <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
                       Needs Input
@@ -626,6 +636,22 @@ export default function BehavioralQuestions() {
   }, [searchParams]);
   const themeMode: ThemeMode =
     searchParams.get("theme_mode") === "and" ? "and" : "or";
+  const goldenOnly = searchParams.get("golden") === "1";
+
+  const toggleGoldenOnly = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (goldenOnly) {
+          next.delete("golden");
+        } else {
+          next.set("golden", "1");
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  }, [goldenOnly, setSearchParams]);
 
   const selectedThemeSet = useMemo(
     () => new Set(selectedThemeSlugs),
@@ -753,7 +779,7 @@ export default function BehavioralQuestions() {
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {(["questions", "examples", "coverage", "story-map"] as ViewMode[]).map((mode) => {
             const label = mode === "story-map" ? "Story Map" : mode;
             return (
@@ -770,6 +796,32 @@ export default function BehavioralQuestions() {
               </button>
             );
           })}
+          <button
+            type="button"
+            onClick={toggleGoldenOnly}
+            aria-pressed={goldenOnly}
+            title={goldenOnly ? "Show all examples" : "Show only golden examples"}
+            className={
+              "ml-2 px-3 py-2 rounded-lg border text-sm font-medium transition-all inline-flex items-center gap-1.5 " +
+              (goldenOnly
+                ? "border-orange-300 bg-orange-50 text-orange-700"
+                : "border-gray-200 bg-white text-gray-600 hover:border-gray-300")
+            }
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill={goldenOnly ? "currentColor" : "none"}
+              stroke="currentColor"
+              strokeWidth={goldenOnly ? 0 : 2}
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 2.5l2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17.7l-6.1 3.3 1.5-6.8L2.2 9.5l6.9-.7L12 2.5z" />
+            </svg>
+            Golden only
+          </button>
         </div>
       </div>
 
@@ -855,6 +907,7 @@ export default function BehavioralQuestions() {
                   onExampleClick={handleExampleClick}
                   selectedThemes={selectedThemeSet}
                   onThemePillClick={handleToggleTheme}
+                  goldenOnly={goldenOnly}
                 />
               ))
             )}
@@ -878,6 +931,7 @@ export default function BehavioralQuestions() {
                 ex.title.toLowerCase().includes(search.toLowerCase()) ||
                 (ex.situation ?? "").toLowerCase().includes(search.toLowerCase())
             )
+            .filter((ex) => !goldenOnly || ex.is_golden)
             .map((ex) => (
               <ExampleCard
                 key={ex.id}
@@ -899,7 +953,16 @@ export default function BehavioralQuestions() {
           </p>
           {coverageCells.length > 0 ? (
             <CoverageHeatmap
-              cells={coverageCells}
+              cells={
+                goldenOnly
+                  ? coverageCells.filter((c) => {
+                      const ex = examples.find(
+                        (e) => e.example_id === c.example_id,
+                      );
+                      return ex?.is_golden;
+                    })
+                  : coverageCells
+              }
               categories={categories}
               onCategoryClick={(categoryId) => {
                 setSelectedCategory(categoryId);
@@ -920,6 +983,18 @@ export default function BehavioralQuestions() {
         open={!!drawerExample}
         onClose={() => setDrawerExampleId(null)}
         title={drawerExample?.title ?? ""}
+        headerActions={
+          drawerExample ? (
+            <GoldenToggleButton
+              itemType="behavioral_example"
+              itemId={drawerExample.id}
+              isGolden={Boolean(drawerExample.is_golden)}
+            />
+          ) : null
+        }
+        headerAccentClassName={
+          drawerExample?.is_golden ? "border-t-2 border-t-orange-300" : ""
+        }
       >
         {drawerExample && <ExampleDrawerContent example={drawerExample} />}
       </SlideOverPanel>

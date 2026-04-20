@@ -13,19 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P2-558
-- **Description**: Execute the plan from T-GOLD-07a. Expected work surface:
-  - Add <GoldenToggleButton itemType='behavioral_example' /> to the behavioral story viewer (drawer or inline).
-  - Apply goldenCardClass + <GoldenBadge /> to behavioral card lists.
-  - Add ?golden=1 URL filter to whichever page lists behavioral examples.
-
-Follow the exact visual + interaction pattern from T-GOLD-05/06 so the UX feels consistent across the app. Adjust complexity in flight if 07a surfaces unexpected structure -- the 07a plan is authoritative for this task's scope.
-
-AC: manual test -- mark a behavioral story golden, see badge on card + filled star in drawer + ?golden=1 filter works.
-
 #### T-P2-560: [T-GOLD-08] Company docs integration: drawer toggle + card visuals (no filter on index pages)
 - **Priority**: P2
 - **Complexity**: S
@@ -135,6 +122,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter. Execute the plan from T-GOLD-07a. Expected work surface:
 - [x] **2026-04-20** -- T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points. Research-only task, NO code writes. Read:
 - [x] **2026-04-20** -- T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals. Via scripts/seed_google_hub_mlf_crosslink.py (idempotent with sha256 guard):
 - [x] **2026-04-20** -- T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter. Edit src/frontend/src/pages/MLFundamentals.tsx:

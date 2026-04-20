@@ -21,6 +21,8 @@ export interface BehavioralExample {
   analogy: string | null;
   tech_terms: Record<string, string>;
   cn_elevator_pitch?: string | null;
+  is_golden: boolean;
+  golden_at: string | null;
   linked_questions: LinkedQuestion[];
 }
 
