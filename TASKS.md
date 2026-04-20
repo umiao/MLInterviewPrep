@@ -9,20 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-539
-- **Description**: BARRIER TASK: runner MUST stop here pending user review. Steps:
-  1. Start frontend dev server (cd src/frontend && npm run dev) in background; verify it serves on localhost
-  2. For each of the 7 Cat 1-2 leaves (#1-4 + #5/#6/#7 per inventory), open the drawer in browser and capture rendering notes (KaTeX OK? bold terms? section breaks? GFM tables OK?)
-  3. Produce docs/ml_fundamentals_template.md — canonical 5-section markdown template (问题设定 / 推导 / 物理意义 / 常见追问 / 参考) with concrete formatting rules
-  4. Append a [BARRIER-AWAITING-USER] entry to PROGRESS.md
-  5. CRITICAL: end the session with 'task_db.py update T-P0-540 --status review' (NOT --status completed). This leaves T-P0-541 blocked so the orchestrator's has-unblocked check returns false and the runner exits, prompting the user to manually review the template before approving downstream content fills.
-  6. Commit template doc + PROGRESS entry as '[T-MLF-03.5] Template lock checkpoint - awaiting user review'
-
-After user reviews docs/ml_fundamentals_template.md and approves, they will run 'task_db.py update T-P0-540 --status completed' and re-launch autonomous_run.sh.
-
 #### T-P0-541: [T-MLF-04] T1 content fill Cat 3-4 (7 Q: Unsupervised + DL Training)
 - **Priority**: P0
 - **Complexity**: M
@@ -173,6 +159,20 @@ AC: id=53 has new bucket; runs twice: 1 update / 0 updates.
 ### P3 -- Stretch Goals
 
 ## Blocked
+
+#### T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-539
+- **Description**: BARRIER TASK: runner MUST stop here pending user review. Steps:
+  1. Start frontend dev server (cd src/frontend && npm run dev) in background; verify it serves on localhost
+  2. For each of the 7 Cat 1-2 leaves (#1-4 + #5/#6/#7 per inventory), open the drawer in browser and capture rendering notes (KaTeX OK? bold terms? section breaks? GFM tables OK?)
+  3. Produce docs/ml_fundamentals_template.md — canonical 5-section markdown template (问题设定 / 推导 / 物理意义 / 常见追问 / 参考) with concrete formatting rules
+  4. Append a [BARRIER-AWAITING-USER] entry to PROGRESS.md
+  5. CRITICAL: end the session with 'task_db.py update T-P0-540 --status review' (NOT --status completed). This leaves T-P0-541 blocked so the orchestrator's has-unblocked check returns false and the runner exits, prompting the user to manually review the template before approving downstream content fills.
+  6. Commit template doc + PROGRESS entry as '[T-MLF-03.5] Template lock checkpoint - awaiting user review'
+
+After user reviews docs/ml_fundamentals_template.md and approves, they will run 'task_db.py update T-P0-540 --status completed' and re-launch autonomous_run.sh.
 
 #### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
 - **Priority**: P1
