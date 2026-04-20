@@ -11,20 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-556
-- **Description**: Edit src/frontend/src/pages/MLFundamentals.tsx:
-  1. Fetch is_golden + golden_at per leaf -- the /framework/tree endpoint now returns them (per T-GOLD-01). Extend the INVENTORY consumer to merge is_golden from the query.
-  2. Apply goldenCardClass(isGolden) to each card button's className; render <GoldenBadge /> (from T-GOLD-04) near the freq badge when is_golden=true.
-  3. Add a 'Golden only' toggle next to the tab bar. Backed by URL param `?golden=1` (matches existing ?cat=, ?slug= pattern). When active, filter categoryItems to only is_golden rows, regardless of active cat. Count shown in tab labels updates to reflect filtered counts.
-  4. When ?golden=1 and a tab's filtered count drops to 0, keep the tab button visible but show '(0)'; the empty-state message under the grid says 'No golden items in this category yet.'
-
-No GoldenToggleButton on individual cards -- card click opens drawer, toggling happens in drawer (T-GOLD-05). Card is a pure read-only surface + visual indicator.
-
-AC: manual test -- mark 2-3 items golden via drawer, reload with ?golden=1 in URL, only those show; ?golden=1&cat=classical_ml further narrows; URL is shareable (golden state persists).
-
 ### P2 -- Nice to Have
 
 #### T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals
@@ -178,6 +164,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter. Edit src/frontend/src/pages/MLFundamentals.tsx:
 - [x] **2026-04-20** -- T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first). BEFORE coding: take a screenshot of the current FrameworkNodeDrawer header (src/frontend/src/components/framework/Framew
 - [x] **2026-04-20** -- T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists. Create src/frontend/src/utils/goldenStyle.ts exporting:
 - [x] **2026-04-20** -- T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens. Create src/frontend/src/components/ui/GoldenToggleButton.tsx:
