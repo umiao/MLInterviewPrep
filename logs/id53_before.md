@@ -13,9 +13,6 @@
 - [DNN / Key Papers Gist](db://52)
 - [Staging 13 Flashcards](db://57)
 
-**系统性八股文复习**
-- [ML Fundamentals -- 27 题系统速查](/ml-fundamentals)
-
 **Fundamentals**
 - [Regularization](db://55)
 - [Bias-Variance](db://56)

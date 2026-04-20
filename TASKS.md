@@ -13,16 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-550
-- **Description**: Via scripts/seed_google_hub_mlf_crosslink.py (idempotent with sha256 guard):
-  append to company_documents.content id=53 a new '系统性八股文复习' bucket above the Fundamentals bucket, linking to '/ml-fundamentals'.
-Preserve all existing Tier-2/3 buckets byte-identical (sha256 guarded).
-
-AC: id=53 has new bucket; runs twice: 1 update / 0 updates.
-
 #### T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points
 - **Priority**: P2
 - **Complexity**: S
@@ -164,6 +154,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals. Via scripts/seed_google_hub_mlf_crosslink.py (idempotent with sha256 guard):
 - [x] **2026-04-20** -- T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter. Edit src/frontend/src/pages/MLFundamentals.tsx:
 - [x] **2026-04-20** -- T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first). BEFORE coding: take a screenshot of the current FrameworkNodeDrawer header (src/frontend/src/components/framework/Framew
 - [x] **2026-04-20** -- T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists. Create src/frontend/src/utils/goldenStyle.ts exporting:

@@ -640,3 +640,11 @@
 - **Sanity check result**: `npx tsc --noEmit` clean. `npx vitest run`: 151/151 passed in 1.46s (no regressions across the 10 test files). `npx eslint src/pages/MLFundamentals.tsx`: clean. `npx vite build`: clean in 1.04s. Manual browser smoke (reviewer task): mark 2-3 framework nodes golden via drawer; reload with `?golden=1` -> only those cards render with orange accents + pill; add `&cat=classical_ml` -> further narrows within that tab; remove `golden=1` -> all 27 return.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-557 --status completed`. T-P2-558 ([T-GOLD-07a] Behavioral UI discovery scan) now unblocked.
+
+## 2026-04-20 02:05 -- [T-P2-551] [T-MLF-11] Google Prep Hub id=53 cross-link bucket to /ml-fundamentals
+- **What I did**: Added `scripts/seed_google_hub_mlf_crosslink.py`, an idempotent seed script that inserts a new `**系统性八股文复习**` bucket into `company_documents.content` (id=53, "Google 2026-04-17 Prep Hub") immediately above the existing `**Fundamentals**` bucket. The bucket contains a single link `[ML Fundamentals -- 27 题系统速查](/ml-fundamentals)` pointing at the frontend MLFundamentals page. Idempotency guard: checks `**系统性八股文复习**` marker presence and exits 0 with 0 updates if already there; structural guard checks `**Fundamentals**` appears exactly once before mutating; byte-identical guard verifies the only diff is the inserted chunk (`new_content.replace(NEW_BUCKET, "", 1) == pre_content`). All other Tier-2/3 buckets (Quick-review, Fundamentals, Ranking losses, Calibration, Retrieval, Production) preserved byte-for-byte.
+- **Deliverables**:
+  - ADDED `scripts/seed_google_hub_mlf_crosslink.py` (idempotent cross-link seed, 3 guard layers)
+- **Sanity check result**: First run -> `[OK] updates=1 pre=843262a1d2bcff47... post=40b12d8163614730...`. Second run -> `[OK] updates=0 skipped=1`. Dumped `logs/id53_after.md`: structure intact, new bucket sits between Quick-review and Fundamentals as specified, link renders correct Markdown `[text](/ml-fundamentals)` form.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-551 --status completed`. T-P2-558 and later Golden/Behavioral tasks remain the next unblocked P2 queue.
