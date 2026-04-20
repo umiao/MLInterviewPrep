@@ -13,54 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Context
-Flat list on /companies/3/prep doesn't visually group docs by topic. Add title prefix so alphabetical sort auto-buckets.
-
-## Scope
-UPDATE company_documents.title ONLY (content untouched). 14 docs + buckets:
-
-**Quick-review** (2):
-- id=52 'Google DNN / Key Papers Gist' → '[R1/Quick] Google DNN / Key Papers Gist'
-- id=57 'Staging 13 Flashcards (Google R1 Prep)' → '[R1/Quick] Staging 13 Flashcards'
-
-**Fundamentals** (2):
-- id=55 → '[R1/Fund] Regularization Deep Dive'
-- id=56 → '[R1/Fund] Bias-Variance + Overfitting Diagnosis'
-
-**Ranking losses & metrics** (3):
-- id=60 → '[R1/Rank] LambdaRank / LambdaMART'
-- id=61 → '[R1/Rank] NDCG / MAP / MRR + Position Bias'
-- id=65 → '[R1/Rank] Multi-Objective Ranking (DPP / MMR)'
-
-**Calibration & eval** (3):
-- id=62 → '[R1/Eval] Calibration: Platt / Isotonic / Temperature'
-- id=63 → '[R1/Eval] IPS / Counterfactual / Debiased NDCG'
-- id=67 → '[R1/Eval] A/B Test Rigor: Sample Size / SRM / CUPED'
-
-**Retrieval & embeddings** (2):
-- id=72 → '[R1/Retr] MF to Two-Tower Bridge'
-- id=64 → '[R1/Retr] Two-Tower Retrieval Deep Dive'
-
-**Production gotchas** (2):
-- id=68 → '[R1/Prod] Feature Drift: PSI / KL / JS / KS'
-- id=69 → '[R1/Prod] Train-Serve Skew / Leakage / Temporal Split'
-
-Tier-1/Tier-2 (id=38, 51, 53) titles UNCHANGED.
-
-## Deliverables
-- scripts/seed_google_prep_title_prefix_20260419.py idempotent
-- 14 title UPDATEs; content column untouched
-
-## Acceptance Criteria
-- [ ] 14 titles match expected pattern [R1/<bucket>] <slimmed title>
-- [ ] Second seed run = 0 writes
-- [ ] Original 3 prep_note/hub titles (id=38/51/53) unchanged
-- [ ] /companies/3/prep doc drawer shows buckets visually grouped (alphabetical sort within brackets)
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -144,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 494 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-19** -- T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep. ## Context
 - [x] **2026-04-19** -- T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%). ## Context
 - [x] **2026-04-19** -- T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack. CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
