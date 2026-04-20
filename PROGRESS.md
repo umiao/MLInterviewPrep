@@ -621,3 +621,14 @@
 - **Sanity check result**: `npx vitest run` on both test files: 5/5 passed in 9ms. `npm run build` clean (tsc -b + vite build, 1.08s, no type errors). `npx eslint` on all 4 new files: clean. No consumers yet (T-GOLD-06 wires `goldenCardClass` + `<GoldenBadge />` onto MLFundamentals cards; T-GOLD-07/08 extend to behavioral + company docs).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-555 --status completed`. T-P1-556 (FrameworkNodeDrawer integration, depends on T-P1-554 + T-P1-555) now unblocked.
+
+## 2026-04-20 01:40 -- [T-P1-556] [T-GOLD-05] GoldenToggleButton wired into FrameworkNodeDrawer + orange top-border accent
+- **What I did**: Audited the existing drawer header (title + close X only -- minimal, lots of room), so per the AC decision rule I used the **header icon** placement, not the bottom-right pill. Landed three coordinated edits: (1) `FrameworkNode` type gains `is_golden: boolean` + `golden_at: string | null` to match the already-shipped backend schema; (2) `SlideOverPanel` gains two optional, backwards-compatible props -- `headerActions?: ReactNode` (rendered in a `flex gap-2` row before the close x) and `headerAccentClassName?: string` (concatenated onto the header strip); (3) `FrameworkNodeDrawer` passes a `<GoldenToggleButton itemType="framework_node" itemId={node.id} isGolden={node.is_golden} />` into `headerActions` and adds `border-t-2 border-t-orange-300` as `headerAccentClassName` when the current node is golden. The thinner top stripe echoes the orange-300 top edge of `goldenCardClass` without fighting the drawer header's existing `border-b`. All other `SlideOverPanel` consumers (`ProblemDrawer`, `PrepNotesModal`, behavioral drawers, etc.) omit the new props and render unchanged. Also wrote `docs/golden_placement_audit_20260420.md` documenting the placement decision + manual smoke checklist (screenshot PNG not possible from headless run -- markdown audit serves as the decision record).
+- **Deliverables**:
+  - MODIFIED `src/frontend/src/types/framework.ts` (+2 fields on `FrameworkNode`)
+  - MODIFIED `src/frontend/src/components/ui/SlideOverPanel.tsx` (+2 optional props, header action slot, accent class)
+  - MODIFIED `src/frontend/src/components/framework/FrameworkNodeDrawer.tsx` (+GoldenToggleButton in header, +orange top border when golden)
+  - ADDED `docs/golden_placement_audit_20260420.md` (placement decision + manual smoke steps)
+- **Sanity check result**: `npx tsc --noEmit` clean. `npx vitest run`: 151/151 passed in 1.45s (no regressions across the 10 test files). `npx vite build`: clean in 1.04s. Manual browser smoke documented in the audit doc; reviewer should click the star in a framework node drawer to confirm optimistic flip + toast + orange top border (runtime check not available from this session).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-556 --status completed`. T-P1-557 ([T-GOLD-06] MLFundamentals cards + `?golden=1` filter) now unblocked.

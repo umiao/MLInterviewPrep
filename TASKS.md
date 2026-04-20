@@ -11,22 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-554, T-P1-555
-- **Description**: BEFORE coding: take a screenshot of the current FrameworkNodeDrawer header (src/frontend/src/components/framework/FrameworkNodeDrawer.tsx) to assess horizontal space. Save screenshot under docs/golden_placement_audit_<date>.png for the commit.
-
-Decision rule:
-  - If header has clear room next to the close (X) button: put GoldenToggleButton there, icon-only, 32x32.
-  - If header is already cramped (title + status badge + confidence + progress + close): put at the drawer's BOTTOM-RIGHT as a full pill 'Mark as golden' / 'Golden ✓' (text + icon), so it's discoverable but doesn't fight the header.
-
-In either case: pass the framework_node id + current is_golden to the button; let the shared component (T-GOLD-03) handle mutation and invalidation.
-
-Also: when drawer is open on a golden node, add a thin orange-300 top border inside the drawer header to echo the card visual (uses goldenCardClass pattern from T-GOLD-04).
-
-AC: manual test in browser -- click star on a framework_node, it flips + toast + drawer top-border echoes state; re-open a different golden node, star renders filled.
-
 #### T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter
 - **Priority**: P1
 - **Complexity**: S
@@ -194,6 +178,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first). BEFORE coding: take a screenshot of the current FrameworkNodeDrawer header (src/frontend/src/components/framework/Framew
 - [x] **2026-04-20** -- T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists. Create src/frontend/src/utils/goldenStyle.ts exporting:
 - [x] **2026-04-20** -- T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens. Create src/frontend/src/components/ui/GoldenToggleButton.tsx:
 - [x] **2026-04-20** -- T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true. Extend three existing PUT endpoints (do NOT add new ones):

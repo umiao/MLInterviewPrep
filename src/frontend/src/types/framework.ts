@@ -13,6 +13,8 @@ export interface FrameworkNode {
   importance: number;
   priority: string;
   estimated_hours: number | null;
+  is_golden: boolean;
+  golden_at: string | null;
   children: FrameworkNode[];
 }
 

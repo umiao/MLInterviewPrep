@@ -8,6 +8,10 @@ interface SlideOverPanelProps {
   title: string;
   children: ReactNode;
   width?: string;
+  /** Optional controls rendered between the title and the close button. */
+  headerActions?: ReactNode;
+  /** Optional extra classes on the header strip (e.g. orange top border for golden). */
+  headerAccentClassName?: string;
 }
 
 /**
@@ -25,6 +29,8 @@ export default function SlideOverPanel({
   title,
   children,
   width = DRAWER_RESPONSIVE_WIDTH,
+  headerActions,
+  headerAccentClassName = "",
 }: SlideOverPanelProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -62,15 +68,20 @@ export default function SlideOverPanel({
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0">
+        <div
+          className={`flex items-center justify-between px-5 py-3 border-b border-gray-200 shrink-0 ${headerAccentClassName}`}
+        >
           <h2 className="text-lg font-semibold text-gray-800 truncate pr-4">{title}</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-xl leading-none"
-            aria-label="Close"
-          >
-            x
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            {headerActions}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+              aria-label="Close"
+            >
+              x
+            </button>
+          </div>
         </div>
         <div className="px-5 py-4 overflow-y-auto flex-1">{children}</div>
       </div>
