@@ -11,17 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-546
-- **Description**: Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smoke.md.
-
-Per drawer: {slug, KaTeX OK y/n, GFM table OK y/n, callout render OK y/n, notes}.
-
-If anything broken: file follow-up task via task_db.py add; do NOT fix silently.
-AC: smoke report committed; each of 27 has a row.
-
 #### T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions
 - **Priority**: P1
 - **Complexity**: M
@@ -288,6 +277,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers. Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smo
 - [x] **2026-04-20** -- T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test). X-depth: keep original structure, expand all acronyms on first use, fix formula context holes.
 - [x] **2026-04-20** -- T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y). Upgrade #25 from original X-depth (acronym-only) to full Y-depth.
 - [x] **2026-04-20** -- T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1). Apply the calibrated Y-depth template (from zeta1 review) to #22 MoE.
