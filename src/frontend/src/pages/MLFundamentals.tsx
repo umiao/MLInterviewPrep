@@ -43,6 +43,9 @@ const CATEGORY_ORDER: CategorySlug[] = [
   "llm_stats",
 ];
 
+type TabSlug = CategorySlug | "all";
+const TAB_ORDER: TabSlug[] = ["all", ...CATEGORY_ORDER];
+
 // Mirrors data/ml_fundamentals_inventory.yaml. Keep in sync when the YAML changes.
 const INVENTORY: InventoryItem[] = [
   { id: 1, slug: "bias-variance-tradeoff", category: "classical_ml", title_zh: "Bias-Variance 权衡", title_en: "Bias-Variance Tradeoff", interview_freq: "high" },
@@ -82,8 +85,8 @@ const FREQ_BADGE: Record<InterviewFreq, { label: string; cls: string }> = {
   low: { label: "low freq", cls: "bg-gray-50 text-gray-600 border-gray-200" },
 };
 
-function isCategorySlug(v: string | null): v is CategorySlug {
-  return !!v && (CATEGORY_ORDER as string[]).includes(v);
+function isTabSlug(v: string | null): v is TabSlug {
+  return !!v && (TAB_ORDER as string[]).includes(v);
 }
 
 /** Walk subtree and collect path -> node_id for all leaves. */
@@ -118,14 +121,18 @@ export default function MLFundamentals() {
     return m;
   }, []);
 
-  const activeCat: CategorySlug = isCategorySlug(rawCat)
+  const activeCat: TabSlug = isTabSlug(rawCat)
     ? rawCat
     : rawSlug && slugByCat.has(rawSlug)
     ? (slugByCat.get(rawSlug) as CategorySlug)
-    : CATEGORY_ORDER[0];
+    : "all";
 
   const activeSlug =
-    rawSlug && slugByCat.get(rawSlug) === activeCat ? rawSlug : null;
+    rawSlug &&
+    slugByCat.has(rawSlug) &&
+    (activeCat === "all" || slugByCat.get(rawSlug) === activeCat)
+      ? rawSlug
+      : null;
 
   const { data: tree } = useQuery<FrameworkNode[]>({
     queryKey: ["framework", "tree"],
@@ -141,19 +148,29 @@ export default function MLFundamentals() {
   const drawerNodeId = activeSlug ? slugToNodeId.get(activeSlug) ?? null : null;
 
   const categoryItems = useMemo(
-    () => INVENTORY.filter((it) => it.category === activeCat),
+    () =>
+      activeCat === "all"
+        ? [...INVENTORY].sort((a, b) => a.id - b.id)
+        : INVENTORY.filter((it) => it.category === activeCat),
     [activeCat],
   );
 
-  const selectTab = (cat: CategorySlug) => {
-    // Preserve slug if it belongs to the new category, else clear.
-    const next: Record<string, string> = { cat };
-    if (rawSlug && slugByCat.get(rawSlug) === cat) next.slug = rawSlug;
+  const selectTab = (tab: TabSlug) => {
+    // Preserve slug if it belongs to the new tab (all accepts any), else clear.
+    const next: Record<string, string> = { cat: tab };
+    if (
+      rawSlug &&
+      slugByCat.has(rawSlug) &&
+      (tab === "all" || slugByCat.get(rawSlug) === tab)
+    ) {
+      next.slug = rawSlug;
+    }
     setParams(next);
   };
 
-  const openCard = (slug: string, cat: CategorySlug) => {
-    setParams({ cat, slug });
+  const openCard = (slug: string, itemCat: CategorySlug) => {
+    // From the All tab, stay in All on open; otherwise pin to the item's cat.
+    setParams({ cat: activeCat === "all" ? "all" : itemCat, slug });
   };
 
   const closeDrawer = () => {
@@ -175,15 +192,19 @@ export default function MLFundamentals() {
       </p>
 
       <div className="flex flex-wrap gap-2 mb-6">
-        {CATEGORY_ORDER.map((cat) => (
+        {TAB_ORDER.map((tab) => (
           <button
-            key={cat}
-            onClick={() => selectTab(cat)}
-            className={tabBtn(cat === activeCat)}
+            key={tab}
+            onClick={() => selectTab(tab)}
+            className={tabBtn(tab === activeCat)}
           >
-            {CATEGORY_LABELS[cat]}
+            {tab === "all" ? "All" : CATEGORY_LABELS[tab]}
             <span className="ml-2 text-xs text-gray-400">
-              ({INVENTORY.filter((it) => it.category === cat).length})
+              (
+              {tab === "all"
+                ? INVENTORY.length
+                : INVENTORY.filter((it) => it.category === tab).length}
+              )
             </span>
           </button>
         ))}
