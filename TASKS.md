@@ -13,25 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-557
-- **Description**: Research-only task, NO code writes. Read:
-  - src/frontend/src/pages/Behavioral*.tsx (all files matching this glob)
-  - src/frontend/src/components/behavioral/* (if the dir exists)
-  - src/backend/routers/behavioral.py (to confirm PUT endpoint shape from T-GOLD-02)
-
-Produce docs/behavioral_golden_integration_plan.md with:
-  - Does a BehavioralExampleDrawer component exist? Where?
-  - If yes: which section is best for the toggle (mirroring T-GOLD-05 rules)?
-  - If no: what's the current 'view a story' UX (modal? inline expand?)? Does it need a new drawer, or can we attach the toggle to the inline view?
-  - React-query cache keys used today for behavioral queries (for invalidation planning).
-  - Card list rendering location — where to apply goldenCardClass + GoldenBadge (analogous to T-GOLD-06)?
-  - Estimated complexity for T-GOLD-07b: S / M / L, with reasoning.
-
-AC: markdown file with 5 sections answering the above, committed with no other changes.
-
 #### T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter
 - **Priority**: P2
 - **Complexity**: M
@@ -154,6 +135,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points. Research-only task, NO code writes. Read:
 - [x] **2026-04-20** -- T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals. Via scripts/seed_google_hub_mlf_crosslink.py (idempotent with sha256 guard):
 - [x] **2026-04-20** -- T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter. Edit src/frontend/src/pages/MLFundamentals.tsx:
 - [x] **2026-04-20** -- T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first). BEFORE coding: take a screenshot of the current FrameworkNodeDrawer header (src/frontend/src/components/framework/Framew
