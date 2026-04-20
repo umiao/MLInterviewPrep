@@ -96,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-566: Add Lyra MD session with Mary Miller 2026-04-23. Add incoming Lyra MD video session with Mary Miller scheduled Thu 2026-04-23 08:30 AM PDT per user Discord 2026-04-20.
 - [x] **2026-04-20** -- T-P2-565: EM+GMM node 216: density-ratio note + BIC/AIC/held-out expansion + DPMM mechanics. Per user Discord 2026-04-20: three improvements to ml-fundamentals/unsupervised/em-and-gmm -- (A) clarify E-step respons
 - [x] **2026-04-20** -- T-P2-564: L1 vs L2 node 210: append MLE/MAP + Gaussian/Laplace prior view. Per user Discord 2026-04-20: augment ml-fundamentals/classical_ml/l1-vs-l2-regularization with a dedicated subsection af
 - [x] **2026-04-20** -- T-P2-563: Bias-Variance node 209 (ML Fundamentals leaf): append 5 interview follow-ups. Per user Discord 2026-04-20: correctly target the ml-fundamentals/classical_ml/bias-variance-tradeoff leaf (not pillar2 

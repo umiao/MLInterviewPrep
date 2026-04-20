@@ -727,3 +727,13 @@
 - **Sanity check result**: `ast.parse()` valid. First run `[OK] 2903 -> 5008 chars (+2105)`. Second run `[SKIP] all 2 followups already present` (idempotent). DB inspection: marker `FOLLOWUP_20260420_DENSITY_RATIO_NOTE` at char 1021 (inline between E-step formula and M-step section), marker `FOLLOWUP_20260420_K_SELECTION_AND_DPMM` at char 3150 (replaces old combined bullet in section 6). KaTeX verified inline and display expressions compile in head: `\lim_{\mathrm{d}x \to 0}`, `\int p(x_n | \theta)`, `N_k \cdot p(x_n | \theta_k)`, `\log \hat{L} + p \log N` all well-formed. Downstream sections (section 6 remaining bullets 协方差奇异 / 计算贵 / EM 通用性) intact and unbroken. User still needs backend `:8100` + hard-refresh to see it.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-565 --status completed` (already applied).
+
+## 2026-04-20 12:30 -- [T-P2-566] Add Lyra MD session with Mary Miller 2026-04-23
+- **What I did**: Per user Discord msg 1495913610612965546 inserted a new `interview_events` row for the upcoming Lyra MD video session with Mary Miller, Thu 2026-04-23 08:30 AM PDT, 60 min, event_type=`other` (matching prior Lyra event pattern), status=`upcoming`. Category Lyra (company_id=25) — incoming psychological care, NOT an interview. Mirrored event id=12 ("MD Video Session -- Mary Miller (FMLA)" on 2026-04-13) for title / duration / event_type consistency, dropping the `(FMLA)` qualifier since the user did not specify a paperwork agenda for this session. Description notes 2026-04-13 as the prior Mary session to carry forward open symptom-log / medication-list / paperwork items.
+- **Deliverables**:
+  - NEW `scripts/_add_lyra_mary_2026-04-23.py` (idempotent insert-if-not-exists by `(title, scheduled_at)` key)
+  - NEW row `interview_events.id=32` (company_id=25, scheduled_at='2026-04-23 08:30:00')
+  - DB backup `data/mle_prep.db.bak.<ts>_pre_lyra_mary`
+- **Sanity check result**: First run `[OK] inserted event id=32`. Second run `[SKIP] event already exists id=32` (idempotent). DB inspection: row 32 present with expected columns (Lyra / other / MD Video Session -- Mary Miller / 2026-04-23 08:30:00 / 60 min / upcoming). Verified 2026-04-23 is a Thursday via `datetime`. Upcoming-week query confirms the new event slots correctly between the existing 2026-04-22 Jacqueline session and the end of the week — no conflicts against Google Round 1 events (Tue 2026-04-21).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P2-566 --status completed` (already applied).
