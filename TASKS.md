@@ -11,27 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-549
-- **Description**: Add curation columns to three tables (single Alembic migration or one-shot Python migration script under scripts/ -- follow existing project convention):
-  - `framework_nodes.is_golden BOOLEAN NOT NULL DEFAULT 0`
-  - `framework_nodes.golden_at DATETIME NULL`
-  - `behavioral_examples.is_golden BOOLEAN NOT NULL DEFAULT 0`
-  - `behavioral_examples.golden_at DATETIME NULL`
-  - `company_documents.is_golden BOOLEAN NOT NULL DEFAULT 0`
-  - `company_documents.golden_at DATETIME NULL`
-
-Update SQLAlchemy models (src/backend/models/framework.py, behavioral.py, company.py) and Pydantic schemas (src/backend/schemas/*.py) so response shapes include `is_golden` + `golden_at`.
-
-Also produce `docs/golden_marker.md` (1-2 paragraphs):
-  - feature intent: curation flag, orthogonal to progress status
-  - decision rule: user's discretion, NO hard criteria in code
-  - semantics: toggling false->true refreshes golden_at; true->false keeps golden_at untouched (decided at endpoint layer, see T-GOLD-02)
-
-AC: migration runs clean on a fresh copy of mle_prep.db; all 3 model classes + update schemas expose is_golden/golden_at; docs file exists; commit includes model + schema + migration + doc.
-
 #### T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true
 - **Priority**: P1
 - **Complexity**: S
@@ -265,6 +244,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md. Add curation columns to three tables (single Alembic migration or one-shot Python migration script under scripts/ -- fol
 - [x] **2026-04-20** -- T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions. Walk each of 27 leaf descriptions and verify:
 - [x] **2026-04-20** -- T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers. Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smo
 - [x] **2026-04-20** -- T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test). X-depth: keep original structure, expand all acronyms on first use, fix formula context holes.

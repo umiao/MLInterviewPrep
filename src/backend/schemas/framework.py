@@ -1,7 +1,7 @@
 """Pydantic schemas for Framework and StudyLog."""
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -17,6 +17,7 @@ class FrameworkNodeUpdate(BaseModel):
     confidence_level: int | None = Field(default=None, ge=0, le=5)
     priority: Literal["P0", "P1", "P2", "P3"] | None = None
     importance: float | None = Field(default=None, ge=0, le=1)
+    is_golden: bool | None = None
 
 
 class StudyLogCreate(BaseModel):
@@ -43,6 +44,8 @@ class FrameworkNodeResponse(BaseModel):
     importance: float = 1.0
     priority: str = "P1"
     estimated_hours: float | None = None
+    is_golden: bool = False
+    golden_at: datetime | None = None
     children: list[FrameworkNodeResponse] = []
 
     @field_validator("progress_pct", mode="before")
@@ -64,6 +67,11 @@ class FrameworkNodeResponse(BaseModel):
     @classmethod
     def _coalesce_priority(cls, v: str | None) -> str:
         return v if v is not None else "P1"
+
+    @field_validator("is_golden", mode="before")
+    @classmethod
+    def _coalesce_is_golden(cls, v: bool | int | None) -> bool:
+        return bool(v) if v is not None else False
 
     model_config = ConfigDict(from_attributes=True)
 

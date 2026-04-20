@@ -3,12 +3,14 @@ import json
 from datetime import datetime
 
 from sqlalchemy import (
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
     Integer,
     String,
     Text,
+    text,
 )
 from sqlalchemy.orm import relationship
 
@@ -57,6 +59,13 @@ class BehavioralExample(Base):
     tech_terms = Column(Text, nullable=True)  # JSON dict {"term": "definition"}
     cn_elevator_pitch = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    is_golden = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=text("0"),
+    )
+    golden_at = Column(DateTime, nullable=True)
 
     question_links = relationship(
         "QuestionExampleLink",

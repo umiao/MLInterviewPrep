@@ -68,6 +68,7 @@ class CompanyDocumentUpdate(BaseModel):
 
     title: str | None = None
     content: str | None = None
+    is_golden: bool | None = None
 
 
 class CompanyDocumentResponse(BaseModel):
@@ -81,6 +82,8 @@ class CompanyDocumentResponse(BaseModel):
     doc_kind: str = "prep_note"
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    is_golden: bool = False
+    golden_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

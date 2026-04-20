@@ -3,6 +3,7 @@ import json
 from datetime import datetime
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Column,
     Date,
@@ -57,6 +58,13 @@ class FrameworkNode(Base):
     completed_at = Column(DateTime, nullable=True)
     last_studied_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    is_golden = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=text("0"),
+    )
+    golden_at = Column(DateTime, nullable=True)
 
     children = relationship(
         "FrameworkNode",
