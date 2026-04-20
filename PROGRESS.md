@@ -422,3 +422,12 @@
 - **Sanity check result**: Validation script confirmed all 4 ACs: (1) file parses as valid YAML, (2) exactly 27 items with contiguous ids 1..27, (3) CE/KL (id=14, slug=`cross-entropy-kl-divergence`) landed in `classical_ml` not `eval_data` per v2 plan, (4) `interview_freq` present + valid on every row. Category distribution: classical_ml=5, eval_data=2, unsupervised=2, dl_training=5, attention_transformer=6, llm_stats=7 (=27). Tier distribution: T1=14, T2=6, T3=7 matches the Task 3/4/5/6 fill-batch splits. Slugs unique; line_ranges monotonic non-overlapping over source.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-537 --status completed`
+
+## 2026-04-20 -- [T-P0-538] [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs
+- **What I did**: Authored idempotent `scripts/seed_ml_fundamentals_skeleton.py` that builds the ML Fundamentals framework_nodes subtree from `data/ml_fundamentals_inventory.yaml`. One root `path='ml-fundamentals'` (depth=0, title `"ML 八股文 · Fundamentals"`), six category children at depth=1 (`ml-fundamentals/<cat>`), 27 leaf grandchildren at depth=2 (`ml-fundamentals/<cat>/<slug>`). Leaf titles are bilingual `"{title_en} ({title_zh})"` drawn from the YAML; leaf descriptions are placeholder `"TODO[MLF-<slug>]"` strings that tasks T-P0-539..T-P0-546 will overwrite. Safety: SHA-256 of the full subtree captured pre/post; any existing path whose title differs from the expected title triggers a `[CONFLICT]` abort before any write; matching rows are SKIPPED (no UPDATE path), so a second run is a true no-op.
+- **Deliverables**:
+  - `scripts/seed_ml_fundamentals_skeleton.py` (new, ~190 lines)
+  - 34 new rows in `data/mle_prep.db` framework_nodes (ids 202-235)
+- **Sanity check result**: First run: `inserted=34 skipped=0 total_in_subtree=34`, pre-hash `e3b0c4...` (empty SHA) -> post-hash `9c47fe38...`. Second run: `inserted=0 skipped=34 total_in_subtree=34`, hash unchanged -- idempotency confirmed. Structural invariants: depth distribution `{0:1, 1:6, 2:27}`; per-category leaf counts classical_ml=5, eval_data=2, unsupervised=2, dl_training=5, attention_transformer=6, llm_stats=7 (=27, matches v2 plan); CE/KL leaf resolves to `ml-fundamentals/classical_ml/cross-entropy-kl-divergence` (not eval_data); parent_id chain traverses leaf(depth=2) -> category(depth=1) -> root(depth=0, parent_id=NULL); all 27 leaves start with `TODO[MLF-`.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-538 --status completed`

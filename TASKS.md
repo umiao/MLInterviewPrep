@@ -9,23 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-537
-- **Description**: Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
-
-Inserts into framework_nodes:
-  - 1 root: path='ml-fundamentals', depth=0, title='ML 八股文 · Fundamentals'
-  - 6 category children (depth=1): classical_ml, eval_data, unsupervised, dl_training, attention_transformer, llm_stats
-  - 27 leaf grandchildren (depth=2), description='TODO[MLF-<slug>]' placeholder, path '<cat>/<slug>'
-
-Reads from data/ml_fundamentals_inventory.yaml (from alpha).
-Guards: sha256 of pre/post, refuses to run if existing path conflicts with a different title.
-Second run is a no-op (updates=0 skipped=34).
-
-AC: both runs pass; framework_nodes WHERE path LIKE 'ml-fundamentals%' returns exactly 34 rows (1+6+27).
-
 #### T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data)
 - **Priority**: P0
 - **Complexity**: M
@@ -295,4 +278,5 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
+- [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
 - [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943

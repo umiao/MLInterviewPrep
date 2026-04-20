@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 478 completed tasks archived as of latest archival.
+> 494 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -684,3 +684,34 @@ While reading /kg?node=n44&expanded=n9 (Array / String), the user noted KMP dese
 - [x] **2026-04-18** -- T-P1-509: KG-CONTENT-02: Add LC 1392 Longest Happy Prefix to KMP family (kmp[n-1] canonical application). ## Context
 User identified LC 1392 "Longest Happy Prefix" as the purest teaching example of KMP's next-array semantics: 
 - [x] **2026-04-17** -- T-P2-492: KG-UX-06: Bezier edges, pillar-colored, spacing polish. Current edges are orthogonal smoothstep with flat gray. Upgrade to bezier curves colored by source pillar for mindmap ae
+- [x] **2026-04-18** -- T-P0-514: T-MLSD-FRAMEWORK-02: Append Writing Discipline rules to id=18 Appendix A (5 rules + examples + heuristic gates). ## Context
+Current id=18 has Appendix A (11 sections + 6 mechanical gates). User review of id=92/id=198 V1 golds reveale
+- [x] **2026-04-19** -- T-P0-515: T-MLSD-WORKED-92-V2: Rewrite id=92 Marketplace under Writing Discipline rules (prose-first, triage-complete). ## Context
+Depends on T-P0-514 (Writing Discipline rules + 4 regex gates + LLM-judge) AND T-P0-518 (pilot rewrite of §2 
+- [x] **2026-04-19** -- T-P0-516: T-MLSD-WORKED-198-V2: Rewrite id=198 Rec System under Writing Discipline rules. ## Context
+Parallel counterpart to T-P0-515 — same execution model and gates, applied to id=198 Rec System. Depends on T
+- [x] **2026-04-18** -- T-P0-518: T-MLSD-PILOT-92-S2: Pilot rewrite §2 of id=92 under new rules + human-review gate. ## Context — ITERATION 2
+First iteration (commit 004e351, docs/mlsd_pilot_92_s2_20260418.md) passed regex gates + Gate 1
+- [x] **2026-04-18** -- T-P0-519: T-MLSD-FRAMEWORK-03: Tighten Appendix A.1 — Rule 3 ≥3 alternatives + expanded Gate 9 regex + Rule 6 follow-up preemption + raised length targets. ## Context
+T-P0-518 pilot (commit 004e351) passed all 4 regex gates + Gate 10 LLM-judge, but user review revealed the RU
+- [x] **2026-04-18** -- T-P1-511: T-MLSD-AUDIT-01: Score 10 design problems against L5 framework, produce gap report. ## Context
+Depends on T-P0-510 (L5 framework + Appendix A Unified Template are now canonical). After the framework is pu
+- [x] **2026-04-18** -- T-P1-512: T-MLSD-WORKED-92: Upgrade Marketplace & Logistics (id=92) to L5-bar gold standard. ## Context
+Depends on T-P0-510 (L5 framework + Appendix A Unified Template) + T-P1-511 (audit identifies this problem's 
+- [x] **2026-04-18** -- T-P1-513: T-MLSD-WORKED-198: Upgrade Real-Time Rec System (id=198) with L5 skeleton. ## Context
+Depends on T-P0-510 (framework + Appendix A template) + T-P1-511 (audit). id=198 "Real-Time Recommendation Sy
+- [x] **2026-04-19** -- T-P1-520: T-LC-399-NOTES: Add LC 399 Evaluate Division double-solution notes + mark completed + link framework. ## Context
+LC 399 Evaluate Division already exists in `problems` table (id=227, leetcode_id=399, title="Evaluate Divisio
+- [x] **2026-04-19** -- T-P1-522: T-MLSD-WORKED-90-V2: Rewrite id=90 Recommendation Systems under A.1.v2. ## Context
+Depends on T-P0-519 (A.1.v2 rules, completed). Apply Uniform Migration Recipe from `docs/mlsd_l5_audit_202604
+- [x] **2026-04-19** -- T-P1-523: T-MLSD-WORKED-89-V2: Rewrite id=89 Search & Retrieval Systems under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe from `docs/mlsd_l5_audit_20260418.md` to id=89 Search & R
+- [x] **2026-04-19** -- T-P1-524: T-MLSD-WORKED-91-V2: Rewrite id=91 Ads & Click Prediction under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=91 Ads & Click Prediction. V1 ~5296 chars with stan
+- [x] **2026-04-19** -- T-P1-525: T-MLSD-WORKED-97-V2: Rewrite id=97 Generative AI Systems under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=97 Generative AI Systems. V1 ~5511 chars, standard 
+- [x] **2026-04-19** -- T-P1-526: T-MLSD-WORKED-96-V2: Rewrite id=96 ML Infrastructure Design under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=96 ML Infrastructure Design. V1 ~5677 chars, standa
+- [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
+- [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
+Before this cleanup, 'does a node have drawer content?' could be answered multiple ways (content_length === 0
