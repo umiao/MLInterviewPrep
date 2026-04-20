@@ -9,19 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-545
-- **Description**: X-depth: keep original structure, expand all acronyms on first use, fix formula context holes.
-
-  #23 Tokenization — BPE=Byte Pair Encoding, PMI=Pointwise Mutual Information; preserve BPE/WordPiece/SentencePiece comparison
-  #24 Chinchilla scaling — add Kaplan 2020 / Hoffmann 2022 paper refs; formalize '~20 tokens/param' rule; add inference-cost note
-  #26 CLT vs LLN — CLT=Central Limit Theorem, LLN=Law of Large Numbers; define iid, a.s., →_P, →_d symbols
-  #27 A/B test — FWER=Family-Wise Error Rate, FDR=False Discovery Rate, MDE=Minimum Detectable Effect, BH=Benjamini-Hochberg; add power=1-β intuition
-
-Via scripts/seed_ml_fundamentals_content_q2324_2627.py (idempotent).
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers
@@ -301,6 +288,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test). X-depth: keep original structure, expand all acronyms on first use, fix formula context holes.
 - [x] **2026-04-20** -- T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y). Upgrade #25 from original X-depth (acronym-only) to full Y-depth.
 - [x] **2026-04-20** -- T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1). Apply the calibrated Y-depth template (from zeta1 review) to #22 MoE.
 - [x] **2026-04-19** -- T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep. ## Context
