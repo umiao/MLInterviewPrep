@@ -9,21 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-544
-- **Description**: Upgrade #25 from original X-depth (acronym-only) to full Y-depth.
-
-Original covers ~60% already (Gaussian→L2 and Laplace→L1 derivations present). Add:
-  Section 1: Frequentist vs Bayesian framing
-  Section 2: Full MLE/MAP derivation + prior-as-regularizer equivalence (keep existing)
-  Section 3: Physical meaning — prior 'sharpness' σ or b controls λ
-  Section 4: 常见追问 (conjugate priors, n→∞ limit, when to prefer MAP, credible vs confidence intervals)
-
-Full acronyms: MLE=Maximum Likelihood Estimation, MAP=Maximum A Posteriori, KKT=Karush-Kuhn-Tucker.
-Via scripts/seed_ml_fundamentals_content_q25.py (idempotent).
-
 #### T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test)
 - **Priority**: P0
 - **Complexity**: M
@@ -316,6 +301,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y). Upgrade #25 from original X-depth (acronym-only) to full Y-depth.
 - [x] **2026-04-20** -- T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1). Apply the calibrated Y-depth template (from zeta1 review) to #22 MoE.
 - [x] **2026-04-19** -- T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep. ## Context
 - [x] **2026-04-19** -- T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%). ## Context
