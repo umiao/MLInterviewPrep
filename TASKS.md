@@ -13,18 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-560: [T-GOLD-08] Company docs integration: drawer toggle + card visuals (no filter on index pages)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P2-559
-- **Description**: Add <GoldenToggleButton itemType='company_document' /> to whatever view renders a company_document in full (prep note page / hub doc drawer). Apply goldenCardClass + <GoldenBadge /> to any place where docs are listed as cards (e.g., Prep Notes index per-company).
-
-DO NOT add ?golden=1 filter here -- company docs are browsed per-company, not across the whole app. The Golden Collection page (T-GOLD-09) is the aggregator.
-
-Invalidation needs the companyId: pass it as an extra prop to GoldenToggleButton; if T-GOLD-03 didn't already wire this, add the prop now as a follow-up edit.
-
-AC: mark Google Hub id=53 as golden via UI; star renders filled on reload; other company doc lists show orange-tinted cards for any golden doc.
-
 #### T-P2-561: [T-GOLD-09] Golden Collection aggregator page (backend /golden endpoint + frontend page)
 - **Priority**: P2
 - **Complexity**: M
@@ -122,6 +110,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-560: [T-GOLD-08] Company docs integration: drawer toggle + card visuals (no filter on index pages). Add <GoldenToggleButton itemType='company_document' /> to whatever view renders a company_document in full (prep note pa
 - [x] **2026-04-20** -- T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter. Execute the plan from T-GOLD-07a. Expected work surface:
 - [x] **2026-04-20** -- T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points. Research-only task, NO code writes. Read:
 - [x] **2026-04-20** -- T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals. Via scripts/seed_google_hub_mlf_crosslink.py (idempotent with sha256 guard):

@@ -139,6 +139,8 @@ export interface CompanyDocument {
   content: string;
   source_type: string;
   doc_kind: string;
+  is_golden: boolean;
+  golden_at: string | null;
   created_at: string | null;
   updated_at: string | null;
 }

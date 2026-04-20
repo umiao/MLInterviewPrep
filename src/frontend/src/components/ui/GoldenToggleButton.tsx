@@ -59,9 +59,13 @@ function invalidationKeys(
         ["behavioral-examples-theme"],
       ];
     case "company_document":
+      // Match the actual query keys used by useCompanyDocuments /
+      // useCompanyDocument in hooks/useForumPosts.ts. Also invalidate the
+      // company detail cache so any nested read of the doc list refreshes.
       return [
+        ["companyDocuments", companyId],
+        ["companyDocument", companyId, itemId],
         ["companies", companyId],
-        ["companies", "document", itemId],
       ];
   }
 }

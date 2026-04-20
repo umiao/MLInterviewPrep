@@ -13,6 +13,8 @@ import CodingTab from "../components/companies/CodingTab";
 import CompanyCardIndex from "../components/CompanyCardIndex";
 import DocTocSidebar from "../components/ui/DocTocSidebar";
 import DynamicTocSidebar from "../components/ui/DynamicTocSidebar";
+import GoldenToggleButton from "../components/ui/GoldenToggleButton";
+import GoldenBadge from "../components/ui/GoldenBadge";
 import type { TocHeading } from "../utils/slugify";
 import {
   useCompanyDocuments,
@@ -140,6 +142,14 @@ export default function PrepNotesPage() {
   // Child documents
   const { data: documents } = useCompanyDocuments(companyId);
 
+  const activeDoc = useMemo(
+    () =>
+      activeDocId !== null
+        ? (documents ?? []).find((d) => d.id === activeDocId) ?? null
+        : null,
+    [documents, activeDocId],
+  );
+
   // Index-tab drawer state (local, mirrors DocumentViewer pattern)
   const [indexLcDrawerId, setIndexLcDrawerId] = useState<number | null>(null);
   const [indexDbDrawerId, setIndexDbDrawerId] = useState<number | null>(null);
@@ -255,7 +265,12 @@ export default function PrepNotesPage() {
                   Documents ({documents.length})
                 </option>
                 {documents.map((doc) => (
-                  <option key={doc.id} value={String(doc.id)}>
+                  <option
+                    key={doc.id}
+                    value={String(doc.id)}
+                    style={doc.is_golden ? { color: "#ea580c" } : undefined}
+                  >
+                    {doc.is_golden ? "[Golden] " : ""}
                     {doc.title}
                   </option>
                 ))}
@@ -278,9 +293,10 @@ export default function PrepNotesPage() {
             />
             </div>
           </div>
-          {effectiveTab === "docs" && activeDocId !== null && documents && (
-            <span className="text-xs text-gray-500">
-              {documents.find((d) => d.id === activeDocId)?.title}
+          {effectiveTab === "docs" && activeDoc && (
+            <span className="text-xs text-gray-500 inline-flex items-center gap-2">
+              {activeDoc.title}
+              <GoldenBadge golden={activeDoc.is_golden} />
             </span>
           )}
         </div>
@@ -292,6 +308,16 @@ export default function PrepNotesPage() {
             onNavigate={handleCompanyNav}
             enableKeyboard={mode === "preview"}
           />
+          {/* Golden toggle -- docs tab only, for the currently selected doc */}
+          {effectiveTab === "docs" && activeDoc && (
+            <GoldenToggleButton
+              itemType="company_document"
+              itemId={activeDoc.id}
+              companyId={companyId}
+              isGolden={activeDoc.is_golden}
+              variant="icon"
+            />
+          )}
           {/* Mode toggle -- notes/doc tabs only */}
           {(effectiveTab === "notes" || effectiveTab === "docs") && (
             <>
@@ -455,6 +481,7 @@ export default function PrepNotesPage() {
           companyId={companyId}
           docId={activeDocId}
           mode={mode}
+          isGolden={activeDoc?.is_golden ?? false}
         />
       ) : effectiveTab === "forum" ? (
         <div className="flex-1 overflow-auto p-6 min-h-0">
@@ -500,10 +527,12 @@ function DocumentViewer({
   companyId,
   docId,
   mode,
+  isGolden,
 }: {
   companyId: number;
   docId: number;
   mode: "edit" | "preview";
+  isGolden: boolean;
 }) {
   const { data: doc, isLoading } = useQuery<CompanyDocument>({
     queryKey: ["companyDocument", companyId, docId],
@@ -555,7 +584,12 @@ function DocumentViewer({
           ? <DocTocSidebar scrollContainer={scrollContainer} />
           : <DynamicTocSidebar headings={tocHeadings} scrollContainer={scrollContainer} />
       )}
-      <div ref={scrollContainerRef} className={`flex-1 overflow-auto p-6 flex flex-col min-h-0 ${showSidebar ? "has-acronym-sidebar" : ""}`}>
+      <div
+        ref={scrollContainerRef}
+        className={`flex-1 overflow-auto p-6 flex flex-col min-h-0 ${
+          showSidebar ? "has-acronym-sidebar" : ""
+        } ${isGolden ? "border-t-2 border-t-orange-300" : ""}`}
+      >
         {mode === "edit" ? (
           <textarea
             ref={textareaRef}
