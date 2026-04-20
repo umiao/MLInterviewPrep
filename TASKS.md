@@ -95,15 +95,6 @@ Via scripts/seed_ml_fundamentals_content_q25.py (idempotent).
 
 Via scripts/seed_ml_fundamentals_content_q2324_2627.py (idempotent).
 
-#### T-P0-548: [T-MLF-08] Sidebar navItem + route wiring
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-547
-- **Description**: Edit src/frontend/src/components/Sidebar.tsx:
-  add { to: '/ml-fundamentals', label: 'ML 八股文' } between Quick Index and Framework in navItems.
-
-AC: sidebar shows new item at correct position; clicking navigates to /ml-fundamentals; no TS errors.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers
@@ -250,6 +241,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
+- [x] **2026-04-19** -- T-P0-548: [T-MLF-08] Sidebar navItem + route wiring. Edit src/frontend/src/components/Sidebar.tsx:
 - [x] **2026-04-19** -- T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link. Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
 - [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
 - [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).

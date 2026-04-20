@@ -465,3 +465,11 @@
 - **Sanity check result**: `npm run build` in `src/frontend/` -> 0 TypeScript errors, Vite emitted `dist/` in ~1.05s (pre-existing >500kB chunk-size warning unchanged). DB cross-check: 27 rows under `path LIKE 'ml-fundamentals/%/%'` in `data/mle_prep.db` match the 27 slugs in the inlined INVENTORY const (verified via sqlite3 dump), so every card resolves to a real `framework_nodes.id` at runtime. Visual verification of KaTeX rendering + per-drawer content is the explicit scope of the downstream smoke task T-P1-549 (dev-server review of all 27 drawers), not this task.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-547 --status completed`
+
+## 2026-04-20 -- [T-P0-548] [T-MLF-08] Sidebar navItem for /ml-fundamentals
+- **What I did**: Edited `src/frontend/src/components/Sidebar.tsx` navItems array to insert `{ to: '/ml-fundamentals', label: 'ML 八股文' }` between Quick Index and LeetCode (i.e. between Quick Index and Framework in the original spec sense -- QI -> ML 八股文 -> LeetCode -> Framework). This matches the App.tsx route ordering established in T-P0-547 where `/ml-fundamentals` sits directly below `/quick-index`.
+- **Deliverables**:
+  - MODIFIED `src/frontend/src/components/Sidebar.tsx` (+1 line in navItems)
+- **Sanity check result**: `npx tsc --noEmit` in `src/frontend/` exits 0 (no TS errors). Route target `/ml-fundamentals` verified present in `App.tsx:45` with matching `MLFundamentals` import at `App.tsx:22`. Visual sidebar verification (clicking the item navigates, item highlights when active) is covered by the downstream smoke task T-P1-549 (dev-server review of all 27 drawers plus the entry-point page).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-548 --status completed`
