@@ -9,19 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-538
-- **Description**: Write description markdown for 7 leaves:
-  Cat 1 (Classical ML & Losses): #1 Bias-Variance, #2 L1 vs L2 (+OLS), #3 Logistic Loss, #4 GBDT/RF/XGB, #7 CE vs KL
-  Cat 2 (Eval & Data Issues): #5 Class Imbalance, #6 AUC vs PR
-
-T1 = verbatim cleanup: dedupe the 3-line LaTeX repetition artifact from the attachment; first-occurrence terms as **English** (缩写, 中文); preserve all derivations and 追问预判 sections.
-
-Write via scripts/seed_ml_fundamentals_content_cat12.py (idempotent).
-AC: 7 framework_nodes.description updated; each has KaTeX math; each has section headers; seed re-run is no-op.
-
 #### T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet
 - **Priority**: P0
 - **Complexity**: S
@@ -278,5 +265,6 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
+- [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
 - [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
 - [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943
