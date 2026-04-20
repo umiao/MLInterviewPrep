@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-543: [T-MLF-06a] [BARRIER] T3 Y-depth #21 SFT/RLHF/DPO (calibration session)
 - **Priority**: P0
 - **Complexity**: M
@@ -29,6 +25,10 @@ Full acronyms on first occurrence, formatted **English** (acronym, 中文): SFT 
 CRITICAL: end the session with 'task_db.py update T-P0-543 --status review' (NOT completed). Leaves T-P0-544 blocked so user can read the rendered drawer and confirm the Y-depth standard before T-P0-544/545 reuse it as template.
 
 Commit as '[T-MLF-06a] DPO golden answer Y-depth calibration - awaiting user review'.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 #### T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1)
 - **Priority**: P0
