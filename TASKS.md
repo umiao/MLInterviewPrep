@@ -13,20 +13,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-561: [T-GOLD-09] Golden Collection aggregator page (backend /golden endpoint + frontend page)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P2-560
-- **Description**: Backend: add GET /golden router endpoint that unions rows from the 3 tables where is_golden=true, normalized into a uniform response:
-  [{ id, item_type: 'framework_node'|'behavioral_example'|'company_document', title, preview (first 200 chars of content/description), golden_at, url_path (for deep-linking: e.g. '/ml-fundamentals?cat=...&slug=...' or '/behavioral?id=...' or '/companies/<id>/documents/<id>') }]
-  Sort by golden_at DESC. Implement in src/backend/routers/golden.py; mount in main.py.
-
-Frontend: create src/frontend/src/pages/GoldenCollection.tsx. Three tabs (framework_nodes / behavioral / company_docs) + 'All' tab at position 0 (matching MLFundamentals pattern). Each card is clickable and navigates to the url_path from the API. Empty state per tab: 'No items marked golden in this category yet.'
-
-Sidebar: add { to: '/golden', label: 'Golden' } nav item near the top (above Framework or between Fundamentals and LeetCode).
-
-AC: mark 3+ items across 3 different tables; /golden page shows all with correct per-tab filtering; clicking a card deep-links to the correct origin page; empty tabs display the friendly message.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -110,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-561: [T-GOLD-09] Golden Collection aggregator page (backend /golden endpoint + frontend page). Backend: add GET /golden router endpoint that unions rows from the 3 tables where is_golden=true, normalized into a unif
 - [x] **2026-04-20** -- T-P2-560: [T-GOLD-08] Company docs integration: drawer toggle + card visuals (no filter on index pages). Add <GoldenToggleButton itemType='company_document' /> to whatever view renders a company_document in full (prep note pa
 - [x] **2026-04-20** -- T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter. Execute the plan from T-GOLD-07a. Expected work surface:
 - [x] **2026-04-20** -- T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points. Research-only task, NO code writes. Read:

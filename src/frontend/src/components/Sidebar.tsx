@@ -4,6 +4,7 @@ const navItems: { to: string; label: string; separator?: boolean }[] = [
   { to: "/", label: "Dashboard" },
   { to: "/quick-index", label: "Quick Index" },
   { to: "/ml-fundamentals", label: "Fundamentals" },
+  { to: "/golden", label: "Golden" },
   { to: "/problems", label: "LeetCode" },
   { to: "/framework", label: "Framework" },
   { to: "/kg", label: "Knowledge Graph" },

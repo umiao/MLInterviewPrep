@@ -22,6 +22,7 @@ import QuickIndex from "./pages/QuickIndex";
 import MLFundamentals from "./pages/MLFundamentals";
 import BakingStudio from "./pages/BakingStudio";
 import KnowledgeGraph from "./pages/KnowledgeGraph";
+import GoldenCollection from "./pages/GoldenCollection";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ export default function App() {
                 <Route index element={<Dashboard />} />
                 <Route path="quick-index" element={<QuickIndex />} />
                 <Route path="ml-fundamentals" element={<MLFundamentals />} />
+                <Route path="golden" element={<GoldenCollection />} />
                 <Route path="problems" element={<Problems />} />
                 <Route path="problems/:problemId" element={<ProblemDetailPage />} />
                 <Route path="framework" element={<Framework />} />

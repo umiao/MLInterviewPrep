@@ -24,6 +24,7 @@ from src.backend.routers.behavioral import router as behavioral_router
 from src.backend.routers.companies import router as companies_router
 from src.backend.routers.forum import router as forum_router
 from src.backend.routers.framework import router as framework_router
+from src.backend.routers.golden import router as golden_router
 from src.backend.routers.kg import router as kg_router
 from src.backend.routers.knowledge_cards import router as knowledge_cards_router
 from src.backend.routers.problems import router as problems_router
@@ -165,6 +166,7 @@ app.include_router(reading_router, prefix="/api")
 app.include_router(forum_router, prefix="/api")
 app.include_router(system_design_router, prefix="/api")
 app.include_router(baking_router, prefix="/api")
+app.include_router(golden_router, prefix="/api")
 
 
 @app.get("/api/dashboard")
