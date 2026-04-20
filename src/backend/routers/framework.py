@@ -43,6 +43,8 @@ def _build_tree(
             "importance": n.importance,
             "priority": n.priority,
             "estimated_hours": n.estimated_hours,
+            "is_golden": bool(n.is_golden),
+            "golden_at": n.golden_at,
             "children": [],
         }
 
@@ -94,6 +96,8 @@ def get_framework_node(
         "importance": node.importance,
         "priority": node.priority,
         "estimated_hours": node.estimated_hours,
+        "is_golden": bool(node.is_golden),
+        "golden_at": node.golden_at,
         "children": [],
     }
 
@@ -207,6 +211,12 @@ def update_framework_node(
                 node.completed_at = now
             node.progress_pct = 100.0
 
+    # Golden flag: false -> true stamps golden_at; true -> false leaves it.
+    if "is_golden" in update_data:
+        new_golden = bool(update_data["is_golden"])
+        if new_golden and not node.is_golden:
+            node.golden_at = now
+
     for field, value in update_data.items():
         setattr(node, field, value)
 
@@ -229,6 +239,8 @@ def update_framework_node(
         "importance": node.importance,
         "priority": node.priority,
         "estimated_hours": node.estimated_hours,
+        "is_golden": bool(node.is_golden),
+        "golden_at": node.golden_at,
         "children": [],
     }
 

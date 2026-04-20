@@ -1,0 +1,99 @@
+"""Tests for framework PUT endpoint golden marker auto-refresh (T-P1-553)."""
+import time
+from datetime import datetime
+
+import pytest
+
+from src.backend.models.framework import FrameworkNode
+
+
+@pytest.fixture()
+def seed_node(db_session):
+    """Insert a single leaf framework node for golden-marker tests."""
+    node = FrameworkNode(
+        path="pillar1.dp",
+        depth=0,
+        title="DP",
+        importance=1.0,
+        priority="P0",
+        estimated_hours=10,
+    )
+    db_session.add(node)
+    db_session.commit()
+    db_session.refresh(node)
+    return node
+
+
+def _iso_to_dt(raw: str) -> datetime:
+    """Parse an ISO-format timestamp string into datetime."""
+    return datetime.fromisoformat(raw)
+
+
+def test_framework_golden_false_to_true_sets_golden_at(test_client, seed_node):
+    """AC (a): false->true sets golden_at to a recent time."""
+    before = datetime.utcnow()
+    resp = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": True}
+    )
+    after = datetime.utcnow()
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["is_golden"] is True
+    assert body["golden_at"] is not None
+    stamped = _iso_to_dt(body["golden_at"])
+    assert before <= stamped <= after
+
+
+def test_framework_golden_true_to_true_does_not_overwrite(test_client, seed_node):
+    """AC (b): re-PUT with is_golden=true but no flip does NOT refresh golden_at."""
+    resp1 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": True}
+    )
+    assert resp1.status_code == 200
+    first_stamp = resp1.json()["golden_at"]
+
+    time.sleep(0.01)
+    resp2 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": True}
+    )
+    assert resp2.status_code == 200
+    assert resp2.json()["golden_at"] == first_stamp
+
+
+def test_framework_golden_true_to_false_keeps_golden_at(test_client, seed_node):
+    """AC (c): true->false keeps golden_at pinned."""
+    resp1 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": True}
+    )
+    assert resp1.status_code == 200
+    first_stamp = resp1.json()["golden_at"]
+
+    resp2 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": False}
+    )
+    assert resp2.status_code == 200
+    body = resp2.json()
+    assert body["is_golden"] is False
+    assert body["golden_at"] == first_stamp
+
+
+def test_framework_golden_remark_refreshes_golden_at(test_client, seed_node):
+    """AC (d): false->true after an unmark refreshes golden_at to a later timestamp."""
+    resp1 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": True}
+    )
+    assert resp1.status_code == 200
+    first_stamp = _iso_to_dt(resp1.json()["golden_at"])
+
+    resp2 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": False}
+    )
+    assert resp2.status_code == 200
+
+    time.sleep(0.01)
+    resp3 = test_client.put(
+        f"/api/framework/nodes/{seed_node.id}", json={"is_golden": True}
+    )
+    assert resp3.status_code == 200
+    new_stamp = _iso_to_dt(resp3.json()["golden_at"])
+    assert new_stamp > first_stamp

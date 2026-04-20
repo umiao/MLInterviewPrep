@@ -589,3 +589,16 @@
 - **Sanity check result**: Took pre-migration backup (`data/mle_prep.db.bak.20260420_golden_*`). Ran migration once: `added=6 skipped=0`, all 3 tables report `is_golden=True golden_at=True golden_rows=0`. Re-ran migration: `added=0 skipped=6`, no-op verified. ORM + Pydantic round-trip: queried first row of each table via SQLAlchemy and confirmed `is_golden=False golden_at=None` defaults read correctly; `FrameworkNodeResponse.model_validate` round-trip emits both fields. Ruff clean on all 7 changed/new files. Full pytest suite 1133 passed in 55s -- no regressions.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-552 --status completed`. T-P1-553 (backend PUT + endpoint-layer golden_at refresh) unblocks next.
+
+## 2026-04-20 -- [T-P1-553] [T-GOLD-02] Backend PUT endpoints accept is_golden + endpoint-layer golden_at refresh on false->true
+- **What I did**: Wired the golden_at auto-refresh rule into the three existing PUT endpoints so the frontend toggle stays as a dumb setter. For each of `PUT /framework/nodes/{node_id}`, `PUT /companies/{company_id}/documents/{doc_id}`, and `PUT /behavioral/examples/{example_id}`: detect `is_golden` in the partial payload, stamp `golden_at = datetime.utcnow()` only on false->true transitions, and leave `golden_at` untouched on true->false and no-op true->true (matches `docs/golden_marker.md` semantics). Framework `update_framework_node` + `get_framework_node` + `_build_tree` response dicts now also emit `is_golden` and `golden_at`; behavioral `_build_example_response` emits them too (company docs already serialized via `from_attributes`, so no router-side dict surgery needed there). Added three focused test modules under `tests/test_{framework,behavioral,companies}_api.py`, each covering ACs (a) false->true stamp within a wall-clock window, (b) true->true no-op keeps stamp, (c) true->false pins stamp, (d) unmark+remark refreshes stamp to a strictly later timestamp. Used `time.sleep(0.01)` between PUTs to guarantee monotonic `datetime.utcnow()` on Windows.
+- **Deliverables**:
+  - MODIFIED `src/backend/routers/framework.py` (golden_at stamp in PUT + is_golden/golden_at in tree + single-node + PUT response dicts)
+  - MODIFIED `src/backend/routers/behavioral.py` (datetime import, golden_at stamp in update_example, is_golden/golden_at in _build_example_response)
+  - MODIFIED `src/backend/routers/companies.py` (datetime import, golden_at stamp in update_document)
+  - ADDED `tests/test_framework_api.py` (4 AC tests)
+  - ADDED `tests/test_behavioral_api.py` (4 AC tests)
+  - ADDED `tests/test_companies_api.py` (4 AC tests)
+- **Sanity check result**: `pytest tests/test_framework_api.py tests/test_behavioral_api.py tests/test_companies_api.py`: 12/12 passed (1.69s). Full suite `pytest tests/`: 1145/1145 passed (56.3s) -- no regressions. `ruff check` clean on all 6 touched/new files. FastAPI auto-docs will reflect the new optional `is_golden` on the update schemas (already present from T-GOLD-01) and the new response fields, so /docs surfaces the contract automatically.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-553 --status completed`. T-P1-554 (GoldenToggleButton + orange tokens) unblocks next.

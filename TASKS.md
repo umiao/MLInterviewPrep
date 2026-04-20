@@ -11,21 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-552
-- **Description**: Extend three existing PUT endpoints (do NOT add new ones):
-  - PUT /framework/nodes/{node_id}  (routers/framework.py)
-  - PUT /companies/{company_id}/documents/{doc_id}  (routers/companies.py)
-  - PUT /behavioral/examples/{example_id}  (routers/behavioral.py)
-
-For each: accept partial update with optional `is_golden` in the request body. Business rule at endpoint layer (NOT frontend): when `is_golden` flips from False to True, set `golden_at = datetime.utcnow()`; when True -> False, leave `golden_at` unchanged (so we remember the last time it was canonized). Use UTC timestamps; keep consistent with existing project timestamp convention (check `created_at` handling on these models to match).
-
-Add pytest tests in tests/test_*_api.py per module: (a) false->true sets golden_at to a recent time; (b) re-PUT with is_golden=true but no flip change does NOT overwrite golden_at; (c) true->false keeps golden_at pinned; (d) false->true after an unmark refreshes golden_at to a new later timestamp.
-
-AC: 3 endpoints + matching tests green; API docs (if FastAPI auto-docs) reflect new optional fields.
-
 #### T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens
 - **Priority**: P1
 - **Complexity**: M
@@ -244,6 +229,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true. Extend three existing PUT endpoints (do NOT add new ones):
 - [x] **2026-04-20** -- T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md. Add curation columns to three tables (single Alembic migration or one-shot Python migration script under scripts/ -- fol
 - [x] **2026-04-20** -- T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions. Walk each of 27 leaf descriptions and verify:
 - [x] **2026-04-20** -- T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers. Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smo

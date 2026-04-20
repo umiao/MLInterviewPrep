@@ -1,5 +1,6 @@
 """Company management API routes."""
 import json
+from datetime import datetime
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
@@ -410,6 +411,13 @@ def update_document(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     update_data = body.model_dump(exclude_unset=True)
+
+    # Golden flag: false -> true stamps golden_at; true -> false leaves it.
+    if "is_golden" in update_data:
+        new_golden = bool(update_data["is_golden"])
+        if new_golden and not doc.is_golden:
+            doc.golden_at = datetime.utcnow()
+
     for field, value in update_data.items():
         setattr(doc, field, value)
     db.commit()

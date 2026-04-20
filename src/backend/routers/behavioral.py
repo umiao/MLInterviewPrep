@@ -1,5 +1,6 @@
 """Behavioral Questions API routes."""
 import json
+from datetime import datetime
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -329,6 +330,8 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
         "tech_terms": ex.tech_terms_dict,
         "cn_elevator_pitch": ex.cn_elevator_pitch,
         "created_at": ex.created_at,
+        "is_golden": bool(ex.is_golden),
+        "golden_at": ex.golden_at,
         "linked_questions": linked_questions,
     }
 
@@ -514,6 +517,13 @@ def update_example(
         raise HTTPException(status_code=404, detail="Example not found")
 
     update_data = data.model_dump(exclude_unset=True)
+
+    # Golden flag: false -> true stamps golden_at; true -> false leaves it.
+    if "is_golden" in update_data:
+        new_golden = bool(update_data["is_golden"])
+        if new_golden and not ex.is_golden:
+            ex.golden_at = datetime.utcnow()
+
     for key, value in update_data.items():
         if key in ("evidence_quotes", "principle_tags"):
             setattr(ex, key, json.dumps(value, ensure_ascii=False))
