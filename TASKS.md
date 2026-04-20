@@ -11,18 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-549
-- **Description**: Walk each of 27 leaf descriptions and verify:
-  (1) every acronym has first-occurrence full expansion in **English** (缩写, 中文) format
-  (2) every standalone formula has surrounding prose context
-  (3) any jargon (expert collapse, FWER, MDE, ...) has inline definition
-Any issue found: update the corresponding seed_ml_fundamentals_content_*.py and re-run; do NOT edit DB directly.
-
-AC: diffs committed; sha256 of affected rows changed; seed re-run is no-op.
-
 #### T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md
 - **Priority**: P1
 - **Complexity**: S
@@ -277,6 +265,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions. Walk each of 27 leaf descriptions and verify:
 - [x] **2026-04-20** -- T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers. Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smo
 - [x] **2026-04-20** -- T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test). X-depth: keep original structure, expand all acronyms on first use, fix formula context holes.
 - [x] **2026-04-20** -- T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y). Upgrade #25 from original X-depth (acronym-only) to full Y-depth.
