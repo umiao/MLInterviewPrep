@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 494 completed tasks archived as of latest archival.
+> 510 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -715,3 +715,37 @@ Depends on T-P0-519. Apply Uniform Migration Recipe to id=96 ML Infrastructure D
 - [x] **2026-04-18** -- T-P2-500: [DEBT] CLAUDE.md: Remove duplicate Key Constraints section. CLAUDE.md has two ## Key Constraints sections (lines 15 and 34) with nearly identical content. The first is a template p
 - [x] **2026-04-18** -- T-P2-503: KG-UX-12: Audit/migrate scattered content_length checks + LESSONS entry. ## Problem
 Before this cleanup, 'does a node have drawer content?' could be answered multiple ways (content_length === 0
+- [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943
+- [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
+
+Inserts into framework_node
+- [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
+  Cat 1 (Classical ML & Losses): #1 Bias-Variance, #2 L1 vs L2 (+OLS), #3 Logis
+- [x] **2026-04-19** -- T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet. BARRIER TASK: runner MUST stop here pending user review. Steps:
+  1. Start frontend dev server (cd src/frontend && npm r
+- [x] **2026-04-19** -- T-P0-541: [T-MLF-04] T1 content fill Cat 3-4 (7 Q: Unsupervised + DL Training). Write description markdown for 7 leaves per the canonical template (from gamma_barrier):
+  Cat 3 (Unsupervised): #8 K-me
+- [x] **2026-04-19** -- T-P0-542: [T-MLF-05] T2 content fill Cat 5 (6 Q: Attention & Transformer). Write description markdown for 6 leaves:
+  #15 Self-Attention Complexity (merge with its linear-attention deep-dive subs
+- [x] **2026-04-19** -- T-P0-543: [T-MLF-06a] [BARRIER] T3 Y-depth #21 SFT/RLHF/DPO (calibration session). CALIBRATION BARRIER: runner MUST stop here pending user review.
+
+Write a full Y-depth golden answer for Q#21 (SFT / RLHF
+- [x] **2026-04-19** -- T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link. Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
+  - Top tab bar: 6 categories (classical_ml,
+- [x] **2026-04-19** -- T-P0-548: [T-MLF-08] Sidebar navItem + route wiring. Edit src/frontend/src/components/Sidebar.tsx:
+  add { to: '/ml-fundamentals', label: 'ML 八股文' } between Quick Index and 
+- [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=93 NLP & LLM Systems. V1 ~5371 chars, standard 8-he
+- [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=94 Computer Vision Systems. V1 ~5174 chars, standar
+- [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
+Depends on T-P0-519. Apply Uniform Migration Recipe to id=95 Fraud & Trust Safety. V1 ~5040 chars, standard 8
+- [x] **2026-04-19** -- T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete). ## Context
+Google R1 **rescheduled** (not past). Events per interview_events:
+- Mon 2026-04-20 10:00 AM PT — Google Cham
+- [x] **2026-04-19** -- T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN). ## Context
+Google R1 ML Basics interview 2026-04-21 11:15 AM PT. id=52 is a 9509-char one-page gist covering Google-fami
+- [x] **2026-04-19** -- T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN). ## Context
+Google R1 ML Basics 2026-04-21 11:15 AM PT. id=57 is a 12123-char StudyNoteBuilder-generated doc with 13 flas
+- [x] **2026-04-19** -- T-P1-534: T-GOOG-REORG-HUB: Rewrite id=53 Prep Hub to pure 3-tier navigation index (~3558→~700 chars). ## Context
+Google /companies/3/prep has 17 docs flat-listed; id=38 + id=51 + id=53 all overlap as 'entry'. User confused

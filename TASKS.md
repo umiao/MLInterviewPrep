@@ -5,41 +5,9 @@
 
 ## In Progress
 
-#### T-P0-543: [T-MLF-06a] [BARRIER] T3 Y-depth #21 SFT/RLHF/DPO (calibration session)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-542
-- **Description**: CALIBRATION BARRIER: runner MUST stop here pending user review.
-
-Write a full Y-depth golden answer for Q#21 (SFT / RLHF / DPO) into framework_nodes.description for the leaf at path 'ml-fundamentals/llm_stats/sft-rlhf-dpo' via scripts/seed_ml_fundamentals_content_q21.py (idempotent, sha256 guard).
-
-5-section structure (per template from T-P0-540 review):
-  1. 问题设定 — three objective types defined rigorously
-  2. 推导 — Bradley-Terry RM loss; PPO with KL-constraint; DPO closed-form derivation showing Z(x) cancellation step-by-step
-  3. 物理意义 — why ref model stays as KL anchor; what 'reward hacking' means; why DPO is supervised but still aligned
-  4. 常见追问预判 — 5+ items (DPO vs IPO vs KTO; β temperature interpretation; offline vs online; reward overoptimization; iterative DPO)
-  5. 参考 — 2-3 paper refs
-
-Full acronyms on first occurrence, formatted **English** (acronym, 中文): SFT (Supervised Fine-Tuning), RLHF (Reinforcement Learning from Human Feedback), DPO (Direct Preference Optimization), PPO (Proximal Policy Optimization), RM (Reward Model), KL (Kullback-Leibler), MLE (Maximum Likelihood Estimation).
-
-CRITICAL: end the session with 'task_db.py update T-P0-543 --status review' (NOT completed). Leaves T-P0-544 blocked so user can read the rendered drawer and confirm the Y-depth standard before T-P0-544/545 reuse it as template.
-
-Commit as '[T-MLF-06a] DPO golden answer Y-depth calibration - awaiting user review'.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
-
-#### T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-543
-- **Description**: Apply the calibrated Y-depth template (from zeta1 review) to #22 MoE.
-
-Four sections with: top-k routing math, load-balancing aux loss derivation (f_i, P_i), expert collapse definition, capacity factor definition, Switch (k=1) vs Mixtral (k=2) examples, drop-token behavior.
-
-Full acronyms: MoE=Mixture of Experts.
-Via scripts/seed_ml_fundamentals_content_q22.py (idempotent).
 
 #### T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y)
 - **Priority**: P0
@@ -346,25 +314,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 ## Completed Tasks
 
-> 494 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1). Apply the calibrated Y-depth template (from zeta1 review) to #22 MoE.
 - [x] **2026-04-19** -- T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep. ## Context
 - [x] **2026-04-19** -- T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%). ## Context
 - [x] **2026-04-19** -- T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack. CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
 - [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
 - [x] **2026-04-19** -- T-P1-535: T-GOOG-REORG-SLIM51: Slim id=51 by replacing Round 1 ML-dims + Round 2 G&L-attrs with db://38 refs (~6213→~4500 chars). ## Context
-- [x] **2026-04-19** -- T-P1-534: T-GOOG-REORG-HUB: Rewrite id=53 Prep Hub to pure 3-tier navigation index (~3558→~700 chars). ## Context
-- [x] **2026-04-19** -- T-P1-532: T-GOOG-CN-57: Rewrite company_documents id=57 'Staging 13 Flashcards' to Chinese-prose narration (12K chars, 0%→≥60% CN). ## Context
-- [x] **2026-04-19** -- T-P1-531: T-GOOG-CN-52: Rewrite company_documents id=52 'Google DNN / Key Papers Gist' to Chinese-prose narration (9.5K chars, 0%→≥60% CN). ## Context
-- [x] **2026-04-19** -- T-P1-530: T-GOOG-DEDUPE: Dedupe Google prep docs id=38/51/53 schedule overlap + refresh dates to 4/20 mock + 4/21 R1 (NO archive, NO delete). ## Context
-- [x] **2026-04-19** -- T-P1-529: T-MLSD-WORKED-95-V2: Rewrite id=95 Fraud & Trust Safety under A.1.v2. ## Context
-- [x] **2026-04-19** -- T-P1-528: T-MLSD-WORKED-94-V2: Rewrite id=94 Computer Vision Systems under A.1.v2. ## Context
-- [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
-- [x] **2026-04-19** -- T-P0-548: [T-MLF-08] Sidebar navItem + route wiring. Edit src/frontend/src/components/Sidebar.tsx:
-- [x] **2026-04-19** -- T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link. Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
-- [x] **2026-04-19** -- T-P0-542: [T-MLF-05] T2 content fill Cat 5 (6 Q: Attention & Transformer). Write description markdown for 6 leaves:
-- [x] **2026-04-19** -- T-P0-541: [T-MLF-04] T1 content fill Cat 3-4 (7 Q: Unsupervised + DL Training). Write description markdown for 7 leaves per the canonical template (from gamma_barrier):
-- [x] **2026-04-19** -- T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet. BARRIER TASK: runner MUST stop here pending user review. Steps:
-- [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
-- [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
-- [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943
