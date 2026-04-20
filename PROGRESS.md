@@ -737,3 +737,13 @@
 - **Sanity check result**: First run `[OK] inserted event id=32`. Second run `[SKIP] event already exists id=32` (idempotent). DB inspection: row 32 present with expected columns (Lyra / other / MD Video Session -- Mary Miller / 2026-04-23 08:30:00 / 60 min / upcoming). Verified 2026-04-23 is a Thursday via `datetime`. Upcoming-week query confirms the new event slots correctly between the existing 2026-04-22 Jacqueline session and the end of the week — no conflicts against Google Round 1 events (Tue 2026-04-21).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-566 --status completed` (already applied).
+
+## 2026-04-20 12:55 -- [T-P1-567] Add Slack Hiring Manager Round (Scott Clark) 2026-04-22
+- **What I did**: Per user Discord msg 1495921236360958104 inserted a new `interview_events` row for the Salesforce virtual interview for Software Engineer II, Machine Learning on the Slack team. Wed 2026-04-22 09:00-09:45 AM PDT (tentative per email), 45 min, interviewer Scott Clark (Manager, Software Engineering). Per user explicit instruction category is Slack (company_id=32) since the role is on the Slack ML team even though scheduled by Salesforce. Chose `event_type=phone_screen` as the closest bucket to a hiring-manager round (no dedicated `hm_round` enum value exists; the existing taxonomy is other / technical / hr_call / phone_screen / system_design / behavioral — phone_screen fits pre-onsite manager conversational round better than hr_call which was used for the prior 2026-04-15 recruiter screen). Title made informative: `Slack Hiring Manager Round -- SWE II, ML (Scott Clark)`. Description captures the full scheduling context + prep focus (team/role fit, main project stories, comp anchor, 3 prepared questions).
+- **Deliverables**:
+  - NEW `scripts/_add_slack_hm_2026-04-22.py` (idempotent insert-if-not-exists by `(title, scheduled_at)`)
+  - NEW row `interview_events.id=33` (company_id=32, event_type=phone_screen, scheduled_at='2026-04-22 09:00:00')
+  - DB backup `data/mle_prep.db.bak.<ts>_pre_slack_hm`
+- **Sanity check result**: `datetime.date(2026,4,22)` weekday = Wednesday (matches email). First run `[OK] inserted event id=33`. Second run `[SKIP] event already exists id=33` (idempotent). Weekly schedule query confirms placement: Wed 09:00 Slack HM slot is before the 13:00 Lyra/Jacqueline session on the same day — no conflicts. Also not colliding with the dense Tue 04-21 Google Round 1 block (11:15 + 13:15) or Thu 04-23 Mary Miller session.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-567 --status completed` (already applied).
