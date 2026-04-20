@@ -11,21 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-553
-- **Description**: Create src/frontend/src/utils/goldenStyle.ts exporting:
-  goldenCardClass(isGolden: boolean): string  -- returns extra Tailwind className when golden is true:
-    'bg-orange-50 border-orange-300 border-l-4 border-l-orange-500'
-  Default (non-golden) returns empty string so the caller can concat without clobbering.
-
-Also export a <GoldenBadge /> tiny pill component: when golden=true, renders a small filled star icon + 'GOLDEN' text in orange-700 on orange-50, with orange-200 border, matching the existing FREQ_BADGE style on MLFundamentals cards.
-
-Do NOT apply these anywhere yet -- pure shared utilities. T-GOLD-06 consumes them.
-
-AC: tsc clean, both exports importable, visual snapshot captured (or a manual screenshot committed under docs/ for reference).
-
 #### T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first)
 - **Priority**: P1
 - **Complexity**: S
@@ -209,6 +194,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists. Create src/frontend/src/utils/goldenStyle.ts exporting:
 - [x] **2026-04-20** -- T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens. Create src/frontend/src/components/ui/GoldenToggleButton.tsx:
 - [x] **2026-04-20** -- T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true. Extend three existing PUT endpoints (do NOT add new ones):
 - [x] **2026-04-20** -- T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md. Add curation columns to three tables (single Alembic migration or one-shot Python migration script under scripts/ -- fol
