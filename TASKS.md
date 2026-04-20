@@ -9,17 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-541: [T-MLF-04] T1 content fill Cat 3-4 (7 Q: Unsupervised + DL Training)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-540
-- **Description**: Write description markdown for 7 leaves per the canonical template (from gamma_barrier):
-  Cat 3 (Unsupervised): #8 K-means, #9 EM+GMM
-  Cat 4 (DL Training): #10 BN vs LN, #11 Adam/SGD/AdamW, #12 Gradient Vanish/Explode, #13 Dropout, #14 Activation Evolution
-
-T1 = verbatim cleanup; #10/#11/#14 have non-trivial acronym expansion (BN/LN/GELU/GLU/SwiGLU).
-Via scripts/seed_ml_fundamentals_content_cat34.py (idempotent).
-
 #### T-P0-542: [T-MLF-05] T2 content fill Cat 5 (6 Q: Attention & Transformer)
 - **Priority**: P0
 - **Complexity**: L
@@ -136,20 +125,6 @@ AC: id=53 has new bucket; runs twice: 1 update / 0 updates.
 
 ## Blocked
 
-#### T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-539
-- **Description**: BARRIER TASK: runner MUST stop here pending user review. Steps:
-  1. Start frontend dev server (cd src/frontend && npm run dev) in background; verify it serves on localhost
-  2. For each of the 7 Cat 1-2 leaves (#1-4 + #5/#6/#7 per inventory), open the drawer in browser and capture rendering notes (KaTeX OK? bold terms? section breaks? GFM tables OK?)
-  3. Produce docs/ml_fundamentals_template.md — canonical 5-section markdown template (问题设定 / 推导 / 物理意义 / 常见追问 / 参考) with concrete formatting rules
-  4. Append a [BARRIER-AWAITING-USER] entry to PROGRESS.md
-  5. CRITICAL: end the session with 'task_db.py update T-P0-540 --status review' (NOT --status completed). This leaves T-P0-541 blocked so the orchestrator's has-unblocked check returns false and the runner exits, prompting the user to manually review the template before approving downstream content fills.
-  6. Commit template doc + PROGRESS entry as '[T-MLF-03.5] Template lock checkpoint - awaiting user review'
-
-After user reviews docs/ml_fundamentals_template.md and approves, they will run 'task_db.py update T-P0-540 --status completed' and re-launch autonomous_run.sh.
-
 #### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
 - **Priority**: P1
 - **Complexity**: S
@@ -243,6 +218,8 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - [x] **2026-04-19** -- T-P1-527: T-MLSD-WORKED-93-V2: Rewrite id=93 NLP & LLM Systems under A.1.v2. ## Context
 - [x] **2026-04-19** -- T-P0-548: [T-MLF-08] Sidebar navItem + route wiring. Edit src/frontend/src/components/Sidebar.tsx:
 - [x] **2026-04-19** -- T-P0-547: [T-MLF-07] MLFundamentals.tsx page + ?cat=&slug= deep-link. Create src/frontend/src/pages/MLFundamentals.tsx modeled on QuickIndex.tsx:
+- [x] **2026-04-19** -- T-P0-541: [T-MLF-04] T1 content fill Cat 3-4 (7 Q: Unsupervised + DL Training). Write description markdown for 7 leaves per the canonical template (from gamma_barrier):
+- [x] **2026-04-19** -- T-P0-540: [T-MLF-03.5] [BARRIER] Template lock checkpoint: dev server review + canonical snippet. BARRIER TASK: runner MUST stop here pending user review. Steps:
 - [x] **2026-04-19** -- T-P0-539: [T-MLF-03] T1 content fill Cat 1-2 (7 Q: Classical ML & Losses + Eval/Data). Write description markdown for 7 leaves:
 - [x] **2026-04-19** -- T-P0-538: [T-MLF-02] seed_ml_fundamentals_skeleton.py: root + 6 category + 27 leaf stubs. Create scripts/seed_ml_fundamentals_skeleton.py (idempotent, Python 3.11+, encoding=utf-8).
 - [x] **2026-04-19** -- T-P0-537: [T-MLF-01] Parse attachment -> ml_fundamentals_inventory.yaml (27 Q, tier + interview_freq columns). Parse the 85KB 'ML high-freq' attachment at C:/Users/Shenghui Xu/.claude/channels/discord/inbox/1776657806963-1495635943

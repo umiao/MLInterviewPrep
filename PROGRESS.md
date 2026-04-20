@@ -473,3 +473,19 @@
 - **Sanity check result**: `npx tsc --noEmit` in `src/frontend/` exits 0 (no TS errors). Route target `/ml-fundamentals` verified present in `App.tsx:45` with matching `MLFundamentals` import at `App.tsx:22`. Visual sidebar verification (clicking the item navigates, item highlights when active) is covered by the downstream smoke task T-P1-549 (dev-server review of all 27 drawers plus the entry-point page).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-548 --status completed`
+
+## 2026-04-20 -- [T-MLF-07b] All tab + sidebar label rename per user browser-review feedback
+- **What I did**: User reviewed the rendered portal after runner shipped eta/theta; rendering is "fine, actually nice" for the 7 Cat 1-2 drawers, but two UX gaps: (a) no way to see the 27 questions in sequential id order -- every tab filters to one category; (b) sidebar label `ML 八股文` mixed Chinese into an otherwise English nav list. Direct-edit fix (not a new task_db entry -- this is a sub-step of T-P0-547 polish, not a new slice of work): added `TabSlug = CategorySlug | "all"` + `TAB_ORDER` with "all" at position 0 in MLFundamentals.tsx, made "all" the default landing tab when no `?cat=` is in the URL, rewrote selectTab/openCard/activeSlug logic so the All tab preserves slugs across tab transitions (any slug is valid in "all") and concrete-cat tabs only preserve slugs that belong to that cat. Sidebar label renamed to `Fundamentals` for language consistency. Removed the now-unused `isCategorySlug` helper.
+- **Deliverables**: commit `c7eccfd` (2 files, +40/-19) — src/frontend/src/pages/MLFundamentals.tsx + src/frontend/src/components/Sidebar.tsx.
+- **Sanity check result**: `npm run build` clean (zero TS errors after removing unused helper caught by TS6133); build output 3.98MB bundle unchanged in size from prior build.
+- **Status**: [DONE]
+- **Next**: User re-reviews in browser; on approval, runs `task_db.py update T-P0-540 --status completed` to unblock delta; then signals me to relaunch `autonomous_run.sh` for delta -> epsilon -> zeta1 (next barrier).
+
+## 2026-04-20 -- [T-P0-541] [T-MLF-04] T1 content fill Cat 3-4 (7 leaves)
+- **What I did**: Wrote canonical 5-section descriptions for the 7 Tier-1 leaves across Cat 3 (unsupervised) + Cat 4 (dl_training): #7 k-means-assumptions-and-failures, #8 em-and-gmm, #9 batchnorm-vs-layernorm, #10 adam-vs-sgd-adamw, #11 vanishing-exploding-gradient, #12 dropout, #13 activation-function-evolution. Followed docs/ml_fundamentals_template.md conventions: single-KaTeX math blocks (source triple-render collapsed), first-occurrence acronym expansion `**English** (ACRONYM, 中文译名)` per inventory.yaml (WCSS/GMM/EM/ELBO/KL/MLE/BN/LN/RMSNorm/EMA/SGD/Adam/AdamW/ReLU/RNN/LSTM/GRU/ResNet/GELU/SiLU/Swish/ELU/PReLU/SwiGLU/GLU), GFM tables for normalization-family + Adam-vs-SGD + activation comparisons, boxed takeaway for AdamW decoupled-weight-decay update rule. Preserved all derivation steps and 追问预判 sections from source.
+- **Deliverables**:
+  - ADDED `scripts/seed_ml_fundamentals_content_cat34.py` (~500 lines: 7 r-string descriptions, SHA-256 audit, conflict guard, idempotency via placeholder-check).
+  - UPDATED 7 rows in `framework_nodes.description` (ids 215-221) via the seed script.
+- **Sanity check result**: First run `[SUMMARY] updated=7 skipped=0 total=7 (expected 7)`, post-hash `636ea237...1891bf`. Second run `updated=0 skipped=7`, pre-hash = post-hash = `636ea237...1891bf` — idempotent. Per-leaf length range 1777-2965 chars, in-band with T-P0-539 Cat 1-2 actuals (1419-3304) and template budget for T1 (~1500-3500). `validate_content()` pre-flight check passed (every leaf has `$` math + `## ` header).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-541 --status completed`
