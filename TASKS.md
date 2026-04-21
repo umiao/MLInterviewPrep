@@ -211,29 +211,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-596
-- **Description**: The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inline expand/collapse (setExpanded) and does NOT render cn_elevator_pitch. BehavioralThemePage uses drawer + CN pitch. Per user feedback (Discord msg 1496193185129431200), the Examples tab should match.
-
-Deliverables:
-- UPDATE src/frontend/src/pages/BehavioralQuestions.tsx ExampleCard function (lines 182-334):
-  - Card FRONT: render cn_elevator_pitch summary + KEY-FACTS pills (reuse BehavioralThemePage card-front pattern) above/beside the principle_tags. Drop the [+]/[-] indicator and inline onClick toggle.
-  - Card CLICK: open SlideOverPanel with ExampleDrawerContent (same drawer used by Questions tab — already imported at top of file)
-  - Remove the 100-line inline expanded JSX block (lines 237-331) since drawer replaces it
-  - Keep 'Needs Input' amber styling + golden border
-- The existing SlideOverPanel state machinery (drawerExampleId / handleExampleClick in main component) should be reused, not duplicated
-- viewMode='examples' should still render ExampleCard grid but clicking opens the shared drawer
-
-AC:
-- Manual smoke test: /behavioral → Examples tab → click any card → drawer opens showing CN pitch + STAR + risk + analogy + tech_terms + evidence + linked_questions (same as Questions tab)
-- Golden border styling preserved on card front
-- Filter/search/theme still work unchanged
-- vitest + tsc + vite build pass
-- No duplicate drawer state (drawerExampleId is the single source)
-- Depends on BQ-UX-01 landing first (needs CN pitch inside drawer)
-
 #### T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column
 - **Priority**: P1
 - **Complexity**: S
@@ -506,6 +483,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer). The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inl
 - [x] **2026-04-21** -- T-P1-596: [BQ-UX-01] Phase 1: Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent. Shared-component prep task for BQ Examples tab drawer conversion. All 34 behavioral_examples already have cn_elevator_pi
 - [x] **2026-04-21** -- T-P1-595: [KG-MLF-FS-01] Content: leaf 28 — Comprehensive 千级特征筛选与建模 (single-page, all 7 sections + expansions). Author the single comprehensive content page for leaf id=28 (feature-selection-pipeline-1000features). Per user clarific
 - [x] **2026-04-21** -- T-P1-588: [KG-MLF-FS-00] Skeleton: new category feature_engineering_selection + 1 leaf + YAML + frontend wiring. Add a new /ml-fundamentals category 'feature_engineering_selection' positioned at CATEGORY_ORDER slot 3 (after classical
