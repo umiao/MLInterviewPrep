@@ -1,6 +1,7 @@
 import type { BehavioralExample } from "../../types/behavioral";
 import MarkdownPreview from "../ui/MarkdownPreview";
 import DrawerLayout from "../ui/DrawerLayout";
+import { parsePitch } from "../../utils/parsePitch";
 
 const STAR_COLORS: Record<string, { label: string; border: string }> = {
   Situation: { label: "text-blue-700", border: "border-blue-300" },
@@ -101,6 +102,9 @@ function ExampleMetaPane({ example }: { example: BehavioralExample }) {
 
 function ExampleStarContent({ example }: { example: BehavioralExample }) {
   const needsInput = example.title.startsWith("[NEEDS-INPUT]");
+  const pitchParts = example.cn_elevator_pitch
+    ? parsePitch(example.cn_elevator_pitch)
+    : null;
   return (
     <div>
       <div className="mb-5">
@@ -115,6 +119,29 @@ function ExampleStarContent({ example }: { example: BehavioralExample }) {
           </div>
         )}
       </div>
+
+      {pitchParts && (
+        <div className="mb-5 bg-slate-50 rounded-lg p-3 border border-slate-200">
+          <span className="font-bold text-slate-700 text-sm uppercase tracking-wider">
+            Elevator Pitch
+          </span>
+          <p className="mt-1.5 text-[15px] text-gray-800 leading-relaxed bq-pitch-text">
+            {pitchParts.summary}
+          </p>
+          {pitchParts.facts.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1">
+              {pitchParts.facts.map((fact, i) => (
+                <span
+                  key={i}
+                  className="bq-pitch-pill text-xs bg-white text-gray-700 border border-gray-300 px-2 py-0.5 rounded-full"
+                >
+                  {fact}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       <StarSection label="Situation" content={example.situation} needsInput={needsInput} />
       <StarSection label="Task" content={example.task} needsInput={needsInput} />

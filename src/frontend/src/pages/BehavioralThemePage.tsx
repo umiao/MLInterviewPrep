@@ -11,6 +11,7 @@ import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent"
 import GoldenToggleButton from "../components/ui/GoldenToggleButton";
 import GoldenBadge from "../components/ui/GoldenBadge";
 import { goldenCardClass } from "../utils/goldenStyle";
+import { parsePitch } from "../utils/parsePitch";
 import { useReturnPath } from "../hooks/useReturnPath";
 import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 
@@ -205,15 +206,3 @@ function ExampleCard({
   );
 }
 
-function parsePitch(pitch: string): { summary: string; facts: string[] } {
-  const separator = " | KEY FACTS: ";
-  const idx = pitch.indexOf(separator);
-  if (idx === -1) return { summary: pitch, facts: [] };
-  const summary = pitch.substring(0, idx);
-  const factsStr = pitch.substring(idx + separator.length);
-  const facts = factsStr
-    .split("|")
-    .map((f) => f.trim())
-    .filter(Boolean);
-  return { summary, facts };
-}

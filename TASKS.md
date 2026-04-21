@@ -211,6 +211,140 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-596
+- **Description**: The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inline expand/collapse (setExpanded) and does NOT render cn_elevator_pitch. BehavioralThemePage uses drawer + CN pitch. Per user feedback (Discord msg 1496193185129431200), the Examples tab should match.
+
+Deliverables:
+- UPDATE src/frontend/src/pages/BehavioralQuestions.tsx ExampleCard function (lines 182-334):
+  - Card FRONT: render cn_elevator_pitch summary + KEY-FACTS pills (reuse BehavioralThemePage card-front pattern) above/beside the principle_tags. Drop the [+]/[-] indicator and inline onClick toggle.
+  - Card CLICK: open SlideOverPanel with ExampleDrawerContent (same drawer used by Questions tab — already imported at top of file)
+  - Remove the 100-line inline expanded JSX block (lines 237-331) since drawer replaces it
+  - Keep 'Needs Input' amber styling + golden border
+- The existing SlideOverPanel state machinery (drawerExampleId / handleExampleClick in main component) should be reused, not duplicated
+- viewMode='examples' should still render ExampleCard grid but clicking opens the shared drawer
+
+AC:
+- Manual smoke test: /behavioral → Examples tab → click any card → drawer opens showing CN pitch + STAR + risk + analogy + tech_terms + evidence + linked_questions (same as Questions tab)
+- Golden border styling preserved on card front
+- Filter/search/theme still work unchanged
+- vitest + tsc + vite build pass
+- No duplicate drawer state (drawerExampleId is the single source)
+- Depends on BQ-UX-01 landing first (needs CN pitch inside drawer)
+
+#### T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-597
+- **Description**: Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, schema 再动, 避免 bug 归因成本非线性放大.
+
+Schema changes (idempotent migration):
+1. CREATE TABLE behavioral_facets (id INT PK, slug VARCHAR UNIQUE, label VARCHAR, parent_theme_id INT NULL FK->behavioral_themes, description TEXT, display_order INT, created_at DATETIME)
+   - Facet usage rule (written in schema comment + docs): facets are ONLY for (a) staff/L6 signal tags, (b) cross-theme retrieval tags, (c) scenario sub-type when rename would mix abstraction layers. NOT a dumping ground.
+2. CREATE TABLE example_facet_tags (example_id INT FK, facet_id INT FK, created_at DATETIME, PRIMARY KEY(example_id, facet_id))
+3. CREATE TABLE question_facet_tags (question_id INT FK, facet_id INT FK, created_at DATETIME, PRIMARY KEY(question_id, facet_id))
+4. ALTER TABLE behavioral_examples ADD COLUMN is_signature BOOLEAN DEFAULT 0
+5. ALTER TABLE behavioral_examples ADD COLUMN signature_at DATETIME NULL
+
+Deliverables:
+- scripts/migrate_bq_taxonomy_20260421.py (idempotent via PRAGMA table_info / sqlite_master check, DB-backup-guarded)
+- SQLAlchemy model updates in src/backend/models/behavioral.py
+- Pydantic schema updates in src/backend/schemas/behavioral.py
+- Regression test confirming (a) existing rows survive, (b) new tables created once, (c) ALTER COLUMN idempotent
+
+AC:
+- Migration runs clean; re-runs with [SKIP]
+- pytest passes 
+- Backend API still returns existing data unchanged
+- No frontend changes yet (Phase 2 schema only)
+
+#### T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-597, T-P1-598
+- **Description**: Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
+
+ADD themes (2):
+- customer_user_focus / 'Customer & User Focus' — 为用户做对的事的叙事轴 (Amazon CO, Meta, Google)
+- ethical_integrity_backbone / 'Ethical Integrity & Backbone' — integrity / disagree-not-just-commit / push back even at cost
+
+ADD facets (3):
+- fast_learning / 'Fast Learning' / parent_theme_id=NULL (cross-theme tag per reviewer: learning is capability not scenario, independent retrieval axis)
+- scrappy_innovation / 'Scrappy Innovation' / parent_theme_id NULL (cross-theme tag: solution style not scenario)
+- strategic_scope / 'Strategic / Org-Level Scope' / parent_theme_id NULL (staff/L6 signal per reviewer: not a theme, don't split leadership_direction)
+
+DEMOTE scope_creep_ambiguous → facet under ambiguity_uncertainty (do NOT rename ambiguity_uncertainty per reviewer: 场景 vs 能力 不能绑死一个 theme):
+- Create facet 'scope_creep_pm_ambiguity' with parent_theme_id = ambiguity_uncertainty.id
+- Do NOT delete the original theme yet — Phase 3 (after retag verified) can drop it
+
+Deliverables:
+- scripts/seed_bq_taxonomy_delta_20260421.py (idempotent, DB-backup-guarded)
+- docs/bq_taxonomy_delta_20260421.md — documents the delta + facet usage rule
+
+AC:
+- 2 themes + 4 facets inserted (3 cross-theme + 1 scope_creep_pm_ambiguity under ambiguity)
+- Idempotent re-run prints [SKIP]
+- behavioral_themes row count: 15 → 17
+- behavioral_facets row count: 0 → 4
+- Existing example/question theme tags unchanged (Phase 2 schema+seed only; retag is BQ-TAX-03)
+
+#### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-599
+- **Description**: Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
+
+Retag steps:
+1. For each of 34 examples: evaluate whether story advocates for user → tag customer_user_focus; evaluate ethical/integrity angle → tag ethical_integrity_backbone; evaluate fast_learning facet fit; evaluate scrappy_innovation facet fit; evaluate strategic_scope facet fit
+2. For each of 115 questions: same evaluation against question stem
+3. Migrate existing scope_creep_ambiguous theme tags to scope_creep_pm_ambiguity facet tags (under ambiguity_uncertainty) — same example/question rows, different tag table
+4. After migration verification: DROP scope_creep_ambiguous theme (safe because all tags migrated to facet)
+
+Tagging approach per story_rewrite_protocol Step 4 (audit propagation surface):
+- Pre-draft audit: list which existing themes each example already has, check for overlap with new customer/ethical
+- Apply tags via seed script
+- Post-apply audit: verify count (expect 34 examples get 0-3 new tags each, 115 questions get 0-2)
+
+Deliverables:
+- scripts/seed_bq_taxonomy_retag_20260421.py (idempotent, DB-backup-guarded)
+- docs/bq_taxonomy_retag_log_20260421.md — per-example + per-question tagging decisions with rationale (so revert recipe exists)
+
+AC:
+- Every example with user-advocacy angle tagged customer_user_focus
+- Every example with push-back-at-cost angle tagged ethical_integrity_backbone
+- 0 rows reference scope_creep_ambiguous theme post-migration
+- scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
+- Script re-runs [SKIP]
+- Retag log shows rationale for each tag added (not a black box)
+
+#### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-600
+- **Description**: Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
+
+Scope:
+1. /quick-index?section=bq — add 2 new theme cards (customer_user_focus, ethical_integrity_backbone). Update CLUSTER_FAMILIES in QuickIndex.tsx:
+   - customer_user_focus → new cluster 'Customer & User' (standalone) OR fold into 'Data and Decisions' renamed to 'Data & Customer'
+   - ethical_integrity_backbone → add to 'Conflict & Collaboration' cluster (renamed 'Conflict, Collaboration & Integrity')
+   - Remove scope_creep_ambiguous from 'Decision under Ambiguity' cluster (it was deleted)
+2. BehavioralQuestions.tsx ExampleCard + BehavioralThemePage ExampleCard — render facet pills (small, distinct color from theme pills). Example: a story tagged fast_learning + scrappy_innovation gets 2 small pills below the theme pills.
+3. ThemeFilterSidebar.tsx — include new themes in the filter list; optionally add a separate 'Facets' filter group (can defer to later if scope creep)
+4. is_signature visual — if is_signature=1, show a small 'Signature Story' badge (distinct from golden badge). Golden = quality mark; Signature = 'proudest achievement, use for open-ended impact Q's'
+5. types/behavioral.ts — add facets: FacetTag[] and is_signature/signature_at to BehavioralExample interface
+
+Deliverables:
+- Updated QuickIndex.tsx / BehavioralQuestions.tsx / BehavioralThemePage.tsx / ThemeFilterSidebar.tsx / ExampleDrawerContent.tsx / types/behavioral.ts
+- Backend response schemas updated in behavioral.py router to include facets + is_signature
+
+AC:
+- Manual smoke test: /quick-index?section=bq shows 2 new theme cards at correct cluster positions; ExampleCard shows facet pills when example has facet tags; ThemeFilterSidebar has new themes
+- tsc + vitest + vite build pass
+- No regression on existing theme/question/example rendering
+- Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
+
 ### P2 -- Nice to Have
 
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
@@ -372,6 +506,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P1-596: [BQ-UX-01] Phase 1: Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent. Shared-component prep task for BQ Examples tab drawer conversion. All 34 behavioral_examples already have cn_elevator_pi
 - [x] **2026-04-21** -- T-P1-595: [KG-MLF-FS-01] Content: leaf 28 — Comprehensive 千级特征筛选与建模 (single-page, all 7 sections + expansions). Author the single comprehensive content page for leaf id=28 (feature-selection-pipeline-1000features). Per user clarific
 - [x] **2026-04-21** -- T-P1-588: [KG-MLF-FS-00] Skeleton: new category feature_engineering_selection + 1 leaf + YAML + frontend wiring. Add a new /ml-fundamentals category 'feature_engineering_selection' positioned at CATEGORY_ORDER slot 3 (after classical
 - [x] **2026-04-21** -- T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list). Apply link pruning per audit output from BQ-DEPTH-02.

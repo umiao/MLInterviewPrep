@@ -430,3 +430,21 @@
 - **Status**: [DONE]
 
 - **Request**: `task_db.py update T-P1-595 --status completed`
+
+## 2026-04-21 10:00 -- [BQ-UX-PLAN] Plan Examples-tab drawer refactor + CN pitch rendering
+- **What I did**: User (Discord msg 1496193185129431200) flagged that /behavioral Examples tab lags — no cn_elevator_pitch rendering and uses inline [+]/[-] expand instead of drawer. Investigated: ExampleCard at BehavioralQuestions.tsx:182-334 uses local setExpanded + 100-line inline JSX. BehavioralThemePage.tsx ExampleCard already renders CN pitch summary + KEY-FACTS pills + uses SlideOverPanel/ExampleDrawerContent drawer. Gap purely frontend — 34/34 examples have cn_elevator_pitch populated (153-564 chars). Additional finding: parsePitch helper exists only at BehavioralThemePage.tsx:208 (not shared), ExampleDrawerContent does NOT render cn_elevator_pitch — so drawer itself is missing the CN block. Planned 2 tasks: T-P1-596 (S, extract parsePitch to utils/parsePitch.ts + add CN block at top of ExampleDrawerContent + unit test) → T-P1-597 (M, refactor BehavioralQuestions ExampleCard: render CN pitch on card front, replace inline expand with drawer click, reuse drawerExampleId state, delete 100 lines inline JSX). Both autonomous-safe. Posted Discord asking run-now or merge-with-theme-restructure. BQ theme-restructure discussion (Discord msg 1496192775941521578) remains open in parallel.
+- **Deliverables**: 2 tasks T-P1-596 + T-P1-597 in `.claude/tasks.db` with dep; TASKS.md regenerated; Discord confirmation msg 1496193840967581828.
+- **Sanity check result**: task_db.py list confirms both tasks present; T-P1-597 depends_on=T-P1-596. No DB content writes.
+- **Status**: [DONE] for planning.
+- **Request**: 2 new tasks in queue; no status changes needed.
+
+## 2026-04-21 10:15 -- [T-P1-596] [BQ-UX-01] Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent
+- **What I did**: Autonomous session. P0 BQ-DEPTH rewrite tasks (T-P0-575..578) require mid-execution Discord approval gates, so picked the highest-priority fully-autonomous unblocked task. Extracted the `parsePitch` helper (previously inlined at BehavioralThemePage.tsx:208) into a shared `src/frontend/src/utils/parsePitch.ts` with a `PitchParts` interface, removed the local copy from BehavioralThemePage and imported from the util, then added an "Elevator Pitch" block (slate-50 card) at the top of `ExampleDrawerContent`'s STAR pane — before the Situation section — that renders the parsed summary plus KEY-FACTS pills when `cn_elevator_pitch` is present. Card styling mirrors the BehavioralThemePage card-front pattern (slate-50 background + rounded pills) but uses a distinct label so it's clearly a summary, not the card itself.
+- **Deliverables**:
+  - NEW `src/frontend/src/utils/parsePitch.ts` (17 lines, exports `parsePitch` + `PitchParts`)
+  - NEW `src/frontend/src/utils/parsePitch.test.ts` (4 tests: separator path, no-separator path, empty input, whitespace/empty-fact handling)
+  - MODIFIED `src/frontend/src/pages/BehavioralThemePage.tsx` (removed 11-line local parsePitch, added util import)
+  - MODIFIED `src/frontend/src/components/behavioral/ExampleDrawerContent.tsx` (imports parsePitch; ExampleStarContent renders Elevator Pitch block conditionally before StarSection calls)
+- **Sanity check result**: vitest 11 files / 155 tests pass (including the 4 new parsePitch tests). tsc --noEmit exit 0. vite build clean in 1.08s (pre-existing chunk-size warning only). eslint clean on all 4 touched files. Visual structure: drawer now renders header → needs-input banner (if any) → Elevator Pitch block (new) → Situation/Task/Action/Result → risk_statement → analogy → tech_terms → evidence → cross-references, so STAR ordering is unchanged, only a summary block added above.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-596 --status completed`. T-P1-597 (depends on this) unblocks next.
