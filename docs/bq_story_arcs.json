@@ -105,7 +105,7 @@
       "title_zh": "团队建设与人才培养 (领导力线)",
       "title_en": "Leadership & People Development",
       "color": "amber",
-      "narrative_zh": "这条线展示了你在people management和团队文化方面的能力——从mentoring个体到建立团队规范。\n\n**实习生mentoring (EX-11)**：一个实习生有over-promise的习惯，目标设定不切实际。我没有直接纠正，而是帮助他建立goal visibility的框架，让他自己看到承诺和交付之间的差距。\n\n**PhD上手 (EX-12)**：PhD实习生习惯了notebook环境，对production stack完全陌生。我设计了渐进式的onboarding路径，让他们在不失去研究者思维的同时掌握工程能力。\n\n**署名争议 (EX-13)**：跨研究员合作中出现了authorship dispute。我没有回避冲突，而是推动建立了明确的贡献认定规范，将个案解决转化为长期机制。\n\n**senior IC反馈 (EX-17)**：收到资深IC对我代码的尖锐反馈。我没有防御性地回应，而是将其作为建立credibility的机会——接受合理的批评，用改进的行动证明自己。\n\n**Code Review标准 (BLOG-02)**：团队的code review标准不统一，导致反复的review摩擦。我推动建立了共享的guidelines，将个人偏好转化为团队共识。",
+      "narrative_zh": "这条线展示了你在people management和团队文化方面的能力——从mentoring个体到建立团队规范。\n\n**实习生mentoring (EX-11)**：一个实习生有over-promise的习惯，目标设定不切实际。我没有直接纠正，而是帮助他建立goal visibility的框架，让他自己看到承诺和交付之间的差距。\n\n**PhD上手 (EX-12)**：PhD实习生习惯了notebook环境，对production stack完全陌生。我设计了渐进式的onboarding路径，让他们在不失去研究者思维的同时掌握工程能力。\n\n**署名争议 (EX-13)**：跨研究员合作中出现了authorship dispute。我没有回避冲突，而是推动建立了明确的贡献认定规范，将个案解决转化为长期机制。\n\n**senior IC反馈 (EX-17)**：teammate意外leave期间manager让我inherit researcher的remote branch做final-checklist merge。我raise了deep-context担忧后accept了\"researcher owns那层\"的framing。CI broken后senior IC拒继续review——不是为CI failure、是为我literally executed manager instruction without holding own gate。Manager提出帮我解释，我declined（accept她的protection会延续同一shortcut）；自己直接去explain时被refused，承认explanation technically accurate but beside the point。靠consistency重建trust：manager-mediated review、严格checklist、快on-call。Kill-line lesson：I had conflated being relied on with being trusted。\n\n**Code Review标准 (BLOG-02)**：团队的code review标准不统一，导致反复的review摩擦。我推动建立了共享的guidelines，将个人偏好转化为团队共识。",
       "examples": [
         {
           "example_id": "EX-11",
@@ -124,8 +124,8 @@
         },
         {
           "example_id": "EX-17",
-          "role_zh": "学习者：接受senior IC的尖锐反馈，用行动建立credibility",
-          "principles": ["earn_trust", "learn_and_be_curious"]
+          "role_zh": "Frame-owner：accept了manager-given的'researcher owns那层'的framing后CI broken，明白senior IC's anger其实是I executed instruction without holding own gate；拒绝manager的protection（保住会延续同一shortcut）、承认自己的explanation technically accurate but beside the point、靠consistency重建trust。Kill-line lesson：conflated being relied on with being trusted",
+          "principles": ["ownership", "have_backbone", "earn_trust", "humility"]
         },
         {
           "example_id": "BLOG-02",
@@ -133,7 +133,7 @@
           "principles": ["insist_on_highest_standards", "earn_trust"]
         }
       ],
-      "improvement_notes": "这条线的故事普遍较薄(多数只有2-3 tags, 5 links)。建议重点打磨EX-11和EX-13——它们的冲突点最有戏剧性。EX-12和BLOG-02可以考虑合并为一个\"团队规范建设\"的综合故事。EX-17如果能加入具体的反馈内容和你的改进措施会更有力。"
+      "improvement_notes": "这条线的故事普遍较薄(多数只有2-3 tags, 5 links)。建议重点打磨EX-11和EX-13——它们的冲突点最有戏剧性。EX-12和BLOG-02可以考虑合并为一个\"团队规范建设\"的综合故事。EX-17于2026-04-21重写为frame-ownership / reliance-vs-trust story（之前的版本redemption-arc tone太重、bullet-form action、manager-shortcut根因藏在Result段后半）。新版结构：accept manager-given framing -> CI break -> decline manager protection (story最强character signal) -> 自己explain被refused且承认beside the point -> consistency rebuild。Kill-line lesson \"conflated being relied on with being trusted\"作为Result收口、Risk段reframe为defaults-class risk而非incident-class risk。"
     },
     {
       "arc_id": "arc-5",

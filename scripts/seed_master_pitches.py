@@ -54,14 +54,21 @@ PITCHES: dict[str, str] = {
         " | org-level approver policy \u81f3\u4eca in effect"
     ),
     "EX-17": (
-        "\u6536\u5230 senior IC \u4e25\u5389\u53cd\u9988\"\u7f3a\u4e4f\u57fa\u672c\u5de5\u7a0b"
-        "\u7d20\u517b\"\uff1b\u4e0d push back \u800c\u5185\u5316\u6839\u56e0\u2014\u2014"
-        "\u538b\u529b\u4e0b\u672a\u963b\u6321 manager shortcut\u2014\u2014\u91cd\u5efa"
-        "\u4fe1\u8a89\u4e0e gate-keeping \u8d23\u4efb"
-        " | KEY FACTS: senior IC \u4e25\u5389\u53cd\u9988"
-        " | 'lacked basic engineering quality'"
-        " | over-promise \u6839\u56e0"
-        " | \u540e\u7eed gate-keeping \u8d23\u4efb"
+        # Rewritten 2026-04-21 -- "reliance vs trust" reframe (was "build credibility").
+        # Owns accepting manager-given framing that let user author a PR
+        # without owning deep context, declines manager-offered protection
+        # because that protection would extend the same shortcut, admits
+        # own technically-accurate explanation was beside the point.
+        "Manager \u8ba9\u6211 inherit researcher \u7684 remote branch \u7ec4 surface-level review\uff0c"
+        "\u6211 raise \u4e86\u4e00\u6b21 deep-context \u62c5\u5fe7\u540e accept \u4e86\"researcher owns \u90a3\u5c42\""
+        "\u7684 framing\uff1bCI \u540e senior IC \u62d2\u7ee7\u7eed review\u2014\u2014\u4e0d\u662f\u4e3a CI failure\u3001"
+        "\u662f\u4e3a\u6211 literally executed manager instruction without holding own gate\u3002"
+        "\u62d2\u4e86 manager \u63d0\u51fa\u7684\u63ed protection\uff0c\u627f\u8ba4\u81ea\u5df1\u7684 explanation "
+        "technically accurate but completely beside the point\uff0c\u9760 consistency \u91cd\u5efa trust"
+        " | KEY FACTS: senior IC \u62d2 review (\u4e0d\u662f CI \u800c\u662f gate-keeping)"
+        " | \u62d2 manager protection \u662f\u5168 story \u6700\u5f3a character signal"
+        " | 2 \u4e2a\u6708\u540e senior IC \u6062\u590d normal review"
+        " | engineer-researcher ownership boundary \u5165 team policy"
     ),
     "EX-30": (
         "\u9ad8\u901f PM \u5408\u4f5c\u671f\u4e0a\u7ebf\"\u6570\u5b66\u4f18\u96c5\"hash"
