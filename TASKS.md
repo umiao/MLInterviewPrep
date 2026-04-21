@@ -211,6 +211,55 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-595: [KG-MLF-FS-01] Content: leaf 28 — Comprehensive 千级特征筛选与建模 (single-page, all 7 sections + expansions)
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P1-588
+- **Description**: Author the single comprehensive content page for leaf id=28 (feature-selection-pipeline-1000features). Per user clarification (Discord msg 1496183573684817964 + 1496183668912296036): this is ONE page answering ONE question about large-scale feature selection + adoption. Do NOT split into multiple leaves.
+
+BODY = user's 7-section pipeline from Discord msg 1496180848553103402 attachment, translated to Chinese narration + English full-name expansion per feedback_content_style_cn_en. Plus the 4 gap topics I originally wanted to break out as separate leaves — FOLDED INTO the relevant sections as in-page subsections, not separate pages:
+- Filter methods depth (MI / mRMR / chi2 / ANOVA F-test) → fold into Section 3 or Section 4 as a subsection
+- FS vs Dimensionality Reduction (PCA / AE / PLS) → new Section 4.5 or appendix
+- Feature interaction detection (Friedman H / SHAP pair / tree-based) → fold into Section 4 under 'interaction-aware selection'
+- Categorical encoding + target-encoding CV leakage → fold into Section 3 (feature engineering)
+- Nested CV + post-selection inference → fold into Section 6 (validation)
+
+Structure (single-page):
+1. 先划分数据 (data split, prevent leakage)
+2. Target leakage 检查
+3. Feature engineering 粗筛 — missing / collinearity (VIF) / stability (PSI/CSI) / low-variance / categorical encoding + target-encoding CV leakage trap / filter methods (MI/mRMR/chi2/F-test)
+4. 模型驱动特征选择 — linear (L1, Elastic Net, Stability Selection), tree (permutation, SHAP, null importance, Boruta), specialized (RFECV, Group Lasso), interaction detection (Friedman H, SHAP pair values)
+4.5. FS vs Dimensionality Reduction — PCA / AE / PLS, when to use which
+5. Ablation study — LOO / group / forward
+6. Final validation — test set + calibration + subgroup + selection stability + nested CV + post-selection inference (Lasso p-values invalid, knockoff filter)
+7. 工程与业务维度 — cost / latency / interpretability / maintenance / train-serve skew
+
+CRITICAL user constraint (msg 1496182009976979476): 每一个技术/名词概念展开诠释. Not name-drop. Every acronym gets **English** (acronym, 中文) on first mention + 1-3 sentence intuition + math formulation where applicable (KaTeX) + when-to-use / failure mode guidance.
+
+Terms that MUST be expanded (grep-able checklist, not exhaustive):
+- Section 2: target leakage / AUC / MI=Mutual Information / univariate correlation
+- Section 3: MNAR=Missing Not At Random / is_missing indicator / VIF=Variance Inflation Factor / hierarchical clustering / PSI=Population Stability Index / CSI=Characteristic Stability Index / target encoding / WOE=Weight of Evidence / frequency encoding / CatBoost ordered TS / mRMR=maximum Relevance Minimum Redundancy / chi-squared / ANOVA F-test
+- Section 4: L1 / Lasso=Least Absolute Shrinkage and Selection Operator / Elastic Net / Stability Selection / bootstrap / GBDT=Gradient Boosted Decision Tree / kitchen sink / Gini impurity bias / Permutation Importance / SHAP=SHapley Additive exPlanations / null importance / shuffle test / Boruta / shadow features / RFECV=Recursive Feature Elimination with CV / Group Lasso / structured sparsity / Friedman H-statistic / SHAP interaction values
+- Section 4.5: PCA=Principal Component Analysis / SVD=Singular Value Decomposition / Factor Analysis / Autoencoder (AE) / PLS=Partial Least Squares / Kernel PCA
+- Section 5: Leave-One-Out (LOO) / group ablation / forward ablation / greedy addition / p-value / AUC delta
+- Section 6: nested CV / outer-inner loop / post-selection inference / selective inference / Lee-Sun-Sun-Taylor 2016 / knockoff filter / Barber-Candès / FDR=False Discovery Rate / BH=Benjamini-Hochberg / calibration / subgroup / CV fold overlap / shadow deployment
+- Section 7: latency budget / p99 / interpretability / drift monitoring / feature-store / train-serve skew
+
+Deliverables:
+- scripts/seed_ml_fundamentals_content_q28_feature_selection.py (idempotent + DB backup, pattern from seed_ml_fundamentals_content_q21.py)
+- Single page content, target length 12000-16000 chars (long but justified — it's one comprehensive topic per user request; comparable to a multi-node case study)
+- KaTeX for: VIF=1/(1-R²_j), Stability Selection frequency, SHAP phi_i, MI formula, mRMR objective, chi-squared statistic, F-statistic, PCA eigendecomposition, AE reconstruction loss, H-statistic, WOE, FDR/BH, polyhedral selection event
+- Comparison tables: filter-method routing (feature type × target type) / selection vs reduction trade-off / encoding methods / ablation granularity / L4 vs L5 bar
+
+AC:
+- framework_nodes.description for leaf id=28 populated with single-page comprehensive content
+- Every term in the grep-able checklist appears at least once with full expansion
+- No name-drop (e.g. 'use Boruta' without at least 2-3 sentences of what it does and why)
+- Script re-runs [SKIP]
+- /ml-fundamentals?cat=feature_engineering_selection&slug=feature-selection-pipeline-1000features renders with all 7 sections + embedded subsections visible
+- At least 4 comparison tables
+- interview_freq: high
+
 ### P2 -- Nice to Have
 
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
@@ -260,6 +309,34 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
+
+#### T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None of these are in the root yet (root is current to 2026-04-13).
+
+Lessons to add:
+1. [2026-04-17] claude -p usage limits & 429 handling -- Tags: #claude-code #usage-limits #batch-scripts #429-retry. Batch scripts using claude -p hit daily subscription cap (rc=1, JSON result with api_error_status=429). Fix: detect 429 JSON pattern, fail fast with clear message; split batches across days.
+2. [2026-04-18] Background runner visibility: nohup & vs Bash run_in_background -- Tags: #orchestration #autonomous #bash #monitor #visibility. nohup+& detaches child; Bash tool tracks launcher (exits fast), not runner. Fix: use run_in_background directly (no &) OR keep nohup+& with Monitor on tail -f log filtered for session boundaries.
+3. [2026-04-19] Human-approval-gate language in task specs is sticky -- Tags: #autonomous #task-spec #approval-gate #workflow. Prose gate inside task description (does NOT auto-start) persists across autonomous sessions even after condition is cleared. Fix: use a separate blocking task OR make gate language self-cancelling (if T-XX status=completed, proceed).
+
+Source: MLInterviewPrep LESSONS.md lines approx 2026-04-17 to 2026-04-19 section.
+
+#### T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
+
+Duplicates to consolidate or close:
+- Bare python fix (4 duplicates): T-P1-184, T-P1-238, T-P1-254, T-P1-319 -- all address the same issue (bare python in helixos settings.json)
+- stop-cache removal (3 duplicates): T-P2-207, T-P2-255, T-P2-320 -- all address deprecated stop-cache in helixos test_check.py
+- setup_python_env.sh: T-P2-187 (overlaps with bare-python tasks)
+- template stop-cache: T-P2-208
+- session_context propagation: T-P2-239
+
+Action: verify current helixos state (does bare python still exist? does test_check.py still have stop-cache?), close duplicates keeping only the newest or most complete, and consolidate survivors into 2 clean tasks max.
 
 ### P3 -- Stretch Goals
 
@@ -344,6 +421,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P1-588: [KG-MLF-FS-00] Skeleton: new category feature_engineering_selection + 1 leaf + YAML + frontend wiring. Add a new /ml-fundamentals category 'feature_engineering_selection' positioned at CATEGORY_ORDER slot 3 (after classical
 - [x] **2026-04-21** -- T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list). Apply link pruning per audit output from BQ-DEPTH-02.
 - [x] **2026-04-21** -- T-P0-573: [BQ-DEPTH-02] Link distribution audit on 266 question_example_links + prune candidates. Write scripts/audit_bq_link_distribution.py (read-only, no DB writes) and produce docs/bq_link_audit_20260421.md.
 - [x] **2026-04-21** -- T-P0-572: [BQ-DEPTH-01] Phase A: Golden-story x Trait matrix doc + free-lunch call-out. Author docs/bq_golden_trait_matrix.md mapping 5 golden (EX-01/15/16/17/30) + 4-5 strong non-golden (EX-14/33/13/20/02) a

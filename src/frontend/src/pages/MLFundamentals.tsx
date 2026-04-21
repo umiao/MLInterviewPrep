@@ -11,6 +11,7 @@ import { goldenCardClass } from "../utils/goldenStyle";
 type CategorySlug =
   | "classical_ml"
   | "eval_data"
+  | "feature_engineering_selection"
   | "unsupervised"
   | "dl_training"
   | "attention_transformer"
@@ -30,6 +31,7 @@ interface InventoryItem {
 const CATEGORY_LABELS: Record<CategorySlug, string> = {
   classical_ml: "Classical ML",
   eval_data: "Evaluation & Data",
+  feature_engineering_selection: "特征工程 FE+FS",
   unsupervised: "Unsupervised",
   dl_training: "DL Training",
   attention_transformer: "Attention & Transformer",
@@ -39,6 +41,7 @@ const CATEGORY_LABELS: Record<CategorySlug, string> = {
 const CATEGORY_ORDER: CategorySlug[] = [
   "classical_ml",
   "eval_data",
+  "feature_engineering_selection",
   "unsupervised",
   "dl_training",
   "attention_transformer",
@@ -77,6 +80,7 @@ const INVENTORY: InventoryItem[] = [
   { id: 25, slug: "mle-vs-map", category: "llm_stats", title_zh: "MLE vs MAP", title_en: "MLE vs MAP Estimation", interview_freq: "high" },
   { id: 26, slug: "clt-vs-lln", category: "llm_stats", title_zh: "中心极限定理 vs 大数定律", title_en: "Central Limit Theorem vs Law of Large Numbers", interview_freq: "mid" },
   { id: 27, slug: "ab-test-pvalue-sample-size-multiple-testing", category: "llm_stats", title_zh: "A/B test：p-value、样本量、多重检验", title_en: "A/B Test (p-value, Sample Size, Multiple Testing)", interview_freq: "mid" },
+  { id: 28, slug: "feature-selection-pipeline-1000features", category: "feature_engineering_selection", title_zh: "千级特征筛选与建模完整流程", title_en: "Feature Selection & Modeling Pipeline at 1000+ Features", interview_freq: "high" },
 ];
 
 const ML_FUNDAMENTALS_ROOT_PATH = "ml-fundamentals";
