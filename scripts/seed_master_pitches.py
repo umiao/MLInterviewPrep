@@ -20,12 +20,21 @@ DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
 
 PITCHES: dict[str, str] = {
     "EX-15": (
-        "\u6309\u6d41\u7a0b\u4e0b\u7ebf\u65e7\u6a21\u578b\u5374\u89e6\u53d1\u672a\u6587\u6863\u5316"
-        "\u7684\u8de8\u56e2\u961f\u4f9d\u8d56\uff1b\u4ee5\u4e8b\u6545\u4e3a\u5951\u673a\u63a8\u52a8"
-        "\u8de8\u56e2\u961f\u5bf9\u9f50\u673a\u5236\u4e0e\u5206\u9636\u6bb5\u4e0b\u7ebf safety knob"
-        " | KEY FACTS: 1 \u5468\u4fee\u590d | VP/Senior Director \u8de8\u7ec4\u4f1a\u8bae"
-        " | \u8de8\u56e2\u961f\u5bf9\u9f50\u673a\u5236\u6210\u4e3a\u65b0\u89c4\u8303"
-        " | \u5206\u9636\u6bb5 deprecation safety knob"
+        # Rewritten 2026-04-20 -- structural reframe story (was "process improvement").
+        # Owns the dashboard blind spot, absorbs rollback, reframes single-choice
+        # "who must migrate" into double-choice with ownership transfer, escalates to
+        # senior leadership for capacity-budget boundary.
+        "\u6211\u81ea\u5df1\u7684 traffic dashboard \u76f2\u533a\u6f0f\u6389\u4e86 hardcoded \u8c03\u7528"
+        "\uff0c\u4e0b\u7ebf legacy model \u540e 3-4 \u4e2a Query Understanding pipeline "
+        "\u88ab block\uff1b\u4e0d\u4e89\u6d41\u7a0b\u5bf9\u9519\u5148\u5403 rollback\uff0c"
+        "\u4e00\u5468\u5185\u5168\u90e8 unblock \u6362\u5230 credibility\uff0c\u518d\u628a "
+        "\"\u8c01\u5fc5\u987b\u8fc1\u79fb\" \u8fd9\u9053\u5355\u9009\u9898 reframe \u4e3a "
+        "\u542b ownership transfer \u7684\u53cc\u9009\u9898\uff0c\u63a8\u5230 senior leadership "
+        "\u5212\u6e05 capacity ownership \u8fb9\u754c"
+        " | KEY FACTS: 1 \u5468 unblock 3-4 pipelines"
+        " | dashboard \u76f2\u533a (URL params \u4e0d\u8bb0 hardcoded)"
+        " | \u5f15\u5165 ownership transfer \u7b2c\u4e09\u9009\u9879"
+        " | senior leadership boundary \u51b3\u8bae"
     ),
     "EX-16": (
         "\u4e3b\u52a8\u8de8\u8fb9\u754c\u505a\u5ef6\u8fdf\u4f18\u5316\u4f46\u672a\u5bf9\u9f50 infra"

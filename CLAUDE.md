@@ -119,6 +119,14 @@ during live mock interviews and daily drills.
   and config between the two.  Every delta is a finding.  Do NOT skip to
   output-format analysis or external doc research before completing this diff.
   Analysis of "why" comes AFTER identifying "what's different."
+- **Story / content rewrite propagation.** When rewriting a behavioral
+  example, framework node, company document, or other DB content entity,
+  follow `docs/workflow/story_rewrite_protocol.md` -- the 7-step checklist
+  catches the 5 propagation surfaces that "just edit the field" misses
+  (derived fields, join-table notes, API-merged JSON/MD, upstream canonical
+  seeds, frontend pre-renders). Skipping the audit creates pages where the
+  STAR fields tell a new story while the title, KEY-FACTS pills, principle
+  tags, and 10 question relevance notes still tell the old one.
 
 ### Task Planning Mode
 When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":
