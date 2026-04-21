@@ -9,26 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-573: [BQ-DEPTH-02] Link distribution audit on 266 question_example_links + prune candidates
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-572
-- **Description**: Write scripts/audit_bq_link_distribution.py (read-only, no DB writes) and produce docs/bq_link_audit_20260421.md.
-
-Per user direction: cut-before-schema. Adding is_primary on links that should not exist in the first place is worse than pruning them first.
-
-Audit output must report:
-1. Questions with >= 3 story links (primary concept needed here) - list with counts
-2. Stories with >= 5 question links (angle thinking needed) - list with counts. Specifically check if COM-2 (15 links), PS-1 (7), PS-2 (7), OWN-11 (6), INN-4 (6) show weak-relevance tails
-3. PRUNE candidates - links with relevance_note that is (a) single-sentence boilerplate, (b) references old story framing (e.g. 'Brand recall two-part story' placeholder), (c) tagged story has been re-framed and note no longer matches STAR
-4. Orphan/coverage gaps - questions with 0 non-boilerplate links
-
-AC:
-- Audit script runs clean, reads-only
-- docs/bq_link_audit_20260421.md has 4 sections above, each with specific question_id/example_id enumerated
-- Prune candidate list includes the NOTE text so user can accept/reject per-link
-- No DB writes
-
 #### T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list)
 - **Priority**: P0
 - **Complexity**: M
@@ -392,6 +372,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P0-573: [BQ-DEPTH-02] Link distribution audit on 266 question_example_links + prune candidates. Write scripts/audit_bq_link_distribution.py (read-only, no DB writes) and produce docs/bq_link_audit_20260421.md.
 - [x] **2026-04-21** -- T-P0-572: [BQ-DEPTH-01] Phase A: Golden-story x Trait matrix doc + free-lunch call-out. Author docs/bq_golden_trait_matrix.md mapping 5 golden (EX-01/15/16/17/30) + 4-5 strong non-golden (EX-14/33/13/20/02) a
 - [x] **2026-04-20** -- T-P2-571: Fix MHA node 225: render residual formula + replace emoji with ASCII tags. Per user Discord 2026-04-20: fix residual formula which was in a code span (backticks) so \text{Attn}(x) rendered litera
 - [x] **2026-04-20** -- T-P2-570: MHA/MQA/GQA node 225: add dimension-flow clarifier + 3 interview misconceptions. Per user Discord 2026-04-20 (critical distillation of supplied notes): insert dimension-flow invariants (X n-by-d preser
