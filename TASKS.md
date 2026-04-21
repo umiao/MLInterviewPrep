@@ -9,34 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-572, T-P0-573
-- **Description**: Apply link pruning per audit output from BQ-DEPTH-02.
-
-AUTONOMOUS-SAFE MODE (no user gate): apply prune rules deterministically, log every deletion, user reviews post-hoc via git commit + docs/bq_link_prune_log_20260421.md.
-
-AUTO-PRUNE RULES (conservative, only delete if ALL conditions met):
-1. relevance_note matches boilerplate placeholder pattern (e.g. exact match to 'Brand recall two-part story', 'Brand recall deep dive story', or other <=6 word generic pointers with no substance)
-2. OR: the linked example has been rewritten since the note (created_at < example.updated_at-7d) AND the note text references elements not in current STAR (grep for removed phrases)
-3. AND: the question would still have >=2 links after this prune (never orphan a question)
-4. AND: the linked example is NOT is_golden=1 (preserve all golden links; user can re-prune manually)
-
-Write scripts/_prune_bq_links_20260421.py:
-- Timestamped DB backup before any DELETE (mle_prep.db.bak.20260421_*_pre_link_prune)
-- Idempotent: skip if link already deleted on re-run
-- Transaction-wrapped
-- Log each deletion with (question_id, example_id, old_relevance_note, prune_rule_triggered) to docs/bq_link_prune_log_20260421.md
-- Print before/after counts
-
-AC:
-- Script re-runs with [SKIP]
-- After prune: log file enumerates every deletion with the rule that triggered it
-- No question has 0 links post-prune
-- No is_golden link deleted
-- User reviews the committed prune log on Discord AFTER the fact; can revert individual deletions by inverting the log entries
-
 #### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
 - **Priority**: P0
 - **Complexity**: L
@@ -372,6 +344,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list). Apply link pruning per audit output from BQ-DEPTH-02.
 - [x] **2026-04-21** -- T-P0-573: [BQ-DEPTH-02] Link distribution audit on 266 question_example_links + prune candidates. Write scripts/audit_bq_link_distribution.py (read-only, no DB writes) and produce docs/bq_link_audit_20260421.md.
 - [x] **2026-04-21** -- T-P0-572: [BQ-DEPTH-01] Phase A: Golden-story x Trait matrix doc + free-lunch call-out. Author docs/bq_golden_trait_matrix.md mapping 5 golden (EX-01/15/16/17/30) + 4-5 strong non-golden (EX-14/33/13/20/02) a
 - [x] **2026-04-20** -- T-P2-571: Fix MHA node 225: render residual formula + replace emoji with ASCII tags. Per user Discord 2026-04-20: fix residual formula which was in a code span (backticks) so \text{Attn}(x) rendered litera

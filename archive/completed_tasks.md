@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 510 completed tasks archived as of latest archival.
+> 535 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -749,3 +749,51 @@ Google R1 ML Basics interview 2026-04-21 11:15 AM PT. id=52 is a 9509-char one-p
 Google R1 ML Basics 2026-04-21 11:15 AM PT. id=57 is a 12123-char StudyNoteBuilder-generated doc with 13 flas
 - [x] **2026-04-19** -- T-P1-534: T-GOOG-REORG-HUB: Rewrite id=53 Prep Hub to pure 3-tier navigation index (~3558→~700 chars). ## Context
 Google /companies/3/prep has 17 docs flat-listed; id=38 + id=51 + id=53 all overlap as 'entry'. User confused
+- [x] **2026-04-20** -- T-P0-544: [T-MLF-06b] T3 Y-depth #22 MoE routing + load balancing (template from zeta1). Apply the calibrated Y-depth template (from zeta1 review) to #22 MoE.
+
+Four sections with: top-k routing math, load-bala
+- [x] **2026-04-20** -- T-P0-545: [T-MLF-06c] T3 Y-depth #25 MLE vs MAP (upgraded from X to Y). Upgrade #25 from original X-depth (acronym-only) to full Y-depth.
+
+Original covers ~60% already (Gaussian→L2 and Laplace
+- [x] **2026-04-20** -- T-P0-546: [T-MLF-06d] T3 X-depth batch #23/#24/#26/#27 (Tokenization, Chinchilla, CLT/LLN, A/B test). X-depth: keep original structure, expand all acronyms on first use, fix formula context holes.
+
+  #23 Tokenization — BPE
+- [x] **2026-04-19** -- T-P1-535: T-GOOG-REORG-SLIM51: Slim id=51 by replacing Round 1 ML-dims + Round 2 G&L-attrs with db://38 refs (~6213→~4500 chars). ## Context
+id=51 (Interview Prep Note) currently duplicates content from id=38 (Recruiter Call Prep):
+- §Round 1 > '面试官期
+- [x] **2026-04-20** -- T-P1-549: [T-MLF-09] KaTeX/drawer smoke test — all 27 drawers. Run npm run dev; manually open every one of the 27 question drawers; record rendering status in docs/ml_fundamentals_smo
+- [x] **2026-04-20** -- T-P1-550: [T-MLF-10] Content QA pass — acronyms, formula context, term definitions. Walk each of 27 leaf descriptions and verify:
+  (1) every acronym has first-occurrence full expansion in **English** (缩写
+- [x] **2026-04-20** -- T-P1-552: [T-GOLD-01] Schema + migration: is_golden + golden_at on framework_nodes / behavioral_examples / company_documents + docs/golden_marker.md. Add curation columns to three tables (single Alembic migration or one-shot Python migration script under scripts/ -- fol
+- [x] **2026-04-20** -- T-P1-553: [T-GOLD-02] Backend PUT endpoints accept is_golden; endpoint-layer golden_at auto-refresh on false->true. Extend three existing PUT endpoints (do NOT add new ones):
+  - PUT /framework/nodes/{node_id}  (routers/framework.py)
+  
+- [x] **2026-04-20** -- T-P1-554: [T-GOLD-03] Frontend <GoldenToggleButton> shared component + orange color tokens. Create src/frontend/src/components/ui/GoldenToggleButton.tsx:
+  Props: { itemType: 'framework_node' | 'behavioral_exampl
+- [x] **2026-04-20** -- T-P1-555: [T-GOLD-04] goldenCardClass(isGolden) helper + golden [star] badge for card lists. Create src/frontend/src/utils/goldenStyle.ts exporting:
+  goldenCardClass(isGolden: boolean): string  -- returns extra T
+- [x] **2026-04-20** -- T-P1-556: [T-GOLD-05] Integrate GoldenToggleButton into FrameworkNodeDrawer (audit placement first). BEFORE coding: take a screenshot of the current FrameworkNodeDrawer header (src/frontend/src/components/framework/Framew
+- [x] **2026-04-20** -- T-P1-557: [T-GOLD-06] Integrate into MLFundamentals.tsx cards + ?golden=1 URL filter. Edit src/frontend/src/pages/MLFundamentals.tsx:
+  1. Fetch is_golden + golden_at per leaf -- the /framework/tree endpoin
+- [x] **2026-04-20** -- T-P1-567: Add Slack Hiring Manager Round (Scott Clark) 2026-04-22. Add Salesforce/Slack SWE II ML hiring-manager round with Scott Clark on Wed 2026-04-22 09:00-09:45 AM PDT (category Slac
+- [x] **2026-04-19** -- T-P2-517: KG-UX-18: Drawer rendering polish (GFM, rehype-raw, blockquote + callout styling). ## Context
+Drawer-layer rendering polish, parallel to content V2 tasks. Independent of 514/515/516/518 — can run first, 
+- [x] **2026-04-19** -- T-P2-521: [DEBT] MLInterviewPrep: Customize CLAUDE.md.local with project overview and tech stack. CLAUDE.md.local still has template placeholder text (generated from claude-code-project-template). Specific gaps:
+
+1. Pr
+- [x] **2026-04-19** -- T-P2-533: T-GOOG-CN-DRILL-BATCH: Batch-upgrade 11 Google drill docs + id=72 Bridge to ≥50% CN prose (from 30-47%). ## Context
+Google R1 ML Basics 2026-04-21. 11 drill docs (id=55, 56, 60-69) + 1 bridge doc (id=72) currently 30-47% CN p
+- [x] **2026-04-19** -- T-P2-536: T-GOOG-REORG-PREFIX: Add [R1/Bucket] prefix to 14 Tier-3 doc titles for visual grouping on /prep. ## Context
+Flat list on /companies/3/prep doesn't visually group docs by topic. Add title prefix so alphabetical sort au
+- [x] **2026-04-20** -- T-P2-551: [T-MLF-11] Google Prep Hub id=53 cross-link to /ml-fundamentals. Via scripts/seed_google_hub_mlf_crosslink.py (idempotent with sha256 guard):
+  append to company_documents.content id=53
+- [x] **2026-04-20** -- T-P2-558: [T-GOLD-07a] Discovery: scan Behavioral UI for drawer + toggle insertion points. Research-only task, NO code writes. Read:
+  - src/frontend/src/pages/Behavioral*.tsx (all files matching this glob)
+  - 
+- [x] **2026-04-20** -- T-P2-559: [T-GOLD-07b] Behavioral UI integration: drawer toggle + card visuals + filter. Execute the plan from T-GOLD-07a. Expected work surface:
+  - Add <GoldenToggleButton itemType='behavioral_example' /> to
+- [x] **2026-04-20** -- T-P2-560: [T-GOLD-08] Company docs integration: drawer toggle + card visuals (no filter on index pages). Add <GoldenToggleButton itemType='company_document' /> to whatever view renders a company_document in full (prep note pa
+- [x] **2026-04-20** -- T-P2-561: [T-GOLD-09] Golden Collection aggregator page (backend /golden endpoint + frontend page). Backend: add GET /golden router endpoint that unions rows from the 3 tables where is_golden=true, normalized into a unif
+- [x] **2026-04-20** -- T-P2-563: Bias-Variance node 209 (ML Fundamentals leaf): append 5 interview follow-ups. Per user Discord 2026-04-20: correctly target the ml-fundamentals/classical_ml/bias-variance-tradeoff leaf (not pillar2 
+- [x] **2026-04-20** -- T-P2-564: L1 vs L2 node 210: append MLE/MAP + Gaussian/Laplace prior view. Per user Discord 2026-04-20: augment ml-fundamentals/classical_ml/l1-vs-l2-regularization with a dedicated subsection af
+- [x] **2026-04-20** -- T-P2-565: EM+GMM node 216: density-ratio note + BIC/AIC/held-out expansion + DPMM mechanics. Per user Discord 2026-04-20: three improvements to ml-fundamentals/unsupervised/em-and-gmm -- (A) clarify E-step respons
