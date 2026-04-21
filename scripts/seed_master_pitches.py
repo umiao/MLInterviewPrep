@@ -71,15 +71,25 @@ PITCHES: dict[str, str] = {
         " | engineer-researcher ownership boundary \u5165 team policy"
     ),
     "EX-30": (
-        "\u9ad8\u901f PM \u5408\u4f5c\u671f\u4e0a\u7ebf\"\u6570\u5b66\u4f18\u96c5\"hash"
-        " \u672a\u8be2\u95ee\u4e0b\u6e38 consumer\uff1b\u81f4 2-3 \u4e2a\u4e0b\u6e38 DS"
-        " \u56e2\u961f\u6570\u5468\u5206\u6790\u65f6\u95f4\u635f\u5931\uff1b\u8de8\u56e2\u961f"
-        " rescue \u63d0\u6848\u88ab\u62d2\uff0c\u6700\u7ec8\u91c7\u7eb3 indexing \u56e2\u961f"
-        " prior art"
-        " | KEY FACTS: 2-3 \u4e2a\u4e0b\u6e38 DS/\u4ea7\u54c1\u56e2\u961f"
-        " | \u6570\u5468\u5206\u6790\u65f6\u95f4\u635f\u5931"
-        " | \u8de8\u56db\u56e2\u961f rescue \u63d0\u6848\u88ab\u62d2"
-        " | \u56de\u5f52 indexing \u56e2\u961f prior art"
+        # Rewritten 2026-04-21 -- structural-recognition + L5-tease version.
+        # Tightens Action from 2429 to ~1100 chars, introduces "fundamental
+        # but not yet integrated as red flag" L5 signal + experiment-level
+        # confounding probe-bait, crystallizes kill-line "Domain depth is
+        # not design authority. The authority belongs to whoever consumes
+        # the output."
+        "\u9ad8\u901f PM \u5408\u4f5c\u671f\u4ee5 hash-expert \u8eab\u4efd\u4e0a\u7ebf"
+        "\u6570\u5b66\u4f18\u96c5\u7684 facet hash\uff0c\u4e0b\u6e38 2-3 \u4e2a DS \u56e2"
+        "\u961f\u88ab block \u51e0\u5468 launch analysis\uff1b\u63d0 cross-four-team rescue"
+        " \u88ab\u62d2\u540e\u505c\u4e86\uff0c\u8ba4\u51fa rescue \u662f self-centered\u3002"
+        "\u6700\u7ec8\u91c7\u7eb3 indexing team \u5df2\u6709\u7684 explicit aspect cache + "
+        "stable ID assignment\u3002Kill-line: domain depth is not design "
+        "authority\u2014\u2014authority belongs to whoever consumes the output"
+        " | KEY FACTS: 2-3 \u4e2a\u4e0b\u6e38 DS team \u51e0\u5468 launch analysis \u635f\u5931"
+        " | cross-four-team multi-quarter rescue \u88ab\u62d2"
+        " | \"It was rejected. And this is where I stopped.\""
+        " | \u91c7\u7eb3 indexing team \u73b0\u6210 prior art"
+        " | structural lesson: orphan capability \u4f1a leak \u6210"
+        " experiment-level confounding"
     ),
     "EX-33B": (
         "\u4f5c\u4e3a model believer \u5728 MoE \u4e0a\u5c42\u5c42\u8fed\u4ee3\u2014\u2014"
