@@ -37,15 +37,21 @@ PITCHES: dict[str, str] = {
         " | senior leadership boundary \u51b3\u8bae"
     ),
     "EX-16": (
-        "\u4e3b\u52a8\u8de8\u8fb9\u754c\u505a\u5ef6\u8fdf\u4f18\u5316\u4f46\u672a\u5bf9\u9f50 infra"
-        " \u56e2\u961f\uff1bC++ \u9759\u6001\u7f16\u8bd1\"\u90e8\u843d\u77e5\u8bc6\"\u5bfc\u81f4"
-        "\u8de8\u6570\u636e\u4e2d\u5fc3\u4e0a\u7ebf panic\uff0c\u786e\u7acb\u5f3a\u5236"
-        " cross-team reviewer \u7b56\u7565"
-        " | KEY FACTS: \u8de8 DC error rate spike | \u7d27\u6025 rollback"
-        " | \u5f3a\u5236 cross-team reviewer \u7b56\u7565"
-        " | \u540e\u7eed\u88ab\u9080\u8bf7\u52a0\u5165 declarative artifactory \u5021\u8bae"
-        "\uff08\u6ce8\uff1a\u6b64 tail \u4ec5\u7528\u4e8e calculated-risk \u6846\u67b6"
-        "\uff0c\u4e0d\u5728 failure \u6846\u67b6\u4e2d\u63d0\u53ca\uff09"
+        # Rewritten 2026-04-20 -- failure-cut story (was redemption-tail).
+        # Owns the cross-team rollout manager couldn't get budgeted, absorbs
+        # rollback, declines to deflect with available evidence, drives the
+        # counterpart-bandwidth-as-line-item lesson into an org-level
+        # senior-bench approver policy. Artifactory tail dropped -- belongs
+        # only in calculated-risk framing per NRG-v2.
+        "Manager \u6ca1\u62ff\u5230 cross-team PD quota \u8ba9\u6211\u72ec\u81ea"
+        "\u625b release-by-DC rollout\uff1bDC2 \u51e0\u5206\u949f\u5185 panic out\uff0c"
+        "rollback \u662f\u6211\u7684\uff0c\u6ca1\u62ff\u624b\u4e0a\u7684\u8bc1\u636e\u6307"
+        "\u5bf9\u65b9\u800c\u662f framing \u6210 context gap\uff0c\u4e8b\u540e\u63a8\u52a8"
+        "\u4e86 search engine \u5c42\u7684 cross-team senior-bench approver policy"
+        " | KEY FACTS: DC2 \u51e0\u5206\u949f panic out"
+        " | \u4e09\u5206\u4e4b\u4e00 quarter \u4fee\u590d + RCA \u4ee3\u4ef7"
+        " | senior IC joint debug \u63ed\u51fa partial artifactory migration"
+        " | org-level approver policy \u81f3\u4eca in effect"
     ),
     "EX-17": (
         "\u6536\u5230 senior IC \u4e25\u5389\u53cd\u9988\"\u7f3a\u4e4f\u57fa\u672c\u5de5\u7a0b"

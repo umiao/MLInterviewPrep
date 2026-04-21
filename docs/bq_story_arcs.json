@@ -140,7 +140,7 @@
       "title_zh": "运营与流程改进 (韧性线)",
       "title_en": "Operations & Process Improvement",
       "color": "red",
-      "narrative_zh": "这条线展示了你在压力、意外和组织惯性面前的韧性和流程改进能力。\n\n**模型下线事故 (EX-15)**：on-call时主动接了deferred已久的legacy model deprecation ticket。traffic dashboard只追踪URL-param调用、漏掉了hardcoded在search engine里的静态调用，下线几分钟后3-4个Query Understanding pipeline被block。我做了两个关键判断：(1)不争流程对错，先吃rollback，一周内全部unblock，换来推动结构性改变的credibility；(2)把单选题\"谁必须服从deprecation\"reframe成包含ownership transfer的双选题——consumer team要么迁移、要么fork代码自养。推到senior leadership划清了\"search engine team owns capacity budget\"的boundary，把一个recurring zero-sum conflict转成sustainable governance pattern。核心lesson：deprecation是negotiation不是announcement。\n\n**跨DC部署 (EX-16)**：跨数据中心部署时遇到了unexpected的问题，需要跨出自己的comfort zone处理基础设施层面的issue。这个经历让我学会了在不确定性中快速学习新领域。\n\n**scope pushback (EX-18)**：分布式训练探索项目中，scope不断膨胀到不合理的程度。我push back了，明确了什么是合理的探索范围，保护了团队的focus。\n\n**目标追踪改革 (BLOG-04)**：发现团队的目标追踪系统在\"奖励失败\"——团队重命名未完成的目标、mid-cycle调整deliverable、rollover到下个周期。我诊断了root cause(jargon阻碍peer review、进度不映射原始承诺、\"交付\"只是换了个名字)，重新定义了goal-setting框架——高不确定性项目承诺\"开发并AB测试N个feature\"而非\"所有测试都成功\"。经理pushback后我redesign了方案，在Senior Director的office hour获得了top-down支持和no-blame policy。短期交付率下降——这恰恰证明系统在工作。",
+      "narrative_zh": "这条线展示了你在压力、意外和组织惯性面前的韧性和流程改进能力。\n\n**模型下线事故 (EX-15)**：on-call时主动接了deferred已久的legacy model deprecation ticket。traffic dashboard只追踪URL-param调用、漏掉了hardcoded在search engine里的静态调用，下线几分钟后3-4个Query Understanding pipeline被block。我做了两个关键判断：(1)不争流程对错，先吃rollback，一周内全部unblock，换来推动结构性改变的credibility；(2)把单选题\"谁必须服从deprecation\"reframe成包含ownership transfer的双选题——consumer team要么迁移、要么fork代码自养。推到senior leadership划清了\"search engine team owns capacity budget\"的boundary，把一个recurring zero-sum conflict转成sustainable governance pattern。核心lesson：deprecation是negotiation不是announcement。\n\n**跨DC部署 (EX-16)**：manager没拿到cross-team PD quota，让我独自扛release-by-DC rollout。DC2几分钟内panic out——declarative artifactory底下藏着partial migration的statically-compiled C++ runtime，没人知道。我先owns rollback，在共享群flat description请backend admin approver；senior IC joint debug时手上有可以指向对方的证据，没那么做，把RCA framing成context gap而非blame gap。事后推动了search engine层的cross-team senior-bench approver policy。核心lesson：counterpart bandwidth不是favor、是line item。\n\n**scope pushback (EX-18)**：分布式训练探索项目中，scope不断膨胀到不合理的程度。我push back了，明确了什么是合理的探索范围，保护了团队的focus。\n\n**目标追踪改革 (BLOG-04)**：发现团队的目标追踪系统在\"奖励失败\"——团队重命名未完成的目标、mid-cycle调整deliverable、rollover到下个周期。我诊断了root cause(jargon阻碍peer review、进度不映射原始承诺、\"交付\"只是换了个名字)，重新定义了goal-setting框架——高不确定性项目承诺\"开发并AB测试N个feature\"而非\"所有测试都成功\"。经理pushback后我redesign了方案，在Senior Director的office hour获得了top-down支持和no-blame policy。短期交付率下降——这恰恰证明系统在工作。",
       "examples": [
         {
           "example_id": "EX-15",
@@ -149,8 +149,8 @@
         },
         {
           "example_id": "EX-16",
-          "role_zh": "跨界学习者：跨DC部署中走出comfort zone，快速学习基础设施领域",
-          "principles": ["learn_and_be_curious", "bias_for_action"]
+          "role_zh": "Cross-team owner：在没拿到正式bandwidth的情况下扛下cross-DC rollout，DC2出事后owns rollback、不用手头证据deflect、把counterpart bandwidth从favor reframe成line item并driven into org-level senior-bench approver policy",
+          "principles": ["ownership", "have_backbone", "earn_trust", "deliver_results"]
         },
         {
           "example_id": "EX-18",
@@ -163,7 +163,7 @@
           "principles": ["ownership", "have_backbone", "think_big", "influence_without_authority", "earn_trust"]
         }
       ],
-      "improvement_notes": "BLOG-04是这条线的绝对亮点，叙事完整、冲突清晰。EX-15于2026-04-20重写为结构性reframe story（之前的'process improvement'版本有两个redflag：defensive\"我没错manager也支持\"开场+把锅甩给informal stakeholders的undocumented tests）。新版owns dashboard盲区，把conflict从communication failure reframe为capacity-vs-stability的structural conflict，引入ownership transfer作为第三条路并推到senior leadership划清boundary。EX-16保留preprod细节+architectural mismatch根因分析+declarative artifactory具体交付。EX-18仍较薄，可考虑后续打磨。"
+      "improvement_notes": "BLOG-04是这条线的绝对亮点，叙事完整、冲突清晰。EX-15于2026-04-20重写为结构性reframe story（之前的'process improvement'版本有两个redflag：defensive\"我没错manager也支持\"开场+把锅甩给informal stakeholders的undocumented tests）。新版owns dashboard盲区，把conflict从communication failure reframe为capacity-vs-stability的structural conflict，引入ownership transfer作为第三条路并推到senior leadership划清boundary。EX-16同样于2026-04-20重写为failure-cut story（之前是redemption tail——artifactory invitation结尾，触发disguised-success trap）。新版owns manager没争取到bandwidth后独自扛的cross-DC rollout，DC2 panic后absorbs rollback、不用手头证据deflect、把RCA framing成context gap而非blame gap、推动了org-level cross-team senior-bench approver policy。Artifactory tail完全drop，仅保留在NRG-v2作为calculated-risk框架（PS-6/OWN-6/ADP-12）的指引。EX-18仍较薄，可考虑后续打磨。"
     },
     {
       "arc_id": "arc-6",

@@ -38,6 +38,16 @@ Polish in chat (or in the user's preferred review surface), send for explicit
 approval before any DB write. The gate is an unambiguous green light from the
 user, not their silence. For EX-15 the gate was: "我觉得很好 可以去执行".
 
+**Match the user's golden voice and length.** When polishing, query the
+most recent user-marked golden in the same content type. Match its
+char counts per field (within ~10%) and its voice. EX-15 golden voice
+(2026-04-20 reference): short declaratives, sentence fragments OK,
+spoken-English rhythm ("Early call: don't argue...", "Then I reframed
+the problem.", "The conclusion: ..."). Avoid AI explainer-mode --
+linking words like "Furthermore", over-qualified phrases, abstract
+nouns where verbs work. User feedback verbatim 2026-04-20: "AI味有点重
+表达应该简短客观符合习惯; 长度也要和我mark好的golden example对齐".
+
 Anti-pattern: pushing to DB during the polish loop "since we'll iterate
 anyway." Every push without explicit approval consumes user trust.
 
@@ -54,9 +64,25 @@ idempotent seed script as its source of truth. Mandatory script properties:
 - **Single transaction** for the primary entity's changes
 - **Verbose diff output** so the user can see exactly what changed
 
-### 4. Audit the propagation surface
+### 4. Audit the propagation surface (TWO modes: pre-draft AND post-apply)
 
-Apply the primary fields, then STOP and audit. Five places to always check:
+The audit has two complementary phases:
+
+**Phase A: pre-draft audit (constraint surfacing).** Before writing the
+new STAR, check what the story is currently linked to. Themes constrain
+framing; link relevance_notes reveal which framings the story currently
+serves. If your planned rewrite would make any link incoherent, surface
+it as an explicit user decision BEFORE drafting. Example from EX-16
+(2026-04-20): the story was linked to PS-6 ("calculated risk"), OWN-6
+("bold risk"), and ADP-12 ("project didn't go as planned, what would
+you do differently") with an artifactory-tail relevance note. The user's
+proposed rewrite dropped the artifactory tail entirely -- which would
+leave ADP-12 incoherent. Catching this in the audit BEFORE drafting
+gave the user a clean choice (full drop / Result mention / split into
+EX-XX-A + EX-XX-B) rather than a surprise during propagation.
+
+**Phase B: post-apply audit (propagation surface check).** After applying
+primary fields, STOP and audit again. Five places to always check:
 
 1. **Derived fields on same row** -- summary, elevator pitch, key-facts pills,
    tags, title, role descriptions
