@@ -192,3 +192,38 @@
   4. Audit sentinel: `grep -rn 'content_length === 0\|content_length > 0' src/frontend/src/` must return 0 matches outside `hasContent.ts`.
 - **Related task**: T-P2-503 (migration + lesson), T-P1-501 (introduced util)
 - **Tags**: #frontend #kg #source-of-truth #predicate-util #future-proofing
+
+### [2026-04-18] Background runner visibility: `nohup ... &` vs Bash `run_in_background`
+- **Context**: Launched `autonomous_run.sh` with `nohup bash scripts/autonomous_run.sh 5 MLInterviewPrep > $LOG 2>&1 &` and marked the Bash tool call itself `run_in_background: true`. User noticed they (and I) could not track progress.
+- **What went wrong**: `&` detaches the child from the parent shell. The parent shell exits ~immediately after forking, so the Bash tool reports "command completed" within seconds even though the real runner is still executing for 20+ minutes. `nohup` made this worse (SIGHUP-proof, but no stdout linkage back to Claude). The Bash tool's `run_in_background` was tracking the wrong process (the short-lived launcher, not the runner).
+- **Fix / Correct approach**: Two options, pick one:
+  1. **Bash `run_in_background` directly** (no `&`, no `nohup`): `bash scripts/autonomous_run.sh 5 MLInterviewPrep 2>&1` with `run_in_background: true`. Bash tool owns the runner's PID for its real lifetime; `Read` tool retrieves output; completion notification fires when the runner actually exits.
+  2. **Detach + Monitor** (if you need the runner to survive session restarts): keep `nohup ... &` BUT pair with `Monitor` on `tail -f` of the log file, filtered via `grep -E --line-buffered 'Session [0-9]+/|complete|Committed|Error|FAILED|Traceback|Finished'`. Each session boundary or error surfaces as a chat notification.
+- **Do NOT**: use `run_in_background` AND `nohup &` together. The Bash tracking becomes useless (sees launcher's quick exit) and you lose visibility.
+- **Related task**: T-P1-505 / T-P1-506 batch launch
+- **Tags**: #orchestration #autonomous #bash #monitor #visibility #gotcha
+
+### [2026-04-19] Human-approval-gate language in task specs is sticky — write it self-cancelling
+- **Context**: T-P0-516 had a "does NOT auto-start after 518 completes — waits for Discord approval" note in its description. After user approved 518 on 2026-04-19 and 518 flipped to completed (clearing the gate), two subsequent autonomous sessions STILL skipped 516 because they re-read the task spec fresh each session and interpreted the gate language as persistent.
+- **What went wrong**: Autonomous sessions don't have session-to-session memory of "the human approval already happened." They read the task spec verbatim each time. Gate language phrased as a standing rule ("does NOT auto-start") is sticky even when the gate condition has been cleared externally.
+- **Fix / Correct approach**:
+  1. Preferred: use a separate blocking task (e.g., a dedicated "approval gate" task that gets marked completed by the human) rather than embedding gate prose inside the downstream task's description. Then normal dependency semantics handle it.
+  2. Alternative: if you must embed gate prose, make it self-cancelling: "If T-P0-518 status=completed (check with task_db.py get), this gate is cleared and you should proceed immediately."
+  3. When removing the gate language, UPDATE the task description via `task_db.py update --description`, not just rely on DB state. Autonomous sessions read the spec text, not the dependency graph semantics alone.
+- **Cost**: 2 unnecessary session roundtrips (sessions 2 and 3 of Phase 2 runner skipped 516 and did 520/517 instead; session 4 finally picked 516 after I cleaned the description).
+- **Related task**: T-P0-516 gate confusion (2026-04-19)
+- **Tags**: #autonomous #task-spec #approval-gate #gotcha #workflow
+
+## [2026-04-20] Generic toggle components must verify react-query invalidation keys against real consumers
+- **Context**: Introduced `<GoldenToggleButton itemType="..." ... />` (T-P1-554) as a generic switch over three item types (framework_node, behavioral_example, company_document). Wrote invalidation keys by pattern guess: `["companies", "document", itemId]`.
+- **What went wrong**: Discovered during T-P2-560 integration that the actual React-Query keys used by PrepNotesPage hooks were `["companyDocuments", companyId]` / `["companyDocument", docId]` -- pattern-named, NOT path-slug-named. Our pattern-guessed keys matched zero real queries, so toggling golden on a company doc didn't invalidate anything and the UI showed stale state until manual refresh.
+- **Fix**: T-P2-560 commit `7a835c1` rewrote the invalidation block in GoldenToggleButton to use the real key names. Also surfaces a testing gap: unit tests for the toggle mocked useMutation but didn't assert on `queryClient.invalidateQueries` arguments.
+- **Rule**: For any generic component that dispatches to multiple consumers by discriminator, grep the consumer for its actual query keys BEFORE wiring invalidation -- do not guess by convention. Add an assertion test for each discriminator path that verifies the exact invalidation keys match what the consumer reads.
+- **Tags**: #react-query #invalidation #generic-components #integration-risk
+
+## [2026-04-20] Copying raw notes into KG docs needs a two-pass pass-through (emoji + inline math)
+- **Context**: User provided raw notes with `❌`/`✅` markers and requested "critical distillation" into the MHA/MQA/GQA leaf (node 225). I lifted the markers directly and also wrapped an inline formula `x = x + \text{Attn}(x)` in backticks (code span) to "make it look formula-like."
+- **What went wrong**: (1) Project CLAUDE.md explicitly forbids emoji in any doc / config / code; I violated it by passing through `❌`/`✅` as-is. (2) Markdown code spans (backticks) suppress KaTeX, so the backticked inline formula rendered literally as `x = x + \text{Attn}(x)` instead of math. User caught both on the frontend.
+- **Fix**: T-P2-571 — swap backticks to `$...$` for inline math; replace emoji with ASCII `**[误]** / **[对]**` tags. Also ran a cross-node emoji regex scan over all docs I edited this session to ensure nothing else leaked.
+- **Rule**: When absorbing user-supplied raw notes into KG docs, do a two-pass translation: (a) **rendering pass** — every piece of math has to be in `$...$` or `$$...$$`; never use backticks for math ('looks like code' is not good enough reason). (b) **project-convention pass** — apply the no-emoji rule; replace unicode check/cross with ASCII text tags. Run a regex scan (`[\u2600-\u27BF\U0001F300-\U0001FAFF]`) before claiming done.
+- **Tags**: #markdown #katex #emoji #project-convention #content-authoring

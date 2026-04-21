@@ -96,6 +96,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 510 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-20** -- T-P2-571: Fix MHA node 225: render residual formula + replace emoji with ASCII tags. Per user Discord 2026-04-20: fix residual formula which was in a code span (backticks) so \text{Attn}(x) rendered litera
 - [x] **2026-04-20** -- T-P2-570: MHA/MQA/GQA node 225: add dimension-flow clarifier + 3 interview misconceptions. Per user Discord 2026-04-20 (critical distillation of supplied notes): insert dimension-flow invariants (X n-by-d preser
 - [x] **2026-04-20** -- T-P2-569: Cross-Entropy/KL node 222: add formal Wasserstein primal + K-R dual definition. Per user Discord 2026-04-20 follow-up: add Kantorovich primal (inf over couplings) + Kantorovich-Rubinstein dual (sup ov
 - [x] **2026-04-20** -- T-P2-568: Cross-Entropy/KL node 222: clarify KL is not Earth Mover's / Wasserstein. Per user Discord 2026-04-20: add minimal-diff clarification that KL 'distance' is information-theoretic (not geometric),
