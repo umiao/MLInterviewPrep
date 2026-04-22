@@ -211,36 +211,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-597, T-P1-598
-- **Description**: Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
-
-ADD themes (2):
-- customer_user_focus / 'Customer & User Focus' — 为用户做对的事的叙事轴 (Amazon CO, Meta, Google)
-- ethical_integrity_backbone / 'Ethical Integrity & Backbone' — integrity / disagree-not-just-commit / push back even at cost
-
-ADD facets (3):
-- fast_learning / 'Fast Learning' / parent_theme_id=NULL (cross-theme tag per reviewer: learning is capability not scenario, independent retrieval axis)
-- scrappy_innovation / 'Scrappy Innovation' / parent_theme_id NULL (cross-theme tag: solution style not scenario)
-- strategic_scope / 'Strategic / Org-Level Scope' / parent_theme_id NULL (staff/L6 signal per reviewer: not a theme, don't split leadership_direction)
-
-DEMOTE scope_creep_ambiguous → facet under ambiguity_uncertainty (do NOT rename ambiguity_uncertainty per reviewer: 场景 vs 能力 不能绑死一个 theme):
-- Create facet 'scope_creep_pm_ambiguity' with parent_theme_id = ambiguity_uncertainty.id
-- Do NOT delete the original theme yet — Phase 3 (after retag verified) can drop it
-
-Deliverables:
-- scripts/seed_bq_taxonomy_delta_20260421.py (idempotent, DB-backup-guarded)
-- docs/bq_taxonomy_delta_20260421.md — documents the delta + facet usage rule
-
-AC:
-- 2 themes + 4 facets inserted (3 cross-theme + 1 scope_creep_pm_ambiguity under ambiguity)
-- Idempotent re-run prints [SKIP]
-- behavioral_themes row count: 15 → 17
-- behavioral_facets row count: 0 → 4
-- Existing example/question theme tags unchanged (Phase 2 schema+seed only; retag is BQ-TAX-03)
-
 #### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
 - **Priority**: P1
 - **Complexity**: M
@@ -533,6 +503,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous. Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
 - [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
 - [x] **2026-04-21** -- T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer). The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inl
 - [x] **2026-04-21** -- T-P1-596: [BQ-UX-01] Phase 1: Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent. Shared-component prep task for BQ Examples tab drawer conversion. All 34 behavioral_examples already have cn_elevator_pi
