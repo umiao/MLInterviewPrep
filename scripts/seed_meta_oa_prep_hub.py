@@ -40,9 +40,11 @@ DOC_TITLE = "[Meta-OA] 2026-04-22 OA Prep Hub"
 DOC_KIND = "prep_note"
 SOURCE_TYPE = "manual"
 
-# Source per-problem doc ids (hub opens these in drawer via db:// links).
-# Kept here so a future doc-id refactor surfaces the coupling.
-SOURCE_DOC_IDS = (76, 77, 78, 79)
+# Source per-problem PROBLEM ids (hub opens these in drawer via db:// links).
+# Post T-P0-252 migration: detail content now lives in `problems` table, not
+# `company_documents`. db://N resolves to /problems/N in ProblemDrawer.
+# 1092 Cloud FS · 1093 In-Memory DB · 1094 Bank System · 1095 Standalone Algos.
+SOURCE_DOC_IDS = (1092, 1093, 1094, 1095)
 
 CONTENT = SENTINEL + r'''
 # Meta OA 2026-04-22 — Prep Hub
@@ -50,7 +52,7 @@ CONTENT = SENTINEL + r'''
 > **用法**: 考试当天早上扫这一页。四题速查卡片在下方；点击 [📖 打开完整题解] 链接会在右侧以 drawer (slide-over) 弹出完整题解原文，ESC 或点击遮罩关闭。
 > **时长**: 90 min。Warm-up 10 min → Cloud FS 20 min → In-Memory DB 25 min → Bank System 30 min，剩 5 min buffer。
 
-**快速跳转**: [§A Warm-up](db://79) · [§B Cloud FS](db://76) · [§C In-Memory DB](db://77) · [§D Bank System](db://78)
+**快速跳转**: [§A Warm-up](db://1095) · [§B Cloud FS](db://1092) · [§C In-Memory DB](db://1093) · [§D Bank System](db://1094)
 
 ---
 
@@ -105,7 +107,7 @@ CONTENT = SENTINEL + r'''
 - Python 字符串 `<` 是按 Unicode code point 的字典序，ASCII 等价；别上 suffix array 炫技。
 - 复杂度 $O(n^3) = 2n$ 候选 × $O(n)$ 构造 × $O(n)$ 比较，$n \le 10^3$ 刚好。
 
-**[📖 打开完整题解 → Meta-OA Standalone Algos](db://79)**
+**[📖 打开完整题解 → Meta-OA Standalone Algos](db://1095)**
 
 ---
 
@@ -117,7 +119,7 @@ CONTENT = SENTINEL + r'''
 - **L4** `compress` / `decompress` — 名字字面拼接 `.COMPRESSED`，**不用** bool flag；size `// 2` 向下取整；decompress `* 2`（信息损失 OK）
 - **坑**：L4 不能重复压缩（suffix 已存在返 `False`）；decompress 时目标 base name 若已被占用也返 `False`。
 
-**[📖 打开完整题解 → Meta-OA Cloud File System 4-level](db://76)**
+**[📖 打开完整题解 → Meta-OA Cloud File System 4-level](db://1092)**
 
 ---
 
@@ -130,7 +132,7 @@ CONTENT = SENTINEL + r'''
 - **V2** CAS (`compare_and_set` / `compare_and_delete`) + `get_value_at` — append-only history list + `bisect_right((ts, chr(0x10FFFF))) - 1`
 - **坑**：`ts == exp` 已过期不可读；backup 忘 deepcopy → restore 污染；V2 history 保持严格升序（用 `(ts, seq)` tie-break 更稳）。
 
-**[📖 打开完整题解 → Meta-OA In-Memory Database L1-L4 + V2](db://77)**
+**[📖 打开完整题解 → Meta-OA In-Memory Database L1-L4 + V2](db://1093)**
 
 ---
 
@@ -142,7 +144,7 @@ CONTENT = SENTINEL + r'''
 - **L4** `mergeAccounts(id1, id2)` — id2 并入 id1；`spent / balance` 合并；pending transfer 的 `src` 和 `dst` **双向都要改写**；self-pending 作废；merge 后 `dirty = True`。
 - **3 个 L3 必背 bug**：(1) 过期用 `>=` 不是 `>`；(2) expire 退款在 src；(3) cancel 与 expire 共享 `_refund(src, amount)` 避免两处重复逻辑。
 
-**[📖 打开完整题解 → Meta-OA Bank System L1-L4](db://78)**
+**[📖 打开完整题解 → Meta-OA Bank System L1-L4](db://1094)**
 
 ---
 
@@ -268,21 +270,23 @@ def main() -> int:
             return 1
         print(f"[OK] target company: id={COMPANY_ID} name={row[0]!r}")
 
-        # Sanity: the 4 source docs we drawer-link to must exist.
+        # Sanity: the 4 source problems we drawer-link to must exist.
+        # Post T-P0-252: detail content migrated from company_documents to problems;
+        # db://N now resolves to /problems/N via ProblemDrawer.
         placeholders = ",".join("?" * len(SOURCE_DOC_IDS))
         source_rows = conn.execute(
-            f"SELECT id, title FROM company_documents WHERE id IN ({placeholders})",
+            f"SELECT id, title FROM problems WHERE id IN ({placeholders})",
             SOURCE_DOC_IDS,
         ).fetchall()
         found_ids = {r[0] for r in source_rows}
         missing = [sid for sid in SOURCE_DOC_IDS if sid not in found_ids]
         if missing:
             print(
-                f"[ERROR] source docs missing: {missing} — "
-                "hub depends on T-P0-246/247/248/T-P1-249 seeds"
+                f"[ERROR] source problems missing: {missing} — "
+                "hub depends on T-P0-252 migration seed (problems 1092-1095)"
             )
             return 1
-        print(f"[OK] all {len(SOURCE_DOC_IDS)} source docs present")
+        print(f"[OK] all {len(SOURCE_DOC_IDS)} source problems present")
 
         cur = conn.execute(
             "SELECT id, content FROM company_documents "
