@@ -5,6 +5,11 @@ from src.backend.models.behavioral import (
     BehavioralQuestion,
     QuestionExampleLink,
 )
+from src.backend.models.behavioral_facet import (
+    BehavioralFacet,
+    ExampleFacetTag,
+    QuestionFacetTag,
+)
 from src.backend.models.behavioral_theme import (
     BehavioralTheme,
     ExampleThemeTag,
@@ -32,6 +37,9 @@ __all__ = [
     "BehavioralTheme",
     "QuestionThemeTag",
     "ExampleThemeTag",
+    "BehavioralFacet",
+    "QuestionFacetTag",
+    "ExampleFacetTag",
     "Problem",
     "Attempt",
     "QASession",

@@ -66,6 +66,13 @@ class BehavioralExample(Base):
         server_default=text("0"),
     )
     golden_at = Column(DateTime, nullable=True)
+    is_signature = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=text("0"),
+    )
+    signature_at = Column(DateTime, nullable=True)
 
     question_links = relationship(
         "QuestionExampleLink",

@@ -91,6 +91,7 @@ class BehavioralExampleUpdate(BaseModel):
     tech_terms: dict[str, str] | None = None
     cn_elevator_pitch: str | None = None
     is_golden: bool | None = None
+    is_signature: bool | None = None
 
 
 class LinkedQuestionBrief(BaseModel):
@@ -125,6 +126,8 @@ class BehavioralExampleResponse(BaseModel):
     created_at: datetime | None = None
     is_golden: bool = False
     golden_at: datetime | None = None
+    is_signature: bool = False
+    signature_at: datetime | None = None
     linked_questions: list[LinkedQuestionBrief] = []
 
     model_config = ConfigDict(from_attributes=True)

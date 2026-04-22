@@ -211,32 +211,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-597
-- **Description**: Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, schema 再动, 避免 bug 归因成本非线性放大.
-
-Schema changes (idempotent migration):
-1. CREATE TABLE behavioral_facets (id INT PK, slug VARCHAR UNIQUE, label VARCHAR, parent_theme_id INT NULL FK->behavioral_themes, description TEXT, display_order INT, created_at DATETIME)
-   - Facet usage rule (written in schema comment + docs): facets are ONLY for (a) staff/L6 signal tags, (b) cross-theme retrieval tags, (c) scenario sub-type when rename would mix abstraction layers. NOT a dumping ground.
-2. CREATE TABLE example_facet_tags (example_id INT FK, facet_id INT FK, created_at DATETIME, PRIMARY KEY(example_id, facet_id))
-3. CREATE TABLE question_facet_tags (question_id INT FK, facet_id INT FK, created_at DATETIME, PRIMARY KEY(question_id, facet_id))
-4. ALTER TABLE behavioral_examples ADD COLUMN is_signature BOOLEAN DEFAULT 0
-5. ALTER TABLE behavioral_examples ADD COLUMN signature_at DATETIME NULL
-
-Deliverables:
-- scripts/migrate_bq_taxonomy_20260421.py (idempotent via PRAGMA table_info / sqlite_master check, DB-backup-guarded)
-- SQLAlchemy model updates in src/backend/models/behavioral.py
-- Pydantic schema updates in src/backend/schemas/behavioral.py
-- Regression test confirming (a) existing rows survive, (b) new tables created once, (c) ALTER COLUMN idempotent
-
-AC:
-- Migration runs clean; re-runs with [SKIP]
-- pytest passes 
-- Backend API still returns existing data unchanged
-- No frontend changes yet (Phase 2 schema only)
-
 #### T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous
 - **Priority**: P1
 - **Complexity**: M
@@ -321,6 +295,82 @@ AC:
 - tsc + vitest + vite build pass
 - No regression on existing theme/question/example rendering
 - Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
+
+#### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architecture/dataflow/formulas/production_constraints/tradeoffs/defense) with user-provided material (Discord msg 1496318022804308119 attachment).
+
+Current gap analysis (grep):
+- HAS partial: AV1(5) H.264(7) HLS(6) DASH(4) Argos(1) ABR(4) ASIC(1)
+- MISSING: VCU name explicit, Colossus, Bigtable, Pub/Sub, chunked upload mechanics, Google Global Cache
+
+Expansions to add (fold into existing sections, not rewrite):
+1. **Ingestion subsection** (into  or ): chunked upload (10-50MB chunks to edge server) → GCS → Pub/Sub queue → stateless FFmpeg workers on thousands of instances
+2. **Transcoding tier policy** (into  or ): 'H.264 for all / VP9 for hot / AV1 for head + 4K/8K' — explicit cost amortize principle (AV1 is 50-100× H.264 cost but saves 50-60% bandwidth; VP9 saves 30-40% bandwidth). 长尾保守头部激进.
+3. **Encoding ladder specifics** (into ): per-resolution bitrate tiers (720p has 1.5/2.5/4 Mbps tiers; 144p/240p/360p/480p/720p/1080p/1440p/2160p/4320p pyramid)
+4. **VCU/Argos ASIC callout** (into  or new subsection): Google's self-designed video coding unit ASIC for VP9/AV1 encoding at scale — cite 'VCU (Argos)' 论文 as reference
+5. **DASH vs HLS trade** (into ): DASH 1-5s segment for web (Chrome/Firefox/Edge) / HLS 6-10s segment for Apple only — shorter DASH segments reduce rebuffering by up to 30% on mobile networks
+6. **Storage split** (into ): Colossus for blob (raw + all transcoded) / Bigtable for metadata / Elasticsearch for full-text. Content ID audio fingerprinting as copyright subsystem.
+7. **CDN architecture** (into  or ): Google Global Cache deployed into ISP racks (not just edge POPs) — 3-tier: edge → regional cache → origin
+8. **Content-to-feature bridge** (into  or ): multimodal pipeline (frame embedding Video-BERT-like / ASR / OCR / audio fingerprint Content ID / topic classification / thumbnail scoring) outputs feed BOTH search index AND recommendation retrieval/ranking features — explicit bridge to id=198
+
+Deliverables:
+- scripts/seed_sd_youtube_content_pipeline_expand_20260421.py (idempotent via hash-compare on target columns, DB-backup-guarded with pre_expand_sd21 suffix)
+- Target final length: 25000-30000 chars (net +4000-9000)
+- Content citations: VCU/Argos paper, VdoCipher reference
+
+AC:
+- grep count post-expand: VCU>=1, Colossus>=1, Bigtable>=2, Pub/Sub>=1, chunked>=2, 'Google Global Cache'>=1
+- Preserve existing sections and numbered lists (no section deletion; additive only)
+- Script re-runs [SKIP] via content hash check
+- Pytest passes; vite build clean
+- Manual smoke on /system-design/<id=21 slug> renders new subsections properly
+
+#### T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 headers, structure: 1 Requirements / 2 Capacity / 3 HL Arch / 4a Two-Tower / 4b Ranking / 4c Re-rank / 4d Cold Start / 5 Reliability / 6 Summary / Interview Q&A / Self-Check / L5 Tradeoff Matrix).
+
+Current gap analysis (grep): HAS MMoE(16) two-tower(17) ScaNN(4) YouTube(3). MISSING watch(0 — no watch-time weighted LR!), Covington(0), Zhao(0), Semantic ID(0), LRM(0).
+
+Expansions (fold into existing sections 4a/4b, add new 4e for 2024-2025 LRM):
+
+**4a Two-Tower Retrieval additions:**
+- Covington 2016 DNN recall paper trick set: (a) user vector from last-layer activation, item embedding = softmax input weights so u·v is learned similarity; (b) example age feature fed during training, zeroed at serving to counteract ML bias toward old viral content; (c) 'next-watch' target (not held-out random) to prevent sequential-episode leak; (d) extreme multiclass framing with sampled softmax
+- Multi-source retrieval: parallel召回 from (collab filter / two-tower / subscription new / search history / topic-trending / item-item related / fresh upload cold-start). Ranker receives 'which_source nominated this + source_score' as features to combine signals.
+- Frequency features: 'historical impression frequency' features prevent sequential requests returning same list (cite Rangadurai)
+
+**4b Ranking additions:**
+- Zhao 2019 MMoE paper specifics: share-bottom → MMoE substitution; expert networks + per-task gating network; solves negative transfer between engagement (clicks/watch) and satisfaction (likes/ratings)
+- Watch-time weighted LR: output layer uses weighted logistic regression, weight = observed watch-time — optimizes expected watch duration directly, avoids clickbait trap
+- Shallow tower for bias correction: stacked on MMoE, learns position bias + device bias explicitly — position fed as feature, linearly subtracted; serving sets position to a fixed value. Cite Daiwk.
+- Training-sample policy: samples from ALL YouTube videos (not just recommender's own surfaces) to avoid model-induced bias; per-user equal weighting prevents heavy-user dominance.
+- Query features vs impression features distinction: query features computed once per request; impression features computed per candidate.
+
+**4e NEW SUBSECTION (2024-2025 frontier):**
+- Large Recommender Models (LRM): Google Gemini variant adapted for video rec; continued pre-training teaches model 'English + YouTube video language' simultaneously; enables generative retrieval.
+- Semantic IDs via RQ-VAE: Video-BERT-style transformer encoder → dense embedding → Residual Quantization Variational AutoEncoder compresses to 4-8 discrete tokens per video → LLM treats video as sequence → next-video prediction natural.
+- Cold-start advantage: LRM materially improves fresh/long-tail content performance vs pure CF.
+- Serving cost reality: requires 95%+ cost reduction + offline inference strategy to deploy at YouTube scale — currently LRM is auxiliary retrieval source or offline tagging, NOT replacing main online two-tower+MMoE pipeline.
+
+Also update:
+- Cross-link to id=21 (content pipeline) — content-understanding multimodal features are the bridge
+- Add YouTube-specific scale numbers where helpful (keep existing 23K QPS etc as generic; add '例: YouTube 日上传 500h+, 月 DAU 2B+' context)
+
+Deliverables:
+- scripts/seed_fn198_youtube_rec_expand_20260421.py (idempotent via description-hash compare, DB-backup-guarded with pre_expand_fn198 suffix)
+- Target final length: 32000-36000 chars (net +4000-8000)
+- All insertions preserve existing 19 headers; new 4e adds 1-2 headers
+
+AC:
+- grep count post-expand: Covington>=1, Zhao>=1, 'watch-time'>=2, 'Semantic ID'>=2, LRM>=3, RQ-VAE>=1, 'shallow tower'>=1, 'example age'>=1
+- Existing 19 headers all still present (no structural breakage; additive only)
+- Script re-runs [SKIP]
+- /framework page renders id=198 drawer without layout breaks
+- Pytest passes
 
 ### P2 -- Nice to Have
 
@@ -483,6 +533,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
 - [x] **2026-04-21** -- T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer). The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inl
 - [x] **2026-04-21** -- T-P1-596: [BQ-UX-01] Phase 1: Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent. Shared-component prep task for BQ Examples tab drawer conversion. All 34 behavioral_examples already have cn_elevator_pi
 - [x] **2026-04-21** -- T-P1-595: [KG-MLF-FS-01] Content: leaf 28 — Comprehensive 千级特征筛选与建模 (single-page, all 7 sections + expansions). Author the single comprehensive content page for leaf id=28 (feature-selection-pipeline-1000features). Per user clarific

@@ -558,6 +558,50 @@ MIGRATIONS: list[tuple[int, str, list[str]]] = [
             "ON behavioral_example_company_tags(example_id)",
         ],
     ),
+    (
+        22,
+        "BQ-TAX Phase 2: behavioral_facets + facet-tag joins + "
+        "behavioral_examples.is_signature/signature_at",
+        [
+            "CREATE TABLE IF NOT EXISTS behavioral_facets ("
+            "  id INTEGER PRIMARY KEY AUTOINCREMENT,"
+            "  slug VARCHAR NOT NULL UNIQUE,"
+            "  label VARCHAR NOT NULL,"
+            "  parent_theme_id INTEGER REFERENCES behavioral_themes(id) "
+            "    ON DELETE SET NULL,"
+            "  description TEXT,"
+            "  display_order INTEGER NOT NULL DEFAULT 0,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_bf_parent_theme_id "
+            "ON behavioral_facets(parent_theme_id)",
+            "CREATE TABLE IF NOT EXISTS question_facet_tags ("
+            "  question_id INTEGER NOT NULL "
+            "    REFERENCES behavioral_questions(id) ON DELETE CASCADE,"
+            "  facet_id INTEGER NOT NULL "
+            "    REFERENCES behavioral_facets(id) ON DELETE CASCADE,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  PRIMARY KEY (question_id, facet_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_qft_facet_id "
+            "ON question_facet_tags(facet_id)",
+            "CREATE TABLE IF NOT EXISTS example_facet_tags ("
+            "  example_id INTEGER NOT NULL "
+            "    REFERENCES behavioral_examples(id) ON DELETE CASCADE,"
+            "  facet_id INTEGER NOT NULL "
+            "    REFERENCES behavioral_facets(id) ON DELETE CASCADE,"
+            "  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+            "  PRIMARY KEY (example_id, facet_id)"
+            ")",
+            "CREATE INDEX IF NOT EXISTS ix_eft_facet_id "
+            "ON example_facet_tags(facet_id)",
+            "ADD_COLUMN_IF_MISSING:behavioral_examples:is_signature:"
+            "ALTER TABLE behavioral_examples "
+            "ADD COLUMN is_signature BOOLEAN NOT NULL DEFAULT 0",
+            "ADD_COLUMN_IF_MISSING:behavioral_examples:signature_at:"
+            "ALTER TABLE behavioral_examples ADD COLUMN signature_at DATETIME",
+        ],
+    ),
 ]
 
 
