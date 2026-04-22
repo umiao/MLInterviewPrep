@@ -344,6 +344,16 @@ n = 总文件数，k = `find_file` 命中数。题目明确不要求最优；O(n
 
 - 原 docx 提取代码：`staging/04_22_Meta_OA/docx_extract.txt`
 - Level 4 原截图缺失；`.COMPRESSED` 后缀约定为 Meta OA 常见变体推断。
+
+---
+
+## 11. 相邻题 (drawer 快跳)
+
+点击下方链接会在右侧 drawer 展开对应题解（ESC 或点击遮罩关闭）。
+
+- **姊妹 4-level**: [Meta-OA In-Memory Database L1-L4 + V2](db://77) · [Meta-OA Bank System L1-L4](db://78)
+- **Warm-up 独立算法**: [Meta-OA Standalone Algos](db://79)
+- **OA Prep Hub**: [Meta-OA 2026-04-22 OA Prep Hub](db://80)
 """
 
 

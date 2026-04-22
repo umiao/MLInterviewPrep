@@ -449,6 +449,16 @@ F = 所有 (key, field) 总数；B = backup 条目数；h = 单 field 历史长�
 - 原 docx 提取代码：`staging/04_22_Meta_OA/in memory sys/docx_extract.txt`
 - 作者题解 bug：`scan_at` / `scan_by_prefix_at` 缺 `timestamp < expire` guard（本文 §4 踩坑点第 3 条）。
 - 相邻题：`[Meta-OA] Cloud File System (4-level)`（同族 4-level 结构）。
+
+---
+
+## 12. 相邻题 (drawer 快跳)
+
+点击下方链接会在右侧 drawer 展开对应题解（ESC 或点击遮罩关闭）。
+
+- **姊妹 4-level**: [Meta-OA Cloud File System 4-level](db://76) · [Meta-OA Bank System L1-L4](db://78)
+- **Warm-up 独立算法**: [Meta-OA Standalone Algos](db://79)
+- **OA Prep Hub**: [Meta-OA 2026-04-22 OA Prep Hub](db://80)
 """
 
 

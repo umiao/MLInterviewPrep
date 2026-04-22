@@ -267,6 +267,15 @@ return "abc"
 - `[Meta-OA] Bank System (L1-L4)` — 4-level + scheduled transfer + merge。
 - 同族 Leetcode 映射: §1 ≈ LC 819 (Most Common Word) 的简化；§2 ≈ LC 2588 (Make String Sorted) 的反转变体，但 §2 不要求完全排序。
 
+---
+
+## 8. 相邻题 (drawer 快跳)
+
+点击下方链接会在右侧 drawer 展开对应题解（ESC 或点击遮罩关闭）。
+
+- **4-level 系统设计**: [Meta-OA Cloud File System 4-level](db://76) · [Meta-OA In-Memory Database L1-L4 + V2](db://77) · [Meta-OA Bank System L1-L4](db://78)
+- **OA Prep Hub**: [Meta-OA 2026-04-22 OA Prep Hub](db://80)
+
 '''
 
 

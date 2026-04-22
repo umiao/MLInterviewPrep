@@ -460,6 +460,16 @@ class BankSystem:
 - `[Meta-OA] Cloud File System (4-level)` — 同族 4-level, prefix/suffix 查找 + compress。
 - 考场里这三题按难度序通常是：Cloud FS ≤ Bank System ≤ In-Memory DB（TTL 最难）。
 
+---
+
+## 11. 相邻题 (drawer 快跳)
+
+点击下方链接会在右侧 drawer 展开对应题解（ESC 或点击遮罩关闭）。
+
+- **姊妹 4-level**: [Meta-OA Cloud File System 4-level](db://76) · [Meta-OA In-Memory Database L1-L4 + V2](db://77)
+- **Warm-up 独立算法**: [Meta-OA Standalone Algos](db://79)
+- **OA Prep Hub**: [Meta-OA 2026-04-22 OA Prep Hub](db://80)
+
 '''
 
 
