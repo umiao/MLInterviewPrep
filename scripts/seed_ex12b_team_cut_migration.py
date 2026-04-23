@@ -220,7 +220,7 @@ def _upsert_example(cur: sqlite3.Cursor) -> tuple[str, int]:
         return "INSERT", cur.lastrowid
 
     pk = row[0]
-    set_clause = ", ".join(f"{k} = ?" for k in fields.keys())
+    set_clause = ", ".join(f"{k} = ?" for k in fields)
     cur.execute(
         f"UPDATE behavioral_examples SET {set_clause} WHERE id = ?",
         (*fields.values(), pk),
