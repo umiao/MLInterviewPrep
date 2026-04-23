@@ -117,14 +117,28 @@ PITCHES = {
         "| KEY FACTS: conclusion-first 沟通 | ranking = zero-sum allocation | "
         "no free lunch | VP 调整方向 | 持久 mental model"
     ),
-    33: (  # EX-33
-        "eBay 搜索 org 困于 pairwise ranking 范式，leadership 批准 MoE + neural ranking "
-        "项目占用约 80 GPU nodes；主动将项目 scope 定义为\"start test\"而非\"test and launch\"，"
-        "放弃包装失败为 carry-over 的保护；"
-        "MoE 未达预期后如实汇报，推动 org 从 ranking modeling 转型为 allocation team，"
-        "开启 allocation policy 新主线 "
-        "| KEY FACTS: 80 GPU nodes | \"start test\" vs \"test and launch\" | "
-        "honest negative result | org 更名 ranking -> allocation | 范式转移"
+    33: (  # EX-33 -- rewritten 2026-04-23 under T-P0-578 (BQ-DEPTH-07).
+        # Sharpened KEY FACTS suffix to cover the NRG-v1 narration guard
+        # (don't lead with 200M number) and the paradigm-reframe outcome.
+        # Canonical source for EX-33's cn_elevator_pitch; re-running this
+        # batch overwrites with the same polished pitch.
+        "eBay 搜索 org 范式停在 pairwise distributed ranking; leadership 批 MoE + "
+        "neural ranking 项目 ~80 GPU nodes，我把 scope 定为 \"start test\" 而非 "
+        "\"test and launch\"——放弃 carry-over 保护，让结果两边都可信。执行中看到"
+        " abandonment/exploration expert 与 conversion expert 结构性正交，单头 "
+        "item-level ranker 扛不动；MRR up、revenue neutral 按 launch criteria 能"
+        "上线，用户并未更好——认清 MRR 是 self-fulfilling proxy 不是 KPI。把失败"
+        "转成 reframe 提案——allocation policy 让模型在明确 tradeoff 框内工作，"
+        "替代 ranker-centric 规划。MoE deprecate；下游 Allocation 方向 shipped "
+        "**200M+ 年化 GMB**；team 从 ranking modeling 改名为 Allocation team；"
+        "leadership 默认规划问题从\"怎么训更强 ranker\"换成\"这是不是 ranker 该解"
+        "的问题\" "
+        "| KEY FACTS: ~80 GPU nodes (nearly all org-wide headroom) "
+        "| \"start test\" vs \"test and launch\" 弃 carry-over 保护 "
+        "| MRR = self-fulfilling proxy, BI/GMB 才是真 KPI "
+        "| MoE deprecated, 下游 Allocation 200M+ 年化 GMB "
+        "| team rename: ranking modeling -> Allocation team "
+        "| paradigm reframe 不可逆; default 规划问题换了"
     ),
 }
 
