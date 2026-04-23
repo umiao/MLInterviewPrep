@@ -11,12 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-### P2 -- Nice to Have
-
-### P3 -- Stretch Goals
-
-## Blocked
-
 #### T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each)
 - **Priority**: P1
 - **Complexity**: M
@@ -247,31 +241,7 @@ AC:
 - /framework page renders id=198 drawer without layout breaks
 - Pytest passes
 
-#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Remove deprecated stop-cache from BOTH helixos/.claude/hooks/test_check.py AND claude-code-project-template/.claude/hooks/test_check.py. Both still import and use check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed these (T-P2-188, commit abf6543) per the lesson that stop caches cause false PASS results when files change between sessions.
-
-Verified state (2026-04-23): helixos/.claude/hooks/test_check.py lines 10, 21, 48 still import/call check_stop_cache/write_stop_cache. claude-code-project-template/.claude/hooks/test_check.py same three lines.
-
-Action:
-1. helixos/.claude/hooks/test_check.py: remove cache import and calls -- copy MLInterviewPrep version.
-2. claude-code-project-template/.claude/hooks/test_check.py: same removal.
-3. Clean up hook_utils.py in both repos only if no other callers remain.
-4. Run tests after to confirm hook still works.
-
-Consolidated from duplicates: T-P2-255, T-P2-320 (both helixos stop-cache), T-P2-208 (template stop-cache). All 3 marked completed-as-duplicate on 2026-04-23 per T-P2-587.
-
-Blocked: must be executed from a helixos or template Claude Code session -- file permissions prevent writing to those repos' .claude/hooks/ from a MLInterviewPrep session.
-
-Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
-
-#### T-P2-239: [SYNC] Propagate session_context.py improvements from MLInterviewPrep to helixos
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
+### P2 -- Nice to Have
 
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
 - **Priority**: P2
@@ -320,6 +290,36 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
+
+### P3 -- Stretch Goals
+
+## Blocked
+
+#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Remove deprecated stop-cache from BOTH helixos/.claude/hooks/test_check.py AND claude-code-project-template/.claude/hooks/test_check.py. Both still import and use check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed these (T-P2-188, commit abf6543) per the lesson that stop caches cause false PASS results when files change between sessions.
+
+Verified state (2026-04-23): helixos/.claude/hooks/test_check.py lines 10, 21, 48 still import/call check_stop_cache/write_stop_cache. claude-code-project-template/.claude/hooks/test_check.py same three lines.
+
+Action:
+1. helixos/.claude/hooks/test_check.py: remove cache import and calls -- copy MLInterviewPrep version.
+2. claude-code-project-template/.claude/hooks/test_check.py: same removal.
+3. Clean up hook_utils.py in both repos only if no other callers remain.
+4. Run tests after to confirm hook still works.
+
+Consolidated from duplicates: T-P2-255, T-P2-320 (both helixos stop-cache), T-P2-208 (template stop-cache). All 3 marked completed-as-duplicate on 2026-04-23 per T-P2-587.
+
+Blocked: must be executed from a helixos or template Claude Code session -- file permissions prevent writing to those repos' .claude/hooks/ from a MLInterviewPrep session.
+
+Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
+
+#### T-P2-239: [SYNC] Propagate session_context.py improvements from MLInterviewPrep to helixos
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
 ## Completed Tasks
 
