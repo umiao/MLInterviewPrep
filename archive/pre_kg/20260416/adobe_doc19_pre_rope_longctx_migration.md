@@ -1327,7 +1327,7 @@ DPO:   Pretrained → SFT → DPO Loss → Aligned
 | 训练稳定性 | 脆弱（RL 超参敏感） | 稳定（类交叉熵损失） |
 | 超参数 | PPO clip, LRs, **GAE (Generalized Advantage Estimation，广义优势估计)** λ, KL coeff | 基本只有 $\beta$ |
 | Reward hacking 风险 | 较高（显式 RM 可被利用） | 较低（无显式 RM） |
-| 在线探索 | ✅ PPO 生成新轨迹 | ❌ 离线，固定数据集 |
+| 在线探索 | [YES] PPO 生成新轨迹 | [NO] 离线，固定数据集 |
 | 迭代改进 | 容易（重新生成、重新排序） | 较难（需要新偏好数据） |
 | 性能上限 | 更高（好 RM + 充足算力） | 对多数任务可比 |
 | 工业应用 | OpenAI (GPT-4 早期), Anthropic | Meta (Llama 2+), 大部分开源模型 |
@@ -1955,9 +1955,9 @@ ZeRO:  S1=切优化器, S2=+梯度, S3=+参数（=FSDP）。
 **题**：13B 模型，8×A100 80GB，求 DDP / ZeRO-S1 / ZeRO-S3 每卡显存。
 
 **答**：
-- DDP: $16 \times 13B = 208$ GB → ❌ 放不下
-- S1: $4 \times 13 + 12 \times 13 / 8 = 52 + 19.5 = 71.5$ GB → ⚠️ 勉强
-- S3: $16 \times 13 / 8 = 26$ GB → ✅ 充裕（剩 54 GB）
+- DDP: $16 \times 13B = 208$ GB → [NO] 放不下
+- S1: $4 \times 13 + 12 \times 13 / 8 = 52 + 19.5 = 71.5$ GB → [WARN] 勉强
+- S3: $16 \times 13 / 8 = 26$ GB → [YES] 充裕（剩 54 GB）
 
 ### Q2：气泡计算
 
@@ -2831,23 +2831,23 @@ PagedAttention：
 
 ## 六、常见误解纠正
 
-### ❌ "FlashAttention 减少了 FLOPs"
-✅ FlashAttention 的 FLOPs 和标准 attention 一样（反向传播时因重计算甚至略多）。加速完全来自减少 HBM I/O。它是 **IO-aware**，不是 compute-efficient。
+### [NO] "FlashAttention 减少了 FLOPs"
+[YES] FlashAttention 的 FLOPs 和标准 attention 一样（反向传播时因重计算甚至略多）。加速完全来自减少 HBM I/O。它是 **IO-aware**，不是 compute-efficient。
 
-### ❌ "量化总是会显著降低模型质量"
-✅ INT4 权重量化（GPTQ, AWQ）在 7B+ 模型上通常损失 &lt;1%。模型越大越鲁棒——700 亿个参数时单个权重的量化误差影响微乎其微。
+### [NO] "量化总是会显著降低模型质量"
+[YES] INT4 权重量化（GPTQ, AWQ）在 7B+ 模型上通常损失 &lt;1%。模型越大越鲁棒——700 亿个参数时单个权重的量化误差影响微乎其微。
 
-### ❌ "Speculative Decoding 会改变输出分布"
-✅ 通过 rejection sampling，输出分布和直接用 target 模型生成**数学上完全一致**。Draft 模型只提供候选人，被拒的 token 从修正分布重采样。可证明无损。
+### [NO] "Speculative Decoding 会改变输出分布"
+[YES] 通过 rejection sampling，输出分布和直接用 target 模型生成**数学上完全一致**。Draft 模型只提供候选人，被拒的 token 从修正分布重采样。可证明无损。
 
-### ❌ "KV-Cache 只是一个优化，可以不用"
-✅ 没有 KV-Cache，生成 N 个 token 需要 O(N²) 计算；有 KV-Cache 每步只需 O(N)。生成 1000 个 token 就是 1000 倍计算量差距。KV-Cache 是**必需品**，问题只是怎么高效管理它。
+### [NO] "KV-Cache 只是一个优化，可以不用"
+[YES] 没有 KV-Cache，生成 N 个 token 需要 O(N²) 计算；有 KV-Cache 每步只需 O(N)。生成 1000 个 token 就是 1000 倍计算量差距。KV-Cache 是**必需品**，问题只是怎么高效管理它。
 
-### ❌ "Continuous Batching 意味着更大的 batch size"
-✅ 它是关于调度粒度，不是 batch 大小。静态批处理等一批全部完成才换，连续批处理每步都可换人，消除空闲槽位，吞吐提升 2-4x 而无需改变最大 batch size。
+### [NO] "Continuous Batching 意味着更大的 batch size"
+[YES] 它是关于调度粒度，不是 batch 大小。静态批处理等一批全部完成才换，连续批处理每步都可换人，消除空闲槽位，吞吐提升 2-4x 而无需改变最大 batch size。
 
-### ❌ "PagedAttention 和 FlashAttention 是同一类优化"
-✅ 完全不同！FlashAttention 优化 attention 的**计算过程**（tiling 避免 N×N 矩阵），PagedAttention 优化 KV-Cache 的**内存管理**（分页消除碎片）。前者主攻 prefill 阶段，后者主攻 decode 阶段的显存效率。
+### [NO] "PagedAttention 和 FlashAttention 是同一类优化"
+[YES] 完全不同！FlashAttention 优化 attention 的**计算过程**（tiling 避免 N×N 矩阵），PagedAttention 优化 KV-Cache 的**内存管理**（分页消除碎片）。前者主攻 prefill 阶段，后者主攻 decode 阶段的显存效率。
 
 ---
 
@@ -3057,7 +3057,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 
 > $L = \mathbb{E}\left[\|\varepsilon - \varepsilon_\theta(x_t, t)\|^2\right]$
 
-> ⚠️ **常见误区：** 扩散模型不是一步出图，是**迭代去噪**，每步只去掉一小部分噪声。
+> [WARN] **常见误区：** 扩散模型不是一步出图，是**迭代去噪**，每步只去掉一小部分噪声。
 
 ---
 
@@ -3074,7 +3074,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 - w=1 无引导，w=7.5 文生图典型值
 - **Tradeoff：** w 越大 → 文本一致性越高，但多样性降低，过高会过饱和/扭曲
 
-> ⚠️ **常见误区：** CFG 操作的是**噪声预测**，不是 text embedding。不是"把文本嵌入放大"。
+> [WARN] **常见误区：** CFG 操作的是**噪声预测**，不是 text embedding。不是"把文本嵌入放大"。
 
 ---
 
@@ -3095,7 +3095,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 
 ### Q4：**DDPM (Denoising Diffusion Probabilistic Models，去噪扩散概率模型)** vs **DDIM (Denoising Diffusion Implicit Models，去噪扩散隐式模型)** 采样
 
-> ✅ **首先明确：DDPM 和 DDIM 不是两个不同的模型，是同一模型的两种采样方式。**
+> [YES] **首先明确：DDPM 和 DDIM 不是两个不同的模型，是同一模型的两种采样方式。**
 
 | | DDPM | DDIM |
 |---|---|---|
@@ -3126,7 +3126,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 - **FLOPs 相同（反向甚至略多），加速来自减少 HBM 读写**
 - 实测 wall-clock 加速 2-4x
 
-> ⚠️ **第1号高频翻车点：** FlashAttention 不是"减少了 FLOPs"，是"减少了 HBM I/O"。
+> [WARN] **第1号高频翻车点：** FlashAttention 不是"减少了 FLOPs"，是"减少了 HBM I/O"。
 
 ---
 
@@ -3157,7 +3157,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 - 和训练时 teacher forcing 同理
 - 从 memory-bound 变为更接近 compute-bound
 
-> ⚠️ **常见误区：** 投机解码不改变输出分布。draft 模型再差也只影响接受率（速度），不影响质量。
+> [WARN] **常见误区：** 投机解码不改变输出分布。draft 模型再差也只影响接受率（速度），不影响质量。
 
 **Draft 模型选择：** target 的小版本、量化版本、n-gram 模型、**Medusa (多头并行推测解码方法)** 并行预测头。
 
@@ -3204,7 +3204,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 
 > Bubble 比例 $= \frac{P-1}{P-1+M}$，$P$ = stage 数，$M$ = micro-batch 数。$M$ 越大 bubble 越小。
 
-> ⚠️ **常见误区：** TP ≠ 切数据。TP 切的是层内权重矩阵，DP 才切数据。
+> [WARN] **常见误区：** TP ≠ 切数据。TP 切的是层内权重矩阵，DP 才切数据。
 
 ---
 
@@ -3226,7 +3226,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 
 **一句话总结：** 标准 DP 拿内存换简单，FSDP 拿通信换内存。模型越大 FSDP 价值越大。
 
-> ⚠️ **常见误区：** FSDP ≠ PP。FSDP 分片参数/梯度/优化器，每张卡仍跑完整前向反向。PP 把不同层分到不同卡。
+> [WARN] **常见误区：** FSDP ≠ PP。FSDP 分片参数/梯度/优化器，每张卡仍跑完整前向反向。PP 把不同层分到不同卡。
 
 ---
 
@@ -3282,7 +3282,7 @@ Speculative Decoding: Draft 模型提议 K 个 token，target 一次验证
 | 成本 | 高 | 低（约 1/3） |
 | 适用 | 多维度精细对齐 | 快速对齐、资源有限 |
 
-> ⚠️ **常见误区：** DPO **需要** π_ref（reference model）。它避免的是单独的 reward model，不是 reference model。π_ref 出现在 DPO loss 的每一项中。
+> [WARN] **常见误区：** DPO **需要** π_ref（reference model）。它避免的是单独的 reward model，不是 reference model。π_ref 出现在 DPO loss 的每一项中。
 
 ---
 
@@ -3500,7 +3500,7 @@ Z(x) 是归一化常数（配分函数）。
 
 面试前最后过一遍，避免低级翻车：
 
-| # | ❌ 常见错误 | ✅ 正确理解 |
+| # | [NO] 常见错误 | [YES] 正确理解 |
 |---|-----------|-----------|
 | 1 | FlashAttention 减少了 FLOPs | FLOPs 相同，加速来自减少 HBM I/O |
 | 2 | 投机解码改变了输出 | 拒绝采样**可证明无损**，输出分布 = target 模型 |
@@ -3532,7 +3532,7 @@ Z(x) 是归一化常数（配分函数）。
 
 ## 复习优先级
 
-### 🔴 紧急（面试前必须补）
+### [CRITICAL] 紧急（面试前必须补）
 1. PyTorch 实操（DataLoader、distributed、Module 细节）
 2. Adam vs AdamW（decoupled weight decay）
 3. QLoRA 三个创新点
