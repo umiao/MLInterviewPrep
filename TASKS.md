@@ -330,6 +330,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - [x] **2026-04-23** -- T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Folded into T-P2-207's expanded scope, which now covers BOTH helixos AND templa
+- [x] **2026-04-23** -- T-P1-605: Seed LC 3900 (Longest Balanced Substring After One Swap, Google tag). User-driven: ad-hoc request to seed LC 3900 with Google company tag, preserving prefix-sum + bucket approach and adding 
 - [x] **2026-04-23** -- T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label). Schema migration after all 4 high-link rewrites land.
 - [x] **2026-04-23** -- T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol. EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
 - [x] **2026-04-23** -- T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol. EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
