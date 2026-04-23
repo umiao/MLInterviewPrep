@@ -543,3 +543,10 @@
 - **Sanity check result**: DB probe post-run: Uber rows 34,22,35,36 match canonical (ids 20/21/23 deleted); Lyra rows 37,38 inserted. Second run output: Uber `inserted=0, deleted=0, synced=4`; Lyra `inserted=0, skipped=2` -- both idempotent. Final upcoming dashboard (>= 2026-04-27): 4 Uber + 2 Lyra events at the correct times.
 - **Status**: [DONE] -- ad-hoc dashboard update, no task ticket.
 - **Request**: No change (no task associated). Discord reply blocked (channel 1484761064292749422 not allowlisted -- user ran /discord:access).
+
+## 2026-04-22 -- [followup] Dashboard: ByteDance Apr 28 14:00 interview
+- **What I did**: User forwarded ByteDance video interview confirmation (Discord msg 1496692745719517214): interviewer 桑燕, 60 min, 2026-04-28 14:00 PDT. Filed under TikTok company row (id=24) since TikTok is ByteDance's product — keeps the existing Commerce Ads Ranking prep notes consolidated; title preserves "ByteDance" branding from the email for searchability. Created `scripts/_add_bytedance_interview_2026-04-28.py` (idempotent). Ran once + re-ran to verify idempotency.
+- **Deliverables**: CREATED `scripts/_add_bytedance_interview_2026-04-28.py`. DB row id=39 (company_id=24 TikTok, title "ByteDance Video Interview -- 桑燕", scheduled_at 2026-04-28 14:00).
+- **Sanity check result**: First run inserted id=39; second run `[SKIP]`. Upcoming dashboard (>= 2026-04-27) now shows 7 events across Uber/Lyra/TikTok with the ByteDance slot at Tue 14:00.
+- **Status**: [DONE] -- ad-hoc dashboard update, no task ticket.
+- **Request**: No change. Caveat: if ByteDance team differs from TikTok Commerce Ads Ranking, user should flag and I'll migrate to a new company row.
