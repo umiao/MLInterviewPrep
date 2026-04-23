@@ -52,7 +52,9 @@ PLACEHOLDER_RE = re.compile(r"^\s*brand\s+recall\s+.*\s+story\s*$", re.IGNORECAS
 # Stale-high-link stories per docs/bq_golden_trait_matrix.md Phase-A-II plan.
 # Their links are not wrong per se but will likely need re-framing after the
 # story STAR is rewritten, so they are flagged as "re-audit after rewrite".
-STALE_HIGH_LINK_STORIES = {"EX-01", "EX-02", "EX-14", "EX-33"}
+# EX-14 removed 2026-04-23 after T-P0-577 rewrite landed (relevance_notes
+# refreshed inline by _rewrite_ex14_llm_exploration_20260423.py).
+STALE_HIGH_LINK_STORIES = {"EX-01", "EX-02", "EX-33"}
 
 
 @dataclass

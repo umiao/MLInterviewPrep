@@ -8,7 +8,7 @@
 |------|-------|-------------|
 | 1 | **EX-06** Allocation Framework Platform Primitive | 从 Hacker Week 原型 → 跨团队复用 → 年化 200M+ 影响，完整展示从发现问题到扩成平台能力的端到端所有权。|
 | 2 | **EX-23** NYC C2C Policy Launch | 2 周 test + 1 月 launch 的硬 deadline，跨 30+ 人组织，强调独立把控 scope + 节奏 + 结果。|
-| 3 | **EX-14** LLM-as-Judge | 从模糊的 GenAI 探索命令开始，独立交付多个 relevance metric + GMB + 被广告等团队复用的评估基础设施。|
+| 3 | **EX-14** LLM-as-Judge | 从模糊 GenAI mandate 出发，先用 1 周 ROI math 杀掉 agentic search headline path，再独立把 LLM-as-Judge 落到 relevance backlog，scaled 成被广告等多团队复用的 measurement infra。|
 
 ## Q2. 需求从何而来（你怎么判断这个问题值得做？）
 

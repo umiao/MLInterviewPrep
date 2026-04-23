@@ -36,7 +36,7 @@ schema question in ~6 months; see `.claude/tasks.db` T-P0-572 description.)
 | EX-01 | Search Diversity -- Intent Collapse Discovery         | stale-high-link    | yes     | data_analysis |
 | EX-02 | Team Transfer -- Overcoming Manager Resistance        | stale-high-link    | no      | ownership_accountability |
 | EX-13 | Authorship Dispute -- Norm Establishment              | stable             | no      | conflict_disagreement, mentoring_coaching |
-| EX-14 | LLM-as-Judge -- Vague AI Mandate to Production        | stale-high-link    | no      | scope_creep_ambiguous, ambiguity_uncertainty |
+| EX-14 | LLM-as-Judge -- Killing the Agentic Mandate with One Week of ROI Math | fresh (2026-04-23) | no      | scope_creep_ambiguous, ambiguity_uncertainty |
 | EX-15 | Model Deprecation -- Ownership Transfer Pattern       | fresh (2026-04-20) | yes     | collaboration_teamwork, process_systems, oncall_prod_incident |
 | EX-16 | Cross-DC Deployment -- Counterpart Bandwidth Line Item| fresh (2026-04-20) | yes     | code_quality_tech_debt, deadline_pressure |
 | EX-17 | Senior IC Feedback -- Reliance vs. Trust              | fresh (2026-04-21) | yes     | -- (backup-heavy)  |

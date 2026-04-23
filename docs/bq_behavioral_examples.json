@@ -746,70 +746,74 @@
     },
     {
       "id": "EX-14",
-      "title": "LLM Exploration --- From Vague AI Mandate to Pragmatic LLM-as-Judge",
+      "title": "LLM Exploration --- Killing the Agentic Mandate with One Week of ROI Math",
       "source_project": "2023 GenAI Exploration Initiative",
-      "situation": "In 2023, company leadership was excited about LLMs and wanted to explore upgrading core business from simple tree models to GenAI for 'expert-like' search experiences. Assigned to explore independently with only a sandbox and some API resources. No one knew what AI could do in production.",
-      "task": "I needed to find a viable, business-impactful application of LLM technology despite massive ambiguity and no clear requirements.",
-      "action": "Spent ~1 week on feasibility study; identified critical blockers: AI couldn't easily plug into indexing pipeline, couldn't read inventory; cost analysis showed only ~tens of QPS vs. 40K peak; latency was prohibitive. Convinced manager to pivot: instead of chasing agentic search, find the most promising low-hanging fruit to build org confidence in AI. Deep-dived into backlog of severe relevance issues; discovered LLM-as-Judge could effectively identify, classify, and label difficult samples. Overcame challenges: over-focused initially on AI-human agreement metrics, LLM instruction-following was immature (JSON failures, NSFW blocks), offline comparison showed no improvement initially (diagnosed as dataset quality issue).",
-      "result": "Won across multiple relevance metrics + GMB win + increased user engagement. Project became production infrastructure adopted by ads and other teams to measure impact of their changes on user experience and relevance.",
+      "situation": "In 2023, leadership wanted to \"upgrade to GenAI\" -- expert-like search experiences, agentic flows -- but the brief was a hand wave. I got a sandbox, some API credits, no requirements, no precedent in our production stack. Explore on your own.",
+      "task": "Find a real, business-impactful LLM application -- but the bigger task underneath was scoping. Without a feasibility-first cut, the exploration would drift into the agentic search demo leadership half-imagined: high-visibility, weeks of prototype, then quietly deprioritized. The job was to disqualify the obvious path before sunk cost made it harder, then earn the budget to pursue the unglamorous one.",
+      "action": "First move: a 1-week feasibility study on the agentic path, framed as ROI math. LLM couldn't plug into the indexing pipeline. Couldn't read live inventory. Throughput maxed at tens of QPS against a 40K-peak surface; latency was prohibitive for real-time. The numbers killed the path before any prototype.\n\nThat bought me the standing to push the harder argument: skip the headline demo, find the highest-value low-hanging fruit, use it to build org confidence in LLMs as a tool. The agentic version would be a pitch; this would be infrastructure.\n\nThe fit was the relevance backlog -- severe mislabels, edge cases where human annotators themselves disagreed. LLM-as-Judge was cheap to operate, easy to audit, aimed at the surface where humans were already failing. The build hit three separate issues: inter-rater agreement low enough to invalidate AI-vs-human alignment as a metric, immature instruction-following (JSON failures, NSFW blocks), and an initial no-lift offline comparison I traced to dataset quality rather than model quality. Each was a separate diagnosis.",
+      "result": "LLM-as-Judge won across multiple relevance metrics, delivered GMB improvement, and lifted user engagement. It became the production measurement infrastructure for the team, then for ads, then for several other groups -- a solo exploration scaled into org-wide infra without ever shipping the demo leadership originally asked for.\n\nThe lesson I carry: **the cheapest move in a vague AI mandate is the one nobody assigns -- disqualify the obvious path with a week of ROI math before sunk cost makes the kill politically expensive.** Feasibility is the real authoring; pitch decks are downstream of it.",
       "evidence_quotes": [],
       "principle_tags": [
         "adaptability",
+        "ownership",
         "innovation",
-        "problem_solving"
+        "feasibility_first",
+        "no_precedent_scoping",
+        "ROI_math_disqualification",
+        "infrastructure_over_demo"
       ],
       "cross_references": [
         {
           "question_id": "ADP-6",
-          "relevance_note": "Navigated highly ambiguous project with no clear requirements or precedent for LLM in production"
+          "relevance_note": "No requirements, no LLM precedent in our stack -- scoped through feasibility math rather than brainstorming."
         },
         {
           "question_id": "ADP-8",
-          "relevance_note": "Made decisions with limited data about LLM feasibility in production search"
+          "relevance_note": "Made the agentic-search disqualification call from QPS, latency, and integration numbers alone, before any prototype existed."
         },
         {
           "question_id": "ADP-4",
-          "relevance_note": "Adapted approach mid-project: pivoted from agentic search to LLM-as-Judge"
+          "relevance_note": "Killed the agentic-search path with 1-week feasibility math, pivoted to LLM-as-Judge against the relevance backlog."
         },
         {
           "question_id": "INN-4",
-          "relevance_note": "Innovative LLM-as-Judge solution for relevance labeling"
+          "relevance_note": "LLM-as-Judge for relevance labeling -- the move wasn't the technique, it was the pivot away from agentic search to it."
         },
         {
           "question_id": "PS-2",
-          "relevance_note": "Creative pivot: found LLM-as-Judge as low-hanging fruit instead of full agentic search"
+          "relevance_note": "Disqualified the headline agentic-search path with ROI math, then found low-hanging fruit at the relevance backlog -- creativity in scoping, not in building."
         },
         {
           "question_id": "COM-2",
-          "relevance_note": "Persuaded manager to pivot from flashy agentic search to pragmatic LLM-as-Judge"
+          "relevance_note": "Walked manager off the agentic-search headline path using ROI math, not vision -- pivot was an infrastructure argument, not a pitch."
         },
         {
           "question_id": "IMP-4",
-          "relevance_note": "LLM-as-Judge became production infrastructure adopted across multiple teams"
+          "relevance_note": "Solo LLM-as-Judge exploration scaled into org-wide measurement infrastructure adopted by ads and several other teams."
         },
         {
           "question_id": "INN-6",
-          "relevance_note": "Proposed LLM-as-Judge strategy that became major relevance measurement infrastructure"
+          "relevance_note": "LLM-as-Judge became production measurement infrastructure adopted by ads and several other teams."
         },
         {
           "question_id": "INN-3",
-          "relevance_note": "Explored LLM technologies to find pragmatic application matching team capabilities"
+          "relevance_note": "Picked LLM-as-Judge over agentic search by feasibility-first scoping -- ROI math chose the experiment, not novelty."
         },
         {
           "question_id": "ADP-1",
-          "relevance_note": "Quickly learned LLM capabilities when given vague AI mandate from leadership"
+          "relevance_note": "1-week ROI-math feasibility study scoped a no-precedent GenAI mandate -- learned the LLM stack via disqualification, not tutorials."
         },
         {
           "question_id": "ADP-7",
-          "relevance_note": "LLM exploration started with incomplete requirements from vague AI mandate"
+          "relevance_note": "Vague AI mandate had no requirements -- substituted feasibility analysis for the missing requirements."
         },
         {
           "question_id": "ADP-10",
-          "relevance_note": "Created structured plan to evaluate LLM applications in highly ambiguous AI mandate"
+          "relevance_note": "Built a 1-week structured feasibility on the obvious path before committing to any LLM application."
         },
         {
           "question_id": "EXE-4",
-          "relevance_note": "Incorporated LLM industry trends into pragmatic team project planning"
+          "relevance_note": "Took the LLM industry hype as input but applied feasibility math to disqualify the headline application before chasing it."
         }
       ]
     },

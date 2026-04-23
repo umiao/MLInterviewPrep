@@ -9,33 +9,10 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
-
-Same 7-step protocol as BQ-DEPTH-04.
-
-Pre-draft red-flag scan: EX-14 currently frames as 'persuaded manager to pivot from flashy agentic to pragmatic LLM-as-Judge'. Check if this can be sharpened to structural-reframe pattern matching EX-15 golden voice (spoken-English rhythm, sentence fragments OK, no AI explainer mode).
-
-AC:
-- User approves draft before DB write
-- Scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex14_rewrite
-
----
-**[PRE-APPROVED FOR AUTORUN 2026-04-23]** User Discord msg 1496990176625561771: "可以的 如果没有问题就 script auto run". Proceed with story_rewrite_protocol.md all 7 steps INCLUDING DB write, but treat step 2 (draft-show-approve) as pre-satisfied for structural polish ONLY. Boundaries:
-- PERMITTED without re-approval: voice/length polish matching golden EX-15/17, principle_tag upgrade from generic to specific, cn_elevator_pitch rewrite with KEY FACTS suffix, link relevance_note tightening, propagation surface sync (bq_behavioral_examples.json + bq_story_arcs.json + seed_behavioral_themes.py per feedback_sync_all_surfaces.md).
-- REQUIRES STOP + new follow-up task for user review: content-level reframe (like EX-15 process->structural flip), inventing new beats not in current STAR, introducing a new red-flag interpretation, splitting into dual-cut (like EX-12/12B pattern), changing the fundamental outcome/lesson.
-If you are not sure whether a change is structural vs content-level, stop and add a new task for user instead of writing.
-
 #### T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-574
+- **Depends on**: None
 - **Description**: EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
 
 Same protocol as BQ-DEPTH-04 (7 steps, 2 scripts, idempotent, DB backup).
@@ -58,7 +35,7 @@ If you are not sure whether a change is structural vs content-level, stop and ad
 #### T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-574
+- **Depends on**: None
 - **Description**: EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
 
 Same 7-step protocol as BQ-DEPTH-04.
@@ -82,7 +59,7 @@ If you are not sure whether a change is structural vs content-level, stop and ad
 #### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
 - **Priority**: P0
 - **Complexity**: L
-- **Depends on**: T-P0-574
+- **Depends on**: None
 - **Description**: EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement / structured-protocol era.
 
 Follow docs/workflow/story_rewrite_protocol.md (all 7 steps):
@@ -235,35 +212,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-599
-- **Description**: Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
-
-Retag steps:
-1. For each of 34 examples: evaluate whether story advocates for user → tag customer_user_focus; evaluate ethical/integrity angle → tag ethical_integrity_backbone; evaluate fast_learning facet fit; evaluate scrappy_innovation facet fit; evaluate strategic_scope facet fit
-2. For each of 115 questions: same evaluation against question stem
-3. Migrate existing scope_creep_ambiguous theme tags to scope_creep_pm_ambiguity facet tags (under ambiguity_uncertainty) — same example/question rows, different tag table
-4. After migration verification: DROP scope_creep_ambiguous theme (safe because all tags migrated to facet)
-
-Tagging approach per story_rewrite_protocol Step 4 (audit propagation surface):
-- Pre-draft audit: list which existing themes each example already has, check for overlap with new customer/ethical
-- Apply tags via seed script
-- Post-apply audit: verify count (expect 34 examples get 0-3 new tags each, 115 questions get 0-2)
-
-Deliverables:
-- scripts/seed_bq_taxonomy_retag_20260421.py (idempotent, DB-backup-guarded)
-- docs/bq_taxonomy_retag_log_20260421.md — per-example + per-question tagging decisions with rationale (so revert recipe exists)
-
-AC:
-- Every example with user-advocacy angle tagged customer_user_focus
-- Every example with push-back-at-cost angle tagged ethical_integrity_backbone
-- 0 rows reference scope_creep_ambiguous theme post-migration
-- scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
-- Script re-runs [SKIP]
-- Retag log shows rationale for each tag added (not a black box)
-
 #### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
 - **Priority**: P1
 - **Complexity**: M
@@ -289,6 +237,89 @@ AC:
 - tsc + vitest + vite build pass
 - No regression on existing theme/question/example rendering
 - Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
+
+### P2 -- Nice to Have
+
+#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P0-575
+- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
+
+Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
+
+Output files (one per story):
+- docs/behavioral_prep_notes/EX-01_probe_qa.md
+- docs/behavioral_prep_notes/EX-15_probe_qa.md
+- docs/behavioral_prep_notes/EX-16_probe_qa.md
+- docs/behavioral_prep_notes/EX-17_probe_qa.md
+
+Each file mirrors EX-30_probe_qa.md structure:
+- Header: linked story id + themes + preservation note
+- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
+- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
+- Language: 中英混合 per user's EX-30 precedent (不需要统一)
+
+AC:
+- All 4 .md files created; each >= 40 lines
+- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
+- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
+- User reviews each one on Discord before marking complete
+
+#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-582
+- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
+
+Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
+- behavioral_examples.principle_tags
+- behavioral_examples.risk_statement
+- behavioral_examples.result (the outcome)
+- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
+
+Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
+
+Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
+
+AC:
+- Script reads-only; no DB writes
+- Empty output when no drift (silent-on-no-work rule)
+- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
+- True-positive rate: manually mutate a test risk_statement; expect 1 report
+
+### P3 -- Stretch Goals
+
+## Blocked
+
+#### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
+
+Retag steps:
+1. For each of 34 examples: evaluate whether story advocates for user → tag customer_user_focus; evaluate ethical/integrity angle → tag ethical_integrity_backbone; evaluate fast_learning facet fit; evaluate scrappy_innovation facet fit; evaluate strategic_scope facet fit
+2. For each of 115 questions: same evaluation against question stem
+3. Migrate existing scope_creep_ambiguous theme tags to scope_creep_pm_ambiguity facet tags (under ambiguity_uncertainty) — same example/question rows, different tag table
+4. After migration verification: DROP scope_creep_ambiguous theme (safe because all tags migrated to facet)
+
+Tagging approach per story_rewrite_protocol Step 4 (audit propagation surface):
+- Pre-draft audit: list which existing themes each example already has, check for overlap with new customer/ethical
+- Apply tags via seed script
+- Post-apply audit: verify count (expect 34 examples get 0-3 new tags each, 115 questions get 0-2)
+
+Deliverables:
+- scripts/seed_bq_taxonomy_retag_20260421.py (idempotent, DB-backup-guarded)
+- docs/bq_taxonomy_retag_log_20260421.md — per-example + per-question tagging decisions with rationale (so revert recipe exists)
+
+AC:
+- Every example with user-advocacy angle tagged customer_user_focus
+- Every example with push-back-at-cost angle tagged ethical_integrity_backbone
+- 0 rows reference scope_creep_ambiguous theme post-migration
+- scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
+- Script re-runs [SKIP]
+- Retag log shows rationale for each tag added (not a black box)
 
 #### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
 - **Priority**: P1
@@ -366,60 +397,6 @@ AC:
 - /framework page renders id=198 drawer without layout breaks
 - Pytest passes
 
-### P2 -- Nice to Have
-
-#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P0-575
-- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
-
-Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
-
-Output files (one per story):
-- docs/behavioral_prep_notes/EX-01_probe_qa.md
-- docs/behavioral_prep_notes/EX-15_probe_qa.md
-- docs/behavioral_prep_notes/EX-16_probe_qa.md
-- docs/behavioral_prep_notes/EX-17_probe_qa.md
-
-Each file mirrors EX-30_probe_qa.md structure:
-- Header: linked story id + themes + preservation note
-- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
-- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
-- Language: 中英混合 per user's EX-30 precedent (不需要统一)
-
-AC:
-- All 4 .md files created; each >= 40 lines
-- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
-- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
-- User reviews each one on Discord before marking complete
-
-#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-582
-- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
-
-Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
-- behavioral_examples.principle_tags
-- behavioral_examples.risk_statement
-- behavioral_examples.result (the outcome)
-- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
-
-Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
-
-Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
-
-AC:
-- Script reads-only; no DB writes
-- Empty output when no drift (silent-on-no-work rule)
-- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
-- True-positive rate: manually mutate a test risk_statement; expect 1 report
-
-### P3 -- Stretch Goals
-
-## Blocked
-
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
 - **Complexity**: S
@@ -448,30 +425,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 ## Completed Tasks
 
-> 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-23** -- T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh). The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
 - [x] **2026-04-23** -- T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md. Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None
 - [x] **2026-04-23** -- T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Folded into T-P2-207's expanded scope, which now covers BOTH helixos AND templa
-- [x] **2026-04-23** -- T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Helixos portion VERIFIED DONE: setup_python_env.sh present + absolute Python pa
-- [x] **2026-04-23** -- T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical). SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184/T-P1-238/T-P1-254 (helixos bare-python fix). Verified fix
-- [x] **2026-04-23** -- T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184/T-P1-238 (helixos bare-python fix + setup_python_env.sh).
-- [x] **2026-04-23** -- T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184 (both target helixos bare-python -> /c/Anaconda/python.ex
-- [x] **2026-04-23** -- T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Verified: helixos/.claude/settings.json all hook commands use /c/Anaconda/pytho
-- [x] **2026-04-23** -- T-P0-604: [HOTFIX] ProblemResponse NULL category ResponseValidationError. Hotfix applied at 2026-04-21 18:55 after user Discord error report (msg 1496327736505925767).
-- [x] **2026-04-21** -- T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous. Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
-- [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
-- [x] **2026-04-21** -- T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer). The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inl
-- [x] **2026-04-21** -- T-P1-596: [BQ-UX-01] Phase 1: Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent. Shared-component prep task for BQ Examples tab drawer conversion. All 34 behavioral_examples already have cn_elevator_pi
-- [x] **2026-04-21** -- T-P1-595: [KG-MLF-FS-01] Content: leaf 28 — Comprehensive 千级特征筛选与建模 (single-page, all 7 sections + expansions). Author the single comprehensive content page for leaf id=28 (feature-selection-pipeline-1000features). Per user clarific
-- [x] **2026-04-21** -- T-P1-588: [KG-MLF-FS-00] Skeleton: new category feature_engineering_selection + 1 leaf + YAML + frontend wiring. Add a new /ml-fundamentals category 'feature_engineering_selection' positioned at CATEGORY_ORDER slot 3 (after classical
-- [x] **2026-04-21** -- T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list). Apply link pruning per audit output from BQ-DEPTH-02.
-- [x] **2026-04-21** -- T-P0-573: [BQ-DEPTH-02] Link distribution audit on 266 question_example_links + prune candidates. Write scripts/audit_bq_link_distribution.py (read-only, no DB writes) and produce docs/bq_link_audit_20260421.md.
-- [x] **2026-04-21** -- T-P0-572: [BQ-DEPTH-01] Phase A: Golden-story x Trait matrix doc + free-lunch call-out. Author docs/bq_golden_trait_matrix.md mapping 5 golden (EX-01/15/16/17/30) + 4-5 strong non-golden (EX-14/33/13/20/02) a
-- [x] **2026-04-20** -- T-P2-571: Fix MHA node 225: render residual formula + replace emoji with ASCII tags. Per user Discord 2026-04-20: fix residual formula which was in a code span (backticks) so \text{Attn}(x) rendered litera
-- [x] **2026-04-20** -- T-P2-570: MHA/MQA/GQA node 225: add dimension-flow clarifier + 3 interview misconceptions. Per user Discord 2026-04-20 (critical distillation of supplied notes): insert dimension-flow invariants (X n-by-d preser
-- [x] **2026-04-20** -- T-P2-569: Cross-Entropy/KL node 222: add formal Wasserstein primal + K-R dual definition. Per user Discord 2026-04-20 follow-up: add Kantorovich primal (inf over couplings) + Kantorovich-Rubinstein dual (sup ov
-- [x] **2026-04-20** -- T-P2-568: Cross-Entropy/KL node 222: clarify KL is not Earth Mover's / Wasserstein. Per user Discord 2026-04-20: add minimal-diff clarification that KL 'distance' is information-theoretic (not geometric),
-- [x] **2026-04-20** -- T-P2-566: Add Lyra MD session with Mary Miller 2026-04-23. Add incoming Lyra MD video session with Mary Miller scheduled Thu 2026-04-23 08:30 AM PDT per user Discord 2026-04-20.
+- [x] **2026-04-23** -- T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol. EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).

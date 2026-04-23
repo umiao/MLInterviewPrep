@@ -75,12 +75,12 @@
       "title_zh": "LLM与新技术探索 (技术创新线)",
       "title_en": "LLM & New Technology",
       "color": "purple",
-      "narrative_zh": "这条线展示了你如何在新技术浪潮中从模糊的mandate到落地可用的系统。\n\n**GenAI探索 (EX-14)**：2023年，团队收到模糊的\"用AI做点什么\"的指令。我没有追逐炒作，而是将LLM定位为pragmatic的判断工具(LLM-as-Judge)，专注于可落地的应用场景。\n\n**对话式搜索 (EX-09)**：搜索开始支持对话式查询时，传统的关键词匹配失效了。我发现了proxy item的突破口——用已知商品作为锚点来理解模糊的对话意图。\n\n**Brand Recall (BLOG-01 + BLOG-01B)**：这是一个影响力+技术深度的双面故事。Part A讲的是如何改变researcher-engineer的动态——研究员把模型扔过墙，认为工程就是部署服务。我通过反复对话和共同失败(量化压缩、hash lookup都失败了)，将对抗关系转变为协作关系。Part B讲的是技术深度——我发现评估方法本身有盲点，用GMV校准挑战了研究员认为已经完成的工作。",
+      "narrative_zh": "这条线展示了你如何在新技术浪潮中从模糊的mandate到落地可用的系统。\n\n**GenAI探索 (EX-14)**：2023年leadership要\"upgrade to GenAI\"，给sandbox+API credits自己探，没有requirements、没有LLM precedent。先用1周feasibility把agentic search路径用ROI math杀掉——不接indexing pipeline、tens of QPS vs 40K peak、latency不适合real-time，数字在任何prototype之前就杀掉了路径。换来standing推manager跳过headline demo找highest-value low-hanging fruit，落到relevance backlog上的LLM-as-Judge——不是因为新颖，是因为cheap to operate、easy to audit、瞄准人类annotator已经做不好的面。Solo exploration scaled成被ads等多团队复用的production measurement infra。核心lesson：feasibility才是real authoring，pitch decks是它的下游。\n\n**对话式搜索 (EX-09)**：搜索开始支持对话式查询时，传统的关键词匹配失效了。我发现了proxy item的突破口——用已知商品作为锚点来理解模糊的对话意图。\n\n**Brand Recall (BLOG-01 + BLOG-01B)**：这是一个影响力+技术深度的双面故事。Part A讲的是如何改变researcher-engineer的动态——研究员把模型扔过墙，认为工程就是部署服务。我通过反复对话和共同失败(量化压缩、hash lookup都失败了)，将对抗关系转变为协作关系。Part B讲的是技术深度——我发现评估方法本身有盲点，用GMV校准挑战了研究员认为已经完成的工作。",
       "examples": [
         {
           "example_id": "EX-14",
-          "role_zh": "实用主义者：将模糊的GenAI mandate转化为可落地的LLM-as-Judge方案",
-          "principles": ["innovation", "deliver_results", "bias_for_action"]
+          "role_zh": "Feasibility-first scoper：用1周ROI math杀掉agentic search headline path，把vague GenAI mandate落到LLM-as-Judge measurement infra；不是因为LLM-as-Judge新颖，而是因为feasibility math先disqualified了obvious path才腾出space pursue unglamorous one。Kill-line lesson：feasibility才是real authoring，pitch decks是downstream",
+          "principles": ["innovation", "feasibility_first", "deliver_results", "ROI_math_disqualification"]
         },
         {
           "example_id": "EX-09",
@@ -98,7 +98,7 @@
           "principles": ["dive_deep", "insist_on_highest_standards", "have_backbone"]
         }
       ],
-      "improvement_notes": "EX-14和EX-09的内容可以更丰富——目前只有3 tags。建议参考你改进EX-01/EX-05的模式，加入beat结构和更具体的转折点。BLOG-01/01B是这条线的标杆。"
+      "improvement_notes": "EX-14于2026-04-23重写为feasibility-first / ROI-math-kill story（之前的'persuaded manager to pivot'版本用bullet-form action + 把LLM-as-Judge作为obvious answer呈现，掩盖了真正的move——1周feasibility math先disqualified了agentic path）。新版结构：1周ROI math杀掉agentic search路径（QPS/latency/integration三项硬数字）-> 用credibility换manager支持'skip headline demo for low-hanging fruit' -> LLM-as-Judge挂到relevance backlog -> 三项build issue分别诊断。Kill-line lesson：'Feasibility is the real authoring; pitch decks are downstream of it.' Risk段加NRG-v1引导narration先讲ROI kill后讲pivot，避免story听成'I had a clever idea'。EX-09仍较薄，可后续打磨。BLOG-01/01B仍是这条线的标杆。"
     },
     {
       "arc_id": "arc-4",

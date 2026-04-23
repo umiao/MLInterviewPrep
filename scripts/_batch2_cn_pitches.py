@@ -37,13 +37,28 @@ PITCHES = {
         "| KEY FACTS: authorship = actual contribution | 拒绝 gift authorship | "
         "manager mediation | 轮换制规范 | 零后续争议"
     ),
-    18: (  # EX-14
-        "2023 年领导要求\"升级到 GenAI\"但只给 sandbox + API credits，"
-        "无明确需求；一周可行性研究发现 LLM 无法直接嵌入 indexing pipeline，"
-        "成本/延迟不适合实时；pivot 到 LLM-as-Judge 识别和标注 difficult samples，"
-        "最终成为多团队复用的 production infrastructure "
-        "| KEY FACTS: 1 周 feasibility -> pivot | LLM-as-Judge | "
-        "GMB improvement + engagement 提升 | ads 团队采用 | solo exploration -> production infra"
+    18: (  # EX-14 -- rewritten 2026-04-23 (T-P0-577) per story_rewrite_protocol
+        # Feasibility-first kill of agentic search via 1-week ROI math, then
+        # pivot to LLM-as-Judge against the relevance backlog. Old version
+        # framed pivot as a persuasion win; new version makes the kill the
+        # move. Matches DB row 18 cn_elevator_pitch set by
+        # _rewrite_ex14_llm_exploration_20260423.py.
+        "2023 年 leadership 要 'upgrade to GenAI'，给 sandbox + "
+        "API credits 自己探，没有 requirements、没"
+        "有 LLM precedent；先用 1 周 feasibility 把 "
+        "agentic search 路径用 ROI math 杀掉 -- 不能"
+        "接 indexing pipeline、tens of QPS vs 40K peak、latency "
+        "不适合 real-time；换来 standing 推 manager "
+        "跳过 headline demo 找 highest-value low-hanging fruit，"
+        "落到 relevance backlog 上的 LLM-as-Judge -- 不是"
+        "因为新颖，是因为 cheap to operate、"
+        "easy to audit、瞄准人类 annotator 已经做"
+        "不好的面"
+        " | KEY FACTS: 1 周 ROI math 杀 agentic"
+        " | 不接 indexing pipeline + tens of QPS vs 40K peak"
+        " | LLM-as-Judge 挂到 relevance backlog"
+        " | solo exploration -> 多团队 production measurement infra"
+        " | 核心 lesson: feasibility 才是 real authoring"
     ),
     22: (  # EX-18
         "作为唯一工程师同时承担 2-3 个业务项目，director 还要求探索 "
