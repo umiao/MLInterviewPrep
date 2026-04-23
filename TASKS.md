@@ -213,19 +213,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None of these are in the root yet (root is current to 2026-04-13).
-
-Lessons to add:
-1. [2026-04-17] claude -p usage limits & 429 handling -- Tags: #claude-code #usage-limits #batch-scripts #429-retry. Batch scripts using claude -p hit daily subscription cap (rc=1, JSON result with api_error_status=429). Fix: detect 429 JSON pattern, fail fast with clear message; split batches across days.
-2. [2026-04-18] Background runner visibility: nohup & vs Bash run_in_background -- Tags: #orchestration #autonomous #bash #monitor #visibility. nohup+& detaches child; Bash tool tracks launcher (exits fast), not runner. Fix: use run_in_background directly (no &) OR keep nohup+& with Monitor on tail -f log filtered for session boundaries.
-3. [2026-04-19] Human-approval-gate language in task specs is sticky -- Tags: #autonomous #task-spec #approval-gate #workflow. Prose gate inside task description (does NOT auto-start) persists across autonomous sessions even after condition is cleared. Fix: use a separate blocking task OR make gate language self-cancelling (if T-XX status=completed, proceed).
-
-Source: MLInterviewPrep LESSONS.md lines approx 2026-04-17 to 2026-04-19 section.
-
 #### T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh)
 - **Priority**: P2
 - **Complexity**: S
@@ -503,6 +490,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-23** -- T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md. Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None
 - [x] **2026-04-23** -- T-P0-604: [HOTFIX] ProblemResponse NULL category ResponseValidationError. Hotfix applied at 2026-04-21 18:55 after user Discord error report (msg 1496327736505925767).
 - [x] **2026-04-21** -- T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous. Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
 - [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
