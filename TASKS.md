@@ -9,6 +9,80 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-574
+- **Description**: EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement / structured-protocol era.
+
+Follow docs/workflow/story_rewrite_protocol.md (all 7 steps):
+1. Red-flag scan BEFORE drafting: surface any defensive openers / cliche lessons / etc. in current EX-01
+2. Draft + show on Discord, wait for explicit user approval ('可以执行' or equivalent)
+3. Two idempotent seed scripts: _rewrite_ex01_*.py (STAR + risk_statement + NRG-v2) and _propagate_ex01_*.py (title/cn_elevator_pitch/principle_tags/16 relevance_notes)
+4. Pre-draft audit: list the 16 current question framings; post-apply audit: 5 propagation surfaces (derived fields, join tables, API JSON, canonical seeds, frontend pre-renders)
+5. Single propagation script + inline edits to scripts/seed_master_pitches.py and docs/bq_story_arcs.json (arc-1 narrative)
+6. Verify: idempotent re-run, DB read-back, simulate /behavioral/story-arcs merge
+7. Update NRG, principle_tags, role_zh meta-layers
+
+AC:
+- User approves rewritten draft on Discord before any DB write
+- Both scripts re-run with [SKIP]
+- All 16 relevance_notes refreshed to match new STAR
+- canonical seed scripts updated inline (no silent re-run drift)
+- DB backup with suffix _pre_ex01_rewrite
+
+#### T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-574
+- **Description**: EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
+
+Same protocol as BQ-DEPTH-04 (7 steps, 2 scripts, idempotent, DB backup).
+
+Pre-draft red-flag scan should check: does EX-02 currently tell the persuasion story or the influence-without-authority story? User to call the frame during draft review.
+
+AC:
+- User approves draft before DB write
+- Both scripts re-run [SKIP]
+- All linked relevance_notes refreshed
+- Canonical seeds updated inline
+- DB backup with suffix _pre_ex02_rewrite
+
+#### T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-574
+- **Description**: EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
+
+Same 7-step protocol as BQ-DEPTH-04.
+
+Pre-draft red-flag scan: EX-14 currently frames as 'persuaded manager to pivot from flashy agentic to pragmatic LLM-as-Judge'. Check if this can be sharpened to structural-reframe pattern matching EX-15 golden voice (spoken-English rhythm, sentence fragments OK, no AI explainer mode).
+
+AC:
+- User approves draft before DB write
+- Scripts re-run [SKIP]
+- All linked relevance_notes refreshed
+- Canonical seeds updated inline
+- DB backup with suffix _pre_ex14_rewrite
+
+#### T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-574
+- **Description**: EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
+
+Same 7-step protocol as BQ-DEPTH-04.
+
+Note: EX-33 already has sibling EX-33B (MoE Over-Iteration humility lesson). Pre-draft audit must check that rewriting EX-33 does not leave EX-33B stranded -- verify EX-33B can stand alone or needs parallel update.
+
+AC:
+- User approves draft before DB write
+- Scripts re-run [SKIP]
+- All linked relevance_notes refreshed
+- EX-33B coherence check documented in commit message
+- Canonical seeds updated inline
+- DB backup with suffix _pre_ex33_rewrite
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label)
@@ -137,160 +211,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-600
-- **Description**: Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
-
-Scope:
-1. /quick-index?section=bq — add 2 new theme cards (customer_user_focus, ethical_integrity_backbone). Update CLUSTER_FAMILIES in QuickIndex.tsx:
-   - customer_user_focus → new cluster 'Customer & User' (standalone) OR fold into 'Data and Decisions' renamed to 'Data & Customer'
-   - ethical_integrity_backbone → add to 'Conflict & Collaboration' cluster (renamed 'Conflict, Collaboration & Integrity')
-   - Remove scope_creep_ambiguous from 'Decision under Ambiguity' cluster (it was deleted)
-2. BehavioralQuestions.tsx ExampleCard + BehavioralThemePage ExampleCard — render facet pills (small, distinct color from theme pills). Example: a story tagged fast_learning + scrappy_innovation gets 2 small pills below the theme pills.
-3. ThemeFilterSidebar.tsx — include new themes in the filter list; optionally add a separate 'Facets' filter group (can defer to later if scope creep)
-4. is_signature visual — if is_signature=1, show a small 'Signature Story' badge (distinct from golden badge). Golden = quality mark; Signature = 'proudest achievement, use for open-ended impact Q's'
-5. types/behavioral.ts — add facets: FacetTag[] and is_signature/signature_at to BehavioralExample interface
-
-Deliverables:
-- Updated QuickIndex.tsx / BehavioralQuestions.tsx / BehavioralThemePage.tsx / ThemeFilterSidebar.tsx / ExampleDrawerContent.tsx / types/behavioral.ts
-- Backend response schemas updated in behavioral.py router to include facets + is_signature
-
-AC:
-- Manual smoke test: /quick-index?section=bq shows 2 new theme cards at correct cluster positions; ExampleCard shows facet pills when example has facet tags; ThemeFilterSidebar has new themes
-- tsc + vitest + vite build pass
-- No regression on existing theme/question/example rendering
-- Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
-
-### P2 -- Nice to Have
-
-#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P0-575
-- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
-
-Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
-
-Output files (one per story):
-- docs/behavioral_prep_notes/EX-01_probe_qa.md
-- docs/behavioral_prep_notes/EX-15_probe_qa.md
-- docs/behavioral_prep_notes/EX-16_probe_qa.md
-- docs/behavioral_prep_notes/EX-17_probe_qa.md
-
-Each file mirrors EX-30_probe_qa.md structure:
-- Header: linked story id + themes + preservation note
-- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
-- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
-- Language: 中英混合 per user's EX-30 precedent (不需要统一)
-
-AC:
-- All 4 .md files created; each >= 40 lines
-- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
-- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
-- User reviews each one on Discord before marking complete
-
-#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-582
-- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
-
-Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
-- behavioral_examples.principle_tags
-- behavioral_examples.risk_statement
-- behavioral_examples.result (the outcome)
-- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
-
-Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
-
-Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
-
-AC:
-- Script reads-only; no DB writes
-- Empty output when no drift (silent-on-no-work rule)
-- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
-- True-positive rate: manually mutate a test risk_statement; expect 1 report
-
-### P3 -- Stretch Goals
-
-## Blocked
-
-#### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-574
-- **Description**: EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement / structured-protocol era.
-
-Follow docs/workflow/story_rewrite_protocol.md (all 7 steps):
-1. Red-flag scan BEFORE drafting: surface any defensive openers / cliche lessons / etc. in current EX-01
-2. Draft + show on Discord, wait for explicit user approval ('可以执行' or equivalent)
-3. Two idempotent seed scripts: _rewrite_ex01_*.py (STAR + risk_statement + NRG-v2) and _propagate_ex01_*.py (title/cn_elevator_pitch/principle_tags/16 relevance_notes)
-4. Pre-draft audit: list the 16 current question framings; post-apply audit: 5 propagation surfaces (derived fields, join tables, API JSON, canonical seeds, frontend pre-renders)
-5. Single propagation script + inline edits to scripts/seed_master_pitches.py and docs/bq_story_arcs.json (arc-1 narrative)
-6. Verify: idempotent re-run, DB read-back, simulate /behavioral/story-arcs merge
-7. Update NRG, principle_tags, role_zh meta-layers
-
-AC:
-- User approves rewritten draft on Discord before any DB write
-- Both scripts re-run with [SKIP]
-- All 16 relevance_notes refreshed to match new STAR
-- canonical seed scripts updated inline (no silent re-run drift)
-- DB backup with suffix _pre_ex01_rewrite
-
-#### T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
-
-Same protocol as BQ-DEPTH-04 (7 steps, 2 scripts, idempotent, DB backup).
-
-Pre-draft red-flag scan should check: does EX-02 currently tell the persuasion story or the influence-without-authority story? User to call the frame during draft review.
-
-AC:
-- User approves draft before DB write
-- Both scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex02_rewrite
-
-#### T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
-
-Same 7-step protocol as BQ-DEPTH-04.
-
-Pre-draft red-flag scan: EX-14 currently frames as 'persuaded manager to pivot from flashy agentic to pragmatic LLM-as-Judge'. Check if this can be sharpened to structural-reframe pattern matching EX-15 golden voice (spoken-English rhythm, sentence fragments OK, no AI explainer mode).
-
-AC:
-- User approves draft before DB write
-- Scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex14_rewrite
-
-#### T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
-
-Same 7-step protocol as BQ-DEPTH-04.
-
-Note: EX-33 already has sibling EX-33B (MoE Over-Iteration humility lesson). Pre-draft audit must check that rewriting EX-33 does not leave EX-33B stranded -- verify EX-33B can stand alone or needs parallel update.
-
-AC:
-- User approves draft before DB write
-- Scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- EX-33B coherence check documented in commit message
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex33_rewrite
-
 #### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
 - **Priority**: P1
 - **Complexity**: M
@@ -319,6 +239,32 @@ AC:
 - scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
 - Script re-runs [SKIP]
 - Retag log shows rationale for each tag added (not a black box)
+
+#### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-600
+- **Description**: Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
+
+Scope:
+1. /quick-index?section=bq — add 2 new theme cards (customer_user_focus, ethical_integrity_backbone). Update CLUSTER_FAMILIES in QuickIndex.tsx:
+   - customer_user_focus → new cluster 'Customer & User' (standalone) OR fold into 'Data and Decisions' renamed to 'Data & Customer'
+   - ethical_integrity_backbone → add to 'Conflict & Collaboration' cluster (renamed 'Conflict, Collaboration & Integrity')
+   - Remove scope_creep_ambiguous from 'Decision under Ambiguity' cluster (it was deleted)
+2. BehavioralQuestions.tsx ExampleCard + BehavioralThemePage ExampleCard — render facet pills (small, distinct color from theme pills). Example: a story tagged fast_learning + scrappy_innovation gets 2 small pills below the theme pills.
+3. ThemeFilterSidebar.tsx — include new themes in the filter list; optionally add a separate 'Facets' filter group (can defer to later if scope creep)
+4. is_signature visual — if is_signature=1, show a small 'Signature Story' badge (distinct from golden badge). Golden = quality mark; Signature = 'proudest achievement, use for open-ended impact Q's'
+5. types/behavioral.ts — add facets: FacetTag[] and is_signature/signature_at to BehavioralExample interface
+
+Deliverables:
+- Updated QuickIndex.tsx / BehavioralQuestions.tsx / BehavioralThemePage.tsx / ThemeFilterSidebar.tsx / ExampleDrawerContent.tsx / types/behavioral.ts
+- Backend response schemas updated in behavioral.py router to include facets + is_signature
+
+AC:
+- Manual smoke test: /quick-index?section=bq shows 2 new theme cards at correct cluster positions; ExampleCard shows facet pills when example has facet tags; ThemeFilterSidebar has new themes
+- tsc + vitest + vite build pass
+- No regression on existing theme/question/example rendering
+- Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
 
 #### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
 - **Priority**: P1
@@ -395,6 +341,60 @@ AC:
 - Script re-runs [SKIP]
 - /framework page renders id=198 drawer without layout breaks
 - Pytest passes
+
+### P2 -- Nice to Have
+
+#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P0-575
+- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
+
+Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
+
+Output files (one per story):
+- docs/behavioral_prep_notes/EX-01_probe_qa.md
+- docs/behavioral_prep_notes/EX-15_probe_qa.md
+- docs/behavioral_prep_notes/EX-16_probe_qa.md
+- docs/behavioral_prep_notes/EX-17_probe_qa.md
+
+Each file mirrors EX-30_probe_qa.md structure:
+- Header: linked story id + themes + preservation note
+- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
+- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
+- Language: 中英混合 per user's EX-30 precedent (不需要统一)
+
+AC:
+- All 4 .md files created; each >= 40 lines
+- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
+- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
+- User reviews each one on Discord before marking complete
+
+#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-582
+- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
+
+Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
+- behavioral_examples.principle_tags
+- behavioral_examples.risk_statement
+- behavioral_examples.result (the outcome)
+- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
+
+Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
+
+Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
+
+AC:
+- Script reads-only; no DB writes
+- Empty output when no drift (silent-on-no-work rule)
+- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
+- True-positive rate: manually mutate a test risk_statement; expect 1 report
+
+### P3 -- Stretch Goals
+
+## Blocked
 
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
