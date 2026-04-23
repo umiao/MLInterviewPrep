@@ -58,7 +58,7 @@ class ProblemResponse(BaseModel):
     difficulty: str | None = None
     tags: list[str] = []
     pattern: str | None = None
-    category: str = "algorithm"
+    category: str | None = "algorithm"
     source: str | None = None
     company_tags: list[str] = []
     priority: int | None = 2

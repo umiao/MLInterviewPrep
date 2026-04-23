@@ -9,80 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-574
-- **Description**: EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement / structured-protocol era.
-
-Follow docs/workflow/story_rewrite_protocol.md (all 7 steps):
-1. Red-flag scan BEFORE drafting: surface any defensive openers / cliche lessons / etc. in current EX-01
-2. Draft + show on Discord, wait for explicit user approval ('可以执行' or equivalent)
-3. Two idempotent seed scripts: _rewrite_ex01_*.py (STAR + risk_statement + NRG-v2) and _propagate_ex01_*.py (title/cn_elevator_pitch/principle_tags/16 relevance_notes)
-4. Pre-draft audit: list the 16 current question framings; post-apply audit: 5 propagation surfaces (derived fields, join tables, API JSON, canonical seeds, frontend pre-renders)
-5. Single propagation script + inline edits to scripts/seed_master_pitches.py and docs/bq_story_arcs.json (arc-1 narrative)
-6. Verify: idempotent re-run, DB read-back, simulate /behavioral/story-arcs merge
-7. Update NRG, principle_tags, role_zh meta-layers
-
-AC:
-- User approves rewritten draft on Discord before any DB write
-- Both scripts re-run with [SKIP]
-- All 16 relevance_notes refreshed to match new STAR
-- canonical seed scripts updated inline (no silent re-run drift)
-- DB backup with suffix _pre_ex01_rewrite
-
-#### T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
-
-Same protocol as BQ-DEPTH-04 (7 steps, 2 scripts, idempotent, DB backup).
-
-Pre-draft red-flag scan should check: does EX-02 currently tell the persuasion story or the influence-without-authority story? User to call the frame during draft review.
-
-AC:
-- User approves draft before DB write
-- Both scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex02_rewrite
-
-#### T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
-
-Same 7-step protocol as BQ-DEPTH-04.
-
-Pre-draft red-flag scan: EX-14 currently frames as 'persuaded manager to pivot from flashy agentic to pragmatic LLM-as-Judge'. Check if this can be sharpened to structural-reframe pattern matching EX-15 golden voice (spoken-English rhythm, sentence fragments OK, no AI explainer mode).
-
-AC:
-- User approves draft before DB write
-- Scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex14_rewrite
-
-#### T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-574
-- **Description**: EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
-
-Same 7-step protocol as BQ-DEPTH-04.
-
-Note: EX-33 already has sibling EX-33B (MoE Over-Iteration humility lesson). Pre-draft audit must check that rewriting EX-33 does not leave EX-33B stranded -- verify EX-33B can stand alone or needs parallel update.
-
-AC:
-- User approves draft before DB write
-- Scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- EX-33B coherence check documented in commit message
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex33_rewrite
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label)
@@ -211,35 +137,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-599
-- **Description**: Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
-
-Retag steps:
-1. For each of 34 examples: evaluate whether story advocates for user → tag customer_user_focus; evaluate ethical/integrity angle → tag ethical_integrity_backbone; evaluate fast_learning facet fit; evaluate scrappy_innovation facet fit; evaluate strategic_scope facet fit
-2. For each of 115 questions: same evaluation against question stem
-3. Migrate existing scope_creep_ambiguous theme tags to scope_creep_pm_ambiguity facet tags (under ambiguity_uncertainty) — same example/question rows, different tag table
-4. After migration verification: DROP scope_creep_ambiguous theme (safe because all tags migrated to facet)
-
-Tagging approach per story_rewrite_protocol Step 4 (audit propagation surface):
-- Pre-draft audit: list which existing themes each example already has, check for overlap with new customer/ethical
-- Apply tags via seed script
-- Post-apply audit: verify count (expect 34 examples get 0-3 new tags each, 115 questions get 0-2)
-
-Deliverables:
-- scripts/seed_bq_taxonomy_retag_20260421.py (idempotent, DB-backup-guarded)
-- docs/bq_taxonomy_retag_log_20260421.md — per-example + per-question tagging decisions with rationale (so revert recipe exists)
-
-AC:
-- Every example with user-advocacy angle tagged customer_user_focus
-- Every example with push-back-at-cost angle tagged ethical_integrity_backbone
-- 0 rows reference scope_creep_ambiguous theme post-migration
-- scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
-- Script re-runs [SKIP]
-- Retag log shows rationale for each tag added (not a black box)
-
 #### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
 - **Priority**: P1
 - **Complexity**: M
@@ -265,82 +162,6 @@ AC:
 - tsc + vitest + vite build pass
 - No regression on existing theme/question/example rendering
 - Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
-
-#### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architecture/dataflow/formulas/production_constraints/tradeoffs/defense) with user-provided material (Discord msg 1496318022804308119 attachment).
-
-Current gap analysis (grep):
-- HAS partial: AV1(5) H.264(7) HLS(6) DASH(4) Argos(1) ABR(4) ASIC(1)
-- MISSING: VCU name explicit, Colossus, Bigtable, Pub/Sub, chunked upload mechanics, Google Global Cache
-
-Expansions to add (fold into existing sections, not rewrite):
-1. **Ingestion subsection** (into  or ): chunked upload (10-50MB chunks to edge server) → GCS → Pub/Sub queue → stateless FFmpeg workers on thousands of instances
-2. **Transcoding tier policy** (into  or ): 'H.264 for all / VP9 for hot / AV1 for head + 4K/8K' — explicit cost amortize principle (AV1 is 50-100× H.264 cost but saves 50-60% bandwidth; VP9 saves 30-40% bandwidth). 长尾保守头部激进.
-3. **Encoding ladder specifics** (into ): per-resolution bitrate tiers (720p has 1.5/2.5/4 Mbps tiers; 144p/240p/360p/480p/720p/1080p/1440p/2160p/4320p pyramid)
-4. **VCU/Argos ASIC callout** (into  or new subsection): Google's self-designed video coding unit ASIC for VP9/AV1 encoding at scale — cite 'VCU (Argos)' 论文 as reference
-5. **DASH vs HLS trade** (into ): DASH 1-5s segment for web (Chrome/Firefox/Edge) / HLS 6-10s segment for Apple only — shorter DASH segments reduce rebuffering by up to 30% on mobile networks
-6. **Storage split** (into ): Colossus for blob (raw + all transcoded) / Bigtable for metadata / Elasticsearch for full-text. Content ID audio fingerprinting as copyright subsystem.
-7. **CDN architecture** (into  or ): Google Global Cache deployed into ISP racks (not just edge POPs) — 3-tier: edge → regional cache → origin
-8. **Content-to-feature bridge** (into  or ): multimodal pipeline (frame embedding Video-BERT-like / ASR / OCR / audio fingerprint Content ID / topic classification / thumbnail scoring) outputs feed BOTH search index AND recommendation retrieval/ranking features — explicit bridge to id=198
-
-Deliverables:
-- scripts/seed_sd_youtube_content_pipeline_expand_20260421.py (idempotent via hash-compare on target columns, DB-backup-guarded with pre_expand_sd21 suffix)
-- Target final length: 25000-30000 chars (net +4000-9000)
-- Content citations: VCU/Argos paper, VdoCipher reference
-
-AC:
-- grep count post-expand: VCU>=1, Colossus>=1, Bigtable>=2, Pub/Sub>=1, chunked>=2, 'Google Global Cache'>=1
-- Preserve existing sections and numbered lists (no section deletion; additive only)
-- Script re-runs [SKIP] via content hash check
-- Pytest passes; vite build clean
-- Manual smoke on /system-design/<id=21 slug> renders new subsections properly
-
-#### T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 headers, structure: 1 Requirements / 2 Capacity / 3 HL Arch / 4a Two-Tower / 4b Ranking / 4c Re-rank / 4d Cold Start / 5 Reliability / 6 Summary / Interview Q&A / Self-Check / L5 Tradeoff Matrix).
-
-Current gap analysis (grep): HAS MMoE(16) two-tower(17) ScaNN(4) YouTube(3). MISSING watch(0 — no watch-time weighted LR!), Covington(0), Zhao(0), Semantic ID(0), LRM(0).
-
-Expansions (fold into existing sections 4a/4b, add new 4e for 2024-2025 LRM):
-
-**4a Two-Tower Retrieval additions:**
-- Covington 2016 DNN recall paper trick set: (a) user vector from last-layer activation, item embedding = softmax input weights so u·v is learned similarity; (b) example age feature fed during training, zeroed at serving to counteract ML bias toward old viral content; (c) 'next-watch' target (not held-out random) to prevent sequential-episode leak; (d) extreme multiclass framing with sampled softmax
-- Multi-source retrieval: parallel召回 from (collab filter / two-tower / subscription new / search history / topic-trending / item-item related / fresh upload cold-start). Ranker receives 'which_source nominated this + source_score' as features to combine signals.
-- Frequency features: 'historical impression frequency' features prevent sequential requests returning same list (cite Rangadurai)
-
-**4b Ranking additions:**
-- Zhao 2019 MMoE paper specifics: share-bottom → MMoE substitution; expert networks + per-task gating network; solves negative transfer between engagement (clicks/watch) and satisfaction (likes/ratings)
-- Watch-time weighted LR: output layer uses weighted logistic regression, weight = observed watch-time — optimizes expected watch duration directly, avoids clickbait trap
-- Shallow tower for bias correction: stacked on MMoE, learns position bias + device bias explicitly — position fed as feature, linearly subtracted; serving sets position to a fixed value. Cite Daiwk.
-- Training-sample policy: samples from ALL YouTube videos (not just recommender's own surfaces) to avoid model-induced bias; per-user equal weighting prevents heavy-user dominance.
-- Query features vs impression features distinction: query features computed once per request; impression features computed per candidate.
-
-**4e NEW SUBSECTION (2024-2025 frontier):**
-- Large Recommender Models (LRM): Google Gemini variant adapted for video rec; continued pre-training teaches model 'English + YouTube video language' simultaneously; enables generative retrieval.
-- Semantic IDs via RQ-VAE: Video-BERT-style transformer encoder → dense embedding → Residual Quantization Variational AutoEncoder compresses to 4-8 discrete tokens per video → LLM treats video as sequence → next-video prediction natural.
-- Cold-start advantage: LRM materially improves fresh/long-tail content performance vs pure CF.
-- Serving cost reality: requires 95%+ cost reduction + offline inference strategy to deploy at YouTube scale — currently LRM is auxiliary retrieval source or offline tagging, NOT replacing main online two-tower+MMoE pipeline.
-
-Also update:
-- Cross-link to id=21 (content pipeline) — content-understanding multimodal features are the bridge
-- Add YouTube-specific scale numbers where helpful (keep existing 23K QPS etc as generic; add '例: YouTube 日上传 500h+, 月 DAU 2B+' context)
-
-Deliverables:
-- scripts/seed_fn198_youtube_rec_expand_20260421.py (idempotent via description-hash compare, DB-backup-guarded with pre_expand_fn198 suffix)
-- Target final length: 32000-36000 chars (net +4000-8000)
-- All insertions preserve existing 19 headers; new 4e adds 1-2 headers
-
-AC:
-- grep count post-expand: Covington>=1, Zhao>=1, 'watch-time'>=2, 'Semantic ID'>=2, LRM>=3, RQ-VAE>=1, 'shallow tower'>=1, 'example age'>=1
-- Existing 19 headers all still present (no structural breakage; additive only)
-- Script re-runs [SKIP]
-- /framework page renders id=198 drawer without layout breaks
-- Pytest passes
 
 ### P2 -- Nice to Have
 
@@ -424,6 +245,80 @@ Action: verify current helixos state (does bare python still exist? does test_ch
 
 ## Blocked
 
+#### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-574
+- **Description**: EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement / structured-protocol era.
+
+Follow docs/workflow/story_rewrite_protocol.md (all 7 steps):
+1. Red-flag scan BEFORE drafting: surface any defensive openers / cliche lessons / etc. in current EX-01
+2. Draft + show on Discord, wait for explicit user approval ('可以执行' or equivalent)
+3. Two idempotent seed scripts: _rewrite_ex01_*.py (STAR + risk_statement + NRG-v2) and _propagate_ex01_*.py (title/cn_elevator_pitch/principle_tags/16 relevance_notes)
+4. Pre-draft audit: list the 16 current question framings; post-apply audit: 5 propagation surfaces (derived fields, join tables, API JSON, canonical seeds, frontend pre-renders)
+5. Single propagation script + inline edits to scripts/seed_master_pitches.py and docs/bq_story_arcs.json (arc-1 narrative)
+6. Verify: idempotent re-run, DB read-back, simulate /behavioral/story-arcs merge
+7. Update NRG, principle_tags, role_zh meta-layers
+
+AC:
+- User approves rewritten draft on Discord before any DB write
+- Both scripts re-run with [SKIP]
+- All 16 relevance_notes refreshed to match new STAR
+- canonical seed scripts updated inline (no silent re-run drift)
+- DB backup with suffix _pre_ex01_rewrite
+
+#### T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-574
+- **Description**: EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
+
+Same protocol as BQ-DEPTH-04 (7 steps, 2 scripts, idempotent, DB backup).
+
+Pre-draft red-flag scan should check: does EX-02 currently tell the persuasion story or the influence-without-authority story? User to call the frame during draft review.
+
+AC:
+- User approves draft before DB write
+- Both scripts re-run [SKIP]
+- All linked relevance_notes refreshed
+- Canonical seeds updated inline
+- DB backup with suffix _pre_ex02_rewrite
+
+#### T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-574
+- **Description**: EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
+
+Same 7-step protocol as BQ-DEPTH-04.
+
+Pre-draft red-flag scan: EX-14 currently frames as 'persuaded manager to pivot from flashy agentic to pragmatic LLM-as-Judge'. Check if this can be sharpened to structural-reframe pattern matching EX-15 golden voice (spoken-English rhythm, sentence fragments OK, no AI explainer mode).
+
+AC:
+- User approves draft before DB write
+- Scripts re-run [SKIP]
+- All linked relevance_notes refreshed
+- Canonical seeds updated inline
+- DB backup with suffix _pre_ex14_rewrite
+
+#### T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-574
+- **Description**: EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
+
+Same 7-step protocol as BQ-DEPTH-04.
+
+Note: EX-33 already has sibling EX-33B (MoE Over-Iteration humility lesson). Pre-draft audit must check that rewriting EX-33 does not leave EX-33B stranded -- verify EX-33B can stand alone or needs parallel update.
+
+AC:
+- User approves draft before DB write
+- Scripts re-run [SKIP]
+- All linked relevance_notes refreshed
+- EX-33B coherence check documented in commit message
+- Canonical seeds updated inline
+- DB backup with suffix _pre_ex33_rewrite
+
 #### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
 - **Priority**: P1
 - **Complexity**: S
@@ -454,6 +349,111 @@ BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ dir
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
+
+#### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-599
+- **Description**: Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
+
+Retag steps:
+1. For each of 34 examples: evaluate whether story advocates for user → tag customer_user_focus; evaluate ethical/integrity angle → tag ethical_integrity_backbone; evaluate fast_learning facet fit; evaluate scrappy_innovation facet fit; evaluate strategic_scope facet fit
+2. For each of 115 questions: same evaluation against question stem
+3. Migrate existing scope_creep_ambiguous theme tags to scope_creep_pm_ambiguity facet tags (under ambiguity_uncertainty) — same example/question rows, different tag table
+4. After migration verification: DROP scope_creep_ambiguous theme (safe because all tags migrated to facet)
+
+Tagging approach per story_rewrite_protocol Step 4 (audit propagation surface):
+- Pre-draft audit: list which existing themes each example already has, check for overlap with new customer/ethical
+- Apply tags via seed script
+- Post-apply audit: verify count (expect 34 examples get 0-3 new tags each, 115 questions get 0-2)
+
+Deliverables:
+- scripts/seed_bq_taxonomy_retag_20260421.py (idempotent, DB-backup-guarded)
+- docs/bq_taxonomy_retag_log_20260421.md — per-example + per-question tagging decisions with rationale (so revert recipe exists)
+
+AC:
+- Every example with user-advocacy angle tagged customer_user_focus
+- Every example with push-back-at-cost angle tagged ethical_integrity_backbone
+- 0 rows reference scope_creep_ambiguous theme post-migration
+- scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
+- Script re-runs [SKIP]
+- Retag log shows rationale for each tag added (not a black box)
+
+#### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architecture/dataflow/formulas/production_constraints/tradeoffs/defense) with user-provided material (Discord msg 1496318022804308119 attachment).
+
+Current gap analysis (grep):
+- HAS partial: AV1(5) H.264(7) HLS(6) DASH(4) Argos(1) ABR(4) ASIC(1)
+- MISSING: VCU name explicit, Colossus, Bigtable, Pub/Sub, chunked upload mechanics, Google Global Cache
+
+Expansions to add (fold into existing sections, not rewrite):
+1. **Ingestion subsection** (into  or ): chunked upload (10-50MB chunks to edge server) → GCS → Pub/Sub queue → stateless FFmpeg workers on thousands of instances
+2. **Transcoding tier policy** (into  or ): 'H.264 for all / VP9 for hot / AV1 for head + 4K/8K' — explicit cost amortize principle (AV1 is 50-100× H.264 cost but saves 50-60% bandwidth; VP9 saves 30-40% bandwidth). 长尾保守头部激进.
+3. **Encoding ladder specifics** (into ): per-resolution bitrate tiers (720p has 1.5/2.5/4 Mbps tiers; 144p/240p/360p/480p/720p/1080p/1440p/2160p/4320p pyramid)
+4. **VCU/Argos ASIC callout** (into  or new subsection): Google's self-designed video coding unit ASIC for VP9/AV1 encoding at scale — cite 'VCU (Argos)' 论文 as reference
+5. **DASH vs HLS trade** (into ): DASH 1-5s segment for web (Chrome/Firefox/Edge) / HLS 6-10s segment for Apple only — shorter DASH segments reduce rebuffering by up to 30% on mobile networks
+6. **Storage split** (into ): Colossus for blob (raw + all transcoded) / Bigtable for metadata / Elasticsearch for full-text. Content ID audio fingerprinting as copyright subsystem.
+7. **CDN architecture** (into  or ): Google Global Cache deployed into ISP racks (not just edge POPs) — 3-tier: edge → regional cache → origin
+8. **Content-to-feature bridge** (into  or ): multimodal pipeline (frame embedding Video-BERT-like / ASR / OCR / audio fingerprint Content ID / topic classification / thumbnail scoring) outputs feed BOTH search index AND recommendation retrieval/ranking features — explicit bridge to id=198
+
+Deliverables:
+- scripts/seed_sd_youtube_content_pipeline_expand_20260421.py (idempotent via hash-compare on target columns, DB-backup-guarded with pre_expand_sd21 suffix)
+- Target final length: 25000-30000 chars (net +4000-9000)
+- Content citations: VCU/Argos paper, VdoCipher reference
+
+AC:
+- grep count post-expand: VCU>=1, Colossus>=1, Bigtable>=2, Pub/Sub>=1, chunked>=2, 'Google Global Cache'>=1
+- Preserve existing sections and numbered lists (no section deletion; additive only)
+- Script re-runs [SKIP] via content hash check
+- Pytest passes; vite build clean
+- Manual smoke on /system-design/<id=21 slug> renders new subsections properly
+
+#### T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 headers, structure: 1 Requirements / 2 Capacity / 3 HL Arch / 4a Two-Tower / 4b Ranking / 4c Re-rank / 4d Cold Start / 5 Reliability / 6 Summary / Interview Q&A / Self-Check / L5 Tradeoff Matrix).
+
+Current gap analysis (grep): HAS MMoE(16) two-tower(17) ScaNN(4) YouTube(3). MISSING watch(0 — no watch-time weighted LR!), Covington(0), Zhao(0), Semantic ID(0), LRM(0).
+
+Expansions (fold into existing sections 4a/4b, add new 4e for 2024-2025 LRM):
+
+**4a Two-Tower Retrieval additions:**
+- Covington 2016 DNN recall paper trick set: (a) user vector from last-layer activation, item embedding = softmax input weights so u·v is learned similarity; (b) example age feature fed during training, zeroed at serving to counteract ML bias toward old viral content; (c) 'next-watch' target (not held-out random) to prevent sequential-episode leak; (d) extreme multiclass framing with sampled softmax
+- Multi-source retrieval: parallel召回 from (collab filter / two-tower / subscription new / search history / topic-trending / item-item related / fresh upload cold-start). Ranker receives 'which_source nominated this + source_score' as features to combine signals.
+- Frequency features: 'historical impression frequency' features prevent sequential requests returning same list (cite Rangadurai)
+
+**4b Ranking additions:**
+- Zhao 2019 MMoE paper specifics: share-bottom → MMoE substitution; expert networks + per-task gating network; solves negative transfer between engagement (clicks/watch) and satisfaction (likes/ratings)
+- Watch-time weighted LR: output layer uses weighted logistic regression, weight = observed watch-time — optimizes expected watch duration directly, avoids clickbait trap
+- Shallow tower for bias correction: stacked on MMoE, learns position bias + device bias explicitly — position fed as feature, linearly subtracted; serving sets position to a fixed value. Cite Daiwk.
+- Training-sample policy: samples from ALL YouTube videos (not just recommender's own surfaces) to avoid model-induced bias; per-user equal weighting prevents heavy-user dominance.
+- Query features vs impression features distinction: query features computed once per request; impression features computed per candidate.
+
+**4e NEW SUBSECTION (2024-2025 frontier):**
+- Large Recommender Models (LRM): Google Gemini variant adapted for video rec; continued pre-training teaches model 'English + YouTube video language' simultaneously; enables generative retrieval.
+- Semantic IDs via RQ-VAE: Video-BERT-style transformer encoder → dense embedding → Residual Quantization Variational AutoEncoder compresses to 4-8 discrete tokens per video → LLM treats video as sequence → next-video prediction natural.
+- Cold-start advantage: LRM materially improves fresh/long-tail content performance vs pure CF.
+- Serving cost reality: requires 95%+ cost reduction + offline inference strategy to deploy at YouTube scale — currently LRM is auxiliary retrieval source or offline tagging, NOT replacing main online two-tower+MMoE pipeline.
+
+Also update:
+- Cross-link to id=21 (content pipeline) — content-understanding multimodal features are the bridge
+- Add YouTube-specific scale numbers where helpful (keep existing 23K QPS etc as generic; add '例: YouTube 日上传 500h+, 月 DAU 2B+' context)
+
+Deliverables:
+- scripts/seed_fn198_youtube_rec_expand_20260421.py (idempotent via description-hash compare, DB-backup-guarded with pre_expand_fn198 suffix)
+- Target final length: 32000-36000 chars (net +4000-8000)
+- All insertions preserve existing 19 headers; new 4e adds 1-2 headers
+
+AC:
+- grep count post-expand: Covington>=1, Zhao>=1, 'watch-time'>=2, 'Semantic ID'>=2, LRM>=3, RQ-VAE>=1, 'shallow tower'>=1, 'example age'>=1
+- Existing 19 headers all still present (no structural breakage; additive only)
+- Script re-runs [SKIP]
+- /framework page renders id=198 drawer without layout breaks
+- Pytest passes
 
 #### T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template
 - **Priority**: P2
@@ -503,6 +503,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-23** -- T-P0-604: [HOTFIX] ProblemResponse NULL category ResponseValidationError. Hotfix applied at 2026-04-21 18:55 after user Discord error report (msg 1496327736505925767).
 - [x] **2026-04-21** -- T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous. Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
 - [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
 - [x] **2026-04-21** -- T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer). The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inl
