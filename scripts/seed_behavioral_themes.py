@@ -524,6 +524,7 @@ EXAMPLE_OVERRIDES: dict[str, list[str]] = {
     "EX-10": ["technical_problem_solving", "data_analysis"],
     "EX-11": ["mentoring_coaching", "leadership_direction"],
     "EX-12": ["mentoring_coaching", "leadership_direction"],
+    "EX-12B": ["process_systems", "collaboration_teamwork"],
     "EX-13": ["conflict_disagreement", "collaboration_teamwork"],
     "EX-14": ["ambiguity_uncertainty", "technical_problem_solving"],
     "EX-15": ["oncall_prod_incident", "failure_setback"],

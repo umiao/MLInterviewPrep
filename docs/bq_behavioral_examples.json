@@ -618,18 +618,92 @@
         {
           "question_id": "LDR-5",
           "relevance_note": "Empowered interns by building reusable template enabling independent onboarding"
-        },
+        }
+      ]
+    },
+    {
+      "id": "EX-12B",
+      "title": "Notebook -> ML Platform Migration --- Team Utilization 5% to 40% via Template+Profile Abstraction (Team-Cut of EX-12)",
+      "source_project": "Research-team ML infra migration (team-cut, same project as EX-12)",
+      "situation": "The research team ran long-running Jupyter notebook instances for model development and inference pipelines. The whole fleet reserved hundreds of GB of memory and a large CPU footprint year-round, but real utilization sat below 5%. A few legacy models were still being trained locally with R native boosting packages (gbm-class) — no production refresh path, no way to scale to serving traffic. An open question in the org was whether researcher / DS could actually ship deployable, production-grade systems.",
+      "task": "Migrate the team off ad-hoc notebook environments onto the mature ML platform without killing research velocity, and answer the 'DS can't ship production' skepticism directly. I was not the platform owner — leverage had to come from RS<->Infra translation plus carrying the researchers' real needs into the platform roadmap.",
+      "action": "Early call: turn 'waste' into an undeniable fact. I profiled the notebook fleet's real utilization and put the <5% CPU/GPU numbers + idle memory reservation in front of both leadership and RS. Vague 'feels wasteful' became hard data.\n\nThen I did not start from the migration mandate — I started from researcher pain: unstable long-running kernels, legacy R models with no refresh path, no route to scale to serving. Turned out they were willing to cooperate as long as the alternative was actually viable.\n\nI placed myself as a two-way translator between RS and Infra. Researchers' real workflow requirements went into the platform roadmap: HDFS, Spark, the internal search engine LnP, debug/scrape tooling compatibility — not one could be dropped, otherwise leaving notebook would be a capability loss and no one would sign off.\n\nThen I pushed the platform beyond its initial 'Kubernetes + ephemeral Docker pod' scope. The argument: if RS was expected to do research AND ship production components directly, the platform had to support persistent dev environments, reusable pipeline components, and first-class data source integration.\n\nFinally, codify. On top of the runtime, I built a template repo + abstraction layer with agreed-upon interfaces. Researchers described their training / exploration behavior through a profile-like config; everything below was automatic. New members fork-and-go. Iteration velocity and production solidity rose together.",
+      "result": "Team CPU/GPU utilization climbed from <5% to ~40% (measured by the SRE resource-management monitor); the freed capacity flowed to other workloads. 40% is the realistic ceiling for our workload shape — each run processes hundreds of GB; I/O and memory have to be provisioned for peak read phases, so CPU idles during data loading until load/train dynamic re-allocation lands. Given that constraint, the team was very satisfied.\n\nThe migration also unlocked a set of durable wins that were simply unreachable in the notebook era: automatic model versioning, persistent retention of core metrics and historical weights for one-click comparison, real-time CPU/GPU diagnostics for failure mitigation. More importantly, it reframed the 'can DS ship production?' debate from opinion into fact — researchers were now directly shipping reusable, schedulable, auto-refreshing pipeline components. The original skepticism was shown to be a **tooling gap, not a skill gap**. Several platform capabilities I pushed for later became ML platform defaults, clearing the runway for other teams' similar migrations.\n\nThe deepest lesson for me: **researcher onboarding is a platform-design problem, not a training problem.** To get a research team shipping production code, you don't teach them how to use the production stack — you grow the production stack into the shape they already want.",
+      "evidence_quotes": [],
+      "principle_tags": [
+        "influence_without_authority",
+        "build_mechanism",
+        "cross_functional_translator",
+        "platform_thinking",
+        "evidence_based_advocacy",
+        "template_as_artifact",
+        "deliver_results",
+        "research_to_production_bridge"
+      ],
+      "cross_references": [
         {
           "question_id": "INN-5",
-          "relevance_note": "Identified and fixed inefficient process (24/7 instance running) with proper resource lifecycle"
+          "relevance_note": "Team-wide migration off notebook onto ML platform; utilization 5%->40%, legacy R models back on refresh cadence."
         },
         {
-          "question_id": "INN-14",
-          "relevance_note": "Built template class that improved entire research team's productivity and onboarding"
+          "question_id": "INN-6",
+          "relevance_note": "Proposed template + profile abstraction on top of ML platform runtime — the process change that made researcher adoption default and delivered utilization 5%->40% + platform-wide capability defaults."
+        },
+        {
+          "question_id": "INN-7",
+          "relevance_note": "Didn't just fix notebook waste — pushed platform roadmap beyond ephemeral pods toward persistent dev + reusable pipelines; strategic bet that later became ML platform defaults."
+        },
+        {
+          "question_id": "INN-11",
+          "relevance_note": "Migrated entire research team off ad-hoc notebook environments onto a mature ML platform with template+profile abstraction; utilization 5%->40%."
         },
         {
           "question_id": "INN-13",
-          "relevance_note": "Improved established notebook-only workflow by building production template class for research team"
+          "relevance_note": "Well-established notebook workflow was inefficient at <5% utilization; team-wide migration with template+profile abstraction improved it without killing research velocity."
+        },
+        {
+          "question_id": "INN-14",
+          "relevance_note": "Template+profile abstraction codified as team best practice; new researchers fork-and-go, team iteration velocity + production solidity both rose."
+        },
+        {
+          "question_id": "INN-15",
+          "relevance_note": "Codified team-accepted best practice: template repos + profile-like config so researchers describe training / exploration declaratively; fork-and-go for new joiners."
+        },
+        {
+          "question_id": "COL-3",
+          "relevance_note": "Two-way translator between Research Science and ML platform / Infra — carried RS workflow requirements (HDFS, Spark, LnP, debug tooling) into platform roadmap so migration preserved capability."
+        },
+        {
+          "question_id": "COL-5",
+          "relevance_note": "Aligned researchers (worried about losing notebook capability) with platform team (scoped initially to k8s + ephemeral pods) around a shared roadmap that satisfied both."
+        },
+        {
+          "question_id": "COL-7",
+          "relevance_note": "RS (non-infra) + ML platform engineers (non-research) had no shared language; translated in both directions — surfaced <5% utilization to leadership, carried HDFS/Spark/LnP requirements into platform scope."
+        },
+        {
+          "question_id": "IMP-4",
+          "relevance_note": "Notebook->ML platform migration: utilization 5%->40%, freed capacity benefits other workloads, legacy R models refreshable, platform capabilities became defaults for other teams."
+        },
+        {
+          "question_id": "IMP-6",
+          "relevance_note": "Template+profile abstraction sustains onboarding for new researchers without coaching overhead; auto model versioning + historical weights + real-time CPU/GPU diagnostics replaced notebook-era ad-hoc maintenance."
+        },
+        {
+          "question_id": "IMP-8",
+          "relevance_note": "Built template+profile abstraction that scales horizontally (fork-and-go) rather than by coaching hours; platform capabilities pushed during migration became ML platform defaults."
+        },
+        {
+          "question_id": "IMP-10",
+          "relevance_note": "Short-term: team utilization 5%->40% + unblocked refreshable legacy models. Long-term: platform capabilities adopted org-wide as defaults; reframed 'DS can't ship production' from skill gap to tooling gap."
+        },
+        {
+          "question_id": "OWN-10",
+          "relevance_note": "Prioritized platform-level change (persistent dev + reusable pipelines into ML platform roadmap) over short-term migration; capabilities later became defaults for other teams."
+        },
+        {
+          "question_id": "COM-2",
+          "relevance_note": "Persuaded leadership with utilization data and persuaded researchers with pain-first empathy — didn't mandate notebook deprecation, made the alternative viable enough that cooperation was rational."
         }
       ]
     },
