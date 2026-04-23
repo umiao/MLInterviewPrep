@@ -46,11 +46,24 @@ PITCHES = {
         "| KEY FACTS: Hacker Week 自发 | 90%+ intent collapse | "
         "200M+ annualized impact | 多年 initiative 起点"
     ),
-    2: (  # EX-02
-        "Diversity ranking 项目因 manager 认为超出 relevance team scope 而停滞；"
-        "主动转组到 Final Ranking team 将 diversity 重新定义为 allocation 问题 "
-        "| KEY FACTS: 主动跨组转岗 | +1% GMB 首次实验 | "
-        "200M+ annualized impact | \"问题跟人走\""
+    2: (  # EX-02 (rewritten 2026-04-23 via _rewrite_ex02_team_transfer_20260423.py)
+        "Hacker Week 做出 diversity ranking prototype -- "
+        "200M+ GMB opportunity 但 manager 判 out of scope，"
+        "team charter 是 relevance filtering thresholds 而不是 "
+        "ranking allocation，OKRs 结构上对不上；先试 soft "
+        "reframe 把 project 包装进 relevance 语言，失败 -- "
+        "OKRs 是 team 被 measure 的东西，不是 aspire 的东西；"
+        "做了 structural call 转到 Final Ranking team，把 "
+        "diversity 重新定义成 intent-aware slot allocation；"
+        "正式申请前先和 receiving team lead 预谈，cold 转组 "
+        "变成 warm sponsor；对前 manager 也 name 了自己的 "
+        "gap -- 应该在 Hacker Week 之前就把 business case "
+        "translate 成 OKR 语言"
+        " | KEY FACTS: structural call 而非 political win"
+        " | soft reframe 失败是信号不是 setback"
+        " | 转组前先预谈 receiving team lead"
+        " | +1% GMB 首次实验 -> 200M+ annualized impact"
+        " | 核心 lesson: problem follows the person, not the org chart"
     ),
     3: (  # EX-03
         "发现 Sale NDCG 系统性偏向低价商品——$5 配饰排在 $100 项链前面；"

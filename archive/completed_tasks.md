@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 535 completed tasks archived as of latest archival.
+> 555 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -797,3 +797,32 @@ Flat list on /companies/3/prep doesn't visually group docs by topic. Add title p
 - [x] **2026-04-20** -- T-P2-563: Bias-Variance node 209 (ML Fundamentals leaf): append 5 interview follow-ups. Per user Discord 2026-04-20: correctly target the ml-fundamentals/classical_ml/bias-variance-tradeoff leaf (not pillar2 
 - [x] **2026-04-20** -- T-P2-564: L1 vs L2 node 210: append MLE/MAP + Gaussian/Laplace prior view. Per user Discord 2026-04-20: augment ml-fundamentals/classical_ml/l1-vs-l2-regularization with a dedicated subsection af
 - [x] **2026-04-20** -- T-P2-565: EM+GMM node 216: density-ratio note + BIC/AIC/held-out expansion + DPMM mechanics. Per user Discord 2026-04-20: three improvements to ml-fundamentals/unsupervised/em-and-gmm -- (A) clarify E-step respons
+- [x] **2026-04-21** -- T-P0-572: [BQ-DEPTH-01] Phase A: Golden-story x Trait matrix doc + free-lunch call-out. Author docs/bq_golden_trait_matrix.md mapping 5 golden (EX-01/15/16/17/30) + 4-5 strong non-golden (EX-14/33/13/20/02) a
+- [x] **2026-04-21** -- T-P0-573: [BQ-DEPTH-02] Link distribution audit on 266 question_example_links + prune candidates. Write scripts/audit_bq_link_distribution.py (read-only, no DB writes) and produce docs/bq_link_audit_20260421.md.
+
+Per u
+- [x] **2026-04-21** -- T-P0-574: [BQ-DEPTH-03] Apply link pruning per audit (gated by user approval of prune list). Apply link pruning per audit output from BQ-DEPTH-02.
+
+AUTONOMOUS-SAFE MODE (no user gate): apply prune rules determinis
+- [x] **2026-04-23** -- T-P0-604: [HOTFIX] ProblemResponse NULL category ResponseValidationError. Hotfix applied at 2026-04-21 18:55 after user Discord error report (msg 1496327736505925767).
+
+Root cause: src/backend/s
+- [x] **2026-04-23** -- T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Verified: helixos/.claude/settings.json all hook commands use /c/Anaconda/pytho
+- [x] **2026-04-23** -- T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184 (both target helixos bare-python -> /c/Anaconda/python.ex
+- [x] **2026-04-23** -- T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184/T-P1-238 (helixos bare-python fix + setup_python_env.sh).
+- [x] **2026-04-23** -- T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical). SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184/T-P1-238/T-P1-254 (helixos bare-python fix). Verified fix
+- [x] **2026-04-21** -- T-P1-588: [KG-MLF-FS-00] Skeleton: new category feature_engineering_selection + 1 leaf + YAML + frontend wiring. Add a new /ml-fundamentals category 'feature_engineering_selection' positioned at CATEGORY_ORDER slot 3 (after classical
+- [x] **2026-04-21** -- T-P1-595: [KG-MLF-FS-01] Content: leaf 28 — Comprehensive 千级特征筛选与建模 (single-page, all 7 sections + expansions). Author the single comprehensive content page for leaf id=28 (feature-selection-pipeline-1000features). Per user clarific
+- [x] **2026-04-21** -- T-P1-596: [BQ-UX-01] Phase 1: Extract parsePitch util + render cn_elevator_pitch in ExampleDrawerContent. Shared-component prep task for BQ Examples tab drawer conversion. All 34 behavioral_examples already have cn_elevator_pi
+- [x] **2026-04-21** -- T-P1-597: [BQ-UX-02] Phase 1: Refactor BehavioralQuestions Examples tab (CN pitch + drawer). The /behavioral Examples tab's ExampleCard (BehavioralQuestions.tsx:182-334) lags behind the rest of the UI: it uses inl
+- [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
+- [x] **2026-04-21** -- T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous. Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
+
+ADD themes (2):
+- customer_user_focus / 'Customer & 
+- [x] **2026-04-23** -- T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Helixos portion VERIFIED DONE: setup_python_env.sh present + absolute Python pa
+- [x] **2026-04-20** -- T-P2-566: Add Lyra MD session with Mary Miller 2026-04-23. Add incoming Lyra MD video session with Mary Miller scheduled Thu 2026-04-23 08:30 AM PDT per user Discord 2026-04-20.
+- [x] **2026-04-20** -- T-P2-568: Cross-Entropy/KL node 222: clarify KL is not Earth Mover's / Wasserstein. Per user Discord 2026-04-20: add minimal-diff clarification that KL 'distance' is information-theoretic (not geometric),
+- [x] **2026-04-20** -- T-P2-569: Cross-Entropy/KL node 222: add formal Wasserstein primal + K-R dual definition. Per user Discord 2026-04-20 follow-up: add Kantorovich primal (inf over couplings) + Kantorovich-Rubinstein dual (sup ov
+- [x] **2026-04-20** -- T-P2-570: MHA/MQA/GQA node 225: add dimension-flow clarifier + 3 interview misconceptions. Per user Discord 2026-04-20 (critical distillation of supplied notes): insert dimension-flow invariants (X n-by-d preser
+- [x] **2026-04-20** -- T-P2-571: Fix MHA node 225: render residual formula + replace emoji with ASCII tags. Per user Discord 2026-04-20: fix residual formula which was in a code span (backticks) so \text{Attn}(x) rendered litera

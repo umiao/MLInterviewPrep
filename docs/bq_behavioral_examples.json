@@ -105,54 +105,60 @@
     },
     {
       "id": "EX-02",
-      "title": "Overcoming Manager Resistance via Proactive Team Transfer",
+      "title": "Diversity Ranking --- Moving the Problem to Its Right Home",
       "source_project": "Diversity / Intent-Aware Ranking",
-      "situation": "After the Hacker Week success, my manager believed our team's mission was relevance flooring, not ranking optimization. The project stalled — no experiment slots were allocated, and the work was considered out-of-scope for our team charter.",
-      "task": "I needed to find a way to get full ownership and resources for the diversity ranking project despite organizational resistance.",
-      "action": "Rather than continuing to push within the wrong team boundary, I made a deliberate decision to transfer to the Final Ranking team. I reframed the problem as a ranking problem (which it fundamentally was) to align with the new team's charter. I also acknowledged my own gap: I hadn't translated the business case into relevance team OKR language early enough, nor found a ranking team sponsor sooner.",
-      "result": "The transfer gave me complete ownership. I led the first experiment to a +1% GMB lift on diversity ranking, and the framework I built was reused across multiple verticals for 200M+ annualized impact. The key lesson: 'problem follows the person' — proactively seek the right organizational home rather than accepting structural constraints.",
+      "situation": "After Hacker Week I had a working diversity-ranking prototype -- 200M+ GMB opportunity on multi-intent queries the existing dashboards missed. My manager judged it out of scope. Our relevance team's charter was filtering thresholds, not ranking allocation. No experiment slots, no resources, project about to die.",
+      "task": "Not: argue harder. The mismatch was structural -- a ranking problem sitting inside a relevance team whose OKRs measured precision and recall against filtering thresholds, not allocation across intents. No amount of reframing would change what the team was actually measured on. The real task was to decide whether to relocate the problem to a charter that fit, knowing the transfer would cost political capital and rebuild time, and to move it without burning the bridge behind me.",
+      "action": "First I tried the soft move. Reframed the project in relevance-threshold language -- if I could make it fit the existing OKRs, nobody had to move. It didn't fit. The team was measured on filtering; the work was an allocation problem wearing a relevance hat.\n\nThe failure was the signal, not a setback. The next move was structural: find the team whose charter already covers allocation, and make the transfer the clean way.\n\nI went to the Final Ranking team's lead before formally raising the transfer. Walked them through diversity as intent-aware slot allocation in the final-ranking stage -- so they saw it on their own charter, not as an import from someone else's team. By the time the transfer request went up the chain, I already had a sponsor inside the receiving team, not a cold ask.\n\nI also named my own gap to my manager upfront: I should have translated the business case into OKR language before Hacker Week, not after, and found a ranking-team sponsor in advance instead of discovering the charter mismatch post-prototype. That ack kept the conversation structural instead of adversarial. I left cleanly -- no skip-level, no hero narrative -- because a clean exit is what protects the next cross-team move anyone tries.",
+      "result": "First experiment in the new team delivered +1% GMB. The allocation framework was reused across multiple verticals and compounded into 200M+ annualized impact -- the idea survived the move and scaled well beyond the original scope.\n\nThe lesson I carry: **when organizational structure blocks a validated idea, the cheapest move is to relocate the idea, not to keep arguing about whether the structure is wrong.** The problem follows the person, not the org chart. Now before any new project I pressure-test it against the receiving team's OKR language up front; if the language doesn't fit, that's a day-zero scoping issue, not a post-prototype one.",
       "evidence_quotes": [
-        "Manager 认为 team 的 job 是 relevance flooring，而非 ranking 优化；缺乏 experiment slot，项目停滞",
-        "主动 transfer 到 Final Ranking team，将问题重新定义为 ranking problem，获得完整 ownership",
-        "问题跟着人走——这是我主动做的选择，不是被动的妥协"
+        "Team charter 是 relevance filtering thresholds 而非 ranking allocation，OKRs 结构上对不上",
+        "Soft reframe 失败是信号不是 setback -- OKRs 是 team 被 measure 的东西，不是 aspire 的东西",
+        "转组前先和 receiving team lead 预谈 -- cold 转组变成 warm sponsor",
+        "Problem follows the person, not the org chart -- relocate 而非 argue 结构"
       ],
       "principle_tags": [
         "ownership",
         "adaptability",
-        "leadership"
+        "leadership",
+        "structural_relocation",
+        "problem_follows_person",
+        "preemptive_sponsorship",
+        "OKR_language_discipline",
+        "clean_exit_protects_future_moves"
       ],
       "cross_references": [
         {
           "question_id": "ADP-14",
-          "relevance_note": "Faced organizational roadblock (no experiment slots, out-of-scope mandate) and found creative workaround through team transfer"
+          "relevance_note": "Charter-mismatch roadblock -- ranking problem in a relevance team's scope. Tried the soft reframe first, then made the structural call to relocate instead of arguing harder."
         },
         {
           "question_id": "OWN-11",
-          "relevance_note": "Took ownership of a challenging situation by transferring teams to follow the problem"
+          "relevance_note": "Structural-relocation ownership -- moved the problem to the charter that fit rather than waiting for the charter to change."
         },
         {
           "question_id": "COM-2",
-          "relevance_note": "Persuaded new team to take on diversity ranking by reframing it as a ranking problem"
+          "relevance_note": "Walked the receiving team's lead through diversity-as-allocation in their own charter language before the transfer request went up -- a structural sell, not a vision pitch."
         },
         {
           "question_id": "ADP-4",
-          "relevance_note": "Adapted approach mid-project: from pushing within wrong team to strategically transferring"
+          "relevance_note": "Soft reframe inside the team's charter failed because OKRs are what a team is measured on, not what they aspire to -- switched to structural relocation."
         },
         {
           "question_id": "COL-3",
-          "relevance_note": "Story I enrichment: drove project across multiple teams — from relevance team to final ranking team, multi-team production deployment"
+          "relevance_note": "Pre-negotiated with Final Ranking team's lead before the transfer went up -- cold ask became warm sponsor; allocation framework later reused across multiple verticals."
         },
         {
           "question_id": "COL-5",
-          "relevance_note": "Story I enrichment: aligned different teams on shared goal — reframed diversity as ranking problem to gain cross-team buy-in"
+          "relevance_note": "Reframed diversity as an intent-aware slot-allocation problem so it mapped to the receiving team's charter -- alignment through re-language, not persuasion."
         },
         {
           "question_id": "OWN-7",
-          "relevance_note": "Showed resilience by transferring teams rather than accepting organizational constraints"
+          "relevance_note": "Resilience as a structural call -- cut the losing argument inside the relevance charter, relocated the problem cleanly; problem follows the person, not the org chart."
         },
         {
           "question_id": "ADP-17",
-          "relevance_note": "Recognized own gap: had not translated business case into team OKR language early enough"
+          "relevance_note": "Own-gap ack upfront: should have translated business case into OKR language and secured a ranking-team sponsor before Hacker Week, not after the prototype."
         }
       ]
     },

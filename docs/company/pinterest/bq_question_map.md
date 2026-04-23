@@ -32,7 +32,7 @@
 |------|-------|-------------|
 | 1 | **EX-17** Senior IC Difficult Feedback | Senior IC 直接指出我 PR 流程不规范，讲如何把对抗变成 checklist 制度、最终建立互信。|
 | 2 | **EX-13** Authorship Dispute | 同事质疑我的贡献并争夺一作，讲如何基于证据据理力争、并把结果抽象成团队长期规则。|
-| 3 | **EX-02** Manager Resistance to Diversity Ranking | 经理认为方向不在 charter 内、不给实验 slot，讲如何消化这个反馈 → 换组 → 最终用 +1% GMB 证明判断。|
+| 3 | **EX-02** Diversity Ranking --- Moving the Problem to Its Right Home | 经理判方向 out of scope、不给 slot，讲如何把它当 charter/OKR 结构信号而非反对意见——soft reframe 失败后做 structural call 转组，先和 receiving team lead 预谈再正式申请，+1% GMB -> 200M+ 验证 structural call 没错。|
 
 ## Q5. 与错过 deadline 的同事合作（teammate missing deadlines）
 

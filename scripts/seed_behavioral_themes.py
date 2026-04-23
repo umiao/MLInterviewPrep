@@ -513,7 +513,7 @@ EXAMPLE_OVERRIDES: dict[str, list[str]] = {
     "BLOG-03": ["collaboration_teamwork", "technical_problem_solving"],
     "BLOG-04": ["ownership_accountability", "process_systems"],
     "EX-01": ["technical_problem_solving", "data_analysis"],
-    "EX-02": ["conflict_disagreement", "ownership_accountability"],
+    "EX-02": ["ownership_accountability", "conflict_disagreement"],
     "EX-03": ["technical_problem_solving", "data_analysis"],
     "EX-04": ["data_analysis", "collaboration_teamwork"],
     "EX-05": ["technical_problem_solving", "prioritization_tradeoffs"],

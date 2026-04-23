@@ -5,7 +5,7 @@
       "title_zh": "搜索多样性与排名创新 (核心主线)",
       "title_en": "Search Diversity & Ranking Innovation",
       "color": "blue",
-      "narrative_zh": "这是我职业生涯中最重要的一条主线，从一个Hacker Week的个人发现，成长为影响200M+年化GMB的多年项目。\n\n**起点 (EX-01)**：Hacker Week期间，我独立发现搜索排名系统在\"静默地失败\"——多意图查询(如\"pokemon\")90%以上的结果是交易卡，但购买数据显示一半用户实际上想要游戏、玩具或手办。标准指标看起来很健康，因为满意的主流用户掩盖了被忽视的那一半。我在一周内从发现到原型验证，证明了问题可以解决。\n\n**组织阻力 (EX-02)**：Hacker Week获奖后，项目却停滞了——我的经理认为团队的使命是相关性过滤，不是排名优化。没有实验slot，工作被视为超出范围。我没有继续在错误的组织边界内推进，而是主动转到Final Ranking团队，将问题重新定义为排名问题。\n\n**指标重定义 (EX-03)**：在新团队，我发现行业标准的Sale NDCG指标存在根本缺陷——它系统性地偏好低价商品，因为便宜商品的转化率更高。我提出GMB(价格x购买概率)作为正确的优化目标，并发现了更深层的校准陷阱。\n\n**stakeholder教育 (EX-04)**：多样性实验上线后，MRR指标下降而GMB和购买率上升，引发了利益相关者的警惕。我必须解释为什么一个\"变差\"的指标实际上意味着更好的结果。\n\n**平台化 (EX-06)**：我将多样性方案设计为可复用的allocation primitive，任何团队只需插入目标分布即可使用。关键架构决策：用统一的GMB bidding维度替代旧的LTR评分范式。最终跨多个垂直领域达成200M+年化影响。\n\n**实验严谨性 (EX-10)**：为了确保实验结果的可信度，我设计了去偏差的评估框架，发表于SIGIR。\n\n**线上风险管理 (EX-08)**：当module数量激增导致线上质量退化时，我将问题升级到VP层面，推动建立模块仲裁机制。",
+      "narrative_zh": "这是我职业生涯中最重要的一条主线，从一个Hacker Week的个人发现，成长为影响200M+年化GMB的多年项目。\n\n**起点 (EX-01)**：Hacker Week期间，我独立发现搜索排名系统在\"静默地失败\"——多意图查询(如\"pokemon\")90%以上的结果是交易卡，但购买数据显示一半用户实际上想要游戏、玩具或手办。标准指标看起来很健康，因为满意的主流用户掩盖了被忽视的那一半。我在一周内从发现到原型验证，证明了问题可以解决。\n\n**组织阻力 (EX-02)**：Hacker Week 之后项目停滞——不是 manager 挡路，是 team charter 本身是 filtering thresholds 而非 ranking allocation，OKRs 结构上对不上。先试 soft reframe 把 project 包装成 relevance 语言，失败——OKRs 是 team 被 measure 的东西，不是 aspire 的东西。做 structural call 转到 Final Ranking team，把 diversity 重新定义为 intent-aware slot allocation；正式申请前先和 receiving team lead 预谈，把 cold 转组变成 warm sponsor。Problem follows the person, not the org chart。\n\n**指标重定义 (EX-03)**：在新团队，我发现行业标准的Sale NDCG指标存在根本缺陷——它系统性地偏好低价商品，因为便宜商品的转化率更高。我提出GMB(价格x购买概率)作为正确的优化目标，并发现了更深层的校准陷阱。\n\n**stakeholder教育 (EX-04)**：多样性实验上线后，MRR指标下降而GMB和购买率上升，引发了利益相关者的警惕。我必须解释为什么一个\"变差\"的指标实际上意味着更好的结果。\n\n**平台化 (EX-06)**：我将多样性方案设计为可复用的allocation primitive，任何团队只需插入目标分布即可使用。关键架构决策：用统一的GMB bidding维度替代旧的LTR评分范式。最终跨多个垂直领域达成200M+年化影响。\n\n**实验严谨性 (EX-10)**：为了确保实验结果的可信度，我设计了去偏差的评估框架，发表于SIGIR。\n\n**线上风险管理 (EX-08)**：当module数量激增导致线上质量退化时，我将问题升级到VP层面，推动建立模块仲裁机制。",
       "examples": [
         {
           "example_id": "EX-01",
@@ -14,8 +14,8 @@
         },
         {
           "example_id": "EX-02",
-          "role_zh": "推动者：面对组织阻力主动转team，将问题重新定义为排名问题以获得ownership",
-          "principles": ["ownership", "have_backbone", "adaptability"]
+          "role_zh": "结构性 relocator：charter/OKR 对不上时做 structural call 而非 political fight，预谈 receiving team lead 把 cold 转组变 warm sponsor，problem follows the person not the org chart",
+          "principles": ["ownership", "structural_relocation", "problem_follows_person", "preemptive_sponsorship"]
         },
         {
           "example_id": "EX-03",

@@ -9,29 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
-
-Same protocol as BQ-DEPTH-04 (7 steps, 2 scripts, idempotent, DB backup).
-
-Pre-draft red-flag scan should check: does EX-02 currently tell the persuasion story or the influence-without-authority story? User to call the frame during draft review.
-
-AC:
-- User approves draft before DB write
-- Both scripts re-run [SKIP]
-- All linked relevance_notes refreshed
-- Canonical seeds updated inline
-- DB backup with suffix _pre_ex02_rewrite
-
----
-**[PRE-APPROVED FOR AUTORUN 2026-04-23]** User Discord msg 1496990176625561771: "可以的 如果没有问题就 script auto run". Proceed with story_rewrite_protocol.md all 7 steps INCLUDING DB write, but treat step 2 (draft-show-approve) as pre-satisfied for structural polish ONLY. Boundaries:
-- PERMITTED without re-approval: voice/length polish matching golden EX-15/17, principle_tag upgrade from generic to specific, cn_elevator_pitch rewrite with KEY FACTS suffix, link relevance_note tightening, propagation surface sync (bq_behavioral_examples.json + bq_story_arcs.json + seed_behavioral_themes.py per feedback_sync_all_surfaces.md).
-- REQUIRES STOP + new follow-up task for user review: content-level reframe (like EX-15 process->structural flip), inventing new beats not in current STAR, introducing a new red-flag interpretation, splitting into dual-cut (like EX-12/12B pattern), changing the fundamental outcome/lesson.
-If you are not sure whether a change is structural vs content-level, stop and add a new task for user instead of writing.
-
 #### T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol
 - **Priority**: P0
 - **Complexity**: M
@@ -433,3 +410,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - [x] **2026-04-23** -- T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Folded into T-P2-207's expanded scope, which now covers BOTH helixos AND templa
 - [x] **2026-04-23** -- T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol. EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
+- [x] **2026-04-23** -- T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol. EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
