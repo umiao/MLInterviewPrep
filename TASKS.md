@@ -213,21 +213,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
-
-Duplicates to consolidate or close:
-- Bare python fix (4 duplicates): T-P1-184, T-P1-238, T-P1-254, T-P1-319 -- all address the same issue (bare python in helixos settings.json)
-- stop-cache removal (3 duplicates): T-P2-207, T-P2-255, T-P2-320 -- all address deprecated stop-cache in helixos test_check.py
-- setup_python_env.sh: T-P2-187 (overlaps with bare-python tasks)
-- template stop-cache: T-P2-208
-- session_context propagation: T-P2-239
-
-Action: verify current helixos state (does bare python still exist? does test_check.py still have stop-cache?), close duplicates keeping only the newest or most complete, and consolidate survivors into 2 clean tasks max.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -305,37 +290,6 @@ AC:
 - EX-33B coherence check documented in commit message
 - Canonical seeds updated inline
 - DB backup with suffix _pre_ex33_rewrite
-
-#### T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: All hooks in helixos settings.json use bare python which resolves to the Windows Store stub (exit 49) on this machine. MLInterviewPrep already has the fix applied.
-
-Actions needed:
-1. Copy .claude/hooks/setup_python_env.sh from MLInterviewPrep to helixos (writes Anaconda to CLAUDE_ENV_FILE)
-2. Update helixos .claude/settings.json: replace all python with /c/Anaconda/python.exe in ALL hook commands
-3. Add SessionStart hook entry for setup_python_env.sh
-
-BLOCKED: Claude Code file permissions block writes to helixos .claude/hooks/ directory from MLInterviewPrep session. Must be done from a helixos session or manually.
-
-#### T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos/.claude/settings.json uses bare `python` for all hook commands (plan_mode_hook, block_dangerous, commit_msg_guard, secret_guard, tasks_md_guard, file_watch_warn, yaml_validate, lint_check, test_check, archive_check, session_context). Per CLAUDE.md Prohibited Actions: bare python resolves to Windows Store stub (exit code 49) and hooks silently fail. Fix: replace all `python "$CLAUDE_PROJECT_DIR/..."` with `/c/Anaconda/python.exe "$CLAUDE_PROJECT_DIR/..."`. Source: MLInterviewPrep settings.json (already fixed). Also add setup_python_env.sh as first SessionStart hook (bash "$CLAUDE_PROJECT_DIR/.claude/hooks/setup_python_env.sh") -- MLInterviewPrep has this, helixos does not. Copy setup_python_env.sh from MLInterviewPrep if not present.
-
-#### T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: CRITICAL: helixos settings.json uses bare python for ALL hook commands. On Windows, bare python resolves to the AppData Store stub (exit code 49), silently breaking all hooks. Fix: (1) Replace all bare python with /c/Anaconda/python.exe in settings.json. (2) Add setup_python_env.sh SessionStart hook (copy from MLInterviewPrep) to inject Anaconda into PATH for Bash tool calls via CLAUDE_ENV_FILE. CLAUDE.md already documents this prohibition (added 2026-03-21 via propagation) but the fix was never applied. This is the same root cause as MLInterviewPrep lesson [2026-03-20] #bash-tool #path.
-
-#### T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ALL hook commands in helixos settings.json use bare python instead of /c/Anaconda/python.exe. This causes exit code 49 on Windows Store stub. Also missing setup_python_env.sh in SessionStart. Actions: (1) Replace python with /c/Anaconda/python.exe in every hook command. (2) Add setup_python_env.sh as first SessionStart hook copied from MLInterviewPrep. Source: MLInterviewPrep settings.json, LESSONS.md 2026-03-20.
 
 #### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
 - **Priority**: P1
@@ -442,31 +396,25 @@ AC:
 - /framework page renders id=198 drawer without layout breaks
 - Pytest passes
 
-#### T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template
+#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: MLInterviewPrep has: (1) setup_python_env.sh SessionStart hook that writes Anaconda to CLAUDE_ENV_FILE, (2) /c/Anaconda/python.exe absolute paths in all settings.json hook commands. helixos and claude-code-project-template both use bare python in settings.json and have no setup_python_env.sh. Per LESSONS.md: Bash tool runs non-login shells, .bashrc not sourced, bare python resolves to Windows Store stub. Source: MLInterviewPrep/.claude/hooks/setup_python_env.sh and settings.json. Action: copy setup_python_env.sh to helixos and template, update settings.json hook commands to use absolute path.
+- **Description**: Remove deprecated stop-cache from BOTH helixos/.claude/hooks/test_check.py AND claude-code-project-template/.claude/hooks/test_check.py. Both still import and use check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed these (T-P2-188, commit abf6543) per the lesson that stop caches cause false PASS results when files change between sessions.
 
-#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos/.claude/hooks/test_check.py still imports and uses check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed the cache in T-P2-188 (commit abf6543), per the lesson that stop caches can produce false passes when files change between sessions.
+Verified state (2026-04-23): helixos/.claude/hooks/test_check.py lines 10, 21, 48 still import/call check_stop_cache/write_stop_cache. claude-code-project-template/.claude/hooks/test_check.py same three lines.
 
-Action: Update helixos/.claude/hooks/test_check.py to match MLInterviewPrep version -- remove check_stop_cache/write_stop_cache import and usage. Run tests after to confirm hook still works.
+Action:
+1. helixos/.claude/hooks/test_check.py: remove cache import and calls -- copy MLInterviewPrep version.
+2. claude-code-project-template/.claude/hooks/test_check.py: same removal.
+3. Clean up hook_utils.py in both repos only if no other callers remain.
+4. Run tests after to confirm hook still works.
 
-Source: MLInterviewPrep/.claude/hooks/test_check.py (current, cache-free version).
+Consolidated from duplicates: T-P2-255, T-P2-320 (both helixos stop-cache), T-P2-208 (template stop-cache). All 3 marked completed-as-duplicate on 2026-04-23 per T-P2-587.
 
-#### T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: claude-code-project-template/.claude/hooks/test_check.py still uses check_stop_cache/write_stop_cache from hook_utils. The lesson [2026-03-18] established that stop caches cause false PASS results when files change between sessions. MLInterviewPrep already fixed this.
+Blocked: must be executed from a helixos or template Claude Code session -- file permissions prevent writing to those repos' .claude/hooks/ from a MLInterviewPrep session.
 
-Action: Update template/.claude/hooks/test_check.py to match MLInterviewPrep version -- remove cache import and usage. The template is the reference baseline, so it should have the best-known version of all hooks.
-
-Source: MLInterviewPrep/.claude/hooks/test_check.py.
+Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 #### T-P2-239: [SYNC] Propagate session_context.py improvements from MLInterviewPrep to helixos
 - **Priority**: P2
@@ -474,23 +422,20 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py.
 - **Depends on**: None
 - **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
-#### T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: test_check.py imports check_stop_cache and write_stop_cache from hook_utils and uses them to skip re-running tests in the same session. These deprecated caching functions were removed from the hook architecture (LESSONS.md lesson [2026-03-18]: removed lint cache so every Stop hook runs fresh). The caching logic means test failures can be silently skipped if tests passed earlier in the same session. Fix: Remove the cache check/write calls from test_check.py so tests always run fresh on Stop. Keep check_stop_cache/write_stop_cache in hook_utils.py only if other hooks still use them.
-
-#### T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: helixos test_check.py still uses check_stop_cache/write_stop_cache which were deprecated per LESSONS.md 2026-03-18. Cache can produce false passes when files change between cache write and next session. MLInterviewPrep already removed this. Action: Remove cache imports and calls from test_check.py; clean up hook_utils.py if no other callers.
-
 ## Completed Tasks
 
 > 535 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-23** -- T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh). The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
 - [x] **2026-04-23** -- T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md. Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None
+- [x] **2026-04-23** -- T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
+- [x] **2026-04-23** -- T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
+- [x] **2026-04-23** -- T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Folded into T-P2-207's expanded scope, which now covers BOTH helixos AND templa
+- [x] **2026-04-23** -- T-P2-187: [SYNC] Add setup_python_env.sh + absolute Python path to helixos and template. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Helixos portion VERIFIED DONE: setup_python_env.sh present + absolute Python pa
+- [x] **2026-04-23** -- T-P1-319: [SYNC] helixos: Fix bare python in settings.json hooks (critical). SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184/T-P1-238/T-P1-254 (helixos bare-python fix). Verified fix
+- [x] **2026-04-23** -- T-P1-254: [SYNC] helixos: Fix bare python in settings.json + add setup_python_env.sh. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184/T-P1-238 (helixos bare-python fix + setup_python_env.sh).
+- [x] **2026-04-23** -- T-P1-238: [SYNC] Fix helixos: replace bare python with absolute path in settings.json hooks. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P1-184 (both target helixos bare-python -> /c/Anaconda/python.ex
+- [x] **2026-04-23** -- T-P1-184: [SYNC] helixos: Fix broken hooks -- use absolute Python path + add setup_python_env.sh. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Verified: helixos/.claude/settings.json all hook commands use /c/Anaconda/pytho
 - [x] **2026-04-23** -- T-P0-604: [HOTFIX] ProblemResponse NULL category ResponseValidationError. Hotfix applied at 2026-04-21 18:55 after user Discord error report (msg 1496327736505925767).
 - [x] **2026-04-21** -- T-P1-599: [BQ-TAX-02] Phase 2: Seed 2 new themes + 3 facets + demote scope_creep_ambiguous. Seed the taxonomy delta into the new facets schema from BQ-TAX-01.
 - [x] **2026-04-21** -- T-P1-598: [BQ-TAX-01] Phase 2: Schema migration — add behavioral_facets tables + is_signature column. Phase 2 of taxonomy refactor. Blocked behind Phase 1 UX (T-P1-596/597) per reviewer-approved execution order: UX先稳, sche
