@@ -9,34 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement / structured-protocol era.
-
-Follow docs/workflow/story_rewrite_protocol.md (all 7 steps):
-1. Red-flag scan BEFORE drafting: surface any defensive openers / cliche lessons / etc. in current EX-01
-2. Draft + show on Discord, wait for explicit user approval ('可以执行' or equivalent)
-3. Two idempotent seed scripts: _rewrite_ex01_*.py (STAR + risk_statement + NRG-v2) and _propagate_ex01_*.py (title/cn_elevator_pitch/principle_tags/16 relevance_notes)
-4. Pre-draft audit: list the 16 current question framings; post-apply audit: 5 propagation surfaces (derived fields, join tables, API JSON, canonical seeds, frontend pre-renders)
-5. Single propagation script + inline edits to scripts/seed_master_pitches.py and docs/bq_story_arcs.json (arc-1 narrative)
-6. Verify: idempotent re-run, DB read-back, simulate /behavioral/story-arcs merge
-7. Update NRG, principle_tags, role_zh meta-layers
-
-AC:
-- User approves rewritten draft on Discord before any DB write
-- Both scripts re-run with [SKIP]
-- All 16 relevance_notes refreshed to match new STAR
-- canonical seed scripts updated inline (no silent re-run drift)
-- DB backup with suffix _pre_ex01_rewrite
-
----
-**[PRE-APPROVED FOR AUTORUN 2026-04-23]** User Discord msg 1496990176625561771: "可以的 如果没有问题就 script auto run". Proceed with story_rewrite_protocol.md all 7 steps INCLUDING DB write, but treat step 2 (draft-show-approve) as pre-satisfied for structural polish ONLY. Boundaries:
-- PERMITTED without re-approval: voice/length polish matching golden EX-15/17, principle_tag upgrade from generic to specific, cn_elevator_pitch rewrite with KEY FACTS suffix, link relevance_note tightening, propagation surface sync (bq_behavioral_examples.json + bq_story_arcs.json + seed_behavioral_themes.py per feedback_sync_all_surfaces.md).
-- REQUIRES STOP + new follow-up task for user review: content-level reframe (like EX-15 process->structural flip), inventing new beats not in current STAR, introducing a new red-flag interpretation, splitting into dual-cut (like EX-12/12B pattern), changing the fundamental outcome/lesson.
-If you are not sure whether a change is structural vs content-level, stop and add a new task for user instead of writing.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label)
@@ -388,3 +360,4 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - [x] **2026-04-23** -- T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol. EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
 - [x] **2026-04-23** -- T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol. EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
 - [x] **2026-04-23** -- T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol. EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
+- [x] **2026-04-23** -- T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol. EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement

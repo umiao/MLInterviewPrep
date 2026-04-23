@@ -23,7 +23,7 @@ schema question in ~6 months; see `.claude/tasks.db` T-P0-572 description.)
   pattern calibration; facet rationale below already matches the rewritten STAR.
 - `stale-high-link` = high `question_example_links` count but not rewritten; facet
   rationale below will likely need patching after the Phase-A-II rewrites land
-  (EX-01 / EX-33; EX-02 and EX-14 now `fresh`).
+  (EX-33; EX-01, EX-02, EX-14 now `fresh`).
 - `stable` = rarely linked or already settled enough that protocol refresh is
   not the bottleneck (EX-13 / EX-20).
 
@@ -33,7 +33,7 @@ schema question in ~6 months; see `.claude/tasks.db` T-P0-572 description.)
 
 | ID   | Title (short)                                          | rewrite_status     | golden? | Primary themes claimed |
 |------|--------------------------------------------------------|--------------------|---------|------------------------|
-| EX-01 | Search Diversity -- Intent Collapse Discovery         | stale-high-link    | yes     | data_analysis |
+| EX-01 | Search Diversity -- Intent Collapse via Item-vs-Page Diagnosis | fresh (2026-04-23) | yes     | data_analysis |
 | EX-02 | Diversity Ranking -- Moving the Problem to Its Right Home | fresh (2026-04-23) | no      | ownership_accountability |
 | EX-13 | Authorship Dispute -- Norm Establishment              | stable             | no      | conflict_disagreement, mentoring_coaching |
 | EX-14 | LLM-as-Judge -- Killing the Agentic Mandate with One Week of ROI Math | fresh (2026-04-23) | no      | scope_creep_ambiguous, ambiguity_uncertainty |
@@ -359,24 +359,32 @@ does the 4 calibration samples, T-P1-582 does the bulk.
 
 ## 5. Stale-high-link -- protocol-refresh targets
 
-**EX-01 / EX-33** have high `question_example_links` count but
-have NOT been refreshed through the current `story_rewrite_protocol.md`. Their
-facet rationales in section 2 are written against the *current* STAR content in
+**EX-33** has high `question_example_links` count but has NOT yet been refreshed
+through the current `story_rewrite_protocol.md`. Facet rationales in section 2
+for EX-33 are written against the *current* STAR content in
 `bq_improved_stories.md` / `behavioral_examples`, but downstream propagation
 surfaces (KEY-FACTS pills, principle tags, question relevance notes,
 `cn_elevator_pitch`, frontend pre-renders) may tell a slightly older version of
-the same story. Expect rationale-level patches after each rewrite lands.
+the same story. Expect rationale-level patches after the rewrite lands.
 
-**EX-02** (2026-04-23, T-P0-576) and **EX-14** (2026-04-23, T-P0-577) have
-been refreshed -- STAR + title + principle_tags + cn_elevator_pitch + all
-linked relevance_notes now match the feasibility-first / structural-
-relocation facet vocabulary.
+**EX-01** (2026-04-23, T-P0-575), **EX-02** (2026-04-23, T-P0-576), and
+**EX-14** (2026-04-23, T-P0-577) have been refreshed -- STAR + title +
+principle_tags + cn_elevator_pitch + all linked relevance_notes now match the
+invisible-to-standard-metrics / structural-relocation / feasibility-first facet
+vocabulary. EX-01 specifically now anchors on `item_vs_page_level_reasoning`
+and `invisible_to_standard_metrics` -- the item-level-scoring-creates-page-
+level-homogeneity diagnosis is now the L5 signal rather than the 200M+ /
+SIGIR trophy stack.
 
 Phase-A-II plan (T-P0-575 ... T-P0-578) refreshes these in this order:
 
-- **T-P0-575 / EX-01** (L complexity) -- highest link volume, largest
-  propagation surface; the intent-collapse vocabulary is load-bearing for
-  data_analysis primary and ambiguity_uncertainty backup.
+- **T-P0-575 / EX-01** (L, DONE 2026-04-23) -- data_analysis primary now
+  anchored on `invisible_to_standard_metrics : abandon-log slice exposed
+  intent collapse the dashboard masked` and
+  `item_vs_page_level_reasoning : item-level scoring creates page-level
+  homogeneity by design`. KEY FACTS: item-vs-page diagnosis / invisible
+  half / one-week end-to-end prototype / 200M+ annualized / SIGIR
+  methodology writeup.
 - **T-P0-576 / EX-02** (M, DONE 2026-04-23) -- ownership_accountability
   primary now anchored on `structural_relocation : problem follows the
   person, not the org chart` facet. KEY FACTS: structural call vs political

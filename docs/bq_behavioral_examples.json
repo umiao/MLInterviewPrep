@@ -16,90 +16,90 @@
   "examples": [
     {
       "id": "EX-01",
-      "title": "Search Diversity: Intent Collapse Discovery",
+      "title": "Search Diversity --- Intent Collapse via Item-vs-Page Diagnosis",
       "source_project": "Diversity / Intent-Aware Ranking",
-      "situation": "During Hacker Week, I discovered that our search ranking system was silently failing half its users. Multi-intent queries like 'pokemon' returned 90%+ trading cards, even though purchase data showed half the buyers actually wanted games, toys, or figures. Standard metrics looked healthy because the dominant-intent users were satisfied -- the problem was invisible.",
-      "task": "No one had assigned this. I had one week to validate the problem, pinpoint the root cause, and build a working prototype that proved it was fixable.",
-      "action": "Analyzed abandoned-query logs and found a systematic pattern: hundreds of high-volume queries suffered 'intent collapse' where one product type crowded out everything else. Diagnosed the root cause -- ranking model scored each item in isolation, no mechanism to reason about diversity across the full results page. Built an end-to-end diversity-blending prototype in one week -- data pipeline, blending algorithm, experiment framework -- validated with purchase data that it surfaced previously invisible user intents.",
-      "result": "This self-initiated project proved clear revenue improvement potential and grew into a multi-year initiative with 200M+ annualized impact across multiple product verticals. The core insight -- that item-level scoring creates page-level homogeneity -- fundamentally changed how the organization approached ranking optimization. Published as a full research paper at SIGIR.",
+      "situation": "During Hacker Week I went looking for where our search ranker was failing silently. Standard dashboards looked healthy. But multi-intent queries like \"pokemon\" returned 90%+ trading cards, while purchase data showed half the buyers wanted games, toys, or figures. The dashboard was fine because the dominant-intent users were fine. The missing half was invisible.",
+      "task": "No one had assigned this. One week to go from a hunch to a defensible diagnosis plus a working prototype -- or drop it. The framing mattered more than the fix. If I couldn't name precisely why the ranker produced homogeneous pages, nobody downstream would fund a multi-intent solution on top of a healthy-looking dashboard.",
+      "action": "First pass: abandon-log slice. Sorted queries by post-impression drop-off and looked for the pattern. Hundreds of high-volume multi-intent queries collapsed the same way -- one product type crowded out every other valid interpretation. Not a bug on any single query. A systematic bias.\n\nRoot-cause call: the ranker scored each item in isolation. It had no mechanism to reason about the page. When the top candidates all looked alike, the page looked alike -- by design. Item-level scoring was producing page-level homogeneity, and no amount of per-item tuning would fix it. The gap was structural, not a calibration miss.\n\nPrototype: diversity-blending layer on top of the existing ranker. Cheap intent-coverage proxy -- I didn't try to rewrite holistic ranking in a week. End-to-end in the Hacker Week window: abandon-log data pipeline, blending algorithm, experiment framework. Validated against purchase data that the blended pages surfaced intents the dashboard had never measured.",
+      "result": "The prototype survived review and grew past Hacker Week. Compounded across verticals into 200M+ annualized impact over multiple years. The methodology was later written up at SIGIR.\n\nThe lesson I carry: **item-level scoring creates page-level homogeneity.** Any time a ranker optimizes per-candidate without a page-level constraint, the top-K will cluster -- and the dashboard will look fine because the dominant-intent users are fine. Now before I trust a \"healthy\" search metric I ask which users it's measuring and which ones it cannot see.",
       "evidence_quotes": [
-        "Standard metrics said everything was fine -- because they only measured the users who stayed",
-        "The problem was invisible because the happy users masked the missing ones"
+        "The dashboard was fine because the dominant-intent users were fine -- the missing half was invisible",
+        "Item-level scoring was producing page-level homogeneity, and no amount of per-item tuning would fix it"
       ],
       "principle_tags": [
-        "ownership",
-        "innovation",
-        "problem_solving",
-        "bias_for_action",
-        "dive_deep",
-        "deliver_results",
-        "think_big",
-        "influence_without_authority"
+        "invisible_to_standard_metrics",
+        "root_cause_diagnosis",
+        "item_vs_page_level_reasoning",
+        "self_initiated_direction",
+        "end_to_end_prototype_one_week",
+        "problem_framing_before_persuasion",
+        "ambiguous_assignment_ownership",
+        "dashboard_blindspot_discipline"
       ],
       "cross_references": [
         {
           "question_id": "OWN-6",
-          "relevance_note": "Bold risk: invested entire Hacker Week on an unassigned problem that challenged core ranking assumptions"
+          "relevance_note": "Bold risk: spent the full Hacker Week on a self-framed invisible-to-standard-metrics problem with no assignment and no guarantee the root-cause diagnosis would hold up."
         },
         {
           "question_id": "INN-1",
-          "relevance_note": "Identified a problem no one else saw -- standard metrics masked the failure"
+          "relevance_note": "Identified a failure the dashboard couldn't see -- the dominant-intent users masked the abandoned half. Abandon-log slice surfaced the pattern standard metrics had been hiding."
         },
         {
           "question_id": "INN-2",
-          "relevance_note": "Entirely self-started project, from problem discovery to working prototype in one week"
+          "relevance_note": "Entirely self-started: chose the problem, framed it as intent collapse, and shipped an end-to-end prototype (data pipeline + blending algorithm + experiment framework) inside one Hacker Week."
         },
         {
           "question_id": "PS-15",
-          "relevance_note": "Identified intent collapse through data analysis -- purchase distributions vs display distributions revealed the gap"
+          "relevance_note": "Data-only diagnosis: abandon-log slice vs purchase-distribution slice revealed the invisible-half gap; no user interview, no ticket, just the two data views the dashboard wasn't joining."
         },
         {
           "question_id": "PS-2",
-          "relevance_note": "Creative solution: diversity-blending algorithm that surfaced invisible user intents without rewriting the ranker"
+          "relevance_note": "Creative move was the diagnosis, not the algorithm: named item-level scoring as the cause of page-level homogeneity so a cheap blending layer could fix it without rewriting holistic ranking."
         },
         {
           "question_id": "IMP-2",
-          "relevance_note": "Prioritized user experience: half of users on multi-intent queries were completely unserved"
+          "relevance_note": "Prioritized the invisible users: half of multi-intent-query buyers were getting a page that ignored them, and the dashboard rewarded the team for ignoring them back."
         },
         {
           "question_id": "OWN-11",
-          "relevance_note": "Took ownership of a problem the organization did not know existed, grew it into 200M+ initiative"
+          "relevance_note": "Owned a problem the org didn't know existed -- framed intent collapse, diagnosed item-vs-page, prototyped the fix; it compounded into a multi-year 200M+ annualized initiative."
         },
         {
           "question_id": "OWN-9",
-          "relevance_note": "Built prototype with incomplete information -- one week, no guarantee it would work or get funded"
+          "relevance_note": "Moved fast with incomplete information: one Hacker Week, no funded scope, no guarantee the item-vs-page diagnosis would survive review; shipped end-to-end prototype anyway."
         },
         {
           "question_id": "INN-9",
-          "relevance_note": "Creative solution to a complex problem: cheap intent-coverage proxy instead of expensive holistic ranking rewrite"
+          "relevance_note": "Complex-problem creativity was structural: cheap diversity-blending proxy on top of the existing ranker instead of rewriting holistic ranking -- the framing made the fix cheap."
         },
         {
           "question_id": "INN-10",
-          "relevance_note": "Identified intent collapse as innovation area by questioning why standard metrics looked healthy"
+          "relevance_note": "Innovation-from-questioning-metrics: asked why healthy-looking dashboards could coexist with unserved users; abandon-log slice answered it."
         },
         {
           "question_id": "ADP-20",
-          "relevance_note": "Self-initiated Hacker Week project driven by curiosity about abandoned query patterns"
+          "relevance_note": "Self-directed curiosity: Hacker Week scope I defined myself, driven by the gap between healthy-looking standard metrics and the abandoned-query pattern nobody was slicing."
         },
         {
           "question_id": "PS-11",
-          "relevance_note": "Used purchase data to prove the ranking system was failing -- display metrics said fine, purchase data said broken"
+          "relevance_note": "Purchase-data slice vs display-data slice was the decision: one said \"ranker fine,\" the other said \"half the buyers unserved.\" The disagreement was the signal."
         },
         {
           "question_id": "INN-8",
-          "relevance_note": "Challenged the status quo: questioned why healthy-looking metrics masked half the user base being unserved"
+          "relevance_note": "Challenged the default: standard metrics said the system was healthy, I argued the metric was measuring only the users the system hadn't lost -- and proved it with abandon-log + purchase data."
         },
         {
           "question_id": "INN-4",
-          "relevance_note": "Innovative diversity-blending solution validated during Hacker Week, published at SIGIR"
+          "relevance_note": "End-to-end diversity-blending prototype validated during Hacker Week; the methodology was later written up at SIGIR once the item-vs-page diagnosis was confirmed across verticals."
         },
         {
           "question_id": "IMP-10",
-          "relevance_note": "Long-term impact: grew from one-week prototype to multi-year 200M+ initiative that changed org-wide ranking approach"
+          "relevance_note": "Long-term impact came from the diagnosis, not the prototype: \"item-level scoring creates page-level homogeneity\" became a reusable frame that grew a one-week prototype into a multi-year 200M+ initiative."
         },
         {
           "question_id": "EXE-5",
-          "relevance_note": "Delivered end-to-end prototype (data pipeline + algorithm + experiment framework) in one-week Hacker Week deadline"
+          "relevance_note": "Deadline-tight end-to-end delivery in the Hacker Week window: abandon-log pipeline + diversity-blending algorithm + experiment framework, shipped as one working stack."
         }
       ]
     },

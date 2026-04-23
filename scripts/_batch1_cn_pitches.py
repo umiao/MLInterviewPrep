@@ -39,12 +39,22 @@ PITCHES = {
         "| KEY FACTS: 锁定 goal scope | peer confidence estimates | "
         "短期交付率下降 = 系统生效 | VP 级 velocity 改善"
     ),
-    1: (  # EX-01
-        "Hacker Week 自发发现 multi-intent query \"intent collapse\"——"
-        "\"pokemon\" 90%+ 返回 trading cards 而购买数据显示一半用户要游戏/玩具；"
-        "构建端到端 diversity prototype "
-        "| KEY FACTS: Hacker Week 自发 | 90%+ intent collapse | "
-        "200M+ annualized impact | 多年 initiative 起点"
+    1: (  # EX-01 (rewritten 2026-04-23 via _rewrite_ex01_intent_collapse_20260423.py)
+        "Hacker Week 自己去找 search ranker 在哪 silently failing -- "
+        "dashboard 显示健康但 multi-intent query 比如 \"pokemon\" 90%+ "
+        "返回 trading cards，而购买数据显示一半 buyer 要 games / toys / "
+        "figures；abandon-log slice 发现上百个 high-volume query 同样 "
+        "collapse，根因不在 per-item calibration 而在 ranker 按 item "
+        "独立打分没有 page-level reasoning -- item-level scoring 本身 "
+        "在生产 page-level homogeneity；一周内端到端搭出 diversity "
+        "blending prototype (abandon-log pipeline + blending 算法 + "
+        "实验框架)，用 purchase data 验证"
+        " | KEY FACTS: 核心 insight -- item-level scoring creates "
+        "page-level homogeneity"
+        " | abandon-log slice 暴露 dashboard 看不见的 invisible half"
+        " | Hacker Week 一周端到端 prototype"
+        " | 200M+ annualized impact 多 vertical 复用; SIGIR 总结方法论"
+        " | 核心 lesson: healthy metric 可能只在 measure 没被系统丢掉的那批用户"
     ),
     2: (  # EX-02 (rewritten 2026-04-23 via _rewrite_ex02_team_transfer_20260423.py)
         "Hacker Week 做出 diversity ranking prototype -- "

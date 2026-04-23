@@ -5,12 +5,12 @@
       "title_zh": "搜索多样性与排名创新 (核心主线)",
       "title_en": "Search Diversity & Ranking Innovation",
       "color": "blue",
-      "narrative_zh": "这是我职业生涯中最重要的一条主线，从一个Hacker Week的个人发现，成长为影响200M+年化GMB的多年项目。\n\n**起点 (EX-01)**：Hacker Week期间，我独立发现搜索排名系统在\"静默地失败\"——多意图查询(如\"pokemon\")90%以上的结果是交易卡，但购买数据显示一半用户实际上想要游戏、玩具或手办。标准指标看起来很健康，因为满意的主流用户掩盖了被忽视的那一半。我在一周内从发现到原型验证，证明了问题可以解决。\n\n**组织阻力 (EX-02)**：Hacker Week 之后项目停滞——不是 manager 挡路，是 team charter 本身是 filtering thresholds 而非 ranking allocation，OKRs 结构上对不上。先试 soft reframe 把 project 包装成 relevance 语言，失败——OKRs 是 team 被 measure 的东西，不是 aspire 的东西。做 structural call 转到 Final Ranking team，把 diversity 重新定义为 intent-aware slot allocation；正式申请前先和 receiving team lead 预谈，把 cold 转组变成 warm sponsor。Problem follows the person, not the org chart。\n\n**指标重定义 (EX-03)**：在新团队，我发现行业标准的Sale NDCG指标存在根本缺陷——它系统性地偏好低价商品，因为便宜商品的转化率更高。我提出GMB(价格x购买概率)作为正确的优化目标，并发现了更深层的校准陷阱。\n\n**stakeholder教育 (EX-04)**：多样性实验上线后，MRR指标下降而GMB和购买率上升，引发了利益相关者的警惕。我必须解释为什么一个\"变差\"的指标实际上意味着更好的结果。\n\n**平台化 (EX-06)**：我将多样性方案设计为可复用的allocation primitive，任何团队只需插入目标分布即可使用。关键架构决策：用统一的GMB bidding维度替代旧的LTR评分范式。最终跨多个垂直领域达成200M+年化影响。\n\n**实验严谨性 (EX-10)**：为了确保实验结果的可信度，我设计了去偏差的评估框架，发表于SIGIR。\n\n**线上风险管理 (EX-08)**：当module数量激增导致线上质量退化时，我将问题升级到VP层面，推动建立模块仲裁机制。",
+      "narrative_zh": "这是我职业生涯中最重要的一条主线，从一个Hacker Week的个人发现，成长为影响200M+年化GMB的多年项目。\n\n**起点 (EX-01)**：Hacker Week 期间我自己去找 search ranker 在哪 silently failing——dashboard 显示健康但 multi-intent query 比如 \"pokemon\" 90%+ 返回 trading cards，而 purchase data 显示一半用户要 games / toys / figures。关键诊断：abandon-log slice 发现上百个 high-volume query 同样 collapse，根因不在 per-item calibration 而在 ranker 按 item 独立打分没有 page-level reasoning——item-level scoring 本身在生产 page-level homogeneity。一周内端到端搭出 diversity blending prototype (abandon-log pipeline + 算法 + 实验框架)。\n\n**组织阻力 (EX-02)**：Hacker Week 之后项目停滞——不是 manager 挡路，是 team charter 本身是 filtering thresholds 而非 ranking allocation，OKRs 结构上对不上。先试 soft reframe 把 project 包装成 relevance 语言，失败——OKRs 是 team 被 measure 的东西，不是 aspire 的东西。做 structural call 转到 Final Ranking team，把 diversity 重新定义为 intent-aware slot allocation；正式申请前先和 receiving team lead 预谈，把 cold 转组变成 warm sponsor。Problem follows the person, not the org chart。\n\n**指标重定义 (EX-03)**：在新团队，我发现行业标准的Sale NDCG指标存在根本缺陷——它系统性地偏好低价商品，因为便宜商品的转化率更高。我提出GMB(价格x购买概率)作为正确的优化目标，并发现了更深层的校准陷阱。\n\n**stakeholder教育 (EX-04)**：多样性实验上线后，MRR指标下降而GMB和购买率上升，引发了利益相关者的警惕。我必须解释为什么一个\"变差\"的指标实际上意味着更好的结果。\n\n**平台化 (EX-06)**：我将多样性方案设计为可复用的allocation primitive，任何团队只需插入目标分布即可使用。关键架构决策：用统一的GMB bidding维度替代旧的LTR评分范式。最终跨多个垂直领域达成200M+年化影响。\n\n**实验严谨性 (EX-10)**：为了确保实验结果的可信度，我设计了去偏差的评估框架，发表于SIGIR。\n\n**线上风险管理 (EX-08)**：当module数量激增导致线上质量退化时，我将问题升级到VP层面，推动建立模块仲裁机制。",
       "examples": [
         {
           "example_id": "EX-01",
-          "role_zh": "发现者：Hacker Week期间独立发现intent collapse问题，一周内完成从数据分析到原型验证的全链路",
-          "principles": ["bias_for_action", "dive_deep", "think_big", "ownership"]
+          "role_zh": "诊断者：Hacker Week 自己去找 silently failing 的 multi-intent query，abandon-log slice 暴露 dashboard 看不见的 invisible half，诊断核心是 item-level scoring 本身在生产 page-level homogeneity -- 结构性而非 calibration；一周端到端 prototype (pipeline + blending + 实验框架)",
+          "principles": ["invisible_to_standard_metrics", "root_cause_diagnosis", "item_vs_page_level_reasoning", "self_initiated_direction"]
         },
         {
           "example_id": "EX-02",
@@ -220,7 +220,7 @@
     {
       "from": "EX-01",
       "to": "EX-10",
-      "note_zh": "intent collapse发现 -> 严谨实验验证 -> SIGIR发表"
+      "note_zh": "item-vs-page 诊断 -> 严谨 debiased 评估 -> SIGIR 方法论总结"
     },
     {
       "from": "EX-14",
