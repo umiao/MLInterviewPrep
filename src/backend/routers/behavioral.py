@@ -144,6 +144,10 @@ def list_questions(
             "created_at": q.created_at,
             "example_count": link_count,
             "theme_tags": theme_rows_by_q.get(q.id, []),
+            "probe_notes": (
+                json.loads(q.probe_notes) if q.probe_notes else None
+            ),
+            "probe_notes_updated_at": q.probe_notes_updated_at,
         })
     return result
 
@@ -226,7 +230,12 @@ def create_question(
     db.add(q)
     db.commit()
     db.refresh(q)
-    return {**q.__dict__, "example_count": 0}
+    return {
+        **q.__dict__,
+        "example_count": 0,
+        "probe_notes": None,
+        "probe_notes_updated_at": None,
+    }
 
 
 @router.put("/behavioral/questions/{question_db_id}", response_model=BehavioralQuestionResponse)
@@ -251,7 +260,14 @@ def update_question(
 
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
-        setattr(q, key, value)
+        if key == "probe_notes":
+            if value is None:
+                q.probe_notes = None
+            else:
+                q.probe_notes = json.dumps(value, ensure_ascii=False)
+            q.probe_notes_updated_at = datetime.utcnow()
+        else:
+            setattr(q, key, value)
 
     db.commit()
     db.refresh(q)
@@ -261,7 +277,12 @@ def update_question(
         .scalar()
         or 0
     )
-    return {**q.__dict__, "example_count": link_count}
+    return {
+        **q.__dict__,
+        "example_count": link_count,
+        "probe_notes": json.loads(q.probe_notes) if q.probe_notes else None,
+        "probe_notes_updated_at": q.probe_notes_updated_at,
+    }
 
 
 @router.delete("/behavioral/questions/{question_db_id}", status_code=204)
@@ -312,6 +333,7 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
                 "text": q.text,
                 "category_id": q.category_id,
                 "relevance_note": link.relevance_note,
+                "is_primary": bool(link.is_primary),
             })
 
     return {
@@ -594,10 +616,29 @@ def create_link(
     if existing:
         raise HTTPException(status_code=409, detail="Link already exists")
 
+    # Enforce single-primary-per-question invariant at the application layer
+    # before the DB constraint fires, so we return a clean 409 instead of a
+    # raw IntegrityError surfacing as 500.
+    if data.is_primary:
+        prior_primary = (
+            db.query(QuestionExampleLink)
+            .filter(
+                QuestionExampleLink.question_id == data.question_id,
+                QuestionExampleLink.is_primary.is_(True),
+            )
+            .first()
+        )
+        if prior_primary:
+            raise HTTPException(
+                status_code=409,
+                detail="Question already has a primary example link",
+            )
+
     link = QuestionExampleLink(
         question_id=data.question_id,
         example_id=data.example_id,
         relevance_note=data.relevance_note,
+        is_primary=bool(data.is_primary),
     )
     db.add(link)
     db.commit()

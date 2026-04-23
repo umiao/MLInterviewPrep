@@ -17,6 +17,22 @@ class BehavioralQuestionCreate(BaseModel):
     company_target: str | None = None
 
 
+class ProbeNotes(BaseModel):
+    """Structured probe-note payload attached to a behavioral question.
+
+    Fields are optional individually so partial edits are allowed; the
+    migration + wire format stores the whole dict as a JSON TEXT blob on
+    ``behavioral_questions.probe_notes``.
+    """
+
+    core_signal: str | None = None
+    what_good_looks_like: str | None = None
+    # Field name uses "L5" (Staff Engineer level) per T-P1-579 spec; keep as-is
+    # so the JSON wire format matches the documented schema.
+    what_L5_adds: str | None = None  # noqa: N815
+    common_failure_modes: str | None = None
+
+
 class BehavioralQuestionUpdate(BaseModel):
     """Schema for updating a behavioral question."""
 
@@ -26,6 +42,7 @@ class BehavioralQuestionUpdate(BaseModel):
     original_category: str | None = None
     difficulty: str | None = None
     company_target: str | None = None
+    probe_notes: ProbeNotes | None = None
 
 
 class QuestionThemeBrief(BaseModel):
@@ -51,6 +68,8 @@ class BehavioralQuestionResponse(BaseModel):
     created_at: datetime | None = None
     example_count: int = 0
     theme_tags: list[QuestionThemeBrief] = []
+    probe_notes: ProbeNotes | None = None
+    probe_notes_updated_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -102,6 +121,7 @@ class LinkedQuestionBrief(BaseModel):
     text: str
     category_id: str
     relevance_note: str | None = None
+    is_primary: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -141,6 +161,7 @@ class QuestionExampleLinkCreate(BaseModel):
     question_id: int
     example_id: int
     relevance_note: str | None = None
+    is_primary: bool = False
 
 
 class QuestionExampleLinkResponse(BaseModel):
@@ -150,6 +171,7 @@ class QuestionExampleLinkResponse(BaseModel):
     question_id: int
     example_id: int
     relevance_note: str | None = None
+    is_primary: bool = False
     created_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)

@@ -11,32 +11,11 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-575, T-P0-576, T-P0-577, T-P0-578
-- **Description**: Schema migration after all 4 high-link rewrites land.
+### P2 -- Nice to Have
 
-Per user direction: NO angle_label DB field. Angle lives in probe_notes prose as writing discipline. Revisit in 6 months if cluster emerges.
+### P3 -- Stretch Goals
 
-Add:
-1. question_example_links.is_primary BOOLEAN DEFAULT 0  (exactly one primary per question, enforced by trigger)
-2. behavioral_questions.probe_notes JSON  (structured: {core_signal, what_good_looks_like, what_L5_adds, common_failure_modes})
-3. behavioral_questions.probe_notes_updated_at DATETIME
-
-Deliverables:
-- scripts/migrate_bq_schema_20260421.py (idempotent: ALTER TABLE ... IF NOT EXISTS pattern via PRAGMA check)
-- DB backup before migration
-- SQLAlchemy model + Pydantic schema updates in src/backend/models/behavioral.py and schemas/behavioral.py
-- Backend routes wired: GET /behavioral/questions returns probe_notes + link is_primary; PUT /behavioral/questions/{id} accepts probe_notes; POST /behavioral/links accepts is_primary
-- Regression test in tests/: round-trip probe_notes JSON, enforce single-primary-per-question invariant
-
-AC:
-- Migration runs clean on current DB (no data loss)
-- Migration script re-runs with [SKIP]
-- Backend tests pass (existing + new)
-- Frontend types file updated (src/frontend/src/types/behavioral.ts)
-- No angle_label field added (verified via grep)
+## Blocked
 
 #### T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each)
 - **Priority**: P1
@@ -137,86 +116,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-600
-- **Description**: Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
-
-Scope:
-1. /quick-index?section=bq — add 2 new theme cards (customer_user_focus, ethical_integrity_backbone). Update CLUSTER_FAMILIES in QuickIndex.tsx:
-   - customer_user_focus → new cluster 'Customer & User' (standalone) OR fold into 'Data and Decisions' renamed to 'Data & Customer'
-   - ethical_integrity_backbone → add to 'Conflict & Collaboration' cluster (renamed 'Conflict, Collaboration & Integrity')
-   - Remove scope_creep_ambiguous from 'Decision under Ambiguity' cluster (it was deleted)
-2. BehavioralQuestions.tsx ExampleCard + BehavioralThemePage ExampleCard — render facet pills (small, distinct color from theme pills). Example: a story tagged fast_learning + scrappy_innovation gets 2 small pills below the theme pills.
-3. ThemeFilterSidebar.tsx — include new themes in the filter list; optionally add a separate 'Facets' filter group (can defer to later if scope creep)
-4. is_signature visual — if is_signature=1, show a small 'Signature Story' badge (distinct from golden badge). Golden = quality mark; Signature = 'proudest achievement, use for open-ended impact Q's'
-5. types/behavioral.ts — add facets: FacetTag[] and is_signature/signature_at to BehavioralExample interface
-
-Deliverables:
-- Updated QuickIndex.tsx / BehavioralQuestions.tsx / BehavioralThemePage.tsx / ThemeFilterSidebar.tsx / ExampleDrawerContent.tsx / types/behavioral.ts
-- Backend response schemas updated in behavioral.py router to include facets + is_signature
-
-AC:
-- Manual smoke test: /quick-index?section=bq shows 2 new theme cards at correct cluster positions; ExampleCard shows facet pills when example has facet tags; ThemeFilterSidebar has new themes
-- tsc + vitest + vite build pass
-- No regression on existing theme/question/example rendering
-- Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
-
-### P2 -- Nice to Have
-
-#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P0-575
-- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
-
-Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
-
-Output files (one per story):
-- docs/behavioral_prep_notes/EX-01_probe_qa.md
-- docs/behavioral_prep_notes/EX-15_probe_qa.md
-- docs/behavioral_prep_notes/EX-16_probe_qa.md
-- docs/behavioral_prep_notes/EX-17_probe_qa.md
-
-Each file mirrors EX-30_probe_qa.md structure:
-- Header: linked story id + themes + preservation note
-- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
-- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
-- Language: 中英混合 per user's EX-30 precedent (不需要统一)
-
-AC:
-- All 4 .md files created; each >= 40 lines
-- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
-- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
-- User reviews each one on Discord before marking complete
-
-#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-582
-- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
-
-Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
-- behavioral_examples.principle_tags
-- behavioral_examples.risk_statement
-- behavioral_examples.result (the outcome)
-- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
-
-Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
-
-Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
-
-AC:
-- Script reads-only; no DB writes
-- Empty output when no drift (silent-on-no-work rule)
-- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
-- True-positive rate: manually mutate a test risk_statement; expect 1 report
-
-### P3 -- Stretch Goals
-
-## Blocked
-
 #### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
 - **Priority**: P1
 - **Complexity**: M
@@ -245,6 +144,32 @@ AC:
 - scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
 - Script re-runs [SKIP]
 - Retag log shows rationale for each tag added (not a black box)
+
+#### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-600
+- **Description**: Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
+
+Scope:
+1. /quick-index?section=bq — add 2 new theme cards (customer_user_focus, ethical_integrity_backbone). Update CLUSTER_FAMILIES in QuickIndex.tsx:
+   - customer_user_focus → new cluster 'Customer & User' (standalone) OR fold into 'Data and Decisions' renamed to 'Data & Customer'
+   - ethical_integrity_backbone → add to 'Conflict & Collaboration' cluster (renamed 'Conflict, Collaboration & Integrity')
+   - Remove scope_creep_ambiguous from 'Decision under Ambiguity' cluster (it was deleted)
+2. BehavioralQuestions.tsx ExampleCard + BehavioralThemePage ExampleCard — render facet pills (small, distinct color from theme pills). Example: a story tagged fast_learning + scrappy_innovation gets 2 small pills below the theme pills.
+3. ThemeFilterSidebar.tsx — include new themes in the filter list; optionally add a separate 'Facets' filter group (can defer to later if scope creep)
+4. is_signature visual — if is_signature=1, show a small 'Signature Story' badge (distinct from golden badge). Golden = quality mark; Signature = 'proudest achievement, use for open-ended impact Q's'
+5. types/behavioral.ts — add facets: FacetTag[] and is_signature/signature_at to BehavioralExample interface
+
+Deliverables:
+- Updated QuickIndex.tsx / BehavioralQuestions.tsx / BehavioralThemePage.tsx / ThemeFilterSidebar.tsx / ExampleDrawerContent.tsx / types/behavioral.ts
+- Backend response schemas updated in behavioral.py router to include facets + is_signature
+
+AC:
+- Manual smoke test: /quick-index?section=bq shows 2 new theme cards at correct cluster positions; ExampleCard shows facet pills when example has facet tags; ThemeFilterSidebar has new themes
+- tsc + vitest + vite build pass
+- No regression on existing theme/question/example rendering
+- Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
 
 #### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
 - **Priority**: P1
@@ -348,6 +273,54 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - **Depends on**: None
 - **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
+#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P0-575
+- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
+
+Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
+
+Output files (one per story):
+- docs/behavioral_prep_notes/EX-01_probe_qa.md
+- docs/behavioral_prep_notes/EX-15_probe_qa.md
+- docs/behavioral_prep_notes/EX-16_probe_qa.md
+- docs/behavioral_prep_notes/EX-17_probe_qa.md
+
+Each file mirrors EX-30_probe_qa.md structure:
+- Header: linked story id + themes + preservation note
+- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
+- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
+- Language: 中英混合 per user's EX-30 precedent (不需要统一)
+
+AC:
+- All 4 .md files created; each >= 40 lines
+- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
+- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
+- User reviews each one on Discord before marking complete
+
+#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-582
+- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
+
+Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
+- behavioral_examples.principle_tags
+- behavioral_examples.risk_statement
+- behavioral_examples.result (the outcome)
+- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
+
+Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
+
+Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
+
+AC:
+- Script reads-only; no DB writes
+- Empty output when no drift (silent-on-no-work rule)
+- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
+- True-positive rate: manually mutate a test risk_statement; expect 1 report
+
 ## Completed Tasks
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
@@ -357,6 +330,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - [x] **2026-04-23** -- T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
 - [x] **2026-04-23** -- T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Folded into T-P2-207's expanded scope, which now covers BOTH helixos AND templa
+- [x] **2026-04-23** -- T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label). Schema migration after all 4 high-link rewrites land.
 - [x] **2026-04-23** -- T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol. EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
 - [x] **2026-04-23** -- T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol. EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
 - [x] **2026-04-23** -- T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol. EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).

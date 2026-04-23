@@ -4,6 +4,14 @@ export interface LinkedQuestion {
   text: string;
   category_id: string;
   relevance_note: string | null;
+  is_primary: boolean;
+}
+
+export interface ProbeNotes {
+  core_signal?: string | null;
+  what_good_looks_like?: string | null;
+  what_L5_adds?: string | null;
+  common_failure_modes?: string | null;
 }
 
 export interface BehavioralExample {

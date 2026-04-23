@@ -7,6 +7,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -31,12 +32,28 @@ class BehavioralQuestion(Base):
     difficulty = Column(String, nullable=True)  # easy/medium/hard
     company_target = Column(String, nullable=True)  # e.g. "Meta E6"
     created_at = Column(DateTime, default=datetime.utcnow)
+    # JSON blob with keys: core_signal, what_good_looks_like, what_L5_adds,
+    # common_failure_modes. Stored as TEXT for SQLite portability.
+    probe_notes = Column(Text, nullable=True)
+    probe_notes_updated_at = Column(DateTime, nullable=True)
 
     example_links = relationship(
         "QuestionExampleLink",
         back_populates="question",
         cascade="all, delete-orphan",
     )
+
+    @property
+    def probe_notes_dict(self) -> dict:
+        """Return probe_notes as a parsed dict, or {} if unset/invalid."""
+        if not self.probe_notes:
+            return {}
+        return json.loads(self.probe_notes)
+
+    @probe_notes_dict.setter
+    def probe_notes_dict(self, value: dict) -> None:
+        """Serialize a probe_notes dict into the JSON text column."""
+        self.probe_notes = json.dumps(value, ensure_ascii=False)
 
 
 class BehavioralExample(Base):
@@ -132,7 +149,24 @@ class QuestionExampleLink(Base):
         nullable=False,
     )
     relevance_note = Column(Text, nullable=True)  # Why this example fits this question
+    # At most one primary example per question (enforced by partial unique
+    # index ``ux_qel_primary_per_question`` created by the migration script).
+    is_primary = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=text("0"),
+    )
     created_at = Column(DateTime, default=datetime.utcnow)
 
     question = relationship("BehavioralQuestion", back_populates="example_links")
     example = relationship("BehavioralExample", back_populates="question_links")
+
+    __table_args__ = (
+        Index(
+            "ux_qel_primary_per_question",
+            "question_id",
+            unique=True,
+            sqlite_where=text("is_primary = 1"),
+        ),
+    )
