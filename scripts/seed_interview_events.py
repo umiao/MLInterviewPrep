@@ -34,6 +34,15 @@ EVENTS = [
         "duration_minutes": 60,
         "status": "upcoming",
     },
+    {
+        "company_name": "Unknown Fintech",
+        "event_type": "hr_call",
+        "title": "HR Call with Maddie Gore",
+        "description": "HR phone screen - recruiter Maddie Gore (She/Her). Company name TBD. Slot confirmed 2026-04-28 09:00 AM PT (between Uber final day 1 Apr 27 and day 2 Apr 29).",
+        "scheduled_at": "2026-04-28T09:00:00",
+        "duration_minutes": 30,
+        "status": "upcoming",
+    },
 ]
 
 
