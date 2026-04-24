@@ -11,37 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-579
-- **Description**: Per user direction: use the 4 already-rewritten (fresh) stories as free-lunch pattern calibration BEFORE doing bulk C2. This validates the probe_notes schema + style guide with 4 real samples so bulk work does not go sideways.
-
-Pick each story's clearest primary question (propose during Phase A matrix, confirm in this task):
-- EX-15 primary Q candidate: OWN-1 (take ownership of failure) -- picks up dashboard blind spot + absorbing rollback
-- EX-16 primary Q candidate: PS-6 or ADP-5 (calculated risk / handled mistake)
-- EX-17 primary Q candidate: ADP-19 or COM-5 (receiving difficult feedback / frame pivot)
-- EX-30 primary Q candidate: OWN-1 or ADP-5 (ownership of failure / mistake recovery)
-
-Language: 中文叙述 + 英文术语. Copy EX-30_probe_qa.md style for all 4. Do NOT write a style guide yet -- user wants to see 4 samples before codifying.
-
-Structure for each probe_notes (stored in behavioral_questions.probe_notes JSON):
-{
-  'core_signal': '1-2 sentence 中文: 这题本质在问什么 L5 signal',
-  'what_good_looks_like': '3-5 bullet 中文+英文术语: L4 bar 答出这些即过',
-  'what_L5_adds': '2-3 bullet: L5 bar 在此基础上再多一层 (structural reframe / risk_statement / org-level lesson)',
-  'common_failure_modes': '3-4 bullet: junior answer / redemption tail / scapegoating / 避开 reviewer 当场扣分的点'
-}
-
-Also mark the 4 links as is_primary=1 in question_example_links for these 4 Q-E pairs.
-
-AC:
-- scripts/seed_bq_probe_notes_calibration_20260421.py is idempotent + DB-backup-guarded
-- 4 probe_notes persisted, each structurally complete (all 4 fields non-empty)
-- 4 is_primary=1 flags set on the 4 chosen links
-- User REVIEW GATE on Discord before any BQ-DEPTH-10 / BQ-DEPTH-11 work starts (attach the 4 probe_notes MD preview)
-- Script re-runs with [SKIP]
-
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
 - **Complexity**: M
@@ -354,6 +323,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-24** -- T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each). Per user direction: use the 4 already-rewritten (fresh) stories as free-lunch pattern calibration BEFORE doing bulk C2. 
 - [x] **2026-04-24** -- T-P0-608: Fix emoji-CI: align check_emoji.py regex + Windows UTF-8 streams + code/doc split + meta test + cp1252 regression harness. Recapture of prior aborted session. Root cause found: check_emoji.py has wider regex (includes \u2600-\u26ff + \u2700-\u
 - [x] **2026-04-23** -- T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh). The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
 - [x] **2026-04-23** -- T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md. Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None
