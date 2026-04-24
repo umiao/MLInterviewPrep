@@ -291,9 +291,38 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
+#### T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Follow-up to T-P1-606 (first emoji-scanner fix commit).
+
+Make scripts/check_emoji.py honor sys.argv[1:]: if non-empty, scan only those paths (files or directories); otherwise preserve full-repo fallback so CI bare-invocation (.github/workflows/ci.yml) stays unchanged.
+
+Per reviewer feedback on the emoji_scan_fix_plan_20260423.md: before shipping, produce a diff preview of the scan_single_file extraction (current scan_emoji couples walk + per-file logic at lines 42-49) and surface it for user review. LoC estimate (~25) may be optimistic if the extraction requires parameter renames or return-value changes.
+
+Acceptance: (a) python scripts/check_emoji.py [path] scans only [path]; (b) python scripts/check_emoji.py with zero args behaves exactly as before; (c) new test covers both the single-file-dirty and single-file-clean branches.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
+
+#### T-P1-606: Fix emoji-scan cp1252 crash + lock regex consistency (F-1 + F-3 + meta-test)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Commit 1 of the emoji-scanner fix plan. BLOCKED on user decision between options A/B/C for the 1 legit FE0F hit in PROGRESS.md:590 (discord msg 1497033478842351616, 2026-04-23).
+
+INVESTIGATION COMPLETE, revised findings:
+- Original plan assumed 3 regexes byte-identical (subagent survey claim). Verified empirically: FALSE. check_emoji.py retains stale BMP ranges \u2600-\u26ff + \u2700-\u27bf; check_emoji_files.py and lint_check.py had them removed 2026-04-11 per archive/progress_log.md:20 (to kill 81 BLACK STAR-style false positives).
+- Current full-repo scan: 63 hits from stale check_emoji.py regex; 62 are BMP false positives that DISAPPEAR under the narrow (canonical) regex; 1 is a legit U+FE0F variation selector in PROGRESS.md:590 from a quoted historical discord message about a prior emoji incident.
+- Root cause of user pain is this regex drift (RC-3), not the Windows encoding issue alone (RC-1 is latent).
+
+REVISED EXECUTION SCOPE when unblocked:
+1. scripts/check_emoji.py: remove 2 BMP range lines to match check_emoji_files.py + lint_check.py.
+2. scripts/check_emoji.py + scripts/check_emoji_files.py: F-1 UTF-8 stream reconfigure at main() entry (defense in depth for future U+1F6xx emoji).
+3. tests/test_emoji_regex.py (or new tests/test_emoji_scanner.py): regex-equality meta-test + subprocess cp1252 env test (reviewer's revised F-3).
+4. User-chosen handling of PROGRESS.md:590 FE0F (option A/B/C pending).
 
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
