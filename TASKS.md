@@ -134,50 +134,6 @@ AC:
 - No regression on existing theme/question/example rendering
 - Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
 
-#### T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 headers, structure: 1 Requirements / 2 Capacity / 3 HL Arch / 4a Two-Tower / 4b Ranking / 4c Re-rank / 4d Cold Start / 5 Reliability / 6 Summary / Interview Q&A / Self-Check / L5 Tradeoff Matrix).
-
-Current gap analysis (grep): HAS MMoE(16) two-tower(17) ScaNN(4) YouTube(3). MISSING watch(0 — no watch-time weighted LR!), Covington(0), Zhao(0), Semantic ID(0), LRM(0).
-
-Expansions (fold into existing sections 4a/4b, add new 4e for 2024-2025 LRM):
-
-**4a Two-Tower Retrieval additions:**
-- Covington 2016 DNN recall paper trick set: (a) user vector from last-layer activation, item embedding = softmax input weights so u·v is learned similarity; (b) example age feature fed during training, zeroed at serving to counteract ML bias toward old viral content; (c) 'next-watch' target (not held-out random) to prevent sequential-episode leak; (d) extreme multiclass framing with sampled softmax
-- Multi-source retrieval: parallel召回 from (collab filter / two-tower / subscription new / search history / topic-trending / item-item related / fresh upload cold-start). Ranker receives 'which_source nominated this + source_score' as features to combine signals.
-- Frequency features: 'historical impression frequency' features prevent sequential requests returning same list (cite Rangadurai)
-
-**4b Ranking additions:**
-- Zhao 2019 MMoE paper specifics: share-bottom → MMoE substitution; expert networks + per-task gating network; solves negative transfer between engagement (clicks/watch) and satisfaction (likes/ratings)
-- Watch-time weighted LR: output layer uses weighted logistic regression, weight = observed watch-time — optimizes expected watch duration directly, avoids clickbait trap
-- Shallow tower for bias correction: stacked on MMoE, learns position bias + device bias explicitly — position fed as feature, linearly subtracted; serving sets position to a fixed value. Cite Daiwk.
-- Training-sample policy: samples from ALL YouTube videos (not just recommender's own surfaces) to avoid model-induced bias; per-user equal weighting prevents heavy-user dominance.
-- Query features vs impression features distinction: query features computed once per request; impression features computed per candidate.
-
-**4e NEW SUBSECTION (2024-2025 frontier):**
-- Large Recommender Models (LRM): Google Gemini variant adapted for video rec; continued pre-training teaches model 'English + YouTube video language' simultaneously; enables generative retrieval.
-- Semantic IDs via RQ-VAE: Video-BERT-style transformer encoder → dense embedding → Residual Quantization Variational AutoEncoder compresses to 4-8 discrete tokens per video → LLM treats video as sequence → next-video prediction natural.
-- Cold-start advantage: LRM materially improves fresh/long-tail content performance vs pure CF.
-- Serving cost reality: requires 95%+ cost reduction + offline inference strategy to deploy at YouTube scale — currently LRM is auxiliary retrieval source or offline tagging, NOT replacing main online two-tower+MMoE pipeline.
-
-Also update:
-- Cross-link to id=21 (content pipeline) — content-understanding multimodal features are the bridge
-- Add YouTube-specific scale numbers where helpful (keep existing 23K QPS etc as generic; add '例: YouTube 日上传 500h+, 月 DAU 2B+' context)
-
-Deliverables:
-- scripts/seed_fn198_youtube_rec_expand_20260421.py (idempotent via description-hash compare, DB-backup-guarded with pre_expand_fn198 suffix)
-- Target final length: 32000-36000 chars (net +4000-8000)
-- All insertions preserve existing 19 headers; new 4e adds 1-2 headers
-
-AC:
-- grep count post-expand: Covington>=1, Zhao>=1, 'watch-time'>=2, 'Semantic ID'>=2, LRM>=3, RQ-VAE>=1, 'shallow tower'>=1, 'example age'>=1
-- Existing 19 headers all still present (no structural breakage; additive only)
-- Script re-runs [SKIP]
-- /framework page renders id=198 drawer without layout breaks
-- Pytest passes
-
 ### P2 -- Nice to Have
 
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
@@ -291,6 +247,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-24** -- T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline. Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 header
 - [x] **2026-04-24** -- T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps. Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architec
 - [x] **2026-04-24** -- T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each). Per user direction: use the 4 already-rewritten (fresh) stories as free-lunch pattern calibration BEFORE doing bulk C2. 
 - [x] **2026-04-24** -- T-P0-608: Fix emoji-CI: align check_emoji.py regex + Windows UTF-8 streams + code/doc split + meta test + cp1252 regression harness. Recapture of prior aborted session. Root cause found: check_emoji.py has wider regex (includes \u2600-\u26ff + \u2700-\u
