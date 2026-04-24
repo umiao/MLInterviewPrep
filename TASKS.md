@@ -134,38 +134,6 @@ AC:
 - No regression on existing theme/question/example rendering
 - Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
 
-#### T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architecture/dataflow/formulas/production_constraints/tradeoffs/defense) with user-provided material (Discord msg 1496318022804308119 attachment).
-
-Current gap analysis (grep):
-- HAS partial: AV1(5) H.264(7) HLS(6) DASH(4) Argos(1) ABR(4) ASIC(1)
-- MISSING: VCU name explicit, Colossus, Bigtable, Pub/Sub, chunked upload mechanics, Google Global Cache
-
-Expansions to add (fold into existing sections, not rewrite):
-1. **Ingestion subsection** (into  or ): chunked upload (10-50MB chunks to edge server) → GCS → Pub/Sub queue → stateless FFmpeg workers on thousands of instances
-2. **Transcoding tier policy** (into  or ): 'H.264 for all / VP9 for hot / AV1 for head + 4K/8K' — explicit cost amortize principle (AV1 is 50-100× H.264 cost but saves 50-60% bandwidth; VP9 saves 30-40% bandwidth). 长尾保守头部激进.
-3. **Encoding ladder specifics** (into ): per-resolution bitrate tiers (720p has 1.5/2.5/4 Mbps tiers; 144p/240p/360p/480p/720p/1080p/1440p/2160p/4320p pyramid)
-4. **VCU/Argos ASIC callout** (into  or new subsection): Google's self-designed video coding unit ASIC for VP9/AV1 encoding at scale — cite 'VCU (Argos)' 论文 as reference
-5. **DASH vs HLS trade** (into ): DASH 1-5s segment for web (Chrome/Firefox/Edge) / HLS 6-10s segment for Apple only — shorter DASH segments reduce rebuffering by up to 30% on mobile networks
-6. **Storage split** (into ): Colossus for blob (raw + all transcoded) / Bigtable for metadata / Elasticsearch for full-text. Content ID audio fingerprinting as copyright subsystem.
-7. **CDN architecture** (into  or ): Google Global Cache deployed into ISP racks (not just edge POPs) — 3-tier: edge → regional cache → origin
-8. **Content-to-feature bridge** (into  or ): multimodal pipeline (frame embedding Video-BERT-like / ASR / OCR / audio fingerprint Content ID / topic classification / thumbnail scoring) outputs feed BOTH search index AND recommendation retrieval/ranking features — explicit bridge to id=198
-
-Deliverables:
-- scripts/seed_sd_youtube_content_pipeline_expand_20260421.py (idempotent via hash-compare on target columns, DB-backup-guarded with pre_expand_sd21 suffix)
-- Target final length: 25000-30000 chars (net +4000-9000)
-- Content citations: VCU/Argos paper, VdoCipher reference
-
-AC:
-- grep count post-expand: VCU>=1, Colossus>=1, Bigtable>=2, Pub/Sub>=1, chunked>=2, 'Google Global Cache'>=1
-- Preserve existing sections and numbered lists (no section deletion; additive only)
-- Script re-runs [SKIP] via content hash check
-- Pytest passes; vite build clean
-- Manual smoke on /system-design/<id=21 slug> renders new subsections properly
-
 #### T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline
 - **Priority**: P1
 - **Complexity**: M
@@ -323,6 +291,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-24** -- T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps. Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architec
 - [x] **2026-04-24** -- T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each). Per user direction: use the 4 already-rewritten (fresh) stories as free-lunch pattern calibration BEFORE doing bulk C2. 
 - [x] **2026-04-24** -- T-P0-608: Fix emoji-CI: align check_emoji.py regex + Windows UTF-8 streams + code/doc split + meta test + cp1252 regression harness. Recapture of prior aborted session. Root cause found: check_emoji.py has wider regex (includes \u2600-\u26ff + \u2700-\u
 - [x] **2026-04-23** -- T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh). The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
