@@ -1,9 +1,22 @@
-"""Standalone emoji scanner for CI. Exits non-zero if emoji found in project files."""
+"""Standalone emoji scanner for CI. Exits non-zero if emoji found in code/config files.
+
+Emoji in doc files (.md/.txt) produce a warning but do not fail the scan,
+matching the policy in .claude/hooks/lint_check.py.
+"""
 import os
 import re
 import sys
 
-# Regex matching common emoji ranges (mirrors .claude/hooks/lint_check.py)
+# Force UTF-8 on stdout/stderr so diagnostics containing emoji chars don't crash
+# on Windows (default cp1252 cannot encode e.g. \u274c and raises UnicodeEncodeError).
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+# Regex matching common emoji ranges. MUST stay byte-identical to
+# scripts/check_emoji_files.py and .claude/hooks/lint_check.py. Locked by
+# tests/test_emoji_regex_equivalence.py.
 _EMOJI_RE = re.compile(
     "["
     "\U0001f600-\U0001f64f"  # emoticons
@@ -12,8 +25,6 @@ _EMOJI_RE = re.compile(
     "\U0001f900-\U0001f9ff"  # supplemental symbols
     "\U0001fa00-\U0001fa6f"  # chess symbols
     "\U0001fa70-\U0001faff"  # symbols extended-A
-    "\u2600-\u26ff"          # misc symbols
-    "\u2700-\u27bf"          # dingbats
     "\u200d"                 # zero-width joiner
     "\ufe0f"                 # variation selector-16
     "]"
@@ -24,15 +35,22 @@ _SCAN_EXTENSIONS = {
     ".json", ".html", ".css", ".js", ".ts", ".sh", ".bat", ".ps1",
 }
 
+# Extensions where emoji should block (code/config). Doc files only warn.
+_CODE_EXTENSIONS = {
+    ".py", ".yaml", ".yml", ".toml", ".cfg", ".ini",
+    ".json", ".html", ".css", ".js", ".ts", ".sh", ".bat", ".ps1",
+}
+
 _SKIP_DIRS = {
     ".git", "__pycache__", ".venv", "venv", "node_modules",
     ".mypy_cache", ".ruff_cache", "data", ".claude", "dist",
 }
 
 
-def scan_emoji(root: str) -> list[str]:
-    """Walk project tree and return list of 'file:line: <match>' for any emoji found."""
-    hits: list[str] = []
+def scan_emoji(root: str) -> tuple[list[str], list[str]]:
+    """Walk project tree and return (code_hits, doc_hits) for any emoji found."""
+    code_hits: list[str] = []
+    doc_hits: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in _SKIP_DIRS]
         for fname in filenames:
@@ -46,22 +64,31 @@ def scan_emoji(root: str) -> list[str]:
                         if _EMOJI_RE.search(line):
                             rel = os.path.relpath(fpath, root)
                             preview = line.rstrip()[:120]
-                            hits.append(f"  {rel}:{lineno}: {preview}")
+                            hit = f"  {rel}:{lineno}: {preview}"
+                            if ext in _CODE_EXTENSIONS:
+                                code_hits.append(hit)
+                            else:
+                                doc_hits.append(hit)
             except OSError:
                 continue
-    return hits
+    return code_hits, doc_hits
 
 
 def main() -> int:
-    """Run emoji scan on project root. Returns 0 if clean, 1 if emoji found."""
-    # Project root is two levels up from scripts/
+    """Run emoji scan. Exit 0 if no code/config hits; 1 if any. Doc hits warn only."""
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    hits = scan_emoji(root)
-    if hits:
-        report = "\n".join(hits[:30])
-        print(f"[FAIL] Found emoji in {len(hits)} location(s):\n{report}")
+    code_hits, doc_hits = scan_emoji(root)
+    if doc_hits:
+        report = "\n".join(doc_hits[:10])
+        print(
+            f"[WARN] Emoji in {len(doc_hits)} doc file(s) (warning only):\n{report}",
+            file=sys.stderr,
+        )
+    if code_hits:
+        report = "\n".join(code_hits[:30])
+        print(f"[FAIL] Found emoji in {len(code_hits)} code/config location(s):\n{report}")
         return 1
-    print("[OK] No emoji found.")
+    print("[OK] No emoji found in code/config files.")
     return 0
 
 
