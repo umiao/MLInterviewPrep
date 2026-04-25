@@ -68,9 +68,18 @@ def test_probe_notes_round_trip(test_client, seed_question):
     payload = {
         "probe_notes": {
             "core_signal": "Owns ambiguous ambiguity",
-            "what_good_looks_like": "Names the gap and closes it",
-            "what_L5_adds": "Links to cross-team system impact",
-            "common_failure_modes": "Stops at \"not my team\"",
+            "what_good_looks_like": [
+                "Names the gap and closes it",
+                "Surfaces blockers early instead of absorbing them silently",
+            ],
+            "what_L5_adds": [
+                "Links to cross-team system impact",
+                "Defines the bar for the next IC who inherits the surface",
+            ],
+            "common_failure_modes": [
+                "Stops at \"not my team\"",
+                "Frames ownership as taking on more tasks rather than closing gaps",
+            ],
         },
     }
     resp = test_client.put(
@@ -179,6 +188,26 @@ def test_linked_questions_surface_is_primary(
     lq = body["linked_questions"][0]
     assert lq["id"] == q.id
     assert lq["is_primary"] is True
+
+
+def test_probe_notes_schema_accepts_bullet_lists():
+    """Regression: seed (T-P1-580) writes bullet lists on what_good_looks_like /
+    what_L5_adds / common_failure_modes; schema must accept that shape, otherwise
+    GET /api/behavioral/questions raises ResponseValidationError on every row that
+    has probe_notes set (4 rows on prod DB).
+    """
+    from src.backend.schemas.behavioral import ProbeNotes
+
+    pn = ProbeNotes(
+        core_signal="Owns ambiguous scope",
+        what_good_looks_like=["bullet a", "bullet b", "bullet c"],
+        what_L5_adds=["L5 bullet a", "L5 bullet b"],
+        common_failure_modes=["fail a", "fail b", "fail c"],
+    )
+    assert isinstance(pn.what_good_looks_like, list)
+    assert pn.what_good_looks_like == ["bullet a", "bullet b", "bullet c"]
+    assert pn.what_L5_adds == ["L5 bullet a", "L5 bullet b"]
+    assert pn.common_failure_modes == ["fail a", "fail b", "fail c"]
 
 
 def test_no_angle_label_field_on_models():

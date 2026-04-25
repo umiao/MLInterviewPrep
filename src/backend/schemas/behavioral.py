@@ -26,11 +26,11 @@ class ProbeNotes(BaseModel):
     """
 
     core_signal: str | None = None
-    what_good_looks_like: str | None = None
+    what_good_looks_like: list[str] | None = None
     # Field name uses "L5" (Staff Engineer level) per T-P1-579 spec; keep as-is
     # so the JSON wire format matches the documented schema.
-    what_L5_adds: str | None = None  # noqa: N815
-    common_failure_modes: str | None = None
+    what_L5_adds: list[str] | None = None  # noqa: N815
+    common_failure_modes: list[str] | None = None
 
 
 class BehavioralQuestionUpdate(BaseModel):
