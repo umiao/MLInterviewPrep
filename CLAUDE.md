@@ -96,6 +96,13 @@ during live mock interviews and daily drills.
 ## Behavior Rules
 - **Fix violations immediately**: When a check you run (lint, emoji scan, tests) discovers
   violations in project files, fix them immediately.
+- **New framework_node seed batches (>=3 rows) require running
+  `docs/workflow/seed_smoke_test_protocol.md` before merge. Skipping the
+  protocol is not optional.** The protocol catches taxonomy mis-classification
+  bugs (slash-vs-dot path separators, missing PILLAR_ORDER entries, missing
+  PILLAR_STYLES entries) that vitest and pytest cannot see because they only
+  surface when the KG page actually renders. Postmortem: `LESSONS.md`
+  2026-04-25 entry; convention rule: `docs/protocol/kg_markdown_conventions.md` §10.
 
 ### Verification Requirements
 - **"Tests pass" is necessary but not sufficient.** If your task changes a

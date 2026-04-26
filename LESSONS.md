@@ -236,3 +236,16 @@
 - **Second-order rule**: When writing plan-mode prompts to subagents, ASK explicitly for the byte-level check, e.g. "run `A.pattern == B.pattern` and report the boolean + lengths, do not eyeball". Shifting verification from subjective inspection to objective assertion up front is cheaper than auditing the subagent's output after.
 - **Related task**: T-P1-606 (blocked on user decision after this finding).
 - **Tags**: #subagent #verification #regex #gotcha #plan-mode #due-diligence
+
+### [2026-04-25] Slash-path KG taxonomy mis-classification -- silent merge
+- **Context**: A 35-row `framework_nodes` seed batch for the `ml-fundamentals` subtree shipped with `path` values using slash separators (`ml-fundamentals/classical_ml/...`) while the rest of the table used dot separators (`pillar2.feature_engineering.scaling_normalization`). The KG router's `_pillar_of()` derived the pillar by `path.split(".")[0]`, so every slash-path node returned `None` and got bucketed into the grey "Other" FALLBACK_STYLE swimlane. The 35 nodes rendered as 35 separate "Other" lanes on the KG page. The seed series was merged because no AC required running the KG page after seed.
+- **What went wrong / What I learned**: vitest passed (it tests components in isolation, not the layout end-to-end). pytest passed (no test exercised `_pillar_of()` against the real DB after seed). The bug was visually obvious on the first page render but the merge gate didn't include "open the page". When a content seed and a render path both exist, "all tests green" is not a sufficient signal -- the actual render is the only thing that catches taxonomy drift.
+- **Fix / Correct approach**: KG-FIX-01..05 (T-P0-609..T-P0-613):
+  1. **KG-FIX-01** -- rewrote `_pillar_of()` to walk `parent_id` to depth=0 and read the root path (taxonomy-agnostic). Added `tests/test_framework_path_convention.py` schema invariant: every slash-path node must trace back to a WHITELIST root, with TTL tied to T-P2-614.
+  2. **KG-FIX-02** -- added `"ml-fundamentals"` to `PILLAR_STYLES` (cyan-600 border) so the lane renders.
+  3. **KG-FIX-03** -- replaced regex-based `pillarSortKey()` with explicit `PILLAR_ORDER` map (step=10 numbering, `ml-fundamentals=25` between pillar2 and pillar3) so the lane sits in the right visual position.
+  4. **KG-FIX-04** (this entry) -- convention doc `docs/protocol/kg_markdown_conventions.md` §10 + smoke protocol `docs/workflow/seed_smoke_test_protocol.md` + CLAUDE.md Behavior Rules entry.
+  5. **KG-FIX-05** -- manual smoke test + before/after screenshots + HARD merge gate (no auto-merge to main).
+- **Prevention**: `docs/workflow/seed_smoke_test_protocol.md` 5-step checklist is now mandatory for any framework_node seed batch (>=3 rows). The convention test (`tests/test_framework_path_convention.py`) gates new slash-path roots in CI. CLAUDE.md Behavior Rules makes the protocol non-optional. The schema invariant test forces whitelist cleanup once T-P2-614 (KG-DESIGN-DUAL-VIEW) closes -- the exception cannot become permanent by inattention.
+- **Related task**: T-P0-609..T-P0-613 (KG-FIX epic), T-P2-614 (KG-DESIGN-DUAL-VIEW, deferred).
+- **Tags**: #kg #taxonomy #seed-process #postmortem

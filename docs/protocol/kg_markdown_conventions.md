@@ -191,3 +191,74 @@ The POC patch in T-P0-472 upgrades nodes **130 (Model Serving Systems)** and **1
 - Frontend rendering: the FrameworkNodeDrawer should surface `前置` / `后续` as clickable breadcrumb chips.
 - Bidirectional link validation: enforce that every `正典` has an inverse edge from the target node back to the source doc.
 - Composition parser (§3 list form) with a separate regex scoped to `doc_kind='canonical_hub'`.
+
+## 10. `framework_nodes.path` separator convention
+
+**Status**: Adopted 2026-04-25 (T-P0-612, [KG-FIX-04]) after the slash-path KG bug
+postmortem (see `LESSONS.md` 2026-04-25 entry).
+
+### 10.1 The rule
+
+`framework_nodes.path` uses the **dot** (`.`) separator for taxonomy segments.
+
+```
+pillar2.feature_engineering.scaling_normalization     <-- correct
+pillar7.probability_statistics.bias_variance          <-- correct
+```
+
+The first dot-segment is the **pillar key** and is the load-bearing prefix for
+KG rendering. The backend `src/backend/routers/kg.py::_pillar_of()` walks
+`parent_id` to depth=0 and reads the root path; the frontend
+`PILLAR_STYLES` (`src/frontend/src/components/kg/kgStyles.ts`) and
+`PILLAR_ORDER` (`src/frontend/src/components/kg/useKgLayout.ts`) map that key
+to colour and lane order.
+
+### 10.2 Known historical exception: `ml-fundamentals/*`
+
+The `ml-fundamentals` subtree (35 nodes, seeded 2026-04-2x) was authored with
+**slash** (`/`) separators:
+
+```
+ml-fundamentals/classical_ml/bias-variance-tradeoff   <-- exception
+ml-fundamentals/optimization/sgd-vs-adam              <-- exception
+```
+
+This single root is whitelisted in `tests/test_framework_path_convention.py`
+(`WHITELIST = {"ml-fundamentals"}`). The exception is governed by **T-P2-614
+(KG-DESIGN-DUAL-VIEW)** -- when that design task closes, either (a) the
+subtree gets migrated to dot-separator and the whitelist is emptied, or
+(b) the dual-root pattern is ratified and the whitelist enforcement is
+replaced by a permanent rule. The schema invariant test fails once T-P2-614
+is marked completed while the whitelist is still non-empty, forcing the
+cleanup.
+
+### 10.3 Adding a new top-level taxonomy
+
+Any new top-level taxonomy (a new pillar, or any new depth=0 root) **MUST**
+land **all four** of the following in the same change:
+
+1. **WHITELIST entry** in `tests/test_framework_path_convention.py` if the
+   new root uses slash separators (preferred: use dots and skip this step).
+2. **`PILLAR_ORDER` entry** in `src/frontend/src/components/kg/useKgLayout.ts`
+   with a step=10 rank (or an adjacent decimal if inserting between existing
+   ranks -- see the insertion-convention comment in that file).
+3. **`PILLAR_STYLES` entry** in `src/frontend/src/components/kg/kgStyles.ts`
+   with a unique border colour (no collision with existing pillar hues).
+4. **Convention test update**: extend the parameterized known-pillars list
+   in `src/frontend/src/components/kg/kgStyles.test.ts` and
+   `useKgLayout.test.ts` so the new key is covered by the
+   `FALLBACK_STYLE`/`UNKNOWN_PILLAR_RANK` invariants.
+
+Skipping any of the four reproduces the original "Other" bucket bug (every
+node in the new taxonomy gets bucketed grey + sorted to the end of the lane
+order).
+
+### 10.4 Why a separator convention at all
+
+The KG layout pipeline groups nodes into swimlanes by their pillar key.
+Mixing separators silently breaks any code that splits on a single delimiter
+(`path.split(".")[0]`), which is the easy / wrong way to derive the pillar.
+The dot-separator rule plus the parent_id walk in `_pillar_of()` make the
+backend separator-agnostic, but the frontend lane order/colour still keys
+off the literal pillar string. The whitelist + invariant test are the
+checkpoint that prevents another silent slash-root from slipping in.

@@ -9,52 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
-seed-batch process change.
-
-WHY: The slash-path bug entered through a seed-script series (the
-ml-fundamentals batch) that was never run against KG page rendering before
-merge. Convert this from a "should remember" lesson into machinery and
-process that prevents the next occurrence.
-
-ACCEPTANCE CRITERIA
-AC1: tests/test_framework_path_convention.py (already created in KG-FIX-01
-     AC3) lives in CI; verify it runs in `pytest -k "convention"`.
-AC2: New file docs/protocol/kg_markdown_conventions.md (or extend existing)
-     adds explicit rule: "framework_nodes.path uses '.' separator. Known
-     historical exception: ml-fundamentals/* subtree, governed by T-P2-614
-     (KG-DESIGN-DUAL-VIEW). Any new top-level taxonomy MUST add a
-     PILLAR_ORDER entry, a PILLAR_STYLES entry, and a whitelist entry in
-     the convention test."
-AC3: New file docs/workflow/seed_smoke_test_protocol.md — 5-step checklist
-     for any framework_node seed batch (>=3 rows):
-       1. Run seed against staging DB
-       2. Full-table _pillar_of scan; assert all returned pillars in known set
-       3. `vite dev` + open KG page; capture cold-start screenshot
-       4. expand-all; capture screenshot; verify lane count matches expectation
-       5. Diff before/after screenshots; no unexpected regressions
-AC4: CLAUDE.md gets a new bullet under "Behavior Rules":
-     '**New framework_node seed batches (>=3 rows) require running
-     docs/workflow/seed_smoke_test_protocol.md before merge. Skipping the
-     protocol is not optional.'
-AC5: LESSONS.md postmortem entry with this content:
-     - Date: 2026-04-25
-     - Title: "Slash-path KG taxonomy mis-classification — silent merge"
-     - Root cause: 35 ml-fundamentals seed inserts used '/' separator while
-       _pillar_of() only split on '.'. Series merged because no AC required
-       running KG page after seed.
-     - Fix: KG-FIX-01..05 (parent_id-based pillar derivation, explicit pillar
-       order map, schema invariant test, convention doc).
-     - Prevention: seed_smoke_test_protocol.md + CLAUDE.md rule + invariant
-       test gate.
-     - Tags: #kg #taxonomy #seed-process #postmortem
-
-COMPLEXITY: S
-
 #### T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main)
 - **Priority**: P0
 - **Complexity**: S
@@ -376,6 +330,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
 - [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
 - [x] **2026-04-25** -- T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES. [KG-FIX-02] Frontend: extend PILLAR_STYLES in
 - [x] **2026-04-25** -- T-P0-609: [KG-FIX-01] Backend: walk parent_id for pillar derivation. [KG-FIX-01] Backend: rewrite `_pillar_of()` in src/backend/routers/kg.py to walk
