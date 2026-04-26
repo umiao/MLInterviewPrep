@@ -14,7 +14,7 @@
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
 - **Priority**: P1
 - **Complexity**: L
-- **Depends on**: T-P1-580, T-P1-581
+- **Depends on**: T-P1-581
 - **Description**: After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 36 questions in the top 40.
 
 Split into 3-4 sub-batches of ~10 each, each a separate autonomous session per feedback_always_auto_run. Between batches, user spot-check one probe_notes entry to catch style drift early.
@@ -120,7 +120,7 @@ AC:
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
 - **Priority**: P2
 - **Complexity**: M
-- **Depends on**: T-P0-575
+- **Depends on**: None
 - **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
 
 Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
@@ -165,18 +165,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Follow-up to T-P1-606 (first emoji-scanner fix commit).
-
-Make scripts/check_emoji.py honor sys.argv[1:]: if non-empty, scan only those paths (files or directories); otherwise preserve full-repo fallback so CI bare-invocation (.github/workflows/ci.yml) stays unchanged.
-
-Per reviewer feedback on the emoji_scan_fix_plan_20260423.md: before shipping, produce a diff preview of the scan_single_file extraction (current scan_emoji couples walk + per-file logic at lines 42-49) and surface it for user review. LoC estimate (~25) may be optimistic if the extraction requires parameter renames or return-value changes.
-
-Acceptance: (a) python scripts/check_emoji.py [path] scans only [path]; (b) python scripts/check_emoji.py with zero args behaves exactly as before; (c) new test covers both the single-file-dirty and single-file-clean branches.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -184,7 +172,7 @@ Acceptance: (a) python scripts/check_emoji.py [path] scans only [path]; (b) pyth
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P1-579
+- **Depends on**: None
 - **Description**: From the Phase A matrix (BQ-DEPTH-01), propose the top 40 high-probability BQ questions (based on company overlap + asked-frequency intuition). For each, pick the ONE primary story.
 
 Dependency on BQ-DEPTH-09 is through user-approved calibration style + schema, but this task can run in parallel with C2 bulk if user approves the 40 assignments upfront.
@@ -245,26 +233,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 ## Completed Tasks
 
-> 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 571 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
+- [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
 - [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
 - [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
 - [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
 - [x] **2026-04-25** -- T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES. [KG-FIX-02] Frontend: extend PILLAR_STYLES in
-- [x] **2026-04-25** -- T-P0-609: [KG-FIX-01] Backend: walk parent_id for pillar derivation. [KG-FIX-01] Backend: rewrite `_pillar_of()` in src/backend/routers/kg.py to walk
-- [x] **2026-04-24** -- T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline. Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 header
-- [x] **2026-04-24** -- T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps. Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architec
-- [x] **2026-04-24** -- T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each). Per user direction: use the 4 already-rewritten (fresh) stories as free-lunch pattern calibration BEFORE doing bulk C2. 
-- [x] **2026-04-24** -- T-P0-608: Fix emoji-CI: align check_emoji.py regex + Windows UTF-8 streams + code/doc split + meta test + cp1252 regression harness. Recapture of prior aborted session. Root cause found: check_emoji.py has wider regex (includes \u2600-\u26ff + \u2700-\u
-- [x] **2026-04-23** -- T-P2-587: [DEBT] helixos: Deduplicate 10 stale blocked SYNC tasks (bare-python, stop-cache, setup_python_env.sh). The helixos task DB has 10 blocked SYNC/DEBT tasks that are stale duplicates of each other, clogging the backlog.
-- [x] **2026-04-23** -- T-P2-586: [SYNC] Propagate 3 universal lessons from MLInterviewPrep (2026-04-17..04-19) to root LESSONS.md. Promote 3 new universal lessons from MLInterviewPrep LESSONS.md (2026-04-17..04-19) to Gen_AI_Proj root LESSONS.md. None
-- [x] **2026-04-23** -- T-P2-320: [SYNC] helixos: Remove deprecated stop-cache from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
-- [x] **2026-04-23** -- T-P2-255: [DEBT] helixos: Remove deprecated stop cache usage from test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Duplicate of T-P2-207 (helixos test_check.py stop-cache removal). Work folded i
-- [x] **2026-04-23** -- T-P2-208: [SYNC] Remove deprecated stop-cache from template test_check.py. SUPERSEDED 2026-04-23 by T-P2-587 dedup. Folded into T-P2-207's expanded scope, which now covers BOTH helixos AND templa
-- [x] **2026-04-23** -- T-P1-605: Seed LC 3900 (Longest Balanced Substring After One Swap, Google tag). User-driven: ad-hoc request to seed LC 3900 with Google company tag, preserving prefix-sum + bucket approach and adding 
-- [x] **2026-04-23** -- T-P1-579: [BQ-DEPTH-08] Phase B: Schema uplift -- add is_primary on links, probe_notes JSON on questions (NO angle_label). Schema migration after all 4 high-link rewrites land.
-- [x] **2026-04-23** -- T-P0-578: [BQ-DEPTH-07] Rewrite EX-33 (MoE -> Allocation Paradigm Shift) via story_rewrite_protocol. EX-33 is a high-link, pre-rewrite story (links from 2026-03-24 batch).
-- [x] **2026-04-23** -- T-P0-577: [BQ-DEPTH-06] Rewrite EX-14 (LLM Exploration / Vague AI Mandate) via story_rewrite_protocol. EX-14 is a high-link, pre-rewrite story (2026-03-24 relevance_notes).
-- [x] **2026-04-23** -- T-P0-576: [BQ-DEPTH-05] Rewrite EX-02 (Manager Resistance -> Team Transfer) via story_rewrite_protocol. EX-02 is a high-link story still on pre-rewrite relevance_notes (2026-03-24 batch).
-- [x] **2026-04-23** -- T-P0-575: [BQ-DEPTH-04] Rewrite EX-01 (Search Diversity/Intent Collapse) via story_rewrite_protocol. EX-01 has 16 question links -- the biggest stale surface. It IS golden-flagged but pre-dates the NRG-v2 / risk_statement
