@@ -60,35 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
-
-Retag steps:
-1. For each of 34 examples: evaluate whether story advocates for user → tag customer_user_focus; evaluate ethical/integrity angle → tag ethical_integrity_backbone; evaluate fast_learning facet fit; evaluate scrappy_innovation facet fit; evaluate strategic_scope facet fit
-2. For each of 115 questions: same evaluation against question stem
-3. Migrate existing scope_creep_ambiguous theme tags to scope_creep_pm_ambiguity facet tags (under ambiguity_uncertainty) — same example/question rows, different tag table
-4. After migration verification: DROP scope_creep_ambiguous theme (safe because all tags migrated to facet)
-
-Tagging approach per story_rewrite_protocol Step 4 (audit propagation surface):
-- Pre-draft audit: list which existing themes each example already has, check for overlap with new customer/ethical
-- Apply tags via seed script
-- Post-apply audit: verify count (expect 34 examples get 0-3 new tags each, 115 questions get 0-2)
-
-Deliverables:
-- scripts/seed_bq_taxonomy_retag_20260421.py (idempotent, DB-backup-guarded)
-- docs/bq_taxonomy_retag_log_20260421.md — per-example + per-question tagging decisions with rationale (so revert recipe exists)
-
-AC:
-- Every example with user-advocacy angle tagged customer_user_focus
-- Every example with push-back-at-cost angle tagged ethical_integrity_backbone
-- 0 rows reference scope_creep_ambiguous theme post-migration
-- scope_creep_ambiguous theme deleted from behavioral_themes (row count 17 → 16 after drop)
-- Script re-runs [SKIP]
-- Retag log shows rationale for each tag added (not a black box)
-
 #### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
 - **Priority**: P1
 - **Complexity**: M
@@ -237,6 +208,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 - [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
 - [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
+- [x] **2026-04-25** -- T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy. Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
 - [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
 - [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
 - [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
