@@ -9,46 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-609, T-P0-610, T-P0-611, T-P0-612
-- **Description**: [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
-
-WHY: AC-as-software-test only. Auto-merge by autonomous agent is forbidden
-for this change because rendering bugs slip past unit tests
-(see KG bug history — vitest passed while every node was bucketed as Other).
-
-ACCEPTANCE CRITERIA
-AC1: With FIX-01..04 deployed, cold-start KG page shows:
-     - ml-fundamentals as a single cyan swimlane (not 36)
-     - Tree expansion: 1 root -> 7 categories at depth=1 -> 28 leaves at
-       depth=2, all rendered hierarchically under the cyan lane
-     - "Other" / grey FALLBACK_STYLE appears nowhere
-AC2: After clicking "Expand All", total swimlane count = 9
-     (pillar1..pillar8 + ml-fundamentals). Not 36+.
-AC3: Before/after screenshots saved to logs/kg_fix_smoke_20260425/
-     (cold_before.png, cold_after.png, expandall_before.png,
-     expandall_after.png).
-AC4: [HARD GATE — autonomous agent MUST OBEY]
-     - Autonomous session runs FIX-01..04 on feature branch `kg-fix-20260425`
-       (NOT main). Each task gets its own commit.
-     - After FIX-04 commit, session pushes the feature branch to origin
-       (`git push -u origin kg-fix-20260425`) WITHOUT merging to main.
-     - Session captures FIX-05 screenshots, posts them to Discord chat
-       1484761064292749422 with text:
-         "KG-FIX-01..05 done on branch kg-fix-20260425. Review screenshots.
-          Reply: ✅ to merge to main, ❌ to abort, or describe needed changes."
-     - Session EXITS without touching main. The fast-forward merge is
-       performed by the user OR by the next session after user reaction is
-       observed in Discord history.
-     - Auto-merge to main is FORBIDDEN.
-
-DEPENDS ON: KG-FIX-01, KG-FIX-02, KG-FIX-03, KG-FIX-04 (all four must be
-done before smoke test can run).
-
-COMPLEXITY: S
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
@@ -330,6 +290,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
 - [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
 - [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
 - [x] **2026-04-25** -- T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES. [KG-FIX-02] Frontend: extend PILLAR_STYLES in
