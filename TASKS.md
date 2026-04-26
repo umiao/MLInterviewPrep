@@ -9,36 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-610
-- **Description**: [KG-FIX-03] Frontend: replace pillarSortKey() regex in
-src/frontend/src/components/kg/useKgLayout.ts with an EXPLICIT
-`PILLAR_ORDER: Record<string, number>` map. No fallback ordering by regex
-match.
-
-WHY: Current logic returns 9999 for non-matching pillars, which lets new
-top-level taxonomies sort to "wherever" implicitly. Explicit map makes
-swimlane order a first-class design decision.
-
-ACCEPTANCE CRITERIA
-AC1: PILLAR_ORDER uses step=10 numbering with documented insertion convention:
-       pillar1: 10, pillar2: 20, "ml-fundamentals": 25, pillar3: 30,
-       pillar4: 40, pillar5: 50, pillar6: 60, pillar7: 70, pillar8: 80
-     Comment: "Insert new entries at adjacent decimals (e.g. 25, 35); reserve
-     larger gaps if topology will expand."
-AC2: ml-fundamentals swimlane is positioned visually between pillar2 and
-     pillar3 on KG canvas (verified via KG-FIX-05 smoke).
-AC3: Unit test in useKgLayout.test.ts asserting full sorted order matches
-     [pillar1, pillar2, ml-fundamentals, pillar3, pillar4, pillar5, pillar6,
-     pillar7, pillar8].
-
-DEPENDS ON: KG-FIX-02 (the new pillar key must exist in PILLAR_STYLES first
-so any KG render asserting style coverage doesn't trip).
-
-COMPLEXITY: S
-
 #### T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem
 - **Priority**: P0
 - **Complexity**: S
@@ -406,6 +376,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
 - [x] **2026-04-25** -- T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES. [KG-FIX-02] Frontend: extend PILLAR_STYLES in
 - [x] **2026-04-25** -- T-P0-609: [KG-FIX-01] Backend: walk parent_id for pillar derivation. [KG-FIX-01] Backend: rewrite `_pillar_of()` in src/backend/routers/kg.py to walk
 - [x] **2026-04-24** -- T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline. Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 header

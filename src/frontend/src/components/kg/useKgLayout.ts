@@ -76,10 +76,27 @@ export function computeBBox(
   ];
 }
 
-/** Sort key for pillar ordering: pillar1, pillar2, ..., pillar8, then fallbacks. */
+// Explicit swimlane order. Step=10 numbering — insert new entries at adjacent
+// decimals (e.g. 25, 35); reserve larger gaps if topology will expand. Any
+// pillar key not present here sorts to the end deterministically (alphabetic
+// tiebreak handled by the consumer's stable sort).
+export const PILLAR_ORDER: Record<string, number> = {
+  pillar1: 10,
+  pillar2: 20,
+  "ml-fundamentals": 25,
+  pillar3: 30,
+  pillar4: 40,
+  pillar5: 50,
+  pillar6: 60,
+  pillar7: 70,
+  pillar8: 80,
+};
+
+const UNKNOWN_PILLAR_RANK = 9999;
+
+/** Sort key for pillar ordering using the explicit PILLAR_ORDER map. */
 export function pillarSortKey(pillar: string): number {
-  const m = /^pillar(\d+)$/.exec(pillar);
-  return m ? Number(m[1]) : 9999;
+  return PILLAR_ORDER[pillar] ?? UNKNOWN_PILLAR_RANK;
 }
 
 export const UNASSIGNED_PILLAR = "__unassigned__";
