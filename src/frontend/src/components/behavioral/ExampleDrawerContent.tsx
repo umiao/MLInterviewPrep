@@ -1,6 +1,8 @@
 import type { BehavioralExample } from "../../types/behavioral";
 import MarkdownPreview from "../ui/MarkdownPreview";
 import DrawerLayout from "../ui/DrawerLayout";
+import GoldenBadge from "../ui/GoldenBadge";
+import SignatureBadge from "../ui/SignatureBadge";
 import { parsePitch } from "../../utils/parsePitch";
 
 const STAR_COLORS: Record<string, { label: string; border: string }> = {
@@ -40,6 +42,8 @@ function StarSection({
 
 function ExampleMetaPane({ example }: { example: BehavioralExample }) {
   const needsInput = example.title.startsWith("[NEEDS-INPUT]");
+  const themeTags = example.theme_tags ?? [];
+  const facetTags = example.facet_tags ?? [];
   return (
     <div className="space-y-4 text-sm">
       <div>
@@ -48,6 +52,8 @@ function ExampleMetaPane({ example }: { example: BehavioralExample }) {
           <span className="font-mono font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded">
             {example.example_id}
           </span>
+          <GoldenBadge golden={Boolean(example.is_golden)} />
+          <SignatureBadge signature={Boolean(example.is_signature)} />
           {needsInput && (
             <span className="text-[11px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
               Needs Input
@@ -63,14 +69,46 @@ function ExampleMetaPane({ example }: { example: BehavioralExample }) {
         </div>
       )}
 
-      {example.principle_tags.length > 0 && (
+      {themeTags.length > 0 && (
         <div>
           <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Themes</div>
+          <div className="flex flex-wrap gap-1.5">
+            {themeTags.map((t) => (
+              <span
+                key={t.slug}
+                className="text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full"
+              >
+                {t.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {facetTags.length > 0 && (
+        <div>
+          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Facets</div>
+          <div className="flex flex-wrap gap-1.5">
+            {facetTags.map((f) => (
+              <span
+                key={f.slug}
+                className="text-xs font-medium text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full"
+              >
+                {f.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {example.principle_tags.length > 0 && (
+        <div>
+          <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">Principle tags</div>
           <div className="flex flex-wrap gap-1.5">
             {example.principle_tags.map((tag) => (
               <span
                 key={tag}
-                className="text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full"
+                className="text-[11px] font-medium text-gray-700 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full"
               >
                 {tag}
               </span>

@@ -31,10 +31,19 @@ export interface BehavioralExample {
   cn_elevator_pitch?: string | null;
   is_golden: boolean;
   golden_at: string | null;
+  is_signature?: boolean;
+  signature_at?: string | null;
+  theme_tags?: ThemeTag[];
+  facet_tags?: FacetTag[];
   linked_questions: LinkedQuestion[];
 }
 
 export interface ThemeTag {
+  slug: string;
+  label: string;
+}
+
+export interface FacetTag {
   slug: string;
   label: string;
 }

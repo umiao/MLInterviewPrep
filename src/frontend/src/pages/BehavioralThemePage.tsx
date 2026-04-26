@@ -10,6 +10,8 @@ import SlideOverPanel from "../components/ui/SlideOverPanel";
 import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent";
 import GoldenToggleButton from "../components/ui/GoldenToggleButton";
 import GoldenBadge from "../components/ui/GoldenBadge";
+import SignatureBadge from "../components/ui/SignatureBadge";
+import FacetPills from "../components/behavioral/FacetPills";
 import { goldenCardClass } from "../utils/goldenStyle";
 import { parsePitch } from "../utils/parsePitch";
 import { useReturnPath } from "../hooks/useReturnPath";
@@ -162,6 +164,7 @@ function ExampleCard({
   const pitch = example.cn_elevator_pitch;
   const pitchParts = pitch ? parsePitch(pitch) : null;
   const isGolden = Boolean(example.is_golden);
+  const isSignature = Boolean(example.is_signature);
 
   return (
     <button
@@ -177,10 +180,12 @@ function ExampleCard({
           {example.example_id}
         </span>
         <GoldenBadge golden={isGolden} />
+        <SignatureBadge signature={isSignature} />
       </div>
       <div className="mt-2 font-medium text-gray-800 text-sm leading-snug">
         {example.title}
       </div>
+      <FacetPills facets={example.facet_tags} className="mt-1.5" />
       {pitchParts ? (
         <div className="mt-2">
           <p className="text-sm text-gray-700 leading-snug bq-pitch-text">

@@ -75,12 +75,12 @@ const ML_PROBLEMS: { dbId: number; title: string }[] = [
 
 const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [
   { id: "failure", label: "Failure & Ownership", theme_slugs: ["failure_setback", "ownership_accountability"] },
-  { id: "conflict", label: "Conflict & Collaboration", theme_slugs: ["conflict_disagreement", "collaboration_teamwork"] },
-  { id: "decision", label: "Decision under Ambiguity", theme_slugs: ["prioritization_tradeoffs", "ambiguity_uncertainty", "scope_creep_ambiguous"] },
+  { id: "conflict", label: "Conflict, Collaboration & Integrity", theme_slugs: ["conflict_disagreement", "collaboration_teamwork", "ethical_integrity_backbone"] },
+  { id: "decision", label: "Decision under Ambiguity", theme_slugs: ["prioritization_tradeoffs", "ambiguity_uncertainty"] },
   { id: "execution", label: "Execution & Pressure", theme_slugs: ["deadline_pressure", "process_systems", "oncall_prod_incident"] },
   { id: "leadership", label: "Leadership & People", theme_slugs: ["leadership_direction", "mentoring_coaching"] },
   { id: "technical", label: "Technical Depth", theme_slugs: ["technical_problem_solving", "code_quality_tech_debt"] },
-  { id: "data", label: "Data and Decisions", theme_slugs: ["data_analysis"] },
+  { id: "data", label: "Data & Customer", theme_slugs: ["data_analysis", "customer_user_focus"] },
 ];
 
 const ALL_KNOWN_SLUGS = new Set(CLUSTER_FAMILIES.flatMap((f) => f.theme_slugs));

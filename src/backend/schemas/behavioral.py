@@ -126,6 +126,15 @@ class LinkedQuestionBrief(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class FacetBrief(BaseModel):
+    """Compact facet entry embedded in example/question responses."""
+
+    slug: str
+    label: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class BehavioralExampleResponse(BaseModel):
     """Schema for behavioral example API response."""
 
@@ -148,6 +157,8 @@ class BehavioralExampleResponse(BaseModel):
     golden_at: datetime | None = None
     is_signature: bool = False
     signature_at: datetime | None = None
+    theme_tags: list[QuestionThemeBrief] = []
+    facet_tags: list[FacetBrief] = []
     linked_questions: list[LinkedQuestionBrief] = []
 
     model_config = ConfigDict(from_attributes=True)

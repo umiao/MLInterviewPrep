@@ -10,6 +10,10 @@ from src.backend.models.behavioral import (
     BehavioralExample,
     BehavioralQuestion,
 )
+from src.backend.models.behavioral_facet import (
+    BehavioralFacet,
+    ExampleFacetTag,
+)
 from src.backend.models.behavioral_theme import (
     BehavioralTheme,
     ExampleThemeTag,
@@ -287,3 +291,33 @@ def test_seed_script_matcher_idempotent(db_session, seeded_behavioral):
         .count()
     )
     assert total == 1
+
+
+def test_examples_response_includes_theme_tags_and_facet_tags(
+    db_session, test_client, seeded_behavioral
+):
+    """Each example row carries theme_tags + facet_tags + is_signature (T-P1-601)."""
+    facet = BehavioralFacet(
+        slug="strategic_scope",
+        label="Strategic / Org-Level Scope",
+        display_order=3,
+    )
+    db_session.add(facet)
+    db_session.flush()
+    ex1 = seeded_behavioral["examples"]["ex1"]
+    ex1.is_signature = True
+    db_session.add(ExampleFacetTag(example_id=ex1.id, facet_id=facet.id))
+    db_session.commit()
+
+    resp = test_client.get("/api/behavioral/examples")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data, "expected at least one example in response"
+    for e in data:
+        assert "theme_tags" in e and isinstance(e["theme_tags"], list)
+        assert "facet_tags" in e and isinstance(e["facet_tags"], list)
+        assert "is_signature" in e
+    target = next(e for e in data if e["example_id"] == "EX-T1")
+    assert {t["slug"] for t in target["theme_tags"]} == {"failure_setback"}
+    assert {f["slug"] for f in target["facet_tags"]} == {"strategic_scope"}
+    assert target["is_signature"] is True

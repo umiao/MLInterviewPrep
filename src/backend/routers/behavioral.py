@@ -13,6 +13,10 @@ from src.backend.models.behavioral import (
     BehavioralQuestion,
     QuestionExampleLink,
 )
+from src.backend.models.behavioral_facet import (
+    BehavioralFacet,
+    ExampleFacetTag,
+)
 from src.backend.models.behavioral_theme import (
     BehavioralTheme,
     ExampleThemeTag,
@@ -309,7 +313,7 @@ def delete_question(
 
 
 def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
-    """Build a full example response with linked questions.
+    """Build a full example response with linked questions, themes, and facets.
 
     Args:
         db: Database session.
@@ -336,6 +340,24 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
                 "is_primary": bool(link.is_primary),
             })
 
+    theme_rows = (
+        db.query(BehavioralTheme.slug, BehavioralTheme.label)
+        .join(ExampleThemeTag, ExampleThemeTag.theme_id == BehavioralTheme.id)
+        .filter(ExampleThemeTag.example_id == ex.id)
+        .order_by(BehavioralTheme.display_order, BehavioralTheme.slug)
+        .all()
+    )
+    theme_tags = [{"slug": slug, "label": label} for slug, label in theme_rows]
+
+    facet_rows = (
+        db.query(BehavioralFacet.slug, BehavioralFacet.label)
+        .join(ExampleFacetTag, ExampleFacetTag.facet_id == BehavioralFacet.id)
+        .filter(ExampleFacetTag.example_id == ex.id)
+        .order_by(BehavioralFacet.display_order, BehavioralFacet.slug)
+        .all()
+    )
+    facet_tags = [{"slug": slug, "label": label} for slug, label in facet_rows]
+
     return {
         "id": ex.id,
         "example_id": ex.example_id,
@@ -354,6 +376,10 @@ def _build_example_response(db: Session, ex: BehavioralExample) -> dict:
         "created_at": ex.created_at,
         "is_golden": bool(ex.is_golden),
         "golden_at": ex.golden_at,
+        "is_signature": bool(getattr(ex, "is_signature", False)),
+        "signature_at": getattr(ex, "signature_at", None),
+        "theme_tags": theme_tags,
+        "facet_tags": facet_tags,
         "linked_questions": linked_questions,
     }
 
@@ -545,6 +571,12 @@ def update_example(
         new_golden = bool(update_data["is_golden"])
         if new_golden and not ex.is_golden:
             ex.golden_at = datetime.utcnow()
+
+    # Signature flag: false -> true stamps signature_at; true -> false leaves it.
+    if "is_signature" in update_data:
+        new_signature = bool(update_data["is_signature"])
+        if new_signature and not getattr(ex, "is_signature", False):
+            ex.signature_at = datetime.utcnow()
 
     for key, value in update_data.items():
         if key in ("evidence_quotes", "principle_tags"):

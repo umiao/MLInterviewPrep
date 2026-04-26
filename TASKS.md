@@ -60,32 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-600
-- **Description**: Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
-
-Scope:
-1. /quick-index?section=bq — add 2 new theme cards (customer_user_focus, ethical_integrity_backbone). Update CLUSTER_FAMILIES in QuickIndex.tsx:
-   - customer_user_focus → new cluster 'Customer & User' (standalone) OR fold into 'Data and Decisions' renamed to 'Data & Customer'
-   - ethical_integrity_backbone → add to 'Conflict & Collaboration' cluster (renamed 'Conflict, Collaboration & Integrity')
-   - Remove scope_creep_ambiguous from 'Decision under Ambiguity' cluster (it was deleted)
-2. BehavioralQuestions.tsx ExampleCard + BehavioralThemePage ExampleCard — render facet pills (small, distinct color from theme pills). Example: a story tagged fast_learning + scrappy_innovation gets 2 small pills below the theme pills.
-3. ThemeFilterSidebar.tsx — include new themes in the filter list; optionally add a separate 'Facets' filter group (can defer to later if scope creep)
-4. is_signature visual — if is_signature=1, show a small 'Signature Story' badge (distinct from golden badge). Golden = quality mark; Signature = 'proudest achievement, use for open-ended impact Q's'
-5. types/behavioral.ts — add facets: FacetTag[] and is_signature/signature_at to BehavioralExample interface
-
-Deliverables:
-- Updated QuickIndex.tsx / BehavioralQuestions.tsx / BehavioralThemePage.tsx / ThemeFilterSidebar.tsx / ExampleDrawerContent.tsx / types/behavioral.ts
-- Backend response schemas updated in behavioral.py router to include facets + is_signature
-
-AC:
-- Manual smoke test: /quick-index?section=bq shows 2 new theme cards at correct cluster positions; ExampleCard shows facet pills when example has facet tags; ThemeFilterSidebar has new themes
-- tsc + vitest + vite build pass
-- No regression on existing theme/question/example rendering
-- Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
-
 ### P2 -- Nice to Have
 
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
@@ -210,6 +184,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
 - [x] **2026-04-25** -- T-P1-616: [PROB-NOTES-04] Rewrite LC#4 (id=89) solution with cleaner sentinel-based partition + 4-fact mental model. WHY
 - [x] **2026-04-25** -- T-P1-615: [PROB-SEARCH-01] Pure-numeric search exact-match on leetcode_id (currently '4' returns 50+ irrelevant). WHY
+- [x] **2026-04-25** -- T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual. Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
 - [x] **2026-04-25** -- T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy. Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
 - [x] **2026-04-25** -- T-P0-617: [DEV-FIX-01] scripts/dev.py auto-evict stale backend on port 8100 conflict. WHY
 - [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.

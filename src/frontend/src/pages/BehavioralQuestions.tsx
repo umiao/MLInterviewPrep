@@ -8,6 +8,8 @@ import ExampleDrawerContent from "../components/behavioral/ExampleDrawerContent"
 import ThemeFilterSidebar from "../components/behavioral/ThemeFilterSidebar";
 import GoldenToggleButton from "../components/ui/GoldenToggleButton";
 import GoldenBadge from "../components/ui/GoldenBadge";
+import SignatureBadge from "../components/ui/SignatureBadge";
+import FacetPills from "../components/behavioral/FacetPills";
 import { goldenCardClass } from "../utils/goldenStyle";
 import { parsePitch } from "../utils/parsePitch";
 import type {
@@ -140,6 +142,7 @@ function ExampleCard({
 }) {
   const needsInput = example.title.startsWith("[NEEDS-INPUT]");
   const isGolden = Boolean(example.is_golden);
+  const isSignature = Boolean(example.is_signature);
   const pitchParts = example.cn_elevator_pitch
     ? parsePitch(example.cn_elevator_pitch)
     : null;
@@ -163,6 +166,7 @@ function ExampleCard({
             </span>
             <h4 className="text-gray-900 font-bold text-base">{example.title}</h4>
             <GoldenBadge golden={isGolden} />
+            <SignatureBadge signature={isSignature} />
             {needsInput && (
               <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
                 Needs Input
@@ -174,6 +178,7 @@ function ExampleCard({
               Source: <span className="font-medium text-gray-700">{example.source_project}</span>
             </p>
           )}
+          <FacetPills facets={example.facet_tags} className="mt-1.5 ml-1" />
         </div>
         <div className="flex items-center gap-2 flex-wrap shrink-0">
           {example.principle_tags.map((tag) => (
