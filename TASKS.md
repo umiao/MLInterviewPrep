@@ -9,43 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-609: [KG-FIX-01] Backend: walk parent_id for pillar derivation
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: [KG-FIX-01] Backend: rewrite `_pillar_of()` in src/backend/routers/kg.py to walk
-parent_id back to the depth=0 ancestor and return that ancestor's path string,
-instead of `path.split(".",1)[0]`.
-
-WHY: framework_nodes.path has two incompatible separator conventions. The 8
-original pillars use dot (`pillar2.feature_engineering`); the 36-row
-ml-fundamentals subtree uses slash (`ml-fundamentals/classical_ml/...`). The
-current split-by-dot logic returns the entire slash-path as the pillar key,
-which (a) falls into "Other" via PILLAR_STYLES fallback and (b) gives every
-ml-fundamentals node a unique pillar value, exploding the swimlane layout
-into 36 individual L1 lanes. Walking parent_id is taxonomy-agnostic and
-correct under arbitrary path conventions.
-
-ACCEPTANCE CRITERIA
-AC1: All 36 ml-fundamentals/* rows return pillar="ml-fundamentals".
-AC2: REGRESSION — every pillar1..pillar8 descendant still returns its original
-     "pillarN" value. Parameterised pytest in tests/test_kg_router.py covering
-     >=1 sample per pillar (>=8 cases total).
-AC3: Invariant test in tests/test_framework_path_convention.py:
-       WHITELIST = {"ml-fundamentals"}  # TTL: remove after T-P2-614 (KG-DESIGN-DUAL-VIEW)
-     Test fails if any path matches '%/%' AND its depth=0 ancestor's path is
-     not in WHITELIST. Additionally, test queries task_db (`task_db.py get
-     T-P2-614 --json`) and FAILS if KG-DESIGN-DUAL-VIEW status==completed but
-     WHITELIST is non-empty (forces whitelist cleanup once migration decision
-     lands).
-AC4: docstring on _pillar_of uses CONDITIONAL language:
-     'NOTE: Required AS LONG AS the taxonomy permits multiple depth=0 roots
-     with different path-separator conventions. The transitional vs permanent
-     question is open and resolved by T-P2-614 (KG-DESIGN-DUAL-VIEW). DO NOT
-     revert to path.split(".",1)[0] until that question is answered.'
-
-COMPLEXITY: S
-
 #### T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES
 - **Priority**: P0
 - **Complexity**: S
@@ -460,6 +423,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-25** -- T-P0-609: [KG-FIX-01] Backend: walk parent_id for pillar derivation. [KG-FIX-01] Backend: rewrite `_pillar_of()` in src/backend/routers/kg.py to walk
 - [x] **2026-04-24** -- T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline. Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 header
 - [x] **2026-04-24** -- T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps. Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architec
 - [x] **2026-04-24** -- T-P1-580: [BQ-DEPTH-09] probe_notes PATTERN CALIBRATION: write 4 samples on fresh stories (EX-15/16/17/30 top-Q each). Per user direction: use the 4 already-rewritten (fresh) stories as free-lunch pattern calibration BEFORE doing bulk C2. 

@@ -1,8 +1,9 @@
 """Knowledge graph API: framework nodes + concept_links edges.
 
 POC scope (KG-VIZ-01): emits framework_nodes as graph nodes and concept_links
-rows as edges. Pillar grouping is derived from FrameworkNode.path
-(everything before the first '.'), e.g., 'pillar3.design_problems' -> 'pillar3'.
+rows as edges. Pillar grouping is derived by walking parent_id back to the
+depth=0 ancestor and using that ancestor's path string. This is
+taxonomy-agnostic and works regardless of path-separator convention.
 If concept_links is empty, a small set of synthetic parent->child edges is
 returned so the frontend POC has at least some non-tree wiring to render.
 """
@@ -21,11 +22,46 @@ from src.backend.models.framework import FrameworkNode
 router = APIRouter()
 
 
-def _pillar_of(path: str | None) -> str | None:
-    """Return the pillar prefix (text before first '.') of a path."""
-    if not path:
+def _pillar_of(
+    node: FrameworkNode | None,
+    nodes_by_id: dict[int, FrameworkNode],
+) -> str | None:
+    """Return the depth=0 ancestor's path for a framework node.
+
+    Walks parent_id back to the root and returns that root's path string.
+    Taxonomy-agnostic: works for both the dot-separated original pillars
+    (e.g. 'pillar2.feature_engineering' -> root 'pillar2') and the
+    slash-separated ml-fundamentals subtree
+    (e.g. 'ml-fundamentals/classical_ml/bias-variance-tradeoff' -> root
+    'ml-fundamentals').
+
+    NOTE: Required AS LONG AS the taxonomy permits multiple depth=0 roots
+    with different path-separator conventions. The transitional vs permanent
+    question is open and resolved by T-P2-614 (KG-DESIGN-DUAL-VIEW). DO NOT
+    revert to path.split(".",1)[0] until that question is answered.
+
+    Args:
+        node: The framework node to derive a pillar for.
+        nodes_by_id: Lookup dict id -> FrameworkNode covering the full
+            ancestor chain.
+
+    Returns:
+        The depth=0 ancestor's path string, or None if node is None or the
+        chain is broken (orphaned parent_id, cycle).
+    """
+    if node is None:
         return None
-    return path.split(".", 1)[0]
+    cur: FrameworkNode = node
+    seen: set[int] = set()
+    while cur.parent_id is not None:
+        if cur.id in seen:
+            return None
+        seen.add(cur.id)
+        parent = nodes_by_id.get(cur.parent_id)
+        if parent is None:
+            return None
+        cur = parent
+    return cur.path
 
 
 @router.get("/kg/graph")
@@ -54,8 +90,13 @@ def get_kg_graph(
     if pillars:
         pillar_filter = {p.strip() for p in pillars.split(",") if p.strip()}
 
-    q = db.query(FrameworkNode).order_by(FrameworkNode.depth, FrameworkNode.id)
-    rows = q.limit(limit).all()
+    # Load all nodes once so _pillar_of() can walk parent_id chains even when
+    # the limit slices off the depth=0 ancestors.
+    all_nodes = (
+        db.query(FrameworkNode).order_by(FrameworkNode.depth, FrameworkNode.id).all()
+    )
+    nodes_by_id: dict[int, FrameworkNode] = {n.id: n for n in all_nodes}
+    rows = all_nodes[:limit]
 
     try:
         rows_cl = db.execute(
@@ -76,7 +117,7 @@ def get_kg_graph(
     node_payload: list[dict[str, Any]] = []
     emitted_ids: set[int] = set()
     for n in rows:
-        pillar = _pillar_of(n.path)
+        pillar = _pillar_of(n, nodes_by_id)
         if pillar_filter is not None and pillar not in pillar_filter:
             continue
         node_payload.append(
