@@ -62,32 +62,6 @@ AC:
 
 ### P2 -- Nice to Have
 
-#### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + delivery cues) that pairs with question-side probe_notes.
-
-Decoupled from Phase D; independent sessions after EX-01 rewrite lands.
-
-Output files (one per story):
-- docs/behavioral_prep_notes/EX-01_probe_qa.md
-- docs/behavioral_prep_notes/EX-15_probe_qa.md
-- docs/behavioral_prep_notes/EX-16_probe_qa.md
-- docs/behavioral_prep_notes/EX-17_probe_qa.md
-
-Each file mirrors EX-30_probe_qa.md structure:
-- Header: linked story id + themes + preservation note
-- 5 anticipated probes (the most dangerous / most common follow-ups) with 应答方向
-- 口述 delivery section: pacing cues, pause markers, L5 tone discipline
-- Language: 中英混合 per user's EX-30 precedent (不需要统一)
-
-AC:
-- All 4 .md files created; each >= 40 lines
-- Each file's Q1 is the single most-dangerous probe (the one where junior answer would get eliminated)
-- Linked from behavioral_examples.analogy or tech_terms field (or a new pointer) so /behavioral/examples drawer can deeplink
-- User reviews each one on Discord before marking complete
-
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
 - **Priority**: P2
 - **Complexity**: S
@@ -182,6 +156,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 - [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
 - [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
+- [x] **2026-04-25** -- T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style. Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + del
 - [x] **2026-04-25** -- T-P1-616: [PROB-NOTES-04] Rewrite LC#4 (id=89) solution with cleaner sentinel-based partition + 4-fact mental model. WHY
 - [x] **2026-04-25** -- T-P1-615: [PROB-SEARCH-01] Pure-numeric search exact-match on leetcode_id (currently '4' returns 50+ irrelevant). WHY
 - [x] **2026-04-25** -- T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual. Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
