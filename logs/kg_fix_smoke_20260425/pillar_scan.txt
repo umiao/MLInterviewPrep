@@ -1,0 +1,11 @@
+total=238  bad=0
+--- pillar distribution ---
+  ml-fundamentals: 36
+  pillar2: 34
+  pillar6: 33
+  pillar1: 28
+  pillar4: 27
+  pillar3: 24
+  pillar5: 20
+  pillar7: 20
+  pillar8: 16
