@@ -11,25 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-579
-- **Description**: From the Phase A matrix (BQ-DEPTH-01), propose the top 40 high-probability BQ questions (based on company overlap + asked-frequency intuition). For each, pick the ONE primary story.
-
-Dependency on BQ-DEPTH-09 is through user-approved calibration style + schema, but this task can run in parallel with C2 bulk if user approves the 40 assignments upfront.
-
-Deliverables:
-- docs/bq_primary_story_assignments_20260421.md -- 40 rows with (question_id, primary_example_id, rationale)
-- scripts/seed_bq_primary_flags_20260421.py -- idempotent, DB-backup-guarded
-- Invariant: each question has exactly one is_primary=1 link (trigger or pre-check)
-
-AC:
-- User reviews 40 assignments on Discord BEFORE DB write
-- Script re-runs with [SKIP]
-- SELECT question_id, COUNT(*) FROM question_example_links WHERE is_primary=1 GROUP BY question_id HAVING COUNT(*) > 1 returns empty
-- 40 questions have is_primary=1 set; other questions left at is_primary=0 until later batch
-
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
 - **Priority**: P1
 - **Complexity**: L
@@ -196,52 +177,28 @@ Per reviewer feedback on the emoji_scan_fix_plan_20260423.md: before shipping, p
 
 Acceptance: (a) python scripts/check_emoji.py [path] scans only [path]; (b) python scripts/check_emoji.py with zero args behaves exactly as before; (c) new test covers both the single-file-dirty and single-file-clean branches.
 
-#### T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: T-P0-613
-- **Description**: [KG-DESIGN-DUAL-VIEW] Open question: is ml-fundamentals/* + pillar2 coexistence
-a bug to eliminate (consolidate to single root) OR a feature to legitimize
-(permanent dual view)? Output: a design doc, not code.
-
-WHY: Both KG bug-review rounds defaulted to "two structures = bug, migrate to
-single root". Reviewer round 2 challenged that premise: ml-fundamentals
-(interview-grind / leaf-dense / drill-oriented) and pillar2 (knowledge-system
-/ structured / theory-deep) may serve different cognitive modes. Their
-overlap could be intentional view separation, not redundancy. Resolving this
-question changes whether KG-FIX-01's parent_id walk is transitional or
-permanent infrastructure.
-
-ACCEPTANCE CRITERIA
-AC1: docs/design/kg_dual_view_decision_20260425.md created. Section 1 MUST
-     answer the open Question 0 explicitly:
-        "Are we eliminating duplication (single-root consolidation) or
-         legitimizing it (permanent dual view)?"
-     Pick (a) or (b) with stated rationale.
-AC2: If (a) "consolidate":
-     - Section 2 specifies migration strategy (keep eight_essays subnode vs
-       flatten as pillar2 siblings vs change kindForDepth topology).
-     - Section 3 enumerates name-collision pairs (e.g.
-       pillar2.unsupervised_learning vs ml-fundamentals/unsupervised) and
-       resolution (merge content, dedupe, drop one side).
-     - Section 4 lists implementation tasks to be split out as P1 follow-ups.
-AC3: If (b) "dual view":
-     - Section 2 specifies path-convention rules for additional roots
-       (under what circumstances may a 3rd top-level taxonomy be added?).
-     - Section 3 confirms KG-FIX-01 implementation is permanent — request
-     amendment of its docstring to drop "transitional" language.
-     - Section 4 closes this task with no follow-up implementation work.
-AC4: Decision is shared via Discord for explicit user ratification before
-     any further migration / cleanup work begins.
-
-DEPENDS ON: KG-FIX-05 (no point answering the dual-view question until the
-acute "Other" symptom is resolved and the system is observable).
-
-COMPLEXITY: L (deferred — this is a design question, not implementation)
-
 ### P3 -- Stretch Goals
 
 ## Blocked
+
+#### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-579
+- **Description**: From the Phase A matrix (BQ-DEPTH-01), propose the top 40 high-probability BQ questions (based on company overlap + asked-frequency intuition). For each, pick the ONE primary story.
+
+Dependency on BQ-DEPTH-09 is through user-approved calibration style + schema, but this task can run in parallel with C2 bulk if user approves the 40 assignments upfront.
+
+Deliverables:
+- docs/bq_primary_story_assignments_20260421.md -- 40 rows with (question_id, primary_example_id, rationale)
+- scripts/seed_bq_primary_flags_20260421.py -- idempotent, DB-backup-guarded
+- Invariant: each question has exactly one is_primary=1 link (trigger or pre-check)
+
+AC:
+- User reviews 40 assignments on Discord BEFORE DB write
+- Script re-runs with [SKIP]
+- SELECT question_id, COUNT(*) FROM question_example_links WHERE is_primary=1 GROUP BY question_id HAVING COUNT(*) > 1 returns empty
+- 40 questions have is_primary=1 set; other questions left at is_primary=0 until later batch
 
 #### T-P1-606: Fix emoji-scan cp1252 crash + lock regex consistency (F-1 + F-3 + meta-test)
 - **Priority**: P1
@@ -290,6 +247,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
 - [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
 - [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
 - [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in

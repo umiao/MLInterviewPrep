@@ -26,19 +26,24 @@ def _pillar_of(
     node: FrameworkNode | None,
     nodes_by_id: dict[int, FrameworkNode],
 ) -> str | None:
-    """Return the depth=0 ancestor's path for a framework node.
+    """Walk parent_id chain for taxonomy-agnostic pillar derivation.
 
-    Walks parent_id back to the root and returns that root's path string.
-    Taxonomy-agnostic: works for both the dot-separated original pillars
+    Required because the KG supports multiple top-level taxonomies
+    (pillar1..pillar8 system view + ml-fundamentals interview-grind view).
+    See docs/design/kg_dual_view_decision_20260425.md.
+
+    Walks parent_id back to the depth=0 ancestor and returns that root's
+    path string. Works for both the dot-separated original pillars
     (e.g. 'pillar2.feature_engineering' -> root 'pillar2') and the
     slash-separated ml-fundamentals subtree
     (e.g. 'ml-fundamentals/classical_ml/bias-variance-tradeoff' -> root
-    'ml-fundamentals').
+    'ml-fundamentals'), and for any future user-approved 3rd root that
+    follows the criteria in Section 2 of the decision doc above.
 
-    NOTE: Required AS LONG AS the taxonomy permits multiple depth=0 roots
-    with different path-separator conventions. The transitional vs permanent
-    question is open and resolved by T-P2-614 (KG-DESIGN-DUAL-VIEW). DO NOT
-    revert to path.split(".",1)[0] until that question is answered.
+    PERMANENT infrastructure (ratified 2026-04-26 by T-P2-614). Do NOT
+    revert to path.split(".",1)[0] -- doing so silently breaks the
+    ml-fundamentals view (slash-separated paths have no '.' to split on)
+    and re-introduces the bug fixed by KG-FIX-01..05.
 
     Args:
         node: The framework node to derive a pillar for.
