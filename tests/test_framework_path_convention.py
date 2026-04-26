@@ -1,37 +1,43 @@
 """Schema invariant: framework_nodes path-separator convention (T-P0-609 / KG-FIX-01).
 
 The 8 original pillars use '.' separators (e.g. 'pillar2.feature_engineering').
-The ml-fundamentals subtree was authored with '/' separators
-(e.g. 'ml-fundamentals/classical_ml/bias-variance-tradeoff'). Walking
-parent_id back to depth=0 makes the slash convention work for KG rendering,
-but the convention itself remains an exception that must be tracked.
+The ml-fundamentals subtree uses '/' separators
+(e.g. 'ml-fundamentals/classical_ml/bias-variance-tradeoff'). Both are
+permanent top-level taxonomies of the KG dual-view design ratified by
+T-P2-614 (see docs/design/kg_dual_view_decision_20260425.md). Walking
+parent_id back to depth=0 in src/backend/routers/kg.py::_pillar_of() handles
+both conventions transparently.
 
-This test enforces that:
-  1. Every framework_node whose path contains '/' has a depth=0 ancestor
-     in WHITELIST. New slash-path roots require explicit whitelist additions.
-  2. Once T-P2-614 (KG-DESIGN-DUAL-VIEW) is marked completed, the WHITELIST
-     must be empty -- the design decision either consolidates the dual root
-     (no slash paths remain) OR ratifies it permanently (whitelist is no
-     longer the right enforcement vehicle and should be replaced).
+Per Section 2 of that decision, any future 3rd top-level taxonomy with a
+slash separator (or any non-dot separator) must be ratified by an explicit
+design doc and added to RATIFIED_SLASH_ROOTS below in the same change set
+that extends frontend PILLAR_STYLES + PILLAR_ORDER. This file is the
+single source of truth for that registry.
+
+This test enforces that every framework_node whose path contains '/' has a
+depth=0 ancestor in RATIFIED_SLASH_ROOTS. Unratified slash roots would
+otherwise slip in silently and recreate the original 'Other' bucket bug
+(KG-FIX-01..05).
 
 Skips if runtime DB data/mle_prep.db is not present.
 """
 from __future__ import annotations
 
-import json
 import sqlite3
-import subprocess
-import sys
 from pathlib import Path
 
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = REPO_ROOT / "data" / "mle_prep.db"
-TASK_DB_CLI = REPO_ROOT / ".claude" / "hooks" / "task_db.py"
 
-# TTL: remove after T-P2-614 (KG-DESIGN-DUAL-VIEW) lands a decision.
-WHITELIST: set[str] = {"ml-fundamentals"}
+# Permanent registry of ratified slash-separated top-level taxonomies.
+# T-P2-614 (KG-DESIGN-DUAL-VIEW) ratified ml-fundamentals as a permanent root
+# alongside the dot-separated pillar1..pillar8. To add a new entry, follow
+# Section 2 of docs/design/kg_dual_view_decision_20260425.md (distinct
+# cognitive mode + non-overlapping leaf set OR explicit alternate-projection)
+# AND extend frontend PILLAR_STYLES + PILLAR_ORDER in the same change set.
+RATIFIED_SLASH_ROOTS: set[str] = {"ml-fundamentals"}
 
 pytestmark = pytest.mark.skipif(
     not DB_PATH.exists(), reason="runtime DB data/mle_prep.db not present"
@@ -59,13 +65,15 @@ def _root_path_of(conn: sqlite3.Connection, node_id: int) -> str | None:
     return None
 
 
-def test_slash_paths_have_whitelisted_root() -> None:
-    """Every slash-path node must trace back to a WHITELIST root.
+def test_slash_paths_have_ratified_root() -> None:
+    """Every slash-path node must trace back to a RATIFIED_SLASH_ROOTS entry.
 
-    A new top-level taxonomy that uses '/' separators would otherwise slip in
-    silently and recreate the original 'Other' bucket bug. To add a new
-    slash-path root: extend WHITELIST AND add corresponding entries to
-    PILLAR_STYLES (KG-FIX-02) and PILLAR_ORDER (KG-FIX-03).
+    Unratified slash-path roots would slip in silently and recreate the
+    original 'Other' bucket bug fixed by KG-FIX-01..05. To add a new
+    slash-path root: follow Section 2 of
+    docs/design/kg_dual_view_decision_20260425.md (file a design doc + extend
+    RATIFIED_SLASH_ROOTS + extend frontend PILLAR_STYLES + PILLAR_ORDER, all
+    in the same change set).
     """
     with sqlite3.connect(str(DB_PATH)) as conn:
         slash_rows = conn.execute(
@@ -74,52 +82,30 @@ def test_slash_paths_have_whitelisted_root() -> None:
         offenders: list[tuple[int, str, str | None]] = []
         for node_id, path in slash_rows:
             root_path = _root_path_of(conn, node_id)
-            if root_path not in WHITELIST:
+            if root_path not in RATIFIED_SLASH_ROOTS:
                 offenders.append((node_id, path, root_path))
 
     assert not offenders, (
-        f"slash-path nodes outside WHITELIST {sorted(WHITELIST)}: "
-        f"{offenders}. Add the new root to WHITELIST + PILLAR_STYLES + "
-        "PILLAR_ORDER, or migrate paths to dot-separator convention."
+        f"slash-path nodes outside RATIFIED_SLASH_ROOTS "
+        f"{sorted(RATIFIED_SLASH_ROOTS)}: {offenders}. Either ratify the new "
+        "root via the Section 2 process in "
+        "docs/design/kg_dual_view_decision_20260425.md (extend the registry "
+        "+ PILLAR_STYLES + PILLAR_ORDER), or migrate paths to the "
+        "dot-separator convention."
     )
 
 
-def test_whitelist_emptied_when_dual_view_decision_lands() -> None:
-    """Force whitelist cleanup once T-P2-614 closes.
+def test_dual_view_decision_doc_exists() -> None:
+    """The dual-view ratification doc must remain in place.
 
-    When KG-DESIGN-DUAL-VIEW completes, either (a) the slash subtree was
-    consolidated (slash paths no longer exist) or (b) the dual root was
-    ratified (whitelist is the wrong enforcement vehicle and must be removed
-    in favour of a permanent rule). Either way, the WHITELIST sentinel
-    should not survive the decision.
+    docs/design/kg_dual_view_decision_20260425.md is the canonical reference
+    for the permanent dual-root design and the Section 2 process for adding
+    further slash-separated roots. Removing it would orphan
+    RATIFIED_SLASH_ROOTS and the _pillar_of() docstring that point to it.
     """
-    if not TASK_DB_CLI.exists():
-        pytest.skip(f"task_db CLI not found at {TASK_DB_CLI}")
-
-    result = subprocess.run(
-        [sys.executable, str(TASK_DB_CLI), "get", "T-P2-614"],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        cwd=str(REPO_ROOT),
-        check=False,
+    decision_doc = REPO_ROOT / "docs" / "design" / "kg_dual_view_decision_20260425.md"
+    assert decision_doc.exists(), (
+        f"missing {decision_doc.relative_to(REPO_ROOT)}: this doc is "
+        "referenced by RATIFIED_SLASH_ROOTS and src/backend/routers/kg.py "
+        "::_pillar_of(). Restore it or update both references."
     )
-    if result.returncode != 0:
-        pytest.skip(
-            f"task_db get T-P2-614 failed (rc={result.returncode}): "
-            f"{result.stderr.strip()}"
-        )
-
-    try:
-        task = json.loads(result.stdout)
-    except json.JSONDecodeError as exc:
-        pytest.skip(f"task_db output is not JSON: {exc}")
-
-    status = task.get("status")
-    if status == "completed":
-        assert not WHITELIST, (
-            "T-P2-614 (KG-DESIGN-DUAL-VIEW) is completed but the slash-path "
-            f"WHITELIST is still non-empty: {sorted(WHITELIST)}. "
-            "Remove WHITELIST entries (and this test if appropriate) per the "
-            "design decision documented for T-P2-614."
-        )
