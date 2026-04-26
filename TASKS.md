@@ -9,23 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: [KG-FIX-02] Frontend: extend PILLAR_STYLES in
-src/frontend/src/components/kg/kgStyles.ts with an `"ml-fundamentals"` entry
-so the 36-row subtree no longer falls through to FALLBACK_STYLE / "Other".
-
-ACCEPTANCE CRITERIA
-AC1: New entry: `name: "ML 八股文 · Fundamentals"`, `border: "#0891b2"` (cyan-600),
-     `bg: "#ecfeff"` (cyan-50). Adjust to a free hue if collision found.
-AC2: Vitest snapshot/render test asserts FALLBACK_STYLE is NOT triggered for
-     any of the 9 known pillar keys (pillar1..pillar8 + ml-fundamentals).
-AC3: Existing styleForPillar() / colorForPillar() unit tests still pass.
-
-COMPLEXITY: S
-
 #### T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10)
 - **Priority**: P0
 - **Complexity**: S
@@ -423,6 +406,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 555 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-25** -- T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES. [KG-FIX-02] Frontend: extend PILLAR_STYLES in
 - [x] **2026-04-25** -- T-P0-609: [KG-FIX-01] Backend: walk parent_id for pillar derivation. [KG-FIX-01] Backend: rewrite `_pillar_of()` in src/backend/routers/kg.py to walk
 - [x] **2026-04-24** -- T-P1-603: [SD-YT-02] Expand framework_nodes id=198 (Real-Time Recommendation) — YouTube-specific ML pipeline. Expand framework_nodes.description for id=198 'Real-Time Recommendation System Design' (currently 27996 chars, 19 header
 - [x] **2026-04-24** -- T-P1-602: [SD-YT-01] Expand system_designs id=21 (YouTube/Netflix Video Streaming) — traditional SD gaps. Expand system_designs row id=21 'Design YouTube/Netflix Video Streaming' (currently 21417 chars across overview/architec

@@ -11,6 +11,11 @@ export interface PillarStyle {
 export const PILLAR_STYLES: Record<string, PillarStyle> = {
   pillar1: { border: "#475569", bg: "#f8fafc", name: "Coding & Algorithms" },
   pillar2: { border: "#d97706", bg: "#fffbeb", name: "ML Fundamentals & Theory" },
+  "ml-fundamentals": {
+    border: "#0891b2",
+    bg: "#ecfeff",
+    name: "ML 八股文 · Fundamentals",
+  },
   pillar3: { border: "#059669", bg: "#ecfdf5", name: "ML System Design" },
   pillar4: { border: "#0284c7", bg: "#f0f9ff", name: "Applied ML & Domain-Specific" },
   pillar5: { border: "#7c3aed", bg: "#f5f3ff", name: "ML Infrastructure & MLOps" },
