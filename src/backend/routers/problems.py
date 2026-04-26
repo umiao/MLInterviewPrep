@@ -173,17 +173,23 @@ def list_problems(
     if category:
         query = query.filter(Problem.category == category)
     if search:
-        like_term = f"%{search}%"
-        query = query.filter(
-            or_(
-                cast(Problem.leetcode_id, String).ilike(like_term),
-                Problem.title.ilike(like_term),
-                Problem.tags.ilike(like_term),
-                Problem.pattern.ilike(like_term),
-                Problem.company_tags.ilike(like_term),
-                Problem.notes.ilike(like_term),
+        stripped = search.strip()
+        if stripped.isdigit():
+            # Pure-numeric query: exact match on leetcode_id so '4' returns LC#4 only,
+            # not every problem whose id contains the digit 4 (4, 14, 24, 40-49, 140, ...).
+            query = query.filter(Problem.leetcode_id == int(stripped))
+        else:
+            like_term = f"%{search}%"
+            query = query.filter(
+                or_(
+                    cast(Problem.leetcode_id, String).ilike(like_term),
+                    Problem.title.ilike(like_term),
+                    Problem.tags.ilike(like_term),
+                    Problem.pattern.ilike(like_term),
+                    Problem.company_tags.ilike(like_term),
+                    Problem.notes.ilike(like_term),
+                )
             )
-        )
 
     # Total count for pagination header
     total_count = query.count()

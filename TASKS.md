@@ -86,6 +86,87 @@ AC:
 - No regression on existing theme/question/example rendering
 - Backend tests confirm facets included in /behavioral/examples + /behavioral/themes responses
 
+#### T-P1-616: [PROB-NOTES-04] Rewrite LC#4 (id=89) solution with cleaner sentinel-based partition + 4-fact mental model
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: WHY
+User reviewed current LC#4 solution at http://localhost:5173/problems/89 (DB row id=89, leetcode_id=4) and found the boundary handling not ideal. Current code (in problems.notes for id=89) uses inclusive `while iMin <= iMax` + 4-way branched leftMax/rightMin computation (i==0 / j==0 / i==n1 / j==n2). User has a cleaner half-open + sentinel version they want propagated, while preserving the same overall approach (partition binary-search on shorter array) and the detailed Chinese commentary + mental-model section.
+
+USER-PROVIDED REPLACEMENT (verbatim from Discord msg 1497814013814378546, 2026-04-26)
+```python
+class Solution:
+    def findMedianSortedArrays(self, nums1: List[int], nums2: List[int]) -> float:
+        n1, n2 = len(nums1), len(nums2)
+        if n1 > n2:
+            n1, n2 = n2, n1
+            nums1, nums2 = nums2, nums1
+
+        # once we determine the split point in nums1, nums2 is determined
+        totalLen = n1 + n2
+        # we want to find ideal split like:  nums1[:i] and nums2[:j]
+
+        iBeg, iEnd = 0, n1 + 1  # it is legal to iterate to [:n1]
+
+        while iBeg < iEnd:
+            i = iBeg + (iEnd - iBeg) // 2
+            j = (totalLen + 1) // 2 - i
+
+            iLeftFirstElement = nums1[i - 1] if i >= 1 else float('-inf')
+            iRightFirstElement = nums1[i] if i < n1 else float('inf')
+            jLeftFirstElement = nums2[j - 1] if j >= 1 else float('-inf')
+            jRightFirstElement = nums2[j] if j < n2 else float('inf')
+
+            if iLeftFirstElement > jRightFirstElement:
+                iEnd = i
+            elif iRightFirstElement < jLeftFirstElement:
+                iBeg = i + 1
+            else:
+                if totalLen % 2 == 1:
+                    return max(iLeftFirstElement, jLeftFirstElement)
+                else:
+                    ret = max(iLeftFirstElement, jLeftFirstElement) + min(iRightFirstElement, jRightFirstElement)
+                    ret = ret / 2
+                    return ret
+
+        return
+```
+
+USER-PROVIDED MENTAL MODEL (must be incorporated as the new core of the '思路' / '注意要点' section)
+便于记忆的心智模型 — 记住这 4 件事就行,其他都是推导出来的:
+
+1. 谁短二分谁 -- 保证 `i in [0, n1]`, `j` 是被动算出来的
+2. `half = (total + 1) // 2` -- +1 让奇数情况下左半多 1 个,中位数就是 max(left)
+3. 正确性条件: `left1 <= right2 AND left2 <= right1` (交叉比较)
+4. 失败时的方向: 违反哪个条件就反向调整 `i`
+   - `left1 > right2` -> nums1 给左边太多了 -> i 减小
+   - `left2 > right1` -> nums1 给左边太少了 -> i 增大
+
+CONTENT RULES (per memory: feedback_lc_notes_chinese.md + feedback_content_style_cn_en.md)
+- Prose 中文; code blocks + algorithm names + complexity notation 英文.
+- KaTeX math allowed (single-$ now works per memory feedback_math_formatting.md).
+- Section structure preserved: '## Median of Two Sorted Arrays' / '### 思路' / '### 我的题解' / '### 注意要点' / '### 复杂度'.
+- '### 思路' rewrite to lead with the 4-fact mental model (this is the user's NEW preferred framing).
+- '### 注意要点' rewrite to focus on what is now ELEGANT about the new code (sentinel removes 4-way branching, half-open while removes off-by-one), not what was tricky in the OLD code.
+- '### 复杂度' unchanged: O(log(min(m,n))) time, O(1) space.
+
+DELIVERABLES
+1. `scripts/seed_lc4_notes_rewrite_20260426.py` -- idempotent UPDATE of `problems.notes` WHERE id=89. Pattern: read current notes, compare against target, only UPDATE if different, log [SKIP] on second run. DB-backup-guarded with suffix `_pre_lc4_notes_rewrite`.
+2. The seed script's target-content variable (`NEW_NOTES = '''...'''`) is the source of truth for the rewrite -- this is the canonical form per CLAUDE.md invariant 3. Do NOT also paste the markdown into a separate .md file (avoid two-source drift).
+
+ACCEPTANCE CRITERIA
+AC1: Script writes new notes to id=89 on first run; `[SKIP]` on second run (idempotent).
+AC2: New notes preserve the 5 section headers (思路 / 我的题解 / 注意要点 / 复杂度).
+AC3: Code block content matches the user-provided replacement byte-for-byte (after dedent + LF normalization).
+AC4: 思路 section explicitly enumerates the 4 mental-model facts numbered 1-4.
+AC5: `### 注意要点` section has at least 3 bullets explaining why the new sentinel-based code is cleaner than the prior 4-way-branch version (e.g. 'sentinel `+/- inf` 取代 4 个 `i==0 / j==0 / i==n1 / j==n2` 分支' / 'half-open `while iBeg < iEnd` 避免了 +/-1 off-by-one' / 'cross-check 条件直接对应失败方向').
+AC6 (manual smoke per CLAUDE.md rule 5): With backend running, navigate to http://localhost:5173/problems/89; verify ProblemDetailPage renders updated notes with KaTeX math compiling, code block syntax-highlighted, all 5 section headers visible.
+AC7 (regression): Full pytest stays green; `/problems/89` API `notes` length > 2500 chars (sanity floor).
+
+DEPENDS ON: None.
+
+COMPLEXITY: S (one row UPDATE + smoke test). Estimate ~80 lines for the seed script + the embedded NEW_NOTES heredoc.
+
 ### P2 -- Nice to Have
 
 #### T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style
@@ -208,6 +289,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 - [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
 - [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
+- [x] **2026-04-25** -- T-P1-615: [PROB-SEARCH-01] Pure-numeric search exact-match on leetcode_id (currently '4' returns 50+ irrelevant). WHY
 - [x] **2026-04-25** -- T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy. Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
 - [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
 - [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +

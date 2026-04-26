@@ -361,6 +361,66 @@ def test_search_x_total_count(test_client):
 
 
 # ===========================================================================
+# GET /api/problems -- pure-numeric search (PROB-SEARCH-01)
+# ===========================================================================
+# Pure-digit queries short-circuit to exact equality on leetcode_id so '4'
+# returns LC#4 alone instead of every problem whose id substring contains '4'
+# (4, 14, 24, 40-49, 124, 140, ...). Mixed/alpha queries keep substring search.
+
+def test_search_pure_numeric_exact_match(test_client):
+    """search='1' returns exactly LC#1 (Two Sum), not LC#15 / LC#56 / LC#124."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=1")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["leetcode_id"] == 1
+    assert data[0]["title"] == "Two Sum"
+
+
+def test_search_pure_numeric_two_digit(test_client):
+    """search='15' returns exactly LC#15 (3Sum), not also LC#56 / LC#124."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=15")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["leetcode_id"] == 15
+    assert data[0]["title"] == "3Sum"
+
+
+def test_search_pure_numeric_no_such_id(test_client):
+    """search='99999' (no such leetcode_id) returns empty list."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=99999")
+    assert resp.json() == []
+    assert resp.headers["X-Total-Count"] == "0"
+
+
+def test_search_pure_numeric_strips_whitespace(test_client):
+    """search='   1   ' is stripped and treated as pure-numeric '1'."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=   1   ")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["leetcode_id"] == 1
+
+
+def test_search_mixed_digits_letters_falls_through(test_client):
+    """search='1abc' is not pure-digit so it uses substring search (no match here)."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=1abc")
+    assert resp.json() == []
+
+
+def test_search_non_numeric_unchanged(test_client):
+    """Regression: 'merge' still returns Merge Intervals via title substring search."""
+    _seed_diverse_problems(test_client)
+    resp = test_client.get("/api/problems?search=merge")
+    data = resp.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Merge Intervals"
+
+
+# ===========================================================================
 # GET /api/problems -- X-Total-Count header
 # ===========================================================================
 
