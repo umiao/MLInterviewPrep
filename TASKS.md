@@ -211,6 +211,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - [x] **2026-04-25** -- T-P1-616: [PROB-NOTES-04] Rewrite LC#4 (id=89) solution with cleaner sentinel-based partition + 4-fact mental model. WHY
 - [x] **2026-04-25** -- T-P1-615: [PROB-SEARCH-01] Pure-numeric search exact-match on leetcode_id (currently '4' returns 50+ irrelevant). WHY
 - [x] **2026-04-25** -- T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy. Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
+- [x] **2026-04-25** -- T-P0-617: [DEV-FIX-01] scripts/dev.py auto-evict stale backend on port 8100 conflict. WHY
 - [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
 - [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
 - [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
