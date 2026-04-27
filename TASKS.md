@@ -60,6 +60,25 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-627: Add display_label short field to principle_tags so pills show short labels (full phrase in tooltip)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Follow-up to T-P0-626. Pill UI primitive is for short labels; commit e52d568 (2026-04-23) put 33-char-avg phrases in principle_tags. T-P0-626 patches the layout to tolerate long phrases; this ticket fixes the data layer.
+
+Approach:
+- Add 'display_label' (~12 chars) to principle_tags source-of-truth seed
+- Backend exposes both slug and display_label
+- Frontend pills render display_label; tooltip shows full phrase
+- Tags missing display_label fall back to label or auto-truncate
+
+AC:
+- All 8 EX-01 principle_tags have hand-crafted display_label
+- Pills show short labels; tooltip on hover shows full phrase
+- T-P0-626's _-to-space rendering becomes unnecessary once this ships
+
+Scope: backend schema + router + frontend pill rendering + seed. M complexity. NOT urgent: post-Uber 2026-04-27.
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -154,6 +173,15 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 571 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification
+- [x] **2026-04-27** -- T-P2-623: [LC855] Seed Exam Room notes (brute-force sorted-list + heap follow-up). Discord ad-hoc msg 1498356808602095685. User pasted LC official editorial brute-force code and asked for notes + explici
+- [x] **2026-04-27** -- T-P2-622: [LC384] Seed Shuffle an Array notes (Fisher-Yates + sort-based shuffle distillation) + Uber tag. Discord ad-hoc msg 1498353628937715803. User added their own LC 384 attempt and asked to distill discussion: (1) Fisher-
+- [x] **2026-04-27** -- T-P2-621: [LC2861] Seed Maximum Number of Alloys notes (binary-search-on-answer canonical). Discord ad-hoc request msg 1498348552362000474. Write LC 2861 (Maximum Number of Alloys) seed notes to data/mle_prep.db 
+- [x] **2026-04-27** -- T-P2-620: [followup] LC 2571 notes rewrite (bit-greedy + NAF formula) + Uber tag. Discord followup. User wrote LC 2571 with the canonical bit-trick (skip zeros + n&3==3 carry / n&3==1 subtract) and aske
+- [x] **2026-04-27** -- T-P2-619: [followup] LC 502 IPO notes seeded (sort + max-heap greedy). Discord followup. User wrote LC 502 sort+max-heap solution and asked for DB notes. Seeded notes via scripts/_update_lc50
+- [x] **2026-04-27** -- T-P2-618: [followup] LC 864 notes seeded (bitmask BFS canonical + list-of-bool baseline). Discord followup. User wrote LC 864 list-of-bool BFS solution, requested DB notes + bitmask compression upgrade. Seeded 
+- [x] **2026-04-27** -- T-P1-625: [Uber-LC-Index] New company_document: Uber LC index view (drawer-linked, grouped, all 247 Uber-tagged-with-notes problems). ## Goal
+- [x] **2026-04-27** -- T-P0-626: Fix BQ ExampleCard layout: title squeezed to one-word-per-line by long principle pills. Bug: BehavioralQuestions.tsx examples view, EX-01 card title 'Search Diversity --- Intent Collapse via Item-vs-Page Diag
 - [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
 - [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
 - [x] **2026-04-25** -- T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style. Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + del

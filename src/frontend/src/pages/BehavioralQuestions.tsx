@@ -12,6 +12,7 @@ import SignatureBadge from "../components/ui/SignatureBadge";
 import FacetPills from "../components/behavioral/FacetPills";
 import { goldenCardClass } from "../utils/goldenStyle";
 import { parsePitch } from "../utils/parsePitch";
+import { normalizeTagLabel } from "../utils/tagLabel";
 import type {
   BehavioralExample,
   BehavioralThemeSummary,
@@ -158,39 +159,45 @@ function ExampleCard({
           : "border-gray-200 hover:border-blue-400"
       } ${goldenCardClass(isGolden)}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">
-              {example.example_id}
+      <div className="bq-example-card-body">
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-sm font-mono font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded">
+            {example.example_id}
+          </span>
+          <h4 className="text-gray-900 font-bold text-base break-words min-w-0">
+            {example.title}
+          </h4>
+          <GoldenBadge golden={isGolden} />
+          <SignatureBadge signature={isSignature} />
+          {needsInput && (
+            <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
+              Needs Input
             </span>
-            <h4 className="text-gray-900 font-bold text-base">{example.title}</h4>
-            <GoldenBadge golden={isGolden} />
-            <SignatureBadge signature={isSignature} />
-            {needsInput && (
-              <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
-                Needs Input
-              </span>
-            )}
-          </div>
-          {example.source_project && (
-            <p className="text-sm text-gray-500 mt-1 ml-1">
-              Source: <span className="font-medium text-gray-700">{example.source_project}</span>
-            </p>
           )}
-          <FacetPills facets={example.facet_tags} className="mt-1.5 ml-1" />
         </div>
-        <div className="flex items-center gap-2 flex-wrap shrink-0">
-          {example.principle_tags.map((tag) => (
-            <span
-              key={tag}
-              className="text-sm px-3 py-1 rounded-lg bg-blue-100 text-blue-800 font-semibold border border-blue-200"
-              title={categoryLabel(tag)}
-            >
-              {categoryLabel(tag)}
-            </span>
-          ))}
-        </div>
+        {example.source_project && (
+          <p className="text-sm text-gray-500 mt-1 ml-1">
+            Source: <span className="font-medium text-gray-700">{example.source_project}</span>
+          </p>
+        )}
+        <FacetPills facets={example.facet_tags} className="mt-1.5 ml-1" />
+        {example.principle_tags.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2 bq-principle-pills">
+            {example.principle_tags.map((tag) => {
+              const fullLabel = categoryLabel(tag);
+              return (
+                <span
+                  key={tag}
+                  className="text-sm px-3 py-1 rounded-lg bg-blue-100 text-blue-800 font-semibold border border-blue-200 break-words"
+                  title={tag}
+                  aria-label={fullLabel}
+                >
+                  {normalizeTagLabel(fullLabel)}
+                </span>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {pitchParts && (
