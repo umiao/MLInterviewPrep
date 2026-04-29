@@ -1,0 +1,41 @@
+# Uber BPS -- Design & Architecture (D&A) Prep Guide
+## Table of Contents
+## 1. D&A Format and Expectations
+### What happens in the D&A segment
+### What the interviewer evaluates
+### How to structure your walkthrough (8-10 min)
+## 2. Project Showcase: Ranking-as-Allocation
+### Context (1 min)
+### Architecture Diagram
+### End-to-End Flow
+### Key Trade-off Discussions
+### Anticipated follow-ups
+## 3. Project Showcase: LLM Evaluation Pipeline
+### Context (1 min)
+### Architecture Diagram
+### End-to-End Flow
+### Key Trade-off Discussions
+### Anticipated follow-ups
+## 4. Trade-off Discussion Framework
+### STAR-T Framework for Trade-offs
+### Common trade-off dimensions at Uber
+## 5. Uber System Design Patterns
+### 5.1 Driver Maps (Real-time Geospatial)
+### 5.2 Shopping Cart (UberEats)
+### 5.3 Driver Queue / Dispatch
+### 5.4 ETA Estimation
+### 5.5 Food Ordering Pipeline (UberEats)
+## 6. Common D&A Follow-up Questions
+### General architecture questions
+### ML-specific D&A questions
+### Questions from 1p3a BPS reports
+### Red flags to avoid
+## 7. D&A Communication Tips
+### During the diagram
+### During the walkthrough
+### Handling unknown questions
+## 8. Practice Checklist
+### Project 1: Ranking-as-Allocation
+### Project 2: LLM Evaluation Pipeline
+### General D&A readiness
+## Quick Reference: D&A in 60 Seconds

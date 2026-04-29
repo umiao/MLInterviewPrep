@@ -50,66 +50,6 @@ If any verbal AC fails: file a follow-up task to deepen the corresponding sectio
 ## Dependencies
 Upstream: T-P0-632 (MVP), T-P2-633 (banner). Implicitly all of T-P0-628/629/630/631 must be done.
 
-#### T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-628
-- **Description**: ## Priority bump (per critical review)
-P1 -> **P0**. Reasoning: id=33 is the active reference doc for the Round-3 Design rounds; gaps here directly cost interview points. Strengthening must land before T-P0-632 MVP wires links to id=33 anchors.
-
-## Goal
-Patch existing Uber docs with the specific deficits from T-P0-628 audit. Delta-only, NOT rewrite.
-
-## Targets
-- **id=33 'Uber BPS Design & Architecture Prep'** -- primary surface for search/recommendation strengthening.
-- **id=37 'Uber VO 完整准备指南 (Virtual Onsite)'** -- Round 3 'System Design常见主题' list updated to point at T-P0-630; Round 4 'Behavioral Trust/Respect/Conviction' kept as-is.
-
-## Strengthening deltas (10 keywords from source TXT '5 大薄弱处补强')
-For id=33, ensure each is covered with at least one paragraph + concrete trade-off:
-- [ ] **Training-serving skew** 三层防御: Feature Snapshot at Serving Time + Feature Store (Michelangelo Palette) + Feature Monitoring (KL/PSI).
-- [ ] **Graceful degradation**: timeout + fallback + 'is-fallback' as feature + popularity 兜底.
-- [ ] **Hard filter vs Soft feature** for freshness/availability (dead-click prevention).
-- [ ] **Two-tower model** + **MMoE** + **DIN** -- canonical ranking stack.
-- [ ] **H3 hexagonal grid** vs geohash trade-off (Uber-specific must-mention).
-- [ ] **Position bias** (Google paper feature-at-train-zero-at-serve / IPS).
-- [ ] **Online learning vs Batch retraining** trade-off.
-- [ ] **Off-policy evaluation** (IPS / DR estimator).
-- [ ] **Cluster-randomized A/B testing** (interference in marketplace).
-- [ ] **Three-time-scale architecture**: Offline / Near-line / Online.
-
-## Anchor stability invariant (LOCKED, per critical review)
-**MUST NOT modify any existing H2 or H3 heading TEXT in id=33 or id=37.** Only:
-- Append paragraphs under existing headings.
-- Replace paragraph CONTENT (not heading text) under existing headings if a stronger version exists.
-- Add NEW subsections only under a new H3 heading appended below existing structure.
-
-Reason: T-P0-632 MVP deep-links to id=33 / id=37 via heading anchors. Renaming a heading silently breaks every card link.
-
-## Implementation
-- Delta patches via idempotent seed script \`scripts/patch_uber_design_arch_strengthen.py\`.
-- Insert under existing section anchors; do not reorder content.
-- Apply story_rewrite_protocol 7-step protocol -- audit propagation surfaces (BQ examples, framework_nodes, problems-table cross-refs) before editing.
-- Each delta paragraph cites the source TXT line range it comes from (in HTML comment for traceability).
-
-## Scenario matrix
-- Already covered in id=33 at Staff depth -> NO-OP.
-- Covered at lower depth -> REPLACE paragraph CONTENT (not heading) with strengthened version + cite source.
-- Missing from id=33 -> APPEND under appropriate existing section, do not invent new top-level H2.
-- Item NEW (no existing section anywhere appropriate) -> route to T-P0-630 instead.
-
-## Acceptance criteria
-- [ ] Patch script idempotent (rerun = same content_hash).
-- [ ] All 10 strengthening keywords above produce >=1 regex match in id=33 content after patch.
-- [ ] id=37 Round 3 list includes Uber Eats restaurant rec + Budget promo entries with cross-link to T-P0-630 doc anchors.
-- [ ] **Heading audit AC**: \`grep -E '^#{1,3} ' id=33-content-before.md > headings-before.txt; ... after.txt; diff\` -- diff must be empty for HEADING text (only content body diffs allowed).
-- [ ] No duplication of source TXT verbatim content -- verbatim lives in T-P0-630 only.
-- [ ] Manual smoke: open id=33 in PrepNotesPage, scroll to relevant section, confirm strengthened paragraphs render cleanly.
-- [ ] Propagation audit: zero stale cross-references from BQ stories or framework_nodes pointing at the old (weaker) text.
-
-## Dependencies
-Upstream: T-P0-628.
-Downstream: T-P0-632 MVP (anchors must be stable when MVP wires links).
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -372,6 +312,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
 - [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
 - [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
 - [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
