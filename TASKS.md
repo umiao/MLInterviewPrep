@@ -84,19 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
-1. settings.json: bare python -> /c/Anaconda/python.exe in all 11 hook commands + add SessionStart entry for setup_python_env.sh (Windows-store-stub fix from helixos T-P1-185).
-2. settings.json: add permissions.allow carve-out for .claude/session_state.json (helixos T-P1-258).
-3. lint_check.py: add dist to _SKIP_DIRS.
-4. task_db.py: walk-up parent routing + --project override (helixos T-P1-255).
-5. session_context.py: warn when .claude/tasks.db is missing but TASKS.md has tasks (fresh-clone scenario).
-
-Acceptance: template harness files contain these changes, diff -bw shows no remaining divergence on these specific items, no regressions in template settings.json schema.
-
 #### T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template
 - **Priority**: P2
 - **Complexity**: S
@@ -287,6 +274,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
