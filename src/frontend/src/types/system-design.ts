@@ -16,8 +16,13 @@ export interface SystemDesign extends SystemDesignSummary {
   tradeoffs: string | null;
   defense: string | null;
   verbal_outline: string | null;
+  cheat_sheet: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface SystemDesignCheatSheet extends SystemDesignSummary {
+  cheat_sheet: string | null;
 }
 
 export type SystemDesignSection =
@@ -28,7 +33,8 @@ export type SystemDesignSection =
   | "production_constraints"
   | "tradeoffs"
   | "defense"
-  | "verbal_outline";
+  | "verbal_outline"
+  | "cheat_sheet";
 
 export const SECTION_LABELS: Record<SystemDesignSection, string> = {
   overview: "Overview & Motivation",
@@ -39,4 +45,5 @@ export const SECTION_LABELS: Record<SystemDesignSection, string> = {
   tradeoffs: "Trade-off Analysis",
   defense: "Adversarial Defense Q&A",
   verbal_outline: "Verbal Outline",
+  cheat_sheet: "Cheat Sheet",
 };

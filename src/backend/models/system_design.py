@@ -7,7 +7,7 @@ from src.backend.database import Base
 
 
 class SystemDesign(Base):
-    """A system design case study module with 8 markdown content sections."""
+    """A system design case study module with 9 markdown content sections."""
 
     __tablename__ = "system_designs"
 
@@ -17,7 +17,7 @@ class SystemDesign(Base):
     subtitle = Column(Text, nullable=True)
     diagram_filename = Column(String(255), nullable=True)
 
-    # 8 markdown content sections (all editable via frontend)
+    # 9 markdown content sections (all editable via frontend)
     overview = Column(Text, nullable=True)                # S1: Overview & Motivation
     architecture = Column(Text, nullable=True)            # S2: Architecture Deep Dive
     dataflow = Column(Text, nullable=True)                # S3: Data Flow & Key Components
@@ -26,6 +26,7 @@ class SystemDesign(Base):
     tradeoffs = Column(Text, nullable=True)               # S6: Trade-off Analysis
     defense = Column(Text, nullable=True)                 # S7: Adversarial Defense Q&A
     verbal_outline = Column(Text, nullable=True)          # S8: Verbal Outline (3-min & 10-min)
+    cheat_sheet = Column(Text, nullable=True)             # S9: One-pager cheat sheet
 
     content_hash = Column(Text, nullable=True)
     source_path = Column(String(500), nullable=True)

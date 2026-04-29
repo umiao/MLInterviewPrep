@@ -24,6 +24,7 @@ const ALL_SECTIONS: SystemDesignSection[] = [
   "tradeoffs",
   "defense",
   "verbal_outline",
+  "cheat_sheet",
 ];
 
 function buildSectionContents(

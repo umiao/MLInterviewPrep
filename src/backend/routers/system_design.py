@@ -26,7 +26,7 @@ class SystemDesignSummaryResponse(BaseModel):
 
 
 class SystemDesignFullResponse(SystemDesignSummaryResponse):
-    """Full module response including all 8 markdown sections."""
+    """Full module response including all 9 markdown sections."""
 
     overview: str | None
     architecture: str | None
@@ -36,8 +36,15 @@ class SystemDesignFullResponse(SystemDesignSummaryResponse):
     tradeoffs: str | None
     defense: str | None
     verbal_outline: str | None
+    cheat_sheet: str | None
     created_at: datetime | None
     updated_at: datetime | None
+
+
+class SystemDesignCheatSheetResponse(SystemDesignSummaryResponse):
+    """Aggregation response for the cheat-sheet tab: summary + cheat_sheet only."""
+
+    cheat_sheet: str | None
 
 
 class SystemDesignUpdate(BaseModel):
@@ -54,6 +61,7 @@ class SystemDesignUpdate(BaseModel):
     tradeoffs: str | None = None
     defense: str | None = None
     verbal_outline: str | None = None
+    cheat_sheet: str | None = None
     display_order: int | None = None
 
 
@@ -75,6 +83,30 @@ def list_system_designs(
             "subtitle": m.subtitle,
             "diagram_filename": m.diagram_filename,
             "display_order": m.display_order,
+        }
+        for m in modules
+    ]
+
+
+@router.get("/cheat-sheets", response_model=list[SystemDesignCheatSheetResponse])
+def list_system_design_cheat_sheets(
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Return all modules with summary fields + cheat_sheet (powers the Cheat Sheet tab)."""
+    modules = (
+        db.query(SystemDesign)
+        .order_by(SystemDesign.display_order, SystemDesign.id)
+        .all()
+    )
+    return [
+        {
+            "id": m.id,
+            "slug": m.slug,
+            "title": m.title,
+            "subtitle": m.subtitle,
+            "diagram_filename": m.diagram_filename,
+            "display_order": m.display_order,
+            "cheat_sheet": m.cheat_sheet,
         }
         for m in modules
     ]
@@ -104,6 +136,7 @@ def get_system_design(
         "tradeoffs": module.tradeoffs,
         "defense": module.defense,
         "verbal_outline": module.verbal_outline,
+        "cheat_sheet": module.cheat_sheet,
         "display_order": module.display_order,
         "created_at": module.created_at,
         "updated_at": module.updated_at,
@@ -147,6 +180,7 @@ def update_system_design(
         "tradeoffs": module.tradeoffs,
         "defense": module.defense,
         "verbal_outline": module.verbal_outline,
+        "cheat_sheet": module.cheat_sheet,
         "display_order": module.display_order,
         "created_at": module.created_at,
         "updated_at": module.updated_at,
