@@ -84,12 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus one more). Template/LESSONS.md has 0. Copy the 3 universal entries verbatim (preserving date and Source line). Skip any project-specific (#tailwind/#scraper/#hexo) entries. Acceptance: template/LESSONS.md grep -c [UNIVERSAL] returns 3.
-
 #### T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep
 - **Priority**: P2
 - **Complexity**: S
@@ -274,6 +268,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
