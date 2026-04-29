@@ -9,51 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level)
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-628
-- **Description**: ## Goal
-Create one new Uber company_document covering all ML System Design items at Staff-level depth, with the source TXT's two Golden Answers (Uber Eats restaurant rec + Budget-constrained promo) imported nearly verbatim plus Chinese-narration polish.
-
-## Scope
-1. **Uber Eats 餐厅推荐系统** -- import the full 6-stage Golden Answer from source TXT verbatim (心态/节奏 -> 需求澄清 -> 规模估算 -> High-level 架构 -> Deep dive: candidate gen / ranking / training-serving skew / freshness -> 收尾 senior 加分项 -> 5 大薄弱处补强 -> 一页纸记忆卡).
-2. **Budget-Constrained Promo Recommendation** -- import the full 11-section Golden Answer (TL;DR -> Problem framing -> Clarifying questions -> Requirements -> Metrics -> Uplift modeling (T/X/S/DR-learner) -> Constrained allocation (MCKP, Lagrangian, LP relax, greedy bounds, online, PID pacing) -> Bandit -> Architecture -> Evaluation (IPS, DR, switchback) -> Pitfalls -> Cheatsheet).
-3. PLUS any NEW ML SD items surfaced in T-P0-628 audit (Uber tech-blog candidates: ETA prediction, surge pricing, dispatch matching, fraud detection, search ranking, ad ranking, driver-rider matching).
-
-## Locked decision (per critical review)
-**No \`system_designs\` table dual-write.** This doc is markdown-only in \`company_documents\`. The \`system_designs\` table currently has 0 rows; SystemDesignList page is not in active use for mock interviews. If we later want normalized rows, that's a separate migration -- NOT in scope here. Decision locked to keep T-P0-630 simple and avoid double-source-of-truth drift.
-
-## Style requirements
-- Chinese narration + English terms.
-- 行业黑话 highlighted in **bold** on first use, with one-line explanation.
-- Trade-off framing for every architectural decision (per source TXT's 'Senior 答案' format).
-- ASCII diagrams in code-fence (matches source TXT diagrams).
-- Math in \$\$...\$\$.
-- No emoji.
-
-## Stable anchor requirement (locked decision)
-Every H2 section uses kebab-case HTML id, e.g. \`<h2 id=\"uber-eats-restaurant-rec\">Uber Eats 餐厅推荐系统</h2>\`. T-P0-632 MVP deep-links via these anchors.
-
-## Implementation
-- Idempotent Python seed script: \`scripts/seed_uber_ml_sd_golden.py\`.
-- Markdown content stored in sibling data file \`src/backend/seed_data/uber/ml_sd_golden.md\`.
-- UPSERT into \`company_documents\` by (company_id=5, title='Uber ML System Design Golden Answers (Staff-Level)'); doc_kind='prep_note', source_type='prep_doc', is_golden=1.
-- content_hash idempotent.
-
-## Acceptance criteria
-- [ ] Seed script runs idempotently.
-- [ ] Both source-TXT Golden Answers reproduced byte-equivalent (modulo Chinese narration polish where needed).
-- [ ] Each section uses **bold** for 行业黑话 with inline gloss.
-- [ ] Cross-check vs T-P0-628 NEW inventory: every NEW ML SD row is covered.
-- [ ] Stable anchor IDs for every H2 (uber-eats-restaurant-rec, budget-promo-recommendation, plus one per NEW item).
-- [ ] Manual smoke: open in PrepNotesPage, both designs render cleanly with KaTeX + ASCII diagrams visible, anchor jumps work.
-- [ ] Verbal-recall AC: I can talk through Uber Eats 6 stages in 25 minutes without notes; I can talk through Budget Promo 7-item cheatsheet in 15 minutes.
-
-## Dependencies
-Upstream: T-P0-628.
-Downstream: T-P0-632 MVP, T-P0-634 smoke.
-
 #### T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page)
 - **Priority**: P0
 - **Complexity**: L
@@ -473,6 +428,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
 - [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
 - [x] **2026-04-28** -- T-P0-628: [UBER-VO-1] Audit + inventory: extract ML Coding & ML Sys Design content from all Uber sources. ## Goal
 - [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification
