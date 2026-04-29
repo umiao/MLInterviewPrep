@@ -125,36 +125,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P0-632
-- **Description**: ## Goal
-The new T-P0-632 MVP makes id=37 the multi-charter index hub. Update id=81 'Uber LC 题库索引视图' to point users at id=37 instead.
-
-## Change
-Edit id=81's content via idempotent seed script \`scripts/update_uber_lc_index_redirect.py\` to prepend at the very top:
-
-\`\`\`markdown
-> **[UPDATED 2026-04-28]** This LC-only index has been folded into the new
-> [Uber VO 多 Charter 索引](db://37) which lists Round 1 LC, Round 2 ML Coding,
-> Round 3 ML SD, Round 4 BQ, and HR side-by-side. The 47 LC problems below
-> remain the source of truth for Round 1 coverage; the new index links here
-> for the LC charter.
-\`\`\`
-
-Keep the rest of the doc untouched. id=81 still serves as the LC tab content source.
-
-## Acceptance criteria
-- [ ] Seed script idempotent.
-- [ ] Banner appears above the existing \`<!-- UBER_LC_INDEX_V1 -->\` HTML comment.
-- [ ] Markdown link \`db://37\` opens id=37 in SlideOverPanel per drawer convention.
-- [ ] Manual smoke: open id=81, see banner at top, click link, lands on id=37 in drawer.
-
-## Dependencies
-Upstream: T-P0-632 (id=37 must contain the multi-charter index sections before this banner makes sense).
-Downstream: T-P0-634.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -279,6 +249,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
 - [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
