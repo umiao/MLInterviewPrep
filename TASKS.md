@@ -101,39 +101,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P0-628, T-P0-629
-- **Description**: ## Goal
-Companion task to T-P0-629. Once T-P0-628 audit produces its NEW inventory and T-P0-629 lands the 4 known items, this task seeds any additional ML Coding items the audit surfaced (Uber tech-blog topics: ETA prediction, surge pricing, dispatch matching, fraud detection, etc., if surfaced as ML CODING rather than ML SD).
-
-## Why split (per critical review)
-T-P0-629 was originally [L] with an open-ended 'PLUS any NEW items from audit' tail -- classic scope creep. Splitting:
-- Bounds T-P0-629 to exactly 4 known items (no surprises during exec).
-- Lets T-P0-635 (this task) be skipped if audit surfaces zero NEW items.
-- Allows T-P0-632 MVP to ship after T-P0-629 alone, without waiting for this task.
-
-## Scope (data-driven from T-P0-628)
-- Read T-P0-628's audit deliverable (\`logs/uber_mlcoding_mlsd_audit.md\`).
-- For each row marked target charter = 'ML Coding' AND tier = 'Staff Golden Answer', draft Staff-level content following the same structure as T-P0-629 (Clarify -> Brute -> Optimal -> Trade-off -> Follow-up -> 行业黑话).
-- Append to the SAME company_document seeded by T-P0-629, OR create a sibling doc 'Uber ML Coding Golden Answer 补充 (Audit Discovered)' if size > 30 KB.
-
-## Skip condition
-If T-P0-628's NEW inventory has 0 ML Coding rows, mark this task COMPLETED with note 'no NEW items'. Don't fabricate filler.
-
-## Implementation
-- Same idempotent seed script pattern as T-P0-629; either extend \`scripts/seed_uber_ml_coding_golden.py\` (pull data from a second .md file under seed_data/uber/) or create \`scripts/seed_uber_ml_coding_audit_addons.py\`.
-
-## Acceptance criteria
-- [ ] If audit surfaced N>=1 NEW items: each rendered at Staff-level, with stable anchors, KaTeX-clean.
-- [ ] If audit surfaced N=0: task closes with explicit 'no-op' note, no filler content created.
-- [ ] Idempotent rerun.
-
-## Dependencies
-Upstream: T-P0-628 (audit), T-P0-629 (parent doc must exist if appending).
-Downstream: T-P0-634 (smoke).
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -187,37 +154,6 @@ Keep the rest of the doc untouched. id=81 still serves as the LC tab content sou
 ## Dependencies
 Upstream: T-P0-632 (id=37 must contain the multi-charter index sections before this banner makes sense).
 Downstream: T-P0-634.
-
-#### T-P2-636: [UBER-VO-5b POST-5/4] Bespoke pages/UberIndex.tsx with 5-tab charter switcher (deferred)
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: T-P0-632
-- **Description**: ## Status: DEFERRED post-2026-05-04 per critical review
-This is the original T-P0-632 scope (bespoke React page + URL state + drawer state + browser back/forward + accessibility + vitest). Moved out of the 5/4-readiness critical path. Pick up only if the T-P0-632 MVP (id=37 patch) proves insufficient during actual prep usage.
-
-## Trigger to re-prioritize
-- I find myself navigating id=37 -> Round 2 -> click link -> target doc -> back button -> click another link, repeatedly, and the friction matters.
-- Or: a follow-up Uber recruiter loop schedules another VO requiring deeper navigation.
-
-## Goal (preserved from original plan)
-A bespoke \`pages/UberIndex.tsx\` route at \`/companies/uber/index\` mirroring \`pages/QuickIndex.tsx\` pattern: 5 tab pills (LC / ML Coding / ML SD / Behavioral / HR), per-tab card grid, click-to-drawer, URL state, browser back/forward, empty-state copy, ARIA accessibility, vitest coverage.
-
-## Locked decisions inherited from MVP
-- Drawer type: SlideOverPanel via existing \`db://N#anchor\` convention (with anchor support added if T-P0-632 surfaces it as missing).
-- Behavioral API: \`/behavioral/themes?company=uber\`.
-- Implementation Option A: bespoke page (NOT generalize QuickIndex).
-
-## Acceptance criteria (from original T-P0-632)
-- All 5 tabs render correct content with stable URL state.
-- Card click opens SlideOverPanel with anchor-scroll.
-- Browser back/forward preserves tab+drawer state.
-- Empty state for charters lacking content.
-- Accessibility: role=tab, ARIA-controls, keyboard arrow nav.
-- Vitest tab-switch + drawer-open + empty-state.
-- No emoji.
-
-## Dependencies
-Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 'skipped').
 
 ### P3 -- Stretch Goals
 
@@ -308,10 +244,42 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 - **Depends on**: None
 - **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
 
+#### T-P2-636: [UBER-VO-5b POST-5/4] Bespoke pages/UberIndex.tsx with 5-tab charter switcher (deferred)
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: T-P0-632
+- **Description**: ## Status: DEFERRED post-2026-05-04 per critical review
+This is the original T-P0-632 scope (bespoke React page + URL state + drawer state + browser back/forward + accessibility + vitest). Moved out of the 5/4-readiness critical path. Pick up only if the T-P0-632 MVP (id=37 patch) proves insufficient during actual prep usage.
+
+## Trigger to re-prioritize
+- I find myself navigating id=37 -> Round 2 -> click link -> target doc -> back button -> click another link, repeatedly, and the friction matters.
+- Or: a follow-up Uber recruiter loop schedules another VO requiring deeper navigation.
+
+## Goal (preserved from original plan)
+A bespoke \`pages/UberIndex.tsx\` route at \`/companies/uber/index\` mirroring \`pages/QuickIndex.tsx\` pattern: 5 tab pills (LC / ML Coding / ML SD / Behavioral / HR), per-tab card grid, click-to-drawer, URL state, browser back/forward, empty-state copy, ARIA accessibility, vitest coverage.
+
+## Locked decisions inherited from MVP
+- Drawer type: SlideOverPanel via existing \`db://N#anchor\` convention (with anchor support added if T-P0-632 surfaces it as missing).
+- Behavioral API: \`/behavioral/themes?company=uber\`.
+- Implementation Option A: bespoke page (NOT generalize QuickIndex).
+
+## Acceptance criteria (from original T-P0-632)
+- All 5 tabs render correct content with stable URL state.
+- Card click opens SlideOverPanel with anchor-scroll.
+- Browser back/forward preserves tab+drawer state.
+- Empty state for charters lacking content.
+- Accessibility: role=tab, ARIA-controls, keyboard arrow nav.
+- Vitest tab-switch + drawer-open + empty-state.
+- No emoji.
+
+## Dependencies
+Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 'skipped').
+
 ## Completed Tasks
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
 - [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
 - [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal

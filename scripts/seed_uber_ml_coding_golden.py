@@ -3,10 +3,15 @@
 Idempotent UPSERT keyed by (company_id=5, title=DOC_TITLE). Re-running with
 unchanged source markdown produces zero net change (same content_hash).
 
-Source: src/backend/seed_data/uber/ml_coding_golden.md (4 Staff-level items:
-geometric median, K-Means numpy-only, linear regression, logistic regression).
+Sources (concatenated in order at seed time):
+- src/backend/seed_data/uber/ml_coding_golden.md (T-P0-629 base — 4 Staff-level
+  items: geometric median, K-Means numpy-only, linear regression, logistic
+  regression).
+- src/backend/seed_data/uber/ml_coding_audit_addons.md (T-P1-635 audit-aux —
+  2 depth-2 cards: multi-treatment uplift learners, Lagrangian relaxation
+  pseudocode). Optional file; if absent, only base content is seeded.
 
-Task: T-P0-629 ([UBER-VO-2])
+Task: T-P0-629 ([UBER-VO-2]) base + T-P1-635 ([UBER-VO-2b]) audit-discovered companions
 """
 from __future__ import annotations
 
@@ -16,7 +21,9 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = PROJECT_ROOT / "data" / "mle_prep.db"
-MD_PATH = PROJECT_ROOT / "src" / "backend" / "seed_data" / "uber" / "ml_coding_golden.md"
+SEED_DIR = PROJECT_ROOT / "src" / "backend" / "seed_data" / "uber"
+MD_PATH = SEED_DIR / "ml_coding_golden.md"
+ADDONS_MD_PATH = SEED_DIR / "ml_coding_audit_addons.md"
 
 COMPANY_ID = 5  # Uber
 DOC_TITLE = "Uber ML Coding Golden Answer 集合 (Staff-Level)"
@@ -31,10 +38,22 @@ def compute_hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
-def main() -> None:
-    """Read markdown and UPSERT into company_documents."""
+def load_content() -> str:
+    """Read base markdown and append the audit-aux addendum when present."""
     with open(MD_PATH, encoding="utf-8") as f:
-        content = f.read()
+        base = f.read()
+    if ADDONS_MD_PATH.exists():
+        with open(ADDONS_MD_PATH, encoding="utf-8") as f:
+            addons = f.read()
+        # Separator newline ensures the H2 boundary is visually clean
+        # regardless of trailing whitespace in either file.
+        return base.rstrip() + "\n\n---\n\n" + addons.lstrip()
+    return base
+
+
+def main() -> None:
+    """Read markdown(s) and UPSERT into company_documents."""
+    content = load_content()
     new_hash = compute_hash(content)
 
     conn = sqlite3.connect(str(DB_PATH))

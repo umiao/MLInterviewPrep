@@ -14,6 +14,9 @@
 3. [线性回归 from scratch (Linear Regression)](#linear-regression-from-scratch)
 4. [逻辑回归 from scratch (Logistic Regression)](#logistic-regression-from-scratch)
 5. [跨题通用面试要点 (Cross-cutting Interview Tactics)](#cross-cutting-tactics)
+6. [Audit-Discovered 辅助卡片 (Depth-2 Auxiliary Cards)](#audit-aux-cards)
+   - 6.1 [Multi-treatment Uplift Modeling 直觉卡](#uplift-meta-learners)
+   - 6.2 [Lagrangian Relaxation 伪代码卡](#lagrangian-relaxation)
 
 ---
 
