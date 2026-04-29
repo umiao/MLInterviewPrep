@@ -9,6 +9,253 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level)
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-628
+- **Description**: ## Goal
+Create one new Uber company_document covering the 4 KNOWN ML Coding items from the source TXT, at the same Staff-level depth as the source's 'Uber Eats Golden Answer' style (industry jargon, trade-offs, deep dives, runs end-to-end).
+
+## Scope (exactly 4 items, no scope creep)
+1. **Geometric median** (L2-distance sum, NOT mean which minimizes squared sum) -- explain Weiszfeld iteration; numerical stability; convergence to local minimum; large-N follow-up (sub-sampling + coreset / approximate gradient descent on |x-pi|).
+2. **Kmeans (numpy-only)** -- vectorized assignment + update; Kmeans++ init; handling empty clusters; convergence criterion; complexity O(nki) per iter.
+3. **Linear Regression from scratch** -- closed-form normal equation vs gradient descent; regularization L2; numerical stability via QR; runs and prints loss curve.
+4. **Logistic Regression from scratch** -- sigmoid + log-loss; gradient derivation; runs end-to-end with toy data; complexity & convergence notes.
+
+NOTE: NEW items surfaced in T-P0-628 audit go to a separate task (T-P1-635 below), NOT here. This task has bounded scope and is the highest-risk content task -- splitting prevents scope creep.
+
+## Style requirements
+- Chinese narration + English terms. First-occurrence format **English** (acronym, 中文).
+- Code blocks: Python, runnable end-to-end.
+- Each item structured: 题目 -> Clarify -> Brute-force -> Optimal -> Trade-off -> Follow-up scaling -> 行业黑话 used.
+- Math in \$\$...\$\$ (KaTeX).
+- No emoji.
+
+## Stable anchor requirement (locked decision)
+Every H2 section in this doc must use a stable kebab-case slug as its HTML id, e.g. \`<h2 id=\"geometric-median\">几何中位数 (Geometric Median)</h2>\`. The MVP index task (T-P0-632) deep-links via \`/docs/<doc-id>#<anchor>\`. Anchor IDs are part of this task's deliverable.
+
+## Implementation
+- Idempotent Python seed script: \`scripts/seed_uber_ml_coding_golden.py\`.
+- Markdown content stored in sibling data file \`src/backend/seed_data/uber/ml_coding_golden.md\` (per Risks §5 in plan review doc -- avoid 1000-line inlined string).
+- UPSERT into \`company_documents\` by (company_id=5, title='Uber ML Coding Golden Answer 集合 (Staff-Level)'); doc_kind='prep_note', source_type='prep_doc', is_golden=1.
+- content_hash recomputed on rerun; idempotent.
+- Apply story_rewrite_protocol if any item overlaps existing content.
+
+## Acceptance criteria
+- [ ] Seed script runs idempotently: 2nd run produces zero net change (same content_hash).
+- [ ] Doc renders cleanly in PrepNotesPage with KaTeX (manual smoke).
+- [ ] Each of the 4 items has a stable HTML id anchor matching its kebab-case slug.
+- [ ] Each problem has either [lc://N] (LeetCode-style problems) or [db://N] link if a problems-table entry exists; otherwise inline solution.
+- [ ] No emoji anywhere in seeded content.
+- [ ] Manual smoke: open the doc in frontend, confirm KaTeX renders, code blocks colored, anchor jumps work via \`#geometric-median\` etc.
+- [ ] Verbal-recall AC (per user feedback): I can talk through any one of the 4 items in 8 minutes without re-reading.
+
+## Dependencies
+Upstream: T-P0-628 (audit must confirm scope is ONLY these 4, not surfacing duplicates with id=28 'ML Fundamentals From-Scratch').
+Downstream: T-P0-632 (MVP index links here), T-P1-635 (audit-NEW items appended in a separate doc), T-P0-634 (smoke).
+
+#### T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level)
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-628
+- **Description**: ## Goal
+Create one new Uber company_document covering all ML System Design items at Staff-level depth, with the source TXT's two Golden Answers (Uber Eats restaurant rec + Budget-constrained promo) imported nearly verbatim plus Chinese-narration polish.
+
+## Scope
+1. **Uber Eats 餐厅推荐系统** -- import the full 6-stage Golden Answer from source TXT verbatim (心态/节奏 -> 需求澄清 -> 规模估算 -> High-level 架构 -> Deep dive: candidate gen / ranking / training-serving skew / freshness -> 收尾 senior 加分项 -> 5 大薄弱处补强 -> 一页纸记忆卡).
+2. **Budget-Constrained Promo Recommendation** -- import the full 11-section Golden Answer (TL;DR -> Problem framing -> Clarifying questions -> Requirements -> Metrics -> Uplift modeling (T/X/S/DR-learner) -> Constrained allocation (MCKP, Lagrangian, LP relax, greedy bounds, online, PID pacing) -> Bandit -> Architecture -> Evaluation (IPS, DR, switchback) -> Pitfalls -> Cheatsheet).
+3. PLUS any NEW ML SD items surfaced in T-P0-628 audit (Uber tech-blog candidates: ETA prediction, surge pricing, dispatch matching, fraud detection, search ranking, ad ranking, driver-rider matching).
+
+## Locked decision (per critical review)
+**No \`system_designs\` table dual-write.** This doc is markdown-only in \`company_documents\`. The \`system_designs\` table currently has 0 rows; SystemDesignList page is not in active use for mock interviews. If we later want normalized rows, that's a separate migration -- NOT in scope here. Decision locked to keep T-P0-630 simple and avoid double-source-of-truth drift.
+
+## Style requirements
+- Chinese narration + English terms.
+- 行业黑话 highlighted in **bold** on first use, with one-line explanation.
+- Trade-off framing for every architectural decision (per source TXT's 'Senior 答案' format).
+- ASCII diagrams in code-fence (matches source TXT diagrams).
+- Math in \$\$...\$\$.
+- No emoji.
+
+## Stable anchor requirement (locked decision)
+Every H2 section uses kebab-case HTML id, e.g. \`<h2 id=\"uber-eats-restaurant-rec\">Uber Eats 餐厅推荐系统</h2>\`. T-P0-632 MVP deep-links via these anchors.
+
+## Implementation
+- Idempotent Python seed script: \`scripts/seed_uber_ml_sd_golden.py\`.
+- Markdown content stored in sibling data file \`src/backend/seed_data/uber/ml_sd_golden.md\`.
+- UPSERT into \`company_documents\` by (company_id=5, title='Uber ML System Design Golden Answers (Staff-Level)'); doc_kind='prep_note', source_type='prep_doc', is_golden=1.
+- content_hash idempotent.
+
+## Acceptance criteria
+- [ ] Seed script runs idempotently.
+- [ ] Both source-TXT Golden Answers reproduced byte-equivalent (modulo Chinese narration polish where needed).
+- [ ] Each section uses **bold** for 行业黑话 with inline gloss.
+- [ ] Cross-check vs T-P0-628 NEW inventory: every NEW ML SD row is covered.
+- [ ] Stable anchor IDs for every H2 (uber-eats-restaurant-rec, budget-promo-recommendation, plus one per NEW item).
+- [ ] Manual smoke: open in PrepNotesPage, both designs render cleanly with KaTeX + ASCII diagrams visible, anchor jumps work.
+- [ ] Verbal-recall AC: I can talk through Uber Eats 6 stages in 25 minutes without notes; I can talk through Budget Promo 7-item cheatsheet in 15 minutes.
+
+## Dependencies
+Upstream: T-P0-628.
+Downstream: T-P0-632 MVP, T-P0-634 smoke.
+
+#### T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page)
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-629, T-P0-630
+- **Description**: ## MVP downscope (per critical review)
+Original plan was a bespoke \`pages/UberIndex.tsx\` with 5 tabs + URL state + drawer + accessibility. For a personal prep tool aiming at 5/4 readiness, the user's review correctly flagged this as 80/20 over-engineering. **Downscoped to MVP**:
+
+> Patch id=37 'Uber VO 完整准备指南' to act as the multi-charter index. Add link tables under each round pointing at T-P0-629 / T-P0-630 / T-P1-631 doc anchors. Existing PrepNotesPage already renders id=37; existing markdown link convention (\`[title](db://N)\` opens drawer per memory \`reference_dblc_drawer_links.md\`) covers card-style nav.
+
+The full bespoke FE page is moved to a NEW deferred task (T-P2-636 below), to be picked up post-5/4 if the MVP proves insufficient during prep usage.
+
+## Goal
+Make id=37 'Uber VO 完整准备指南' the single navigational hub: from one doc, the user can land on any of Round 1 LC, Round 2 ML Coding, Round 3 ML SD, Round 4 BQ, plus HR. The hub IS the multi-charter index.
+
+## Patches to id=37
+1. **Round 1 (Algorithms & DS)** -- already lists 'Pattern Cheat Sheet' / 'LeetCode Solutions Guide' / etc. ADD a one-liner: 'See [Uber LC 题库索引视图](db://81) for the curated 47-problem index by family.'
+2. **Round 2 (Coding Depth in ML)** -- ADD a new sub-section 'ML Coding Golden Answers' with anchor table:
+   - [几何中位数 (Geometric Median)](db://NEW_DOC_ID#geometric-median)
+   - [Kmeans (numpy-only)](db://NEW_DOC_ID#kmeans-numpy)
+   - [Linear Regression from scratch](db://NEW_DOC_ID#linear-regression-from-scratch)
+   - [Logistic Regression from scratch](db://NEW_DOC_ID#logistic-regression-from-scratch)
+   (NEW_DOC_ID resolved at exec time from T-P0-629's UPSERT result.)
+3. **Round 3 (Design & Architecture)** -- existing 'System Design常见主题' list updated to ADD:
+   - [Uber Eats 餐厅推荐系统 (Staff Golden Answer)](db://NEW_SD_DOC_ID#uber-eats-restaurant-rec)
+   - [Budget-Constrained Promo Recommendation (Staff Golden Answer)](db://NEW_SD_DOC_ID#budget-promo-recommendation)
+   ADD a callout pointing at id=33 strengthened sections.
+4. **Round 4 (Behavioral)** -- existing Trust/Respect/Conviction list kept; add cross-link to /behavioral/themes?company=uber for live filtering.
+5. **HR** -- ADD a new bottom section linking to id=36.
+6. Add '## 多 Charter 快速索引' section at top of doc summarizing all 5 charter links.
+
+## Locked decisions (per critical review)
+- **Drawer type**: (b) anchor-scroll within doc, NOT new drawer component. The existing \`db://N\` link convention opens the target doc in SlideOverPanel; \`db://N#anchor\` should scroll-to within that panel. If anchor support inside SlideOverPanel is missing, that's a follow-up Patch task on the FE -- NOT this task.
+- **Behavioral API**: reuse \`/behavioral/themes\` filtered by company=uber. No new endpoint.
+
+## Implementation
+- Idempotent seed script: \`scripts/patch_uber_vo_index_mvp.py\`.
+- UPDATE id=37 content via story_rewrite_protocol; preserve all existing H2 heading TEXT (anchor-stability invariant from T-P1-631 applies to id=37 too).
+- Resolve NEW_DOC_ID and NEW_SD_DOC_ID at runtime by querying \`SELECT id FROM company_documents WHERE title LIKE '%Uber ML Coding Golden%'\` and similar for SD.
+
+## Acceptance criteria
+- [ ] id=37 has a top-level '## 多 Charter 快速索引' section with 5 links (LC / ML Coding / ML SD / Behavioral / HR).
+- [ ] Round 2 has 4 anchor-deep-links to T-P0-629 doc.
+- [ ] Round 3 has 2 anchor-deep-links to T-P0-630 doc, plus callout to id=33 strengthened sections.
+- [ ] Round 4 has cross-link to /behavioral/themes?company=uber.
+- [ ] Round 1 references id=81.
+- [ ] Patch script idempotent.
+- [ ] No existing H2 heading text changed.
+- [ ] Manual smoke (per critical review's verbal-recall AC): open id=37, click each charter link in turn, end-to-end navigation works WITHOUT console errors.
+
+## Anchor-scroll fallback
+If \`db://N#anchor\` is not yet supported by SlideOverPanel rendering, the link still opens the doc; the user manually scrolls. File a follow-up task (separate from this MVP) to add anchor support. **Does NOT block this MVP.**
+
+## Dependencies
+Upstream: T-P0-629 (need NEW_DOC_ID), T-P0-630 (need NEW_SD_DOC_ID), T-P1-631 (id=33 anchors must be stable).
+Downstream: T-P2-633 banner, T-P0-634 smoke.
+
+#### T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-632, T-P2-633
+- **Description**: ## Goal
+End-to-end manual verification that ALSO tests learning outcome (verbal recall), not just wiring. Per critical review: 'For a personal prep tool, the ultimate AC is "I can talk about it", not "it renders."'
+
+## Steps (run sequentially)
+1. **Doc-level smoke** -- open id=37, scroll to '多 Charter 快速索引' section. Click each of the 5 charter links in turn. Verify each lands on correct target (T-P0-629 doc / T-P0-630 doc / id=33 / behavioral page / id=36).
+2. **Anchor-scroll smoke** -- in T-P0-630 (ML SD doc), navigate via URL \`db://NEW_SD_DOC_ID#uber-eats-restaurant-rec\` and \`#budget-promo-recommendation\`. Verify scroll lands at the right H2.
+3. **Strengthening verification (T-P1-631)** -- open id=33, search for each of the 10 strengthening keywords (training-serving skew / graceful degradation / two-tower / MMoE / DIN / H3 / position bias / off-policy eval / cluster A/B / three-time-scale). All present.
+4. **Heading-stability verification (T-P1-631 invariant)** -- run \`grep -E '^#{1,3} ' id=33-content-before.md > before.txt; ... after.txt; diff before.txt after.txt\`. Diff is empty for HEADING text.
+5. **Source-TXT cross-check** -- pick 3 random paragraphs from source TXT golden answers (lines 14-451 Uber Eats; lines 460-974 Budget Promo). Find them verbatim (or near-verbatim with Chinese narration polish) in T-P0-630.
+6. **Banner redirect smoke (T-P2-633)** -- open id=81, see banner at top, click \`db://37\`, lands on id=37.
+
+## VERBAL RECALL AC (per critical review's most important point)
+For a personal prep tool, 'rendered correctly' is necessary but not sufficient. The real AC:
+- [ ] **VR-1**: I can talk through Uber Eats Golden Answer's 6 stages (心态/节奏 -> 需求澄清 -> 规模估算 -> High-level 架构 -> Deep Dive -> 收尾) in **<= 25 minutes** without re-reading.
+- [ ] **VR-2**: I can recite Budget Promo Cheatsheet's 7 must-cover items + 5 anti-patterns in **<= 8 minutes** without notes.
+- [ ] **VR-3**: For each of the 4 ML Coding items, I can explain the optimal solution + complexity + 1 follow-up in **<= 8 minutes** each.
+- [ ] **VR-4**: I can answer 'what's the difference between H3 and geohash in the Uber-Eats context, and why does Uber prefer H3?' in **<= 90 seconds**.
+- [ ] **VR-5**: I can answer 'how do you avoid training-serving skew in production rec systems' citing the 3-layer defense (Snapshot + Feature Store + Monitoring) in **<= 2 minutes**.
+
+If any verbal AC fails: file a follow-up task to deepen the corresponding section's content (NOT a wiring fix).
+
+## Scenario matrix
+- All wiring + content checks pass + verbal recall passes -> ship.
+- Wiring fails -> reopen the relevant T-P0-629/630/631/632/633.
+- Wiring passes but verbal recall fails -> file new content-deepening task; this task closes with PARTIAL.
+- Source TXT content drift detected -> reopen T-P0-630 with diff.
+
+## Acceptance criteria
+- [ ] All 6 wiring steps pass with notes saved to \`logs/uber_vo_smoke_<timestamp>.md\`.
+- [ ] Heading-stability diff is empty.
+- [ ] All 5 verbal-recall ACs pass on a single sitting practice run.
+- [ ] PROGRESS.md entry written with smoke + recall results.
+- [ ] Final go/no-go: 'Uber VO prep is ready for May 4 Coding 2 + any future ML/SD round.'
+
+## Dependencies
+Upstream: T-P0-632 (MVP), T-P2-633 (banner). Implicitly all of T-P0-628/629/630/631 must be done.
+
+#### T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-628
+- **Description**: ## Priority bump (per critical review)
+P1 -> **P0**. Reasoning: id=33 is the active reference doc for the Round-3 Design rounds; gaps here directly cost interview points. Strengthening must land before T-P0-632 MVP wires links to id=33 anchors.
+
+## Goal
+Patch existing Uber docs with the specific deficits from T-P0-628 audit. Delta-only, NOT rewrite.
+
+## Targets
+- **id=33 'Uber BPS Design & Architecture Prep'** -- primary surface for search/recommendation strengthening.
+- **id=37 'Uber VO 完整准备指南 (Virtual Onsite)'** -- Round 3 'System Design常见主题' list updated to point at T-P0-630; Round 4 'Behavioral Trust/Respect/Conviction' kept as-is.
+
+## Strengthening deltas (10 keywords from source TXT '5 大薄弱处补强')
+For id=33, ensure each is covered with at least one paragraph + concrete trade-off:
+- [ ] **Training-serving skew** 三层防御: Feature Snapshot at Serving Time + Feature Store (Michelangelo Palette) + Feature Monitoring (KL/PSI).
+- [ ] **Graceful degradation**: timeout + fallback + 'is-fallback' as feature + popularity 兜底.
+- [ ] **Hard filter vs Soft feature** for freshness/availability (dead-click prevention).
+- [ ] **Two-tower model** + **MMoE** + **DIN** -- canonical ranking stack.
+- [ ] **H3 hexagonal grid** vs geohash trade-off (Uber-specific must-mention).
+- [ ] **Position bias** (Google paper feature-at-train-zero-at-serve / IPS).
+- [ ] **Online learning vs Batch retraining** trade-off.
+- [ ] **Off-policy evaluation** (IPS / DR estimator).
+- [ ] **Cluster-randomized A/B testing** (interference in marketplace).
+- [ ] **Three-time-scale architecture**: Offline / Near-line / Online.
+
+## Anchor stability invariant (LOCKED, per critical review)
+**MUST NOT modify any existing H2 or H3 heading TEXT in id=33 or id=37.** Only:
+- Append paragraphs under existing headings.
+- Replace paragraph CONTENT (not heading text) under existing headings if a stronger version exists.
+- Add NEW subsections only under a new H3 heading appended below existing structure.
+
+Reason: T-P0-632 MVP deep-links to id=33 / id=37 via heading anchors. Renaming a heading silently breaks every card link.
+
+## Implementation
+- Delta patches via idempotent seed script \`scripts/patch_uber_design_arch_strengthen.py\`.
+- Insert under existing section anchors; do not reorder content.
+- Apply story_rewrite_protocol 7-step protocol -- audit propagation surfaces (BQ examples, framework_nodes, problems-table cross-refs) before editing.
+- Each delta paragraph cites the source TXT line range it comes from (in HTML comment for traceability).
+
+## Scenario matrix
+- Already covered in id=33 at Staff depth -> NO-OP.
+- Covered at lower depth -> REPLACE paragraph CONTENT (not heading) with strengthened version + cite source.
+- Missing from id=33 -> APPEND under appropriate existing section, do not invent new top-level H2.
+- Item NEW (no existing section anywhere appropriate) -> route to T-P0-630 instead.
+
+## Acceptance criteria
+- [ ] Patch script idempotent (rerun = same content_hash).
+- [ ] All 10 strengthening keywords above produce >=1 regex match in id=33 content after patch.
+- [ ] id=37 Round 3 list includes Uber Eats restaurant rec + Budget promo entries with cross-link to T-P0-630 doc anchors.
+- [ ] **Heading audit AC**: \`grep -E '^#{1,3} ' id=33-content-before.md > headings-before.txt; ... after.txt; diff\` -- diff must be empty for HEADING text (only content body diffs allowed).
+- [ ] No duplication of source TXT verbatim content -- verbatim lives in T-P0-630 only.
+- [ ] Manual smoke: open id=33 in PrepNotesPage, scroll to relevant section, confirm strengthened paragraphs render cleanly.
+- [ ] Propagation audit: zero stale cross-references from BQ stories or framework_nodes pointing at the old (weaker) text.
+
+## Dependencies
+Upstream: T-P0-628.
+Downstream: T-P0-632 MVP (anchors must be stable when MVP wires links).
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -60,24 +307,38 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-627: Add display_label short field to principle_tags so pills show short labels (full phrase in tooltip)
+#### T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629)
 - **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Follow-up to T-P0-626. Pill UI primitive is for short labels; commit e52d568 (2026-04-23) put 33-char-avg phrases in principle_tags. T-P0-626 patches the layout to tolerate long phrases; this ticket fixes the data layer.
+- **Complexity**: M
+- **Depends on**: T-P0-628, T-P0-629
+- **Description**: ## Goal
+Companion task to T-P0-629. Once T-P0-628 audit produces its NEW inventory and T-P0-629 lands the 4 known items, this task seeds any additional ML Coding items the audit surfaced (Uber tech-blog topics: ETA prediction, surge pricing, dispatch matching, fraud detection, etc., if surfaced as ML CODING rather than ML SD).
 
-Approach:
-- Add 'display_label' (~12 chars) to principle_tags source-of-truth seed
-- Backend exposes both slug and display_label
-- Frontend pills render display_label; tooltip shows full phrase
-- Tags missing display_label fall back to label or auto-truncate
+## Why split (per critical review)
+T-P0-629 was originally [L] with an open-ended 'PLUS any NEW items from audit' tail -- classic scope creep. Splitting:
+- Bounds T-P0-629 to exactly 4 known items (no surprises during exec).
+- Lets T-P0-635 (this task) be skipped if audit surfaces zero NEW items.
+- Allows T-P0-632 MVP to ship after T-P0-629 alone, without waiting for this task.
 
-AC:
-- All 8 EX-01 principle_tags have hand-crafted display_label
-- Pills show short labels; tooltip on hover shows full phrase
-- T-P0-626's _-to-space rendering becomes unnecessary once this ships
+## Scope (data-driven from T-P0-628)
+- Read T-P0-628's audit deliverable (\`logs/uber_mlcoding_mlsd_audit.md\`).
+- For each row marked target charter = 'ML Coding' AND tier = 'Staff Golden Answer', draft Staff-level content following the same structure as T-P0-629 (Clarify -> Brute -> Optimal -> Trade-off -> Follow-up -> 行业黑话).
+- Append to the SAME company_document seeded by T-P0-629, OR create a sibling doc 'Uber ML Coding Golden Answer 补充 (Audit Discovered)' if size > 30 KB.
 
-Scope: backend schema + router + frontend pill rendering + seed. M complexity. NOT urgent: post-Uber 2026-04-27.
+## Skip condition
+If T-P0-628's NEW inventory has 0 ML Coding rows, mark this task COMPLETED with note 'no NEW items'. Don't fabricate filler.
+
+## Implementation
+- Same idempotent seed script pattern as T-P0-629; either extend \`scripts/seed_uber_ml_coding_golden.py\` (pull data from a second .md file under seed_data/uber/) or create \`scripts/seed_uber_ml_coding_audit_addons.py\`.
+
+## Acceptance criteria
+- [ ] If audit surfaced N>=1 NEW items: each rendered at Staff-level, with stable anchors, KaTeX-clean.
+- [ ] If audit surfaced N=0: task closes with explicit 'no-op' note, no filler content created.
+- [ ] Idempotent rerun.
+
+## Dependencies
+Upstream: T-P0-628 (audit), T-P0-629 (parent doc must exist if appending).
+Downstream: T-P0-634 (smoke).
 
 ### P2 -- Nice to Have
 
@@ -102,6 +363,67 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
+
+#### T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P0-632
+- **Description**: ## Goal
+The new T-P0-632 MVP makes id=37 the multi-charter index hub. Update id=81 'Uber LC 题库索引视图' to point users at id=37 instead.
+
+## Change
+Edit id=81's content via idempotent seed script \`scripts/update_uber_lc_index_redirect.py\` to prepend at the very top:
+
+\`\`\`markdown
+> **[UPDATED 2026-04-28]** This LC-only index has been folded into the new
+> [Uber VO 多 Charter 索引](db://37) which lists Round 1 LC, Round 2 ML Coding,
+> Round 3 ML SD, Round 4 BQ, and HR side-by-side. The 47 LC problems below
+> remain the source of truth for Round 1 coverage; the new index links here
+> for the LC charter.
+\`\`\`
+
+Keep the rest of the doc untouched. id=81 still serves as the LC tab content source.
+
+## Acceptance criteria
+- [ ] Seed script idempotent.
+- [ ] Banner appears above the existing \`<!-- UBER_LC_INDEX_V1 -->\` HTML comment.
+- [ ] Markdown link \`db://37\` opens id=37 in SlideOverPanel per drawer convention.
+- [ ] Manual smoke: open id=81, see banner at top, click link, lands on id=37 in drawer.
+
+## Dependencies
+Upstream: T-P0-632 (id=37 must contain the multi-charter index sections before this banner makes sense).
+Downstream: T-P0-634.
+
+#### T-P2-636: [UBER-VO-5b POST-5/4] Bespoke pages/UberIndex.tsx with 5-tab charter switcher (deferred)
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: T-P0-632
+- **Description**: ## Status: DEFERRED post-2026-05-04 per critical review
+This is the original T-P0-632 scope (bespoke React page + URL state + drawer state + browser back/forward + accessibility + vitest). Moved out of the 5/4-readiness critical path. Pick up only if the T-P0-632 MVP (id=37 patch) proves insufficient during actual prep usage.
+
+## Trigger to re-prioritize
+- I find myself navigating id=37 -> Round 2 -> click link -> target doc -> back button -> click another link, repeatedly, and the friction matters.
+- Or: a follow-up Uber recruiter loop schedules another VO requiring deeper navigation.
+
+## Goal (preserved from original plan)
+A bespoke \`pages/UberIndex.tsx\` route at \`/companies/uber/index\` mirroring \`pages/QuickIndex.tsx\` pattern: 5 tab pills (LC / ML Coding / ML SD / Behavioral / HR), per-tab card grid, click-to-drawer, URL state, browser back/forward, empty-state copy, ARIA accessibility, vitest coverage.
+
+## Locked decisions inherited from MVP
+- Drawer type: SlideOverPanel via existing \`db://N#anchor\` convention (with anchor support added if T-P0-632 surfaces it as missing).
+- Behavioral API: \`/behavioral/themes?company=uber\`.
+- Implementation Option A: bespoke page (NOT generalize QuickIndex).
+
+## Acceptance criteria (from original T-P0-632)
+- All 5 tabs render correct content with stable URL state.
+- Card click opens SlideOverPanel with anchor-scroll.
+- Browser back/forward preserves tab+drawer state.
+- Empty state for charters lacking content.
+- Accessibility: role=tab, ARIA-controls, keyboard arrow nav.
+- Vitest tab-switch + drawer-open + empty-state.
+- No emoji.
+
+## Dependencies
+Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 'skipped').
 
 ### P3 -- Stretch Goals
 
@@ -143,6 +465,29 @@ REVISED EXECUTION SCOPE when unblocked:
 3. tests/test_emoji_regex.py (or new tests/test_emoji_scanner.py): regex-equality meta-test + subprocess cp1252 env test (reviewer's revised F-3).
 4. User-chosen handling of PROGRESS.md:590 FE0F (option A/B/C pending).
 
+#### T-P1-627: Add display_label short field to principle_tags so pills show short labels (full phrase in tooltip)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Follow-up to T-P0-626. Pill UI primitive is for short labels; commit e52d568 (2026-04-23) put 33-char-avg phrases in principle_tags. T-P0-626 patches the layout to tolerate long phrases; this ticket fixes the data layer.
+
+GATE (manual, intentional hack): status=blocked even though depends_on=None. Reason: programmatic schema has no 'not_before' field and creating a sentinel-task pattern is overhead for one ticket. Description-only soft gates are insufficient because the autonomous orchestrator's task picker reads only DB fields. Therefore status=blocked is the load-bearing gate. Re-open by manually flipping to active.
+
+UNGATE WHEN: All Uber final-round interviews complete (last is May 4 Coding 2 with Ali Shameli). Manually run: `task_db.py update T-P1-627 --status active`. Re-launch autonomous_run.sh; the orchestrator will then pick this up.
+
+Approach (when ungated):
+- Add 'display_label' (~12 chars) to principle_tags source-of-truth seed
+- Backend exposes both slug and display_label
+- Frontend pills render display_label; tooltip shows full phrase
+- Tags missing display_label fall back to label or auto-truncate
+
+AC:
+- All 8 EX-01 principle_tags have hand-crafted display_label
+- Pills show short labels; tooltip on hover shows full phrase
+- T-P0-626's _-to-space rendering becomes unnecessary once this ships
+
+Scope: backend schema + router + frontend pill rendering + seed. M complexity.
+
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
 - **Complexity**: S
@@ -171,26 +516,11 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 ## Completed Tasks
 
-> 571 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-28** -- T-P0-628: [UBER-VO-1] Audit + inventory: extract ML Coding & ML Sys Design content from all Uber sources. ## Goal
 - [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification
 - [x] **2026-04-27** -- T-P2-623: [LC855] Seed Exam Room notes (brute-force sorted-list + heap follow-up). Discord ad-hoc msg 1498356808602095685. User pasted LC official editorial brute-force code and asked for notes + explici
 - [x] **2026-04-27** -- T-P2-622: [LC384] Seed Shuffle an Array notes (Fisher-Yates + sort-based shuffle distillation) + Uber tag. Discord ad-hoc msg 1498353628937715803. User added their own LC 384 attempt and asked to distill discussion: (1) Fisher-
 - [x] **2026-04-27** -- T-P2-621: [LC2861] Seed Maximum Number of Alloys notes (binary-search-on-answer canonical). Discord ad-hoc request msg 1498348552362000474. Write LC 2861 (Maximum Number of Alloys) seed notes to data/mle_prep.db 
 - [x] **2026-04-27** -- T-P2-620: [followup] LC 2571 notes rewrite (bit-greedy + NAF formula) + Uber tag. Discord followup. User wrote LC 2571 with the canonical bit-trick (skip zeros + n&3==3 carry / n&3==1 subtract) and aske
-- [x] **2026-04-27** -- T-P2-619: [followup] LC 502 IPO notes seeded (sort + max-heap greedy). Discord followup. User wrote LC 502 sort+max-heap solution and asked for DB notes. Seeded notes via scripts/_update_lc50
-- [x] **2026-04-27** -- T-P2-618: [followup] LC 864 notes seeded (bitmask BFS canonical + list-of-bool baseline). Discord followup. User wrote LC 864 list-of-bool BFS solution, requested DB notes + bitmask compression upgrade. Seeded 
-- [x] **2026-04-27** -- T-P1-625: [Uber-LC-Index] New company_document: Uber LC index view (drawer-linked, grouped, all 247 Uber-tagged-with-notes problems). ## Goal
-- [x] **2026-04-27** -- T-P0-626: Fix BQ ExampleCard layout: title squeezed to one-word-per-line by long principle pills. Bug: BehavioralQuestions.tsx examples view, EX-01 card title 'Search Diversity --- Intent Collapse via Item-vs-Page Diag
-- [x] **2026-04-25** -- T-P2-614: [KG-DESIGN-DUAL-VIEW] Open Q: consolidate vs legitimize ml-fundamentals + pillar2 coexistence. [KG-DESIGN-DUAL-VIEW] Document the dual-view decision as PERMANENT.
-- [x] **2026-04-25** -- T-P2-607: F-2: emoji scan check_emoji.py honor CLI args (scan_single_file extraction). Follow-up to T-P1-606 (first emoji-scanner fix commit).
-- [x] **2026-04-25** -- T-P2-584: [BQ-DEPTH-13] Phase C1: probe_qa.md for remaining 4 golden (EX-01/15/16/17) matching EX-30 style. Extend the EX-30_probe_qa.md pattern to the other 4 golden stories. This is story-side depth (5 anticipated probes + del
-- [x] **2026-04-25** -- T-P1-616: [PROB-NOTES-04] Rewrite LC#4 (id=89) solution with cleaner sentinel-based partition + 4-fact mental model. WHY
-- [x] **2026-04-25** -- T-P1-615: [PROB-SEARCH-01] Pure-numeric search exact-match on leetcode_id (currently '4' returns 50+ irrelevant). WHY
-- [x] **2026-04-25** -- T-P1-601: [BQ-TAX-04] Phase 2: Frontend — new theme cards + facet pills + CLUSTER_FAMILIES update + is_signature visual. Frontend surface for the new taxonomy landed by BQ-TAX-01/02/03.
-- [x] **2026-04-25** -- T-P1-600: [BQ-TAX-03] Phase 2: Retag existing 34 examples + 115 questions against new taxonomy. Retag all existing behavioral_examples + behavioral_questions against the new themes + facets from BQ-TAX-02.
-- [x] **2026-04-25** -- T-P0-617: [DEV-FIX-01] scripts/dev.py auto-evict stale backend on port 8100 conflict. WHY
-- [x] **2026-04-25** -- T-P0-613: [KG-FIX-05] Manual smoke + screenshots + HARD MERGE GATE (no auto-merge to main). [KG-FIX-05] Manual smoke test + before/after screenshots + HARD MERGE GATE.
-- [x] **2026-04-25** -- T-P0-612: [KG-FIX-04] Schema invariant + convention doc + smoke protocol + LESSONS postmortem. [KG-FIX-04] Schema invariant + path convention doc + LESSONS postmortem +
-- [x] **2026-04-25** -- T-P0-611: [KG-FIX-03] Frontend: explicit PILLAR_ORDER map (step=10). [KG-FIX-03] Frontend: replace pillarSortKey() regex in
-- [x] **2026-04-25** -- T-P0-610: [KG-FIX-02] Frontend: add ml-fundamentals to PILLAR_STYLES. [KG-FIX-02] Frontend: extend PILLAR_STYLES in
