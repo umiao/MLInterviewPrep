@@ -9,47 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-632, T-P2-633
-- **Description**: ## Goal
-End-to-end manual verification that ALSO tests learning outcome (verbal recall), not just wiring. Per critical review: 'For a personal prep tool, the ultimate AC is "I can talk about it", not "it renders."'
-
-## Steps (run sequentially)
-1. **Doc-level smoke** -- open id=37, scroll to '多 Charter 快速索引' section. Click each of the 5 charter links in turn. Verify each lands on correct target (T-P0-629 doc / T-P0-630 doc / id=33 / behavioral page / id=36).
-2. **Anchor-scroll smoke** -- in T-P0-630 (ML SD doc), navigate via URL \`db://NEW_SD_DOC_ID#uber-eats-restaurant-rec\` and \`#budget-promo-recommendation\`. Verify scroll lands at the right H2.
-3. **Strengthening verification (T-P1-631)** -- open id=33, search for each of the 10 strengthening keywords (training-serving skew / graceful degradation / two-tower / MMoE / DIN / H3 / position bias / off-policy eval / cluster A/B / three-time-scale). All present.
-4. **Heading-stability verification (T-P1-631 invariant)** -- run \`grep -E '^#{1,3} ' id=33-content-before.md > before.txt; ... after.txt; diff before.txt after.txt\`. Diff is empty for HEADING text.
-5. **Source-TXT cross-check** -- pick 3 random paragraphs from source TXT golden answers (lines 14-451 Uber Eats; lines 460-974 Budget Promo). Find them verbatim (or near-verbatim with Chinese narration polish) in T-P0-630.
-6. **Banner redirect smoke (T-P2-633)** -- open id=81, see banner at top, click \`db://37\`, lands on id=37.
-
-## VERBAL RECALL AC (per critical review's most important point)
-For a personal prep tool, 'rendered correctly' is necessary but not sufficient. The real AC:
-- [ ] **VR-1**: I can talk through Uber Eats Golden Answer's 6 stages (心态/节奏 -> 需求澄清 -> 规模估算 -> High-level 架构 -> Deep Dive -> 收尾) in **<= 25 minutes** without re-reading.
-- [ ] **VR-2**: I can recite Budget Promo Cheatsheet's 7 must-cover items + 5 anti-patterns in **<= 8 minutes** without notes.
-- [ ] **VR-3**: For each of the 4 ML Coding items, I can explain the optimal solution + complexity + 1 follow-up in **<= 8 minutes** each.
-- [ ] **VR-4**: I can answer 'what's the difference between H3 and geohash in the Uber-Eats context, and why does Uber prefer H3?' in **<= 90 seconds**.
-- [ ] **VR-5**: I can answer 'how do you avoid training-serving skew in production rec systems' citing the 3-layer defense (Snapshot + Feature Store + Monitoring) in **<= 2 minutes**.
-
-If any verbal AC fails: file a follow-up task to deepen the corresponding section's content (NOT a wiring fix).
-
-## Scenario matrix
-- All wiring + content checks pass + verbal recall passes -> ship.
-- Wiring fails -> reopen the relevant T-P0-629/630/631/632/633.
-- Wiring passes but verbal recall fails -> file new content-deepening task; this task closes with PARTIAL.
-- Source TXT content drift detected -> reopen T-P0-630 with diff.
-
-## Acceptance criteria
-- [ ] All 6 wiring steps pass with notes saved to \`logs/uber_vo_smoke_<timestamp>.md\`.
-- [ ] Heading-stability diff is empty.
-- [ ] All 5 verbal-recall ACs pass on a single sitting practice run.
-- [ ] PROGRESS.md entry written with smoke + recall results.
-- [ ] Final go/no-go: 'Uber VO prep is ready for May 4 Coding 2 + any future ML/SD round.'
-
-## Dependencies
-Upstream: T-P0-632 (MVP), T-P2-633 (banner). Implicitly all of T-P0-628/629/630/631 must be done.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -252,6 +211,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
+- [x] **2026-04-29** -- T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass. ## Goal
 - [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
 - [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
 - [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
