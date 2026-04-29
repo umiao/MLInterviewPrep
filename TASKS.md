@@ -9,62 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page)
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-629, T-P0-630
-- **Description**: ## MVP downscope (per critical review)
-Original plan was a bespoke \`pages/UberIndex.tsx\` with 5 tabs + URL state + drawer + accessibility. For a personal prep tool aiming at 5/4 readiness, the user's review correctly flagged this as 80/20 over-engineering. **Downscoped to MVP**:
-
-> Patch id=37 'Uber VO 完整准备指南' to act as the multi-charter index. Add link tables under each round pointing at T-P0-629 / T-P0-630 / T-P1-631 doc anchors. Existing PrepNotesPage already renders id=37; existing markdown link convention (\`[title](db://N)\` opens drawer per memory \`reference_dblc_drawer_links.md\`) covers card-style nav.
-
-The full bespoke FE page is moved to a NEW deferred task (T-P2-636 below), to be picked up post-5/4 if the MVP proves insufficient during prep usage.
-
-## Goal
-Make id=37 'Uber VO 完整准备指南' the single navigational hub: from one doc, the user can land on any of Round 1 LC, Round 2 ML Coding, Round 3 ML SD, Round 4 BQ, plus HR. The hub IS the multi-charter index.
-
-## Patches to id=37
-1. **Round 1 (Algorithms & DS)** -- already lists 'Pattern Cheat Sheet' / 'LeetCode Solutions Guide' / etc. ADD a one-liner: 'See [Uber LC 题库索引视图](db://81) for the curated 47-problem index by family.'
-2. **Round 2 (Coding Depth in ML)** -- ADD a new sub-section 'ML Coding Golden Answers' with anchor table:
-   - [几何中位数 (Geometric Median)](db://NEW_DOC_ID#geometric-median)
-   - [Kmeans (numpy-only)](db://NEW_DOC_ID#kmeans-numpy)
-   - [Linear Regression from scratch](db://NEW_DOC_ID#linear-regression-from-scratch)
-   - [Logistic Regression from scratch](db://NEW_DOC_ID#logistic-regression-from-scratch)
-   (NEW_DOC_ID resolved at exec time from T-P0-629's UPSERT result.)
-3. **Round 3 (Design & Architecture)** -- existing 'System Design常见主题' list updated to ADD:
-   - [Uber Eats 餐厅推荐系统 (Staff Golden Answer)](db://NEW_SD_DOC_ID#uber-eats-restaurant-rec)
-   - [Budget-Constrained Promo Recommendation (Staff Golden Answer)](db://NEW_SD_DOC_ID#budget-promo-recommendation)
-   ADD a callout pointing at id=33 strengthened sections.
-4. **Round 4 (Behavioral)** -- existing Trust/Respect/Conviction list kept; add cross-link to /behavioral/themes?company=uber for live filtering.
-5. **HR** -- ADD a new bottom section linking to id=36.
-6. Add '## 多 Charter 快速索引' section at top of doc summarizing all 5 charter links.
-
-## Locked decisions (per critical review)
-- **Drawer type**: (b) anchor-scroll within doc, NOT new drawer component. The existing \`db://N\` link convention opens the target doc in SlideOverPanel; \`db://N#anchor\` should scroll-to within that panel. If anchor support inside SlideOverPanel is missing, that's a follow-up Patch task on the FE -- NOT this task.
-- **Behavioral API**: reuse \`/behavioral/themes\` filtered by company=uber. No new endpoint.
-
-## Implementation
-- Idempotent seed script: \`scripts/patch_uber_vo_index_mvp.py\`.
-- UPDATE id=37 content via story_rewrite_protocol; preserve all existing H2 heading TEXT (anchor-stability invariant from T-P1-631 applies to id=37 too).
-- Resolve NEW_DOC_ID and NEW_SD_DOC_ID at runtime by querying \`SELECT id FROM company_documents WHERE title LIKE '%Uber ML Coding Golden%'\` and similar for SD.
-
-## Acceptance criteria
-- [ ] id=37 has a top-level '## 多 Charter 快速索引' section with 5 links (LC / ML Coding / ML SD / Behavioral / HR).
-- [ ] Round 2 has 4 anchor-deep-links to T-P0-629 doc.
-- [ ] Round 3 has 2 anchor-deep-links to T-P0-630 doc, plus callout to id=33 strengthened sections.
-- [ ] Round 4 has cross-link to /behavioral/themes?company=uber.
-- [ ] Round 1 references id=81.
-- [ ] Patch script idempotent.
-- [ ] No existing H2 heading text changed.
-- [ ] Manual smoke (per critical review's verbal-recall AC): open id=37, click each charter link in turn, end-to-end navigation works WITHOUT console errors.
-
-## Anchor-scroll fallback
-If \`db://N#anchor\` is not yet supported by SlideOverPanel rendering, the link still opens the doc; the user manually scrolls. File a follow-up task (separate from this MVP) to add anchor support. **Does NOT block this MVP.**
-
-## Dependencies
-Upstream: T-P0-629 (need NEW_DOC_ID), T-P0-630 (need NEW_SD_DOC_ID), T-P1-631 (id=33 anchors must be stable).
-Downstream: T-P2-633 banner, T-P0-634 smoke.
-
 #### T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass
 - **Priority**: P0
 - **Complexity**: S
@@ -428,6 +372,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
 - [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
 - [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
 - [x] **2026-04-28** -- T-P0-628: [UBER-VO-1] Audit + inventory: extract ML Coding & ML Sys Design content from all Uber sources. ## Goal

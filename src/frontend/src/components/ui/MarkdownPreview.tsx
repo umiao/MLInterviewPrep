@@ -134,7 +134,12 @@ export default function MarkdownPreview({
                 </button>
               );
             }
-            const dbMatch = typeof href === "string" ? href.match(/^db:\/\/(\d+)$/) : null;
+            // `db://N` opens the doc drawer. `db://N#anchor` also opens the
+            // drawer (anchor ignored at link layer for now; future task adds
+            // scroll-to-anchor inside SlideOverPanel). Without this optional
+            // suffix, anchor-bearing deep-links would fall through to a broken
+            // <a href="db://N#anchor" target="_blank"> new-tab.
+            const dbMatch = typeof href === "string" ? href.match(/^db:\/\/(\d+)(?:#[^\s]*)?$/) : null;
             if (dbMatch && onDbLinkClick) {
               const dbId = Number(dbMatch[1]);
               return (
@@ -144,6 +149,33 @@ export default function MarkdownPreview({
                     e.preventDefault();
                     e.stopPropagation();
                     onDbLinkClick(dbId);
+                  }}
+                  className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
+                >
+                  {children}
+                </button>
+              );
+            }
+            // In-page anchor: smooth-scroll to the heading with matching id.
+            // Mirrors DynamicTocSidebar's behavior so markdown TOC links and
+            // sidebar clicks feel identical instead of opening a new tab.
+            if (typeof href === "string" && href.startsWith("#") && href.length > 1) {
+              const rawId = href.slice(1);
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const id = (() => {
+                      try {
+                        return decodeURIComponent(rawId);
+                      } catch {
+                        return rawId;
+                      }
+                    })();
+                    const el = document.getElementById(id);
+                    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                   }}
                   className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
                 >

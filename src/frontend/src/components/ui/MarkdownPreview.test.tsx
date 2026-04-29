@@ -80,6 +80,59 @@ describe("MarkdownPreview tables (GFM with alignment)", () => {
   });
 });
 
+describe("MarkdownPreview link handling", () => {
+  it("renders in-page anchor links (#slug) as a button, not a new-tab anchor", () => {
+    // Regression: Uber LC index doc has [Tree...](#tree-...) TOC links.
+    // Before the fix these rendered as <a target="_blank">, opening a new
+    // tab instead of scrolling to the heading. Now they must be buttons
+    // (clicked → scrollIntoView, no new tab).
+    const html = render("[Tree section](#tree-section)");
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*Tree section/);
+    expect(html).toContain("Tree section");
+  });
+
+  it("still renders external links as new-tab anchors", () => {
+    const html = render("[Anthropic](https://www.anthropic.com)");
+    expect(html).toMatch(/<a[^>]*href="https:\/\/www\.anthropic\.com"/);
+    expect(html).toMatch(/<a[^>]*target="_blank"/);
+  });
+
+  it("does not treat bare '#' as an in-page anchor", () => {
+    // Edge case: href="#" alone (no slug) should fall through to default
+    // anchor rendering, not produce an unusable button.
+    const html = render("[empty](#)");
+    expect(html).toMatch(/<a[^>]*href="#"/);
+  });
+
+  it("renders db://N#anchor as a button (drawer opener, anchor reserved for future scroll)", () => {
+    // T-P0-632: deep-link format db://N#anchor must still match the dbMatch
+    // regex so click triggers onDbLinkClick(N) and opens the drawer.
+    // Without the optional suffix in the regex, this would fall through to a
+    // broken <a target="_blank" href="db://84#anchor"> new-tab navigation.
+    const handler = (id: number) => id;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview
+        markdown="[geo](db://84#geometric-median)"
+        onDbLinkClick={handler}
+      />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*db:\/\//);
+    expect(html).toContain("geo");
+  });
+
+  it("still renders bare db://N as a drawer-opener button", () => {
+    // Regression-guard the un-anchored case after relaxing the regex.
+    const handler = (id: number) => id;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[doc](db://84)" onDbLinkClick={handler} />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*db:\/\//);
+  });
+});
+
 describe("MarkdownPreview inline code and lists", () => {
   it("renders inline code as a <code> element", () => {
     const html = render("Use `useEffect` for side effects.");
