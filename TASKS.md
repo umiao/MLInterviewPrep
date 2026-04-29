@@ -9,51 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level)
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-628
-- **Description**: ## Goal
-Create one new Uber company_document covering the 4 KNOWN ML Coding items from the source TXT, at the same Staff-level depth as the source's 'Uber Eats Golden Answer' style (industry jargon, trade-offs, deep dives, runs end-to-end).
-
-## Scope (exactly 4 items, no scope creep)
-1. **Geometric median** (L2-distance sum, NOT mean which minimizes squared sum) -- explain Weiszfeld iteration; numerical stability; convergence to local minimum; large-N follow-up (sub-sampling + coreset / approximate gradient descent on |x-pi|).
-2. **Kmeans (numpy-only)** -- vectorized assignment + update; Kmeans++ init; handling empty clusters; convergence criterion; complexity O(nki) per iter.
-3. **Linear Regression from scratch** -- closed-form normal equation vs gradient descent; regularization L2; numerical stability via QR; runs and prints loss curve.
-4. **Logistic Regression from scratch** -- sigmoid + log-loss; gradient derivation; runs end-to-end with toy data; complexity & convergence notes.
-
-NOTE: NEW items surfaced in T-P0-628 audit go to a separate task (T-P1-635 below), NOT here. This task has bounded scope and is the highest-risk content task -- splitting prevents scope creep.
-
-## Style requirements
-- Chinese narration + English terms. First-occurrence format **English** (acronym, 中文).
-- Code blocks: Python, runnable end-to-end.
-- Each item structured: 题目 -> Clarify -> Brute-force -> Optimal -> Trade-off -> Follow-up scaling -> 行业黑话 used.
-- Math in \$\$...\$\$ (KaTeX).
-- No emoji.
-
-## Stable anchor requirement (locked decision)
-Every H2 section in this doc must use a stable kebab-case slug as its HTML id, e.g. \`<h2 id=\"geometric-median\">几何中位数 (Geometric Median)</h2>\`. The MVP index task (T-P0-632) deep-links via \`/docs/<doc-id>#<anchor>\`. Anchor IDs are part of this task's deliverable.
-
-## Implementation
-- Idempotent Python seed script: \`scripts/seed_uber_ml_coding_golden.py\`.
-- Markdown content stored in sibling data file \`src/backend/seed_data/uber/ml_coding_golden.md\` (per Risks §5 in plan review doc -- avoid 1000-line inlined string).
-- UPSERT into \`company_documents\` by (company_id=5, title='Uber ML Coding Golden Answer 集合 (Staff-Level)'); doc_kind='prep_note', source_type='prep_doc', is_golden=1.
-- content_hash recomputed on rerun; idempotent.
-- Apply story_rewrite_protocol if any item overlaps existing content.
-
-## Acceptance criteria
-- [ ] Seed script runs idempotently: 2nd run produces zero net change (same content_hash).
-- [ ] Doc renders cleanly in PrepNotesPage with KaTeX (manual smoke).
-- [ ] Each of the 4 items has a stable HTML id anchor matching its kebab-case slug.
-- [ ] Each problem has either [lc://N] (LeetCode-style problems) or [db://N] link if a problems-table entry exists; otherwise inline solution.
-- [ ] No emoji anywhere in seeded content.
-- [ ] Manual smoke: open the doc in frontend, confirm KaTeX renders, code blocks colored, anchor jumps work via \`#geometric-median\` etc.
-- [ ] Verbal-recall AC (per user feedback): I can talk through any one of the 4 items in 8 minutes without re-reading.
-
-## Dependencies
-Upstream: T-P0-628 (audit must confirm scope is ONLY these 4, not surfacing duplicates with id=28 'ML Fundamentals From-Scratch').
-Downstream: T-P0-632 (MVP index links here), T-P1-635 (audit-NEW items appended in a separate doc), T-P0-634 (smoke).
-
 #### T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level)
 - **Priority**: P0
 - **Complexity**: L
@@ -518,6 +473,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 
 > 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
 - [x] **2026-04-28** -- T-P0-628: [UBER-VO-1] Audit + inventory: extract ML Coding & ML Sys Design content from all Uber sources. ## Goal
 - [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification
 - [x] **2026-04-27** -- T-P2-623: [LC855] Seed Exam Room notes (brute-force sorted-list + heap follow-up). Discord ad-hoc msg 1498356808602095685. User pasted LC official editorial brute-force code and asked for notes + explici
