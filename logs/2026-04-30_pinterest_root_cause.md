@@ -54,7 +54,9 @@ Pure `rg -c` counts. "Mention density" = raw count / file-line count where appli
 
 ## (iii) Falsifiable root-cause hypothesis
 
-> **H1 (Recency-Weighted Mention-Density Routing)**: When a user request is ambiguous about which DB surface to write to, Claude routes to the surface S\* that maximizes `recency_weight(last_edit_of_S) * log(mention_count_in_priors(S))`, where priors = CLAUDE.md + last-N PROGRESS entries + docs/ + scripts/. The model does NOT walk the UI -> API -> table chain unless that chain is named in the priors.
+> **H1 (Recency-Weighted Mention-Density Routing)**: When a user request is ambiguous about which DB surface to write to, Claude routes to the surface with the highest mention count across the priors (CLAUDE.md + last-N PROGRESS entries + docs/ + scripts/), weighted by recency of the last edit on that surface. The model does NOT walk the UI -> API -> table chain unless that chain is named in the priors.
+
+(Functional form intentionally left informal: the data supports a monotone "more mentions + more recent edits = stronger bias" relationship; specifying log/linear/etc. would be over-precise given the n=1 incident this memo investigates.)
 
 **Why this fits the data**:
 - mention_count_in_priors(`company_documents`) >> mention_count_in_priors(`interview_events`): 471 to 89 raw, with the imbalance worst in CLAUDE.md (1 to 0) and docs/ (45 to 1) which dominate the prior.

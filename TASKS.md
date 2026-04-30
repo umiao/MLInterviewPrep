@@ -5,67 +5,48 @@
 
 ## In Progress
 
-#### T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-660
-- **Description**: **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is unanswered: what made Claude choose company_documents over interview_events when the user said 'update Pinterest onsite schedule'? If the root cause is a general bias toward 'edit prose / follow last-modified doc / search by company name first', the same class of bug recurs on different surfaces.
-
-INVESTIGATION STEPS (must answer 4 questions):
-
-Q1: **Mapping in CLAUDE.md** -- Is there a widget->table or feature->seed mapping table anywhere in CLAUDE.md (root or MLInterviewPrep)? Grep for it. If absent, the model has no priors -- it falls back to free-text search.
-  - Action: read MLInterviewPrep/CLAUDE.md fully; grep for 'widget'/'interview_events'/'Dashboard' in shared/claude_md_shared.md and root CLAUDE.md
-  - Finding (expected): mapping is missing or buried
-
-Q2: **Conversation priming** -- Did earlier turns in this session prime the prose path? The first task this session was 'add a problem to doc 84 (Uber)' -- that whole interaction was prose-edits-on-company-doc. By the time the Pinterest request came in, the LAST 'update X for company Y' template I executed was prose-on-doc. Re-reading that, it would be natural to apply the same template to Pinterest.
-  - Action: re-read the doc-84 turn; identify whether the assistant chose company_documents because the prior turn established that pattern
-  - Finding (expected): YES, last-modified priming
-
-Q3: **'Dashboard' in codebase ambiguity** -- How many things are called 'dashboard' or render dashboard-like content? Search src/ for files/components/routes named *Dashboard* or /dashboard.
-  - Action: grep -rn 'Dashboard|/dashboard' src/ --include=*.tsx --include=*.ts
-  - Finding (expected): only one /dashboard route + Dashboard.tsx + Sidebar entry; user's 'dashboard' is unambiguous in the codebase. So the bug is NOT lexical ambiguity, it's semantic priming + missing mapping.
-
-Q4: **Default search behavior** -- What's the assistant's default when given 'update X for company Y'? Read recent PROGRESS.md entries -- how often does the assistant grep company_documents content first vs check interview_events / companies.status / framework_node? Quantify.
-  - Action: tail logs of recent autonomous sessions; count first-grep targets
-  - Finding (expected): heavily biased toward company_documents
-
-DELIVERABLE:
-- Short root-cause memo (1-2 pages) saved to logs/2026-04-30_pinterest_root_cause.md
-- Concrete recommendation: should the fix be (a) add widget->table mapping to CLAUDE.md, (b) extend lint hook (T-P0-660) to ALSO scan company_documents.content writes that smell schedule-like, or (c) both
-- Memo's recommendation feeds DIRECTLY into T-P1-656 (skill design) and CLAUDE.md update content
-
-ACCEPTANCE CRITERIA:
-- AC1: All 4 Q&As answered with concrete evidence from this conversation + grep output
-- AC2: Memo at logs/2026-04-30_pinterest_root_cause.md exists, <=200 lines
-- AC3: Concrete recommendation with rationale (a/b/c above), priority-ordered
-- AC4: User reviews + green-lights the recommendation BEFORE T-P1-656 begins (skill design depends on root-cause finding)
-
-[USER CONSTRAINTS 2026-04-30 green-light -- HARD GATES]
-- AC5: HYPOTHESIS + EVIDENCE, NOT REFLECTION. Memo must NOT read like 'I should check the widget map next time'. Reject behavioral / advisory-only conclusions at draft stage. The memo's value is its explanatory power for future surface bugs of the same class, not a self-pep-talk.
-
-- AC6: REQUIRED MEMO SECTIONS (each with explicit data, not prose):
-    (i)   **Session priming path**: If the conversation transcript is still accessible (check .claude/transcripts/, or scan recent autonomous logs/ for the doc-84 -> Pinterest turn sequence), trace the literal turn-by-turn 'last edited surface' chain leading into the misdirected write. If transcript is gone, document that explicitly and reconstruct from PROGRESS.md + git log.
-    (ii)  **Discoverability comparison**: Quantitative grep counts for 'company_documents' vs 'interview_events' across:
-            - root + MLInterviewPrep CLAUDE.md (literal mention count)
-            - README files (literal mention count)
-            - src/ (import / model usage count)
-            - scripts/ seed files (import count)
-            - docs/ (mention count)
-          Present as a table. If 'company_documents' wins by >2x in CLAUDE.md / docs / README, that itself is a falsifiable mechanism for the priming.
-    (iii) **At least one falsifiable root-cause hypothesis** -- a statement of the form 'Claude defaults to surface S because property P holds, where P is measurable. If P were inverted, the bias would flip.' Example shape (NOT the answer): 'Claude routes to whichever table has the highest CLAUDE.md mention-density when the user request is ambiguous. Falsification: rewrite CLAUDE.md to invert mention densities and re-test on a held-out ambiguous prompt.'
-    (iv)  **Generalization claim**: name at least 2 OTHER surface pairs in this codebase where the same root-cause mechanism would predict a similar mistake (e.g. framework_nodes vs companies.notes, problems.notes vs solution_notes). This forces the hypothesis to make predictions, not just retrofit one incident.
-
-- AC7: DO NOT MARK COMPLETED. After the memo is written:
-    - Append a PROGRESS.md entry with the memo verbatim (or first ~100 lines + 'see logs/2026-04-30_pinterest_root_cause.md for full text')
-    - Set status to in_progress with a STATUS NOTE: 'AWAITING USER REVIEW -- memo at logs/2026-04-30_pinterest_root_cause.md, do not auto-advance'
-    - The orchestrator should then see no unblocked task and stop with all_done=true. User reads memo, replies green-light or revisions.
-
-DEPENDS ON: T-P0-660 (lint hook is the foundation; root cause may recommend extending it)
-COMPLEXITY: M (read + grep + write memo + measure discoverability table; the memo itself stays <=200 lines but the evidence-gathering is substantial)
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
+
+#### T-P0-663: [T-P0-660b] Extend Invariant-3 lint to flag schedule-shaped prose writes (ISO-8601 + interviewer name)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Follow-on to T-P0-660 per T-P0-661 memo recommendation (b). The current lint hook .claude/hooks/invariant3_guard.py blocks SQL writes in scripts/migrations/* (Invariant 3 enforcement). It does NOT yet detect the COMPLEMENTARY mistake class: misdirected prose writes to company_documents.content that smell like schedule data (the original T-P0-651 bug). This task extends the hook with a SECOND detector for prose-shaped schedule writes.
+
+DETECTION HEURISTIC (Write/Edit on company_documents.content via seed scripts OR direct prose):
+Trigger when a string assignment OR multi-line content block contains BOTH:
+  (i)  ISO-8601 timestamp pattern (e.g. '2026-05-05', '2026-05-05T15:00', '2026-05-05 15:00:00')
+  (ii) Interviewer-name-shaped phrase (e.g. 'with <CapitalizedFirstName> <CapitalizedLastName>',
+       OR 'Round N with X', OR 'Day N R N', OR 'Interviewer: X')
+
+If both present in same content block AND target is company_documents.content (detect via filename pattern OR explicit table reference in surrounding code), emit a warning:
+
+  '[INVARIANT-3 EXTENSION] Schedule-shaped prose detected in a write that targets
+  company_documents.content. Schedule data lives in interview_events (Dashboard
+  InterviewTimeline widget). Use scripts/_add_<company>_<date>.py with canonical
+  key (company_id, scheduled_at, interviewer_name). See logs/2026-04-30_pinterest_root_cause.md
+  recommendation (b) for context.'
+
+EXIT CODE BEHAVIOR (per T-P0-660 AC8 convention):
+- Exit 2 + visible stderr banner if BOTH (i) AND (ii) match within ~30 lines of each other AND target is company_documents
+- Exit 0 + no warning if only one signal present (e.g. ISO date in a study note that mentions a paper publication date) -- conservative to avoid false positives in study content
+
+ACCEPTANCE CRITERIA:
+- AC1: Extend invariant3_guard.py with a new detect_schedule_prose() function or a new --schedule-prose mode
+- AC2: Self-test cases:
+   (a) BLOCK: write to company_documents.content with body containing 'Day 1 R1 -- ML Systems Design with Yiyang Zhang' + '2026-05-05 15:00' (the literal T-P0-651 misdirected payload)
+   (b) ALLOW: write to company_documents.content describing a paper '... published in 2018 by Vaswani et al ...' (ISO-fragment + name but no schedule shape)
+   (c) ALLOW: write to interview_events seed scripts/_add_pinterest_*.py with the same body (path exemption)
+   (d) BLOCK: write to scripts/seed_pinterest_*.py with body matching schedule shape AND target table inferable as company_documents (cross-script reference)
+- AC3: False-positive sweep on existing scripts/seed_*.py and company_documents content (read-only --scan mode); document any flags as true/false positive
+- AC4: Wire into PreToolUse Write|Edit alongside existing invariant3_guard logic (single hook entry, two detection paths)
+- AC5: Reference logs/2026-04-30_pinterest_root_cause.md recommendation (b) in the docstring + the warning message
+- AC6: pytest still passes (no regression)
+
+DEPENDS ON: None (T-P0-660 already shipped; this extends it)
+COMPLEXITY: S (~80-150 lines of additional hook code + 4 test cases)
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -117,6 +98,64 @@ AC:
 - vitest suite passes
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
+
+#### T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-661
+- **Description**: Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill's job: make the right path the easy default for any future Claude session that gets a 'dashboard / app / left-nav-first' request. **DEPENDS on T-P0-660 (lint exists) AND T-P0-661 (root cause + recommendation)** -- skill design absorbs the root-cause memo's recommendation.
+
+REVISED DESIGN (per reviewer hole #4: 3 memory files -> 1 reference + CLAUDE.md):
+
+The skill content lives in TWO places, both updated together:
+1. **CLAUDE.md (canonical, loaded every session via SessionStart)**: add a widget->data-source mapping table. This is the source of truth.
+2. **.claude/skills/dashboard.md (deepening / triggers)**: invoked when keywords match. References CLAUDE.md table; doesn't duplicate it. Skill body is the 6-step protocol.
+
+CLAUDE.md addition (under 'Behavior Rules' or new 'Surface Identification' section):
+
+  ### Surface Identification (MLInterviewPrep)
+
+  Before editing DB content for a request that mentions a UI surface, map widget -> data source:
+
+  | Widget (Dashboard.tsx) | Query key                | API endpoint            | DB table / column        |
+  |------------------------|--------------------------|-------------------------|--------------------------|
+  | InterviewTimeline      | ['timeline','events']    | GET /timeline/events    | interview_events         |
+  | FocusTopic             | ['dashboard','today']    | GET /dashboard/today    | derived: framework_node + reading_progress |
+  | CompanyPipeline        | ['companies']            | GET /companies          | companies.status         |
+  | PrepQuickAccess        | ['companies']            | GET /companies          | companies.prep_notes (markdown checklist) |
+  | WeeklyActivityChart    | ['dashboard','activity'] | GET /dashboard/activity | derived: problem_attempts + study_sessions |
+
+  Schedule / itinerary / calendar / event = interview_events (NEVER company_documents.content).
+  Pipeline status = companies.status. Daily focus = derived. Checklist = companies.prep_notes. Prose study notes (and ONLY those) = company_documents.
+
+  Idempotent seed pattern per row type:
+  - interview_events: scripts/_add_<company>_<date>.py, canonical key (company_id, scheduled_at, interviewer_name)
+  - company_documents: scripts/seed_<company>_<doc>.py with sentinel-based UPSERT
+  - problems: scripts/seed_<company>_lc_problems.py or similar; canonical key leetcode_id or title
+
+Skill (.claude/skills/dashboard.md) body — 6-step protocol:
+1. Read MLInterviewPrep/CLAUDE.md 'Surface Identification' table; map request to widget
+2. Confirm match by reading the widget's component file (e.g. InterviewTimeline.tsx -> queryKey -> endpoint -> table)
+3. Locate the matching idempotent seed (or, if absent, plan a new one)
+4. Edit the SEED, not the DB. Run the seed. Verify [INSERT|UNCHANGED] output
+5. Verify with SQL count assertion FIRST, then optionally screenshot
+6. Send Discord deliverable: SQL counts > screenshot. Wait for user confirmation before marking task done.
+
+ACCEPTANCE CRITERIA:
+- AC1: CLAUDE.md (MLInterviewPrep/CLAUDE.md) has the new 'Surface Identification' section with the widget->table table
+- AC2: .claude/skills/dashboard.md exists with the 6-step protocol referencing CLAUDE.md
+- AC3: Skill triggers on regex matching 'dashboard' / '我们 app' / '左侧 tab' / 'left nav' / 'first nav item' (set in skill metadata or trigger field)
+- AC4: Self-test: dry-run skill on 'add Stripe HR call to my dashboard' -> output proposes interview_events row + references _add_<company>_<date>.py pattern -- verified by reading skill output
+- AC5: Section in CLAUDE.md cross-links to the lint hook (T-P0-660) so reader sees both the prescription AND the enforcement
+- AC6: Skill design ABSORBS recommendation from T-P0-661 root-cause memo (e.g. if memo says 'last-modified doc priming bias', skill includes a note 'do NOT pattern-match from prior session's edit target — always re-derive from widget mapping')
+
+DEPENDS ON: T-P0-660, T-P0-661
+COMPLEXITY: M
+
+[USER CONSTRAINTS 2026-04-30 green-light of T-P0-661 memo]
+- AC7: Skill MUST reference the BOTH-not-either recommendation from logs/2026-04-30_pinterest_root_cause.md (lines 91-99). Specifically, the skill body must treat the lint hook (T-P0-660 + T-P0-660b prose-shape extension) and the CLAUDE.md widget map as TWO INDEPENDENT LAYERS, not one. CLAUDE.md mapping addresses the prior; lint hook addresses the failure mode when prior is overridden by recency priming. The skill must not collapse them into a single 'check the map' instruction.
+- AC8: Skill must NOT add behavioral-only conclusions (e.g. 'always check the map first'). The memo explicitly rejects this class of fix at line 99. If the skill author is tempted to write 'remember to check X', that's the signal the structural fix has not been internalized.
+- AC9: When this skill is reviewed, verify it cites the BOTH-not-either recommendation by file+line reference (logs/2026-04-30_pinterest_root_cause.md line 93 'option (c)') so the connection is not implicit.
 
 ### P2 -- Nice to Have
 
@@ -270,59 +309,6 @@ Scope: backend schema + router + frontend pill rendering + seed. M complexity.
 - **Complexity**: S
 - **Depends on**: T-P1-648
 - **Description**: Final integration smoke test (manual + automated): (1) start dev server (npm run dev + uvicorn); (2) navigate to http://localhost:5173/system-design?tab=cheatsheet; (3) verify ALL rows in system_designs have a rendered card (count == row count); (4) zero console errors; (5) KaTeX formulas render where present; (6) deep-link with #<slug> hash scrolls correctly; (7) prev/next nav still works on detail pages; (8) Interview Prep + eBay Projects tabs still render unchanged (regression check). Append a screenshot or text-only confirmation to PROGRESS.md. Add a vitest E2E-ish test that mounts SystemDesignList and asserts all 3 tabs render their expected card count. AC: all 8 verification points pass; no regression in existing tabs.
-
-#### T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-661
-- **Description**: Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill's job: make the right path the easy default for any future Claude session that gets a 'dashboard / app / left-nav-first' request. **DEPENDS on T-P0-660 (lint exists) AND T-P0-661 (root cause + recommendation)** -- skill design absorbs the root-cause memo's recommendation.
-
-REVISED DESIGN (per reviewer hole #4: 3 memory files -> 1 reference + CLAUDE.md):
-
-The skill content lives in TWO places, both updated together:
-1. **CLAUDE.md (canonical, loaded every session via SessionStart)**: add a widget->data-source mapping table. This is the source of truth.
-2. **.claude/skills/dashboard.md (deepening / triggers)**: invoked when keywords match. References CLAUDE.md table; doesn't duplicate it. Skill body is the 6-step protocol.
-
-CLAUDE.md addition (under 'Behavior Rules' or new 'Surface Identification' section):
-
-  ### Surface Identification (MLInterviewPrep)
-
-  Before editing DB content for a request that mentions a UI surface, map widget -> data source:
-
-  | Widget (Dashboard.tsx) | Query key                | API endpoint            | DB table / column        |
-  |------------------------|--------------------------|-------------------------|--------------------------|
-  | InterviewTimeline      | ['timeline','events']    | GET /timeline/events    | interview_events         |
-  | FocusTopic             | ['dashboard','today']    | GET /dashboard/today    | derived: framework_node + reading_progress |
-  | CompanyPipeline        | ['companies']            | GET /companies          | companies.status         |
-  | PrepQuickAccess        | ['companies']            | GET /companies          | companies.prep_notes (markdown checklist) |
-  | WeeklyActivityChart    | ['dashboard','activity'] | GET /dashboard/activity | derived: problem_attempts + study_sessions |
-
-  Schedule / itinerary / calendar / event = interview_events (NEVER company_documents.content).
-  Pipeline status = companies.status. Daily focus = derived. Checklist = companies.prep_notes. Prose study notes (and ONLY those) = company_documents.
-
-  Idempotent seed pattern per row type:
-  - interview_events: scripts/_add_<company>_<date>.py, canonical key (company_id, scheduled_at, interviewer_name)
-  - company_documents: scripts/seed_<company>_<doc>.py with sentinel-based UPSERT
-  - problems: scripts/seed_<company>_lc_problems.py or similar; canonical key leetcode_id or title
-
-Skill (.claude/skills/dashboard.md) body — 6-step protocol:
-1. Read MLInterviewPrep/CLAUDE.md 'Surface Identification' table; map request to widget
-2. Confirm match by reading the widget's component file (e.g. InterviewTimeline.tsx -> queryKey -> endpoint -> table)
-3. Locate the matching idempotent seed (or, if absent, plan a new one)
-4. Edit the SEED, not the DB. Run the seed. Verify [INSERT|UNCHANGED] output
-5. Verify with SQL count assertion FIRST, then optionally screenshot
-6. Send Discord deliverable: SQL counts > screenshot. Wait for user confirmation before marking task done.
-
-ACCEPTANCE CRITERIA:
-- AC1: CLAUDE.md (MLInterviewPrep/CLAUDE.md) has the new 'Surface Identification' section with the widget->table table
-- AC2: .claude/skills/dashboard.md exists with the 6-step protocol referencing CLAUDE.md
-- AC3: Skill triggers on regex matching 'dashboard' / '我们 app' / '左侧 tab' / 'left nav' / 'first nav item' (set in skill metadata or trigger field)
-- AC4: Self-test: dry-run skill on 'add Stripe HR call to my dashboard' -> output proposes interview_events row + references _add_<company>_<date>.py pattern -- verified by reading skill output
-- AC5: Section in CLAUDE.md cross-links to the lint hook (T-P0-660) so reader sees both the prescription AND the enforcement
-- AC6: Skill design ABSORBS recommendation from T-P0-661 root-cause memo (e.g. if memo says 'last-modified doc priming bias', skill includes a note 'do NOT pattern-match from prior session's edit target — always re-derive from widget mapping')
-
-DEPENDS ON: T-P0-660, T-P0-661
-COMPLEXITY: M
 
 #### T-P1-657: Invariant-3 promotion: doc 84 §5 N-gram LM + problem 1097 to seed scripts
 - **Priority**: P1
@@ -487,4 +473,5 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
+- [x] **2026-04-29** -- T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?. **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is una
 - [x] **2026-04-29** -- T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db. **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions 
