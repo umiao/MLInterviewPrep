@@ -534,3 +534,40 @@
 - **Sanity check result**: (a) git log unchanged after timeout (`dd14950` still HEAD). (b) Task statuses post-reset: T-P0-663 active, T-P1-656 active (deps satisfied), no other unblocked. (c) `has-unblocked` -> `yes`. (d) Lockfile clear. (e) `task_db.py list --status active` returns the 2 P0/P1 tasks Phase 3 needs + the 3 BQ chain tasks that orchestrator will skip (deps T-P1-581 still blocked).
 - **Status**: [DONE] for this session's portion. Phase 3 execution is BLOCKED pending user-side `bash scripts/autonomous_run.sh` from PowerShell. Once user launches: orchestrator picks T-P0-663 (P0/S) -> commits hook extension -> picks T-P1-656 (P1/M) -> commits skill files -> stops with all_done=true (BQ chain stays blocked on user 40-BQ review).
 - **Request**: No further main-context action. On user "done" ping after PowerShell launch: read commits, verify T-P0-663's 4 self-test cases + sweep result, verify T-P1-656's AC7 (two-independent-layers handling) / AC8 (no behavioral conclusions) / AC9 (memo cited by file+line), report any drift to user.
+
+## 2026-04-30 21:55 -- [Audit-only] User-requested unblocked-task audit + Discord report; no task_db state mutation
+- **What I did**: User asked (Discord) for the set of MLI tasks that are currently unblocked AND completable with high confidence, then to launch the orchestrator. Audited `task_db.py list --status active` (5 active), resolved each `depends_on` chain to determine actual unblocked status, and posted a structured report to Discord.
+- **Deliverables**:
+  - Discord message (chat 1484761064292749422, msgs 1499273139643748442 / 1499273140327682111): 2 unblocked tasks reported with HIGH confidence -- T-P0-663 (S, lint extension, deps None) and T-P1-656 (S, /dashboard skill, deps T-P0-661=completed). 3 blocked tasks listed with the root blocker (T-P1-581 awaiting 40-row primary-story user review): T-P1-582, T-P1-583, T-P2-585.
+  - PowerShell launch command included verbatim per memory `feedback_no_inline_autonomous_launch.md` (no inline launch attempt from main session).
+- **Sanity check result**: (a) `task_db.py has-unblocked` -> `yes` (exit 0). (b) `task_db.py get T-P1-581` confirms status=blocked (so T-P1-582/583 transitively blocked). (c) `task_db.py get T-P0-661` confirms status=completed 2026-04-29 (so T-P1-656 unblocked). (d) `session_state.json` shows `all_done=false`, ready for orchestrator cold start; no reset needed.
+- **Task state mutation**: NONE. Audit did not start, complete, or re-prioritize any task. The 2 unblocked tasks remain `active`; the orchestrator flips to in_progress at pick-time. Mutating now would falsify state.
+- **Status**: DONE. Awaiting user-side `bash scripts/autonomous_run.sh` from PowerShell.
+
+## 2026-04-30 22:05 -- [In-flight] Inline orchestrator launch attempt (user contested prior "user-launch only" memory)
+- **What I did**: User pushed back on `feedback_no_inline_autonomous_launch.md` (says they never observed the hang; prior successful runs may have been mis-attributed to user-side PowerShell launches). Marked memory as CONTESTED, switched to inline-launch-with-active-monitoring mode. Pre-launch: lockfile absent, has-unblocked=yes, session_state.json all_done=false. Launched `bash scripts/autonomous_run.sh 5` via Bash run_in_background (id `bp6f41bob`). Armed a Monitor on `logs/autonomous.log` with grep filter for commit/error/Session-boundary/orchestrator-status events.
+- **Early diagnostic signals (T+2 min, 22:03:09 launch -> 22:05:18 check)**:
+  - Inner `claude -p` PID 2902 (parent 2895 = orchestrator bash) is ALIVE, no zombie/exit.
+  - T-P0-663 already flipped from `active` to `in_progress` (sqlite write succeeded -> at least one Bash tool call inside inner claude completed).
+  - Log file mtime stalled at orchestrator startup banner (`--- Session 1/5 ---`); zero inner-claude output yet. Note: `claude -p` non-interactive mode buffers output until tool/response completes, so zero stdout != hang yet.
+  - No new commits (`git log 335ec24e..HEAD` empty).
+  - No child processes under PID 2902 = no active tool call in flight at this exact moment.
+- **Status**: [IN-FLIGHT] Orchestrator running. Monitor armed on log. T-P0-663 should produce a commit within ~5-15 min if inline launch is healthy. If 15 min elapses without progress signal, the prior memory's "status-flip-only-no-real-work" hang signature is reproduced and root-cause investigation begins (candidates: stdin handle inheritance, OAuth token collision when 2 claude processes share creds, SIGPIPE on tee pipe close, hook-blocked tool calls in inner session's settings.json).
+- **Request**: No action yet. Monitor will surface real progress signals.
+
+## 2026-04-30 22:15 -- [T-P0-663] Extend invariant3_guard with schedule-prose detector
+- **What I did**: Added a second detector (`detect_schedule_prose`) to `.claude/hooks/invariant3_guard.py` that flags Write/Edit operations whose Python source contains BOTH a full ISO-8601 timestamp AND an interviewer-name-shaped phrase within 30 lines, when the file also writes to the `company_documents` SQL table. Wired into the existing PreToolUse Write|Edit hook entry alongside the migrations-SQL detector. Path-exempted `scripts/_add_*.py` (interview_events seed convention). Honors the existing `# INVARIANT-3-EXEMPT:` opt-out.
+- **Deliverables**:
+  - `.claude/hooks/invariant3_guard.py` (extended): new constants `ISO_8601_RX`, `INTERVIEWER_NAME_RX`, `TABLE_WRITE_RX`, `CD_TABLE`, `EVENT_SEED_PATH_RX`, `SCHEDULE_PROSE_BANNER`; new functions `detect_target_tables`, `detect_schedule_prose`, `evaluate_schedule_prose`, `is_event_seed_path`, `format_schedule_block_message`, `_emit_schedule_block`, `run_scan_prose`; expanded `hook_main` Write/Edit branches to invoke both detectors; new CLI mode `--scan-prose [DIR]`; 7 new self-tests (`SCHEDULE_PROSE_TEST_CASES`).
+  - `scripts/_extend_invariant3_schedule_prose.py`: idempotent one-off applier (audit trail) -- carries `# INVARIANT-3-EXEMPT:` marker since its test-case payloads intentionally contain the schedule-prose patterns.
+- **Sanity check result**:
+  - Self-test: `24/24 PASS` (10 SQL detectors + 7 Bash extraction + 7 schedule-prose). All AC2(a-d) cases land on the expected branch.
+  - Live PreToolUse stdin sim: BLOCK case (Write to `scripts/seed_pinterest_misroute.py` with schedule prose + company_documents UPDATE) -> exit 2 + JSON `{"decision":"block",...}` + stderr banner. ALLOW case (Write to `scripts/_add_pinterest_vo_2026-05-05_06.py` with schedule prose + interview_events INSERT) -> exit 0, no output.
+  - `--scan-prose scripts/`: 1 flag across 441 files -- `scripts/migrations/update_pinterest_onsite_itinerary.py` (the EXACT historical T-P0-651 misdirected payload). **TRUE POSITIVE confirmed**; zero false positives across the seed-script corpus.
+  - `--sweep scripts/migrations`: existing migrations detector unchanged, still blocks the 2 known migration files.
+  - Ruff: `All checks passed` on the modified hook + applier (1 SIM102 fixed by collapsing nested ifs).
+  - pytest: `1221 passed in 77.45s` (no regressions).
+- **AC mapping**: AC1 done (extended hook with new detector path); AC2(a-d) all green via self-tests; AC3 sweep done with zero FPs and 1 true positive on the historical bug; AC4 wired into existing PreToolUse Write|Edit entry (single hook, two detection paths); AC5 banner + docstring both reference `logs/2026-04-30_pinterest_root_cause.md` recommendation (b); AC6 pytest 1221/1221.
+- **Cleanup**: deleted untracked orphan `scripts/_apply_t_p0_663_hook_extension.py` (stale prior-session attempt at this same task, superseded).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-663 --status completed`

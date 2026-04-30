@@ -9,45 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-663: [T-P0-660b] Extend Invariant-3 lint to flag schedule-shaped prose writes (ISO-8601 + interviewer name)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Follow-on to T-P0-660 per T-P0-661 memo recommendation (b). The current lint hook .claude/hooks/invariant3_guard.py blocks SQL writes in scripts/migrations/* (Invariant 3 enforcement). It does NOT yet detect the COMPLEMENTARY mistake class: misdirected prose writes to company_documents.content that smell like schedule data (the original T-P0-651 bug). This task extends the hook with a SECOND detector for prose-shaped schedule writes.
-
-DETECTION HEURISTIC (Write/Edit on company_documents.content via seed scripts OR direct prose):
-Trigger when a string assignment OR multi-line content block contains BOTH:
-  (i)  ISO-8601 timestamp pattern (e.g. '2026-05-05', '2026-05-05T15:00', '2026-05-05 15:00:00')
-  (ii) Interviewer-name-shaped phrase (e.g. 'with <CapitalizedFirstName> <CapitalizedLastName>',
-       OR 'Round N with X', OR 'Day N R N', OR 'Interviewer: X')
-
-If both present in same content block AND target is company_documents.content (detect via filename pattern OR explicit table reference in surrounding code), emit a warning:
-
-  '[INVARIANT-3 EXTENSION] Schedule-shaped prose detected in a write that targets
-  company_documents.content. Schedule data lives in interview_events (Dashboard
-  InterviewTimeline widget). Use scripts/_add_<company>_<date>.py with canonical
-  key (company_id, scheduled_at, interviewer_name). See logs/2026-04-30_pinterest_root_cause.md
-  recommendation (b) for context.'
-
-EXIT CODE BEHAVIOR (per T-P0-660 AC8 convention):
-- Exit 2 + visible stderr banner if BOTH (i) AND (ii) match within ~30 lines of each other AND target is company_documents
-- Exit 0 + no warning if only one signal present (e.g. ISO date in a study note that mentions a paper publication date) -- conservative to avoid false positives in study content
-
-ACCEPTANCE CRITERIA:
-- AC1: Extend invariant3_guard.py with a new detect_schedule_prose() function or a new --schedule-prose mode
-- AC2: Self-test cases:
-   (a) BLOCK: write to company_documents.content with body containing 'Day 1 R1 -- ML Systems Design with Yiyang Zhang' + '2026-05-05 15:00' (the literal T-P0-651 misdirected payload)
-   (b) ALLOW: write to company_documents.content describing a paper '... published in 2018 by Vaswani et al ...' (ISO-fragment + name but no schedule shape)
-   (c) ALLOW: write to interview_events seed scripts/_add_pinterest_*.py with the same body (path exemption)
-   (d) BLOCK: write to scripts/seed_pinterest_*.py with body matching schedule shape AND target table inferable as company_documents (cross-script reference)
-- AC3: False-positive sweep on existing scripts/seed_*.py and company_documents content (read-only --scan mode); document any flags as true/false positive
-- AC4: Wire into PreToolUse Write|Edit alongside existing invariant3_guard logic (single hook entry, two detection paths)
-- AC5: Reference logs/2026-04-30_pinterest_root_cause.md recommendation (b) in the docstring + the warning message
-- AC6: pytest still passes (no regression)
-
-DEPENDS ON: None (T-P0-660 already shipped; this extends it)
-COMPLEXITY: S (~80-150 lines of additional hook code + 4 test cases)
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -473,5 +434,6 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
+- [x] **2026-04-29** -- T-P0-663: [T-P0-660b] Extend Invariant-3 lint to flag schedule-shaped prose writes (ISO-8601 + interviewer name). Follow-on to T-P0-660 per T-P0-661 memo recommendation (b). The current lint hook .claude/hooks/invariant3_guard.py bloc
 - [x] **2026-04-29** -- T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?. **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is una
 - [x] **2026-04-29** -- T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db. **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions 
