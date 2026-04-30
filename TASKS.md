@@ -9,6 +9,64 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-660
+- **Description**: **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is unanswered: what made Claude choose company_documents over interview_events when the user said 'update Pinterest onsite schedule'? If the root cause is a general bias toward 'edit prose / follow last-modified doc / search by company name first', the same class of bug recurs on different surfaces.
+
+INVESTIGATION STEPS (must answer 4 questions):
+
+Q1: **Mapping in CLAUDE.md** -- Is there a widget->table or feature->seed mapping table anywhere in CLAUDE.md (root or MLInterviewPrep)? Grep for it. If absent, the model has no priors -- it falls back to free-text search.
+  - Action: read MLInterviewPrep/CLAUDE.md fully; grep for 'widget'/'interview_events'/'Dashboard' in shared/claude_md_shared.md and root CLAUDE.md
+  - Finding (expected): mapping is missing or buried
+
+Q2: **Conversation priming** -- Did earlier turns in this session prime the prose path? The first task this session was 'add a problem to doc 84 (Uber)' -- that whole interaction was prose-edits-on-company-doc. By the time the Pinterest request came in, the LAST 'update X for company Y' template I executed was prose-on-doc. Re-reading that, it would be natural to apply the same template to Pinterest.
+  - Action: re-read the doc-84 turn; identify whether the assistant chose company_documents because the prior turn established that pattern
+  - Finding (expected): YES, last-modified priming
+
+Q3: **'Dashboard' in codebase ambiguity** -- How many things are called 'dashboard' or render dashboard-like content? Search src/ for files/components/routes named *Dashboard* or /dashboard.
+  - Action: grep -rn 'Dashboard|/dashboard' src/ --include=*.tsx --include=*.ts
+  - Finding (expected): only one /dashboard route + Dashboard.tsx + Sidebar entry; user's 'dashboard' is unambiguous in the codebase. So the bug is NOT lexical ambiguity, it's semantic priming + missing mapping.
+
+Q4: **Default search behavior** -- What's the assistant's default when given 'update X for company Y'? Read recent PROGRESS.md entries -- how often does the assistant grep company_documents content first vs check interview_events / companies.status / framework_node? Quantify.
+  - Action: tail logs of recent autonomous sessions; count first-grep targets
+  - Finding (expected): heavily biased toward company_documents
+
+DELIVERABLE:
+- Short root-cause memo (1-2 pages) saved to logs/2026-04-30_pinterest_root_cause.md
+- Concrete recommendation: should the fix be (a) add widget->table mapping to CLAUDE.md, (b) extend lint hook (T-P0-660) to ALSO scan company_documents.content writes that smell schedule-like, or (c) both
+- Memo's recommendation feeds DIRECTLY into T-P1-656 (skill design) and CLAUDE.md update content
+
+ACCEPTANCE CRITERIA:
+- AC1: All 4 Q&As answered with concrete evidence from this conversation + grep output
+- AC2: Memo at logs/2026-04-30_pinterest_root_cause.md exists, <=200 lines
+- AC3: Concrete recommendation with rationale (a/b/c above), priority-ordered
+- AC4: User reviews + green-lights the recommendation BEFORE T-P1-656 begins (skill design depends on root-cause finding)
+
+[USER CONSTRAINTS 2026-04-30 green-light -- HARD GATES]
+- AC5: HYPOTHESIS + EVIDENCE, NOT REFLECTION. Memo must NOT read like 'I should check the widget map next time'. Reject behavioral / advisory-only conclusions at draft stage. The memo's value is its explanatory power for future surface bugs of the same class, not a self-pep-talk.
+
+- AC6: REQUIRED MEMO SECTIONS (each with explicit data, not prose):
+    (i)   **Session priming path**: If the conversation transcript is still accessible (check .claude/transcripts/, or scan recent autonomous logs/ for the doc-84 -> Pinterest turn sequence), trace the literal turn-by-turn 'last edited surface' chain leading into the misdirected write. If transcript is gone, document that explicitly and reconstruct from PROGRESS.md + git log.
+    (ii)  **Discoverability comparison**: Quantitative grep counts for 'company_documents' vs 'interview_events' across:
+            - root + MLInterviewPrep CLAUDE.md (literal mention count)
+            - README files (literal mention count)
+            - src/ (import / model usage count)
+            - scripts/ seed files (import count)
+            - docs/ (mention count)
+          Present as a table. If 'company_documents' wins by >2x in CLAUDE.md / docs / README, that itself is a falsifiable mechanism for the priming.
+    (iii) **At least one falsifiable root-cause hypothesis** -- a statement of the form 'Claude defaults to surface S because property P holds, where P is measurable. If P were inverted, the bias would flip.' Example shape (NOT the answer): 'Claude routes to whichever table has the highest CLAUDE.md mention-density when the user request is ambiguous. Falsification: rewrite CLAUDE.md to invert mention densities and re-test on a held-out ambiguous prompt.'
+    (iv)  **Generalization claim**: name at least 2 OTHER surface pairs in this codebase where the same root-cause mechanism would predict a similar mistake (e.g. framework_nodes vs companies.notes, problems.notes vs solution_notes). This forces the hypothesis to make predictions, not just retrofit one incident.
+
+- AC7: DO NOT MARK COMPLETED. After the memo is written:
+    - Append a PROGRESS.md entry with the memo verbatim (or first ~100 lines + 'see logs/2026-04-30_pinterest_root_cause.md for full text')
+    - Set status to in_progress with a STATUS NOTE: 'AWAITING USER REVIEW -- memo at logs/2026-04-30_pinterest_root_cause.md, do not auto-advance'
+    - The orchestrator should then see no unblocked task and stop with all_done=true. User reads memo, replies green-light or revisions.
+
+DEPENDS ON: T-P0-660 (lint hook is the foundation; root cause may recommend extending it)
+COMPLEXITY: M (read + grep + write memo + measure discoverability table; the memo itself stays <=200 lines but the evidence-gathering is substantial)
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -99,64 +157,6 @@ AC:
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: [PARTIALLY-SUPERSEDED 2026-04-30] Pinterest portion folded into T-P0-653 (revert) + T-P0-654 (add to interview_events). Uber portion (doc 84 §5 + problem 1097 Invariant-3 promotion) carried forward as T-P0-657.
-
-#### T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-660
-- **Description**: **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is unanswered: what made Claude choose company_documents over interview_events when the user said 'update Pinterest onsite schedule'? If the root cause is a general bias toward 'edit prose / follow last-modified doc / search by company name first', the same class of bug recurs on different surfaces.
-
-INVESTIGATION STEPS (must answer 4 questions):
-
-Q1: **Mapping in CLAUDE.md** -- Is there a widget->table or feature->seed mapping table anywhere in CLAUDE.md (root or MLInterviewPrep)? Grep for it. If absent, the model has no priors -- it falls back to free-text search.
-  - Action: read MLInterviewPrep/CLAUDE.md fully; grep for 'widget'/'interview_events'/'Dashboard' in shared/claude_md_shared.md and root CLAUDE.md
-  - Finding (expected): mapping is missing or buried
-
-Q2: **Conversation priming** -- Did earlier turns in this session prime the prose path? The first task this session was 'add a problem to doc 84 (Uber)' -- that whole interaction was prose-edits-on-company-doc. By the time the Pinterest request came in, the LAST 'update X for company Y' template I executed was prose-on-doc. Re-reading that, it would be natural to apply the same template to Pinterest.
-  - Action: re-read the doc-84 turn; identify whether the assistant chose company_documents because the prior turn established that pattern
-  - Finding (expected): YES, last-modified priming
-
-Q3: **'Dashboard' in codebase ambiguity** -- How many things are called 'dashboard' or render dashboard-like content? Search src/ for files/components/routes named *Dashboard* or /dashboard.
-  - Action: grep -rn 'Dashboard|/dashboard' src/ --include=*.tsx --include=*.ts
-  - Finding (expected): only one /dashboard route + Dashboard.tsx + Sidebar entry; user's 'dashboard' is unambiguous in the codebase. So the bug is NOT lexical ambiguity, it's semantic priming + missing mapping.
-
-Q4: **Default search behavior** -- What's the assistant's default when given 'update X for company Y'? Read recent PROGRESS.md entries -- how often does the assistant grep company_documents content first vs check interview_events / companies.status / framework_node? Quantify.
-  - Action: tail logs of recent autonomous sessions; count first-grep targets
-  - Finding (expected): heavily biased toward company_documents
-
-DELIVERABLE:
-- Short root-cause memo (1-2 pages) saved to logs/2026-04-30_pinterest_root_cause.md
-- Concrete recommendation: should the fix be (a) add widget->table mapping to CLAUDE.md, (b) extend lint hook (T-P0-660) to ALSO scan company_documents.content writes that smell schedule-like, or (c) both
-- Memo's recommendation feeds DIRECTLY into T-P1-656 (skill design) and CLAUDE.md update content
-
-ACCEPTANCE CRITERIA:
-- AC1: All 4 Q&As answered with concrete evidence from this conversation + grep output
-- AC2: Memo at logs/2026-04-30_pinterest_root_cause.md exists, <=200 lines
-- AC3: Concrete recommendation with rationale (a/b/c above), priority-ordered
-- AC4: User reviews + green-lights the recommendation BEFORE T-P1-656 begins (skill design depends on root-cause finding)
-
-[USER CONSTRAINTS 2026-04-30 green-light -- HARD GATES]
-- AC5: HYPOTHESIS + EVIDENCE, NOT REFLECTION. Memo must NOT read like 'I should check the widget map next time'. Reject behavioral / advisory-only conclusions at draft stage. The memo's value is its explanatory power for future surface bugs of the same class, not a self-pep-talk.
-
-- AC6: REQUIRED MEMO SECTIONS (each with explicit data, not prose):
-    (i)   **Session priming path**: If the conversation transcript is still accessible (check .claude/transcripts/, or scan recent autonomous logs/ for the doc-84 -> Pinterest turn sequence), trace the literal turn-by-turn 'last edited surface' chain leading into the misdirected write. If transcript is gone, document that explicitly and reconstruct from PROGRESS.md + git log.
-    (ii)  **Discoverability comparison**: Quantitative grep counts for 'company_documents' vs 'interview_events' across:
-            - root + MLInterviewPrep CLAUDE.md (literal mention count)
-            - README files (literal mention count)
-            - src/ (import / model usage count)
-            - scripts/ seed files (import count)
-            - docs/ (mention count)
-          Present as a table. If 'company_documents' wins by >2x in CLAUDE.md / docs / README, that itself is a falsifiable mechanism for the priming.
-    (iii) **At least one falsifiable root-cause hypothesis** -- a statement of the form 'Claude defaults to surface S because property P holds, where P is measurable. If P were inverted, the bias would flip.' Example shape (NOT the answer): 'Claude routes to whichever table has the highest CLAUDE.md mention-density when the user request is ambiguous. Falsification: rewrite CLAUDE.md to invert mention densities and re-test on a held-out ambiguous prompt.'
-    (iv)  **Generalization claim**: name at least 2 OTHER surface pairs in this codebase where the same root-cause mechanism would predict a similar mistake (e.g. framework_nodes vs companies.notes, problems.notes vs solution_notes). This forces the hypothesis to make predictions, not just retrofit one incident.
-
-- AC7: DO NOT MARK COMPLETED. After the memo is written:
-    - Append a PROGRESS.md entry with the memo verbatim (or first ~100 lines + 'see logs/2026-04-30_pinterest_root_cause.md for full text')
-    - Set status to in_progress with a STATUS NOTE: 'AWAITING USER REVIEW -- memo at logs/2026-04-30_pinterest_root_cause.md, do not auto-advance'
-    - The orchestrator should then see no unblocked task and stop with all_done=true. User reads memo, replies green-light or revisions.
-
-DEPENDS ON: T-P0-660 (lint hook is the foundation; root cause may recommend extending it)
-COMPLEXITY: M (read + grep + write memo + measure discoverability table; the memo itself stays <=200 lines but the evidence-gathering is substantial)
 
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
