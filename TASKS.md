@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation
 - **Priority**: P0
 - **Complexity**: S
@@ -42,6 +38,10 @@ ACCEPTANCE CRITERIA:
 
 DEPENDS ON: T-P0-654
 COMPLEXITY: XS
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 ### P1 -- Should Have (agentic intelligence)
 
