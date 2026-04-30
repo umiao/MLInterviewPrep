@@ -66,12 +66,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of 5 talking points for proper paragraph breaks (currently dense walls of text per pitch), (2) bold key tradeoff phrases + English kill-line, (3) ensure first-occurrence English term format **English** (acronym, 中文) per feedback_content_style_cn_en.md, (4) remove CN-EN duplicate phrasing where the same idea appears in both languages back-to-back, (5) DO NOT change the 5 talking points themselves — content frozen, only style. Acceptance: doc 87 readable as scannable bullet list (not wall of text), each pitch has at most 2-3 paragraphs, no CN-EN duplicate phrasing, file paths still clickable.
-
 #### T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md)
 - **Priority**: P1
 - **Complexity**: S
@@ -346,6 +340,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of
 - [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
 - [x] **2026-04-30** -- T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack. Source review attachment §四/§五/§六: doc 89 already aligned philosophically but missing 3 concrete deliverables. Concrete 
 - [x] **2026-04-30** -- T-P0-678: [Meta-Prep-B] Doc 86 §T1 Code-Pad Prompt — major rewrite per review (1-sentence Version A prompt, fix Step1 AI-clarify contradiction, replace opener, drop OrderedDict critique, add §六 6-pack). Source review attachment: rewrite company_documents.id=86. Concrete edits: (1) §1 30-sec opener: replace 'Cool. Before I

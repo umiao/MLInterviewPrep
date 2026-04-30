@@ -23,7 +23,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
-SENTINEL = "<!-- META_AINATIVE_BREADTH_20260430 -->"
+SENTINEL = "<!-- META_AINATIVE_BREADTH_20260501 -->"
 
 COMPANY_ID = 31  # Meta
 DOC_TITLE = "[Meta] AI-Native Domain Breadth -- 5 Talking Points"
@@ -53,20 +53,23 @@ CONTENT = SENTINEL + r'''
 ### 30-sec spoken pitch
 
 > "我自己 daily-driver 的 Claude Code 工作站不是 stock 的 -- 我在它上面建了
-> 一套 3-layer responsibility model. **Policy Layer** 是 12 个 hook scripts
-> (block_dangerous, secret_guard, invariant3_guard 等), 在 PreToolUse / Stop
-> 上拦危险 shell command, 拦 secret leak, 验 invariant. **Execution Layer**
-> 是 4 个 subagent definition (reviewer, refactor-advisor, test-runner,
-> input-reviewer), 跑 read-only research 和 cross-project review.
-> **Interface Layer** 是 9 个 user-facing skill (e.g. /sanity-check, /review,
-> /e2e-test, /dashboard), 把高频 workflow 封成 slash command. 这套结构让我
-> 在 autonomous mode 下 run 几百场 session 而不出错."
+> 一套 **3-layer responsibility model**.
+>
+> **Policy Layer** 是 12 个 hook scripts (block_dangerous, secret_guard,
+> invariant3_guard 等), 在 PreToolUse / Stop 上拦危险 shell command, 拦 secret
+> leak, 验 invariant. **Execution Layer** 是 4 个 subagent definition (reviewer,
+> refactor-advisor, test-runner, input-reviewer), 跑 read-only research 和
+> cross-project review. **Interface Layer** 是 9 个 user-facing skill (e.g.
+> /sanity-check, /review, /e2e-test, /dashboard), 把高频 workflow 封成 slash
+> command.
+>
+> 这套结构让我在 autonomous mode 下 run **几百场 session 而不出错**."
 
 ### English kill-line
 
-> "I treat Claude Code as a kernel I own, not a tool I use -- hooks are my
+> "I treat Claude Code as **a kernel I own, not a tool I use** -- hooks are my
 > policy layer, agents are execution, skills are interface. The harness
-> survives 800+ autonomous sessions because every dangerous path has a
+> survives **800+ autonomous sessions** because every dangerous path has a
 > hook gate before it can fire."
 
 ### Concrete file path / artifact
@@ -100,21 +103,23 @@ CONTENT = SENTINEL + r'''
 
 > "我项目最严的 invariant 是 **Invariant 3**: 每一行 production DB content
 > (company_documents / framework_nodes / problems / interview_events) 都必须有
-> 一个 git-tracked, idempotent Python seed script 作为 source of truth. Ad-hoc
-> SQL or manual DB edits 是禁止的 -- DB 是 seed scripts 的 regenerable
+> 一个 git-tracked, idempotent Python seed script 作为 source of truth.
+>
+> Ad-hoc SQL or manual DB edits 是禁止的 -- DB 是 seed scripts 的 regenerable
 > projection, 不是 source of truth. 这个规则是用 hook (`invariant3_guard.py`)
 > 强制的: 任何 raw SQL write from `scripts/migrations/*` to `data/*.db` 会
 > 直接 block, 而且我把它扩展 (T-P0-660b) 到 catch schedule-shaped prose
 > writes -- ISO-8601 timestamp + interviewer-name pattern 出现在
-> company_documents.content 也会被 block, 因为那应该写到 interview_events
-> 表. 这就是为什么我 600+ seed scripts 都长得一样."
+> company_documents.content 也会被 block, 因为那应该写到 interview_events 表.
+>
+> 这就是为什么我 **600+ seed scripts 都长得一样**."
 
 ### English kill-line
 
-> "DB rows without a git-tracked seed script are forbidden in this codebase --
-> a hook blocks ad-hoc SQL writes, and a second hook blocks
-> schedule-shaped prose from leaking into the wrong table. Reproducibility
-> is enforced, not requested."
+> "DB rows without a git-tracked seed script are **forbidden in this codebase**
+> -- a hook blocks ad-hoc SQL writes, and a second hook blocks schedule-shaped
+> prose from leaking into the wrong table. **Reproducibility is enforced, not
+> requested**."
 
 ### Concrete file path / artifact
 
@@ -146,21 +151,24 @@ CONTENT = SENTINEL + r'''
 > "我有一个 orchestrator -- `scripts/autonomous_run.sh` -- 在 background
 > 跑 Claude Code 的 autonomous mode. 每个 session 抓一个最高优先级 unblocked
 > task, 跑完 update PROGRESS.md + tasks.db + session_state.json 然后退出, 下一个
-> session fresh context 进来继续. 到现在跑了 800+ session (PROGRESS.md +
-> archive/progress_log.md 加起来 841 个 session entry). 但中间踩过一个 silent-fail
-> bug -- T-P1-257: orchestrator 启动时要 reset stale `all_done=true` flag
-> (上一轮 drained queue 但同时 task_db 又加了新 task), 我用了 `python -c`
-> inline 读 session_state.json, 但传给 Python 的 path 是 MSYS-bash 的
-> `/c/Users/...` 形式, Windows Python 读不出来, silent skip 这个 reset, 结果
-> 整个 orchestrator 立刻退出. Fix 是把 python 调用 `cd` 到 WORK_DIR, 让 Python
-> 看到 relative path 而不是 MSYS path. 教训: cross-shell path 永远要 verify."
+> session fresh context 进来继续. 到现在跑了 **800+ session** (PROGRESS.md +
+> archive/progress_log.md 加起来 **841 个 session entry**).
+>
+> 但中间踩过一个 silent-fail bug -- T-P1-257: orchestrator 启动时要 reset stale
+> `all_done=true` flag (上一轮 drained queue 但同时 task_db 又加了新 task), 我用了
+> `python -c` inline 读 session_state.json, 但传给 Python 的 path 是 MSYS-bash
+> 的 `/c/Users/...` 形式, Windows Python 读不出来, silent skip 这个 reset, 结果
+> 整个 orchestrator 立刻退出.
+>
+> Fix 是把 python 调用 `cd` 到 WORK_DIR, 让 Python 看到 relative path 而不是
+> MSYS path. **教训: cross-shell path 永远要 verify**."
 
 ### English kill-line
 
-> "Autonomous mode runs at 800+ session scale. The bug that almost killed
+> "Autonomous mode runs at **800+ session scale**. The bug that almost killed
 > it was an MSYS-bash path silently passed to Windows Python -- `/c/...`
 > reads as nonexistent, the orchestrator skipped its all_done reset and
-> exited every loop. cd-into-WORK_DIR-then-python is the durable fix."
+> exited every loop. **cd-into-WORK_DIR-then-python is the durable fix**."
 
 ### Concrete file path / artifact
 
@@ -192,24 +200,28 @@ CONTENT = SENTINEL + r'''
 
 ### 30-sec spoken pitch
 
-> "我的 ML interview prep 里有一个 28-topic ML fundamentals knowledge base
+> "我的 ML interview prep 里有一个 **28-topic ML fundamentals knowledge base**
 > (`data/ml_fundamentals_inventory.yaml`), source 是 Discord forum 的
 > high-frequency interview question dump 加我自己加的 large-scale feature
-> selection writeup. 28 topics 跨 7 个 category: classical ML 5 个,
-> evaluation/data 2 个, feature engineering selection 1 个, unsupervised 2 个,
-> deep learning training 5 个, attention/transformer 6 个, LLM/stats 7 个.
-> 每个 topic 我打两个 orthogonal 标签: **tier** (T1/T2/T3, cleanup workload --
-> T1 minor polish 14 个, T2 moderate reformat 7 个, T3 deep expansion 7 个) 和
-> **interview_freq** (high/mid/low, asked frequency). Tier 决定我下次抽时间
-> 改的优先级, freq 决定面试前一天复习哪些. 这套 schema 让我能 plan 出 'I'll
-> spend Saturday on the 7 T3 LLM/stats topics' 而不是漫无目的复习."
+> selection writeup.
+>
+> 28 topics 跨 **7 个 category**: classical ML 5 个, evaluation/data 2 个,
+> feature engineering selection 1 个, unsupervised 2 个, deep learning training
+> 5 个, attention/transformer 6 个, LLM/stats 7 个. 每个 topic 我打两个
+> orthogonal 标签: **tier** (T1/T2/T3, cleanup workload -- T1 minor polish 14
+> 个, T2 moderate reformat 7 个, T3 deep expansion 7 个) 和 **interview_freq**
+> (high/mid/low, asked frequency).
+>
+> Tier 决定我下次抽时间改的优先级, freq 决定面试前一天复习哪些. 这套 schema
+> 让我能 plan 出 'I'll spend Saturday on the 7 T3 LLM/stats topics' 而不是
+> **漫无目的复习**."
 
 ### English kill-line
 
-> "Knowledge bases without a tier system die from over-coverage. Mine has
-> 28 topics, two orthogonal axes (cleanup_tier x interview_frequency), and
-> a schema header that makes Saturday's prep deterministic instead of
-> emotional."
+> "Knowledge bases without a tier system **die from over-coverage**. Mine has
+> 28 topics, **two orthogonal axes** (cleanup_tier x interview_frequency), and
+> a schema header that makes Saturday's prep **deterministic instead of
+> emotional**."
 
 ### Concrete file path / artifact
 
@@ -241,23 +253,25 @@ CONTENT = SENTINEL + r'''
 
 ### 30-sec spoken pitch
 
-> "在前公司 (2023 GenAI Exploration Initiative), 我用 1 周 feasibility math
+> "在前公司 (2023 GenAI Exploration Initiative), 我用 **1 周 feasibility math**
 > 把 leadership 想要的 agentic search 路径 disqualify 掉 -- LLM 接不到
 > indexing pipeline, 读不到 live inventory, throughput 在 40K-peak surface
-> 上只能跑到 tens of QPS, latency prohibitive. 数字直接 kill 那条路, 我用省下来
-> 的 budget 转去做 **LLM-as-Judge** for relevance labeling. 产线上每天产
-> **18K labels at $500 total**, 对比 human annotation **$0.30-0.80 per label**
-> 就是 vendor 报价的 1/10 到 1/30. 关键不是技术, 是 **feasibility-first scoping
-> 把 sunk cost 政治成本压到最小**. 后来这套 LLM-as-Judge 从 relevance team
-> scale 到 ads team 再到几个其他 group, 成了 org-wide measurement
-> infrastructure -- 1.5% GMB lift."
+> 上只能跑到 tens of QPS, latency prohibitive.
+>
+> 数字直接 kill 那条路, 我用省下来的 budget 转去做 **LLM-as-Judge** for
+> relevance labeling. 产线上每天产 **18K labels at $500 total**, 对比 human
+> annotation **$0.30-0.80 per label** 就是 vendor 报价的 1/10 到 1/30. 关键
+> 不是技术, 是 **feasibility-first scoping 把 sunk cost 政治成本压到最小**.
+>
+> 后来这套 LLM-as-Judge 从 relevance team scale 到 ads team 再到几个其他
+> group, 成了 org-wide measurement infrastructure -- **1.5% GMB lift**."
 
 ### English kill-line
 
-> "Vague AI mandates die from sunk cost. The cheapest move nobody assigns
-> is the one-week feasibility kill -- it killed agentic search, freed
+> "Vague AI mandates **die from sunk cost**. The cheapest move nobody assigns
+> is the **one-week feasibility kill** -- it killed agentic search, freed
 > budget for LLM-as-Judge, which scaled into org-wide measurement infra
-> at $500/day for 18K daily labels vs $0.30-0.80/label human pricing."
+> at **$500/day for 18K daily labels** vs $0.30-0.80/label human pricing."
 
 ### Concrete file path / artifact
 
@@ -366,8 +380,8 @@ def validate_content(content: str) -> None:
                 raise RuntimeError(
                     f"emoji char detected at codepoint U+{cp:04X}: {ch!r}"
                 )
-    if not (5000 <= len(content) <= 14000):
-        raise RuntimeError(f"content length {len(content)} outside 5000-14000")
+    if not (5000 <= len(content) <= 16000):
+        raise RuntimeError(f"content length {len(content)} outside 5000-16000")
 
 
 def main() -> int:
