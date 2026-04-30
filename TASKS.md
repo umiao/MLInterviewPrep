@@ -539,6 +539,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
+- [x] **2026-04-29** -- T-P0-662: Pinterest HR prep call (Daniel McCray, 2026-04-30 14:00 PDT) added to InterviewTimeline. User received email from Daniel McCray (Pinterest interview coordinator/recruiter) proposing to move prep call to 2026-0
 - [x] **2026-04-29** -- T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline). Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
 - [x] **2026-04-29** -- T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits. Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has indep
 - [x] **2026-04-29** -- T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass. ## Goal
