@@ -88,6 +88,8 @@ Interviewer 说 "you can use AI" -- **不要立刻打字**, 先讲这段 (30 秒
 
 禁忌: 不要说 "I'll just ask AI" -- **lead with structure 不是 lead with tool**.
 
+> 深度 design rationale (4 bullets 拆解 + 反例) 见 cd://89 §7.
+
 ---
 
 ## §2 The Code-Pad LLM Prompt (canonical 1-sentence)
@@ -117,6 +119,8 @@ B 比 A 短 30%, 保留 3 个核心 directive, 语义等价. 第二轮 prompt / 
 > 不要再贴旧 doc 里 "PHASE 1-4 system prompt" (30+ 行的). 临场没时间打,
 > 而且 PHASE 1 让 AI 问你 = direction backwards: clarification 必须**你
 > 问 interviewer**, AI 不参与那步.
+
+> Version C ("junior engineer" framing) 不推荐 + 详细解释见 cd://89 §8.
 
 ---
 

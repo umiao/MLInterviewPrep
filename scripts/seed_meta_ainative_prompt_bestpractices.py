@@ -1,4 +1,4 @@
-"""Seed Meta AI-Native -- 临场 Prompt 写作 Best Practices doc (T-P0-670 T4-bp).
+"""Seed Meta AI-Native -- 临场 Prompt 写作 Best Practices doc (T-P0-670 T4-bp / T-P0-679).
 
 Companion to seed_meta_ai_native_prep.py (slim hub), seed_meta_ainative_codepad_prompt.py
 (T1: code-pad playbook), seed_meta_ainative_breadth_5pts.py (T2: domain breadth), and
@@ -19,7 +19,21 @@ Three layers of order:
 Plus verification rituals (LLM output as junior PR, not source of truth) and a worked
 side-by-side weak-vs-strong prompt example on the same coding question.
 
-Idempotency: sentinel <!-- META_AINATIVE_PROMPT_BESTPRACTICES_20260430 -->.
+T-P0-679 augmentation (per review attachment §四 / §五 / §六):
+- New §7 30-second Spoken Opener with the §五 verbatim text + 4 design bullets
+  (drive-myself-first / three explicit actions / AI as edge-pressure-tester /
+  end-with-option-not-approval).
+- New §8 Canonical 1-sentence English prompt: Version A (recommended), Version B
+  (shorter alt), Version C (NOT recommended -- explicit 'junior engineer' framing
+  reads as performative role-play; the directives in A/B already imply the same
+  senior-junior dynamic without the awkward labelling).
+- New §9 §六 临场 Review 6-Pack mirroring cd://86 §6: continuous narration,
+  AI-vs-your-direction handling, 45-min time allocation 3/3/10/5/5/5, manual
+  trace as review step, fallback when AI is stuck, prompt transparency.
+
+Idempotency: sentinel <!-- META_AINATIVE_PROMPT_BESTPRACTICES_20260501 --> (rev'd
+from _20260430 because T-P0-679 is a structural augmentation -- the old sentinel
+would short-circuit the upsert via content-hash equality on the smaller body).
 Style: Chinese narration + English term expansion on first use. No emoji.
 """
 from __future__ import annotations
@@ -31,12 +45,39 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
-SENTINEL = "<!-- META_AINATIVE_PROMPT_BESTPRACTICES_20260430 -->"
+SENTINEL = "<!-- META_AINATIVE_PROMPT_BESTPRACTICES_20260501 -->"
 
 COMPANY_ID = 31  # Meta
 DOC_TITLE = "[Meta] AI-Native -- 临场 Prompt 写作 Best Practices"
 DOC_KIND = "prep_note"
 SOURCE_TYPE = "manual"
+
+# Verbatim text fragments (T-P0-679): mirror cd://86's locked anchors so the
+# two docs' opener and prompt versions stay byte-identical.
+VERSION_A_PROMPT = (
+    "Don't write code until I give you the acceptance criteria and edge "
+    "cases; after you draft, surface every assumption you made and every "
+    "edge case you didn't handle as a gap list for me to decide on rather "
+    "than silently fixing them, and flag any stdlib API you're not 100% "
+    "sure exists."
+)
+VERSION_B_PROMPT = (
+    "Hold off on code until I lay out AC + edges; after the draft, list "
+    "every assumption, unhandled edge case, and uncertain stdlib API as "
+    "a gap list for me to call rather than silently fixing them."
+)
+VERSION_C_PROMPT = (
+    "Treat me as the senior engineer and yourself as the junior. Don't "
+    "write code until I give you AC + edges; after your draft, list every "
+    "assumption and unhandled edge case as a gap list for me to decide on; "
+    "wait for my approval before merge."
+)
+OPENER_30SEC = (
+    "Before I bring in the AI, I'd like to drive this myself first -- "
+    "restate, lay out AC + edges, sketch approach. Then I'll use AI to "
+    "draft and pressure-test edges, but review line-by-line before we "
+    "run. Does that work, or would you prefer I lean on AI sooner?"
+)
 
 CONTENT = SENTINEL + r'''
 # Meta AI-Native -- 临场 Prompt 写作 Best Practices
@@ -257,6 +298,117 @@ interviewer 看到的 driving signal: 候选人 **constraint 给得清, AC 给�
 
 ---
 
+## §7 The 30-second Spoken Opener (临场开场词 verbatim)
+
+Interviewer 一说 "feel free to use AI in your code pad" -- **不要立刻打字**,
+先讲下面这段 (30 秒一口气, 与 cd://86 §1 落地版本同源):
+
+> "''' + OPENER_30SEC + r'''"
+
+**4 个 design bullets (为什么这段是对的)**:
+
+1. **"drive this myself first" 锚定 you as driver, AI as tool** -- 第一帧
+   mental model: 这候选人 own it, 不是 typist. Senior signal #1.
+2. **三个明确动作 (restate / AC + edges / sketch approach)** -- structured
+   ownership, 不是 vague "I'll think about it"; 三步是后面 §1-§3 的微缩.
+3. **AI 框成 edge-pressure-tester, 不是 code-writer** -- "pressure-test
+   edges" + "review line-by-line before we run". AI 提交 PR, 你 merge.
+4. **End with option, not approval** -- "would you prefer I lean on AI
+   sooner?" 给 interviewer 选择权, 但**不是** ask permission. Senior posture
+   = open the option, not seek approval.
+
+禁忌: 不要说 "I'll just ask AI" -- **lead with structure 不是 lead with tool**.
+
+---
+
+## §8 Canonical 1-sentence English Prompt (Version A / B / 不推荐 C)
+
+§2 给的是完整 7-block 结构 (role / IO / constraints / edges / reasoning /
+assumption / stop). 但**临场没时间打 30 行**. 1 句 prompt 覆盖 (a)
+acceptance-criteria-first, (b) gap list, (c) no-API-hallucination 三件事.
+配套 cd://86 §2 给同源临场粘贴版本.
+
+### Version A (recommended)
+
+```
+''' + VERSION_A_PROMPT + r'''
+```
+
+锁了三件:
+- (a) "Don't write code until I give you the acceptance criteria and edge
+  cases" = *I drive, AI follows*. AI 不替你假设, 等你给 spec.
+- (b) "surface ... as a gap list for me to decide on rather than silently
+  fixing them" = AI 是 **gap reporter**, 不让 silent fix. 这条是 catch
+  spec drift 最便宜的一招.
+- (c) "flag any stdlib API you're not 100% sure exists" = 直接 catch
+  hallucination. LLM 经常凭空造 stdlib 函数名, 这条让它先承认不确定.
+
+### Version B (shorter alt -- 时间紧贴这版)
+
+```
+''' + VERSION_B_PROMPT + r'''
+```
+
+B 比 A 短约 30%, 保留 3 个核心 directive (AC-first / gap-list /
+uncertain-API), 语义等价. 第二轮 prompt / 时间紧时默认贴 B.
+
+### Version C (NOT recommended -- 看起来 senior 实则 performative)
+
+```
+''' + VERSION_C_PROMPT + r'''
+```
+
+为什么 C 不推荐: explicit "junior engineer" framing **makes you look
+performative**. Senior signal 来自你的 *driving behavior* -- 你怎么 review,
+怎么提 gap, 怎么切 manual fallback -- **不是来自 prompt 里把 AI 标成
+junior**. Version A / B 的 directives ("don't write code until ...",
+"gap list for me to decide on") 已经隐含 senior-junior dynamic, 不需要
+在 prompt 里 role-play. Interviewer 看到 C 会读出 "这候选人在演 senior,
+不是在干 senior 的活". **砍掉 role label, 留 directive** = 更稳的姿态.
+
+---
+
+## §9 §六 临场 Review 6-Pack (整场 driving 看得见的 6 件事)
+
+§4 verification rituals 是 review LLM output 时的 4 条; 这 6 条是**整场
+45 min 全程做** 的, 跨 phase. 与 cd://86 §6 mirror, 此处给 deeper 解释 +
+反例 (反例 = 失分长什么样).
+
+1. **Continuous narration**: AI 生成时**不能沉默 wait**. 边等边 narrate
+   "OK 它在写 X, 我等下 verify Y". 反例: AI 在跑, 你 30 秒 dead air =
+   interviewer 看到 disengaged, 信号丢. 锚点: 全程 engaged, 你脑子在
+   ahead-of-AI.
+2. **AI-vs-your-direction handling**: AI 输出和你心里方向不一致 = **暂停,
+   大声讲出你的方向**让 interviewer 听到 disagreement, 然后改 prompt 或手
+   写. 反例: "AI 说这样, 那就这样吧" = 失分 (你 follow AI, 不是 AI follow
+   你). 锚点: 你 catch AI 偏离 + 主动 correct, 不是被 AI 拽着走.
+3. **45-min time allocation 3/3/10/5/5/5**: 3 min clarify (问 interviewer)
+   / 3 min prompt + AC (写给 AI) / 10 min AI draft + you narrate / 5 min
+   review (junior PR) / 5 min fix + rerun / 5 min buffer + manual trace.
+   共 31 min 主循环, 14 min followup. 反例: prompt 上花 8 min, review 只
+   1 min = 失分 (review 是真信号, prompt 只是工具). 锚点: review 时间
+   至少和 draft 时间 1:2.
+4. **Manual trace as review step**: 跑代码**前**, 拿 1-2 个 example 手动
+   trace ("input [3,1,2], i=0, state=...; i=1, state=..."). Catch
+   off-by-one + 隐含状态比静态读代码强 5x. 反例: AI 给完代码立刻 run,
+   看 example 输出对就接受 = 失分 (你信任 example 不信任 trace). 锚点:
+   trace 时讲出每步 state, 主动指出 boundary 隐患.
+5. **Fallback when AI is stuck**: 第二轮 prompt 还不对就 abandon AI 手写,
+   narrate "let me work this out manually first, then we'll use AI to
+   pressure-test". 不 chain prompt 6 轮. 反例: 被 AI 卡 5 轮还在改 prompt
+   = 失分 (driving 失败 = 不是 senior). 锚点: 主动切 manual = 加分; 配套
+   §1 step 8 stop-condition + §4 ritual #4.
+6. **Prompt transparency**: 写 prompt 时**让 interviewer 看到** (大声读 /
+   屏幕共享留 prompt 框可见 / 写完口头复述 directive). 反例: 你低头打
+   prompt + interviewer 看不见 = signal 丢 (driving 物证消失). 锚点:
+   prompt 是 driving 信号最直接的物证, interviewer 看不见 = 没发生.
+
+> **整合**: §1-§4 让你 *写对 prompt + review 对 output*; §六 6-pack 让你
+> *整场 driving 看得见*. 两者缺一不可. 临场缺时间砍 §1-§4 任意一条,
+> 但 §六 6-pack 6 条 each 30 秒一条, 全场必做.
+
+---
+
 > **Senior framing**: 这套 best practice 不是为了"显得正式". 是因为 Meta
 > AI-native coding round 真正要看的是 **你能不能像 staff/PM 那样 driving
 > AI**. Driving 的可观测证据 = (a) prompt 里有 contract / constraint /
@@ -271,7 +423,15 @@ def sha256_bytes(text: str) -> str:
 
 
 def validate_content(content: str) -> None:
-    """Cheap structural checks on the content payload."""
+    """Cheap structural checks on the content payload (T-P0-679 contract).
+
+    Locks the augmentation contract in addition to the original §1-§6 baseline:
+    - §7 30-sec Spoken Opener present with verbatim OPENER_30SEC.
+    - §8 Canonical 1-sentence prompt with Version A / B / C verbatim, AND
+      explicit explanation of why C is NOT recommended (performative framing).
+    - §9 §六 临场 Review 6-Pack covers all 6 pillars (mirrors cd://86 §6).
+    - cd://86 cross-reference present (this doc is the deep companion).
+    """
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
     required_markers = (
@@ -281,6 +441,9 @@ def validate_content(content: str) -> None:
         "## §4 Verification rituals",
         "## §5 Worked example",
         "## §6 Onsite 临场 60 秒 cheat sheet",
+        "## §7 The 30-second Spoken Opener",
+        "## §8 Canonical 1-sentence English Prompt",
+        "## §9 §六 临场 Review 6-Pack",
         "Junior-PR mindset",
         "Stop-condition",
         "ASSUMPTION:",
@@ -290,10 +453,48 @@ def validate_content(content: str) -> None:
         "8 步",
         "7 块",
         "P95",
+        # T-P0-679 acceptance: §8 Version A / B / C explicit headings.
+        "### Version A (recommended)",
+        "### Version B (shorter alt",
+        "### Version C (NOT recommended",
+        "performative",
+        # T-P0-679 acceptance: §9 6-pack pillars (mirror cd://86 §6).
+        "Continuous narration",
+        "AI-vs-your-direction handling",
+        "45-min time allocation 3/3/10/5/5/5",
+        "Manual trace as review step",
+        "Fallback when AI is stuck",
+        "Prompt transparency",
+        # Cross-link to cd://86 (companion doc).
+        "cd://86",
     )
     for marker in required_markers:
         if marker not in content:
             raise RuntimeError(f"section marker missing: {marker!r}")
+
+    # T-P0-679 verbatim locks: opener + Version A / B / C must match
+    # cd://86's anchor strings byte-identically.
+    if VERSION_A_PROMPT not in content:
+        raise RuntimeError(
+            "Version A canonical prompt missing verbatim "
+            "(must match cd://86 §2 anchor)"
+        )
+    if VERSION_B_PROMPT not in content:
+        raise RuntimeError(
+            "Version B alt prompt missing verbatim "
+            "(must match cd://86 §2 anchor)"
+        )
+    if VERSION_C_PROMPT not in content:
+        raise RuntimeError(
+            "Version C 'junior engineer' prompt missing verbatim "
+            "(needed to explain why C is NOT recommended)"
+        )
+    if OPENER_30SEC not in content:
+        raise RuntimeError(
+            "§7 30-sec opener missing verbatim "
+            "(must match cd://86 §1 anchor)"
+        )
+
     emoji_ranges = (
         (0x1F300, 0x1F6FF),
         (0x1F900, 0x1F9FF),
@@ -307,8 +508,8 @@ def validate_content(content: str) -> None:
                 raise RuntimeError(
                     f"emoji char detected at codepoint U+{cp:04X}: {ch!r}"
                 )
-    if not (5000 <= len(content) <= 14000):
-        raise RuntimeError(f"content length {len(content)} outside 5000-14000")
+    if not (5000 <= len(content) <= 18000):
+        raise RuntimeError(f"content length {len(content)} outside 5000-18000")
 
 
 def main() -> int:

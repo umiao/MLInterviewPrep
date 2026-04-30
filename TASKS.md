@@ -15,12 +15,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Source review attachment §四/§五/§六: doc 89 already aligned philosophically but missing 3 concrete deliverables. Concrete edits to company_documents.id=89: (1) Add new §X 'Canonical 1-sentence English prompt' section presenting Version A as recommended + Version B as shorter alt; explain why C is NOT recommended (explicit 'junior engineer' framing makes it look performative). (2) Add new §Y '30-second spoken opener' section with the §五 verbatim text + design rationale (4 bullets: drive-myself-first anchors on you, three explicit actions, AI as edge-pressure-tester not code-writer, line-by-line review before run, end-with-option-not-approval). (3) Audit existing §6+ for the review §六 6-pack (continuous narration / AI-vs-your-direction / time allocation 45-min / manual trace / fallback / prompt transparency); fill any missing items. (4) Cross-link from doc 86 §1 opener and §2 prompt sections to doc 89 via cd://89 anchor refs. (5) Style: Chinese narration + English term first-occurrence-expansion; no large CN/EN duplicate blocks. Acceptance: doc 89 contains Version A and Version B verbatim from review attachment lines 56-69, contains 30-sec opener verbatim from lines 87-93, all 6 of §六 covered.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -353,6 +347,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
+- [x] **2026-04-30** -- T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack. Source review attachment §四/§五/§六: doc 89 already aligned philosophically but missing 3 concrete deliverables. Concrete 
 - [x] **2026-04-30** -- T-P0-678: [Meta-Prep-B] Doc 86 §T1 Code-Pad Prompt — major rewrite per review (1-sentence Version A prompt, fix Step1 AI-clarify contradiction, replace opener, drop OrderedDict critique, add §六 6-pack). Source review attachment: rewrite company_documents.id=86. Concrete edits: (1) §1 30-sec opener: replace 'Cool. Before I
 - [x] **2026-04-30** -- T-P0-677: [Meta-Prep-A] Hub doc 82 schedule cell-merge — fold 11:00/13:00 identical coding rows via <table> rowspan; verify cd://86 + cd://89 remain clickable in MarkdownPreview. Issue: hub schedule table at company_documents.id=82 has two coding rows (11:00 Sai Srujan, 13:00 Nikhil) with byte-iden
 - [x] **2026-04-30** -- T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke. Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
