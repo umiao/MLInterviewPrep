@@ -5,43 +5,52 @@
 
 ## In Progress
 
-#### T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-654
-- **Description**: Phase 1 verification. **Per reviewer: SQL > screenshot** -- SQL proves DB state, screenshot only proves UI render. Both required, but SQL goes FIRST in the deliverable.
-
-PRIMARY (must pass before sending Discord reply):
-- SQL block A: `SELECT id, scheduled_at, event_type, duration_minutes, status, title FROM interview_events WHERE company_id=29 ORDER BY scheduled_at` -> exactly 7 rows (2 historical + 5 new), all with correct scheduled_at / type / duration / status
-- SQL block B: `SELECT count(*) FROM company_documents WHERE id=83 AND content LIKE '%CONFIRMED 2026-04-30%'` -> 0 (proving the misdirected doc 83 prose edit reverted)
-- SQL block C: `SELECT interview_stages FROM companies WHERE id=29` -> matches user-approved revert state (post T-P0-653 user decision)
-- API parity: `curl -s http://localhost:8000/api/timeline/events | jq '[.[] | select(.company_id==29)] | length'` matches SQL block A count of 7
-
-SECONDARY:
-- Playwright headless screenshot of http://localhost:5173/ (Dashboard root)
-- Visible-text grep finds all 5 interviewer names: Yiyang Zhang, Daniel Liu, Jiankai Sun, Yijian Xiang, Zihao Zhang
-- Screenshot saved to logs/pinterest_vo_dashboard_<timestamp>.png
-
-DELIVERABLE FORMAT for Discord (in order):
-1. SQL block A output (table form)
-2. SQL block B output (single 0 line)
-3. SQL block C output + a paste of the prior value for diff context
-4. API parity result
-5. Screenshot (file attachment)
-6. **Phase-2 entry-criteria checklist for user**: (a) confirm doc 83 partial-revert strategy correct, (b) confirm root cause investigation should proceed, (c) green-light Phase 2 (migration lint hook)
-
-ACCEPTANCE CRITERIA:
-- AC1: All 4 SQL/API checks above pass and are pasted to Discord in that order
-- AC2: Screenshot attached
-- AC3: User explicitly green-lights Phase 2 before this task is marked completed
-- AC4: Until user green-lights, status stays at 'pending_user_confirm' (use 'in_progress' as proxy if no such status)
-
-DEPENDS ON: T-P0-654
-COMPLEXITY: XS
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
+
+#### T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-655
+- **Description**: **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions can ignore. Real Invariant-3 enforcement requires a CI/hook guardrail. Phase 2 PRECEDES the skill so the skill builds on a real foundation, not just prose.
+
+IMPLEMENTATION:
+Add a PreToolUse hook (or git pre-commit hook -- pick the one that fires earlier) that scans Python files being written/edited under scripts/migrations/ AND files passed to bash that look like 'python scripts/migrations/...', looking for SQL-write patterns against data/*.db.
+
+If any of these are found AND the target DB path resolves to data/mle_prep.db (or any *.db under data/), BLOCK the tool call with a message:
+
+  '[INVARIANT-3 VIOLATION] scripts/migrations/* must not write to the DB.
+  Source-of-truth is scripts/seed_*.py. Find the seed that owns this row
+  type and edit/extend it, then re-run the seed. See LESSONS.md 2026-04-30
+  Invariant-3 entry and the /dashboard skill for widget->seed mapping.'
+
+This catches the EXACT mistake I made twice this session, at write-time, before commit, before re-seed wipes the change. False-positive escape hatch: the hook respects a magic comment '# INVARIANT-3-EXEMPT: <reason>' on the first line of the file.
+
+ALTERNATIVE / COMPLEMENT: ruff custom rule or pytest test that grep-scans scripts/migrations/ in CI.
+
+ACCEPTANCE CRITERIA:
+- AC1: Hook file in .claude/hooks/ (e.g. invariant3_guard.py) wired into .claude/settings.json PreToolUse for Write+Edit+Bash
+- AC2: Hook BLOCKS Write to scripts/migrations/foo.py with body containing 'session.execute(text("UPDATE"))' targeting data/mle_prep.db. Test passes.
+- AC3: Hook ALLOWS Write to scripts/seed_<x>.py with the same body (path-based exemption)
+- AC4: Hook ALLOWS scripts/migrations/foo.py with first-line '# INVARIANT-3-EXEMPT: <reason>' (escape hatch)
+- AC5: Hook self-test 'python .claude/hooks/invariant3_guard.py --test' runs test cases (block / block / allow / allow + new patterns below) and exits 0
+- AC6: Hook would have blocked both add_uber_prob_nextword.py and update_pinterest_onsite_itinerary.py at write time -- back-test against logs/
+
+[USER CONSTRAINTS 2026-04-30 green-light]
+- AC7: PATTERN COVERAGE -- hook MUST catch at least 3 SQL-write forms, NOT just literal INSERT/UPDATE/DELETE strings:
+    (i)  raw string:    cur.execute('INSERT INTO data ...')
+    (ii) f-string:      cur.execute(f'INSERT INTO {table} ...')   # current bypass risk
+    (iii) executemany:  cur.executemany('INSERT INTO ...', rows)
+  Self-test in AC5 must include one block-case per form. Don't over-fit on string-prefix matching -- consider AST-level scanning (ast.parse + walk Call nodes targeting .execute / .executemany) so f-string interpolation is detected by the call site, not the literal.
+- AC8: NOT SILENT -- hook output is a visible warning message AND exits non-zero. Do not silently allow with a log entry; the user wants the violation surfaced at the developer's terminal.
+- AC9: COMPLETION GATE -- before marking T-P0-660 completed, paste to PROGRESS.md (and Discord-friendly excerpt) BOTH:
+    (i)  Hook trigger demo: deliberately Write a violating scripts/migrations/_test_violation.py with raw + f-string + executemany variants; show the hook fires for each (3 separate block messages).
+    (ii) False-positive sweep: run the hook against every existing scripts/migrations/* file (read-only scan mode) and confirm zero blocks (or, for any block, document why it's a true positive).
+  These two outputs are the gate. Without them, status stays in_progress.
+
+DEPENDS ON: T-P0-655 (Phase 1 complete + user green-light)
+COMPLEXITY: M (~150-250 lines of hook code + 6+ test cases)
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -134,41 +143,6 @@ AC:
 - **Depends on**: None
 - **Description**: [PARTIALLY-SUPERSEDED 2026-04-30] Pinterest portion folded into T-P0-653 (revert) + T-P0-654 (add to interview_events). Uber portion (doc 84 §5 + problem 1097 Invariant-3 promotion) carried forward as T-P0-657.
 
-#### T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-655
-- **Description**: **Per reviewer: 'Documentation ≠ Constraint'** — the dashboard skill (T-P1-656) is documentation that future sessions can ignore. Real Invariant-3 enforcement requires a CI/hook guardrail. Phase 2 PRECEDES the skill so the skill builds on a real foundation, not just prose.
-
-IMPLEMENTATION:
-Add a PreToolUse hook (or git pre-commit hook -- pick the one that fires earlier) that scans Python files being written/edited under scripts/migrations/ AND files passed to bash that look like `python scripts/migrations/...`, looking for:
-
-  1. `sqlite3.connect(...)` followed by `.execute('...UPDATE...')` / `.execute('...INSERT INTO ...')` / `.execute('...DELETE FROM...')`
-  2. SQLAlchemy session.add / session.merge / session.delete / session.execute(text('UPDATE'|'INSERT'|'DELETE'))
-  3. raw `UPDATE ` / `INSERT INTO ` / `DELETE FROM ` substring in any string literal in the file
-
-If any of these are found AND the target DB path resolves to data/mle_prep.db (or any *.db under data/), BLOCK the tool call with a message:
-
-  '[INVARIANT-3 VIOLATION] scripts/migrations/* must not write to the DB.
-  Source-of-truth is scripts/seed_*.py. Find the seed that owns this row
-  type and edit/extend it, then re-run the seed. See LESSONS.md 2026-04-30
-  Invariant-3 entry and the /dashboard skill for widget->seed mapping.'
-
-This catches the EXACT mistake I made twice this session, at write-time, before commit, before re-seed wipes the change. False-positive escape hatch: the hook respects a magic comment `# INVARIANT-3-EXEMPT: <reason>` on the first line of the file (e.g. for legitimate one-off DB repairs documented separately).
-
-ALTERNATIVE / COMPLEMENT: ruff custom rule or a pytest test that grep-scans scripts/migrations/ in CI.
-
-ACCEPTANCE CRITERIA:
-- AC1: Hook file in .claude/hooks/ (e.g. invariant3_guard.py) wired into .claude/settings.json PreToolUse for Write+Edit+Bash
-- AC2: Hook blocks: Write to scripts/migrations/foo.py with body containing 'session.execute(text("UPDATE"))' targeting data/mle_prep.db. Test passes.
-- AC3: Hook allows: Write to scripts/seed_<x>.py with the same body (path-based exemption)
-- AC4: Hook allows: scripts/migrations/foo.py with first-line `# INVARIANT-3-EXEMPT: legitimate one-off, see T-XXX` (escape hatch)
-- AC5: Hook self-test: `python .claude/hooks/invariant3_guard.py --test` runs 4 cases (block / block / allow / allow) and exits 0
-- AC6: This hook would have blocked both add_uber_prob_nextword.py and update_pinterest_onsite_itinerary.py at write time -- back-test against logs/
-
-DEPENDS ON: T-P0-655 (Phase 1 complete + user green-light)
-COMPLEXITY: M (~150 lines of hook code + 4 test cases)
-
 #### T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?
 - **Priority**: P0
 - **Complexity**: S
@@ -177,35 +151,55 @@ COMPLEXITY: M (~150 lines of hook code + 4 test cases)
 
 INVESTIGATION STEPS (must answer 4 questions):
 
-Q1: **Mapping in CLAUDE.md** — Is there a widget→table or feature→seed mapping table anywhere in CLAUDE.md (root or MLInterviewPrep)? Grep for it. If absent, the model has no priors — it falls back to free-text search.
+Q1: **Mapping in CLAUDE.md** -- Is there a widget->table or feature->seed mapping table anywhere in CLAUDE.md (root or MLInterviewPrep)? Grep for it. If absent, the model has no priors -- it falls back to free-text search.
   - Action: read MLInterviewPrep/CLAUDE.md fully; grep for 'widget'/'interview_events'/'Dashboard' in shared/claude_md_shared.md and root CLAUDE.md
   - Finding (expected): mapping is missing or buried
 
-Q2: **Conversation priming** — Did earlier turns in this session prime the prose path? The first task this session was 'add a problem to doc 84 (Uber)' — that whole interaction was prose-edits-on-company-doc. By the time the Pinterest request came in, the LAST 'update X for company Y' template I executed was prose-on-doc. Re-reading that, it would be natural to apply the same template to Pinterest.
-  - Action: re-read the doc-84 turn (lines for 'Uber ML Coding Golden Answer'); identify whether the assistant chose company_documents because the prior turn established that pattern
+Q2: **Conversation priming** -- Did earlier turns in this session prime the prose path? The first task this session was 'add a problem to doc 84 (Uber)' -- that whole interaction was prose-edits-on-company-doc. By the time the Pinterest request came in, the LAST 'update X for company Y' template I executed was prose-on-doc. Re-reading that, it would be natural to apply the same template to Pinterest.
+  - Action: re-read the doc-84 turn; identify whether the assistant chose company_documents because the prior turn established that pattern
   - Finding (expected): YES, last-modified priming
 
-Q3: **'Dashboard' in codebase ambiguity** — How many things are called 'dashboard' or render dashboard-like content? Search src/ for files/components/routes named *Dashboard* or /dashboard.
-  - Action: `grep -rn 'Dashboard\|/dashboard' src/ --include=*.tsx --include=*.ts`
+Q3: **'Dashboard' in codebase ambiguity** -- How many things are called 'dashboard' or render dashboard-like content? Search src/ for files/components/routes named *Dashboard* or /dashboard.
+  - Action: grep -rn 'Dashboard|/dashboard' src/ --include=*.tsx --include=*.ts
   - Finding (expected): only one /dashboard route + Dashboard.tsx + Sidebar entry; user's 'dashboard' is unambiguous in the codebase. So the bug is NOT lexical ambiguity, it's semantic priming + missing mapping.
 
-Q4: **Default search behavior** — What's the assistant's default when given 'update X for company Y'? Read recent PROGRESS.md entries — how often does the assistant grep company_documents content first vs check interview_events / companies.status / framework_node? Quantify.
+Q4: **Default search behavior** -- What's the assistant's default when given 'update X for company Y'? Read recent PROGRESS.md entries -- how often does the assistant grep company_documents content first vs check interview_events / companies.status / framework_node? Quantify.
   - Action: tail logs of recent autonomous sessions; count first-grep targets
-  - Finding (expected): heavily biased toward company_documents (because it's the largest text surface and most edits this month touched it)
+  - Finding (expected): heavily biased toward company_documents
 
 DELIVERABLE:
-- A short root-cause memo (1-2 pages) saved to logs/2026-04-30_pinterest_root_cause.md
-- A concrete recommendation: should the fix be (a) add widget→table mapping to CLAUDE.md (cheap, ~50 lines), (b) make the lint hook (T-P0-660) ALSO scan for company_documents.content writes that smell schedule-like (calendar dates, time strings, 'onsite', 'interview') and warn, or (c) both
-- The memo's recommendation feeds DIRECTLY into T-P1-656 (skill design) and CLAUDE.md update content
+- Short root-cause memo (1-2 pages) saved to logs/2026-04-30_pinterest_root_cause.md
+- Concrete recommendation: should the fix be (a) add widget->table mapping to CLAUDE.md, (b) extend lint hook (T-P0-660) to ALSO scan company_documents.content writes that smell schedule-like, or (c) both
+- Memo's recommendation feeds DIRECTLY into T-P1-656 (skill design) and CLAUDE.md update content
 
 ACCEPTANCE CRITERIA:
 - AC1: All 4 Q&As answered with concrete evidence from this conversation + grep output
-- AC2: Memo at logs/2026-04-30_pinterest_root_cause.md exists, ≤ 200 lines
+- AC2: Memo at logs/2026-04-30_pinterest_root_cause.md exists, <=200 lines
 - AC3: Concrete recommendation with rationale (a/b/c above), priority-ordered
 - AC4: User reviews + green-lights the recommendation BEFORE T-P1-656 begins (skill design depends on root-cause finding)
 
+[USER CONSTRAINTS 2026-04-30 green-light -- HARD GATES]
+- AC5: HYPOTHESIS + EVIDENCE, NOT REFLECTION. Memo must NOT read like 'I should check the widget map next time'. Reject behavioral / advisory-only conclusions at draft stage. The memo's value is its explanatory power for future surface bugs of the same class, not a self-pep-talk.
+
+- AC6: REQUIRED MEMO SECTIONS (each with explicit data, not prose):
+    (i)   **Session priming path**: If the conversation transcript is still accessible (check .claude/transcripts/, or scan recent autonomous logs/ for the doc-84 -> Pinterest turn sequence), trace the literal turn-by-turn 'last edited surface' chain leading into the misdirected write. If transcript is gone, document that explicitly and reconstruct from PROGRESS.md + git log.
+    (ii)  **Discoverability comparison**: Quantitative grep counts for 'company_documents' vs 'interview_events' across:
+            - root + MLInterviewPrep CLAUDE.md (literal mention count)
+            - README files (literal mention count)
+            - src/ (import / model usage count)
+            - scripts/ seed files (import count)
+            - docs/ (mention count)
+          Present as a table. If 'company_documents' wins by >2x in CLAUDE.md / docs / README, that itself is a falsifiable mechanism for the priming.
+    (iii) **At least one falsifiable root-cause hypothesis** -- a statement of the form 'Claude defaults to surface S because property P holds, where P is measurable. If P were inverted, the bias would flip.' Example shape (NOT the answer): 'Claude routes to whichever table has the highest CLAUDE.md mention-density when the user request is ambiguous. Falsification: rewrite CLAUDE.md to invert mention densities and re-test on a held-out ambiguous prompt.'
+    (iv)  **Generalization claim**: name at least 2 OTHER surface pairs in this codebase where the same root-cause mechanism would predict a similar mistake (e.g. framework_nodes vs companies.notes, problems.notes vs solution_notes). This forces the hypothesis to make predictions, not just retrofit one incident.
+
+- AC7: DO NOT MARK COMPLETED. After the memo is written:
+    - Append a PROGRESS.md entry with the memo verbatim (or first ~100 lines + 'see logs/2026-04-30_pinterest_root_cause.md for full text')
+    - Set status to in_progress with a STATUS NOTE: 'AWAITING USER REVIEW -- memo at logs/2026-04-30_pinterest_root_cause.md, do not auto-advance'
+    - The orchestrator should then see no unblocked task and stop with all_done=true. User reads memo, replies green-light or revisions.
+
 DEPENDS ON: T-P0-660 (lint hook is the foundation; root cause may recommend extending it)
-COMPLEXITY: S (read + grep + write memo; the memo is short)
+COMPLEXITY: M (read + grep + write memo + measure discoverability table; the memo itself stays <=200 lines but the evidence-gathering is substantial)
 
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
@@ -540,6 +534,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
 - [x] **2026-04-29** -- T-P0-662: Pinterest HR prep call (Daniel McCray, 2026-04-30 14:00 PDT) added to InterviewTimeline. User received email from Daniel McCray (Pinterest interview coordinator/recruiter) proposing to move prep call to 2026-0
+- [x] **2026-04-29** -- T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation. Phase 1 verification. **Per reviewer: SQL > screenshot** -- SQL proves DB state, screenshot only proves UI render. Both 
 - [x] **2026-04-29** -- T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline). Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
 - [x] **2026-04-29** -- T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits. Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has indep
 - [x] **2026-04-29** -- T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass. ## Goal
