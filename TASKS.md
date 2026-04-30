@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?
 - **Priority**: P0
 - **Complexity**: S
@@ -66,6 +62,10 @@ ACCEPTANCE CRITERIA:
 
 DEPENDS ON: T-P0-660 (lint hook is the foundation; root cause may recommend extending it)
 COMPLEXITY: M (read + grep + write memo + measure discoverability table; the memo itself stays <=200 lines but the evidence-gathering is substantial)
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 ### P1 -- Should Have (agentic intelligence)
 
