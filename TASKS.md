@@ -249,38 +249,6 @@ ACCEPTANCE CRITERIA:
 DEPENDS ON: T-P0-660 (lint hook should already exist — this task verifies the hook accepts the deprecated files)
 COMPLEXITY: M
 
-#### T-P1-659: Save user feedback memory: dashboard semantics + Invariant 3 trigger words
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-656
-- **Description**: Phase 4. **Per reviewer hole #4**: 3 separate memory files is overengineering — 'next session finds it' is determined by surface path (CLAUDE.md / reference file), not file count. Merge to ONE reference file + ensure CLAUDE.md cross-links to it.
-
-SINGLE MEMORY FILE: ~/.claude/projects/C--Users-Shenghui-Xu-Desktop-Gen-AI-Proj/memory/reference_dashboard_data_sources.md (type=reference)
-
-Body:
-- Lead: 'MLInterviewPrep Dashboard widget -> data source map (verified 2026-04-30 via T-P0-654/T-P0-661). Use this BEFORE editing any prose for a request mentioning a UI surface.'
-- Body: the same widget->table mapping table that goes in CLAUDE.md (one-source-of-truth — memory file CITES CLAUDE.md path: `MLInterviewPrep/CLAUDE.md "Surface Identification"` rather than copying)
-- Trigger phrases section: 'dashboard / app 那边 / 左侧 tab 第一 / left nav top / first nav item -- when these appear, route to /dashboard skill'
-- Anti-pattern section: '2026-04-30 incident: edited company_documents.id=83 prose + companies.interview_stages JSON for an interview-schedule update. Both wrong surface. Right surface = interview_events table (5 rows for 5 onsite rounds).'
-- Why-this-matters: 'Without this map, default behavior is to grep company name + content match -> hit company_documents (largest text surface) -> edit prose. That works for prose updates and FAILS for everything else (schedule, status, checklist, focus).'
-
-MEMORY.md INDEX UPDATE:
-- 1 new line: `- [reference_dashboard_data_sources.md](reference_dashboard_data_sources.md) — Dashboard widget->table map; route 'dashboard' keyword to /dashboard skill before editing`
-
-DELETED FROM ORIGINAL PLAN (per reviewer 'overengineered'):
-- ~~feedback_dashboard_means_widget.md~~ (folded into reference file)
-- ~~feedback_invariant3_seed_only.md~~ (covered by lint hook + LESSONS.md, not a memory)
-- ~~the 'why' / 'how to apply' duplication across 3 files~~ (consolidated)
-
-ACCEPTANCE CRITERIA:
-- AC1: Exactly ONE new memory file: reference_dashboard_data_sources.md (NOT 3)
-- AC2: MEMORY.md has exactly 1 new line, ≤150 chars
-- AC3: File body cites MLInterviewPrep/CLAUDE.md (the canonical source) -- doesn't duplicate the table
-- AC4: A grep test: opening ~/.claude/.../memory/MEMORY.md and following the new index entry surfaces the widget mapping in <2 file reads (MEMORY.md -> reference file -> CLAUDE.md)
-
-DEPENDS ON: T-P1-656 (CLAUDE.md table must exist BEFORE the memory file cites it)
-COMPLEXITY: XS
-
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
 - **Complexity**: S
@@ -346,6 +314,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
+- [x] **2026-04-29** -- T-P1-659: Save user feedback memory: dashboard semantics + Invariant 3 trigger words. Phase 4. **Per reviewer hole #4**: 3 separate memory files is overengineering — 'next session finds it' is determined by
 - [x] **2026-04-29** -- T-P1-658: LESSONS.md: 'Dashboard means widget, not prose' + Invariant 3 enforcement. Append a [UNIVERSAL] LESSONS.md entry capturing the 2026-04-30 mistake class so future sessions don't repeat it. Two dis
 - [x] **2026-04-29** -- T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose. Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill'
 - [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be

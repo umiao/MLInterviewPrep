@@ -316,3 +316,17 @@
   - AC mapping: AC1 (both entries appended at bottom, dated 2026-04-30, tag-line format -- yes); AC2 (T-P0-651 / T-P0-654 / T-P1-657 referenced -- yes, plus T-P0-660 / T-P0-660b / T-P0-661 / T-P1-656 for full traceability); AC3 ([UNIVERSAL] tag in title + `#universal` in tags line for cross-project-reviewer agent eligibility -- yes).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-658 --status completed`
+
+## 2026-04-30 23:55 -- [T-P1-659] Reference memory: dashboard widget->table router (single file, MEMORY.md index entry)
+- **What I did**: Wrote a single `reference`-type memory file (`reference_dashboard_data_sources.md`) and added one ≤150-char index line to `MEMORY.md`. The file is a *router*, not a copy: it cites `MLInterviewPrep/CLAUDE.md` "Surface Identification" (line ~45) as the single source of truth for the widget -> queryKey -> endpoint -> table mapping, lists the dashboard trigger-phrase set, documents the 2026-04-30 anti-pattern (Pinterest VO doc-83 prose / interview_stages JSON edits that should have been `interview_events` rows), and reiterates that the lint hook (T-P0-660 + T-P0-660b) and the prior (the map) are TWO INDEPENDENT LAYERS per the T-P0-661 root-cause memo line 93 'option (c)'.
+- **Deliverables**:
+  - `~/.claude/projects/C--Users-Shenghui-Xu-Desktop-Gen-AI-Proj-MLInterviewPrep/memory/reference_dashboard_data_sources.md` (NEW, ~50 lines, type=reference frontmatter)
+  - `~/.claude/projects/C--Users-Shenghui-Xu-Desktop-Gen-AI-Proj-MLInterviewPrep/memory/MEMORY.md` (+1 line at line 7, 146 chars)
+- **Sanity check result**:
+  - `ls reference_*.md | wc -l` -> 1 (AC1: exactly ONE new memory file -- not 3)
+  - `awk 'NR==7 {print length($0)}' MEMORY.md` -> 146 chars (AC2: ≤150)
+  - Reference file body cites `MLInterviewPrep/CLAUDE.md` "Surface Identification" twice (in description frontmatter line 3 + body line 13); does NOT duplicate the widget table (AC3)
+  - Discoverability chain: MEMORY.md line 7 -> `reference_dashboard_data_sources.md` -> `MLInterviewPrep/CLAUDE.md "Surface Identification"`. 3-hop, ≤2 file reads after MEMORY.md to reach the canonical mapping (AC4)
+  - `bash scripts/check.sh` -> ruff All checks passed; pytest `1221 passed in 74.95s`. No regressions.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-659 --status completed`
