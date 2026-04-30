@@ -1,9 +1,17 @@
 """Patch id=37 'Uber VO 完整准备指南' to act as the multi-charter MVP index.
 
 T-P0-632 ([UBER-VO-5 MVP]): Adds anchor-deep-link tables for Round 2 (ML
-Coding, db://84#...) and Round 3 (ML SD, db://85#...), a top-level Charter
-quick-index, a Round 1 reference to id=81, a Round 4 cross-link to
-/behavioral/themes?company=uber, and a bottom HR Call section linking id=36.
+Coding) and Round 3 (ML SD), a top-level Charter quick-index, a Round 1
+reference to id=81, a Round 4 cross-link to /behavioral/themes?company=uber,
+and a bottom HR Call section linking id=36.
+
+T-P1-676: migrated all sub-doc links from the ``db://`` (ProblemDrawer)
+scheme to ``cd://`` (CompanyDocDrawer). Reason: every sub-doc id used here
+(33/36/81/84/85) collides with an unrelated ``problems.id`` row; the legacy
+``db://`` link routed clicks to the wrong drawer. cd:// is the resolver-
+correct scheme per T-P0-672/673/674. The seed re-renders all 6 sentinel
+blocks idempotently, so re-running this script overwrites any old db://
+bodies with cd:// bodies in place.
 
 The patch is idempotent via sentinel HTML comment markers
 (``<!-- T-P0-632:<KEY> BEGIN/END -->``). Re-running with unchanged block
@@ -68,16 +76,16 @@ def render_charters_block(ml_coding_id: int, ml_sd_id: int) -> str:
         "\n"
         "| Charter | 入口文档 | 重点内容 |\n"
         "|---------|---------|----------|\n"
-        f"| Round 1 LC 算法题 | [Uber LC 题库索引视图](db://{LC_INDEX_DOC_ID}) | "
+        f"| Round 1 LC 算法题 | [Uber LC 题库索引视图](cd://{LC_INDEX_DOC_ID}) | "
         "47 题按算法家族 (Tree / Graph / DP / Sliding Window 等) 索引 |\n"
-        f"| Round 2 ML Coding | [Uber ML Coding Golden Answer 集合](db://{ml_coding_id}) | "
+        f"| Round 2 ML Coding | [Uber ML Coding Golden Answer 集合](cd://{ml_coding_id}) | "
         "几何中位数 / Kmeans (numpy-only) / Linear Reg / Logistic Reg 4 道 from-scratch |\n"
-        f"| Round 3 ML System Design | [Uber ML System Design Golden Answers](db://{ml_sd_id}) | "
+        f"| Round 3 ML System Design | [Uber ML System Design Golden Answers](cd://{ml_sd_id}) | "
         "Uber Eats 餐厅推荐 + Budget-Constrained Promo Recommendation |\n"
         "| Round 4 Behavioral | "
         "[/behavioral/themes?company=uber](/behavioral/themes?company=uber) | "
         "Trust / Respect / Conviction 三大维度按主题筛选 |\n"
-        f"| HR Call | [Uber HR Call Prep Notes](db://{HR_CALL_DOC_ID}) | "
+        f"| HR Call | [Uber HR Call Prep Notes](cd://{HR_CALL_DOC_ID}) | "
         "HR Round 高频问题、薪酬、签证 |\n"
         "\n"
         "---\n"
@@ -87,7 +95,7 @@ def render_charters_block(ml_coding_id: int, ml_sd_id: int) -> str:
 def render_r1_index_block() -> str:
     """One-line Round 1 pointer to id=81 — slotted into the existing 关联资源 list."""
     return (
-        f"- See [Uber LC 题库索引视图](db://{LC_INDEX_DOC_ID}) "
+        f"- See [Uber LC 题库索引视图](cd://{LC_INDEX_DOC_ID}) "
         "for the curated 47-problem index by family.\n"
     )
 
@@ -100,23 +108,23 @@ def render_r2_mlcoding_block(ml_coding_id: int) -> str:
         "| 题目 | Deep-Link |\n"
         "|------|-----------|\n"
         f"| 几何中位数 (Geometric Median) | "
-        f"[db://{ml_coding_id}#geometric-median]"
-        f"(db://{ml_coding_id}#geometric-median) |\n"
+        f"[cd://{ml_coding_id}#geometric-median]"
+        f"(cd://{ml_coding_id}#geometric-median) |\n"
         f"| K-Means (numpy-only) | "
-        f"[db://{ml_coding_id}#kmeans-numpy]"
-        f"(db://{ml_coding_id}#kmeans-numpy) |\n"
+        f"[cd://{ml_coding_id}#kmeans-numpy]"
+        f"(cd://{ml_coding_id}#kmeans-numpy) |\n"
         f"| Linear Regression from scratch | "
-        f"[db://{ml_coding_id}#linear-regression-from-scratch]"
-        f"(db://{ml_coding_id}#linear-regression-from-scratch) |\n"
+        f"[cd://{ml_coding_id}#linear-regression-from-scratch]"
+        f"(cd://{ml_coding_id}#linear-regression-from-scratch) |\n"
         f"| Logistic Regression from scratch | "
-        f"[db://{ml_coding_id}#logistic-regression-from-scratch]"
-        f"(db://{ml_coding_id}#logistic-regression-from-scratch) |\n"
+        f"[cd://{ml_coding_id}#logistic-regression-from-scratch]"
+        f"(cd://{ml_coding_id}#logistic-regression-from-scratch) |\n"
         "\n"
         "> 每题均为 Staff-level Golden Answer "
         "(题目 → Clarify → Brute-force → Optimal → Trade-off → "
         "Follow-up scaling → 行业黑话). "
-        f"跨题通用面试要点见 [db://{ml_coding_id}#cross-cutting-tactics]"
-        f"(db://{ml_coding_id}#cross-cutting-tactics).\n"
+        f"跨题通用面试要点见 [cd://{ml_coding_id}#cross-cutting-tactics]"
+        f"(cd://{ml_coding_id}#cross-cutting-tactics).\n"
     )
 
 
@@ -128,18 +136,18 @@ def render_r3_mlsd_block(ml_sd_id: int) -> str:
         "| 题目 | Deep-Link |\n"
         "|------|-----------|\n"
         "| Uber Eats 餐厅推荐系统 (Restaurant Recommendation) | "
-        f"[db://{ml_sd_id}#uber-eats-restaurant-rec]"
-        f"(db://{ml_sd_id}#uber-eats-restaurant-rec) |\n"
+        f"[cd://{ml_sd_id}#uber-eats-restaurant-rec]"
+        f"(cd://{ml_sd_id}#uber-eats-restaurant-rec) |\n"
         "| Budget-Constrained Promo Recommendation (uplift × Lagrangian) | "
-        f"[db://{ml_sd_id}#budget-promo-recommendation]"
-        f"(db://{ml_sd_id}#budget-promo-recommendation) |\n"
+        f"[cd://{ml_sd_id}#budget-promo-recommendation]"
+        f"(cd://{ml_sd_id}#budget-promo-recommendation) |\n"
         "\n"
         "> 跨题通用 Senior 信号速查表见 "
-        f"[db://{ml_sd_id}#cross-cutting-senior-signals]"
-        f"(db://{ml_sd_id}#cross-cutting-senior-signals).\n"
+        f"[cd://{ml_sd_id}#cross-cutting-senior-signals]"
+        f"(cd://{ml_sd_id}#cross-cutting-senior-signals).\n"
         "\n"
         "> 搜推系统强化点详见 "
-        f"[Uber BPS Design & Architecture Prep](db://{DESIGN_PREP_DOC_ID}) — "
+        f"[Uber BPS Design & Architecture Prep](cd://{DESIGN_PREP_DOC_ID}) — "
         "含 13 个搜推强化关键词 (training-serving skew, MMoE, two-tower, H3, "
         "position bias, off-policy eval, cluster A/B, feature snapshot, "
         "Michelangelo, graceful degradation, Model+Policy 双层防御 等) "
@@ -164,7 +172,7 @@ def render_hr_call_block() -> str:
     return (
         "## HR Call 准备\n"
         "\n"
-        f"详见 [Uber HR Call Prep Notes](db://{HR_CALL_DOC_ID}) — 涵盖 HR Round 高频问题、"
+        f"详见 [Uber HR Call Prep Notes](cd://{HR_CALL_DOC_ID}) — 涵盖 HR Round 高频问题、"
         "Q&A 准备、薪酬讨论提示、签证 (visa) 与 logistics 问题等.\n"
         "\n"
         "---\n"
@@ -200,6 +208,21 @@ def upsert_block(content: str, key: str, body: str, anchor_pattern: str,
     if mode == "after":
         return content[: m.end()] + "\n" + new_block + content[m.end():]
     raise SystemExit(f"[ERROR] unknown mode {mode!r} for key {key!r}")
+
+
+def assert_no_stale_db_links(content: str, sub_ids: set[int]) -> None:
+    """T-P1-676 regression guard: every sub-doc link inside this hub must use
+    cd:// (CompanyDocDrawer); db://N for any N that is also a company_documents.id
+    is cross-table corruption (the link routes to ProblemDrawer instead).
+    """
+    stale = re.findall(r"db://(\d+)", content)
+    bad = sorted({int(n) for n in stale if int(n) in sub_ids})
+    if bad:
+        raise SystemExit(
+            f"[ABORT] hub id=37 still contains db:// links to sub-doc IDs {bad} "
+            f"(T-P1-676 cross-table-corruption regression). All sub-doc links "
+            f"must use cd:// per T-P0-672/673/674."
+        )
 
 
 def patch_content(original: str, ml_coding_id: int, ml_sd_id: int) -> str:
@@ -265,6 +288,10 @@ def patch_content(original: str, ml_coding_id: int, ml_sd_id: int) -> str:
         anchor_pattern=r"## 七、重要链接汇总",
         mode="before",
     )
+
+    sub_ids = {LC_INDEX_DOC_ID, DESIGN_PREP_DOC_ID, HR_CALL_DOC_ID,
+               ml_coding_id, ml_sd_id}
+    assert_no_stale_db_links(out, sub_ids)
 
     return out
 

@@ -7,6 +7,12 @@ script prepends a markdown blockquote banner above the existing
 the rest of the doc (the 47-problem index built by
 ``scripts/seed_uber_lc_index.py``) untouched.
 
+T-P1-676: migrated the banner link from ``db://37`` (ProblemDrawer scheme) to
+``cd://37`` (CompanyDocDrawer scheme). Reason: ``problems.id=37`` and
+``company_documents.id=37`` both exist; the legacy ``db://`` scheme routes to
+the unrelated LeetCode problem instead of the Uber VO hub. The cd:// scheme
+unambiguously selects the hub doc (T-P0-672/673/674 wired the resolver).
+
 Idempotency strategy:
   * Wrap the banner in its own sentinel pair
     ``<!-- T-P2-633:REDIRECT-BANNER BEGIN/END -->``.
@@ -38,11 +44,15 @@ BANNER_BEGIN = "<!-- T-P2-633:REDIRECT-BANNER BEGIN -->"
 BANNER_END = "<!-- T-P2-633:REDIRECT-BANNER END -->"
 
 BANNER_BODY = (
-    "> **[UPDATED 2026-04-28]** This LC-only index has been folded into the new\n"
-    "> [Uber VO 多 Charter 索引](db://37) which lists Round 1 LC, Round 2 ML Coding,\n"
+    "> **[UPDATED 2026-05-01]** This LC-only index has been folded into the new\n"
+    "> [Uber VO 多 Charter 索引](cd://37) which lists Round 1 LC, Round 2 ML Coding,\n"
     "> Round 3 ML SD, Round 4 BQ, and HR side-by-side. The 47 LC problems below\n"
     "> remain the source of truth for Round 1 coverage; the new index links here\n"
-    "> for the LC charter."
+    "> for the LC charter.\n"
+    ">\n"
+    "> Link uses `cd://` (CompanyDocDrawer) per T-P0-672/673/674: id=37 collides\n"
+    "> with `problems.id=37` so the legacy `db://` scheme would route to the wrong\n"
+    "> drawer (T-P1-676 cross-table-corruption fix)."
 )
 
 
@@ -88,7 +98,15 @@ def prepend_banner(existing_content: str) -> str:
             f"'{INDEX_SENTINEL}' — refusing to patch. Got first 80 chars: "
             f"{cleaned[:80]!r}"
         )
-    return build_banner_block() + cleaned
+    block = build_banner_block()
+    # T-P1-676 regression guard: banner must use cd:// (CompanyDocDrawer)
+    # for the hub link, never db:// (ProblemDrawer) -- both tables have id=37.
+    if "db://37" in block:
+        raise SystemExit(
+            "[ABORT] redirect banner contains stale 'db://37' link "
+            "(T-P1-676 cross-table-corruption regression). Use cd://37."
+        )
+    return block + cleaned
 
 
 def main() -> None:

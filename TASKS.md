@@ -66,31 +66,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-675
-- **Description**: FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md root entry):
-- Uber VO Hub id=37 (5 db://: 33/36/81/84/85)
-- Google Prep Note id=51 (1 db://: 38)
-- Google Prep Hub id=53 (16 db://: 38/51/52/55/56/57/60-65/67-69/72)
-- Uber LC Index id=81 (1 db://: 37)
-Total 23 broken links to migrate.
-
-Steps per hub:
-- Find the seed script that owns the doc (grep idempotent seeds)
-- Update every db://N where N is also a company_documents.id to cd://N
-- Re-run seed (idempotent verify)
-- Run scripts/audit_uri_consistency.py — assert 0 errors
-
-Sanity: audit script reports 0 errors across the 5 originally-affected hubs (Meta + Uber-VO + Google-PrepNote + Google-PrepHub + Uber-LC-Index).
-
-Optional: extend the backend integration test from T-P0-675 to cover all 5 hubs.
-
-Priority P1 (not P0): NOT critical for tomorrow's Meta interview. Run after T-P0-675 if time permits, otherwise queue for next day.
-
-Depends T-P0-675 (audit script + scheme must exist).
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -359,6 +334,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
 - [x] **2026-04-30** -- T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke. Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
 - [x] **2026-04-30** -- T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest. Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two dra
 - [x] **2026-04-30** -- T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest. Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/err

@@ -1,4 +1,4 @@
-"""Slim Google Interview Prep Note (id=51) by replacing duplicated sections with db://38 refs.
+"""Slim Google Interview Prep Note (id=51) by replacing duplicated sections with cd://38 refs.
 
 Per T-P1-535 [T-GOOG-REORG-SLIM51]. id=38 (Recruiter Call Prep) is the source
 of truth for the 4 ML Domain dims and the 4 Hiring Attributes + Googleyness
@@ -12,19 +12,31 @@ Scope:
   - id=38 MUST remain byte-identical (sha256 guard pre/post).
   - No other docs touched.
 
-Idempotency: sentinel <!-- HUB_REORG_20260419_SLIM51 --> gates the write.
-Second run = 0 writes.
+Idempotency: a NEW sentinel <!-- HUB_REORG_20260419_SLIM51_CD --> gates the
+write. The old <!-- HUB_REORG_20260419_SLIM51 --> sentinel is treated as
+stale and overwritten on first re-run after T-P1-676. Second run with the
+new sentinel = 0 writes.
+
+T-P1-676: migrated the 2 sub-doc links from db://38 (ProblemDrawer) to
+cd://38 (CompanyDocDrawer). problems.id=38 ('Word Search II') and
+company_documents.id=38 ('Google SWE III (AI/ML) -- Recruiter Call Prep')
+are unrelated rows that share id 38; the legacy db:// scheme routed clicks
+to the wrong drawer. validate_new_content now asserts the cd:// scheme and
+refuses any stale db://38 link as a regression.
 """
 from __future__ import annotations
 
 import hashlib
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
-SENTINEL = "<!-- HUB_REORG_20260419_SLIM51 -->"
+# T-P1-676: bumped sentinel so the cd:// migration is detected as a NEW write
+# even when the old SLIM51 body is byte-identical apart from the link scheme.
+SENTINEL = "<!-- HUB_REORG_20260419_SLIM51_CD -->"
+LEGACY_SENTINEL = "<!-- HUB_REORG_20260419_SLIM51 -->"
 
 GUARD_IDS = (38,)
 
@@ -58,7 +70,7 @@ NEW_CONTENT = SENTINEL + """
 
 ## Round 1 \u2014 ML Basics & Knowledge (4/21 11:15)
 
->\u56db\u4e2a\u8003\u5bdf\u7ef4\u5ea6\u8be6\u89c1 [Recruiter Call Prep](db://38) \u00a7ML Domain Interview \u8003\u5bdf\u65b9\u5411
+>\u56db\u4e2a\u8003\u5bdf\u7ef4\u5ea6\u8be6\u89c1 [Recruiter Call Prep](cd://38) \u00a7ML Domain Interview \u8003\u5bdf\u65b9\u5411
 
 ### \u6df1\u5ea6\u95ee\u7b54\u51c6\u5907 (high-signal \u8bdd\u9898)
 - **Ranking losses**: BCE / pairwise hinge / listwise ListNet / LambdaRank \u2014 \u63a8\u5bfc + \u4f55\u65f6\u7528
@@ -82,7 +94,7 @@ NEW_CONTENT = SENTINEL + """
 
 ## Round 2 \u2014 BQ / Googleyness & Leadership (4/21 13:15)
 
->4 Hiring Attributes + 5 Googleyness \u5b50\u4fe1\u53f7\u8be6\u89c1 [Recruiter Call Prep](db://38) \u00a7G&L \u8003\u5bdf\u65b9\u5411
+>4 Hiring Attributes + 5 Googleyness \u5b50\u4fe1\u53f7\u8be6\u89c1 [Recruiter Call Prep](cd://38) \u00a7G&L \u8003\u5bdf\u65b9\u5411
 
 ### Story Short-list (\u5bf9\u5e94 Googleyness)
 
@@ -141,14 +153,25 @@ def validate_new_content(content: str) -> None:
         )
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing from new content")
-    db_refs = re.findall(r"db://(\d+)", content)
-    if db_refs.count("38") != 2:
+    cd_refs = re.findall(r"cd://(\d+)", content)
+    if cd_refs.count("38") != 2:
         raise RuntimeError(
-            f"expected exactly 2 db://38 refs, found {db_refs.count('38')}"
+            f"expected exactly 2 cd://38 refs, found {cd_refs.count('38')}"
         )
-    extra = {int(r) for r in db_refs} - {38}
-    if extra:
-        raise RuntimeError(f"new content has unexpected db refs: {sorted(extra)}")
+    extra_cd = {int(r) for r in cd_refs} - {38}
+    if extra_cd:
+        raise RuntimeError(
+            f"new content has unexpected cd refs: {sorted(extra_cd)}"
+        )
+    # T-P1-676 regression guard: refuse any stale db://N for sub-doc IDs.
+    # company_documents.id=38 collides with problems.id=38, so db://38 routes
+    # to the wrong drawer (cross-table corruption).
+    db_refs = re.findall(r"db://(\d+)", content)
+    if db_refs:
+        raise RuntimeError(
+            f"new content still has stale db:// refs {db_refs} -- must use "
+            f"cd:// for sub-doc links (T-P1-676 cross-table-corruption fix)"
+        )
     # Schedule rows must be preserved verbatim.
     schedule_markers = (
         "Mon 2026-04-20",
@@ -216,7 +239,7 @@ def main() -> int:
             )
         else:
             new_hash = sha256_bytes(NEW_CONTENT)
-            now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+            now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
             cur = conn.execute(
                 "UPDATE company_documents "
                 "SET content = ?, content_hash = ?, updated_at = ? "
