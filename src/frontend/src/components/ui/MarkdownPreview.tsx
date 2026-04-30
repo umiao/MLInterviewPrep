@@ -26,6 +26,12 @@ interface MarkdownPreviewProps {
    * problems-table database id (for custom problems with no LC number).
    */
   onDbLinkClick?: (dbId: number) => void;
+  /**
+   * Called when the user clicks a link with href of form `cd://N` (e.g. `cd://87`).
+   * When provided, those links render as buttons invoking this handler with the
+   * company-document id, opening the company-doc drawer.
+   */
+  onCdLinkClick?: (cdId: number) => void;
 }
 
 /** Green checkmark SVG (GitHub PR style). */
@@ -71,6 +77,7 @@ export default function MarkdownPreview({
   onHeadingsExtracted,
   onLcLinkClick,
   onDbLinkClick,
+  onCdLinkClick,
 }: MarkdownPreviewProps) {
   const headingsRef = useRef<TocHeading[]>([]);
   const prevJsonRef = useRef<string>("");
@@ -149,6 +156,26 @@ export default function MarkdownPreview({
                     e.preventDefault();
                     e.stopPropagation();
                     onDbLinkClick(dbId);
+                  }}
+                  className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
+                >
+                  {children}
+                </button>
+              );
+            }
+            // `cd://N` opens the company-document drawer (peer to db:// for
+            // problems). Optional `#anchor` suffix is accepted but ignored at
+            // the link layer (anchor-scroll inside drawer is a future task).
+            const cdMatch = typeof href === "string" ? href.match(/^cd:\/\/(\d+)(?:#[^\s]*)?$/) : null;
+            if (cdMatch && onCdLinkClick) {
+              const cdId = Number(cdMatch[1]);
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onCdLinkClick(cdId);
                   }}
                   className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
                 >

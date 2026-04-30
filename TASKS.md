@@ -15,28 +15,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
-
-Source: src/frontend/src/components/ui/MarkdownPreview.tsx
-
-Changes:
-- Add prop: onCdLinkClick?: (cdId: number) => void
-- In components.a (~L118): add a 3rd regex match: /^cd:\/\/(\d+)(?:#[^\s]*)?$/
-- When match + handler given: render <button> identical pattern to existing db:// branch — preventDefault/stopPropagation, call onCdLinkClick(N)
-- Order of regex checks: lc:// first, db:// second, cd:// third (existing pattern), in-page anchor handling unchanged
-
-Vitest (src/frontend/src/components/ui/MarkdownPreview.test.tsx):
-- Add test 'renders cd://N as button when onCdLinkClick provided' (mirror db:// test at ~L127)
-- Add test 'cd://N falls through to anchor when onCdLinkClick not provided'
-
-Sanity: vitest run; tsc clean; no behavioral change for lc:// or db://.
-
-NOTE: This task does NOT change PrepNotesPage state shape or wire the new prop — that is T4.
-
 #### T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest
 - **Priority**: P0
 - **Complexity**: M
@@ -468,6 +446,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest. Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
 - [x] **2026-04-30** -- T-P0-671: [Drawer-Fix-T1] Backend GET /company-documents/{id} endpoint (id-only, no company_id required) + pytest 200/404 cases. Goal: Add a company-id-less endpoint so frontend drawers can resolve cd://N without knowing which company owns the doc.
 - [x] **2026-04-30** -- T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc. Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01
 - [x] **2026-04-30** -- T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17). Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-0

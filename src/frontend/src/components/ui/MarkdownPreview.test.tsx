@@ -131,6 +131,27 @@ describe("MarkdownPreview link handling", () => {
     expect(html).toContain("<button");
     expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*db:\/\//);
   });
+
+  it("renders cd://N as button when onCdLinkClick provided", () => {
+    // T-P0-672: cd:// is the company-document drawer scheme, peer to db://.
+    const handler = (id: number) => id;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[hub](cd://87)" onCdLinkClick={handler} />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*cd:\/\//);
+    expect(html).toContain("hub");
+  });
+
+  it("cd://N falls through to anchor when onCdLinkClick not provided", () => {
+    // No handler -> default <a target="_blank"> rendering. This matches the
+    // lc:// / db:// behavior so callers who haven't opted in still see a link.
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[hub](cd://87)" />
+    );
+    expect(html).toMatch(/<a[^>]*href="cd:\/\/87"/);
+    expect(html).toMatch(/<a[^>]*target="_blank"/);
+  });
 });
 
 describe("MarkdownPreview inline code and lists", () => {

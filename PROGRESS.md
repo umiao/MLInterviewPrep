@@ -418,3 +418,17 @@
   - AC mapping: AC1 (route GET /company-documents/{doc_id}, no company_id required -- yes). AC2 (response_model=CompanyDocumentResponse, full payload incl. id/company_id/title/content/source_type/doc_kind/is_golden/golden_at -- yes, asserted in test). AC3 (404 on missing id with detail message -- yes, asserted). AC4 (test_get_company_document_by_id_returns_200_with_full_payload + test_get_company_document_404_for_missing_id under tests/ -- yes). AC5 (no schema changes, existing endpoint unchanged -- yes).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-671 --status completed`
+
+## 2026-05-01 03:30 -- [T-P0-672] [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest
+- **What I did**: Added a third URI scheme `cd://` (company-document) to `MarkdownPreview`, peer to existing `lc://` and `db://`. Mirrored the `db://` branch exactly: optional-`#anchor`-suffix regex, button render with preventDefault/stopPropagation, fall-through to default `<a target="_blank">` when no handler given. Order of regex checks remains lc:// -> db:// -> cd:// -> in-page anchor -> external anchor. No change to PrepNotesPage state shape (that is T-P0-674).
+- **Deliverables**:
+  - `src/frontend/src/components/ui/MarkdownPreview.tsx`: added `onCdLinkClick?: (cdId: number) => void` prop (with JSDoc), threaded through destructure, added `cdMatch` regex (`/^cd:\/\/(\d+)(?:#[^\s]*)?$/`) + button branch matching the `db://` pattern character-for-character.
+  - `src/frontend/src/components/ui/MarkdownPreview.test.tsx`: added two cases -- 'renders cd://N as button when onCdLinkClick provided' (asserts `<button>`, no `target="_blank"` cd:// anchor, link text rendered) and 'cd://N falls through to anchor when onCdLinkClick not provided' (asserts default `<a href="cd://87" target="_blank">` rendering).
+- **Sanity check result**:
+  - `npx vitest run src/components/ui/MarkdownPreview.test.tsx` -> 17/17 passed (15 pre-existing + 2 new).
+  - `npx vitest run src/components/ui` -> 50/50 passed across 5 files (no regression in other UI tests).
+  - `npx tsc --noEmit` -> clean (no type errors).
+  - Behavioral check: lc:// and db:// branches untouched -- code-diff shows the new branch is appended after `dbMatch`, not interleaved; existing 'db://N#anchor as a button' regression test still passes, proving lc:// + db:// behavior preserved.
+  - AC mapping: AC1 (third scheme cd:// added, regex order lc->db->cd unchanged) -- yes. AC2 (onCdLinkClick prop added) -- yes. AC3 (renders button when handler given, falls through to anchor otherwise) -- yes, both asserted in vitest. AC4 (no behavioral change for lc:// or db://) -- yes, regression suite green. AC5 (PrepNotesPage state shape NOT touched in this task) -- yes, file untouched.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-672 --status completed`
