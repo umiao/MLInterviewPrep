@@ -9,28 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-05-01.
-
-Source: docs/bq_behavioral_examples.json (do NOT edit it — read-only source per repo conventions).
-
-Five stories — for each: 30-45 sec Chinese spoken format + English kill-line + explicit 'AI-native angle' callout (why this story specifically demonstrates AI-native impact, not just general SWE):
-1. EX-14 GenAI ROI Math — leadership said 'upgrade to GenAI', no requirements; week-1 ROI math (QPS / latency / integration hardness) killed agentic search; flipped to LLM-as-Judge measurement infra (unglamorous-but-high-value); scaled into multi-team production. AI-native angle: feasibility-first discipline, kill bad AI ideas with math before prototype.
-2. BLOG-03 Relevance Standards vs Ads Pressure — refused threshold-lowering; built LLM-as-Judge pipeline (18K annotations/day, $500/day). AI-native angle: turning conflict into AI tooling product; using LLM as ops lever not feature.
-3. EX-01 Search Diversity Intent-Collapse — Hacker Week self-framed; dashboard blindness; item→page-level structural diagnosis; 1-week end-to-end prototype. AI-native angle: framing ambiguous problems, diagnosing at right level.
-4. EX-05 XGBoost Deployment Latency + Silent CI Failure — early-exit + cheap rejection; URL-length / JSON-truncation silent failure; built payload stress-test team standard. AI-native angle: owning deployment reality, catching 'green CI broken prod' (relevant to LLM-in-harness).
-5. EX-17 Trust vs Reliance — declined manager protection after CI break; kill-line: 'I conflated being relied on with being trusted.' AI-native angle: integrity in AI-assisted role; not outsourcing judgment to the LLM.
-
-Deliverables:
-1. NEW idempotent seed script under scripts/ creating Meta company_id=31 doc titled '[Meta] AI-Native Behavioral 5-Pack'.
-2. Each story: header, 30-45 sec spoken delivery (Chinese), kill-line (English), AI-native angle (1-2 sentences why this story for Meta AI-native specifically), match-question hints (which BQ themes this answers).
-3. Run + verify + idempotent re-run.
-
-Invariant 3 compliance.
-
 #### T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc
 - **Priority**: P0
 - **Complexity**: M
@@ -379,6 +357,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17). Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-0
 - [x] **2026-04-30** -- T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells). Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harnes
 - [x] **2026-04-30** -- T-P0-667: [Meta-AINative-T1] Code-Pad LLM Prompt + 3-Step Playbook (clarify→spec AC→review). Goal: Distill scripts/seed_meta_ai_native_prep.py (already-seeded doc id=82) into a copy-pasteable code-pad LLM system p
 - [x] **2026-04-29** -- T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep. helixos/CLAUDE.md has a Key Constraints section codifying that pyproject.toml and requirements.txt must be kept in sync 
