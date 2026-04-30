@@ -15,34 +15,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-672, T-P0-671, T-P0-673
-- **Description**: Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two drawers open' physically impossible at the type level — per design review point #4 (highest-value review item).
-
-Source: src/frontend/src/pages/PrepNotesPage.tsx + src/frontend/src/pages/BehavioralQuestions.tsx (and any other callsite of <ProblemDrawer> if present — grep first).
-
-Refactor:
-- Remove: const [lcDrawerId, setLcDrawerId] = useState<number|null>(null); const [dbDrawerId, setDbDrawerId] = useState<number|null>(null); + any cdDrawerId added before this task
-- Add type DrawerTarget = | { type: 'lc'; id: number } | { type: 'problem'; id: number } | { type: 'company_doc'; id: number } | null;
-- Add: const [drawer, setDrawer] = useState<DrawerTarget>(null);
-- Wire MarkdownPreview at line ~628 (DocumentViewer):
-  - onLcLinkClick={(id) => setDrawer({ type: 'lc', id })}
-  - onDbLinkClick={(id) => setDrawer({ type: 'problem', id })}
-  - onCdLinkClick={(id) => setDrawer({ type: 'company_doc', id })}
-- Render layer: <ProblemDrawer lcId={drawer?.type==='lc' ? drawer.id : null} dbId={drawer?.type==='problem' ? drawer.id : null} onClose={() => setDrawer(null)} />; <CompanyDocDrawer docId={drawer?.type==='company_doc' ? drawer.id : null} onClose={() => setDrawer(null)} />
-- Same DrawerTarget pattern in BehavioralQuestions.tsx (currently uses ProblemDrawer with multiple state vars — refactor to discriminated union here too)
-- Keep indexDbDrawerId at line 155 separate (it's a different unrelated drawer for the 'index' view; refactor to its own discriminated union if other types are added there, but for now leave as-is)
-
-Vitest:
-- PrepNotesPage: simulate clicking [foo](cd://87) → asserts CompanyDocDrawer rendered with docId=87
-- PrepNotesPage: simulate clicking [foo](db://5) → asserts ProblemDrawer rendered with dbId=5
-- PrepNotesPage: clicking cd then db → asserts only ONE drawer visible at any time (assert no double-render)
-- BehavioralQuestions: same drawer-target type after refactor
-
-Depends T-P0-672 (MarkdownPreview cd:// support) and T-P0-671 indirectly via T-P0-673 (CompanyDocDrawer).
-
 #### T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke
 - **Priority**: P0
 - **Complexity**: M
@@ -419,6 +391,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest. Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two dra
 - [x] **2026-04-30** -- T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest. Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/err
 - [x] **2026-04-30** -- T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest. Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
 - [x] **2026-04-30** -- T-P0-671: [Drawer-Fix-T1] Backend GET /company-documents/{id} endpoint (id-only, no company_id required) + pytest 200/404 cases. Goal: Add a company-id-less endpoint so frontend drawers can resolve cd://N without knowing which company owns the doc.

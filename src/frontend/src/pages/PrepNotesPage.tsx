@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, useCallback } from "react";
+import { useRef, useState, useMemo, useCallback, useEffect } from "react";
 import { useParams, Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../utils/api";
@@ -6,6 +6,7 @@ import { usePrepNotes } from "../hooks/usePrepNotes";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import ProblemDrawer from "../components/problems/ProblemDrawer";
+import CompanyDocDrawer from "../components/CompanyDocDrawer";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
 import KnowledgeCardsPanel from "../components/companies/KnowledgeCardsPanel";
@@ -25,6 +26,19 @@ import type { Company } from "../types/company";
 import { parsePrepParams, type PrepTab } from "../utils/prepUrlParams";
 
 type ImportMode = "append" | "replace";
+
+/**
+ * Discriminated union for the document-viewer's right-side drawer. Modeling
+ * the three drawer kinds (LC problem / DB problem / company doc) as a single
+ * tagged variant rather than three independent useState slots makes "two
+ * drawers open at once" physically impossible at the type level -- the kind
+ * of shared-state-bug class that prompted T-P0-674.
+ */
+export type DrawerTarget =
+  | { type: "lc"; id: number }
+  | { type: "problem"; id: number }
+  | { type: "company_doc"; id: number }
+  | null;
 
 /** Threshold: only show TOC sidebar for documents >= 20K chars */
 const TOC_MIN_CHARS = 8_000;
@@ -166,6 +180,25 @@ export default function PrepNotesPage() {
   const hasDocParam = searchParams.get("doc") !== null;
   const effectiveTab: PrepTab =
     !hasExplicitTab && !hasDocParam && hasCardIndex ? "index" : activeTab;
+
+  // When URL has no explicit tab/doc and the company has a golden prep_note
+  // doc, surface that doc as the landing view by redirecting to
+  // ?tab=docs&doc=<id> (replaceState, no history pollution). Golden takes
+  // precedence over card_index landing -- the index is still one click away.
+  const goldenPrepNoteId = useMemo(() => {
+    const golden = (documents ?? []).find(
+      (d) => d.doc_kind === "prep_note" && d.is_golden,
+    );
+    return golden?.id ?? null;
+  }, [documents]);
+  useEffect(() => {
+    if (!hasExplicitTab && !hasDocParam && goldenPrepNoteId !== null) {
+      const next = new URLSearchParams();
+      next.set("tab", "docs");
+      next.set("doc", String(goldenPrepNoteId));
+      setSearchParams(next, { replace: true });
+    }
+  }, [hasExplicitTab, hasDocParam, goldenPrepNoteId, setSearchParams]);
 
 
   /** Import .md file handler. */
@@ -544,8 +577,7 @@ function DocumentViewer({
   const [localContent, setLocalContent] = useState<string | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
-  const [lcDrawerId, setLcDrawerId] = useState<number | null>(null);
-  const [dbDrawerId, setDbDrawerId] = useState<number | null>(null);
+  const [drawer, setDrawer] = useState<DrawerTarget>(null);
   const isAdobe = companyId === 23;
   const contentRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -609,8 +641,9 @@ function DocumentViewer({
               <MarkdownPreview
                 markdown={content}
                 onHeadingsExtracted={!isAdobe ? setTocHeadings : undefined}
-                onLcLinkClick={(id) => { setDbDrawerId(null); setLcDrawerId(id); }}
-                onDbLinkClick={(id) => { setLcDrawerId(null); setDbDrawerId(id); }}
+                onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
+                onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+                onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
               />
             ) : (
               <p className="text-gray-400 italic">
@@ -621,9 +654,15 @@ function DocumentViewer({
         )}
       </div>
       <ProblemDrawer
-        lcId={lcDrawerId}
-        dbId={dbDrawerId}
-        onClose={() => { setLcDrawerId(null); setDbDrawerId(null); }}
+        lcId={drawer?.type === "lc" ? drawer.id : null}
+        dbId={drawer?.type === "problem" ? drawer.id : null}
+        onClose={() => setDrawer(null)}
+      />
+      <CompanyDocDrawer
+        docId={drawer?.type === "company_doc" ? drawer.id : null}
+        onClose={() => setDrawer(null)}
+        onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
+        onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
       />
     </>
   );
