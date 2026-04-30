@@ -404,3 +404,17 @@
   - AC mapping: AC1 (NEW seed for 临场 Prompt Best Practices doc -- yes, id=89). AC2 (UPDATED hub at id=82 with [title](db://N) drawer links to T1/T2/T3/T4-bp -- yes; sentinel bumped, is_golden retained, schedule + opening-line + 60-sec check unique to hub). AC3 (verify drawer links + hub <200 lines -- 99 lines, all 4 sub-docs reachable). AC4 (idempotent re-run -- both scripts produce 0 writes on 2nd invocation). NO HTML `<details>` (validation enforces this); only `[title](db://N)` markdown drawer links per `reference_dblc_drawer_links` pattern.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-670 --status completed`
+
+## 2026-05-01 03:00 -- [T-P0-671] Backend GET /company-documents/{doc_id} (id-only resolver)
+- **What I did**: Added an id-only resolver endpoint so frontend drawer links (cd://N) can fetch a `company_documents` row without knowing the owning `company_id`. Implementation lives next to the existing `/companies/{company_id}/documents/{doc_id}` route in `src/backend/routers/companies.py` (matches existing repo style; no new router file). Reuses existing `CompanyDocumentResponse` schema -- no schema changes. Per design review point #2 (YAGNI), did NOT add an optional `company_id` query param.
+- **Deliverables**:
+  - `src/backend/routers/companies.py`: new `get_company_document_by_id` handler at `GET /company-documents/{doc_id}` (registered under `/api` via existing `companies_router` include). Returns 404 with detail "Document not found" when row missing.
+  - `tests/test_company_documents_router.py` (NEW): two pytest cases -- `test_get_company_document_by_id_returns_200_with_full_payload` (asserts id, company_id, title, content, source_type, doc_kind, is_golden, golden_at on a seeded doc) and `test_get_company_document_404_for_missing_id` (asserts status 404 + detail string).
+- **Sanity check result**:
+  - `pytest tests/test_company_documents_router.py -v` -> 2 passed.
+  - `pytest tests/test_companies_api.py tests/test_company_prep_endpoint.py tests/test_company_prep_notes.py tests/test_company_documents_router.py -v` -> 30 passed (zero regressions in the pre-existing `/companies/{cid}/documents/{did}` tests, golden-marker PUT tests, prep endpoint tests, prep_notes import tests).
+  - `ruff check src/backend/routers/companies.py tests/test_company_documents_router.py` -> All checks passed.
+  - Backwards compat: existing `GET /companies/{company_id}/documents/{doc_id}` endpoint unchanged (same handler body, same path); new endpoint is purely additive.
+  - AC mapping: AC1 (route GET /company-documents/{doc_id}, no company_id required -- yes). AC2 (response_model=CompanyDocumentResponse, full payload incl. id/company_id/title/content/source_type/doc_kind/is_golden/golden_at -- yes, asserted in test). AC3 (404 on missing id with detail message -- yes, asserted). AC4 (test_get_company_document_by_id_returns_200_with_full_payload + test_get_company_document_404_for_missing_id under tests/ -- yes). AC5 (no schema changes, existing endpoint unchanged -- yes).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-671 --status completed`

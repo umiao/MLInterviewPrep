@@ -5,9 +5,124 @@
 
 ## In Progress
 
+#### T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to Write/Edit .claude/skills/dashboard/SKILL.md (worked around via _build_dashboard_skill.py idempotent applier). Widen .claude/settings.json (and corresponding settings.json across MLI/helixos/homestead/root) permission carve-out to allow direct Write/Edit on .claude/skills/*/SKILL.md path pattern. Verify by re-running a skill-authoring touch in a fresh autonomous session — no applier-script workaround should be needed. AC: (1) Pattern added to all 4 projects' settings.json (or shared/settings_shared.json if they share). (2) Self-test: Write to a fresh .claude/skills/_test_carveout/SKILL.md succeeds without permission denial. (3) Cleanup test file. (4) LESSONS.md note tagged [UNIVERSAL] for cross-project propagation. Hit class: 3 occurrences today (T-P1-256, T-P1-258, T-P1-656).
+
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
+
+#### T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
+
+Source: src/frontend/src/components/ui/MarkdownPreview.tsx
+
+Changes:
+- Add prop: onCdLinkClick?: (cdId: number) => void
+- In components.a (~L118): add a 3rd regex match: /^cd:\/\/(\d+)(?:#[^\s]*)?$/
+- When match + handler given: render <button> identical pattern to existing db:// branch — preventDefault/stopPropagation, call onCdLinkClick(N)
+- Order of regex checks: lc:// first, db:// second, cd:// third (existing pattern), in-page anchor handling unchanged
+
+Vitest (src/frontend/src/components/ui/MarkdownPreview.test.tsx):
+- Add test 'renders cd://N as button when onCdLinkClick provided' (mirror db:// test at ~L127)
+- Add test 'cd://N falls through to anchor when onCdLinkClick not provided'
+
+Sanity: vitest run; tsc clean; no behavioral change for lc:// or db://.
+
+NOTE: This task does NOT change PrepNotesPage state shape or wire the new prop — that is T4.
+
+#### T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-671
+- **Description**: Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/error UX.
+
+Source: NEW file src/frontend/src/components/CompanyDocDrawer.tsx (mirror src/frontend/src/components/problems/ProblemDrawer.tsx structure).
+
+Spec:
+- Props: { docId: number | null, onClose: () => void }
+- React Query: queryKey ['companyDoc', docId], enabled when docId != null, fetches /company-documents/{docId}
+- SlideOverPanel render with title from doc.title; Description-equivalent shows doc.content via MarkdownPreview
+- **Per design review point #1 — explicit 404 UI**: when useQuery returns 404, show 'Document not found (id={docId})' inline (NOT a blank panel); not a toast — must be visible inside the drawer
+- **Per design review point #2 — observability**: when useQuery errors (any non-200), console.warn with [CompanyDocDrawer] cd://{docId} fetch failed: {error.message}. This log lets us catch silent regressions like the original bug
+- **Recursive cd:// inside drawer**: pass onCdLinkClick to the inner MarkdownPreview that REPLACES current docId with the new one (do NOT stack drawers — per design review point #3, history is YAGNI for now). Add a TODO comment 'observe nested-drawer depth in usage; if multi-level navigation appears, add history stack'
+- Pass onLcLinkClick + onDbLinkClick through to inner MarkdownPreview as well so embedded LC/problem links inside a doc work too — they should set OUTER drawer state via parent callbacks, not nest locally
+- Show is_golden badge if doc.is_golden; show doc_kind badge
+
+Vitest (src/frontend/src/components/CompanyDocDrawer.test.tsx):
+- Renders title + content when fetch returns 200
+- Renders 'Document not found' explicit message when fetch returns 404
+- Renders 'Failed to load document' (or similar) when fetch returns 5xx, AND console.warn was called
+
+Sanity: vitest run; tsc clean. NO PrepNotesPage wiring in this task — that is T4.
+
+Depends on T-P0-671 (the backend endpoint must exist for the queries to work).
+
+#### T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-672, T-P0-671, T-P0-673
+- **Description**: Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two drawers open' physically impossible at the type level — per design review point #4 (highest-value review item).
+
+Source: src/frontend/src/pages/PrepNotesPage.tsx + src/frontend/src/pages/BehavioralQuestions.tsx (and any other callsite of <ProblemDrawer> if present — grep first).
+
+Refactor:
+- Remove: const [lcDrawerId, setLcDrawerId] = useState<number|null>(null); const [dbDrawerId, setDbDrawerId] = useState<number|null>(null); + any cdDrawerId added before this task
+- Add type DrawerTarget = | { type: 'lc'; id: number } | { type: 'problem'; id: number } | { type: 'company_doc'; id: number } | null;
+- Add: const [drawer, setDrawer] = useState<DrawerTarget>(null);
+- Wire MarkdownPreview at line ~628 (DocumentViewer):
+  - onLcLinkClick={(id) => setDrawer({ type: 'lc', id })}
+  - onDbLinkClick={(id) => setDrawer({ type: 'problem', id })}
+  - onCdLinkClick={(id) => setDrawer({ type: 'company_doc', id })}
+- Render layer: <ProblemDrawer lcId={drawer?.type==='lc' ? drawer.id : null} dbId={drawer?.type==='problem' ? drawer.id : null} onClose={() => setDrawer(null)} />; <CompanyDocDrawer docId={drawer?.type==='company_doc' ? drawer.id : null} onClose={() => setDrawer(null)} />
+- Same DrawerTarget pattern in BehavioralQuestions.tsx (currently uses ProblemDrawer with multiple state vars — refactor to discriminated union here too)
+- Keep indexDbDrawerId at line 155 separate (it's a different unrelated drawer for the 'index' view; refactor to its own discriminated union if other types are added there, but for now leave as-is)
+
+Vitest:
+- PrepNotesPage: simulate clicking [foo](cd://87) → asserts CompanyDocDrawer rendered with docId=87
+- PrepNotesPage: simulate clicking [foo](db://5) → asserts ProblemDrawer rendered with dbId=5
+- PrepNotesPage: clicking cd then db → asserts only ONE drawer visible at any time (assert no double-render)
+- BehavioralQuestions: same drawer-target type after refactor
+
+Depends T-P0-672 (MarkdownPreview cd:// support) and T-P0-671 indirectly via T-P0-673 (CompanyDocDrawer).
+
+#### T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-674, T-P0-673
+- **Description**: Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
+
+(a) NEW scripts/audit_uri_consistency.py — repeatable, CI-ready (per design review point ⑤):
+- Walks all rows in company_documents
+- Extracts every db://N and cd://N from content body via regex
+- For db://N: assert problems.id=N exists. If N also exists in company_documents.id, print warning ('ambiguous: db://N could be either; treating as problem per scheme'). If N is missing from problems but present in company_documents.id, print ERROR ('cross-table corruption: db://N points at company_documents id=N, should be cd://N').
+- For cd://N: assert company_documents.id=N exists.
+- Exits non-zero if any ERROR encountered (CI-friendly). Prints summary table of all hubs scanned, count of valid + warning + error per hub.
+- Add to .github/workflows/ if such CI exists (check first); otherwise document in README how to run.
+
+(b) UPDATE scripts/seed_meta_ai_native_prep.py — change all 4 hub doc id=82 sub-doc references from db://86/87/88/89 to cd://86/87/88/89. Re-run idempotent insert; verify hub body now contains cd:// links instead of db://.
+
+(c) Backend integration test (replaces the original 'manual screenshot smoke test' per design review point ⑥):
+- src/backend/tests/test_hub_cd_link_resolution.py
+- For hub doc id=82: extract every cd://N from content; for each, GET /company-documents/{N}; assert 200 + non-empty content
+- Reusable fixture so other hubs (Uber/Google) can be added in T-P0-676 follow-up
+
+Final dev-server manual smoke test (one-time, post-deploy, NOT in CI):
+- Start dev server (npm run dev / uvicorn)
+- Open Meta hub doc id=82 in PrepNotesPage
+- Click each of 4 sub-doc cd:// links — verify drawer shows correct doc title (T1=86 / T2=87 / T3=88 / T4-bp=89)
+- Click an embedded db:// link in any sub-doc (regression check) — verify ProblemDrawer still works
+- Screenshot results into Discord for user verification
+
+Sanity: audit script returns 0 errors for Meta hub after migration; pytest integration test passes; dev-server smoke confirms 4/4 cd:// links open correct drawer.
+
+Depends T-P0-674 (full plumbing must be live for dev-server smoke).
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -60,6 +175,31 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-675
+- **Description**: FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md root entry):
+- Uber VO Hub id=37 (5 db://: 33/36/81/84/85)
+- Google Prep Note id=51 (1 db://: 38)
+- Google Prep Hub id=53 (16 db://: 38/51/52/55/56/57/60-65/67-69/72)
+- Uber LC Index id=81 (1 db://: 37)
+Total 23 broken links to migrate.
+
+Steps per hub:
+- Find the seed script that owns the doc (grep idempotent seeds)
+- Update every db://N where N is also a company_documents.id to cd://N
+- Re-run seed (idempotent verify)
+- Run scripts/audit_uri_consistency.py — assert 0 errors
+
+Sanity: audit script reports 0 errors across the 5 originally-affected hubs (Meta + Uber-VO + Google-PrepNote + Google-PrepHub + Uber-LC-Index).
+
+Optional: extend the backend integration test from T-P0-675 to cover all 5 hubs.
+
+Priority P1 (not P0): NOT critical for tomorrow's Meta interview. Run after T-P0-675 if time permits, otherwise queue for next day.
+
+Depends T-P0-675 (audit script + scheme must exist).
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -83,12 +223,6 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
-
-#### T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to Write/Edit .claude/skills/dashboard/SKILL.md (worked around via _build_dashboard_skill.py idempotent applier). Widen .claude/settings.json (and corresponding settings.json across MLI/helixos/homestead/root) permission carve-out to allow direct Write/Edit on .claude/skills/*/SKILL.md path pattern. Verify by re-running a skill-authoring touch in a fresh autonomous session — no applier-script workaround should be needed. AC: (1) Pattern added to all 4 projects' settings.json (or shared/settings_shared.json if they share). (2) Self-test: Write to a fresh .claude/skills/_test_carveout/SKILL.md succeeds without permission denial. (3) Cleanup test file. (4) LESSONS.md note tagged [UNIVERSAL] for cross-project propagation. Hit class: 3 occurrences today (T-P1-256, T-P1-258, T-P1-656).
 
 #### T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template
 - **Priority**: P2
@@ -334,6 +468,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-671: [Drawer-Fix-T1] Backend GET /company-documents/{id} endpoint (id-only, no company_id required) + pytest 200/404 cases. Goal: Add a company-id-less endpoint so frontend drawers can resolve cd://N without knowing which company owns the doc.
 - [x] **2026-04-30** -- T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc. Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01
 - [x] **2026-04-30** -- T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17). Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-0
 - [x] **2026-04-30** -- T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells). Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harnes

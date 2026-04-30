@@ -348,6 +348,36 @@ def create_document(
 
 
 @router.get(
+    "/company-documents/{doc_id}",
+    response_model=CompanyDocumentResponse,
+)
+def get_company_document_by_id(
+    doc_id: int,
+    db: Session = Depends(get_db),
+) -> CompanyDocument:
+    """Get a single company document by id, without requiring company_id.
+
+    Used by drawer-link resolvers (cd://N) where the caller knows the doc id
+    but not which company owns it.
+
+    Args:
+        doc_id: Document ID.
+        db: Database session.
+
+    Returns:
+        CompanyDocument object.
+    """
+    doc = (
+        db.query(CompanyDocument)
+        .filter(CompanyDocument.id == doc_id)
+        .first()
+    )
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return doc
+
+
+@router.get(
     "/companies/{company_id}/documents/{doc_id}",
     response_model=CompanyDocumentResponse,
 )
