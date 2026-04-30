@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 604 completed tasks archived as of latest archival.
+> 620 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -920,3 +920,21 @@ Companion task to T-P0-629. Once T-P0-628 audit produces its NEW inventory and T
 - [x] **2026-04-27** -- T-P2-622: [LC384] Seed Shuffle an Array notes (Fisher-Yates + sort-based shuffle distillation) + Uber tag. Discord ad-hoc msg 1498353628937715803. User added their own LC 384 attempt and asked to distill discussion: (1) Fisher-
 - [x] **2026-04-27** -- T-P2-623: [LC855] Seed Exam Room notes (brute-force sorted-list + heap follow-up). Discord ad-hoc msg 1498356808602095685. User pasted LC official editorial brute-force code and asked for notes + explici
 - [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification
+- [x] **2026-04-29** -- T-P0-651: Pinterest VO itinerary update (May 5-6 confirmed): doc 83 + companies row. [SUPERSEDED 2026-04-30 by T-P0-654 chain] Original update went to wrong surface (prep_doc prose + companies.interview_st
+- [x] **2026-04-29** -- T-P0-652: Promote DB edits to seed scripts (Invariant 3 durable fix). [PARTIALLY-SUPERSEDED 2026-04-30] Pinterest portion folded into T-P0-653 (revert) + T-P0-654 (add to interview_events). 
+- [x] **2026-04-29** -- T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db. **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions 
+- [x] **2026-04-29** -- T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?. **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is una
+- [x] **2026-04-29** -- T-P0-663: [T-P0-660b] Extend Invariant-3 lint to flag schedule-shaped prose writes (ISO-8601 + interviewer name). Follow-on to T-P0-660 per T-P0-661 memo recommendation (b). The current lint hook .claude/hooks/invariant3_guard.py bloc
+- [x] **2026-04-30** -- T-P0-667: [Meta-AINative-T1] Code-Pad LLM Prompt + 3-Step Playbook (clarify→spec AC→review). Goal: Distill scripts/seed_meta_ai_native_prep.py (already-seeded doc id=82) into a copy-pasteable code-pad LLM system p
+- [x] **2026-04-30** -- T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells). Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harnes
+- [x] **2026-04-30** -- T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17). Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-0
+- [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
+- [x] **2026-04-29** -- T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose. Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill'
+- [x] **2026-04-29** -- T-P1-658: LESSONS.md: 'Dashboard means widget, not prose' + Invariant 3 enforcement. Append a [UNIVERSAL] LESSONS.md entry capturing the 2026-04-30 mistake class so future sessions don't repeat it. Two dis
+- [x] **2026-04-29** -- T-P1-659: Save user feedback memory: dashboard semantics + Invariant 3 trigger words. Phase 4. **Per reviewer hole #4**: 3 separate memory files is overengineering — 'next session finds it' is determined by
+- [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
+The new T-P0-632 MVP makes id=37 the multi-charter index hub. Update id=81 'Uber LC 题库索引视图' to point users at id
+- [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
+1. settings
+- [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
+- [x] **2026-04-29** -- T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep. helixos/CLAUDE.md has a Key Constraints section codifying that pyproject.toml and requirements.txt must be kept in sync 

@@ -3,8 +3,14 @@
 Source: T-P0-670. After T-P0-667/668/669 created 3 deep sub-docs and T-P0-670
 added a 4th (Prompt Best Practices), the original 临场速查 4-section doc became
 redundant -- this script restructures doc id=82 in-place as a SLIM hub (<200
-lines) that drawer-links to T1/T2/T3/T4-bp via `[title](db://N)` markdown
+lines) that drawer-links to T1/T2/T3/T4-bp via `[title](cd://N)` markdown
 (per T-P1-251 SlideOverPanel pattern; NEVER HTML <details>).
+
+T-P0-675: cross-table-corruption fix. Sub-doc IDs (86/87/88/89) collide with
+`problems.id` 86/87/88/89 -- the original db:// links accidentally resolved to
+unrelated LeetCode problems through ProblemDrawer instead of opening the sub-
+docs through CompanyDocDrawer. Switched to the cd:// scheme (T-P0-672/673/674)
+so MarkdownPreview wires the correct drawer.
 
 Sub-docs resolved at runtime by canonical title (so doc IDs survive a fresh
 DB build):
@@ -65,10 +71,10 @@ def render_content(t1_id: int, t2_id: int, t3_id: int, t4bp_id: int) -> str:
 
 | 时段 | Round | Interviewer | Drawer 链接 (戳开看 deep-dive) |
 |------|-------|-------------|-------------------------------|
-| 09:00 | AI-Enabled ML System Design | Nailong Z. | [§T2 Domain Breadth -- 5 Talking Points](db://{t2_id}) |
-| 11:00 | AI-Native Coding | Sai Srujan E. | [§T1 Code-Pad LLM Prompt + 3-Step Playbook](db://{t1_id}) · [§T4-bp 临场 Prompt 写作 Best Practices](db://{t4bp_id}) |
-| 13:00 | AI-Native Coding | Nikhil U. | [§T1 Code-Pad LLM Prompt + 3-Step Playbook](db://{t1_id}) · [§T4-bp 临场 Prompt 写作 Best Practices](db://{t4bp_id}) |
-| 15:00 | AI-Native Behavioral | (pending) | [§T3 Behavioral 5-Pack](db://{t3_id}) |
+| 09:00 | AI-Enabled ML System Design | Nailong Z. | [§T2 Domain Breadth -- 5 Talking Points](cd://{t2_id}) |
+| 11:00 | AI-Native Coding | Sai Srujan E. | [§T1 Code-Pad LLM Prompt + 3-Step Playbook](cd://{t1_id}) · [§T4-bp 临场 Prompt 写作 Best Practices](cd://{t4bp_id}) |
+| 13:00 | AI-Native Coding | Nikhil U. | [§T1 Code-Pad LLM Prompt + 3-Step Playbook](cd://{t1_id}) · [§T4-bp 临场 Prompt 写作 Best Practices](cd://{t4bp_id}) |
+| 15:00 | AI-Native Behavioral | (pending) | [§T3 Behavioral 5-Pack](cd://{t3_id}) |
 
 **休息 / 饮水 / 上厕所窗口**: 09:45-11:00 (75 min) · 12:00-13:00 (60 min) ·
 14:00-15:00 (60 min). 中午吃饭安排进 12:00-13:00.
@@ -80,7 +86,7 @@ def render_content(t1_id: int, t2_id: int, t3_id: int, t4bp_id: int) -> str:
 两场 AI-Native Coding (11:00 / 13:00) 的 code-pad 临场 playbook: high-level
 idea 先开口, 给 LLM 设 acceptance criteria, 下半场重 review 不重 typing.
 
-[**[打开 §T1 完整 playbook → drawer]**](db://{t1_id})
+[**[打开 §T1 完整 playbook → drawer]**](cd://{t1_id})
 
 ## §T2 AI-Native Domain Breadth -- 5 Talking Points
 
@@ -88,7 +94,7 @@ idea 先开口, 给 LLM 设 acceptance criteria, 下半场重 review 不重 typi
 RAG / agent / cost). 用来在 SD round 主动 give tradeoff + 在 buzzword 周围
 留 specific 可观测的 statement.
 
-[**[打开 §T2 5 Talking Points → drawer]**](db://{t2_id})
+[**[打开 §T2 5 Talking Points → drawer]**](cd://{t2_id})
 
 ## §T3 AI-Native Behavioral 5-Pack
 
@@ -96,7 +102,7 @@ RAG / agent / cost). 用来在 SD round 主动 give tradeoff + 在 buzzword 周�
 每条都有 30-45 秒中文口述 + English kill-line + AI-native angle + match-
 question hints, 末尾 5-trigger -> story routing table.
 
-[**[打开 §T3 Behavioral 5-Pack → drawer]**](db://{t3_id})
+[**[打开 §T3 Behavioral 5-Pack → drawer]**](cd://{t3_id})
 
 ## §T4-bp 临场 Prompt 写作 Best Practices
 
@@ -104,7 +110,7 @@ question hints, 末尾 5-trigger -> story routing table.
 逻辑顺序 (prompt 字面 7 块结构) + 5 个 anti-patterns + worked weak-vs-
 strong example.
 
-[**[打开 §T4-bp Prompt Best Practices → drawer]**](db://{t4bp_id})
+[**[打开 §T4-bp Prompt Best Practices → drawer]**](cd://{t4bp_id})
 
 ---
 
@@ -182,11 +188,17 @@ def validate_content(content: str) -> None:
             "HTML <details> drawers are forbidden -- use [title](db://N) "
             "markdown links so MarkdownPreview opens SlideOverPanel"
         )
-    n_db_links = len(re.findall(r"\]\(db://\d+\)", content))
-    if n_db_links < 6:
+    n_cd_links = len(re.findall(r"\]\(cd://\d+\)", content))
+    if n_cd_links < 6:
         raise RuntimeError(
-            f"expected >=6 'db://' drawer links (4 sub-docs, T1+T4bp linked "
-            f"twice from schedule), got {n_db_links}"
+            f"expected >=6 'cd://' drawer links (4 sub-docs, T1+T4bp linked "
+            f"twice from schedule), got {n_cd_links}"
+        )
+    n_stale_db_links = len(re.findall(r"\]\(db://\d+\)", content))
+    if n_stale_db_links:
+        raise RuntimeError(
+            f"hub must use cd:// for sub-docs, found {n_stale_db_links} stale "
+            f"db:// link(s) (T-P0-675 cross-table-corruption regression)"
         )
     # Slim invariant: under 200 lines (excluding sentinel comment).
     n_lines = content.count("\n") + 1

@@ -15,38 +15,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-674, T-P0-673
-- **Description**: Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
-
-(a) NEW scripts/audit_uri_consistency.py — repeatable, CI-ready (per design review point ⑤):
-- Walks all rows in company_documents
-- Extracts every db://N and cd://N from content body via regex
-- For db://N: assert problems.id=N exists. If N also exists in company_documents.id, print warning ('ambiguous: db://N could be either; treating as problem per scheme'). If N is missing from problems but present in company_documents.id, print ERROR ('cross-table corruption: db://N points at company_documents id=N, should be cd://N').
-- For cd://N: assert company_documents.id=N exists.
-- Exits non-zero if any ERROR encountered (CI-friendly). Prints summary table of all hubs scanned, count of valid + warning + error per hub.
-- Add to .github/workflows/ if such CI exists (check first); otherwise document in README how to run.
-
-(b) UPDATE scripts/seed_meta_ai_native_prep.py — change all 4 hub doc id=82 sub-doc references from db://86/87/88/89 to cd://86/87/88/89. Re-run idempotent insert; verify hub body now contains cd:// links instead of db://.
-
-(c) Backend integration test (replaces the original 'manual screenshot smoke test' per design review point ⑥):
-- src/backend/tests/test_hub_cd_link_resolution.py
-- For hub doc id=82: extract every cd://N from content; for each, GET /company-documents/{N}; assert 200 + non-empty content
-- Reusable fixture so other hubs (Uber/Google) can be added in T-P0-676 follow-up
-
-Final dev-server manual smoke test (one-time, post-deploy, NOT in CI):
-- Start dev server (npm run dev / uvicorn)
-- Open Meta hub doc id=82 in PrepNotesPage
-- Click each of 4 sub-doc cd:// links — verify drawer shows correct doc title (T1=86 / T2=87 / T3=88 / T4-bp=89)
-- Click an embedded db:// link in any sub-doc (regression check) — verify ProblemDrawer still works
-- Screenshot results into Discord for user verification
-
-Sanity: audit script returns 0 errors for Meta hub after migration; pytest integration test passes; dev-server smoke confirms 4/4 cd:// links open correct drawer.
-
-Depends T-P0-674 (full plumbing must be live for dev-server smoke).
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -297,7 +265,7 @@ Scope: backend schema + router + frontend pill rendering + seed. M complexity.
 #### T-P1-657: Invariant-3 promotion: doc 84 §5 N-gram LM + problem 1097 to seed scripts
 - **Priority**: P1
 - **Complexity**: S
-- **Depends on**: T-P0-660
+- **Depends on**: None
 - **Description**: Phase 4. Promote earlier session's Uber doc 84 §5 + problem 1097 to seed scripts. **Per reviewer hole #3**: do NOT delete scripts/migrations/add_uber_prob_nextword.py. Better: keep file, replace body with a no-op + DEPRECATED header. Reasons: (a) git history preservation in working tree, not just log; (b) staging / rebuild environments that re-run migrations get a clear deprecation message rather than missing file errors; (c) future readers can grep for the original migration intent.
 
 THREE STEPS:
@@ -389,26 +357,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke. Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
 - [x] **2026-04-30** -- T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest. Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two dra
 - [x] **2026-04-30** -- T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest. Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/err
 - [x] **2026-04-30** -- T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest. Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
 - [x] **2026-04-30** -- T-P0-671: [Drawer-Fix-T1] Backend GET /company-documents/{id} endpoint (id-only, no company_id required) + pytest 200/404 cases. Goal: Add a company-id-less endpoint so frontend drawers can resolve cd://N without knowing which company owns the doc.
 - [x] **2026-04-30** -- T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc. Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01
-- [x] **2026-04-30** -- T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17). Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-0
-- [x] **2026-04-30** -- T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells). Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harnes
-- [x] **2026-04-30** -- T-P0-667: [Meta-AINative-T1] Code-Pad LLM Prompt + 3-Step Playbook (clarify→spec AC→review). Goal: Distill scripts/seed_meta_ai_native_prep.py (already-seeded doc id=82) into a copy-pasteable code-pad LLM system p
-- [x] **2026-04-29** -- T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep. helixos/CLAUDE.md has a Key Constraints section codifying that pyproject.toml and requirements.txt must be kept in sync 
-- [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
-- [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
-- [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
-- [x] **2026-04-29** -- T-P1-659: Save user feedback memory: dashboard semantics + Invariant 3 trigger words. Phase 4. **Per reviewer hole #4**: 3 separate memory files is overengineering — 'next session finds it' is determined by
-- [x] **2026-04-29** -- T-P1-658: LESSONS.md: 'Dashboard means widget, not prose' + Invariant 3 enforcement. Append a [UNIVERSAL] LESSONS.md entry capturing the 2026-04-30 mistake class so future sessions don't repeat it. Two dis
-- [x] **2026-04-29** -- T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose. Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill'
-- [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
-- [x] **2026-04-29** -- T-P0-663: [T-P0-660b] Extend Invariant-3 lint to flag schedule-shaped prose writes (ISO-8601 + interviewer name). Follow-on to T-P0-660 per T-P0-661 memo recommendation (b). The current lint hook .claude/hooks/invariant3_guard.py bloc
-- [x] **2026-04-29** -- T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?. **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is una
-- [x] **2026-04-29** -- T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db. **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions 
-- [x] **2026-04-29** -- T-P0-652: Promote DB edits to seed scripts (Invariant 3 durable fix). [PARTIALLY-SUPERSEDED 2026-04-30] Pinterest portion folded into T-P0-653 (revert) + T-P0-654 (add to interview_events). 
-- [x] **2026-04-29** -- T-P0-651: Pinterest VO itinerary update (May 5-6 confirmed): doc 83 + companies row. [SUPERSEDED 2026-04-30 by T-P0-654 chain] Original update went to wrong surface (prep_doc prose + companies.interview_st
