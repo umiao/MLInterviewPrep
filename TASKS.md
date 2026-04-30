@@ -249,35 +249,6 @@ ACCEPTANCE CRITERIA:
 DEPENDS ON: T-P0-660 (lint hook should already exist — this task verifies the hook accepts the deprecated files)
 COMPLEXITY: M
 
-#### T-P1-658: LESSONS.md: 'Dashboard means widget, not prose' + Invariant 3 enforcement
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Append a [UNIVERSAL] LESSONS.md entry capturing the 2026-04-30 mistake class so future sessions don't repeat it. Two distinct lessons:
-
-LESSON A — Surface identification before prose edits:
-- Title: '[2026-04-30] User says "dashboard" / "app 那边" / "left nav first item" -> they mean a UI widget on the named page, NOT prose in a prep doc'
-- Context: User asked to update Pinterest VO schedule. I edited company_documents.id=83 (prep doc prose) and companies.interview_stages JSON. Both wrong surface. The Dashboard's InterviewTimeline widget reads the interview_events table; that was the surface user actually meant.
-- What went wrong: I matched 'Pinterest onsite update' to the most prominent Pinterest text I could find (the prep doc) without first asking 'which UI surface renders this?' The prep doc is a study notebook; calendar/event data lives in interview_events.
-- Fix: For any 'update X in our app / on dashboard / in <named UI element>' request, FIRST identify which frontend page + widget is being referenced (read src/frontend/src/pages/Dashboard.tsx and trace queryKey -> /api/<endpoint> -> <DB table>). THEN map to the appropriate idempotent seed. Schedule/itinerary/calendar => interview_events. Pipeline status => companies.status. Daily focus => derived from framework + reading. Checklist => companies.prep_notes. Prose study notes only => company_documents.
-- Tags: #ux-target-identification #dashboard #widget-vs-prose #interview-events
-
-LESSON B — Invariant 3 enforcement (already partly logged 2026-04-25; reinforce):
-- Title: '[2026-04-30] Direct SQL UPDATE on data/mle_prep.db violates Invariant 3 — every DB row must originate from a git-tracked, idempotent Python seed in scripts/'
-- Context: I twice this session wrote scripts/migrations/*.py that did sqlite3.execute('UPDATE ...') / INSERT directly. The DB is regenerable; the seed scripts are source of truth. Direct DB edits create timebombs (next seed run wipes them).
-- What went wrong: scripts/migrations/ as a directory pattern feels familiar from server-side migrations, but in this project there are no migrations — there are only idempotent seeds. The migration scripts were correctly idempotent on their own canonical keys, but they bypassed the seed-based source of truth.
-- Fix: For ANY DB content change, edit (or create) the matching seed in scripts/seed_*.py. The seed must be idempotent (re-runnable safely). Run it once to apply. Check git diff on the seed = the durable record of what changed. NEVER write to data/mle_prep.db from scripts/migrations/.
-- Detection: any time you find yourself writing 'sqlite3.connect(...).execute("UPDATE"|"INSERT"|"DELETE")' outside scripts/seed_*.py — STOP. Ask: 'which seed owns this row?' Find/extend that seed.
-- Tags: #invariant-3 #seed-not-migration #db-source-of-truth
-
-ACCEPTANCE CRITERIA:
-- AC1: LESSONS.md has both entries appended at bottom with date 2026-04-30 and tag-line format
-- AC2: Lessons reference T-P0-651 (the misdirected work), T-P0-654 (the correct fix), T-P1-657 (the Invariant-3 promotion)
-- AC3: cross-project-reviewer agent flagged-eligible (both lessons tagged [UNIVERSAL] for propagation to helixos/homestead/template per cross-project-sync 2026-04-29 pattern)
-
-DEPENDS ON: nothing
-COMPLEXITY: XS (~30 lines of LESSONS.md append)
-
 #### T-P1-659: Save user feedback memory: dashboard semantics + Invariant 3 trigger words
 - **Priority**: P1
 - **Complexity**: S
@@ -375,6 +346,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
+- [x] **2026-04-29** -- T-P1-658: LESSONS.md: 'Dashboard means widget, not prose' + Invariant 3 enforcement. Append a [UNIVERSAL] LESSONS.md entry capturing the 2026-04-30 mistake class so future sessions don't repeat it. Two dis
 - [x] **2026-04-29** -- T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose. Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill'
 - [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
 - [x] **2026-04-29** -- T-P0-663: [T-P0-660b] Extend Invariant-3 lint to flag schedule-shaped prose writes (ISO-8601 + interviewer name). Follow-on to T-P0-660 per T-P0-661 memo recommendation (b). The current lint hook .claude/hooks/invariant3_guard.py bloc
