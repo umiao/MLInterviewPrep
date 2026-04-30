@@ -66,12 +66,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 30-45 sec spoken pitch into 2-3 paragraphs (currently wall-of-text), (2) bold the English kill-line so it visually stands out from the surrounding pitch, (3) ensure AI-native angle paragraph is visually distinct from STAR pitch, (4) remove CN-EN duplicate phrasing, (5) verify the 5-trigger -> story routing table at the end is intact and uses correct cd:// or anchor links. DO NOT change the 5 stories themselves (per docs/workflow/story_rewrite_protocol.md, story content is golden). Acceptance: doc 88 each story has at most 2-3 paragraphs, kill-lines bolded, no CN-EN duplicate phrasing, routing table intact, file paths to bq_behavioral_examples.json EX-14/BLOG-03/EX-01/EX-05/EX-17 still resolvable.
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -340,6 +334,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 
 - [x] **2026-04-30** -- T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of
 - [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
 - [x] **2026-04-30** -- T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack. Source review attachment §四/§五/§六: doc 89 already aligned philosophically but missing 3 concrete deliverables. Concrete 

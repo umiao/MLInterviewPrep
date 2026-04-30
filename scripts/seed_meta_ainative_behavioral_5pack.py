@@ -31,7 +31,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
-SENTINEL = "<!-- META_AINATIVE_BEHAVIORAL_5PACK_20260430 -->"
+SENTINEL = "<!-- META_AINATIVE_BEHAVIORAL_5PACK_20260501 -->"
 
 COMPANY_ID = 31  # Meta
 DOC_TITLE = "[Meta] AI-Native Behavioral 5-Pack"
@@ -71,26 +71,29 @@ CONTENT = SENTINEL + r'''
 
 > "2023 年公司 leadership 说 'upgrade to GenAI' -- 给我一个 sandbox, API
 > credits, 没有 requirements, 没有 LLM precedent in 我们 production stack.
-> 大家默认要做 agentic search demo. 我第一周不写 prototype, 写 ROI math
-> feasibility study: LLM 接不到 indexing pipeline, 读不到 live inventory,
-> throughput 在 40K-peak surface 上只能跑到 tens of QPS, latency
-> prohibitive. 数字直接 disqualify 那条 path -- 在 sunk cost 还没让 kill
-> 政治成本变高之前. 省下来的 budget 我转去做 LLM-as-Judge for relevance
-> labeling -- 严重 mislabel + human annotator 之间 inter-rater agreement
-> 低的 backlog. Build 阶段还撞过三个独立 issue: low inter-rater agreement
-> 让 AI-vs-human alignment 这个 metric 失效, 早期 instruction-following
-> 不成熟 (JSON failures, NSFW blocks), 还有一个我 trace 到 dataset quality
-> 不是 model quality 的 no-lift offline comparison. 最后这套 LLM-as-Judge
-> 跨多个 relevance metric 全 win, 从我一个人 explore scale 到 production
-> measurement infrastructure for relevance team, then ads, then several
+> 大家默认要做 **agentic search demo**.
+>
+> 我第一周不写 prototype, 写 **ROI math feasibility study**: LLM 接不到
+> indexing pipeline, 读不到 live inventory, throughput 在 40K-peak surface
+> 上只能跑到 tens of QPS, latency prohibitive. **数字直接 disqualify 那条
+> path -- 在 sunk cost 还没让 kill 政治成本变高之前**.
+>
+> 省下来的 budget 我转去做 **LLM-as-Judge for relevance labeling** -- 严重
+> mislabel + human annotator 之间 inter-rater agreement 低的 backlog. Build
+> 阶段还撞过三个独立 issue: low inter-rater agreement 让 AI-vs-human
+> alignment 这个 metric 失效, 早期 instruction-following 不成熟 (JSON
+> failures, NSFW blocks), 还有一个我 trace 到 dataset quality 不是 model
+> quality 的 no-lift offline comparison. 最后这套 LLM-as-Judge 跨多个
+> relevance metric 全 win, 从我一个人 explore scale 到 **production
+> measurement infrastructure** for relevance team, then ads, then several
 > other groups."
 
 ### English kill-line
 
 > "The cheapest move in a vague AI mandate is the one nobody assigns --
-> disqualify the obvious path with a week of ROI math before sunk cost
-> makes the kill politically expensive. Feasibility is the real authoring;
-> pitch decks are downstream of it."
+> **disqualify the obvious path with a week of ROI math** before sunk cost
+> makes the kill politically expensive. **Feasibility is the real
+> authoring; pitch decks are downstream of it**."
 
 ### AI-native angle (why this story for Meta AI-native specifically)
 
@@ -123,22 +126,26 @@ math 去 kill bad AI ideas before prototype**. 这是 Meta AI org 在
 > "Q2-Q3 那段时间 ads team 来要 access -- 想 tune 我们 relevance filter 的
 > pass-through rate. Org boundary 是 ads 优化 revenue, relevance 优化
 > absolute quality threshold; 让他们直接调 threshold 等于让 ads 政策替
-> relevance 决策. 我没硬拒绝 -- 拒绝就是 zero-sum. 我 reframe 这个
-> conflict: ads 真正缺的不是 policy access, 是 **interpretable relevance
-> signal** 让他们自己做 trade-off. 我用 Q2-Q3 时间 build 了一条 LLM
-> judgment pipeline -- 每天产 18K labels at $500 total, 对比 vendor 的
-> human annotation **$0.30-0.80 per label** 是 1/10 到 1/30. 关键 design
-> decision: pipeline 是 ads team 的 input signal, 不是 relevance team 的
-> policy override -- 两 team 各拿 own 的: relevance 守住 quality
-> threshold, ads 拿到 interpretable signal. 这条 pipeline 后来 scale 成
-> all search result sets 的 standard relevance signal, 贡献 1.5% GMB lift."
+> relevance 决策. 我没硬拒绝 -- **拒绝就是 zero-sum**.
+>
+> 我 reframe 这个 conflict: ads 真正缺的不是 policy access, 是
+> **interpretable relevance signal** 让他们自己做 trade-off. 我用 Q2-Q3
+> 时间 build 了一条 **LLM judgment pipeline** -- 每天产 **18K labels at
+> $500 total**, 对比 vendor 的 human annotation **$0.30-0.80 per label**
+> 是 1/10 到 1/30.
+>
+> 关键 design decision: **pipeline 是 ads team 的 input signal, 不是
+> relevance team 的 policy override** -- 两 team 各拿 own 的: relevance
+> 守住 quality threshold, ads 拿到 interpretable signal. 这条 pipeline
+> 后来 scale 成 all search result sets 的 standard relevance signal, 贡献
+> **1.5% GMB lift**."
 
 ### English kill-line
 
-> "I held the org boundary by turning the conflict into a product. Ads
-> didn't actually need access to our policy -- they needed an
-> interpretable signal. I built it as LLM-as-Judge. Both sides got what
-> they needed."
+> "I held the org boundary by **turning the conflict into a product**.
+> Ads didn't actually need access to our policy -- they needed an
+> **interpretable signal**. I built it as LLM-as-Judge. **Both sides got
+> what they needed**."
 
 ### AI-native angle
 
@@ -167,26 +174,30 @@ GenAI productization 时最重要的 transferable skill: 不是技术问题, 是
 
 ### 30-45 sec spoken pitch
 
-> "Hacker Week 我自己挑了一个题 -- search ranker 在 silently fail 在
-> multi-intent queries 上, e.g. 'pokemon' 搜索结果 90%+ trading cards,
+> "Hacker Week 我自己挑了一个题 -- search ranker 在 **silently fail 在
+> multi-intent queries 上**, e.g. 'pokemon' 搜索结果 90%+ trading cards,
 > 但购买数据显示一半买家想要 games / toys / figures. Standard dashboard
-> 显示 ranker 健康 -- 因为 dominant-intent users 是健康的, 看不见的那一半
-> users 就 invisible. 我先 abandon-log slice -- 按 post-impression
-> drop-off 排序 query, 几百个 high-volume multi-intent queries 都同一种
-> collapse 模式. 不是单 query bug, 是 systematic bias. Root-cause call:
-> ranker 是 per-item scoring, 没 page-level reasoning -- top candidates
-> 都同一类, page 自然 homogeneous. 这是 structural gap, 不是 calibration
-> miss. Prototype: 在现有 ranker 上叠 diversity-blending layer, 用便宜的
+> 显示 ranker 健康 -- **因为 dominant-intent users 是健康的, 看不见的那
+> 一半 users 就 invisible**.
+>
+> 我先 **abandon-log slice** -- 按 post-impression drop-off 排序 query,
+> 几百个 high-volume multi-intent queries 都同一种 collapse 模式. 不是单
+> query bug, 是 systematic bias. Root-cause call: **ranker 是 per-item
+> scoring, 没 page-level reasoning** -- top candidates 都同一类, page
+> 自然 homogeneous. **这是 structural gap, 不是 calibration miss**.
+>
+> Prototype: 在现有 ranker 上叠 diversity-blending layer, 用便宜的
 > intent-coverage proxy. 一周内 abandon-log pipeline + blending algorithm
 > + experiment framework 都跑通了. 后来 compounded across verticals,
-> 200M+ annualized impact, methodology 写成 SIGIR paper."
+> **200M+ annualized impact**, methodology 写成 **SIGIR paper**."
 
 ### English kill-line
 
-> "Item-level scoring creates page-level homogeneity. The dashboard was
-> healthy because the dominant-intent users were healthy -- the missing
-> half was invisible. Before trusting any 'healthy' search metric I now
-> ask which users it's measuring and which ones it cannot see."
+> "**Item-level scoring creates page-level homogeneity**. The dashboard
+> was healthy because the dominant-intent users were healthy -- **the
+> missing half was invisible**. Before trusting any 'healthy' search
+> metric I now ask which users it's measuring and **which ones it cannot
+> see**."
 
 ### AI-native angle
 
@@ -216,27 +227,29 @@ item-level pattern.
 
 ### 30-45 sec spoken pitch
 
-> "我作为 sole MLE on relevance filtering project, 团队两个月 build 了一个
-> 几千棵 tree 的 XGBoost model, 准 accuracy 高. 但 deployment 时发现
-> +10% latency overhead, 而 budget 是 <=1% -- 完全过不去. 我没去 shrink
-> big model -- reframe 是 **80%+ candidate items 是 obviously irrelevant,
-> 它们根本不需要大模型**. 我 try 了三条路 (early exit / feature-pruned /
-> cheap rejection), 两条死了, cheap rejection + early exit 把 computation
-> 砍 order of magnitude 过了 latency budget. 然后撞到一个 insidious wall
-> -- silent CI failure: tests pass 但 production 结果错. Trace 到
-> downstream system 在 URL > 16K chars 时 truncate JSON field, 上游
-> 不报错下游悄悄取 stale value. Fix 后 GMB on null/low-intent queries
-> +4-6%. Cheap rejection + early exit pattern 后来被 reuse 在另两个
-> deployment, silent failure 教训直接产出 team standard: end-to-end
-> payload stress test before every launch."
+> "我作为 **sole MLE on relevance filtering project**, 团队两个月 build
+> 了一个几千棵 tree 的 XGBoost model, 准 accuracy 高. 但 deployment 时
+> 发现 **+10% latency overhead, 而 budget 是 <=1%** -- 完全过不去.
+>
+> 我没去 shrink big model -- reframe 是 **80%+ candidate items 是
+> obviously irrelevant, 它们根本不需要大模型**. 我 try 了三条路 (early
+> exit / feature-pruned / cheap rejection), 两条死了, **cheap rejection +
+> early exit 把 computation 砍 order of magnitude** 过了 latency budget.
+>
+> 然后撞到一个 insidious wall -- **silent CI failure: tests pass 但
+> production 结果错**. Trace 到 downstream system 在 URL > 16K chars 时
+> truncate JSON field, 上游不报错下游悄悄取 stale value. Fix 后 GMB on
+> null/low-intent queries **+4-6%**. Cheap rejection + early exit pattern
+> 后来被 reuse 在另两个 deployment, silent failure 教训直接产出 team
+> standard: **end-to-end payload stress test before every launch**."
 
 ### English kill-line
 
-> "The reframe wasn't 'how do we shrink the big model' -- it was 'most
-> requests don't deserve the big model at all'. The real constraint
-> wasn't model performance vs complexity -- it was the coupling between
-> the model and every system it touches. Green CI does not mean correct
-> production."
+> "The reframe wasn't 'how do we shrink the big model' -- it was
+> **'most requests don't deserve the big model at all'**. The real
+> constraint wasn't model performance vs complexity -- it was **the
+> coupling between the model and every system it touches**. **Green CI
+> does not mean correct production**."
 
 ### AI-native angle
 
@@ -269,28 +282,31 @@ turn into team standard.
 ### 30-45 sec spoken pitch
 
 > "Manager 让我支援一个 researcher 的 urgent model engine change.
-> Researcher 有 project context 但很少 merge code. 我 follow 她的 suggestion,
-> 直接从她 branch 上 raise PR -- unconventional 但 technically possible.
-> 我跑完所有 test 之后, researcher 又改了一些 naming, 把 build 弄断了, 让
-> 我那条 'verified' PR 立刻 invalid. Senior IC 看到之后给了我 harsh
-> feedback -- 说我 lack basic engineering quality, 拒绝 review 我 PR.
-> 第一反应是 demoralized. 跟 manager 聊完, 我意识到一个 lesson: 有时候你
-> 必须 accountable for things 不是你做的也不在你 familiarity 范围内. 我
-> develop 了一套更好的 engineer-researcher collaboration practice (跟
-> existing org policy 'PR should be engineer-owned' 对齐), proactively
-> reach out 那位 senior IC 解释 full context + 分享 improvement plan. 后来
-> 我们 build 了 mutual respect, 成了 professional friends, 两个都在 org 内
-> 以 rigorous checklist + fast response + conscientious on-call 出名.
+> Researcher 有 project context 但很少 merge code. 我 follow 她的
+> suggestion, 直接从她 branch 上 raise PR -- unconventional 但 technically
+> possible. 我跑完所有 test 之后, researcher 又改了一些 naming, 把 build
+> 弄断了, 让我那条 'verified' PR 立刻 invalid.
+>
+> Senior IC 看到之后给了我 **harsh feedback** -- 说我 **lack basic
+> engineering quality**, 拒绝 review 我 PR. 第一反应是 demoralized. 跟
+> manager 聊完, 我意识到一个 lesson: **有时候你必须 accountable for
+> things 不是你做的也不在你 familiarity 范围内**.
+>
+> 我 develop 了一套更好的 engineer-researcher collaboration practice (跟
+> existing org policy 'PR should be engineer-owned' 对齐), **proactively
+> reach out 那位 senior IC** 解释 full context + 分享 improvement plan.
+> 后来我们 build 了 mutual respect, 成了 professional friends, 两个都在
+> org 内以 rigorous checklist + fast response + conscientious on-call 出名.
 > Kill-line: **'I conflated being relied on with being trusted.'**
-> 'Reliable' 是 deliver task, 'trusted' 是 own outcome 不管 task 是不是
-> 你自己做的."
+> 'Reliable' 是 deliver task, **'trusted' 是 own outcome 不管 task 是不是
+> 你自己做的**."
 
 ### English kill-line
 
-> "I conflated being relied on with being trusted. Reliable means I
-> deliver the task. Trusted means I own the outcome even when I didn't
-> do the work. The senior IC didn't doubt my code -- he doubted whether
-> I would defend the artifact past my own boundary."
+> "**I conflated being relied on with being trusted**. Reliable means I
+> deliver the task. **Trusted means I own the outcome even when I didn't
+> do the work**. The senior IC didn't doubt my code -- he doubted whether
+> I would **defend the artifact past my own boundary**."
 
 ### AI-native angle
 
