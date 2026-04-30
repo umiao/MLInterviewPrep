@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Write(.claude/session_state.json)",
-      "Edit(.claude/session_state.json)"
+      "Edit(.claude/session_state.json)",
+      "Write(.claude/skills/**/SKILL.md)",
+      "Edit(.claude/skills/**/SKILL.md)"
     ]
   },
   "hooks": {

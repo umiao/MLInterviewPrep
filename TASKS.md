@@ -5,12 +5,6 @@
 
 ## In Progress
 
-#### T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to Write/Edit .claude/skills/dashboard/SKILL.md (worked around via _build_dashboard_skill.py idempotent applier). Widen .claude/settings.json (and corresponding settings.json across MLI/helixos/homestead/root) permission carve-out to allow direct Write/Edit on .claude/skills/*/SKILL.md path pattern. Verify by re-running a skill-authoring touch in a fresh autonomous session — no applier-script workaround should be needed. AC: (1) Pattern added to all 4 projects' settings.json (or shared/settings_shared.json if they share). (2) Self-test: Write to a fresh .claude/skills/_test_carveout/SKILL.md succeeds without permission denial. (3) Cleanup test file. (4) LESSONS.md note tagged [UNIVERSAL] for cross-project propagation. Hit class: 3 occurrences today (T-P1-256, T-P1-258, T-P1-656).
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -334,6 +328,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects. Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to
 - [x] **2026-04-30** -- T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 
 - [x] **2026-04-30** -- T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of
 - [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
