@@ -42,6 +42,40 @@ during live mock interviews and daily drills.
 2. No hardcoded secrets in code
 3. Every DB content row (company_documents, framework_nodes, problems, etc.) must have a git-tracked, idempotent Python seed script as its source of truth. Ad-hoc SQL or manual DB edits are prohibited — the DB is a regenerable projection of the seed scripts, never the source of truth itself.
 
+## Surface Identification
+
+Before editing DB content for a request that mentions a UI surface (the "dashboard," "left tab," "first nav item," "我们 app," "left nav," "the prep board," etc.), map widget -> data source FIRST. Pattern-matching from the prior turn's edit target is the failure mode (see `logs/2026-04-30_pinterest_root_cause.md`); the table below is the canonical prior that overrides it.
+
+| Widget (file)                                         | Query key                  | API endpoint               | DB table / column                                |
+|-------------------------------------------------------|----------------------------|----------------------------|--------------------------------------------------|
+| `Dashboard.InterviewTimeline` (timeline/InterviewTimeline.tsx) | `["timeline","events"]`    | `GET /timeline/events`     | `interview_events`                               |
+| `Dashboard.TodayFocusCards` (pages/Dashboard.tsx)     | `["dashboard","today"]`    | `GET /dashboard/today`     | derived: `framework_nodes` + `reading_progress`  |
+| `Dashboard.WeeklyActivity` (charts/WeeklyActivityChart.tsx) | `["dashboard","activity"]` | `GET /dashboard/activity`  | derived: `problem_attempts` + `study_sessions`   |
+| `Dashboard.PillarProgress` (pages/Dashboard.tsx)      | `["framework","tree"]`     | `GET /framework/tree`      | `framework_nodes` (depth-0 pillars)              |
+| `Dashboard.CompanySummary` (pages/Dashboard.tsx)      | `["dashboard","summary"]`  | `GET /dashboard/summary`   | derived: `companies.status` counts               |
+| `Dashboard.PrepQuickAccess` (pages/Dashboard.tsx)     | `["companies"]`            | `GET /companies`           | `companies.prep_notes` (markdown checklist)      |
+| `KG.NodeDetail` (framework KG drawer)                 | `["framework","node",id]`  | `GET /framework/nodes/:id` | `framework_nodes` + `framework_node_problems`    |
+| `CompanyDrawer.Notes` (per-company prep doc viewer)   | `["companies",id,"docs"]`  | `GET /companies/:id/docs`  | `company_documents.content` (prose study notes)  |
+
+**Routing rules** (from the priors above; do NOT override based on which surface was edited last turn):
+- Schedule / itinerary / calendar / "interview confirmed for X" / interviewer name + ISO-8601 date = `interview_events` (NEVER `company_documents.content`).
+- Pipeline status (interested / applying / interviewing / offered / rejected) = `companies.status`.
+- Daily focus / weakest topic / streak = derived from existing tables; no direct write target -- update the underlying `framework_nodes` or `reading_progress` row.
+- Per-company checklist ("research X, mock Y, review Z") = `companies.prep_notes` (markdown).
+- Prose study notes (and ONLY those) = `company_documents.content`.
+- KG node prose = `framework_nodes.description`. Adding a LeetCode problem TO a node = INSERT into `framework_node_problems` join table, NOT prose mention in description.
+
+**Idempotent seed pattern per row type** (Invariant 3 -- ad-hoc SQL is prohibited):
+- `interview_events`: `scripts/_add_<company>_<date>.py`. Canonical key: `(company_id, scheduled_at, interviewer_name)`.
+- `company_documents`: `scripts/seed_<company>_<doc>.py` with sentinel-based UPSERT.
+- `problems`: `scripts/seed_<company>_lc_problems.py` (or focused `_add_*.py`); canonical key `leetcode_id` or `title`.
+- `framework_nodes`: `scripts/seed_node_<id>_*.py` or pillar batches; canonical key `path`.
+- `framework_node_problems`: usually written alongside problem seeds; canonical key `(node_id, problem_id)`.
+
+**Enforcement layer** (independent of this section -- they are TWO layers, not one):
+- `.claude/hooks/invariant3_guard.py` (T-P0-660 + T-P0-660b extension) blocks raw SQL writes from `scripts/migrations/*` to `data/*.db` AND blocks writes to `company_documents.content` whose payload contains schedule-shaped prose (ISO-8601 timestamp + interviewer-name pattern within 30 lines). This catches the failure mode when the priors above are overridden by recency priming.
+- The `/dashboard` skill (`.claude/skills/dashboard/SKILL.md`) references this table as its single source of truth and walks the 6-step protocol before any DB write.
+
 ## Key Constraints
 - All API keys and cookies from .env, never hardcoded
 - Every function must have type hints and docstring
@@ -100,13 +134,6 @@ during live mock interviews and daily drills.
 ## Behavior Rules
 - **Fix violations immediately**: When a check you run (lint, emoji scan, tests) discovers
   violations in project files, fix them immediately.
-- **New framework_node seed batches (>=3 rows) require running
-  `docs/workflow/seed_smoke_test_protocol.md` before merge. Skipping the
-  protocol is not optional.** The protocol catches taxonomy mis-classification
-  bugs (slash-vs-dot path separators, missing PILLAR_ORDER entries, missing
-  PILLAR_STYLES entries) that vitest and pytest cannot see because they only
-  surface when the KG page actually renders. Postmortem: `LESSONS.md`
-  2026-04-25 entry; convention rule: `docs/protocol/kg_markdown_conventions.md` §10.
 
 ### Verification Requirements
 - **"Tests pass" is necessary but not sufficient.** If your task changes a
@@ -130,14 +157,6 @@ during live mock interviews and daily drills.
   and config between the two.  Every delta is a finding.  Do NOT skip to
   output-format analysis or external doc research before completing this diff.
   Analysis of "why" comes AFTER identifying "what's different."
-- **Story / content rewrite propagation.** When rewriting a behavioral
-  example, framework node, company document, or other DB content entity,
-  follow `docs/workflow/story_rewrite_protocol.md` -- the 7-step checklist
-  catches the 5 propagation surfaces that "just edit the field" misses
-  (derived fields, join-table notes, API-merged JSON/MD, upstream canonical
-  seeds, frontend pre-renders). Skipping the audit creates pages where the
-  STAR fields tell a new story while the title, KEY-FACTS pills, principle
-  tags, and 10 question relevance notes still tell the old one.
 
 ### Task Planning Mode
 When the user says "plan tasks" / "edit TASKS.md only" / contains keyword "TASKS.md":
