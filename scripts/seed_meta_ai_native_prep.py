@@ -56,7 +56,16 @@ SUB_TITLES = (SUB_T1_TITLE, SUB_T2_TITLE, SUB_T3_TITLE, SUB_T4BP_TITLE)
 
 
 def render_content(t1_id: int, t2_id: int, t3_id: int, t4bp_id: int) -> str:
-    """Render hub markdown with sub-doc IDs substituted into db:// links."""
+    """Render hub markdown with sub-doc IDs substituted into cd:// links.
+
+    Schedule rendered as inline HTML <table> (not GFM markdown table) because
+    the 11:00 / 13:00 coding rows share a byte-identical Drawer-link cell;
+    GFM markdown does not support cell merging, so we use HTML rowspan="2"
+    on the 11:00 row and omit the cell from the 13:00 row. rehype-raw +
+    MarkdownPreview's <a> override means cd:// inside HTML <a href> still
+    routes to onCdLinkClick (CompanyDocDrawer) -- locked by Vitest in
+    MarkdownPreview.test.tsx ('html table with cd:// anchor').
+    """
     return SENTINEL + f'''
 # Meta AI-Native Onsite — 2026-05-01 Prep Hub
 
@@ -69,12 +78,17 @@ def render_content(t1_id: int, t2_id: int, t3_id: int, t4bp_id: int) -> str:
 
 ## 当天 schedule (UTC-7 / Pacific)
 
-| 时段 | Round | Interviewer | Drawer 链接 (戳开看 deep-dive) |
-|------|-------|-------------|-------------------------------|
-| 09:00 | AI-Enabled ML System Design | Nailong Z. | [§T2 Domain Breadth -- 5 Talking Points](cd://{t2_id}) |
-| 11:00 | AI-Native Coding | Sai Srujan E. | [§T1 Code-Pad LLM Prompt + 3-Step Playbook](cd://{t1_id}) · [§T4-bp 临场 Prompt 写作 Best Practices](cd://{t4bp_id}) |
-| 13:00 | AI-Native Coding | Nikhil U. | [§T1 Code-Pad LLM Prompt + 3-Step Playbook](cd://{t1_id}) · [§T4-bp 临场 Prompt 写作 Best Practices](cd://{t4bp_id}) |
-| 15:00 | AI-Native Behavioral | (pending) | [§T3 Behavioral 5-Pack](cd://{t3_id}) |
+<table>
+<thead>
+<tr><th>时段</th><th>Round</th><th>Interviewer</th><th>Drawer 链接 (戳开看 deep-dive)</th></tr>
+</thead>
+<tbody>
+<tr><td>09:00</td><td>AI-Enabled ML System Design</td><td>Nailong Z.</td><td><a href="cd://{t2_id}">§T2 Domain Breadth -- 5 Talking Points</a></td></tr>
+<tr><td>11:00</td><td>AI-Native Coding</td><td>Sai Srujan E.</td><td rowspan="2"><a href="cd://{t1_id}">§T1 Code-Pad LLM Prompt + 3-Step Playbook</a> · <a href="cd://{t4bp_id}">§T4-bp 临场 Prompt 写作 Best Practices</a></td></tr>
+<tr><td>13:00</td><td>AI-Native Coding</td><td>Nikhil U.</td></tr>
+<tr><td>15:00</td><td>AI-Native Behavioral</td><td>(pending)</td><td><a href="cd://{t3_id}">§T3 Behavioral 5-Pack</a></td></tr>
+</tbody>
+</table>
 
 **休息 / 饮水 / 上厕所窗口**: 09:45-11:00 (75 min) · 12:00-13:00 (60 min) ·
 14:00-15:00 (60 min). 中午吃饭安排进 12:00-13:00.
@@ -188,17 +202,41 @@ def validate_content(content: str) -> None:
             "HTML <details> drawers are forbidden -- use [title](db://N) "
             "markdown links so MarkdownPreview opens SlideOverPanel"
         )
-    n_cd_links = len(re.findall(r"\]\(cd://\d+\)", content))
-    if n_cd_links < 6:
+    # Count cd:// occurrences in BOTH markdown `[text](cd://N)` and HTML
+    # `<a href="cd://N">` forms. Schedule rows now use HTML <a> because the
+    # row is wrapped in inline HTML <table> (rowspan='2' on merged 11:00/13:00
+    # coding cell). Sub-doc preview blocks under §T1/§T2/§T3/§T4-bp keep the
+    # markdown form. Total expected: 4 schedule (HTML) + 4 sub-doc previews
+    # (markdown) = 8.
+    n_cd_md = len(re.findall(r"\]\(cd://\d+\)", content))
+    n_cd_html = len(re.findall(r'href="cd://\d+"', content))
+    n_cd_total = n_cd_md + n_cd_html
+    if n_cd_total < 8:
         raise RuntimeError(
-            f"expected >=6 'cd://' drawer links (4 sub-docs, T1+T4bp linked "
-            f"twice from schedule), got {n_cd_links}"
+            f"expected >=8 cd:// drawer links (4 schedule HTML + 4 sub-doc "
+            f"markdown previews; T1+T4bp linked twice via rowspan), "
+            f"got md={n_cd_md} html={n_cd_html} total={n_cd_total}"
         )
-    n_stale_db_links = len(re.findall(r"\]\(db://\d+\)", content))
-    if n_stale_db_links:
+    n_stale_db_md = len(re.findall(r"\]\(db://\d+\)", content))
+    n_stale_db_html = len(re.findall(r'href="db://\d+"', content))
+    if n_stale_db_md + n_stale_db_html:
         raise RuntimeError(
-            f"hub must use cd:// for sub-docs, found {n_stale_db_links} stale "
-            f"db:// link(s) (T-P0-675 cross-table-corruption regression)"
+            f"hub must use cd:// for sub-docs, found "
+            f"{n_stale_db_md + n_stale_db_html} stale db:// link(s) "
+            f"(T-P0-675 cross-table-corruption regression)"
+        )
+    # T-P0-677: schedule must use inline HTML <table> with rowspan='2' on the
+    # merged 11:00/13:00 Drawer-link cell. Lock the cell-merge contract here so
+    # a future markdown-table revert is rejected at seed-time.
+    if "<table>" not in content or "</table>" not in content:
+        raise RuntimeError(
+            "schedule must be inline HTML <table> (T-P0-677 cell-merge), "
+            "not GFM markdown table"
+        )
+    if 'rowspan="2"' not in content:
+        raise RuntimeError(
+            "merged 11:00/13:00 Drawer cell must use rowspan=\"2\" "
+            "(T-P0-677 cell-merge)"
         )
     # Slim invariant: under 200 lines (excluding sentinel comment).
     n_lines = content.count("\n") + 1

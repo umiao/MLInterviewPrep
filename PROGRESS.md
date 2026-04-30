@@ -501,3 +501,19 @@
   - 4-script syntax check via `ast.parse` -> all OK.
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-676 --status completed`. Closes the Drawer-Fix series (T-P0-671..T-P0-675 + T-P1-676) -- every cross-table-corruption hub identified in the 2026-04-30 audit now uses the cd:// scheme.
+
+## 2026-05-01 15:05 -- [T-P0-677] [Meta-Prep-A] Hub doc 82 schedule cell-merge via inline HTML <table rowspan="2">
+- **What I did**: Folded the byte-identical 11:00 / 13:00 coding rows of doc 82's schedule (the §T1 + §T4-bp Drawer cell was duplicated across both rows). GFM markdown does not support cell merging, so converted the schedule from a markdown pipe-table to inline HTML `<table>` with `rowspan="2"` on the 11:00 row's Drawer cell and that cell omitted on 13:00. Other rows (09:00 SD -> §T2, 15:00 BQ -> §T3) kept their own per-row Drawer cells. Cell-internal links use HTML `<a href="cd://N">` because GFM does not parse markdown link syntax inside HTML element content -- rehype-raw + MarkdownPreview's `components.a` override still routes those through `onCdLinkClick` to CompanyDocDrawer. Confirmed by Vitest renderToStaticMarkup: cd:// links inside HTML <td> render as `<button>`, not `<a target="_blank">`.
+- **Deliverables**:
+  - `scripts/seed_meta_ai_native_prep.py` -- replaced markdown schedule table with inline HTML <table>; updated `validate_content` to (1) count cd:// in BOTH markdown `[...](cd://N)` and HTML `href="cd://N"` forms (>=8 total: 4 schedule + 4 sub-doc previews), (2) reject any stale db:// in either form, (3) assert `<table>` + `rowspan="2"` markers exist (locks the cell-merge contract at seed-time so a future markdown-table revert is rejected before commit).
+  - `src/frontend/src/components/ui/MarkdownPreview.test.tsx` -- new test "renders cd:// inside an inline HTML <table rowspan> as drawer-button" rendering a 11:00/13:00 rowspan="2" table and asserting (a) <table> + rowspan attribute present (case-insensitive: React serializes camelCase rowSpan in renderToStaticMarkup, real DOM normalizes back to lowercase), (b) cd:// links render as <button> not anchors, (c) >=2 buttons in the merged cell (T1 + T4-bp), (d) no <a target="_blank"> fallthrough.
+- **Sanity check result**:
+  - `python scripts/seed_meta_ai_native_prep.py` -> [UPDATE] id=82 old_len=3541 new_len=3636 delta=+95. Re-run -> [UNCHANGED] 0 writes (idempotent).
+  - `python scripts/audit_uri_consistency.py --hub 82` -> 0 errors, 8 warnings (all 8 cd:// links detected; warnings are the expected cross-table cd://86,87,88,89-also-in-problems disambiguation flag, not failures).
+  - `python scripts/audit_uri_consistency.py` (all docs) -> 17 valid + 52 warnings + 0 errors. Doc 82's 8 links match the schedule (4) + sub-doc previews (4) = 8 expected references.
+  - `npx vitest run src/components/ui/MarkdownPreview.test.tsx` -> 18/18 passed (the new test plus the 17 existing).
+  - `npx vitest run` (full frontend) -> 210/210 passed across 18 test files.
+  - `python -m pytest tests/` -> 1227/1227 passed (backend smoke).
+  - Doc 82 line count = 104 (well under the 200-line slim budget).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-677 --status completed`.

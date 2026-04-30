@@ -15,6 +15,18 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-678: [Meta-Prep-B] Doc 86 §T1 Code-Pad Prompt — major rewrite per review (1-sentence Version A prompt, fix Step1 AI-clarify contradiction, replace opener, drop OrderedDict critique, add §六 6-pack)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Source review attachment: rewrite company_documents.id=86. Concrete edits: (1) §1 30-sec opener: replace 'Cool. Before I touch the AI...' with the §五 30-sec opener — 'Before I bring in the AI, I'd like to drive this myself first — restate, lay out AC + edges, sketch approach. Then I'll use AI to draft and pressure-test edges, but review line-by-line before we run. Does that work, or would you prefer I lean on AI sooner?' (2) §2 KILL the entire 30+ line PHASE 1-4 system prompt; replace with Version A canonical 1-sentence English prompt: 'Don't write code until I give you the acceptance criteria and edge cases; after you draft, surface every assumption you made and every edge case you didn't handle as a gap list for me to decide on rather than silently fixing them, and flag any stdlib API you're not 100% sure exists.' Add Version B as alt for shorter scenarios. (3) §3 Step 1: clarify that clarifying questions go FROM YOU TO THE INTERVIEWER, not AI-asks-you (current PHASE 1 in prompt is wrong). (4) §4 LRU: drop the 'AI used OrderedDict, force it to rewrite' bit; replace with 'first ask interviewer which implementation they want to see — that's the senior move.' (5) Add new §6 (or fold into existing structure) with the review §六 6-pack: continuous narration, AI-vs-your-direction handling, time allocation 3/3/10/5/5/5 for 45-min, manual trace as review step, fallback when AI is stuck, prompt transparency. (6) Style: prefer Chinese narration; keep English only for terms; remove CN/EN duplicates. Acceptance: doc 86 length reduced (target <8000 chars from current 8969), 4-PHASE block gone, OrderedDict bit gone, §六 6 points present, opener matches §五 verbatim, content_hash regenerated.
+
+#### T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Source review attachment §四/§五/§六: doc 89 already aligned philosophically but missing 3 concrete deliverables. Concrete edits to company_documents.id=89: (1) Add new §X 'Canonical 1-sentence English prompt' section presenting Version A as recommended + Version B as shorter alt; explain why C is NOT recommended (explicit 'junior engineer' framing makes it look performative). (2) Add new §Y '30-second spoken opener' section with the §五 verbatim text + design rationale (4 bullets: drive-myself-first anchors on you, three explicit actions, AI as edge-pressure-tester not code-writer, line-by-line review before run, end-with-option-not-approval). (3) Audit existing §6+ for the review §六 6-pack (continuous narration / AI-vs-your-direction / time allocation 45-min / manual trace / fallback / prompt transparency); fill any missing items. (4) Cross-link from doc 86 §1 opener and §2 prompt sections to doc 89 via cd://89 anchor refs. (5) Style: Chinese narration + English term first-occurrence-expansion; no large CN/EN duplicate blocks. Acceptance: doc 89 contains Version A and Version B verbatim from review attachment lines 56-69, contains 30-sec opener verbatim from lines 87-93, all 6 of §六 covered.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -65,6 +77,18 @@ AC:
 - vitest suite passes
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
+
+#### T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of 5 talking points for proper paragraph breaks (currently dense walls of text per pitch), (2) bold key tradeoff phrases + English kill-line, (3) ensure first-occurrence English term format **English** (acronym, 中文) per feedback_content_style_cn_en.md, (4) remove CN-EN duplicate phrasing where the same idea appears in both languages back-to-back, (5) DO NOT change the 5 talking points themselves — content frozen, only style. Acceptance: doc 87 readable as scannable bullet list (not wall of text), each pitch has at most 2-3 paragraphs, no CN-EN duplicate phrasing, file paths still clickable.
+
+#### T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 30-45 sec spoken pitch into 2-3 paragraphs (currently wall-of-text), (2) bold the English kill-line so it visually stands out from the surrounding pitch, (3) ensure AI-native angle paragraph is visually distinct from STAR pitch, (4) remove CN-EN duplicate phrasing, (5) verify the 5-trigger -> story routing table at the end is intact and uses correct cd:// or anchor links. DO NOT change the 5 stories themselves (per docs/workflow/story_rewrite_protocol.md, story content is golden). Acceptance: doc 88 each story has at most 2-3 paragraphs, kill-lines bolded, no CN-EN duplicate phrasing, routing table intact, file paths to bq_behavioral_examples.json EX-14/BLOG-03/EX-01/EX-05/EX-17 still resolvable.
 
 ### P2 -- Nice to Have
 
@@ -335,6 +359,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
+- [x] **2026-04-30** -- T-P0-677: [Meta-Prep-A] Hub doc 82 schedule cell-merge — fold 11:00/13:00 identical coding rows via <table> rowspan; verify cd://86 + cd://89 remain clickable in MarkdownPreview. Issue: hub schedule table at company_documents.id=82 has two coding rows (11:00 Sai Srujan, 13:00 Nikhil) with byte-iden
 - [x] **2026-04-30** -- T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke. Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
 - [x] **2026-04-30** -- T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest. Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two dra
 - [x] **2026-04-30** -- T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest. Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/err

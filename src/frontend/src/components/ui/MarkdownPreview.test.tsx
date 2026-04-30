@@ -152,6 +152,39 @@ describe("MarkdownPreview link handling", () => {
     expect(html).toMatch(/<a[^>]*href="cd:\/\/87"/);
     expect(html).toMatch(/<a[^>]*target="_blank"/);
   });
+
+  it("renders cd:// inside an inline HTML <table rowspan> as drawer-button", () => {
+    // T-P0-677: the Meta AI-Native hub schedule (doc 82) uses inline HTML
+    // <table> with rowspan="2" on the merged 11:00/13:00 coding row to fold
+    // two byte-identical Drawer-link cells. The cell links use HTML
+    // <a href="cd://N"> (not markdown [text](cd://N)) because GFM markdown
+    // is not parsed inside HTML cell content. Lock the contract here:
+    // rehype-raw + components.a override must still route HTML <a> with
+    // cd:// to the click handler, not fall through to a plain <a>.
+    const handler = (id: number) => id;
+    const md = [
+      "<table>",
+      "<tbody>",
+      '<tr><td>11:00</td><td rowspan="2"><a href="cd://86">T1</a> · <a href="cd://89">T4-bp</a></td></tr>',
+      "<tr><td>13:00</td></tr>",
+      "</tbody>",
+      "</table>",
+    ].join("\n");
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown={md} onCdLinkClick={handler} />
+    );
+    expect(html).toMatch(/<table/);
+    // renderToStaticMarkup emits React prop name (camelCase rowSpan); the
+    // actual browser DOM normalizes back to lowercase rowspan. Match either.
+    expect(html).toMatch(/rowspan="2"/i);
+    // Both cd:// links must render as <button>, not anchor target="_blank".
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*cd:\/\//);
+    // T1 + T4-bp = 2 buttons inside the merged cell.
+    const buttonCount = (html.match(/<button/g) ?? []).length;
+    expect(buttonCount).toBeGreaterThanOrEqual(2);
+    expect(html).toContain("T1");
+    expect(html).toContain("T4-bp");
+  });
 });
 
 describe("MarkdownPreview inline code and lists", () => {
