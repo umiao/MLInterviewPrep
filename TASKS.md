@@ -15,33 +15,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-671
-- **Description**: Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/error UX.
-
-Source: NEW file src/frontend/src/components/CompanyDocDrawer.tsx (mirror src/frontend/src/components/problems/ProblemDrawer.tsx structure).
-
-Spec:
-- Props: { docId: number | null, onClose: () => void }
-- React Query: queryKey ['companyDoc', docId], enabled when docId != null, fetches /company-documents/{docId}
-- SlideOverPanel render with title from doc.title; Description-equivalent shows doc.content via MarkdownPreview
-- **Per design review point #1 — explicit 404 UI**: when useQuery returns 404, show 'Document not found (id={docId})' inline (NOT a blank panel); not a toast — must be visible inside the drawer
-- **Per design review point #2 — observability**: when useQuery errors (any non-200), console.warn with [CompanyDocDrawer] cd://{docId} fetch failed: {error.message}. This log lets us catch silent regressions like the original bug
-- **Recursive cd:// inside drawer**: pass onCdLinkClick to the inner MarkdownPreview that REPLACES current docId with the new one (do NOT stack drawers — per design review point #3, history is YAGNI for now). Add a TODO comment 'observe nested-drawer depth in usage; if multi-level navigation appears, add history stack'
-- Pass onLcLinkClick + onDbLinkClick through to inner MarkdownPreview as well so embedded LC/problem links inside a doc work too — they should set OUTER drawer state via parent callbacks, not nest locally
-- Show is_golden badge if doc.is_golden; show doc_kind badge
-
-Vitest (src/frontend/src/components/CompanyDocDrawer.test.tsx):
-- Renders title + content when fetch returns 200
-- Renders 'Document not found' explicit message when fetch returns 404
-- Renders 'Failed to load document' (or similar) when fetch returns 5xx, AND console.warn was called
-
-Sanity: vitest run; tsc clean. NO PrepNotesPage wiring in this task — that is T4.
-
-Depends on T-P0-671 (the backend endpoint must exist for the queries to work).
-
 #### T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest
 - **Priority**: P0
 - **Complexity**: M
@@ -446,6 +419,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest. Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/err
 - [x] **2026-04-30** -- T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest. Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
 - [x] **2026-04-30** -- T-P0-671: [Drawer-Fix-T1] Backend GET /company-documents/{id} endpoint (id-only, no company_id required) + pytest 200/404 cases. Goal: Add a company-id-less endpoint so frontend drawers can resolve cd://N without knowing which company owns the doc.
 - [x] **2026-04-30** -- T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc. Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01
