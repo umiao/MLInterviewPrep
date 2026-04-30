@@ -9,29 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-667, T-P0-668, T-P0-669
-- **Description**: Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01)') as a SLIM hub with drawer links to T1/T2/T3/T4-bp sub-docs (per reference_dblc_drawer_links.md memory: use [title](db://N) markdown — NEVER HTML <details>); (b) author a NEW best-practices doc on 临场写 prompt 的 best practice (思考顺序 + 逻辑 + common pitfalls), distilled from harness experience.
-
-Best-practices doc content (Chinese narration + English terms):
-- 思考顺序 (Thinking order): clarify problem → state domain assumptions to LLM → spec acceptance criteria + edge cases → ask for skeleton → review → ask for edges → review → run → review output
-- 逻辑顺序 (Logical order in the prompt itself): role/context → input/output contract → constraints (perf / memory / API) → edge cases → 'show your reasoning before code' directive → 'flag any assumption you made' directive
-- Anti-patterns (Common pitfalls): 'make it work' (vague AC); accepting first output blindly; not naming domain ('this is a streaming-rank model with budget P95<200ms'); not stating which library/version constraints; iterating on output instead of prompt
-- Verification rituals (drawn from the user's own harness): treat LLM output as junior PR not source of truth; always run + read errors; assert on shape before content; have a stop-condition criterion before starting a chain of prompts
-- One worked example: a side-by-side 'weak prompt vs strong prompt' on the same coding question, with the LLM output diff showing why structure matters
-
-Deliverables:
-1. NEW idempotent seed script under scripts/ creating doc titled '[Meta] AI-Native — 临场 Prompt 写作 Best Practices'.
-2. UPDATED idempotent seed script (or new one) restructuring doc id=82: keep its title; replace body with slim hub markdown that drawer-links to T1/T2/T3/T4-bp doc IDs via [title](db://N). Hub also lists day-of-interview quick-reference (timing, opening line).
-3. Run scripts, verify drawer links open in SlideOverPanel modal in MLI frontend, verify hub doc is short (<200 lines) and not bloated.
-4. Idempotent re-run (no duplicate rows / no double-applied edits).
-
-Invariant 3 compliance. NO HTML <details>; only [title](db://N) markdown drawer links per memory.
-
-Blocks on T-P0-667, T-P0-668, T-P0-669 because hub needs their doc IDs to link to.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -357,6 +334,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc. Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01
 - [x] **2026-04-30** -- T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17). Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-0
 - [x] **2026-04-30** -- T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells). Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harnes
 - [x] **2026-04-30** -- T-P0-667: [Meta-AINative-T1] Code-Pad LLM Prompt + 3-Step Playbook (clarify→spec AC→review). Goal: Distill scripts/seed_meta_ai_native_prep.py (already-seeded doc id=82) into a copy-pasteable code-pad LLM system p
