@@ -5,65 +5,9 @@
 
 ## In Progress
 
-#### T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has independent narrative value (DSA/ML-Practitioner/ML-SD/HM prep tips) — revert wipes that. Strategy:
-
-(a) Re-run `python scripts/seed_pinterest_onsite_prep.py` to restore doc 83 to seed-defined CONTENT. The seed CONTENT does NOT have the new itinerary -- it's the original prep narrative -- so this DOES restore the narrative.
-
-(b) But the seed CONTENT also has the now-stale '当前状态: HR prep call 2026-04-29 14:00 PT；onsite 日期 TBD this week' line. Consider editing the SEED file (not the DB!) to:
-   - Remove the 'TBD this week' status line
-   - Add a redirect note at top: '> **Schedule lives on the Dashboard** (left-nav first item) — InterviewTimeline widget reads interview_events table. This doc is for prep narrative only.'
-   - Bump the 2026-04-28 sentinel comment if needed
-After editing the seed, re-run -> [UPDATE] -> doc 83 has narrative + redirect note, no schedule data.
-
-(c) Reset companies.id=29 interview_stages JSON and notes back to pre-2026-04-30 state. **OPEN QUESTION for user**: there's no canonical seed for companies.interview_stages -- need to find the original value (git blame on data/ or first-session migration) before we can restore. Phase-1 commit will paste current doc 83 + companies.id=29 row to user for revert-strategy decision.
-
-ACCEPTANCE CRITERIA:
-- AC1: Seed file edited with redirect note (single addition, narrative preserved)
-- AC2: `python scripts/seed_pinterest_onsite_prep.py` exits 0 with [UPDATE]
-- AC3: `SELECT content FROM company_documents WHERE id=83` contains 'Schedule lives on the Dashboard' AND original §1-§6 narrative AND does NOT contain 'CONFIRMED 2026-04-30' / 'Yiyang Zhang' / etc
-- AC4: `SELECT interview_stages FROM companies WHERE id=29` reverted to value user approves (paste current value, get user decision before edit)
-- AC5: Phase-1 deliverable to user includes: SQL counts (problem 1097 row, doc 83 length, interview_events count for company_id=29), Playwright Dashboard screenshot, current doc 83 content for revert-strategy decision
-
-DEPENDS ON: nothing
-COMPLEXITY: S (one seed edit + one re-run + companies row update pending user decision)
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
-
-#### T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-653
-- **Description**: Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
-
-CHANGED FROM ORIGINAL PLAN (per reviewer feedback timebomb #1):
-- **Canonical key changed**: `(company_id, scheduled_at, title)` -> `(company_id, scheduled_at, interviewer_name)`. Reason: title is editable; renaming 'ML Systems Design' to 'ML SD' or 'System Design Round' breaks uniqueness. Interviewer name + scheduled_at is far stabler. Implementation: extract interviewer name into a dedicated column we'll match on, OR parse the title 'Pinterest VO Day X RY -- <Round> | <Interviewer>' format and match on the trailing '| <Interviewer>' suffix.
-- **Embedded twice-run assertion** (per reviewer timebomb #2): script must run itself twice internally. After the first INSERT pass, immediately run the same logic a second time and assert the second pass reports 0 inserts + 0 updates. If the assertion fails, exit non-zero with diagnostic. This catches non-idempotent bugs at seed time, not after deploy.
-
-EVENTS (5 rows, naive Pacific):
-1. company_id=29, type='system_design', title='Pinterest VO Day 1 R1 -- ML Systems Design | Yiyang Zhang', scheduled_at='2026-05-05 15:00:00', duration=60, status='upcoming'
-2. company_id=29, type='behavioral', title='Pinterest VO Day 1 R2 -- HM/Competency | Daniel Liu', scheduled_at='2026-05-05 16:00:00', duration=45, status='upcoming'
-3. company_id=29, type='technical', title='Pinterest VO Day 2 R1 -- Data/Algos | Jiankai Sun', scheduled_at='2026-05-06 13:00:00', duration=45, status='upcoming'
-4. company_id=29, type='technical', title='Pinterest VO Day 2 R2 -- Data/Algos | Yijian Xiang', scheduled_at='2026-05-06 14:00:00', duration=45, status='upcoming'
-5. company_id=29, type='technical', title='Pinterest VO Day 2 R3 -- ML Practitioner | Zihao Zhang', scheduled_at='2026-05-06 15:00:00', duration=60, status='upcoming'
-
-description fields cross-link to doc 83 + include break-time notes (Day 2 has 15min break between rounds).
-
-ACCEPTANCE CRITERIA:
-- AC1: scripts/_add_pinterest_vo_2026-05-05_06.py exists; canonical key uses interviewer name not title
-- AC2: First run reports 5 [INSERT]; SECOND run (embedded inside the script) reports 5 [UNCHANGED] AND the script exits 0 with assertion-pass message
-- AC3: `SELECT count(*) FROM interview_events WHERE company_id=29 AND scheduled_at LIKE '2026-05-0%'` returns 5
-- AC4: `SELECT scheduled_at, title FROM interview_events WHERE company_id=29 ORDER BY scheduled_at` returns 7 rows in chronological order: 2 prior + 5 new (HR call 2026-04-08, phone screen 2026-04-16, then 5 onsite 2026-05-05 to 2026-05-06)
-- AC5: A separate verify script: `python scripts/_add_pinterest_vo_2026-05-05_06.py --verify` returns exit 0 reporting 5 rows match expected and 0 drift
-- AC6: Phase-1 commit deliverable to user: SQL count assertion output (PRIMARY), then Dashboard screenshot (SECONDARY) per reviewer 'SQL > screenshot' priority
-
-DEPENDS ON: T-P0-653
-COMPLEXITY: S (one new ~100-line seed)
 
 #### T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation
 - **Priority**: P0
@@ -595,6 +539,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
+- [x] **2026-04-29** -- T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline). Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
+- [x] **2026-04-29** -- T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits. Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has indep
 - [x] **2026-04-29** -- T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass. ## Goal
 - [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
 - [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
