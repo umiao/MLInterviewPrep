@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 587 completed tasks archived as of latest archival.
+> 604 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -894,3 +894,29 @@ Make scripts/check_emoji.py honor sys.argv[1:]: if non-empty, s
 USER-RATIFIED DECISION (Discord msg 149777377600654
 - [x] **2026-04-27** -- T-P2-618: [followup] LC 864 notes seeded (bitmask BFS canonical + list-of-bool baseline). Discord followup. User wrote LC 864 list-of-bool BFS solution, requested DB notes + bitmask compression upgrade. Seeded 
 - [x] **2026-04-27** -- T-P2-619: [followup] LC 502 IPO notes seeded (sort + max-heap greedy). Discord followup. User wrote LC 502 sort+max-heap solution and asked for DB notes. Seeded notes via scripts/_update_lc50
+- [x] **2026-04-28** -- T-P0-628: [UBER-VO-1] Audit + inventory: extract ML Coding & ML Sys Design content from all Uber sources. ## Goal
+Build a complete inventory of every ML Coding + ML System Design topic that should land in the Uber VO prep, sou
+- [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
+Create one new Uber company_document covering the 4 KNOWN ML Coding items from the source TXT, at the same Staff
+- [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
+Create one new Uber company_document covering all ML System Design items at Staff-level depth, with the source T
+- [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
+Original plan was a bespoke \`pages/UberIndex.tsx\` with 5 tabs + URL state + dra
+- [x] **2026-04-29** -- T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass. ## Goal
+End-to-end manual verification that ALSO tests learning outcome (verbal recall), not just wiring. Per critical r
+- [x] **2026-04-29** -- T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits. Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has indep
+- [x] **2026-04-29** -- T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline). Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
+
+CHANGED FROM ORIGINAL PLAN 
+- [x] **2026-04-29** -- T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation. Phase 1 verification. **Per reviewer: SQL > screenshot** -- SQL proves DB state, screenshot only proves UI render. Both 
+- [x] **2026-04-29** -- T-P0-662: Pinterest HR prep call (Daniel McCray, 2026-04-30 14:00 PDT) added to InterviewTimeline. User received email from Daniel McCray (Pinterest interview coordinator/recruiter) proposing to move prep call to 2026-0
+- [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
+P1 -> **P0**. Reasoning: id=33 is the active reference doc for the Round-3 Design
+- [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
+Companion task to T-P0-629. Once T-P0-628 audit produces its NEW inventory and T-P0-629 lands the 4 known items,
+- [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
+- [x] **2026-04-27** -- T-P2-620: [followup] LC 2571 notes rewrite (bit-greedy + NAF formula) + Uber tag. Discord followup. User wrote LC 2571 with the canonical bit-trick (skip zeros + n&3==3 carry / n&3==1 subtract) and aske
+- [x] **2026-04-27** -- T-P2-621: [LC2861] Seed Maximum Number of Alloys notes (binary-search-on-answer canonical). Discord ad-hoc request msg 1498348552362000474. Write LC 2861 (Maximum Number of Alloys) seed notes to data/mle_prep.db 
+- [x] **2026-04-27** -- T-P2-622: [LC384] Seed Shuffle an Array notes (Fisher-Yates + sort-based shuffle distillation) + Uber tag. Discord ad-hoc msg 1498353628937715803. User added their own LC 384 attempt and asked to distill discussion: (1) Fisher-
+- [x] **2026-04-27** -- T-P2-623: [LC855] Seed Exam Room notes (brute-force sorted-list + heap follow-up). Discord ad-hoc msg 1498356808602095685. User pasted LC official editorial brute-force code and asked for notes + explici
+- [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification

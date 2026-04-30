@@ -28,6 +28,11 @@
             "type": "command",
             "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/commit_msg_guard.py\"",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/invariant3_guard.py\"",
+            "timeout": 10
           }
         ]
       },
@@ -42,6 +47,11 @@
           {
             "type": "command",
             "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/tasks_md_guard.py\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/invariant3_guard.py\"",
             "timeout": 10
           }
         ]

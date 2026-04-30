@@ -9,49 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-655
-- **Description**: **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions can ignore. Real Invariant-3 enforcement requires a CI/hook guardrail. Phase 2 PRECEDES the skill so the skill builds on a real foundation, not just prose.
-
-IMPLEMENTATION:
-Add a PreToolUse hook (or git pre-commit hook -- pick the one that fires earlier) that scans Python files being written/edited under scripts/migrations/ AND files passed to bash that look like 'python scripts/migrations/...', looking for SQL-write patterns against data/*.db.
-
-If any of these are found AND the target DB path resolves to data/mle_prep.db (or any *.db under data/), BLOCK the tool call with a message:
-
-  '[INVARIANT-3 VIOLATION] scripts/migrations/* must not write to the DB.
-  Source-of-truth is scripts/seed_*.py. Find the seed that owns this row
-  type and edit/extend it, then re-run the seed. See LESSONS.md 2026-04-30
-  Invariant-3 entry and the /dashboard skill for widget->seed mapping.'
-
-This catches the EXACT mistake I made twice this session, at write-time, before commit, before re-seed wipes the change. False-positive escape hatch: the hook respects a magic comment '# INVARIANT-3-EXEMPT: <reason>' on the first line of the file.
-
-ALTERNATIVE / COMPLEMENT: ruff custom rule or pytest test that grep-scans scripts/migrations/ in CI.
-
-ACCEPTANCE CRITERIA:
-- AC1: Hook file in .claude/hooks/ (e.g. invariant3_guard.py) wired into .claude/settings.json PreToolUse for Write+Edit+Bash
-- AC2: Hook BLOCKS Write to scripts/migrations/foo.py with body containing 'session.execute(text("UPDATE"))' targeting data/mle_prep.db. Test passes.
-- AC3: Hook ALLOWS Write to scripts/seed_<x>.py with the same body (path-based exemption)
-- AC4: Hook ALLOWS scripts/migrations/foo.py with first-line '# INVARIANT-3-EXEMPT: <reason>' (escape hatch)
-- AC5: Hook self-test 'python .claude/hooks/invariant3_guard.py --test' runs test cases (block / block / allow / allow + new patterns below) and exits 0
-- AC6: Hook would have blocked both add_uber_prob_nextword.py and update_pinterest_onsite_itinerary.py at write time -- back-test against logs/
-
-[USER CONSTRAINTS 2026-04-30 green-light]
-- AC7: PATTERN COVERAGE -- hook MUST catch at least 3 SQL-write forms, NOT just literal INSERT/UPDATE/DELETE strings:
-    (i)  raw string:    cur.execute('INSERT INTO data ...')
-    (ii) f-string:      cur.execute(f'INSERT INTO {table} ...')   # current bypass risk
-    (iii) executemany:  cur.executemany('INSERT INTO ...', rows)
-  Self-test in AC5 must include one block-case per form. Don't over-fit on string-prefix matching -- consider AST-level scanning (ast.parse + walk Call nodes targeting .execute / .executemany) so f-string interpolation is detected by the call site, not the literal.
-- AC8: NOT SILENT -- hook output is a visible warning message AND exits non-zero. Do not silently allow with a log entry; the user wants the violation surfaced at the developer's terminal.
-- AC9: COMPLETION GATE -- before marking T-P0-660 completed, paste to PROGRESS.md (and Discord-friendly excerpt) BOTH:
-    (i)  Hook trigger demo: deliberately Write a violating scripts/migrations/_test_violation.py with raw + f-string + executemany variants; show the hook fires for each (3 separate block messages).
-    (ii) False-positive sweep: run the hook against every existing scripts/migrations/* file (read-only scan mode) and confirm zero blocks (or, for any block, document why it's a true positive).
-  These two outputs are the gate. Without them, status stays in_progress.
-
-DEPENDS ON: T-P0-655 (Phase 1 complete + user green-light)
-COMPLEXITY: M (~150-250 lines of hook code + 6+ test cases)
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -317,7 +274,7 @@ Scope: backend schema + router + frontend pill rendering + seed. M complexity.
 #### T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose
 - **Priority**: P1
 - **Complexity**: S
-- **Depends on**: T-P0-655, T-P0-661
+- **Depends on**: T-P0-661
 - **Description**: Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill's job: make the right path the easy default for any future Claude session that gets a 'dashboard / app / left-nav-first' request. **DEPENDS on T-P0-660 (lint exists) AND T-P0-661 (root cause + recommendation)** -- skill design absorbs the root-cause memo's recommendation.
 
 REVISED DESIGN (per reviewer hole #4: 3 memory files -> 1 reference + CLAUDE.md):
@@ -493,7 +450,7 @@ Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
 #### T-P2-636: [UBER-VO-5b POST-5/4] Bespoke pages/UberIndex.tsx with 5-tab charter switcher (deferred)
 - **Priority**: P2
 - **Complexity**: L
-- **Depends on**: T-P0-632
+- **Depends on**: None
 - **Description**: ## Status: DEFERRED post-2026-05-04 per critical review
 This is the original T-P0-632 scope (bespoke React page + URL state + drawer state + browser back/forward + accessibility + vitest). Moved out of the 5/4-readiness critical path. Pick up only if the T-P0-632 MVP (id=37 patch) proves insufficient during actual prep usage.
 
@@ -523,27 +480,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 587 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-29** -- T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep. helixos/CLAUDE.md has a Key Constraints section codifying that pyproject.toml and requirements.txt must be kept in sync 
 - [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
 - [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
-- [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
-- [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
-- [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)
-- [x] **2026-04-29** -- T-P0-662: Pinterest HR prep call (Daniel McCray, 2026-04-30 14:00 PDT) added to InterviewTimeline. User received email from Daniel McCray (Pinterest interview coordinator/recruiter) proposing to move prep call to 2026-0
-- [x] **2026-04-29** -- T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation. Phase 1 verification. **Per reviewer: SQL > screenshot** -- SQL proves DB state, screenshot only proves UI render. Both 
-- [x] **2026-04-29** -- T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline). Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
-- [x] **2026-04-29** -- T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits. Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has indep
-- [x] **2026-04-29** -- T-P0-634: [UBER-VO-7] Manual smoke + verification: full multi-charter flow + content correctness pass. ## Goal
-- [x] **2026-04-29** -- T-P0-632: [UBER-VO-5 MVP] Patch id=37 Round 3+4 with anchor links to new ML Coding/SD docs (deferring full FE page). ## MVP downscope (per critical review)
-- [x] **2026-04-29** -- T-P0-630: [UBER-VO-3] Seed company_document: 'Uber ML System Design Golden Answers' (Staff-level). ## Goal
-- [x] **2026-04-29** -- T-P0-629: [UBER-VO-2] Seed company_document: 'Uber ML Coding Golden Answer 集合' (Staff-level). ## Goal
-- [x] **2026-04-28** -- T-P0-628: [UBER-VO-1] Audit + inventory: extract ML Coding & ML Sys Design content from all Uber sources. ## Goal
-- [x] **2026-04-27** -- T-P2-624: [LC545] Seed Boundary of Binary Tree notes (4-state flag DFS + deque appendleft). Discord ad-hoc msg 1498358265019371650. User pasted one-pass DFS solution with ROOT/LEFT/RIGHT/INNER flag classification
-- [x] **2026-04-27** -- T-P2-623: [LC855] Seed Exam Room notes (brute-force sorted-list + heap follow-up). Discord ad-hoc msg 1498356808602095685. User pasted LC official editorial brute-force code and asked for notes + explici
-- [x] **2026-04-27** -- T-P2-622: [LC384] Seed Shuffle an Array notes (Fisher-Yates + sort-based shuffle distillation) + Uber tag. Discord ad-hoc msg 1498353628937715803. User added their own LC 384 attempt and asked to distill discussion: (1) Fisher-
-- [x] **2026-04-27** -- T-P2-621: [LC2861] Seed Maximum Number of Alloys notes (binary-search-on-answer canonical). Discord ad-hoc request msg 1498348552362000474. Write LC 2861 (Maximum Number of Alloys) seed notes to data/mle_prep.db 
-- [x] **2026-04-27** -- T-P2-620: [followup] LC 2571 notes rewrite (bit-greedy + NAF formula) + Uber tag. Discord followup. User wrote LC 2571 with the canonical bit-trick (skip zeros + n&3==3 carry / n&3==1 subtract) and aske
+- [x] **2026-04-29** -- T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db. **Per reviewer: 'Documentation != Constraint'** -- the dashboard skill (T-P1-656) is documentation that future sessions 
