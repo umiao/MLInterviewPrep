@@ -9,6 +9,71 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harness practice + breadth.
+
+Five points (each: 30-sec Chinese spoken pitch + English kill-line + concrete file/path for live reference if asked):
+1. 3-layer harness model (hooks/agents/skills) — see root CLAUDE.md §Three-Layer Responsibility Model + .claude/hooks/, .claude/agents/, .claude/skills/
+2. Invariant 3: every DB row backed by git-tracked idempotent seed script — hook-enforced (search MLI for invariant3_guard.py); contrast with ad-hoc SQL anti-pattern
+3. 521+ autonomous sessions + session_state.json bootstrap (cite root T-P1-257: Windows MSYS bash /c/... path-readability silent failure that prevented all_done reset; the cd-into-WORK_DIR-then-python fix) — pull exact session count from PROGRESS.md
+4. 28-topic ML fundamentals KG with tier-classification (T1/T2/T3) — data/ml_fundamentals_inventory.yaml; cite tier counts
+5. LLM-as-Judge production deployment (~$500/day, 18K annotations vs human $0.30-0.80/label) — from BLOG-03 in docs/bq_behavioral_examples.json
+
+Deliverables:
+1. NEW idempotent seed script under scripts/ creating Meta company_id=31 doc titled '[Meta] AI-Native Domain Breadth — 5 Talking Points'.
+2. Doc body Chinese narration + English terms; each point: 30-sec pitch / kill-line / file path / 'when to drop this' contextual cue.
+3. Run + verify visibility + idempotent re-run.
+
+Invariant 3 compliance. Cn narration + En terms (full expansion on first use).
+
+#### T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Goal: Tighten 5 behavioral stories specifically angled for 'AI-native impactful engineer' framing for Meta onsite 2026-05-01.
+
+Source: docs/bq_behavioral_examples.json (do NOT edit it — read-only source per repo conventions).
+
+Five stories — for each: 30-45 sec Chinese spoken format + English kill-line + explicit 'AI-native angle' callout (why this story specifically demonstrates AI-native impact, not just general SWE):
+1. EX-14 GenAI ROI Math — leadership said 'upgrade to GenAI', no requirements; week-1 ROI math (QPS / latency / integration hardness) killed agentic search; flipped to LLM-as-Judge measurement infra (unglamorous-but-high-value); scaled into multi-team production. AI-native angle: feasibility-first discipline, kill bad AI ideas with math before prototype.
+2. BLOG-03 Relevance Standards vs Ads Pressure — refused threshold-lowering; built LLM-as-Judge pipeline (18K annotations/day, $500/day). AI-native angle: turning conflict into AI tooling product; using LLM as ops lever not feature.
+3. EX-01 Search Diversity Intent-Collapse — Hacker Week self-framed; dashboard blindness; item→page-level structural diagnosis; 1-week end-to-end prototype. AI-native angle: framing ambiguous problems, diagnosing at right level.
+4. EX-05 XGBoost Deployment Latency + Silent CI Failure — early-exit + cheap rejection; URL-length / JSON-truncation silent failure; built payload stress-test team standard. AI-native angle: owning deployment reality, catching 'green CI broken prod' (relevant to LLM-in-harness).
+5. EX-17 Trust vs Reliance — declined manager protection after CI break; kill-line: 'I conflated being relied on with being trusted.' AI-native angle: integrity in AI-assisted role; not outsourcing judgment to the LLM.
+
+Deliverables:
+1. NEW idempotent seed script under scripts/ creating Meta company_id=31 doc titled '[Meta] AI-Native Behavioral 5-Pack'.
+2. Each story: header, 30-45 sec spoken delivery (Chinese), kill-line (English), AI-native angle (1-2 sentences why this story for Meta AI-native specifically), match-question hints (which BQ themes this answers).
+3. Run + verify + idempotent re-run.
+
+Invariant 3 compliance.
+
+#### T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-667, T-P0-668, T-P0-669
+- **Description**: Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01)') as a SLIM hub with drawer links to T1/T2/T3/T4-bp sub-docs (per reference_dblc_drawer_links.md memory: use [title](db://N) markdown — NEVER HTML <details>); (b) author a NEW best-practices doc on 临场写 prompt 的 best practice (思考顺序 + 逻辑 + common pitfalls), distilled from harness experience.
+
+Best-practices doc content (Chinese narration + English terms):
+- 思考顺序 (Thinking order): clarify problem → state domain assumptions to LLM → spec acceptance criteria + edge cases → ask for skeleton → review → ask for edges → review → run → review output
+- 逻辑顺序 (Logical order in the prompt itself): role/context → input/output contract → constraints (perf / memory / API) → edge cases → 'show your reasoning before code' directive → 'flag any assumption you made' directive
+- Anti-patterns (Common pitfalls): 'make it work' (vague AC); accepting first output blindly; not naming domain ('this is a streaming-rank model with budget P95<200ms'); not stating which library/version constraints; iterating on output instead of prompt
+- Verification rituals (drawn from the user's own harness): treat LLM output as junior PR not source of truth; always run + read errors; assert on shape before content; have a stop-condition criterion before starting a chain of prompts
+- One worked example: a side-by-side 'weak prompt vs strong prompt' on the same coding question, with the LLM output diff showing why structure matters
+
+Deliverables:
+1. NEW idempotent seed script under scripts/ creating doc titled '[Meta] AI-Native — 临场 Prompt 写作 Best Practices'.
+2. UPDATED idempotent seed script (or new one) restructuring doc id=82: keep its title; replace body with slim hub markdown that drawer-links to T1/T2/T3/T4-bp doc IDs via [title](db://N). Hub also lists day-of-interview quick-reference (timing, opening line).
+3. Run scripts, verify drawer links open in SlideOverPanel modal in MLI frontend, verify hub doc is short (<200 lines) and not bloated.
+4. Idempotent re-run (no duplicate rows / no double-applied edits).
+
+Invariant 3 compliance. NO HTML <details>; only [title](db://N) markdown drawer links per memory.
+
+Blocks on T-P0-667, T-P0-668, T-P0-669 because hub needs their doc IDs to link to.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -89,6 +154,36 @@ AC:
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to Write/Edit .claude/skills/dashboard/SKILL.md (worked around via _build_dashboard_skill.py idempotent applier). Widen .claude/settings.json (and corresponding settings.json across MLI/helixos/homestead/root) permission carve-out to allow direct Write/Edit on .claude/skills/*/SKILL.md path pattern. Verify by re-running a skill-authoring touch in a fresh autonomous session — no applier-script workaround should be needed. AC: (1) Pattern added to all 4 projects' settings.json (or shared/settings_shared.json if they share). (2) Self-test: Write to a fresh .claude/skills/_test_carveout/SKILL.md succeeds without permission denial. (3) Cleanup test file. (4) LESSONS.md note tagged [UNIVERSAL] for cross-project propagation. Hit class: 3 occurrences today (T-P1-256, T-P1-258, T-P1-656).
+
+#### T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/LESSONS.md.
+
+1. Vite proxy port mismatch (#frontend #vite-proxy #port-mismatch #dev-server #symptom-vs-cause #universal): when user reports frontend doesnt show backend changes, check `vite.config.ts target` port and curl through the proxy (NOT directly at backend) before blaming cache.
+
+2. Surface Identification widget-vs-prose (#ux-target-identification #dashboard #widget-vs-prose #universal): when user names a UI surface (dashboard / app / left nav), trace widget -> queryKey -> /api/<endpoint> -> <DB table> BEFORE editing. Pattern-matching to the largest text artifact is the failure mode.
+
+3. Invariant 3 seed-not-migration (#invariant-3 #seed-not-migration #db-source-of-truth #lint-hook #universal): for projects with regenerable DB content, every row must originate from a git-tracked, idempotent Python seed. NEVER write raw SQL UPDATE/INSERT against data/*.db outside scripts/seed_*.py. Lint-hook pattern is portable.
+
+Source: ~/Desktop/Gen_AI_Proj/MLInterviewPrep/LESSONS.md lines 268-292.
+Target: ~/Desktop/Gen_AI_Proj/claude-code-project-template/LESSONS.md (append, skip duplicates).
+Acceptance: 3 entries copied into template LESSONS.md verbatim; commit message references T-P1-658.
+
+#### T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+
+1. task_db.py: `has-unblocked` subcommand. ML has cmd_has_unblocked() (lines ~318-332) + subparser (lines ~427-432) using store.has_unblocked_tasks(); template lacks both. Universal -- used by autonomous_run.sh orchestrator startup gate.
+
+2. settings.json: permissions.allow includes `Write(.claude/session_state.json)` and `Edit(.claude/session_state.json)` carve-out. Added in helixos as T-P1-258 and propagated to ML; template still has no permissions.allow block. Universal -- needed for autonomous mode session_state.json updates without prompts.
+
+Source: ~/Desktop/Gen_AI_Proj/MLInterviewPrep/.claude/hooks/task_db.py + .claude/settings.json.
+Target: ~/Desktop/Gen_AI_Proj/claude-code-project-template (same paths).
+Acceptance: diff -q against template is clean for these two specific items; ML invariant3_guard.py reference is INTENTIONAL divergence and stays project-local.
 
 ### P3 -- Stretch Goals
 
@@ -304,6 +399,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-667: [Meta-AINative-T1] Code-Pad LLM Prompt + 3-Step Playbook (clarify→spec AC→review). Goal: Distill scripts/seed_meta_ai_native_prep.py (already-seeded doc id=82) into a copy-pasteable code-pad LLM system p
 - [x] **2026-04-29** -- T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep. helixos/CLAUDE.md has a Key Constraints section codifying that pyproject.toml and requirements.txt must be kept in sync 
 - [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
