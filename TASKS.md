@@ -5,9 +5,99 @@
 
 ## In Progress
 
+#### T-P0-653: Pinterest VO: revert misdirected prep_doc 83 + companies.interview_stages edits
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Phase 1 of revised plan. **PARTIAL revert + redirect** (NOT pure revert per reviewer feedback hole #2): doc 83 has independent narrative value (DSA/ML-Practitioner/ML-SD/HM prep tips) — revert wipes that. Strategy:
+
+(a) Re-run `python scripts/seed_pinterest_onsite_prep.py` to restore doc 83 to seed-defined CONTENT. The seed CONTENT does NOT have the new itinerary -- it's the original prep narrative -- so this DOES restore the narrative.
+
+(b) But the seed CONTENT also has the now-stale '当前状态: HR prep call 2026-04-29 14:00 PT；onsite 日期 TBD this week' line. Consider editing the SEED file (not the DB!) to:
+   - Remove the 'TBD this week' status line
+   - Add a redirect note at top: '> **Schedule lives on the Dashboard** (left-nav first item) — InterviewTimeline widget reads interview_events table. This doc is for prep narrative only.'
+   - Bump the 2026-04-28 sentinel comment if needed
+After editing the seed, re-run -> [UPDATE] -> doc 83 has narrative + redirect note, no schedule data.
+
+(c) Reset companies.id=29 interview_stages JSON and notes back to pre-2026-04-30 state. **OPEN QUESTION for user**: there's no canonical seed for companies.interview_stages -- need to find the original value (git blame on data/ or first-session migration) before we can restore. Phase-1 commit will paste current doc 83 + companies.id=29 row to user for revert-strategy decision.
+
+ACCEPTANCE CRITERIA:
+- AC1: Seed file edited with redirect note (single addition, narrative preserved)
+- AC2: `python scripts/seed_pinterest_onsite_prep.py` exits 0 with [UPDATE]
+- AC3: `SELECT content FROM company_documents WHERE id=83` contains 'Schedule lives on the Dashboard' AND original §1-§6 narrative AND does NOT contain 'CONFIRMED 2026-04-30' / 'Yiyang Zhang' / etc
+- AC4: `SELECT interview_stages FROM companies WHERE id=29` reverted to value user approves (paste current value, get user decision before edit)
+- AC5: Phase-1 deliverable to user includes: SQL counts (problem 1097 row, doc 83 length, interview_events count for company_id=29), Playwright Dashboard screenshot, current doc 83 content for revert-strategy decision
+
+DEPENDS ON: nothing
+COMPLEXITY: S (one seed edit + one re-run + companies row update pending user decision)
+
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
+
+#### T-P0-654: Pinterest VO: add 5 onsite rounds to interview_events (Dashboard InterviewTimeline)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-653
+- **Description**: Phase 1 of revised plan. Add 5 Pinterest VO rounds to interview_events via idempotent seed.
+
+CHANGED FROM ORIGINAL PLAN (per reviewer feedback timebomb #1):
+- **Canonical key changed**: `(company_id, scheduled_at, title)` -> `(company_id, scheduled_at, interviewer_name)`. Reason: title is editable; renaming 'ML Systems Design' to 'ML SD' or 'System Design Round' breaks uniqueness. Interviewer name + scheduled_at is far stabler. Implementation: extract interviewer name into a dedicated column we'll match on, OR parse the title 'Pinterest VO Day X RY -- <Round> | <Interviewer>' format and match on the trailing '| <Interviewer>' suffix.
+- **Embedded twice-run assertion** (per reviewer timebomb #2): script must run itself twice internally. After the first INSERT pass, immediately run the same logic a second time and assert the second pass reports 0 inserts + 0 updates. If the assertion fails, exit non-zero with diagnostic. This catches non-idempotent bugs at seed time, not after deploy.
+
+EVENTS (5 rows, naive Pacific):
+1. company_id=29, type='system_design', title='Pinterest VO Day 1 R1 -- ML Systems Design | Yiyang Zhang', scheduled_at='2026-05-05 15:00:00', duration=60, status='upcoming'
+2. company_id=29, type='behavioral', title='Pinterest VO Day 1 R2 -- HM/Competency | Daniel Liu', scheduled_at='2026-05-05 16:00:00', duration=45, status='upcoming'
+3. company_id=29, type='technical', title='Pinterest VO Day 2 R1 -- Data/Algos | Jiankai Sun', scheduled_at='2026-05-06 13:00:00', duration=45, status='upcoming'
+4. company_id=29, type='technical', title='Pinterest VO Day 2 R2 -- Data/Algos | Yijian Xiang', scheduled_at='2026-05-06 14:00:00', duration=45, status='upcoming'
+5. company_id=29, type='technical', title='Pinterest VO Day 2 R3 -- ML Practitioner | Zihao Zhang', scheduled_at='2026-05-06 15:00:00', duration=60, status='upcoming'
+
+description fields cross-link to doc 83 + include break-time notes (Day 2 has 15min break between rounds).
+
+ACCEPTANCE CRITERIA:
+- AC1: scripts/_add_pinterest_vo_2026-05-05_06.py exists; canonical key uses interviewer name not title
+- AC2: First run reports 5 [INSERT]; SECOND run (embedded inside the script) reports 5 [UNCHANGED] AND the script exits 0 with assertion-pass message
+- AC3: `SELECT count(*) FROM interview_events WHERE company_id=29 AND scheduled_at LIKE '2026-05-0%'` returns 5
+- AC4: `SELECT scheduled_at, title FROM interview_events WHERE company_id=29 ORDER BY scheduled_at` returns 7 rows in chronological order: 2 prior + 5 new (HR call 2026-04-08, phone screen 2026-04-16, then 5 onsite 2026-05-05 to 2026-05-06)
+- AC5: A separate verify script: `python scripts/_add_pinterest_vo_2026-05-05_06.py --verify` returns exit 0 reporting 5 rows match expected and 0 drift
+- AC6: Phase-1 commit deliverable to user: SQL count assertion output (PRIMARY), then Dashboard screenshot (SECONDARY) per reviewer 'SQL > screenshot' priority
+
+DEPENDS ON: T-P0-653
+COMPLEXITY: S (one new ~100-line seed)
+
+#### T-P0-655: Pinterest VO: verify Dashboard rendering via headless screenshot + user confirmation
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-654
+- **Description**: Phase 1 verification. **Per reviewer: SQL > screenshot** -- SQL proves DB state, screenshot only proves UI render. Both required, but SQL goes FIRST in the deliverable.
+
+PRIMARY (must pass before sending Discord reply):
+- SQL block A: `SELECT id, scheduled_at, event_type, duration_minutes, status, title FROM interview_events WHERE company_id=29 ORDER BY scheduled_at` -> exactly 7 rows (2 historical + 5 new), all with correct scheduled_at / type / duration / status
+- SQL block B: `SELECT count(*) FROM company_documents WHERE id=83 AND content LIKE '%CONFIRMED 2026-04-30%'` -> 0 (proving the misdirected doc 83 prose edit reverted)
+- SQL block C: `SELECT interview_stages FROM companies WHERE id=29` -> matches user-approved revert state (post T-P0-653 user decision)
+- API parity: `curl -s http://localhost:8000/api/timeline/events | jq '[.[] | select(.company_id==29)] | length'` matches SQL block A count of 7
+
+SECONDARY:
+- Playwright headless screenshot of http://localhost:5173/ (Dashboard root)
+- Visible-text grep finds all 5 interviewer names: Yiyang Zhang, Daniel Liu, Jiankai Sun, Yijian Xiang, Zihao Zhang
+- Screenshot saved to logs/pinterest_vo_dashboard_<timestamp>.png
+
+DELIVERABLE FORMAT for Discord (in order):
+1. SQL block A output (table form)
+2. SQL block B output (single 0 line)
+3. SQL block C output + a paste of the prior value for diff context
+4. API parity result
+5. Screenshot (file attachment)
+6. **Phase-2 entry-criteria checklist for user**: (a) confirm doc 83 partial-revert strategy correct, (b) confirm root cause investigation should proceed, (c) green-light Phase 2 (migration lint hook)
+
+ACCEPTANCE CRITERIA:
+- AC1: All 4 SQL/API checks above pass and are pasted to Discord in that order
+- AC2: Screenshot attached
+- AC3: User explicitly green-lights Phase 2 before this task is marked completed
+- AC4: Until user green-lights, status stays at 'pending_user_confirm' (use 'in_progress' as proxy if no such status)
+
+DEPENDS ON: T-P0-654
+COMPLEXITY: XS
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -87,6 +177,91 @@ AC:
 ### P3 -- Stretch Goals
 
 ## Blocked
+
+#### T-P0-651: Pinterest VO itinerary update (May 5-6 confirmed): doc 83 + companies row
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: [SUPERSEDED 2026-04-30 by T-P0-654 chain] Original update went to wrong surface (prep_doc prose + companies.interview_stages JSON) instead of the Dashboard's InterviewTimeline widget which reads interview_events table. The DB writes will be reverted; new rows will be added to interview_events via T-P0-654. See T-P0-654/655/656/657/658/659 chain.
+
+#### T-P0-652: Promote DB edits to seed scripts (Invariant 3 durable fix)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: [PARTIALLY-SUPERSEDED 2026-04-30] Pinterest portion folded into T-P0-653 (revert) + T-P0-654 (add to interview_events). Uber portion (doc 84 §5 + problem 1097 Invariant-3 promotion) carried forward as T-P0-657.
+
+#### T-P0-660: Phase 2 — Migration lint hook: forbid INSERT/UPDATE/DELETE in scripts/migrations/* against data/*.db
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-655
+- **Description**: **Per reviewer: 'Documentation ≠ Constraint'** — the dashboard skill (T-P1-656) is documentation that future sessions can ignore. Real Invariant-3 enforcement requires a CI/hook guardrail. Phase 2 PRECEDES the skill so the skill builds on a real foundation, not just prose.
+
+IMPLEMENTATION:
+Add a PreToolUse hook (or git pre-commit hook -- pick the one that fires earlier) that scans Python files being written/edited under scripts/migrations/ AND files passed to bash that look like `python scripts/migrations/...`, looking for:
+
+  1. `sqlite3.connect(...)` followed by `.execute('...UPDATE...')` / `.execute('...INSERT INTO ...')` / `.execute('...DELETE FROM...')`
+  2. SQLAlchemy session.add / session.merge / session.delete / session.execute(text('UPDATE'|'INSERT'|'DELETE'))
+  3. raw `UPDATE ` / `INSERT INTO ` / `DELETE FROM ` substring in any string literal in the file
+
+If any of these are found AND the target DB path resolves to data/mle_prep.db (or any *.db under data/), BLOCK the tool call with a message:
+
+  '[INVARIANT-3 VIOLATION] scripts/migrations/* must not write to the DB.
+  Source-of-truth is scripts/seed_*.py. Find the seed that owns this row
+  type and edit/extend it, then re-run the seed. See LESSONS.md 2026-04-30
+  Invariant-3 entry and the /dashboard skill for widget->seed mapping.'
+
+This catches the EXACT mistake I made twice this session, at write-time, before commit, before re-seed wipes the change. False-positive escape hatch: the hook respects a magic comment `# INVARIANT-3-EXEMPT: <reason>` on the first line of the file (e.g. for legitimate one-off DB repairs documented separately).
+
+ALTERNATIVE / COMPLEMENT: ruff custom rule or a pytest test that grep-scans scripts/migrations/ in CI.
+
+ACCEPTANCE CRITERIA:
+- AC1: Hook file in .claude/hooks/ (e.g. invariant3_guard.py) wired into .claude/settings.json PreToolUse for Write+Edit+Bash
+- AC2: Hook blocks: Write to scripts/migrations/foo.py with body containing 'session.execute(text("UPDATE"))' targeting data/mle_prep.db. Test passes.
+- AC3: Hook allows: Write to scripts/seed_<x>.py with the same body (path-based exemption)
+- AC4: Hook allows: scripts/migrations/foo.py with first-line `# INVARIANT-3-EXEMPT: legitimate one-off, see T-XXX` (escape hatch)
+- AC5: Hook self-test: `python .claude/hooks/invariant3_guard.py --test` runs 4 cases (block / block / allow / allow) and exits 0
+- AC6: This hook would have blocked both add_uber_prob_nextword.py and update_pinterest_onsite_itinerary.py at write time -- back-test against logs/
+
+DEPENDS ON: T-P0-655 (Phase 1 complete + user green-light)
+COMPLEXITY: M (~150 lines of hook code + 4 test cases)
+
+#### T-P0-661: Root-cause investigation: WHY did Claude default to company_documents.content instead of interview_events?
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-660
+- **Description**: **Per reviewer hole #1**: surface-fix (skill + lint) protects against this specific miss, but the deeper question is unanswered: what made Claude choose company_documents over interview_events when the user said 'update Pinterest onsite schedule'? If the root cause is a general bias toward 'edit prose / follow last-modified doc / search by company name first', the same class of bug recurs on different surfaces.
+
+INVESTIGATION STEPS (must answer 4 questions):
+
+Q1: **Mapping in CLAUDE.md** — Is there a widget→table or feature→seed mapping table anywhere in CLAUDE.md (root or MLInterviewPrep)? Grep for it. If absent, the model has no priors — it falls back to free-text search.
+  - Action: read MLInterviewPrep/CLAUDE.md fully; grep for 'widget'/'interview_events'/'Dashboard' in shared/claude_md_shared.md and root CLAUDE.md
+  - Finding (expected): mapping is missing or buried
+
+Q2: **Conversation priming** — Did earlier turns in this session prime the prose path? The first task this session was 'add a problem to doc 84 (Uber)' — that whole interaction was prose-edits-on-company-doc. By the time the Pinterest request came in, the LAST 'update X for company Y' template I executed was prose-on-doc. Re-reading that, it would be natural to apply the same template to Pinterest.
+  - Action: re-read the doc-84 turn (lines for 'Uber ML Coding Golden Answer'); identify whether the assistant chose company_documents because the prior turn established that pattern
+  - Finding (expected): YES, last-modified priming
+
+Q3: **'Dashboard' in codebase ambiguity** — How many things are called 'dashboard' or render dashboard-like content? Search src/ for files/components/routes named *Dashboard* or /dashboard.
+  - Action: `grep -rn 'Dashboard\|/dashboard' src/ --include=*.tsx --include=*.ts`
+  - Finding (expected): only one /dashboard route + Dashboard.tsx + Sidebar entry; user's 'dashboard' is unambiguous in the codebase. So the bug is NOT lexical ambiguity, it's semantic priming + missing mapping.
+
+Q4: **Default search behavior** — What's the assistant's default when given 'update X for company Y'? Read recent PROGRESS.md entries — how often does the assistant grep company_documents content first vs check interview_events / companies.status / framework_node? Quantify.
+  - Action: tail logs of recent autonomous sessions; count first-grep targets
+  - Finding (expected): heavily biased toward company_documents (because it's the largest text surface and most edits this month touched it)
+
+DELIVERABLE:
+- A short root-cause memo (1-2 pages) saved to logs/2026-04-30_pinterest_root_cause.md
+- A concrete recommendation: should the fix be (a) add widget→table mapping to CLAUDE.md (cheap, ~50 lines), (b) make the lint hook (T-P0-660) ALSO scan for company_documents.content writes that smell schedule-like (calendar dates, time strings, 'onsite', 'interview') and warn, or (c) both
+- The memo's recommendation feeds DIRECTLY into T-P1-656 (skill design) and CLAUDE.md update content
+
+ACCEPTANCE CRITERIA:
+- AC1: All 4 Q&As answered with concrete evidence from this conversation + grep output
+- AC2: Memo at logs/2026-04-30_pinterest_root_cause.md exists, ≤ 200 lines
+- AC3: Concrete recommendation with rationale (a/b/c above), priority-ordered
+- AC4: User reviews + green-lights the recommendation BEFORE T-P1-656 begins (skill design depends on root-cause finding)
+
+DEPENDS ON: T-P0-660 (lint hook is the foundation; root cause may recommend extending it)
+COMPLEXITY: S (read + grep + write memo; the memo is short)
 
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
@@ -201,6 +376,156 @@ Scope: backend schema + router + frontend pill rendering + seed. M complexity.
 - **Depends on**: T-P1-648
 - **Description**: Final integration smoke test (manual + automated): (1) start dev server (npm run dev + uvicorn); (2) navigate to http://localhost:5173/system-design?tab=cheatsheet; (3) verify ALL rows in system_designs have a rendered card (count == row count); (4) zero console errors; (5) KaTeX formulas render where present; (6) deep-link with #<slug> hash scrolls correctly; (7) prev/next nav still works on detail pages; (8) Interview Prep + eBay Projects tabs still render unchanged (regression check). Append a screenshot or text-only confirmation to PROGRESS.md. Add a vitest E2E-ish test that mounts SystemDesignList and asserts all 3 tabs render their expected card count. AC: all 8 verification points pass; no regression in existing tabs.
 
+#### T-P1-656: Build /dashboard skill: route 'dashboard' keyword to InterviewTimeline + Dashboard widgets, never prep_doc prose
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-655, T-P0-661
+- **Description**: Phase 3. **Per reviewer**: skill is documentation, NOT enforcement (lint hook in T-P0-660 is the real guardrail). Skill's job: make the right path the easy default for any future Claude session that gets a 'dashboard / app / left-nav-first' request. **DEPENDS on T-P0-660 (lint exists) AND T-P0-661 (root cause + recommendation)** -- skill design absorbs the root-cause memo's recommendation.
+
+REVISED DESIGN (per reviewer hole #4: 3 memory files -> 1 reference + CLAUDE.md):
+
+The skill content lives in TWO places, both updated together:
+1. **CLAUDE.md (canonical, loaded every session via SessionStart)**: add a widget->data-source mapping table. This is the source of truth.
+2. **.claude/skills/dashboard.md (deepening / triggers)**: invoked when keywords match. References CLAUDE.md table; doesn't duplicate it. Skill body is the 6-step protocol.
+
+CLAUDE.md addition (under 'Behavior Rules' or new 'Surface Identification' section):
+
+  ### Surface Identification (MLInterviewPrep)
+
+  Before editing DB content for a request that mentions a UI surface, map widget -> data source:
+
+  | Widget (Dashboard.tsx) | Query key                | API endpoint            | DB table / column        |
+  |------------------------|--------------------------|-------------------------|--------------------------|
+  | InterviewTimeline      | ['timeline','events']    | GET /timeline/events    | interview_events         |
+  | FocusTopic             | ['dashboard','today']    | GET /dashboard/today    | derived: framework_node + reading_progress |
+  | CompanyPipeline        | ['companies']            | GET /companies          | companies.status         |
+  | PrepQuickAccess        | ['companies']            | GET /companies          | companies.prep_notes (markdown checklist) |
+  | WeeklyActivityChart    | ['dashboard','activity'] | GET /dashboard/activity | derived: problem_attempts + study_sessions |
+
+  Schedule / itinerary / calendar / event = interview_events (NEVER company_documents.content).
+  Pipeline status = companies.status. Daily focus = derived. Checklist = companies.prep_notes. Prose study notes (and ONLY those) = company_documents.
+
+  Idempotent seed pattern per row type:
+  - interview_events: scripts/_add_<company>_<date>.py, canonical key (company_id, scheduled_at, interviewer_name)
+  - company_documents: scripts/seed_<company>_<doc>.py with sentinel-based UPSERT
+  - problems: scripts/seed_<company>_lc_problems.py or similar; canonical key leetcode_id or title
+
+Skill (.claude/skills/dashboard.md) body — 6-step protocol:
+1. Read MLInterviewPrep/CLAUDE.md 'Surface Identification' table; map request to widget
+2. Confirm match by reading the widget's component file (e.g. InterviewTimeline.tsx -> queryKey -> endpoint -> table)
+3. Locate the matching idempotent seed (or, if absent, plan a new one)
+4. Edit the SEED, not the DB. Run the seed. Verify [INSERT|UNCHANGED] output
+5. Verify with SQL count assertion FIRST, then optionally screenshot
+6. Send Discord deliverable: SQL counts > screenshot. Wait for user confirmation before marking task done.
+
+ACCEPTANCE CRITERIA:
+- AC1: CLAUDE.md (MLInterviewPrep/CLAUDE.md) has the new 'Surface Identification' section with the widget->table table
+- AC2: .claude/skills/dashboard.md exists with the 6-step protocol referencing CLAUDE.md
+- AC3: Skill triggers on regex matching 'dashboard' / '我们 app' / '左侧 tab' / 'left nav' / 'first nav item' (set in skill metadata or trigger field)
+- AC4: Self-test: dry-run skill on 'add Stripe HR call to my dashboard' -> output proposes interview_events row + references _add_<company>_<date>.py pattern -- verified by reading skill output
+- AC5: Section in CLAUDE.md cross-links to the lint hook (T-P0-660) so reader sees both the prescription AND the enforcement
+- AC6: Skill design ABSORBS recommendation from T-P0-661 root-cause memo (e.g. if memo says 'last-modified doc priming bias', skill includes a note 'do NOT pattern-match from prior session's edit target — always re-derive from widget mapping')
+
+DEPENDS ON: T-P0-660, T-P0-661
+COMPLEXITY: M
+
+#### T-P1-657: Invariant-3 promotion: doc 84 §5 N-gram LM + problem 1097 to seed scripts
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-660
+- **Description**: Phase 4. Promote earlier session's Uber doc 84 §5 + problem 1097 to seed scripts. **Per reviewer hole #3**: do NOT delete scripts/migrations/add_uber_prob_nextword.py. Better: keep file, replace body with a no-op + DEPRECATED header. Reasons: (a) git history preservation in working tree, not just log; (b) staging / rebuild environments that re-run migrations get a clear deprecation message rather than missing file errors; (c) future readers can grep for the original migration intent.
+
+THREE STEPS:
+
+1. Update scripts/seed_uber_ml_coding_golden.py:
+   - Append §5 N-gram LM section to CONTENT (~600 lines from current DB doc 84 -- copy verbatim from `SELECT content FROM company_documents WHERE id=84`)
+   - Bump validate_content() length range (currently caps at probably 35-40K, new content is ~49K) and add §5 markers ('## §5' or '## 5. 概率下一个词生成' or 'ngram-next-word')
+   - Re-run, expect [UNCHANGED] (since DB content already matches the new CONTENT)
+
+2. Create scripts/seed_uber_ml_coding_problems.py (or extend an existing matching seed):
+   - Owns the from-scratch ML coding problems for Uber: problem 1064 (K-Means), problem 1097 (N-gram LM), and ideally also Geometric Median + Linear Regression + Logistic Regression (the 4 §-1 through §-4 problems in doc 84)
+   - Idempotent UPSERT on title (or leetcode_id when present)
+   - Each row gets the proper company_tags JSON ['Uber'] AND a problem_company_tags row (relevance='likely', source='manual')
+   - Notes field includes [db://doc/84#<anchor>] cross-link to the matching section
+   - Re-run, expect 5 [UNCHANGED] (since DB already has them via the migration)
+
+3. Replace scripts/migrations/add_uber_prob_nextword.py with no-op + deprecation:
+   - First line: `# DEPRECATED 2026-04-30: Logic moved to scripts/seed_uber_ml_coding_golden.py and scripts/seed_uber_ml_coding_problems.py per Invariant 3 (no migration scripts that write to DB).`
+   - Body: `if __name__ == '__main__': sys.exit(0)`
+   - Keep file in git so future tree references resolve, but it does nothing if executed
+   - Same treatment for scripts/migrations/update_pinterest_onsite_itinerary.py (the other this-session migration)
+
+ACCEPTANCE CRITERIA:
+- AC1: scripts/seed_uber_ml_coding_golden.py CONTENT now includes §5; second run = [UNCHANGED]
+- AC2: scripts/seed_uber_ml_coding_problems.py exists with 5 problems (1064 + 1097 + 3 others); second run = 5×[UNCHANGED]
+- AC3: scripts/migrations/add_uber_prob_nextword.py and scripts/migrations/update_pinterest_onsite_itinerary.py both replaced with deprecation no-op; running each prints '[DEPRECATED] no-op' and exits 0
+- AC4: T-P0-660 invariant3 lint hook does NOT trigger on the no-op deprecated files (since they no longer contain INSERT/UPDATE) — this proves the lint design works
+- AC5: `git diff scripts/migrations/` shows clean rewrites; `git log --follow scripts/migrations/add_uber_prob_nextword.py` still shows full history
+
+DEPENDS ON: T-P0-660 (lint hook should already exist — this task verifies the hook accepts the deprecated files)
+COMPLEXITY: M
+
+#### T-P1-658: LESSONS.md: 'Dashboard means widget, not prose' + Invariant 3 enforcement
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Append a [UNIVERSAL] LESSONS.md entry capturing the 2026-04-30 mistake class so future sessions don't repeat it. Two distinct lessons:
+
+LESSON A — Surface identification before prose edits:
+- Title: '[2026-04-30] User says "dashboard" / "app 那边" / "left nav first item" -> they mean a UI widget on the named page, NOT prose in a prep doc'
+- Context: User asked to update Pinterest VO schedule. I edited company_documents.id=83 (prep doc prose) and companies.interview_stages JSON. Both wrong surface. The Dashboard's InterviewTimeline widget reads the interview_events table; that was the surface user actually meant.
+- What went wrong: I matched 'Pinterest onsite update' to the most prominent Pinterest text I could find (the prep doc) without first asking 'which UI surface renders this?' The prep doc is a study notebook; calendar/event data lives in interview_events.
+- Fix: For any 'update X in our app / on dashboard / in <named UI element>' request, FIRST identify which frontend page + widget is being referenced (read src/frontend/src/pages/Dashboard.tsx and trace queryKey -> /api/<endpoint> -> <DB table>). THEN map to the appropriate idempotent seed. Schedule/itinerary/calendar => interview_events. Pipeline status => companies.status. Daily focus => derived from framework + reading. Checklist => companies.prep_notes. Prose study notes only => company_documents.
+- Tags: #ux-target-identification #dashboard #widget-vs-prose #interview-events
+
+LESSON B — Invariant 3 enforcement (already partly logged 2026-04-25; reinforce):
+- Title: '[2026-04-30] Direct SQL UPDATE on data/mle_prep.db violates Invariant 3 — every DB row must originate from a git-tracked, idempotent Python seed in scripts/'
+- Context: I twice this session wrote scripts/migrations/*.py that did sqlite3.execute('UPDATE ...') / INSERT directly. The DB is regenerable; the seed scripts are source of truth. Direct DB edits create timebombs (next seed run wipes them).
+- What went wrong: scripts/migrations/ as a directory pattern feels familiar from server-side migrations, but in this project there are no migrations — there are only idempotent seeds. The migration scripts were correctly idempotent on their own canonical keys, but they bypassed the seed-based source of truth.
+- Fix: For ANY DB content change, edit (or create) the matching seed in scripts/seed_*.py. The seed must be idempotent (re-runnable safely). Run it once to apply. Check git diff on the seed = the durable record of what changed. NEVER write to data/mle_prep.db from scripts/migrations/.
+- Detection: any time you find yourself writing 'sqlite3.connect(...).execute("UPDATE"|"INSERT"|"DELETE")' outside scripts/seed_*.py — STOP. Ask: 'which seed owns this row?' Find/extend that seed.
+- Tags: #invariant-3 #seed-not-migration #db-source-of-truth
+
+ACCEPTANCE CRITERIA:
+- AC1: LESSONS.md has both entries appended at bottom with date 2026-04-30 and tag-line format
+- AC2: Lessons reference T-P0-651 (the misdirected work), T-P0-654 (the correct fix), T-P1-657 (the Invariant-3 promotion)
+- AC3: cross-project-reviewer agent flagged-eligible (both lessons tagged [UNIVERSAL] for propagation to helixos/homestead/template per cross-project-sync 2026-04-29 pattern)
+
+DEPENDS ON: nothing
+COMPLEXITY: XS (~30 lines of LESSONS.md append)
+
+#### T-P1-659: Save user feedback memory: dashboard semantics + Invariant 3 trigger words
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-656
+- **Description**: Phase 4. **Per reviewer hole #4**: 3 separate memory files is overengineering — 'next session finds it' is determined by surface path (CLAUDE.md / reference file), not file count. Merge to ONE reference file + ensure CLAUDE.md cross-links to it.
+
+SINGLE MEMORY FILE: ~/.claude/projects/C--Users-Shenghui-Xu-Desktop-Gen-AI-Proj/memory/reference_dashboard_data_sources.md (type=reference)
+
+Body:
+- Lead: 'MLInterviewPrep Dashboard widget -> data source map (verified 2026-04-30 via T-P0-654/T-P0-661). Use this BEFORE editing any prose for a request mentioning a UI surface.'
+- Body: the same widget->table mapping table that goes in CLAUDE.md (one-source-of-truth — memory file CITES CLAUDE.md path: `MLInterviewPrep/CLAUDE.md "Surface Identification"` rather than copying)
+- Trigger phrases section: 'dashboard / app 那边 / 左侧 tab 第一 / left nav top / first nav item -- when these appear, route to /dashboard skill'
+- Anti-pattern section: '2026-04-30 incident: edited company_documents.id=83 prose + companies.interview_stages JSON for an interview-schedule update. Both wrong surface. Right surface = interview_events table (5 rows for 5 onsite rounds).'
+- Why-this-matters: 'Without this map, default behavior is to grep company name + content match -> hit company_documents (largest text surface) -> edit prose. That works for prose updates and FAILS for everything else (schedule, status, checklist, focus).'
+
+MEMORY.md INDEX UPDATE:
+- 1 new line: `- [reference_dashboard_data_sources.md](reference_dashboard_data_sources.md) — Dashboard widget->table map; route 'dashboard' keyword to /dashboard skill before editing`
+
+DELETED FROM ORIGINAL PLAN (per reviewer 'overengineered'):
+- ~~feedback_dashboard_means_widget.md~~ (folded into reference file)
+- ~~feedback_invariant3_seed_only.md~~ (covered by lint hook + LESSONS.md, not a memory)
+- ~~the 'why' / 'how to apply' duplication across 3 files~~ (consolidated)
+
+ACCEPTANCE CRITERIA:
+- AC1: Exactly ONE new memory file: reference_dashboard_data_sources.md (NOT 3)
+- AC2: MEMORY.md has exactly 1 new line, ≤150 chars
+- AC3: File body cites MLInterviewPrep/CLAUDE.md (the canonical source) -- doesn't duplicate the table
+- AC4: A grep test: opening ~/.claude/.../memory/MEMORY.md and following the new index entry surfaces the widget mapping in <2 file reads (MEMORY.md -> reference file -> CLAUDE.md)
+
+DEPENDS ON: T-P1-656 (CLAUDE.md table must exist BEFORE the memory file cites it)
+COMPLEXITY: XS
+
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
 - **Complexity**: S
@@ -266,6 +591,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
 - [x] **2026-04-29** -- T-P2-637: [SYNC] Promote MLInterviewPrep harness improvements to claude-code-project-template. Cross-project-sync 2026-04-29 found 4 universal harness improvements in MLInterviewPrep that template lacks:
 - [x] **2026-04-29** -- T-P2-633: [UBER-VO-6] Add deprecation/redirect banner to legacy id=81 'Uber LC 题库索引视图'. ## Goal
+- [x] **2026-04-29** -- T-P1-650: Doc 84 §5: Probabilistic Next-Word Generation (Uber, no-library n-gram LM). Add a 5th problem to Uber ML Coding Golden Answer 集合 (doc 84): Probabilistic next-word generation, no library, expand be
 - [x] **2026-04-29** -- T-P1-639: [DEBT] MLInterviewPrep: pyproject.toml deps out of sync with requirements.txt (13 missing). Cross-project-sync 2026-04-29 audit: pyproject.toml [project].dependencies has only 2 packages but requirements.txt has 
 - [x] **2026-04-29** -- T-P1-635: [UBER-VO-2b] Seed audit-discovered NEW ML Coding items (companion to T-P0-629). ## Goal
 - [x] **2026-04-29** -- T-P1-631: [UBER-VO-4] Strengthen existing search/recommendation content in id=33 + id=37 (delta-only). ## Priority bump (per critical review)

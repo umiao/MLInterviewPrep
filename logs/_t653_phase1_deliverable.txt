@@ -1,0 +1,32 @@
+=== T-P0-653 Phase-1 deliverable ===
+
+SQL counts:
+  problem 1097: id=1097 title='Probabilistic Next-Word Generation (N-gram Language Model, no library)' desc_len=663
+  doc 83: id=83 len=5522 is_golden=1 hash=a3415b708ba9...
+  interview_events count for company_id=29: 2
+    - id=14 title='Phone Call with David' scheduled_at=2026-04-08T13:30:00 status=completed
+    - id=19 title='Technical Virtual Phone Interview' scheduled_at=2026-04-16T14:00:00 status=upcoming
+
+=== companies.id=29 CURRENT (post-2026-04-30 itinerary edits) ===
+  name: Pinterest
+  notes_len: 1074
+
+  interview_stages (CURRENT):
+    - {'name': 'Recruiter Call', 'status': 'completed'}
+    - {'name': 'Phone Screen (60min)', 'status': 'completed'}
+    - {'name': 'VO Day 1 R1: ML Systems Design (60min) — Yiyang Zhang', 'status': 'scheduled', 'scheduled_at': '2026-05-05T15:00:00-07:00'}
+    - {'name': 'VO Day 1 R2: HM/Competency (45min) — Daniel Liu (Manager II)', 'status': 'scheduled', 'scheduled_at': '2026-05-05T16:00:00-07:00'}
+    - {'name': 'VO Day 2 R1: Data/Algos (45min) — Jiankai Sun', 'status': 'scheduled', 'scheduled_at': '2026-05-06T13:00:00-07:00'}
+    - {'name': 'VO Day 2 R2: Data/Algos (45min) — Yijian Xiang', 'status': 'scheduled', 'scheduled_at': '2026-05-06T14:00:00-07:00'}
+    - {'name': 'VO Day 2 R3: ML Practitioner (60min) — Zihao Zhang', 'status': 'scheduled', 'scheduled_at': '2026-05-06T15:00:00-07:00'}
+
+=== AC4 OPEN QUESTION ===
+Need user decision: should companies.interview_stages be:
+  (A) Reverted to pre-2026-04-30 (only first 2 entries: Recruiter Call + Phone Screen)
+  (B) Kept as-is (5 onsite rounds in JSON)
+  (C) Reduced to 2 completed entries + a placeholder "Virtual Onsite (5 rounds)" entry
+
+Phase 1 commits:
+  - seed_pinterest_onsite_prep.py: removed TBD status line, added Dashboard redirect
+  - doc 83 in DB: now narrative-only (5522 chars, was 7367)
+  - companies.interview_stages: UNTOUCHED (waiting for user decision)
