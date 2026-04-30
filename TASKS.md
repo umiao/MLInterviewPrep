@@ -15,12 +15,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-678: [Meta-Prep-B] Doc 86 §T1 Code-Pad Prompt — major rewrite per review (1-sentence Version A prompt, fix Step1 AI-clarify contradiction, replace opener, drop OrderedDict critique, add §六 6-pack)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Source review attachment: rewrite company_documents.id=86. Concrete edits: (1) §1 30-sec opener: replace 'Cool. Before I touch the AI...' with the §五 30-sec opener — 'Before I bring in the AI, I'd like to drive this myself first — restate, lay out AC + edges, sketch approach. Then I'll use AI to draft and pressure-test edges, but review line-by-line before we run. Does that work, or would you prefer I lean on AI sooner?' (2) §2 KILL the entire 30+ line PHASE 1-4 system prompt; replace with Version A canonical 1-sentence English prompt: 'Don't write code until I give you the acceptance criteria and edge cases; after you draft, surface every assumption you made and every edge case you didn't handle as a gap list for me to decide on rather than silently fixing them, and flag any stdlib API you're not 100% sure exists.' Add Version B as alt for shorter scenarios. (3) §3 Step 1: clarify that clarifying questions go FROM YOU TO THE INTERVIEWER, not AI-asks-you (current PHASE 1 in prompt is wrong). (4) §4 LRU: drop the 'AI used OrderedDict, force it to rewrite' bit; replace with 'first ask interviewer which implementation they want to see — that's the senior move.' (5) Add new §6 (or fold into existing structure) with the review §六 6-pack: continuous narration, AI-vs-your-direction handling, time allocation 3/3/10/5/5/5 for 45-min, manual trace as review step, fallback when AI is stuck, prompt transparency. (6) Style: prefer Chinese narration; keep English only for terms; remove CN/EN duplicates. Acceptance: doc 86 length reduced (target <8000 chars from current 8969), 4-PHASE block gone, OrderedDict bit gone, §六 6 points present, opener matches §五 verbatim, content_hash regenerated.
-
 #### T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack
 - **Priority**: P0
 - **Complexity**: S
@@ -359,6 +353,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
+- [x] **2026-04-30** -- T-P0-678: [Meta-Prep-B] Doc 86 §T1 Code-Pad Prompt — major rewrite per review (1-sentence Version A prompt, fix Step1 AI-clarify contradiction, replace opener, drop OrderedDict critique, add §六 6-pack). Source review attachment: rewrite company_documents.id=86. Concrete edits: (1) §1 30-sec opener: replace 'Cool. Before I
 - [x] **2026-04-30** -- T-P0-677: [Meta-Prep-A] Hub doc 82 schedule cell-merge — fold 11:00/13:00 identical coding rows via <table> rowspan; verify cd://86 + cd://89 remain clickable in MarkdownPreview. Issue: hub schedule table at company_documents.id=82 has two coding rows (11:00 Sai Srujan, 13:00 Nikhil) with byte-iden
 - [x] **2026-04-30** -- T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke. Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
 - [x] **2026-04-30** -- T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest. Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two dra
