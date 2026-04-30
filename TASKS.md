@@ -9,26 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harness practice + breadth.
-
-Five points (each: 30-sec Chinese spoken pitch + English kill-line + concrete file/path for live reference if asked):
-1. 3-layer harness model (hooks/agents/skills) — see root CLAUDE.md §Three-Layer Responsibility Model + .claude/hooks/, .claude/agents/, .claude/skills/
-2. Invariant 3: every DB row backed by git-tracked idempotent seed script — hook-enforced (search MLI for invariant3_guard.py); contrast with ad-hoc SQL anti-pattern
-3. 521+ autonomous sessions + session_state.json bootstrap (cite root T-P1-257: Windows MSYS bash /c/... path-readability silent failure that prevented all_done reset; the cd-into-WORK_DIR-then-python fix) — pull exact session count from PROGRESS.md
-4. 28-topic ML fundamentals KG with tier-classification (T1/T2/T3) — data/ml_fundamentals_inventory.yaml; cite tier counts
-5. LLM-as-Judge production deployment (~$500/day, 18K annotations vs human $0.30-0.80/label) — from BLOG-03 in docs/bq_behavioral_examples.json
-
-Deliverables:
-1. NEW idempotent seed script under scripts/ creating Meta company_id=31 doc titled '[Meta] AI-Native Domain Breadth — 5 Talking Points'.
-2. Doc body Chinese narration + English terms; each point: 30-sec pitch / kill-line / file path / 'when to drop this' contextual cue.
-3. Run + verify visibility + idempotent re-run.
-
-Invariant 3 compliance. Cn narration + En terms (full expansion on first use).
-
 #### T-P0-669: [Meta-AINative-T3] Behavioral 5-Pack (EX-14, BLOG-03, EX-01, EX-05, EX-17)
 - **Priority**: P0
 - **Complexity**: M
@@ -399,6 +379,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 604 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-04-30** -- T-P0-668: [Meta-AINative-T2] Domain Breadth Talking Points (5 concrete harness/portfolio sells). Goal: Curate 5 concrete domain-breadth talking points the user can drop into Meta AI-Native onsite to demonstrate harnes
 - [x] **2026-04-30** -- T-P0-667: [Meta-AINative-T1] Code-Pad LLM Prompt + 3-Step Playbook (clarify→spec AC→review). Goal: Distill scripts/seed_meta_ai_native_prep.py (already-seeded doc id=82) into a copy-pasteable code-pad LLM system p
 - [x] **2026-04-29** -- T-P2-640: [SYNC] Promote Dependency source-of-truth CLAUDE.md rule to template + MLInterviewPrep. helixos/CLAUDE.md has a Key Constraints section codifying that pyproject.toml and requirements.txt must be kept in sync 
 - [x] **2026-04-29** -- T-P2-638: [SYNC] Promote 3 [UNIVERSAL] LESSONS.md entries from MLInterviewPrep to template. MLInterviewPrep/LESSONS.md has 3 [UNIVERSAL]-tagged entries (task_db cwd-routing, autonomous all_done sticky-state, plus
