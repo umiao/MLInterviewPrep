@@ -25,8 +25,12 @@ const CATEGORY_ORDER = [
   "Location & Geo",
   "Search & Data",
   "Storage & Media",
+  "Recommendation & ML",
+  "Trust & Safety",
   "Specialized",
 ];
+
+const PINTEREST_CATEGORY_ORDER = ["Pinterest"];
 
 /** Client-side metadata for each interview topic, keyed by slug. */
 const TOPIC_META: Record<string, TopicMeta> = {
@@ -170,6 +174,83 @@ const TOPIC_META: Record<string, TopicMeta> = {
     tags: ["Real-time", "Concurrency", "WebSocket"],
     category: "Specialized",
   },
+  "interview-harmful-content-detection": {
+    description:
+      "Multi-modal (text+image+video) classifier with hybrid fast-path + human-review pipeline. 5B+ posts/day at 100ms p99. Per-policy precision/recall thresholds (hate-speech vs CSAM), distilled model for throughput, active-learning loop, region-specific rule engine (GDPR vs US). Metric: prevalence + appeal rate.",
+    difficulty: "Hard",
+    tags: ["Multi-modal", "ML Serving", "Trust & Safety"],
+    category: "Trust & Safety",
+  },
+  "interview-fb-post-privacy": {
+    description:
+      "Audience-visibility at scale: 3B users x 100B posts, p99 < 5ms. Hybrid materialize/filter strategy split by author follower count, bitmap/set membership in TAO/Redis, CDC + Tombstone for privacy-edit propagation, Custom List lazy recompute. Access-control problem, not ML.",
+    difficulty: "Hard",
+    tags: ["Access Control", "TAO", "Materialization"],
+    category: "Social & Real-time",
+  },
+  "interview-spotify-audio-streaming": {
+    description:
+      "Audio-specific differences from video streaming: 3-tier codec ladder (96/160/320 kbps), gapless playback with prefetch+crossfade, file-level DRM (not per-segment), Discover Weekly = CF + audio embedding (CNN on raw waveform). Offline download = force 320kbps. Anti-fraud: device fingerprint + 30s play threshold.",
+    difficulty: "Hard",
+    tags: ["CDN", "Audio", "Recommendations"],
+    category: "Storage & Media",
+  },
+  "interview-recommendation-system": {
+    description:
+      "Three-stage funnel: Retrieval (10B->1K via 5-path multi-source) -> Ranking (DLRM + MMoE 4-8 experts + DCN-v2, multi-task CTR/retention/save/share) -> Rerank (MMR/DPP diversity + creator pacing + IPS position-bias). Two-tower DSSM ANN via HNSW/Faiss-IVF; user-item fully decoupled. Cold start: content embedding for items, demographic prior for users.",
+    difficulty: "Hard",
+    tags: ["Two-Tower", "DLRM", "MMoE", "Multi-task"],
+    category: "Recommendation & ML",
+  },
+  "pinterest-ad-ctr": {
+    description:
+      "Pinterest ad CTR prediction: feature engineering for pins/users/context, GBDT vs deep model tradeoffs, calibration, online learning loop, exploration via Thompson sampling.",
+    difficulty: "Hard",
+    tags: ["CTR", "Ads", "GBDT"],
+    category: "Pinterest",
+  },
+  "pinterest-embeddings": {
+    description:
+      "Pinterest user & pin embeddings: PinSAGE graph neural net, two-tower retrieval, embedding refresh cadence, ANN serving infrastructure, A/B evaluation of embedding quality.",
+    difficulty: "Hard",
+    tags: ["Embeddings", "GNN", "Two-Tower"],
+    category: "Pinterest",
+  },
+  "pinterest-chatbot-pins": {
+    description:
+      "Pinterest personalized chat bot for pin discovery: LLM-driven pin retrieval, multi-turn context, RAG over pin metadata, latency budget, hallucination mitigation, evaluation harness.",
+    difficulty: "Hard",
+    tags: ["LLM", "RAG", "Chatbot"],
+    category: "Pinterest",
+  },
+  "pinterest-pin-ranking": {
+    description:
+      "Pinterest home/topic feed ranking: multi-objective ranking (engagement + retention + creator diversity), MMoE/PLE multi-task, position-bias correction, cold-start strategies.",
+    difficulty: "Hard",
+    tags: ["Ranking", "Multi-task", "MMoE"],
+    category: "Pinterest",
+  },
+  "pinterest-pins-search": {
+    description:
+      "Pinterest pins search engine: query understanding, dense + lexical retrieval hybrid, image-text cross-modal, learning-to-rank, query rewriting and intent classification.",
+    difficulty: "Hard",
+    tags: ["Search", "Cross-modal", "LTR"],
+    category: "Pinterest",
+  },
+  "pinterest-notification-reco": {
+    description:
+      "Pinterest notification recommendation: which pin/topic to push to which user when. Frequency capping, fatigue modeling, downstream engagement attribution, multi-channel arbitration (push/email/in-app).",
+    difficulty: "Medium",
+    tags: ["Notifications", "Recommendation", "Frequency Cap"],
+    category: "Pinterest",
+  },
+  "pinterest-catalog-bulk-update": {
+    description:
+      "Pinterest catalog bulk update at 500M records: scaling Solr/ElasticSearch ingestion, idempotent upsert, partial-update vs full-rebuild tradeoffs, indexing latency SLAs, dead-letter handling.",
+    difficulty: "Medium",
+    tags: ["Bulk Ingest", "Solr", "Indexing"],
+    category: "Pinterest",
+  },
 };
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
@@ -178,7 +259,7 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   Hard: "bg-red-100 text-red-700",
 };
 
-type Tab = "interview" | "ebay";
+type Tab = "interview" | "ebay" | "pinterest";
 
 export default function SystemDesignList() {
   const navigate = useNavigate();
@@ -204,9 +285,13 @@ export default function SystemDesignList() {
     [modules],
   );
 
-  // Interview topics: display_order >= 100, grouped by category
+  // Interview topics: display_order in [100, 200), grouped by category.
+  // Pinterest 200-206 is a separate tab to avoid interleaving with general
+  // interview prep (T-2026-05-01: user request).
   const interviewTopics = useMemo(() => {
-    const topics = modules.filter((m) => m.display_order >= 100);
+    const topics = modules.filter(
+      (m) => m.display_order >= 100 && m.display_order < 200,
+    );
     const grouped: Record<string, SystemDesignSummary[]> = {};
     for (const cat of CATEGORY_ORDER) {
       grouped[cat] = [];
@@ -217,12 +302,39 @@ export default function SystemDesignList() {
       if (!grouped[cat]) grouped[cat] = [];
       grouped[cat].push(topic);
     }
-    // Sort within each category by display_order
     for (const cat of Object.keys(grouped)) {
       grouped[cat].sort((a, b) => a.display_order - b.display_order);
     }
     return grouped;
   }, [modules]);
+
+  // Pinterest topics: display_order >= 200 (separate section, sorted at bottom).
+  const pinterestTopics = useMemo(() => {
+    const topics = modules.filter((m) => m.display_order >= 200);
+    const grouped: Record<string, SystemDesignSummary[]> = {};
+    for (const cat of PINTEREST_CATEGORY_ORDER) {
+      grouped[cat] = [];
+    }
+    for (const topic of topics) {
+      const meta = TOPIC_META[topic.slug];
+      const cat = meta?.category ?? "Pinterest";
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(topic);
+    }
+    for (const cat of Object.keys(grouped)) {
+      grouped[cat].sort((a, b) => a.display_order - b.display_order);
+    }
+    return grouped;
+  }, [modules]);
+
+  const interviewCount = useMemo(
+    () => modules.filter((m) => m.display_order >= 100 && m.display_order < 200).length,
+    [modules],
+  );
+  const pinterestCount = useMemo(
+    () => modules.filter((m) => m.display_order >= 200).length,
+    [modules],
+  );
 
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
@@ -255,14 +367,25 @@ export default function SystemDesignList() {
         >
           eBay Projects
         </button>
+        <button
+          onClick={() => switchTab("pinterest")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "pinterest"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
+        >
+          Pinterest
+        </button>
       </div>
 
       {/* Interview Prep tab */}
       {activeTab === "interview" && (
         <div>
           <p className="text-sm text-gray-600 mb-6">
-            20 system design interview questions, grouped by category. Click any
-            topic for the full study guide.
+            {interviewCount} system design interview questions, grouped by
+            category (Pinterest in its own tab). Click any topic for the full
+            study guide.
           </p>
 
           {isLoading && (
@@ -399,6 +522,82 @@ export default function SystemDesignList() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Pinterest tab — separated from general interview prep so it doesn't
+          interfere with the main study list. Sorted at display_order 200+. */}
+      {activeTab === "pinterest" && (
+        <div>
+          <p className="text-sm text-gray-600 mb-6">
+            {pinterestCount} Pinterest-specific system design modules (former
+            interviewer cycle prep). Kept separate from general interview prep.
+          </p>
+
+          {isLoading && (
+            <div className="text-gray-500 py-12 text-center">Loading...</div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-4">
+              {error instanceof Error
+                ? error.message
+                : "Failed to load topics"}
+            </div>
+          )}
+
+          {!isLoading &&
+            !error &&
+            PINTEREST_CATEGORY_ORDER.map((category) => {
+              const topics = pinterestTopics[category];
+              if (!topics || topics.length === 0) return null;
+              return (
+                <div key={category} className="mb-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {topics.map((topic) => {
+                      const meta = TOPIC_META[topic.slug];
+                      const difficulty = meta?.difficulty ?? "Medium";
+                      const tags = meta?.tags ?? [];
+                      const description =
+                        meta?.description ?? topic.subtitle ?? "";
+                      return (
+                        <div
+                          key={topic.slug}
+                          className="bg-white rounded-lg border border-gray-200 px-4 py-3 cursor-pointer hover:border-blue-400 hover:shadow-md transition-all"
+                          onClick={() =>
+                            navigate(`/system-design/${topic.slug}`)
+                          }
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="text-base font-semibold text-gray-800">
+                              {topic.title}
+                            </h3>
+                            <span
+                              className={`text-xs font-medium px-2 py-0.5 rounded shrink-0 ml-2 ${DIFFICULTY_COLORS[difficulty]}`}
+                            >
+                              {difficulty}
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-500 mb-2">
+                            {description}
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
         </div>
       )}
     </div>

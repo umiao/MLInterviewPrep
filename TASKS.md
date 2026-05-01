@@ -98,6 +98,36 @@ Source: ~/Desktop/Gen_AI_Proj/MLInterviewPrep/.claude/hooks/task_db.py + .claude
 Target: ~/Desktop/Gen_AI_Proj/claude-code-project-template (same paths).
 Acceptance: diff -q against template is clean for these two specific items; ML invariant3_guard.py reference is INTENTIONAL divergence and stays project-local.
 
+#### T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest)
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each needs a 300-600 char CN+EN flash-card style summary (top numbers, key decisions, pivotal tradeoffs).
+
+Targets (31 total):
+- eBay 8: id=1..7 (module-arbitration, llm-orchestration, pbe-pipeline, ranking-allocation, database-comparison, distributed-task-queue, vibe-code-engineering-patterns); id=8 ml-system-design-patterns is DONE.
+- Standard interview 20: id=9..28 except id=23 (price-drop-tracker) which is DONE. So 19 of these.
+- Old Pinterest 3: id=29 ad-ctr, id=30 embeddings, id=31 chatbot-pins. (Other 4 Pinterest are DONE: id=32, 33-but-only-verbal, 34-but-only-verbal, 35.)
+- Wait: redo precise count -- run the verification SQL in DELIVERABLE 1.
+
+DELIVERABLES:
+1. Run this SQL first to get the authoritative target list:
+   SELECT id, slug, display_order FROM system_designs WHERE LENGTH(IFNULL(cheat_sheet,'')) = 0 ORDER BY display_order;
+2. Author CN+EN cheat_sheets following the style established in  -- markdown table, 8-12 rows, with columns 'Item' / 'Number / Decision'. Reuse existing content from each SD's overview / formulas / production_constraints to extract the top numbers and decisions; do not invent new content.
+3. Idempotent seed scripts following the pattern of  (one per SD or grouped by category). Frontmatter docstring + UPSERT logic.
+4. Verify: re-run the SQL above; expected 0 rows.
+
+ACCEPTANCE CRITERIA:
+- Every SD with display_order < 200 (or any tab user sees) has cheat_sheet content.
+- Each cheat_sheet contains Chinese chars (verified by chinese_pattern.search like in the 2026-05-01 script).
+- Each cheat_sheet is 250-700 chars (compact flash card -- not a full essay).
+- Frontend TOC click on '速查表 (Cheat Sheet)' for any of the 31 SDs renders a populated section, not an empty placeholder.
+
+NOTES:
+- Old Pinterest 3 (id=29-31) ALSO need verbal_outline filled if anyone wants to read those modules; but since user said Pinterest 'avoid interfering', P3 priority -- can be deferred.
+- This task can be auto-run; suggested split: 1 session per ~10 SDs to keep context manageable. Total ~3-4 sessions.
+- Reference style:  (CN+EN, 9-row markdown table, ~300-600 chars).
+
 ### P3 -- Stretch Goals
 
 ## Blocked
