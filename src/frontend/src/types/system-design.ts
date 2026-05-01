@@ -37,13 +37,13 @@ export type SystemDesignSection =
   | "cheat_sheet";
 
 export const SECTION_LABELS: Record<SystemDesignSection, string> = {
-  overview: "Overview & Motivation",
-  architecture: "Architecture Deep Dive",
-  dataflow: "Data Flow & Key Components",
-  formulas: "Formulas & Algorithms",
-  production_constraints: "Production Constraints",
-  tradeoffs: "Trade-off Analysis",
-  defense: "Adversarial Defense Q&A",
-  verbal_outline: "Verbal Outline",
-  cheat_sheet: "Cheat Sheet",
+  overview: "概览 (Overview)",
+  architecture: "架构 (Architecture)",
+  dataflow: "数据流 (Data Flow)",
+  formulas: "公式估算 (Formulas)",
+  production_constraints: "生产约束 (Production Constraints)",
+  tradeoffs: "权衡取舍 (Tradeoffs)",
+  defense: "应答策略 (Defense)",
+  verbal_outline: "口述脉络 (Verbal Outline)",
+  cheat_sheet: "速查表 (Cheat Sheet)",
 };

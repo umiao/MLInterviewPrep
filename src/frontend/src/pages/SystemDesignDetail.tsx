@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect, useRef } from "react";
+import { useMemo, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
@@ -6,6 +6,7 @@ import { useSystemDesignNotes } from "../hooks/useSystemDesignNotes";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import ImageLightbox from "../components/ui/ImageLightbox";
 import PrevNextNav from "../components/ui/PrevNextNav";
+import SlideOverPanel from "../components/ui/SlideOverPanel";
 import type {
   SystemDesign,
   SystemDesignSummary,
@@ -73,6 +74,9 @@ export default function SystemDesignDetail() {
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  // Mobile (<lg) drawer state for the section TOC.
+  const [tocDrawerOpen, setTocDrawerOpen] = useState(false);
+
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -114,12 +118,16 @@ export default function SystemDesignDetail() {
   }, [design, setHighlightedSection]);
 
   /** Smooth-scroll to a section within the scroll container. */
-  const scrollToSection = useCallback((section: SystemDesignSection) => {
-    const el = sectionRefs.current[section];
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, []);
+  const scrollToSection = useCallback(
+    (section: SystemDesignSection, opts?: { closeDrawer?: boolean }) => {
+      const el = sectionRefs.current[section];
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (opts?.closeDrawer) setTocDrawerOpen(false);
+    },
+    [],
+  );
 
   if (isLoading) {
     return (
@@ -211,14 +219,13 @@ export default function SystemDesignDetail() {
         </div>
       </header>
 
-      {/* Scrollable content area with right-side TOC */}
-      <div
-        ref={scrollContainerRef}
-        className="flex-1 overflow-auto min-h-0"
-      >
-        <div className="flex max-w-6xl mx-auto">
-          {/* Main content */}
-          <div className="flex-1 min-w-0 px-6 py-6 space-y-10">
+      {/* Scrollable content area. The desktop TOC is rendered as a sibling
+          (position:fixed) below so its containing block is the viewport,
+          NOT the max-w-6xl flex container -- otherwise sticky/absolute
+          release at flex-bottom and the TOC vanishes on the last section. */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto min-h-0">
+        <div className="max-w-6xl mx-auto">
+          <div className="min-w-0 px-6 py-6 space-y-10 lg:pr-60">
             {SECTIONS.map((section) => (
               <section
                 key={section}
@@ -283,34 +290,81 @@ export default function SystemDesignDetail() {
               </section>
             ))}
           </div>
-
-          {/* Right-side TOC sidebar -- hidden on small screens */}
-          <aside className="hidden lg:block w-52 shrink-0 py-6 pr-4">
-            <nav className="sticky top-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-                Sections
-              </p>
-              <ul className="space-y-1">
-                {SECTIONS.map((section) => (
-                  <li key={section}>
-                    <button
-                      onClick={() => scrollToSection(section)}
-                      className={`block w-full text-left text-sm px-2 py-1 rounded transition-colors truncate ${
-                        highlightedSection === section
-                          ? "bg-blue-50 text-blue-700 font-medium"
-                          : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-                      }`}
-                      title={SECTION_LABELS[section]}
-                    >
-                      {SECTION_LABELS[section]}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </aside>
         </div>
       </div>
+
+      {/* Desktop TOC: fixed to viewport so it remains visible at the
+          bottom-most section (not constrained by flex parent). The
+          right offset hugs the right edge of the centered max-w-6xl
+          content on wide screens, falling back to a 1rem gutter on
+          narrower screens. */}
+      <aside
+        className="hidden lg:block fixed top-20 z-10 w-52 max-h-[calc(100vh-6rem)] overflow-y-auto"
+        style={{ right: "max(1rem, calc((100vw - 72rem) / 2 + 1rem))" }}
+        aria-label="Section navigation"
+      >
+        <nav>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            目录 (Sections)
+          </p>
+          <ul className="space-y-1">
+            {SECTIONS.map((section) => (
+              <li key={section}>
+                <button
+                  onClick={() => scrollToSection(section)}
+                  className={`block w-full text-left text-sm px-2 py-1 rounded transition-colors truncate ${
+                    highlightedSection === section
+                      ? "bg-blue-50 text-blue-700 font-medium"
+                      : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                  }`}
+                  title={SECTION_LABELS[section]}
+                >
+                  {SECTION_LABELS[section]}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Mobile (<lg) toggle: vertical "Sections" tab pinned to right edge
+          mid-height. Tapping opens the drawer below. */}
+      <button
+        type="button"
+        onClick={() => setTocDrawerOpen(true)}
+        className="lg:hidden fixed right-0 top-1/2 -translate-y-1/2 z-20 bg-blue-600 text-white text-xs font-medium px-2 py-3 rounded-l-md shadow-md hover:bg-blue-700"
+        style={{ writingMode: "vertical-rl" }}
+        aria-label="Open sections menu"
+      >
+        目录
+      </button>
+
+      {/* Mobile drawer reuses SlideOverPanel for consistency. */}
+      <SlideOverPanel
+        open={tocDrawerOpen}
+        onClose={() => setTocDrawerOpen(false)}
+        title="目录 (Sections)"
+        width="max-w-xs"
+      >
+        <ul className="space-y-1">
+          {SECTIONS.map((section) => (
+            <li key={section}>
+              <button
+                onClick={() =>
+                  scrollToSection(section, { closeDrawer: true })
+                }
+                className={`block w-full text-left text-sm px-3 py-2 rounded transition-colors ${
+                  highlightedSection === section
+                    ? "bg-blue-50 text-blue-700 font-medium"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {SECTION_LABELS[section]}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </SlideOverPanel>
     </div>
   );
 }
