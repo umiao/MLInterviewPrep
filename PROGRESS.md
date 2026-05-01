@@ -589,3 +589,21 @@
   - `python -m pytest -q` -> deferred (no Python source paths under test changed; settings.json + LESSONS.md + applier are out of test scope -- test_check.py Stop hook will run on exit).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P2-664 --status completed`.
+
+## 2026-04-30 23:59 -- [T-P0-271] [META-ANC-2] Max Unique Char Subset drawer inserted (Meta AI-Native Coding inventory)
+- **What I did**: Second of the 10-task META-ANC v3 plan. Wrote `MLInterviewPrep/scripts/content_meta_anc_max_unique_char_subset.py` -- idempotent UPSERT (FIX #3 stable-pattern key, FIX #5 semantic NOOP, FIX #7 Meta-by-name lookup with assert==31, FIX #8 6-keyword content QA). Inserts ONE problems row (id=1099, 7095 chars / ~10.7KB UTF-8) with sentinel `<!-- ANC_SLUG: meta_anc_max_unique_char_subset -->`, pattern='bitmask_dp_subset_sum', source='Meta-AI-Native-Coding-2026-05-01'. Distills source markdown lines 129-150 into 9 sections: (1) 题面 + 数据规模 / Q1-Q4 ladder, (2) 解法谱系表 (Q1-Q2 backtracking O(2^n) -> Q3-Q4 state-compression DP O(n*2^26) with reachable-mask sparsity insight + 36-bit extension), (3) 核心 元规律 = XOR-prev trick (因不相交约束 prev|word == prev^word; dp value = single int, prev 指针折叠进 XOR; 反例 = 重叠允许时反推不再唯一), (4) 关键代码 idiom 3 块: preprocess (bitmap + popcount filter + anagram dedup) / state-compression DP 主循环 (dp[mask] -> word_index dict + snapshot iteration for 0/1 背包性) / 路径重建 (cur ^= masks[w] 反推), (5) 预处理 3 步 cheat sheet, (6) 剪枝 + 边界 (full-mask early stop / same-mask no-rewrite / snapshot list-copy / 36-bit extension), (7) AI 协同 prompt 模板 verbatim from source lines 138-150 (the golden 5-bullet prompt + spoken-version preamble), (8) 一句话 元规律 (面试金句 + 反例边界), (9) AI 协同分工对照表. Plus a `problem_company_tags` row linking problem 1099 -> Meta (id=31, relevance=core).
+- **Deliverables**:
+  - `MLInterviewPrep/scripts/content_meta_anc_max_unique_char_subset.py` (~370 lines)
+  - 1 INSERT into `problems` (id=1099, pattern='bitmask_dp_subset_sum', source='Meta-AI-Native-Coding-2026-05-01', desc len=7095)
+  - 1 INSERT into `problem_company_tags` (problem_id=1099, company_id=31, relevance=core)
+- **Sanity check result**:
+  - **FIX #3 idempotency key**: (source='Meta-AI-Native-Coding-2026-05-01', pattern='bitmask_dp_subset_sum') uniquely resolves to row id=1099. Pattern is the stable slug; not rewritten across runs.
+  - **FIX #5 NOOP normalization**: 1st run -> `[INSERT] problems id=1099 ... len=7095` + `[INSERT] problem_company_tags problem_id=1099 company_id=31 relevance=core`. 2nd run -> `[NOOP] problems id=1099 description semantically identical (len=7095)` + `[NOOP] problem_company_tags problem_id=1099 company_id=31 already present`. Run-twice [NOOP] proof passes.
+  - **FIX #7 COMPANY_ID self-check**: script does `db.query(Company).filter(Company.name=='Meta').one().id` and asserts ==31; verified `[OK] target company: id=31 name='Meta'`.
+  - **FIX #8 required-keywords assertion**: all 6 keywords ('XOR', 'bitmap', 'state-compression', 'snapshot', 'anagram', '不相交') present in inserted description (verified via boolean-True per-keyword scan).
+  - **Sentinel discovery**: `<!-- ANC_SLUG: meta_anc_max_unique_char_subset -->` is at offset 0 of description; greppable.
+  - **No-emoji + UTF-8 + ruff-clean**: `_assert_no_emoji` covers U+1F000-1FAFF + U+2600-27BF (non-violation). `python -m ruff check scripts/content_meta_anc_max_unique_char_subset.py` -> All checks passed!
+  - **Length budget per FIX #6**: total 7095 chars / ~10.7KB UTF-8. Sections 1-6 + 8-9 ~5KB; section 7 (verbatim AI prompt block) is ~2KB on top -- within target window.
+  - **DB state**: ANC inventory now has 2 rows: (1098 bfs_state_bitmask Maze Solver 4231 chars) + (1099 bitmask_dp_subset_sum Max Unique Char Subset 7095 chars). 6 more drawers (T-P0-272..277) needed before META-ANC-9 hub doc can run.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-271 --status completed`. T-P0-272 (META-ANC-3 Friend Recommendation drawer) is next.
