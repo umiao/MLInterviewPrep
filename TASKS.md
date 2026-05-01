@@ -84,22 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/LESSONS.md.
-
-1. Vite proxy port mismatch (#frontend #vite-proxy #port-mismatch #dev-server #symptom-vs-cause #universal): when user reports frontend doesnt show backend changes, check `vite.config.ts target` port and curl through the proxy (NOT directly at backend) before blaming cache.
-
-2. Surface Identification widget-vs-prose (#ux-target-identification #dashboard #widget-vs-prose #universal): when user names a UI surface (dashboard / app / left nav), trace widget -> queryKey -> /api/<endpoint> -> <DB table> BEFORE editing. Pattern-matching to the largest text artifact is the failure mode.
-
-3. Invariant 3 seed-not-migration (#invariant-3 #seed-not-migration #db-source-of-truth #lint-hook #universal): for projects with regenerable DB content, every row must originate from a git-tracked, idempotent Python seed. NEVER write raw SQL UPDATE/INSERT against data/*.db outside scripts/seed_*.py. Lint-hook pattern is portable.
-
-Source: ~/Desktop/Gen_AI_Proj/MLInterviewPrep/LESSONS.md lines 268-292.
-Target: ~/Desktop/Gen_AI_Proj/claude-code-project-template/LESSONS.md (append, skip duplicates).
-Acceptance: 3 entries copied into template LESSONS.md verbatim; commit message references T-P1-658.
-
 #### T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template
 - **Priority**: P2
 - **Complexity**: S
@@ -328,6 +312,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
 - [x] **2026-05-01** -- T-P1-682: [SD-TOC-UX] Fix SystemDesignDetail TOC disappearing at page bottom + CN/EN bilingual labels + mobile drawer. USER CONTEXT (2026-05-01, Discord review thread): right-side section TOC on /system-design/<slug> (a) is English-only an
 - [x] **2026-04-30** -- T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects. Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to
 - [x] **2026-04-30** -- T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 
