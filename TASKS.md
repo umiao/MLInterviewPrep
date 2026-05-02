@@ -84,20 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
-
-1. task_db.py: `has-unblocked` subcommand. ML has cmd_has_unblocked() (lines ~318-332) + subparser (lines ~427-432) using store.has_unblocked_tasks(); template lacks both. Universal -- used by autonomous_run.sh orchestrator startup gate.
-
-2. settings.json: permissions.allow includes `Write(.claude/session_state.json)` and `Edit(.claude/session_state.json)` carve-out. Added in helixos as T-P1-258 and propagated to ML; template still has no permissions.allow block. Universal -- needed for autonomous mode session_state.json updates without prompts.
-
-Source: ~/Desktop/Gen_AI_Proj/MLInterviewPrep/.claude/hooks/task_db.py + .claude/settings.json.
-Target: ~/Desktop/Gen_AI_Proj/claude-code-project-template (same paths).
-Acceptance: diff -q against template is clean for these two specific items; ML invariant3_guard.py reference is INTENTIONAL divergence and stays project-local.
-
 #### T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest)
 - **Priority**: P2
 - **Complexity**: L
@@ -342,8 +328,10 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
 - [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
 - [x] **2026-05-01** -- T-P1-682: [SD-TOC-UX] Fix SystemDesignDetail TOC disappearing at page bottom + CN/EN bilingual labels + mobile drawer. USER CONTEXT (2026-05-01, Discord review thread): right-side section TOC on /system-design/<slug> (a) is English-only an
+- [x] **2026-05-01** -- T-P0-684: Reschedule Meta AI-Native Coding (Nikhil U.) to Tue 2026-05-05 10:00 PT. Update interview_events row for Nikhil U.'s AI-Native Coding round from Fri 2026-05-01 13:00 PT to Tue 2026-05-05 10:00 
 - [x] **2026-04-30** -- T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects. Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to
 - [x] **2026-04-30** -- T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 
 - [x] **2026-04-30** -- T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of
