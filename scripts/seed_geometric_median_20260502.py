@@ -62,6 +62,9 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
 
 TITLE = "Geometric Median (Weber 问题, L2 距离和最小)"

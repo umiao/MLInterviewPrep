@@ -5,39 +5,6 @@
 
 ## In Progress
 
-#### T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Found during T-P0-693 batch verification (2026-05-02)
-
-When re-running scripts/seed_geometric_median_20260502.py on Windows console (cp1252 default) WITHOUT PYTHONIOENCODING=utf-8, the [SKIP] print() at line 416 crashes with UnicodeEncodeError because TITLE contains '问题' / '距离和最小' (Chinese chars).
-
-## DB state is CORRECT
-The crash is in the print() AFTER the conditional branch already determined no DB write. Re-running with PYTHONIOENCODING=utf-8 confirms full idempotency:
-- [SKIP] id=1108 'Geometric Median (Weber 问题, L2 距离和最小)' description+notes byte-equal (desc=884 notes=9723)
-- [SKIP] id=262 (Best Meeting Point) already has geometric-median cross-link (-> id=1108)
-
-So DB writes are correctly idempotent. ONLY the diagnostic output crashes.
-
-## Fix
-Add at top of script (after imports):
-
-    import sys
-    if hasattr(sys.stdout, 'reconfigure'):
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-
-This is the established pattern in scripts/seed_master_pitches.py, scripts/check_emoji.py, scripts/seed_google_drills_cn_batch_20260419.py, etc.
-
-## CLAUDE.md rule violated
-> Explicit UTF-8: All file I/O and subprocess calls must specify encoding='utf-8'. Never rely on locale defaults (cp1252 on Windows).
-
-## Acceptance criteria
-1. Add sys.stdout.reconfigure(encoding='utf-8', errors='replace') guard near top of seed_geometric_median_20260502.py
-2. Re-run script on Windows WITHOUT setting PYTHONIOENCODING -- must print [SKIP] cleanly, no traceback
-3. Sweep other recent ml_coding seeds for same pattern (CJK in TITLE/print f-strings): seed_kmeans_vanilla_init_20260502.py, seed_knn_20260502.py, seed_linear_regression_20260502.py, seed_logistic_regression_20260502.py -- add reconfigure guard if any contain non-ASCII in printable strings
-4. (Optional) Consider adding a hook check or audit script that flags this pattern in future seeds
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -331,6 +298,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252. ## Found during T-P0-693 batch verification (2026-05-02)
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
 - [x] **2026-05-02** -- T-P0-693: [MLI-F] Post-batch idempotency re-run + global URI audit + ML_PROBLEMS sanity check. ## Goal (per user review feedback: 'Idempotency 验证: design 上 idempotent + 实际跑过没 = 两件事')
