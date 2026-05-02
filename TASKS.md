@@ -9,53 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-691: [MLI-E1] Extend problems.id=73 (Rotate Image) with rectangular n×m generalization
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Goal
-Extend problems.id=73 'Rotate Image' (LC 48, currently square-only) notes with the rectangular n×m generalization analysis the user provided in the original brief. PRESERVE the existing square-case content; APPEND the rectangular section.
-
-## Style anchor
-- problems.id=73 existing notes (read in full first) — match its current voice.
-- problems.id=1064 K-Means — section structure baseline.
-
-## Technical content (verified during planning)
-- D₄ dihedral group decomposition: R₉₀ = H ∘ T = T ∘ V; R₁₈₀ = H ∘ V = V ∘ H; R₂₇₀ = V ∘ T = T ∘ H.
-- **Tetrahedral group warning MOTIVATION** (per reviewer's question 'where does tetrahedral come from'): the warning is NOT abstract — the user themselves used '四面体群' in the original brief while actually meaning dihedral D₄. The notes' warning section explicitly frames it as 'a common terminology slip' and cites that 四面体群 = A₄ / S₄ (12 / 24 阶, alternating / symmetric group of the tetrahedron) which is unrelated to matrix rotation. Without this context the warning IS jarring; with the framing it makes pedagogical sense.
-- **Cate & Twigg (1977), Algorithm 513 — VERIFIED REAL via web search**: Cate, E. G. & Twigg, D. W., 'Algorithm 513: Analysis of in-situ transposition', ACM Transactions on Mathematical Software 3(1):104-110, 1977. Cite precisely. Also reference: Brenner (1973) Algorithm 467 + Wikipedia 'In-place matrix transposition' for additional grounding. FFTW does include in-place transpose code based on this lineage.
-- Special cases:
-  - 180° (any shape): involution (i,j) ↔ (n-1-i, m-1-j), O(1) extra space single-pass swap.
-  - Square 90°: H ∘ T decomposition — transpose (involution on upper-triangle) + horizontal flip (involution), each O(1) extra space.
-  - Rectangular 90°: theoretical O(1) via Cate-Twigg cycle-leader enumeration using σ(k) = kn mod (N-1) multiplicative-group structure; FFTW-grade, '面试不写'.
-- Complexity lower bound table:
-  - 180° any shape: time Ω(nm), space O(1) achievable (involution).
-  - Square 90°: time Ω(N²)=Ω(nm), space O(1) achievable (D₄ decomposition).
-  - Rectangular 90°: time Ω(nm), space O(1) achievable (Cate-Twigg) but practically Θ(nm) auxiliary.
-- '面试可达的最优' 收口语 (honest closing): square + 180° doable on whiteboard; rectangular 90° = O(nm) aux is interview answer; theoretical O(1) exists but not implemented.
-
-## Acceptance criteria
-1. UPSERT problems.id=73 notes via idempotent scripts/seed_rotate_image_rect_extension_<date>.py (sentinel <!-- ROTATE_IMAGE_RECT_<DATE> -->).
-2. Existing square-case content PRESERVED (do not delete or rewrite — append the rectangular section).
-3. Notes append:
-   - 题目推广 (n×m 长方)
-   - 核心挑战 (in-place 语义在长方下的微妙)
-   - 解法层次: 主答案 (开 m×n 辅助 O(nm)) + 特殊情况 (180° / 方阵 90°) + 理论极限 (Cate-Twigg cite + FFTW + Brenner)
-   - 群论 D₄ formulas + tetrahedral warning WITH motivating sentence ('一个常见的术语滑步: 四面体群 A_4/S_4 是正四面体的对称群, 12/24 阶, 与矩阵旋转无关')
-   - 复杂度下界表
-   - 面试可达的最优 收口
-4. Idempotent: second run = 0 writes.
-5. ruff check passes.
-6. Manual smoke test: /problems/73 renders; KaTeX for ∘/H/T/V symbols correct; existing square content still intact.
-7. Verify problems.id=73 leetcode_id=48 and existing content preserved (diff before/after).
-
-## Files touched
-- new: scripts/seed_rotate_image_rect_extension_<date>.py
-- DB: problems.id=73 notes UPSERT (append-style)
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-286) — see PROGRESS.md.
-
 #### T-P0-692: [MLI-E2] Google /companies/3/prep R2 Coding Index doc (links to extended problem 73 via db://)
 - **Priority**: P0
 - **Complexity**: M
@@ -421,6 +374,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-691: [MLI-E1] Extend problems.id=73 (Rotate Image) with rectangular n×m generalization. ## Goal
 - [x] **2026-05-02** -- T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld. ## Goal
 - [x] **2026-05-02** -- T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD). ## Goal
 - [x] **2026-05-02** -- T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD). ## Goal
