@@ -9,43 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-688
-- **Description**: ## Goal
-Add Logistic Regression as ml_coding handwritten solution: sigmoid + BCE + GD. Restrained minimal numpy, mirrors LR style established in T-P0-283.
-
-## Style anchor
-- T-P0-283 output (filled problems.id=1102) — match exactly.
-- problems.id=1064 K-Means — section structure baseline.
-
-## Technical content (precise — per user review feedback)
-- Forward: z = X w; p = σ(z) = 1/(1+exp(-z)).
-- Loss: BCE = -1/n · Σ [y log p + (1-y) log (1-p)].
-- Gradient: ∇w = 1/n · X^T (σ(Xw) - y).
-- **Stable BCE formula (give EXPLICIT form, not just 'log-sum-exp')**: per-sample stable BCE = max(z, 0) - z·y + log(1 + exp(-|z|)). Show this in code, not just words. Document why: avoids overflow when |z| large via the |z| trick.
-- Multi-class softmax extension: p_k = exp(z_k) / Σ_j exp(z_j); cross-entropy gradient ∇W = 1/n · X^T (P - Y).
-- Regularization: L1 (subgradient sign(w)), L2 (2λw added to gradient).
-
-## Acceptance criteria
-1. Idempotent scripts/seed_logistic_regression_<date>.py.
-2. New problems row, category='ml_coding'. (Confirmed during planning: no Logistic Regression problem exists.)
-3. Notes content: 题目描述 / 核心代码 (sigmoid, stable BCE FORMULA in code, ∇=X^T(σ(Xw)-y), full-batch GD; mention softmax extension) / 关键要点 (numerical stability — show the explicit |z| trick, NOT just 'use log-sum-exp'; class imbalance; L1/L2) / 面试追问 (Newton/IRLS, SGD, calibration, Platt scaling) / 复杂度.
-4. framework_node_problems insert: link to existing node id=211 'Logistic Regression Loss'.
-5. Idempotent: second run = 0 writes.
-6. ruff check passes.
-7. Manual smoke test: /problems/<id> renders; KaTeX for sigmoid/BCE/gradient/stable-form formulas correct.
-8. Add ML_PROBLEMS entry in QuickIndex.tsx.
-
-## Files touched
-- new: scripts/seed_logistic_regression_<date>.py
-- DB: new problems row + framework_node_problems(node_id=211, problem_id=<new>)
-- src/frontend/src/pages/QuickIndex.tsx (add ML_PROBLEMS entry)
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-284) — see PROGRESS.md.
-
 #### T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld
 - **Priority**: P0
 - **Complexity**: M
@@ -506,6 +469,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD). ## Goal
 - [x] **2026-05-02** -- T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD). ## Goal
 - [x] **2026-05-02** -- T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row). ## Goal
 - [x] **2026-05-02** -- T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast. ## Goal

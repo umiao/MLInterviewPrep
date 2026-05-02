@@ -72,6 +72,7 @@ const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1064, title: "K-Means (K-Means++)" },
   { dbId: 1102, title: "Linear Regression (closed-form lstsq + GD)" },
   { dbId: 1106, title: "K-Nearest Neighbors (KNN + Weighted)" },
+  { dbId: 1107, title: "Logistic Regression (Sigmoid + Stable BCE + GD)" },
 ];
 
 const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [
