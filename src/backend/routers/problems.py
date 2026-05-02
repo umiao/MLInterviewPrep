@@ -323,6 +323,18 @@ def update_problem(
         raise HTTPException(status_code=404, detail="Problem not found")
 
     update_data = problem_update.model_dump(exclude_unset=True)
+
+    # Golden flag: false -> true stamps golden_at; true -> false clears it.
+    # Task spec deviates from behavioral_examples here (which leaves golden_at set
+    # on true -> false); see T-P2-696 AC #2.
+    if "is_golden" in update_data:
+        new_golden = bool(update_data["is_golden"])
+        current_golden = bool(db_problem.is_golden)
+        if new_golden and not current_golden:
+            db_problem.golden_at = datetime.utcnow()
+        elif current_golden and not new_golden:
+            db_problem.golden_at = None
+
     for field, value in update_data.items():
         if field in ("tags", "company_tags") and value is not None:
             setattr(db_problem, field, json.dumps(value, ensure_ascii=False))

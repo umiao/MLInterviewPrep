@@ -1,5 +1,5 @@
 """Tests for problems API routes."""
-
+from datetime import datetime
 
 # ---------------------------------------------------------------------------
 # Helper to seed multiple problems for filter/sort/pagination tests
@@ -1721,3 +1721,73 @@ def test_notes_in_list_response(test_client):
     data = resp.json()
     assert len(data) == 1
     assert data[0]["notes"] == "Some notes here."
+
+
+# ===========================================================================
+# Golden flag (T-P2-696)
+# ===========================================================================
+
+def test_update_problem_is_golden_true_stamps_golden_at(test_client):
+    """PUT is_golden=true on a non-golden problem returns 200 with is_golden=true and an ISO golden_at."""
+    pid = test_client.post("/api/problems", json={"title": "Golden Test"}).json()["id"]
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"is_golden": True})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_golden"] is True
+    assert data["golden_at"] is not None
+    # ISO-8601-ish: must parse as a datetime
+    datetime.fromisoformat(data["golden_at"])
+
+
+def test_update_problem_is_golden_false_clears_golden_at(test_client):
+    """PUT is_golden=false on a golden problem returns 200 with golden_at=null."""
+    pid = test_client.post("/api/problems", json={"title": "Golden Clear"}).json()["id"]
+
+    test_client.put(f"/api/problems/{pid}", json={"is_golden": True})
+    resp = test_client.put(f"/api/problems/{pid}", json={"is_golden": False})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_golden"] is False
+    assert data["golden_at"] is None
+
+
+def test_update_problem_is_golden_unchanged_when_omitted(test_client):
+    """PUT body without is_golden leaves is_golden and golden_at unchanged (partial update)."""
+    pid = test_client.post("/api/problems", json={"title": "Golden Persist"}).json()["id"]
+
+    stamped = test_client.put(f"/api/problems/{pid}", json={"is_golden": True}).json()
+    original_golden_at = stamped["golden_at"]
+    assert original_golden_at is not None
+
+    resp = test_client.put(f"/api/problems/{pid}", json={"notes": "side-effect-free"})
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_golden"] is True
+    assert data["golden_at"] == original_golden_at
+    assert data["notes"] == "side-effect-free"
+
+
+def test_update_problem_is_golden_noop_does_not_restamp(test_client):
+    """PUT is_golden=true on an already-golden problem does not re-stamp golden_at."""
+    pid = test_client.post("/api/problems", json={"title": "Golden Noop"}).json()["id"]
+
+    first = test_client.put(f"/api/problems/{pid}", json={"is_golden": True}).json()
+    second = test_client.put(f"/api/problems/{pid}", json={"is_golden": True}).json()
+    assert second["is_golden"] is True
+    assert second["golden_at"] == first["golden_at"]
+
+
+def test_update_problem_other_fields_unaffected_by_golden_logic(test_client):
+    """Setting is_golden alongside notes still updates both, and notes-only update doesn't touch golden state."""
+    pid = test_client.post("/api/problems", json={"title": "Golden Multi"}).json()["id"]
+
+    resp = test_client.put(
+        f"/api/problems/{pid}",
+        json={"is_golden": True, "notes": "with golden"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["is_golden"] is True
+    assert data["golden_at"] is not None
+    assert data["notes"] == "with golden"

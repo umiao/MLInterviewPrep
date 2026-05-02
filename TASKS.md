@@ -84,26 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P2-695
-- **Description**: WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a working PUT /behavioral/examples/{id} that accepts this field. Problems router currently does not accept is_golden in its update path — without this, the UI toggle has nothing to call.
-
-FILES TO TOUCH:
-- src/backend/routers/problems.py — locate the PUT /problems/{id} handler (or PATCH, whichever is the existing update route). Extend the Pydantic request body model and the SQL update logic to accept and persist is_golden (Boolean) and golden_at (DateTime, auto-set to UTC now on transitions to is_golden=true; clear to NULL when set to false).
-- If there's a Pydantic schema in src/backend/schemas/problem.py or similar, update it too.
-
-REFERENCE PATTERN: Find the behavioral PUT handler in src/backend/routers/behavioral.py (search for 'is_golden' in that file). Mirror the golden_at timestamp logic — when is_golden flips false->true, set golden_at = datetime.utcnow(); when flips true->false, set golden_at = None. Do NOT update golden_at on no-op writes.
-
-ACCEPTANCE CRITERIA:
-1. PUT /problems/1064 with body {"is_golden": true} returns 200 and the response includes is_golden=true and golden_at=<an ISO timestamp>
-2. PUT /problems/1064 with body {"is_golden": false} returns 200 and golden_at is null in response
-3. Other update fields (notes, comfort_level, etc.) still work unchanged — regression-test one existing field
-4. If is_golden is not in the request body, it is left unchanged (partial update semantics)
-
-OUT OF SCOPE: UI integration (KMEANS-GOLDEN-3/4).
-
 #### T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping)
 - **Priority**: P2
 - **Complexity**: S
@@ -414,6 +394,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
 - [x] **2026-05-02** -- T-P2-695: [KMEANS-GOLDEN-1] Add is_golden + golden_at columns to problems table (Alembic migration + ORM model + Problem TS type + /problems API serialization). Schema parity with behavioral_examples / framework_nodes / company_documents — these three already have is_golden + gold
 - [x] **2026-05-02** -- T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252. ## Found during T-P0-693 batch verification (2026-05-02)
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need

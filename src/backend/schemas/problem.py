@@ -46,6 +46,7 @@ class ProblemUpdate(BaseModel):
     neetcode_slug: str | None = None
     description_source: str | None = None
     notes: str | None = None
+    is_golden: bool | None = None
 
 
 class ProblemResponse(BaseModel):
