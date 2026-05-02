@@ -53,6 +53,8 @@ def _problem_to_response(p: Problem) -> dict:
         "description_source": p.description_source,
         "notes": p.notes,
         "frequency_rank": p.frequency_rank,
+        "is_golden": bool(p.is_golden),
+        "golden_at": p.golden_at,
     }
 
 

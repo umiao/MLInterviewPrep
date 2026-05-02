@@ -73,6 +73,8 @@ class ProblemResponse(BaseModel):
     description_source: str | None = None
     notes: str | None = None
     frequency_rank: int | None = None
+    is_golden: bool = False
+    golden_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

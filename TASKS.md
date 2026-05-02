@@ -84,6 +84,122 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
+#### T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P2-695
+- **Description**: WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a working PUT /behavioral/examples/{id} that accepts this field. Problems router currently does not accept is_golden in its update path — without this, the UI toggle has nothing to call.
+
+FILES TO TOUCH:
+- src/backend/routers/problems.py — locate the PUT /problems/{id} handler (or PATCH, whichever is the existing update route). Extend the Pydantic request body model and the SQL update logic to accept and persist is_golden (Boolean) and golden_at (DateTime, auto-set to UTC now on transitions to is_golden=true; clear to NULL when set to false).
+- If there's a Pydantic schema in src/backend/schemas/problem.py or similar, update it too.
+
+REFERENCE PATTERN: Find the behavioral PUT handler in src/backend/routers/behavioral.py (search for 'is_golden' in that file). Mirror the golden_at timestamp logic — when is_golden flips false->true, set golden_at = datetime.utcnow(); when flips true->false, set golden_at = None. Do NOT update golden_at on no-op writes.
+
+ACCEPTANCE CRITERIA:
+1. PUT /problems/1064 with body {"is_golden": true} returns 200 and the response includes is_golden=true and golden_at=<an ISO timestamp>
+2. PUT /problems/1064 with body {"is_golden": false} returns 200 and golden_at is null in response
+3. Other update fields (notes, comfort_level, etc.) still work unchanged — regression-test one existing field
+4. If is_golden is not in the request body, it is left unchanged (partial update semantics)
+
+OUT OF SCOPE: UI integration (KMEANS-GOLDEN-3/4).
+
+#### T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P2-695
+- **Description**: WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the component). To let the ProblemDrawer show a golden toggle, we need the button to know how to call PUT /problems/{id} and which react-query keys to invalidate after a successful flip.
+
+FILES TO TOUCH:
+- src/frontend/src/components/ui/GoldenToggleButton.tsx
+  * Add 'problem' to the ItemType union (line 8 area)
+  * Add endpoint mapping: itemType === 'problem' -> `/problems/${itemId}` (line 31 area where behavioral mapping lives)
+  * Add cache invalidation keys for problem (lines 54-60 area). Look at how QuickIndex.tsx and ProblemDrawer.tsx fetch problems via react-query to identify the keys — common candidates: ['problem', id], ['problems'], ['quick-index-ml'].
+
+REFERENCE: The existing 'behavioral_example' branch is the closest analog — lift its logic for 'problem'.
+
+ACCEPTANCE CRITERIA:
+1. TypeScript compiles (no type errors) after adding 'problem' to the union
+2. The button renders without runtime errors when given itemType='problem'
+3. Clicking the toggle in dev (with backend running) successfully PUTs the flag and the UI re-fetches with the new state — test by mounting the button on a tiny test harness or by completing T4 and clicking through the drawer
+4. No regressions on the existing 3 item types — open a behavioral example drawer and confirm toggle still works
+
+OUT OF SCOPE: Wiring the button into ProblemDrawer (KMEANS-GOLDEN-4) — this task only extends the button's internal config.
+
+#### T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: T-P2-697
+- **Description**: WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — the user opens /quick-index?section=ml, sees a golden badge on K-Means in the grid, and on opening the drawer can see/toggle golden status with the same orange accent treatment as Behavioral.
+
+FILES TO TOUCH:
+
+A) src/frontend/src/pages/QuickIndex.tsx (lines 71-77, 278-295 area)
+   - The ML_PROBLEMS array hardcodes 5 items. We need each card to read is_golden from the problem record. Either:
+     (a) Fetch the full problem record via react-query for each ML_PROBLEMS entry (preferred — keeps source of truth in DB), OR
+     (b) Add is_golden to the ML_PROBLEMS hardcoded entries (rejected — drifts from DB).
+   - Use react-query to fetch /problems/{dbId} for each ML_PROBLEMS entry, render the card with goldenCardClass(is_golden) wrapper (utility at src/frontend/src/utils/goldenStyle.ts) and inline <GoldenBadge golden={is_golden} /> in the card header. Mirror the BehavioralThemePage ExampleCard pattern (lines 156-212 of BehavioralThemePage.tsx).
+
+B) src/frontend/src/components/problems/ProblemDrawer.tsx (lines 1-124)
+   - In the drawer header (where the title is rendered), add <GoldenToggleButton itemType='problem' itemId={problem.id} isGolden={problem.is_golden} /> next to the title — exact placement should mirror BehavioralThemePage.tsx lines 139-145 visually.
+   - Add an orange top-border accent on the SlideOverPanel when problem.is_golden — mirror BehavioralThemePage.tsx lines 147-149.
+
+REFERENCE: BehavioralThemePage.tsx is the canonical golden-treatment page. Read lines 134-212 in full to understand the badge + toggle + accent pattern before implementing.
+
+ACCEPTANCE CRITERIA:
+1. Open http://localhost:5173/quick-index?section=ml — K-Means card (after T6 marks it golden) shows the orange GoldenBadge and golden card styling; the other 4 ML items render normally without the badge
+2. Click K-Means → drawer opens with orange top-border accent + GoldenToggleButton in header showing filled star
+3. Toggle the star OFF in the drawer → after PUT completes, badge disappears from both the drawer header and the card behind it (cache invalidation works)
+4. Toggle back ON → badge reappears on both surfaces
+5. Open another ML item (e.g., Linear Regression 1102) → no golden treatment, but the toggle button is present and clicking it makes that item golden too (no item-type discrimination at UI level)
+6. No regression: open any algorithm-category problem from another route → drawer behaves as before (the toggle+accent should still appear since they're now part of the drawer, but un-toggled by default — confirm no visual breakage)
+
+OUT OF SCOPE: Backfilling content (KMEANS-GOLDEN-5). Marking K-Means specifically as golden (KMEANS-GOLDEN-6). Visual polish beyond mirroring Behavioral — if you notice density/typography issues in the drawer Markdown, do NOT fix them in this task; flag them as a follow-up task instead.
+
+#### T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P2-695
+- **Description**: WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for density and review. The new draft is on disk at docs/drafts/kmeans_golden_v1.md. This task replaces problems.notes for id=1064 with that file's contents, using the same sentinel-based idempotent pattern as scripts/seed_kmeans_vanilla_init_20260502.py.
+
+FILES TO TOUCH:
+- Create scripts/seed_kmeans_golden_v1.py — model it on scripts/seed_kmeans_vanilla_init_20260502.py but with two differences:
+  1. It REPLACES the notes column entirely (not append), since the new draft is a full rewrite
+  2. Sentinel: <!-- KMEANS_GOLDEN_V1_20260502 --> as the first line of the new notes value, so the script is idempotent (re-running detects the sentinel and exits 0 without changes)
+- Source content path (read at script runtime): docs/drafts/kmeans_golden_v1.md
+- Run the script after creating it: `python scripts/seed_kmeans_golden_v1.py` from MLInterviewPrep root
+
+ACCEPTANCE CRITERIA:
+1. Script exits 0 on first run — notes column updated, length matches len(file_contents) + sentinel-comment-line overhead
+2. Script exits 0 on second run with stdout 'already applied' (or similar) — DB row unchanged (verify with: SELECT length(notes) FROM problems WHERE id=1064;)
+3. SELECT substr(notes, 1, 60) FROM problems WHERE id=1064; shows the sentinel as the first line
+4. Open http://localhost:5173/quick-index?section=ml → K-Means → drawer renders the new content correctly: TL;DR blockquote, all code blocks formatted, the math $$D(x)^2$$ renders as inline math (not literal text), the comparison table renders as a table
+5. No FOREIGN KEY or CHECK constraint violations
+6. The seed script does not delete or rename the row, only updates the notes column
+
+OUT OF SCOPE: Marking the row golden (KMEANS-GOLDEN-6). Schema changes (T1).
+
+NOTE FOR THE WORKER: Read scripts/seed_kmeans_vanilla_init_20260502.py first as the canonical seed-script template. Use the same SQLAlchemy session pattern, same sentinel detection style, same logging format.
+
+#### T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P2-699
+- **Description**: WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the chain but it's the user-visible deliverable: K-Means becomes the first golden ML example, mirroring the Behavioral golden-example treatment.
+
+APPROACH:
+- Create scripts/mark_kmeans_golden_20260502.py (small one-shot) OR call the PUT endpoint via curl in a verification script.
+- Recommended: a small Python script under scripts/ that uses the same SQLAlchemy session pattern as other seed scripts. Sentinel: check is_golden first; if already True with a non-null golden_at, exit 0 idempotently.
+- SQL equivalent: UPDATE problems SET is_golden=1, golden_at=datetime('now') WHERE id=1064 AND is_golden=0;
+
+ACCEPTANCE CRITERIA:
+1. SELECT is_golden, golden_at FROM problems WHERE id=1064; returns (1, '<some ISO timestamp>') — both populated
+2. Re-running the script is a no-op (no second timestamp overwrite)
+3. Open http://localhost:5173/quick-index?section=ml — K-Means card now shows the golden badge + golden card styling; the drawer header shows the orange accent + filled star toggle (this is the integrated end-to-end test of T1+T2+T3+T4+T5+T6 together)
+4. No other rows in problems have been touched (run: SELECT COUNT(*) FROM problems WHERE is_golden=1; — must be exactly 1)
+
+OUT OF SCOPE: Marking other problems as golden. Adjusting schema or UI.
+
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -298,6 +414,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-695: [KMEANS-GOLDEN-1] Add is_golden + golden_at columns to problems table (Alembic migration + ORM model + Problem TS type + /problems API serialization). Schema parity with behavioral_examples / framework_nodes / company_documents — these three already have is_golden + gold
 - [x] **2026-05-02** -- T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252. ## Found during T-P0-693 batch verification (2026-05-02)
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:

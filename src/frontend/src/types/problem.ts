@@ -21,6 +21,8 @@ export interface Problem {
   description_source: string | null;
   notes: string | null;
   frequency_rank: number | null;
+  is_golden: boolean;
+  golden_at: string | null;
 }
 
 export type Difficulty = "easy" | "medium" | "hard";

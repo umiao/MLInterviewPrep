@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    text,
 )
 from sqlalchemy.orm import relationship
 
@@ -38,7 +39,9 @@ class Problem(Base):
     category = Column(
         String,
         CheckConstraint("category IN ('algorithm','ml_coding','system_design')"),
+        nullable=False,
         default="algorithm",
+        server_default="algorithm",
     )
     source = Column(Text, nullable=True)
     company_tags = Column(Text, nullable=True)  # JSON array
@@ -64,6 +67,13 @@ class Problem(Base):
     description_source = Column(String, nullable=True)  # "neetcode", "manual", "leetcode"
     notes = Column(Text, nullable=True)
     frequency_rank = Column(Integer, nullable=True)
+    is_golden = Column(
+        Boolean,
+        nullable=False,
+        default=False,
+        server_default=text("0"),
+    )
+    golden_at = Column(DateTime, nullable=True)
 
     attempts = relationship("Attempt", back_populates="problem", cascade="all, delete-orphan")
     qa_sessions = relationship("QASession", back_populates="problem", cascade="all, delete-orphan")
