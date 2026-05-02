@@ -775,3 +775,25 @@
 - **Sanity check result**: (a) **Idempotency**: final re-run shows all 5 NOOP after iterative tightening. (b) **Length AC**: all 5 within 250-700 chars (min 667, max 693). (c) **Empty count**: `COUNT(*) WHERE LENGTH(IFNULL(cheat_sheet,""))=0` went 5 -> 0 -- T-P2-683 complete (all 31 SDs filled across batches 1-4: 7 eBay + 10+9 interview + 5 Pinterest). (d) **CN-char check**: every cheat_sheet contains Chinese chars (passes `chinese_pattern.search`). (e) **Source-of-truth fidelity**: each row's numbers / decisions traced to existing prose (e.g. ad-ctr `500M MAU / 10B impr/day / 150K QPS / DeepFM-DCN-v2 / Isotonic per surface×country` all from overview+formulas+production_constraints; embeddings `5B pins / 256-d / ScaNN+PQ / B=8192 in-batch + LogQ / 256xA100` from formulas+production_constraints+tradeoffs). (f) **Lint**: `ruff check scripts/seed_sd_cheat_sheets_pinterest_batch4_20260502.py` -> All checks passed. (g) **Test**: `pytest -k "system_design or cheat"` -> 6/6 passed (cheat_sheet API endpoints + aggregation + lean-list invariant).
 - **Status**: [DONE] -- 31/31 SDs done (full T-P2-683 closeout: 7 eBay + 10 interview B2 + 9 interview B3 + 5 Pinterest B4). All SDs in `system_designs` table now have populated cheat_sheet.
 - **Request**: `task_db.py update T-P2-683 --status completed`
+
+## 2026-05-02 -- [Ad-hoc] Migrate 9 [MLI-*] P0 tasks from root DB to MLInterviewPrep DB
+- **What I did**: Per user direction (Discord 2026-05-02 17:18 PT), moved T-P0-280..288 (the 9 [MLI-A..F] tasks added 2026-05-02 morning) from root `Gen_AI_Proj/.claude/tasks.db` into `MLInterviewPrep/.claude/tasks.db` so `autonomous_run.sh N MLInterviewPrep` (which reads MLI's local DB only — not walk-up) can pick them up. Root prior task placement was the wrong DB; MLI orchestrator never saw them.
+- **ID renumbering** (forced by collision — MLI DB had archived T-P0-280 / T-P0-281 from prior history, max P0 ID was T-P0-684):
+  - 280→685, 281→686, 282→687, 283→688, 284→689, 285→690, 286→691, 287→692, 288→693
+  - All 9 task descriptions get an appended `[migration 2026-05-02]` breadcrumb pointing back here
+  - Title prefixes `[MLI-A..F]` preserved verbatim
+  - 9 dependency edges remapped (688→689→690 chain; 691→692→693 chain; {685,686,687,688,690}→693 fan-in)
+- **Deliverables**: 9 task rows + 9 dep rows in `MLInterviewPrep/.claude/tasks.db`; 9 task rows + 9 dep rows deleted from root DB; both TASKS.md regenerated; pre-migration backups at `*.db.bak_20260502_pre_mli_migration` (root + MLI).
+- **Sanity check result**: From root cwd `task_db.py has-unblocked` → `no` (root active = 0, expected). From MLI cwd `task_db.py has-unblocked` → `yes` with first pickup `T-P0-685 [MLI-A]` (expected). All 9 dep edges round-tripped (verified via direct SQL count). Migration ran inside per-DB transactions; both committed.
+- **Status**: [DONE]
+- **Request**: No task DB completion change (this entry documents an infra migration, not a tracked task closure).
+- **User can now run**: `cd MLInterviewPrep && bash scripts/autonomous_run.sh 9` — should burn through T-P0-685..693 in topological order ending at T-P0-693 (post-batch audit).
+
+
+## 2026-05-02 10:30 -- [T-P0-685] [MLI-A] Remove Lock Combination from quick-index?section=ml
+- **What I did**: Per task spec (BFS is not ML coding), removed the `{ dbId: 1050, title: "Lock Combination BFS (Bidirectional)" }` entry from the `ML_PROBLEMS` array in `src/frontend/src/pages/QuickIndex.tsx`. Pure frontend cleanup -- DB row 1050 already has `category='algorithm'` (verified via SELECT) so no DB write needed. Pre-grep across `src/frontend` confirmed only this single reference to dbId=1050 exists in the frontend; no orphaned ML-context references elsewhere.
+- **Deliverables**:
+  - MOD `src/frontend/src/pages/QuickIndex.tsx` -- ML_PROBLEMS array now contains only `{ dbId: 1064, title: "K-Means (K-Means++)" }` (1 entry, was 2).
+- **Sanity check result**: (a) **Pre-grep**: `grep 1050 src/frontend` returned only the line being deleted -- no other refs. (b) **DB invariant**: `SELECT id,title,category FROM problems WHERE id=1050` -> `(1050, 'Lock Combination BFS', 'algorithm')` -- already correctly categorized, confirming the AC's premise that no DB recategorization is needed. (c) **Build**: `npm run build` clean exit (1.29s, only the pre-existing 500kB chunk-size warning -- not a regression). (d) **Post-state**: ML_PROBLEMS contains only K-Means(1064) as required by AC1; B/C/D will append new ml_coding rows. (e) **NOT verified**: live browser smoke test of `http://localhost:5173/quick-index?section=ml` -- autonomous mode, no interactive browser available; static read of file confirms array correctness and build pass confirms type/syntax correctness.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-685 --status completed`

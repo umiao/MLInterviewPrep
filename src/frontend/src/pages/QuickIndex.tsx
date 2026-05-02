@@ -70,7 +70,6 @@ const STATEFUL_DS_DESIGN: { lcId: number; title: string }[] = [
 
 const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1064, title: "K-Means (K-Means++)" },
-  { dbId: 1050, title: "Lock Combination BFS (Bidirectional)" },
 ];
 
 const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [
