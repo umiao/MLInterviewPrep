@@ -9,54 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-689
-- **Description**: ## Goal
-ml_coding application problem: given N points on plane, find point minimizing sum of L2 distances (Weber 问题 / geometric median). Primary: Weiszfeld iteration. Follow-ups: scaling, contrast with L1 version (db://262 Best Meeting Point).
-
-## Categorization rationale (per user review)
-- Reviewer flagged: 'geometric median 严格讲属于 robust statistics / numerical optimization, 不是 ML coding'.
-- Resolution: ml_coding inclusion criterion is broader than 'pure ML algorithm'. We include problems that are EITHER (a) ML algorithm implementations (KMeans/KNN/LR/LogReg) OR (b) numerical-optimization problems with direct ML/statistics applications. Geometric median qualifies under (b):
-  - Weiszfeld = gradient descent on convex L2-sum objective (same algorithmic family as T-283/T-284).
-  - Geometric median = M-estimator / robust mean (used in robust regression, robust clustering init).
-  - k=1 K-Means with L2 cost gives the centroid; geometric median is the L2 multivariate analog of median; clean pedagogical bridge.
-- Lock Combination (T-280) fails BOTH (a) and (b) — pure graph search, no ML/optimization tie. Geometric median passes (b). Different bar, principled.
-- Document this rule in the new notes' opening section.
-
-## Style anchor
-- T-P0-283 (Linear Regression) and T-P0-284 (Logistic Regression) — minimal-runnable numpy.
-- problems.id=1064 K-Means — section structure.
-
-## Technical content (precise — per user review feedback)
-- Weiszfeld iteration: x^{(t+1)} = (Σ x_i / d_i^{(t)}) / (Σ 1 / d_i^{(t)}) where d_i^{(t)} = ||x^{(t)} - x_i||.
-- **Degeneracy fix MUST cite Vardi & Zhang 1999** ('A modified Weiszfeld algorithm for the Fermat-Weber location problem', Mathematical Programming, 90(3):559-566). Their fix handles the case when iterate hits a sample point (denominator zero) by adding a correction term involving the subgradient of the objective at that sample point.
-- 1D case degenerates to median (per-axis); contrast with L1 case (db://262 Best Meeting Point) which uses per-axis median in 2D too.
-- Follow-ups: many points → mini-batch SGD on the convex objective; sublinear approximation; relationship to k=1 K-Means (which gives mean for L2² but median-like for L1); outlier robustness vs centroid.
-
-## Acceptance criteria
-1. New problems row via idempotent scripts/seed_geometric_median_<date>.py. Title: 'Geometric Median (Weber 问题, L2 距离和最小)'.
-2. Notes content:
-   - Opening: cite the inclusion-criterion rule (above) explaining why this is ml_coding despite being in robust statistics.
-   - 题目描述 with explicit L1/L2 contrast pointing to db://262.
-   - 核心代码: Weiszfeld iteration in numpy (~15 lines incl. Vardi-Zhang degeneracy correction). Cite Vardi-Zhang 1999 in comments.
-   - 复杂度: O(N) per iter, sublinear iterations in practice.
-   - 面试追问: scaling (mini-batch SGD), 1D = median, k=1 K-Means relationship, outlier robustness vs centroid.
-3. Cross-link: append to problems.id=262 notes 'L2 版本见 [Geometric Median](db://<new_id>)' (with sentinel for the 262 UPSERT).
-4. Idempotent: second run = 0 writes for both UPSERTs.
-5. ruff check passes.
-6. Manual smoke test: /problems/<new_id> + /problems/262 both render the cross-link drawer correctly.
-7. Add ML_PROBLEMS entry in QuickIndex.tsx.
-
-## Files touched
-- new: scripts/seed_geometric_median_<date>.py
-- DB: new problems row + problems.id=262 notes UPSERT
-- src/frontend/src/pages/QuickIndex.tsx (add ML_PROBLEMS entry)
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-285) — see PROGRESS.md.
-
 #### T-P0-691: [MLI-E1] Extend problems.id=73 (Rotate Image) with rectangular n×m generalization
 - **Priority**: P0
 - **Complexity**: M
@@ -469,6 +421,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld. ## Goal
 - [x] **2026-05-02** -- T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD). ## Goal
 - [x] **2026-05-02** -- T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD). ## Goal
 - [x] **2026-05-02** -- T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row). ## Goal
