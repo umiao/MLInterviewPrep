@@ -70,6 +70,7 @@ const STATEFUL_DS_DESIGN: { lcId: number; title: string }[] = [
 
 const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1064, title: "K-Means (K-Means++)" },
+  { dbId: 1106, title: "K-Nearest Neighbors (KNN + Weighted)" },
 ];
 
 const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [

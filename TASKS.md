@@ -9,45 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Goal
-Add a new ml_coding problem covering vanilla KNN classifier + weighted-KNN extension. Style mirrors K-Means(1064) AS-IS.
-
-## Style anchor
-- problems.id=1064 K-Means notes (current version) — section structure: 题目描述 / 核心代码 / 关键要点 / 面试追问 / 复杂度.
-
-## Technical content (precise — per user review feedback)
-- Vanilla KNN: argpartition top-K + majority vote.
-- Weighted KNN — TWO weighting schemes side-by-side:
-  - 1/d weighting: **MUST use 1/(d + epsilon)** with explicit small ε (e.g. 1e-9) to handle d=0 case (query point coincides with training point). Document why.
-  - Gaussian kernel: w_i = exp(-d_i^2 / (2σ^2)) with σ tuning discussion.
-- **Explicit BOTH classification AND regression coverage**:
-  - Classification: weighted majority vote OR argmax over weighted class probabilities.
-  - Regression: weighted average ŷ = Σw_i y_i / Σw_i.
-
-## Acceptance criteria
-1. New problems row via idempotent scripts/seed_knn_<date>.py. Canonical key: title='K-Nearest Neighbors (KNN + Weighted)'. Category='ml_coding'.
-2. Notes contain TWO code blocks: (a) vanilla KNN; (b) weighted KNN with both 1/(d+ε) and Gaussian kernel, both classification and regression.
-3. Discussion: tie-breaking, K selection (cross-val), curse of dimensionality, KD-tree/Ball-tree for sublinear query.
-4. Idempotent: second run = 0 writes.
-5. ruff check passes.
-6. Manual smoke test: /problems/<new_id> renders; both code blocks highlight; KaTeX for Gaussian formula correct.
-7. ALSO add new entry to QuickIndex.tsx ML_PROBLEMS in this same task.
-
-## Dependencies (revised)
-- Per user review: T-281 dep was overcautious — style anchor is K-Means(1064) AS-IS, not post-T-281. Dependency removed; parallelize with T-281.
-
-## Files touched
-- new: scripts/seed_knn_<date>.py
-- new DB row in problems
-- src/frontend/src/pages/QuickIndex.tsx (add ML_PROBLEMS entry)
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-282) — see PROGRESS.md.
-
 #### T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD)
 - **Priority**: P0
 - **Complexity**: M
@@ -591,6 +552,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row). ## Goal
 - [x] **2026-05-02** -- T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast. ## Goal
 - [x] **2026-05-02** -- T-P0-685: [MLI-A] Remove Lock Combination from quick-index?section=ml (BFS is not ML coding). ## Goal
 - [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
