@@ -84,36 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest)
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each needs a 300-600 char CN+EN flash-card style summary (top numbers, key decisions, pivotal tradeoffs).
-
-Targets (31 total):
-- eBay 8: id=1..7 (module-arbitration, llm-orchestration, pbe-pipeline, ranking-allocation, database-comparison, distributed-task-queue, vibe-code-engineering-patterns); id=8 ml-system-design-patterns is DONE.
-- Standard interview 20: id=9..28 except id=23 (price-drop-tracker) which is DONE. So 19 of these.
-- Old Pinterest 3: id=29 ad-ctr, id=30 embeddings, id=31 chatbot-pins. (Other 4 Pinterest are DONE: id=32, 33-but-only-verbal, 34-but-only-verbal, 35.)
-- Wait: redo precise count -- run the verification SQL in DELIVERABLE 1.
-
-DELIVERABLES:
-1. Run this SQL first to get the authoritative target list:
-   SELECT id, slug, display_order FROM system_designs WHERE LENGTH(IFNULL(cheat_sheet,'')) = 0 ORDER BY display_order;
-2. Author CN+EN cheat_sheets following the style established in  -- markdown table, 8-12 rows, with columns 'Item' / 'Number / Decision'. Reuse existing content from each SD's overview / formulas / production_constraints to extract the top numbers and decisions; do not invent new content.
-3. Idempotent seed scripts following the pattern of  (one per SD or grouped by category). Frontmatter docstring + UPSERT logic.
-4. Verify: re-run the SQL above; expected 0 rows.
-
-ACCEPTANCE CRITERIA:
-- Every SD with display_order < 200 (or any tab user sees) has cheat_sheet content.
-- Each cheat_sheet contains Chinese chars (verified by chinese_pattern.search like in the 2026-05-01 script).
-- Each cheat_sheet is 250-700 chars (compact flash card -- not a full essay).
-- Frontend TOC click on '速查表 (Cheat Sheet)' for any of the 31 SDs renders a populated section, not an empty placeholder.
-
-NOTES:
-- Old Pinterest 3 (id=29-31) ALSO need verbal_outline filled if anyone wants to read those modules; but since user said Pinterest 'avoid interfering', P3 priority -- can be deferred.
-- This task can be auto-run; suggested split: 1 session per ~10 SDs to keep context manageable. Total ~3-4 sessions.
-- Reference style:  (CN+EN, 9-row markdown table, ~300-600 chars).
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -328,6 +298,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
 - [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
 - [x] **2026-05-01** -- T-P1-682: [SD-TOC-UX] Fix SystemDesignDetail TOC disappearing at page bottom + CN/EN bilingual labels + mobile drawer. USER CONTEXT (2026-05-01, Discord review thread): right-side section TOC on /system-design/<slug> (a) is English-only an
