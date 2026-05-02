@@ -9,52 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Goal
-FILL problems.id=1102 'Meta AI-Native Coding - Linear Regression (closed-form X^TX + Ridge/Lasso/SGD follow-ups)' with the actual solution notes. Confirmed during planning: row exists, category='ml_coding', notes IS NULL. The cheat-sheet at company_documents.id=90 indexes this problem via db://1102 but the destination is currently empty.
-
-## Verified during planning
-- problems.id=1102 row exists, category='ml_coding', notes IS NULL.
-- company_documents.id=90 row 5 of cheat-sheet table prescribes EXACT style hints: '$w = (X^T X)^{-1} X^T y$, np.linalg.lstsq 不显式求逆', complexity '$O(n d^2 + d^3)$'.
-- ALL Meta AI-Native sibling problems (1098-1101, 1103-1105) also have NULL notes — broader gap, OUT OF SCOPE for this task.
-
-## Style anchor (TWO sources, both must be read first)
-1. problems.id=1064 K-Means — for SECTION STRUCTURE (题目描述 / 核心代码 / 关键要点 / 面试追问 / 复杂度).
-2. company_documents.id=90 cheat-sheet row for LR — for COLUMN HINTS (closed-form, Ridge/Lasso/SGD, lstsq prescription, complexity).
-
-## Technical content (precise — per user review feedback)
-- **Code MUST NOT use np.linalg.inv**. Use np.linalg.lstsq(X, y, rcond=None) OR np.linalg.solve(X.T @ X, X.T @ y). Comment block must explain WHY: ill-conditioned X^T X amplifies error; lstsq uses SVD/QR internally and is numerically stable. The cheat sheet itself prescribes this — code must not contradict its own index.
-- TWO code paths: closed-form (lstsq) and iterative (full-batch GD).
-- Follow-ups: Ridge ((X^T X + λI)^{-1} X^T y, again via solve not inv), Lasso (no closed form — coordinate descent / proximal gradient ISTA), SGD variant.
-- Complexity: O(nd^2 + d^3) closed-form; O(nd) per GD iteration.
-
-## Acceptance criteria
-1. Read problems.id=1064 and company_documents.id=90 in full BEFORE drafting (cite both in PROGRESS.md).
-2. UPSERT problems.id=1102 notes via idempotent scripts/seed_linear_regression_<date>.py (sentinel <!-- META_AI_NATIVE_LR_<DATE> -->).
-3. NO new problems row — fill the existing 1102.
-4. Code section uses lstsq or solve, NEVER inv. Comment explains the numerical-stability reason.
-5. Idempotent: second run = 0 writes.
-6. ruff check passes.
-7. Manual smoke test: /problems/1102 renders; KaTeX for X^T X / Ridge / SGD formulas correct; /companies/31/prep cheat-sheet drawer for LR now resolves to non-empty notes.
-8. Add ML_PROBLEMS entry for 1102 in QuickIndex.tsx in this task.
-
-## Dependencies (revised)
-- Per user review: T-281 dep was overcautious — style anchor is K-Means(1064) AS-IS. Dependency removed; parallelize with T-281.
-
-## Out of scope (do NOT absorb)
-- Meta AI-Native problems 1098-1101, 1103-1105 also have NULL notes. Broader content gap. NOT included in this batch.
-
-## Files touched
-- new: scripts/seed_linear_regression_<date>.py
-- DB: problems.id=1102 notes (UPSERT, fill from NULL)
-- src/frontend/src/pages/QuickIndex.tsx (add ML_PROBLEMS entry)
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-283) — see PROGRESS.md.
-
 #### T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD)
 - **Priority**: P0
 - **Complexity**: M
@@ -548,26 +502,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 620 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD). ## Goal
 - [x] **2026-05-02** -- T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row). ## Goal
 - [x] **2026-05-02** -- T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast. ## Goal
 - [x] **2026-05-02** -- T-P0-685: [MLI-A] Remove Lock Combination from quick-index?section=ml (BFS is not ML coding). ## Goal
-- [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
-- [x] **2026-05-01** -- T-P1-682: [SD-TOC-UX] Fix SystemDesignDetail TOC disappearing at page bottom + CN/EN bilingual labels + mobile drawer. USER CONTEXT (2026-05-01, Discord review thread): right-side section TOC on /system-design/<slug> (a) is English-only an
-- [x] **2026-05-01** -- T-P0-684: Reschedule Meta AI-Native Coding (Nikhil U.) to Tue 2026-05-05 10:00 PT. Update interview_events row for Nikhil U.'s AI-Native Coding round from Fri 2026-05-01 13:00 PT to Tue 2026-05-05 10:00 
-- [x] **2026-04-30** -- T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects. Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to
-- [x] **2026-04-30** -- T-P1-681: [Meta-Prep-E] Doc 88 §T3 Behavioral 5-Pack — formatting/style polish (paragraph breaks, bold kill-lines, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=88 has solid 5 stories but same formatting inconsistency as doc 87. Concrete edits: (1) split each 
-- [x] **2026-04-30** -- T-P1-680: [Meta-Prep-D] Doc 87 §T2 Domain Breadth — formatting/style polish (paragraph breaks, bold/highlight, CN-EN dedupe per feedback_content_style_cn_en.md). company_documents.id=87 has solid content but inconsistent formatting vs golden style. Concrete edits: (1) audit each of
-- [x] **2026-04-30** -- T-P1-676: [Drawer-Fix-T6] [FOLLOW-UP] Migrate other 4 affected hubs (Uber id=37/81 + Google id=51/53) from db://→cd://; re-run audit. FOLLOW-UP after Meta hub critical path lands. Migrate the remaining 4 hubs identified in 2026-04-30 audit (PROGRESS.md r
-- [x] **2026-04-30** -- T-P0-679: [Meta-Prep-C] Doc 89 §T4-bp Prompt Best Practices — augment with canonical 1-sentence prompt (Version A/B), 30-sec spoken opener, missing pieces of §六 6-pack. Source review attachment §四/§五/§六: doc 89 already aligned philosophically but missing 3 concrete deliverables. Concrete 
-- [x] **2026-04-30** -- T-P0-678: [Meta-Prep-B] Doc 86 §T1 Code-Pad Prompt — major rewrite per review (1-sentence Version A prompt, fix Step1 AI-clarify contradiction, replace opener, drop OrderedDict critique, add §六 6-pack). Source review attachment: rewrite company_documents.id=86. Concrete edits: (1) §1 30-sec opener: replace 'Cool. Before I
-- [x] **2026-04-30** -- T-P0-677: [Meta-Prep-A] Hub doc 82 schedule cell-merge — fold 11:00/13:00 identical coding rows via <table> rowspan; verify cd://86 + cd://89 remain clickable in MarkdownPreview. Issue: hub schedule table at company_documents.id=82 has two coding rows (11:00 Sai Srujan, 13:00 Nikhil) with byte-iden
-- [x] **2026-04-30** -- T-P0-675: [Drawer-Fix-T5] scripts/audit_uri_consistency.py + Meta hub seed migration db://→cd:// + backend integration test + dev-server smoke. Three deliverables in one task — they must land together for the Meta hub to work end-to-end.
-- [x] **2026-04-30** -- T-P0-674: [Drawer-Fix-T4] PrepNotesPage discriminated-union DrawerTarget refactor + cd:// wiring + BehavioralQuestions same wiring + Vitest. Goal: Replace the multi-state drawer (lcDrawerId/dbDrawerId) with a single discriminated-union state that makes 'two dra
-- [x] **2026-04-30** -- T-P0-673: [Drawer-Fix-T3] New CompanyDocDrawer component + 404 UI + error log + Vitest. Goal: New right-side drawer that resolves cd://N against the new /company-documents/{id} endpoint, with explicit 404/err
-- [x] **2026-04-30** -- T-P0-672: [Drawer-Fix-T2] MarkdownPreview cd://N support + onCdLinkClick prop + Vitest. Goal: Add a third URI scheme cd:// (company-document) to MarkdownPreview, peer to existing lc:// and db://.
-- [x] **2026-04-30** -- T-P0-671: [Drawer-Fix-T1] Backend GET /company-documents/{id} endpoint (id-only, no company_id required) + pytest 200/404 cases. Goal: Add a company-id-less endpoint so frontend drawers can resolve cd://N without knowing which company owns the doc.
-- [x] **2026-04-30** -- T-P0-670: [Meta-AINative-T4] Hub restructure (drawer-link sub-docs) + 临场 Prompt Best-Practices doc. Goal: Two deliverables — (a) restructure existing Meta company_document id=82 ('[Meta] AI-Native Onsite Prep (2026-05-01
