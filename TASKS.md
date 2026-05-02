@@ -5,83 +5,42 @@
 
 ## In Progress
 
+#### T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Found during T-P0-693 batch verification (2026-05-02)
+
+When re-running scripts/seed_geometric_median_20260502.py on Windows console (cp1252 default) WITHOUT PYTHONIOENCODING=utf-8, the [SKIP] print() at line 416 crashes with UnicodeEncodeError because TITLE contains '问题' / '距离和最小' (Chinese chars).
+
+## DB state is CORRECT
+The crash is in the print() AFTER the conditional branch already determined no DB write. Re-running with PYTHONIOENCODING=utf-8 confirms full idempotency:
+- [SKIP] id=1108 'Geometric Median (Weber 问题, L2 距离和最小)' description+notes byte-equal (desc=884 notes=9723)
+- [SKIP] id=262 (Best Meeting Point) already has geometric-median cross-link (-> id=1108)
+
+So DB writes are correctly idempotent. ONLY the diagnostic output crashes.
+
+## Fix
+Add at top of script (after imports):
+
+    import sys
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+
+This is the established pattern in scripts/seed_master_pitches.py, scripts/check_emoji.py, scripts/seed_google_drills_cn_batch_20260419.py, etc.
+
+## CLAUDE.md rule violated
+> Explicit UTF-8: All file I/O and subprocess calls must specify encoding='utf-8'. Never rely on locale defaults (cp1252 on Windows).
+
+## Acceptance criteria
+1. Add sys.stdout.reconfigure(encoding='utf-8', errors='replace') guard near top of seed_geometric_median_20260502.py
+2. Re-run script on Windows WITHOUT setting PYTHONIOENCODING -- must print [SKIP] cleanly, no traceback
+3. Sweep other recent ml_coding seeds for same pattern (CJK in TITLE/print f-strings): seed_kmeans_vanilla_init_20260502.py, seed_knn_20260502.py, seed_linear_regression_20260502.py, seed_logistic_regression_20260502.py -- add reconfigure guard if any contain non-ASCII in printable strings
+4. (Optional) Consider adding a hook check or audit script that flags this pattern in future seeds
+
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
-
-#### T-P0-692: [MLI-E2] Google /companies/3/prep R2 Coding Index doc (links to extended problem 73 via db://)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-691
-- **Description**: ## Goal
-Build a new R2-coding-only indexing doc for Google (company_id=3). Seeded with the FIRST entry: matrix rotation (links via db://73 to the rectangular-extended notes from T-P0-286). All future index entries reuse ProblemDrawer (db:// scheme) per user requirement.
-
-## Depends on T-P0-286
-- The index links db://73 — the linked content must exist (square + rectangular) before smoke test passes. Hard dep on E1.
-
-## Style anchor
-- Existing Google company_documents (company_id=3) — check via SELECT DISTINCT doc_kind WHERE company_id=3 to pick the conventional doc_kind ('card_index' or 'prep_note').
-- Memory reference_dblc_drawer_links: ALL index entries use db:// (problems) for ProblemDrawer reuse, NEVER cd:// for problems.
-
-## Technical content
-- New company_documents row: company_id=3, doc_kind chosen from existing convention, title='[Google] R2 Coding Index'.
-- Content: short intro + entry list. First entry = matrix rotation (link via db://73). Document the criterion 'R2 coding only' (excludes R1 system design / behavioral).
-- Hub wire-in: if Google has a top-level prep hub doc (check via SELECT id, title FROM company_documents WHERE company_id=3 AND doc_kind='hub_doc'), append a section pointing at the new R2 index via cd://<index_id>.
-
-## Acceptance criteria
-1. Read existing Google company_documents (kinds + titles) BEFORE picking doc_kind — cite the choice rationale in PROGRESS.md.
-2. NEW company_documents row via idempotent scripts/seed_google_r2_coding_index_<date>.py (sentinel <!-- GOOGLE_R2_INDEX_<DATE> -->).
-3. First entry uses db://73 (NEVER cd://73 — that would silently route to a non-existent company_document id=73 per memory feedback_dblc_drawer_links).
-4. If Google hub doc exists: UPSERT-append a cd://<index_id> section in the hub.
-5. Backend GET /companies/3/prep returns the new index in its response (verify by curl or browser).
-6. Idempotent: second run = 0 writes for all UPSERTs.
-7. Manual smoke test: http://localhost:5173/companies/3/prep — R2 coding section visible; click matrix-rotation entry → ProblemDrawer opens with full rectangular analysis (from T-P0-286) rendered correctly.
-8. URI link audit: python scripts/audit_uri_consistency.py — clean, no broken db:// / cd:// / lc:// links.
-
-## Files touched
-- new: scripts/seed_google_r2_coding_index_<date>.py
-- DB: new company_documents row + (conditionally) Google hub doc UPSERT
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-287) — see PROGRESS.md.
-
-#### T-P0-693: [MLI-F] Post-batch idempotency re-run + global URI audit + ML_PROBLEMS sanity check
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-692, T-P0-685, T-P0-686, T-P0-687, T-P0-688, T-P0-690
-- **Description**: ## Goal (per user review feedback: 'Idempotency 验证: design 上 idempotent + 实际跑过没 = 两件事')
-After all 7 content tasks (T-P0-280 through T-P0-287) complete, run a global verification pass to catch any task that PASSED its individual idempotency check but BROKE on a global re-run.
-
-## Acceptance criteria
-1. Re-run every seed script touched in this batch in sequence:
-   - scripts/seed_kmeans_vanilla_init_<date>.py (T-281)
-   - scripts/seed_knn_<date>.py (T-282)
-   - scripts/seed_linear_regression_<date>.py (T-283)
-   - scripts/seed_logistic_regression_<date>.py (T-284)
-   - scripts/seed_geometric_median_<date>.py (T-285)
-   - scripts/seed_rotate_image_rect_extension_<date>.py (T-286)
-   - scripts/seed_google_r2_coding_index_<date>.py (T-287)
-2. Each must report 0 writes / [UNCHANGED]. Any non-zero is a bug — file a regression.
-3. python scripts/audit_uri_consistency.py — must be clean.
-4. Confirm QuickIndex.tsx ML_PROBLEMS array contains the expected final set:
-   - K-Means(1064)
-   - KNN(<new from T-282>)
-   - Linear Regression(1102)
-   - Logistic Regression(<new from T-284>)
-   - Geometric Median(<new from T-285>)
-   - NOT Lock Combination(1050) — removed in T-280
-5. Manual smoke test sweep (~30-45 min budget): visit each new/modified problem URL + /quick-index?section=ml + /companies/3/prep — confirm rendering, no console errors, drawers open correctly.
-6. Append a 'batch verification' entry to PROGRESS.md summarizing: 7 tasks completed, global re-run = clean, smoke tests passed.
-
-## Files touched
-- None (read-only verification + PROGRESS.md append)
-
-## Why this exists
-- Per-task idempotency check is local; doesn't catch order-dependent bugs (e.g., task B writes content that task C's sentinel doesn't recognize).
-- Global re-run is the cheapest insurance against partial state corruption from the autonomous batch.
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-288) — see PROGRESS.md.
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -374,6 +333,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-693: [MLI-F] Post-batch idempotency re-run + global URI audit + ML_PROBLEMS sanity check. ## Goal (per user review feedback: 'Idempotency 验证: design 上 idempotent + 实际跑过没 = 两件事')
+- [x] **2026-05-02** -- T-P0-692: [MLI-E2] Google /companies/3/prep R2 Coding Index doc (links to extended problem 73 via db://). ## Goal
 - [x] **2026-05-02** -- T-P0-691: [MLI-E1] Extend problems.id=73 (Rotate Image) with rectangular n×m generalization. ## Goal
 - [x] **2026-05-02** -- T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld. ## Goal
 - [x] **2026-05-02** -- T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD). ## Goal
