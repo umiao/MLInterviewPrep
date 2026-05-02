@@ -76,6 +76,25 @@ Before editing DB content for a request that mentions a UI surface (the "dashboa
 - `.claude/hooks/invariant3_guard.py` (T-P0-660 + T-P0-660b extension) blocks raw SQL writes from `scripts/migrations/*` to `data/*.db` AND blocks writes to `company_documents.content` whose payload contains schedule-shaped prose (ISO-8601 timestamp + interviewer-name pattern within 30 lines). This catches the failure mode when the priors above are overridden by recency priming.
 - The `/dashboard` skill (`.claude/skills/dashboard/SKILL.md`) references this table as its single source of truth and walks the 6-step protocol before any DB write.
 
+## Autonomous Mode Invocation
+
+The proven invocation pattern for autonomous mode in this project:
+
+```bash
+cd <project-root> && bash scripts/autonomous_run.sh [max_sessions]
+```
+
+Where:
+- `<project-root>` is THIS project's directory (the one containing `CLAUDE.md` and `.claude/tasks.db`).
+- `[max_sessions]` is a **positive integer** (default 5). Non-integer args are rejected at startup with a clear error; the script will not silently misinterpret a project name as a count (workspace-wide invariant `INV-AUTORUN-2`).
+- The script refuses to run if the caller's cwd is not the project root (`INV-AUTORUN-3`). Always `cd` first.
+
+**If `claude -p` hangs silently** (zero log output for >60s after the "Session N/N" banner): this is a known transient class — cold-start of MCP/plugin/hook init or transient API slowness, NOT auth, NOT script-form drift. Kill the runner, remove `.claude/autonomous.lock`, retry. See `docs/investigations/autorun_hang_2026-05-02.md` (in the workspace root) and root `LESSONS.md` 2026-05-02 entry for the full diagnosis.
+
+**Do NOT use** `claude -p PROMPT --bare` to test auth — `--bare` skips OAuth by design and will report "Not logged in" regardless of state. Use `claude auth status` (returns structured JSON with `loggedIn`, `email`, `subscriptionType`) for the proper auth probe.
+
+**Workspace-wide alternative**: from the workspace root, `bash scripts/autonomous_run.sh [max_sessions] <project_dir>` delegates to a sub-project. Functionally equivalent to the local form; the local form is preferred for clarity (no risk of cross-project confusion).
+
 ## Key Constraints
 - All API keys and cookies from .env, never hardcoded
 - Every function must have type hints and docstring
