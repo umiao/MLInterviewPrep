@@ -9,38 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Goal
-Existing K-Means problem (problems.id=1064) has _init_centers_plusplus. Add a sibling _init_centers_random with detailed comments contrasting it with K-Means++.
-
-## Style anchor
-- Match existing K-Means(1064) style: Chinese narration + English terms (full expansion first use), high comment density, no emoji.
-- Do NOT modify existing _init_centers_plusplus structure or fit() flow. Add as parallel utility shown in the notes' Markdown body.
-
-## Technical content (precise — per user review feedback)
-- Vanilla random init: uniformly sample K points from data (not from bounding box — explain why bounding-box is worse for non-convex clusters).
-- Comparison points to write into the contrast comment block:
-  - Failure modes: empty clusters (initial center has no nearest points), local-optima dependence on seed, slow convergence.
-  - **K-Means++ guarantee (precise wording, NOT 'O(log K) bound')**: Arthur & Vassilvitskii 2007 — E[φ] ≤ 8(ln k + 2) · OPT, i.e. expected O(log k) competitive ratio with the optimal clustering cost. Cite the paper.
-  - Probabilistic distance-weighted sampling: D(x)² weighting biases towards under-covered regions.
-
-## Acceptance criteria
-1. Idempotent seed scripts/seed_kmeans_vanilla_init_<date>.py with sentinel <!-- KMEANS_VANILLA_INIT_<DATE> --> gating UPSERT of problems.id=1064 notes.
-2. Second run = 0 writes (sentinel + byte-equal check).
-3. ruff check passes.
-4. Manual smoke test: navigate http://localhost:5173/problems/1064 — new section renders, code block highlights, existing K-Means++ section unchanged, KaTeX renders the bound formula correctly.
-5. Comment block uses the precise Arthur-Vassilvitskii bound, not loose paraphrase.
-
-## Files touched
-- new: scripts/seed_kmeans_vanilla_init_<date>.py
-- DB: problems.id=1064 notes (UPSERT, append-style)
-
----
-[migration 2026-05-02] Moved from root Gen_AI_Proj/.claude/tasks.db (was T-P0-281) — see PROGRESS.md.
-
 #### T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row)
 - **Priority**: P0
 - **Complexity**: M
@@ -623,6 +591,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
 - [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+- [x] **2026-05-02** -- T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast. ## Goal
 - [x] **2026-05-02** -- T-P0-685: [MLI-A] Remove Lock Combination from quick-index?section=ml (BFS is not ML coding). ## Goal
 - [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
 - [x] **2026-05-01** -- T-P1-682: [SD-TOC-UX] Fix SystemDesignDetail TOC disappearing at page bottom + CN/EN bilingual labels + mobile drawer. USER CONTEXT (2026-05-01, Discord review thread): right-side section TOC on /system-design/<slug> (a) is English-only an
