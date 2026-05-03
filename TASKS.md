@@ -5,45 +5,6 @@
 
 ## In Progress
 
-#### T-P0-706: [MLI-GOLDEN-2P-SPEC] Update ml_impl_note_rewrite_spec.md: shape-per-line + e2e-test-block rules
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-705
-- **Description**: **Goal**: Update `docs/methodology/ml_impl_note_rewrite_spec.md` to add the two new structural rules from the second-pass discussion. This task gates the 5 downstream rewrites (T-P0-707..711) -- spec must be canonical source before they execute.
-
-**Edits**:
-
-1. **Add new section** between current "## Inline 注释规范" and "## 表格与对比":
-
-   ### Shape-per-line decomposition
-
-   每个产生形状变化的 numpy 操作单独一行，配 `# (shape)` 注释。禁止把 3+ 步链式操作压缩到一个表达式（典型反例：`np.array([... for c in centers]).T`）。"一次只算一个 vector" 是默认姿态——`(d,)` -> `(n, d)` broadcast -> `(n,)` -> list of K -> `(k, n)` -> `.T` -> `(n, k)` -> argmin -> `(n,)` 应该是 7 行 7 个 shape 注释，不是一行链式。
-
-   目标：白板时读者按行追形状变化，不需要心算 numpy 隐式 broadcast / axis 推导。
-
-2. **Add new section** between current "## 排版细节" and "## 验收清单":
-
-   ### End-to-end test block
-
-   每份笔记末尾必须以 `## End-to-end test` 章节收尾（visible, 不要折叠），位置在完整实现之后（main loop / predict 之类全部讲完）。约束：
-   - <=10 行
-   - 用 `np.random.rand` / `np.random.randn` + 命名常量 `N, D` (和 `K` 如适用)
-   - instantiate class -> `fit()` -> 可选 `predict()` -> assert output shape
-   - <1s 内跑完，无外部依赖
-   - 改写时 autonomous session 必须真正执行此块（捕获 stdout 验证无异常），不止静态检查
-
-3. **Update §验收清单** -- add 2 items:
-   - [ ] 所有 shape-changing numpy 操作单独成行，配 `# (shape)` 注释
-   - [ ] `## End-to-end test` 章节存在且执行通过（autonomous session 实跑过）
-
-4. **Update §"4 道题的具体锚点"** -- per-problem note that the e2e block uses `(N, D)` for LR / KNN, `(N, D, K)` for K-Means (already golden), `(N, D)` binary y for LogReg, `(N, D)` for Geometric Median.
-
-**Acceptance criteria**:
-- Spec file gains 2 new top-level sections + 2 checklist items + 4-anchor updates.
-- `git diff` shows clean structural edits, no whole-file rewrite.
-- Spec still <10KB after edits (small addition only).
-- Validate: `git log --oneline docs/methodology/ml_impl_note_rewrite_spec.md` shows the commit; `wc -l docs/methodology/ml_impl_note_rewrite_spec.md` increased reasonably (~20-40 lines).
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -722,5 +683,6 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
 - [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
+- [x] **2026-05-02** -- T-P0-706: [MLI-GOLDEN-2P-SPEC] Update ml_impl_note_rewrite_spec.md: shape-per-line + e2e-test-block rules. **Goal**: Update `docs/methodology/ml_impl_note_rewrite_spec.md` to add the two new structural rules from the second-pas
 - [x] **2026-05-02** -- T-P0-705: [MLI-GOLDEN-PROMOTE] Smoke test 4 rewrites on /quick-index?section=ml + mark all 4 is_golden=1. **Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is
 - [x] **2026-05-02** -- T-P0-704: [MLI-GOLDEN-GEOMED] Geometric Median (1108) golden-style rewrite + drop '1999' from title (DB + QuickIndex.tsx). **Goal**: Rewrite problem 1108 (Geometric Median) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (
