@@ -48,10 +48,19 @@ jobs:
 
   uri-consistency:
     runs-on: ubuntu-latest
-    if: hashFiles('data/mle_prep.db') != ''
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - id: db_present
+        shell: bash
+        run: |
+          if [ -f data/mle_prep.db ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.db_present.outputs.found == 'true'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python scripts/audit_uri_consistency.py
+      - if: steps.db_present.outputs.found == 'true'
+        run: python scripts/audit_uri_consistency.py
