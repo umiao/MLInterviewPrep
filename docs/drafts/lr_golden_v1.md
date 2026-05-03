@@ -39,8 +39,10 @@ class LinearRegression:
 ```python
 @staticmethod
 def _augment_with_bias(X):
+    # X: (n, d)
     n = X.shape[0]
-    return np.hstack([np.ones((n, 1)), X])  # (n, d) -> (n, d+1)
+    ones = np.ones((n, 1))                       # (n, 1)
+    return np.hstack([ones, X])                   # (n, d+1)
 ```
 
 ### 2. Closed-form fit -- via `lstsq`, NOT `inv`
@@ -49,7 +51,8 @@ def _augment_with_bias(X):
 
 ```python
 def _fit_closed_form(self, X_design, y):
-    w_full, *_ = np.linalg.lstsq(X_design, y, rcond=None)
+    # X_design: (n, d+1), y: (n,)
+    w_full, *_ = np.linalg.lstsq(X_design, y, rcond=None)  # (d+1,)
     return w_full
 ```
 
@@ -59,15 +62,17 @@ def _fit_closed_form(self, X_design, y):
 
 ```python
 def _fit_gd(self, X_design, y):
+    # X_design: (n, d+1), y: (n,)
     n, d_aug = X_design.shape
-    w = np.zeros(d_aug)
+    w = np.zeros(d_aug)                                   # (d+1,)
     previous_loss = float("inf")
     self.training_loss_history = []
 
-    for _ in range(self.max_iterations):                 # Criterion 1: max iter
-        residual = X_design @ w - y                       # (n,)
+    for _ in range(self.max_iterations):                  # Criterion 1: max iter
+        pred = X_design @ w                               # (n,)
+        residual = pred - y                               # (n,)
         gradient = (2.0 / n) * (X_design.T @ residual)    # (d+1,)
-        w = w - self.learning_rate * gradient
+        w = w - self.learning_rate * gradient             # (d+1,)
 
         current_loss = float(np.mean(residual ** 2))
         self.training_loss_history.append(current_loss)
@@ -157,3 +162,20 @@ def predict(self, X):
 
 - $$\eta < 2 / \lambda_{\max}(X^TX / n)$$ 才收敛, 否则发散.
 - 实战: 先 zero-mean unit-variance standardize, $$\lambda_{\max}$$ 落在 $$O(1)$$, $$\eta = 10^{-2}$$ 即稳.
+
+---
+
+## End-to-end test
+
+```python
+import numpy as np
+np.random.seed(0)
+N, D = 200, 5
+X = np.random.randn(N, D)
+true_w = np.random.randn(D)
+y = X @ true_w + 0.01 * np.random.randn(N)
+lr = LinearRegression().fit(X, y)
+preds = lr.predict(X)
+assert preds.shape == (N,)
+print(f"MSE = {np.mean((preds - y) ** 2):.4f}")
+```
