@@ -5,138 +5,6 @@
 
 ## In Progress
 
-#### T-P1-713: [AR-12] Working-tree progress signal in run_claude_with_timeout (state machine + porcelain hash + telemetry + kill switch + debug logging)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: **Goal**: Extend AR-11's HEAD-diff-only timeout classification with a working-tree (`git status --porcelain`) hash signal, so Claude sessions that edited files but did not commit yet are not mis-classified as 'no progress' and false-killed.
-
-**Motivation (context)**: AR-11 wrapper (run_claude_with_timeout, ~scripts/autonomous_run.sh:107) currently has 3 branches keyed only on HEAD diff. T-P0-710's settle showed the failure mode where Claude wrote DB+draft markdown but never committed before the budget cap; if 600s timeout had fired first instead of budget, the wrapper would have classified it as 'no progress' and false-killed. Working-tree hash is the missing signal.
-
-**State machine (write this table BEFORE writing bash)**:
-| HEAD changed | porcelain hash changed | branch | action |
-|---|---|---|---|
-| Yes (non-WIP) | * | head_changed_nonwip | INFO + return 0 (existing AR-11) |
-| Yes (WIP only) | * | head_changed_wip | WARN + retry once, abort (existing AR-11) |
-| No | Yes | porcelain_only | INFO 'working tree changed; extending +300s once' + EXTEND timeout +300s, single extension only, then re-classify |
-| No | No | true_no_progress | WARN + retry once, abort (existing AR-7) |
-
-Priority: HEAD-changed branches return BEFORE porcelain check fires. Porcelain check is fallback only when HEAD unchanged.
-
-**Implementation notes**:
-- Snapshot `wrapper_start_status_hash=$(git status --porcelain 2>/dev/null | sha256sum | cut -d' ' -f1)` before timeout, compare after.
-- On extension trigger, dump first 5 lines of porcelain diff to log: `(diff <(git status --porcelain) <(echo)) | head -5 >> logs/autonomous.log` so post-mortem can see WHAT changed.
-- Two assignments on one line bug: split `CLAUDE_P_TIMEOUT_EXT=300 extended_once=1` into 2 separate lines.
-- Single extension only: `extended_once` flag prevents re-extension within same wrapper invocation.
-
-**Telemetry (sub-AC, shared with AR-15/16)**: append one JSON line per branch trigger to `logs/wrapper-stats.jsonl`. Fields: `{ts, host, branch (head_changed_nonwip|head_changed_wip|porcelain_only|true_no_progress|coldstart_kill), attempt, sha_before, sha_after, log_growth_b, porcelain_hash_changed}`. Used downstream by AR-15/16 to tune their thresholds.
-
-**Kill switch (sub-AC)**: `CLAUDE_P_DISABLE_PROGRESS_SIGNAL=1` env var skips the porcelain check entirely (falls back to AR-11 behavior). For fast revert if false-positive rate is high.
-
-**Performance**: re-test `time git status --porcelain | sha256sum` under high-load conditions (lots of untracked logs/ files + active index writes), not just idle. If >100ms p95, switch to `--porcelain=v2` and re-bench. Document the result.
-
-**Propagation** (per AR-11 precedent):
-- MLInterviewPrep/scripts/autonomous_run.sh (primary, this task targets)
-- Gen_AI_Proj/scripts/autonomous_run.sh (root, same change in same commit)
-- DEFER: worktree copy (MLInterviewPrep/.claude/worktrees/agitated-leavitt/scripts/autonomous_run.sh) + blog_proj/template tools/ scripts -- T-P2-296 shared-lib refactor will sweep them in one shot.
-
-**Acceptance criteria**:
-1. State machine table committed in CLAUDE.md (root + MLI), matches bash branch order.
-2. Wrapper unit-tested via injected fake `claude` shell function: 4 cases (a) HEAD changed non-WIP -> return 0 immediate, (b) HEAD changed WIP -> WARN+retry, (c) porcelain-only changed -> INFO+extend then re-classify, (d) HEAD+porcelain both unchanged -> WARN+retry. Tests live in `tests/test_autonomous_wrapper.sh` (new file).
-3. Existing AR-11 tests still pass.
-4. `logs/wrapper-stats.jsonl` populates correctly across all 5 branch types (test-only fixture validates schema).
-5. Kill switch verified: with env var set, porcelain check skipped (log-traceable).
-6. Performance: p95 < 100ms on this repo at peak (>=100 untracked + 5 modified + 1 staged), with measurement output committed.
-7. Idempotency: running the modified wrapper twice in a row does not change behavior vs once.
-8. Debug log dumps porcelain diff lines on extension trigger.
-9. Both root + MLI scripts updated in same commit.
-
-#### T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-713
-- **Description**: **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wrappers that classify success via global HEAD diff false-positive"). Current AR-11 "timed out at exit but task committed" branch fires on ANY non-WIP HEAD commit during the 600s window, including unrelated commits from external processes (concurrent main-thread Claude session, IDE auto-commit, etc). The fix: add an attribution dimension so the wrapper only credits commits that belong to the inner session.
-
-**Background (incident)**: 07:42-07:52 UTC autorun Session 1/3 was working on T-P0-709 (KNN 2P, working-tree dirty 64+/52-). I committed unrelated  PROGRESS entry from main thread at 07:51. AR-11 saw HEAD moved, message did not match WIP pattern, emitted INFO + return 0. Orchestrator advanced to Session 2/3 with T-P0-709 still incomplete. Caught + TaskStopped before damage. See LESSONS.md 2026-05-03 entry + PROGRESS.md T-adhoc-ar11-incident.
-
-**Two viable design shapes (pick one in implementation, document the other as alt)**:
-
-**(a) Expected-task-prefix attribution** [recommended, simpler, tighter]:
-- Outer loop in autonomous_run.sh peeks  for the highest-priority unblocked task BEFORE calling wrapper, captures task ID, exports as  env var.
-- Wrapper's AR-11 INFO branch additionally requires latest commit msg to match  (handles both  and ).
-- If env var is unset (e.g., outer loop did not peek), fall back to current AR-11 behavior with a WARN about reduced attribution.
-- Trade-off: requires task-db peek logic in outer loop; what if inner Claude picks a different task than peek predicted? Mitigation: peek result is advisory; if commit prefix differs from peek, the more lenient fallback applies.
-
-**(b) Log-activity correlation** [alt, fuzzier, no orchestrator changes]:
-- Wrapper records  (stat of logs/autonomous.log).
-- On timeout, AR-11 INFO branch additionally requires  (default 200B, env-overridable).
-- Reasoning: a real inner session that ran for 600s and committed would have produced substantial log output; a bare-fork hung claude -p produces ~zero log; an external commit produces commit-hook output but not 600s of session log.
-- Trade-off: still attribution-by-correlation, not direct identity; but does not need outer-loop changes.
-
-**Implementation (shape (a))**:
-
-1. In outer while loop of `autonomous_run.sh`, before calling `run_claude_with_timeout`, get expected task:
-   ```bash
-   EXPECTED_TASK_ID=$(python .claude/hooks/task_db.py list --json 2>/dev/null | python -c "
-import json, sys
-tasks = json.load(sys.stdin)
-unblocked = [t for t in tasks if t['status'] in ('active','in_progress') and not t.get('blocked', False)]
-unblocked.sort(key=lambda t: (t['priority'], t.get('sort_order', 0)))
-print(unblocked[0]['id'] if unblocked else '')
-" 2>/dev/null || echo "")
-   export EXPECTED_TASK_PREFIX="${EXPECTED_TASK_ID}"
-   ```
-2. In `run_claude_with_timeout`, AR-11 INFO branch:
-   ```bash
-   if [ "$current_sha" != "$wrapper_start_sha" ] &&       ! [[ "$latest_msg" =~ ^\[T-[A-Z0-9-]+\ WIP\] ]] &&       [[ -z "$EXPECTED_TASK_PREFIX" || "$latest_msg" =~ ^\[${EXPECTED_TASK_PREFIX}[\]\ ] ]]; then
-     echo "[orchestrator] INFO: claude -p timed out at exit but task committed ($wrapper_start_sha -> $current_sha, msg='${latest_msg:0:80}', expected=$EXPECTED_TASK_PREFIX). Treating as success." >&2
-     return 0
-   fi
-   ```
-3. New diagnostic: AR-11 INFO and WARN log lines now include the latest commit message (truncated to 80 chars) for fast post-mortem.
-
-**Acceptance criteria**:
-1. Injected fake `claude` that times out without committing + EXTERNAL test commit during the window with a non-matching prefix (e.g. `[T-adhoc-other]`) -> wrapper does NOT emit INFO success, falls through to WARN+retry path.
-2. Same setup but EXTERNAL commit has a MATCHING prefix `[T-P0-XXX]` (matching EXPECTED_TASK_PREFIX) -> still false-positives. This is acceptable per design (we cannot disambiguate; prefix-match is good-enough). Document this residual.
-3. Inner session that legitimately commits with matching prefix during timeout window -> still gets INFO success (current happy path preserved).
-4. EXPECTED_TASK_PREFIX unset (legacy/test) -> falls back to current AR-11 behavior with WARN about reduced attribution.
-5. Log lines include  excerpt for diagnostic visibility.
-6. AR-12 (T-P1-713) integration: porcelain hash signal still works alongside attribution. No interaction conflict.
-
-**Telemetry**: append `{ts, host, branch=attribution_blocked, expected, actual_msg}` to `logs/wrapper-stats.jsonl` whenever attribution check rejects a HEAD diff that AR-11 alone would have credited.
-
-**Kill switch**: `CLAUDE_P_DISABLE_ATTRIBUTION=1` skips attribution check (falls back to AR-11 raw behavior). For fast revert.
-
-**Operational rule (interim, until AR-18 lands)**: while autonomous_run.sh is in flight in a repo, NO concurrent git commits from main thread, IDE, or other tools. Documented in CLAUDE.md as a hard rule. AR-18 + AR-12 together remove this rule.
-
-**Propagation**: MLI + root scripts/autonomous_run.sh in same commit (per AR-11 precedent). Worktree + tools/ deferred to T-P2-296.
-
-**Depends on**: T-P1-713 (AR-12). Order: AR-12 first (porcelain signal + telemetry baseline), AR-18 layered on top (attribution check + same telemetry). AR-18 also gives AR-16 (T-P1-715) better post-mortem visibility on cold-start kills since latest commit msg ends up logged.
-
-**Priority rationale**: P1/S because (a) actual incident already happened, (b) the workaround ("don't commit during autorun") is easy to forget and Stop-hook pressure can force violation, (c) implementation is small (one env var + one regex) once design is settled.
-
-#### T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-713
-- **Description**: **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s extension already brings worst-case attempt to 1200s; further bump would double-stack.
-
-**Motivation**: 600s too tight for M-complexity. pytest 1232 = ~95s, MCP cold-start = 30-60s, multi-file Read+Edit ~120s, seed+e2e ~60s. Leaves <8min for reasoning. 900s gives ~13min headroom.
-
-**Why not auto-scale**: orchestrator does not know which task inner session picks. Override available via env var for users needing longer.
-
-**Implementation**:
-- 2 files (MLI + root scripts/autonomous_run.sh): default 600 -> 900
-- CLAUDE.md (root + MLI) Hang auto-recovery section: 600s -> 900s
-
-**AC**:
-1. Default 900s verified via wrapper invocation.
-2. Override CLAUDE_P_TIMEOUT=300 still works.
-3. CLAUDE.md matches code.
-4. AR-12 telemetry counter ingests cleanly.
-
-**Depends on**: T-P1-713 (AR-12). Order: AR-12 first, then this.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -260,37 +128,6 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
-
-#### T-P2-716: [AR-17] Placeholder ticket: PostToolUse heartbeat as fallback if AR-12 porcelain signal proves insufficient
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-713
-- **Description**: **Status**: PLACEHOLDER ONLY. Do NOT implement until trigger condition met.
-
-**Trigger condition** (do not start work until this is observed):
-- AR-12 (T-P1-713) has been live for >= 1 week with telemetry collected.
-- `logs/wrapper-stats.jsonl` analysis shows AR-12 false-negative rate > 10% (i.e., wrapper false-killed sessions where Claude was working in stdout but had not yet touched working tree -- e.g., stuck in a long Read/Bash loop without an Edit).
-- OR user reports a specific failure mode that AR-12's porcelain signal did not catch.
-
-**Goal (when triggered)**: Implement a finer-grained progress signal via PostToolUse hook. Hook writes a heartbeat timestamp to `.claude/heartbeat` on every tool call. Wrapper polls heartbeat freshness; mtime within last N seconds = Claude is alive even if no commit / no working-tree change yet.
-
-**Why deferred**: AR-12 + AR-16 cover the dominant failure modes (uncommitted edits + cold-start hang). Heartbeat adds complexity (hook coordination, file-system race, polling cadence) that may be unnecessary. Wait for data before adding.
-
-**Implementation sketch (for future reference, not to be built now)**:
-1. Add PostToolUse hook `.claude/hooks/heartbeat.py` that touches `.claude/heartbeat` on every invocation.
-2. In wrapper, on timeout, also stat `.claude/heartbeat`; if mtime within last 60s, treat as InProgress like AR-12 porcelain branch.
-3. New telemetry branch: `heartbeat_only` (HEAD unchanged + porcelain unchanged + heartbeat fresh).
-4. Same kill switch pattern: `CLAUDE_P_DISABLE_HEARTBEAT_SIGNAL=1`.
-5. Clean up stale heartbeat at session start.
-
-**Acceptance criteria (when triggered)**:
-1. Trigger condition documented and met (telemetry data referenced).
-2. Hook coordinated across MLI + root .claude/hooks/.
-3. Wrapper integration parallel to AR-12.
-4. Telemetry branch added.
-5. Kill switch verified.
-
-**Depends on**: T-P1-713 (AR-12) -- need its telemetry to know if AR-17 is justified.
 
 ### P3 -- Stretch Goals
 
@@ -502,10 +339,44 @@ A bespoke \`pages/UberIndex.tsx\` route at \`/companies/uber/index\` mirroring \
 ## Dependencies
 Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 'skipped').
 
+#### T-P2-716: [AR-17] Placeholder ticket: PostToolUse heartbeat as fallback if AR-12 porcelain signal proves insufficient
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-713
+- **Description**: **Status**: PLACEHOLDER ONLY. Do NOT implement until trigger condition met.
+
+**Trigger condition** (do not start work until this is observed):
+- AR-12 (T-P1-713) has been live for >= 1 week with telemetry collected.
+- `logs/wrapper-stats.jsonl` analysis shows AR-12 false-negative rate > 10% (i.e., wrapper false-killed sessions where Claude was working in stdout but had not yet touched working tree -- e.g., stuck in a long Read/Bash loop without an Edit).
+- OR user reports a specific failure mode that AR-12's porcelain signal did not catch.
+
+**Goal (when triggered)**: Implement a finer-grained progress signal via PostToolUse hook. Hook writes a heartbeat timestamp to `.claude/heartbeat` on every tool call. Wrapper polls heartbeat freshness; mtime within last N seconds = Claude is alive even if no commit / no working-tree change yet.
+
+**Why deferred**: AR-12 + AR-16 cover the dominant failure modes (uncommitted edits + cold-start hang). Heartbeat adds complexity (hook coordination, file-system race, polling cadence) that may be unnecessary. Wait for data before adding.
+
+**Implementation sketch (for future reference, not to be built now)**:
+1. Add PostToolUse hook `.claude/hooks/heartbeat.py` that touches `.claude/heartbeat` on every invocation.
+2. In wrapper, on timeout, also stat `.claude/heartbeat`; if mtime within last 60s, treat as InProgress like AR-12 porcelain branch.
+3. New telemetry branch: `heartbeat_only` (HEAD unchanged + porcelain unchanged + heartbeat fresh).
+4. Same kill switch pattern: `CLAUDE_P_DISABLE_HEARTBEAT_SIGNAL=1`.
+5. Clean up stale heartbeat at session start.
+
+**Acceptance criteria (when triggered)**:
+1. Trigger condition documented and met (telemetry data referenced).
+2. Hook coordinated across MLI + root .claude/hooks/.
+3. Wrapper integration parallel to AR-12.
+4. Telemetry branch added.
+5. Kill switch verified.
+
+**Depends on**: T-P1-713 (AR-12) -- need its telemetry to know if AR-17 is justified.
+
 ## Completed Tasks
 
 > 652 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
+- [x] **2026-05-03** -- T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window. **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wr
+- [x] **2026-05-03** -- T-P1-713: [AR-12] Working-tree progress signal in run_claude_with_timeout (state machine + porcelain hash + telemetry + kill switch + debug logging). **Goal**: Extend AR-11's HEAD-diff-only timeout classification with a working-tree (`git status --porcelain`) hash signa
 - [x] **2026-05-03** -- T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md`
 - [x] **2026-05-03** -- T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.
 - [x] **2026-05-03** -- T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). 
