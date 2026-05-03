@@ -60,51 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-713
-- **Description**: **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_P_TIMEOUT (900s). Reduces user-visible recovery time for the (a) cold-start hang class (the dominant failure mode per LESSONS.md 2026-05-02) from 10min -> ~2min.
-
-**Motivation**: Per AR-7 wrapper retry logic, true cold-start hangs (no log activity for full timeout window) currently wait full 900s before retrying. User in 2026-05-03 07:12 hit this and killed early; we want the wrapper to do the kill itself, predictably.
-
-**Implementation (process-group + grace pattern)**:
-1. Snapshot `log_size_start=$(stat -c %s logs/autonomous.log 2>/dev/null || echo 0)` before launching claude.
-2. Launch claude via `setsid` so it gets its own pgid (claude + MCP servers + sub-claude grandchildren are all in same group, killable as one unit). Capture pgid.
-3. Spawn background watchdog: sleep $grace; if log growth < $min_growth_b, send SIGTERM to whole pgid via `kill -TERM -- -$pgid`, sleep 4s grace for log flush, then SIGKILL via `kill -KILL -- -$pgid`.
-4. After main wait, kill the watchdog if claude exited normally.
-5. Treat exit code 137 (SIGKILL) and 143 (SIGTERM) same as 124 (timeout) -> goes into AR-11 / AR-12 retry/classification logic.
-
-**Hyperparameters (env-overridable)**:
-- `CLAUDE_P_COLDSTART_GRACE=120` (seconds) -- start at 120s NOT 90s; tighten after telemetry.
-- `CLAUDE_P_COLDSTART_GROWTH_MIN=200` (bytes) -- below this in grace window = hung. Tune after observation.
-
-**Kill switch**: `CLAUDE_P_DISABLE_COLDSTART_GUARD=1` skips watchdog entirely. For fast revert if false-positive rate is high.
-
-**Telemetry (sub-AC, shared with AR-12)**: append to `logs/wrapper-stats.jsonl` on cold-start kill: `{ts, host, branch=coldstart_kill, log_growth_b, grace_s}`. After 1 week of data, tune `grace_s` and `growth_min_b` to P95 of legitimate cold-starts.
-
-**Risks (must address in implementation)**:
-1. **Process group leakage** if pgid capture fails or setsid not available. Pre-check: `command -v setsid` at script start, error out if missing.
-2. **Race with AR-12 porcelain signal**: cold-start kill may have left working tree dirty from partial work; on retry, AR-12 may see "porcelain changed" and trigger extension based on stale residue. AC test must inject this scenario and verify outer logic does NOT extend on coldstart-killed retry.
-3. **Watchdog leak**: if main claude exits between watchdog's sleep and stat call, watchdog may kill wrong process. Use `kill -0 -- -$pgid` to verify pgid still alive before kill.
-4. **trap vs explicit kill duplication**: per design review, keep ONLY explicit `kill $watchdog_pid` after main wait; drop the `trap RETURN`. Single mechanism, simpler.
-
-**Propagation**: MLI + root scripts/autonomous_run.sh in same commit (per AR-11 precedent). Worktree + tools/ deferred to T-P2-296.
-
-**Acceptance criteria**:
-1. `command -v setsid` precheck at script start; if missing, exit with clear error.
-2. Injected fake `claude` = `sleep 700 && exit 0` (zero log) -> wrapper kills within ${grace}s + 5s, returns 124.
-3. Injected fake `claude` = normal output (echo banner; sleep 5; loop edits) -> watchdog does NOT mis-kill.
-4. Injected fake = exits within grace window (e.g., 30s normal completion) -> watchdog cleanup is clean, no zombie.
-5. AR-12 race AC: fake `claude` writes 1 file then sleeps 700; cold-start kill fires; on retry, AR-12 must NOT extend (working tree changed, but it was the killed run's residue, not new progress).
-6. `logs/wrapper-stats.jsonl` populates branch=coldstart_kill on each kill.
-7. Kill switch `CLAUDE_P_DISABLE_COLDSTART_GUARD=1` verified to skip watchdog.
-8. Process group accounting: spawn fake `claude` that forks 2 grandchildren; on kill, all 3 processes dead (no orphans).
-
-**Complexity**: L (3-4h). Process group + bash subprocess + race testing is non-trivial.
-
-**Depends on**: T-P1-713 (AR-12). Order: AR-12 baseline first (for telemetry schema and porcelain signal); then AR-16 layered on top (with AR-12 race AC).
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -376,6 +331,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
 - [x] **2026-05-03** -- T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window. **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wr
+- [x] **2026-05-03** -- T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC). **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_
 - [x] **2026-05-03** -- T-P1-713: [AR-12] Working-tree progress signal in run_claude_with_timeout (state machine + porcelain hash + telemetry + kill switch + debug logging). **Goal**: Extend AR-11's HEAD-diff-only timeout classification with a working-tree (`git status --porcelain`) hash signa
 - [x] **2026-05-03** -- T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md`
 - [x] **2026-05-03** -- T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.

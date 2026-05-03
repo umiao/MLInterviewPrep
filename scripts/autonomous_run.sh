@@ -93,7 +93,7 @@ if state.get('all_done', False):
   fi
 fi
 
-# --- AR-7 + AR-11 + AR-12 + AR-15 + AR-18: timeout+retry wrapper around claude -p ---
+# --- AR-7 + AR-11 + AR-12 + AR-15 + AR-16 + AR-18: timeout+retry wrapper around claude -p ---
 # AR-7  (2026-05-02): wrap each invocation with CLAUDE_P_TIMEOUT-second timeout, retry once on hang.
 # AR-11 (2026-05-03): distinguish exit-time hang via HEAD diff (non-WIP commit during window -> success).
 # AR-12 (2026-05-03): working-tree porcelain hash signal. If WT changed during the window but no commit
@@ -102,6 +102,15 @@ fi
 #                     signal mis-classifies as no-progress.
 # AR-15 (2026-05-03): bump default CLAUDE_P_TIMEOUT 600s -> 900s. AR-12 extension caps worst-case per
 #                     attempt at 1200s. Override via env var for L-complexity tasks if needed.
+# AR-16 (2026-05-03): cold-start fast-fail watchdog. Launches claude in its own pgid via `setsid` and
+#                     spawns a watchdog that kills the entire pgid (SIGTERM, 4s grace, SIGKILL) if log
+#                     growth in CLAUDE_P_COLDSTART_GRACE seconds (default 120s) is below
+#                     CLAUDE_P_COLDSTART_GROWTH_MIN bytes (default 200). Cuts cold-start hang recovery
+#                     time from ~10min (full timeout) to ~2min. Race-with-AR12: after a cold-start
+#                     kill, the porcelain baseline is refreshed before AR-12 evaluation so residue
+#                     from the killed run does not trigger a false extension on retry. Falls back to
+#                     no-watchdog mode if `setsid` is missing (e.g., Windows MSYS), with a WARN log.
+#                     Kill switch: CLAUDE_P_DISABLE_COLDSTART_GUARD=1 disables AR-16.
 # AR-18 (2026-05-03): attribution check on AR-11 INFO branch. The outer loop sets EXPECTED_TASK_PREFIX
 #                     env var (the task ID it expects this session to handle); AR-11 INFO success only
 #                     fires when the new commit's [T-XX-N] prefix matches. Closes the 2026-05-03 incident
@@ -111,6 +120,18 @@ fi
 # See docs/investigations/autorun_hang_2026-05-02.md and LESSONS.md 2026-05-03 entry.
 CLAUDE_P_TIMEOUT="${CLAUDE_P_TIMEOUT:-900}"
 CLAUDE_P_TIMEOUT_EXT="${CLAUDE_P_TIMEOUT_EXT:-300}"
+CLAUDE_P_COLDSTART_GRACE="${CLAUDE_P_COLDSTART_GRACE:-120}"
+CLAUDE_P_COLDSTART_GROWTH_MIN="${CLAUDE_P_COLDSTART_GROWTH_MIN:-200}"
+
+# AR-16 platform precheck: setsid is required for pgid-based group kill. On Windows MSYS the binary is
+# absent, so auto-disable AR-16 with a clear warning rather than hard-fail (the rest of the wrapper is
+# still useful and disabling AR-16 just falls back to AR-7's full-timeout retry path).
+if [ "${CLAUDE_P_DISABLE_COLDSTART_GUARD:-0}" != "1" ]; then
+  if ! command -v setsid >/dev/null 2>&1; then
+    echo "[orchestrator] WARN: setsid not found on this platform; AR-16 cold-start watchdog auto-disabled. Set CLAUDE_P_DISABLE_COLDSTART_GUARD=1 explicitly to silence this warning." >&2
+    export CLAUDE_P_DISABLE_COLDSTART_GUARD=1
+  fi
+fi
 
 # Helper: classify HEAD outcome with AR-18 attribution. Echoes one of:
 #   head_legit   — non-WIP commit AND attribution OK (or unset/disabled)
@@ -153,19 +174,101 @@ _classify_head() {
   fi
 }
 
+# AR-16 helper: launch `claude` either with or without the cold-start watchdog. Returns the
+# exit code in $? and sets the global $_AR16_LAST_KILLED to 1 if the watchdog fired.
+# Inputs (read from caller scope): $effective_timeout, $log_size_start, ${CLAUDE_P_COLDSTART_*}
+# Args: same as `claude` (forwarded). Logs to logs/autonomous.log via the script's exec redirect.
+_AR16_LAST_KILLED=0
+_run_claude_attempt() {
+  _AR16_LAST_KILLED=0
+  local rc claude_pid claude_pgid watchdog_pid marker_file log_size_now log_growth
+  local cs_ts cs_host telemetry_line
+  local log_file="logs/autonomous.log"
+
+  if [ "${CLAUDE_P_DISABLE_COLDSTART_GUARD:-0}" = "1" ]; then
+    timeout --foreground --kill-after=10s "$effective_timeout" claude "$@"
+    return $?
+  fi
+
+  marker_file=".claude/.coldstart_killed_$$"
+  rm -f "$marker_file" 2>/dev/null || true
+
+  # Launch claude in its own session/pgid via setsid. In a non-interactive script (no job control),
+  # setsid does not fork — it becomes the session leader in-place and execs timeout. So $! is the
+  # new session leader's PID, which equals its own pgid.
+  setsid timeout --kill-after=10s "$effective_timeout" claude "$@" &
+  claude_pid=$!
+  claude_pgid="$claude_pid"
+
+  # Watchdog: sleep grace, check log growth, kill the whole pgid if hung. Single-mechanism
+  # cleanup (no trap RETURN per design review).
+  (
+    sleep "$CLAUDE_P_COLDSTART_GRACE"
+    # Risk #3: verify pgid still alive before kill (avoids killing reused PID).
+    if kill -0 -- "-$claude_pgid" 2>/dev/null; then
+      log_size_now=0
+      if [ -f "$log_file" ]; then
+        log_size_now=$(stat -c %s "$log_file" 2>/dev/null || echo 0)
+      fi
+      log_growth=$((log_size_now - log_size_start))
+      if [ "$log_growth" -lt "$CLAUDE_P_COLDSTART_GROWTH_MIN" ]; then
+        cs_ts="$(date -u +%FT%TZ)"
+        cs_host="$(hostname 2>/dev/null || echo unknown)"
+        echo "[orchestrator] AR-16: cold-start kill (log grew ${log_growth}b in ${CLAUDE_P_COLDSTART_GRACE}s, threshold=${CLAUDE_P_COLDSTART_GROWTH_MIN}b). SIGTERM -> pgid $claude_pgid. ts=$cs_ts host=$cs_host" >&2
+        kill -TERM -- "-$claude_pgid" 2>/dev/null || true
+        sleep 4
+        if kill -0 -- "-$claude_pgid" 2>/dev/null; then
+          echo "[orchestrator] AR-16: SIGTERM grace expired; SIGKILL -> pgid $claude_pgid. ts=$cs_ts host=$cs_host" >&2
+          kill -KILL -- "-$claude_pgid" 2>/dev/null || true
+        fi
+        # Telemetry (sub-AC, shared schema with AR-12).
+        mkdir -p logs
+        telemetry_line=$(python -c "
+import json
+print(json.dumps({'ts':'$cs_ts','host':'$cs_host','branch':'coldstart_kill','log_growth_b':$log_growth,'grace_s':$CLAUDE_P_COLDSTART_GRACE,'growth_min_b':$CLAUDE_P_COLDSTART_GROWTH_MIN}))
+" 2>/dev/null) && echo "$telemetry_line" >> logs/wrapper-stats.jsonl
+        # Marker so the wrapper knows on return that this kill was AR-16-attributed.
+        touch "$marker_file" 2>/dev/null || true
+      fi
+    fi
+  ) &
+  watchdog_pid=$!
+
+  wait "$claude_pid" 2>/dev/null
+  rc=$?
+
+  # Single explicit cleanup of the watchdog (Risk #4: no trap RETURN).
+  kill "$watchdog_pid" 2>/dev/null || true
+  wait "$watchdog_pid" 2>/dev/null || true
+
+  if [ -f "$marker_file" ]; then
+    _AR16_LAST_KILLED=1
+    rm -f "$marker_file" 2>/dev/null || true
+  fi
+  return "$rc"
+}
+
 run_claude_with_timeout() {
   local attempt rc ts host wrapper_start_sha current_sha latest_msg outcome
   local wrapper_start_porcelain_hash current_porcelain_hash porcelain_dump
   local extended_once=0
   local effective_timeout="${CLAUDE_P_TIMEOUT}s"
+  local log_file="logs/autonomous.log"
+  local log_size_start
 
   wrapper_start_sha=$(git rev-parse HEAD 2>/dev/null || echo "none")
   wrapper_start_porcelain_hash=$(git status --porcelain 2>/dev/null | sha256sum 2>/dev/null | cut -d' ' -f1)
 
   for attempt in 1 2; do
-    timeout --foreground --kill-after=10s "$effective_timeout" claude "$@"
+    log_size_start=0
+    if [ -f "$log_file" ]; then
+      log_size_start=$(stat -c %s "$log_file" 2>/dev/null || echo 0)
+    fi
+    _run_claude_attempt "$@"
     rc=$?
-    if [ "$rc" -ne 124 ] && [ "$rc" -ne 137 ]; then
+    # Treat 137 (SIGKILL) and 143 (SIGTERM) the same as 124 (timeout) — all mean "did not exit
+    # cleanly". AR-16 cold-start kills produce 143 or 137; AR-7 timeouts produce 124 or 137.
+    if [ "$rc" -ne 124 ] && [ "$rc" -ne 137 ] && [ "$rc" -ne 143 ]; then
       return "$rc"
     fi
     current_sha=$(git rev-parse HEAD 2>/dev/null || echo "none")
@@ -174,6 +277,15 @@ run_claude_with_timeout() {
     ts="$(date -u +%FT%TZ)"
     host="$(hostname 2>/dev/null || echo unknown)"
     outcome=$(_classify_head "$wrapper_start_sha" "$current_sha" "$latest_msg")
+
+    # AR-16 race-with-AR12: a cold-start kill may leave the working tree dirty from the killed
+    # run's partial edits. Without resetting the porcelain baseline, AR-12 below would interpret
+    # the residue as "progress" and false-extend the next attempt. Reset the baseline now so the
+    # AR-12 comparison only fires on changes that happen AFTER the kill.
+    if [ "$_AR16_LAST_KILLED" = "1" ]; then
+      echo "[orchestrator] AR-16: cold-start kill detected (attempt $attempt); resetting porcelain baseline to current to suppress AR-12 false-extend on residue. ts=$ts" >&2
+      wrapper_start_porcelain_hash="$current_porcelain_hash"
+    fi
 
     case "$outcome" in
       head_legit)
@@ -210,9 +322,11 @@ run_claude_with_timeout() {
       echo "[orchestrator] INFO: working tree changed during ${effective_timeout} window (AR-12); extending +${CLAUDE_P_TIMEOUT_EXT}s once. porcelain_peek='${porcelain_dump:0:200}'. ts=$ts host=$host" >&2
       extended_once=1
       effective_timeout="${CLAUDE_P_TIMEOUT_EXT}s"
+      # AR-12 extension: claude has already made progress, so the cold-start watchdog is not
+      # needed here. Use plain `timeout` for the extension window. Treat 137/143/124 as hang.
       timeout --foreground --kill-after=10s "$effective_timeout" claude "$@"
       rc=$?
-      if [ "$rc" -ne 124 ] && [ "$rc" -ne 137 ]; then
+      if [ "$rc" -ne 124 ] && [ "$rc" -ne 137 ] && [ "$rc" -ne 143 ]; then
         return "$rc"
       fi
       current_sha=$(git rev-parse HEAD 2>/dev/null || echo "none")
