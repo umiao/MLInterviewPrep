@@ -34,15 +34,20 @@ class KMeans:
 
 ```python
 def _init_centers_plusplus(self, data):
+    # data: (n, d)
     n = data.shape[0]
-    centers = [data[self.rng.randint(n)]]
+    centers = [data[self.rng.randint(n)]]          # list of (d,)
     for _ in range(1, self.num_clusters):
-        sq_dists = np.min(
-            [np.sum((data - c) ** 2, axis=1) for c in centers], axis=0
-        )
-        probs = sq_dists / sq_dists.sum()
+        per_centroid = []
+        for c in centers:                          # c: (d,)
+            diff = data - c                        # (n, d)  -- broadcast
+            sq_dist = np.sum(diff ** 2, axis=1)    # (n,)
+            per_centroid.append(sq_dist)
+        sq_dists_all = np.array(per_centroid)      # (m, n)  m = #chosen so far
+        sq_dists = np.min(sq_dists_all, axis=0)    # (n,)   nearest existing center
+        probs = sq_dists / sq_dists.sum()          # (n,)   weighted by D(x)^2
         centers.append(data[self.rng.choice(n, p=probs)])
-    return np.array(centers)
+    return np.array(centers)                       # (k, d)
 ```
 
 **Vanilla random (Forgy)**：从数据点中无放回均匀采样，仅作对比基线。
@@ -61,15 +66,21 @@ def _init_centers_random(self, data):
 
 ```python
 def _assign_to_nearest_center(self, data):
-    sq_dists = np.array([
-        np.sum((data - c) ** 2, axis=1) for c in self.cluster_centers
-    ]).T  # (n, k)
-    return np.argmin(sq_dists, axis=1)
+    # data: (n, d),  self.cluster_centers: (k, d)
+    per_centroid = []
+    for c in self.cluster_centers:                 # c: (d,)
+        diff = data - c                            # (n, d)  -- broadcast
+        sq_dist = np.sum(diff ** 2, axis=1)        # (n,)
+        per_centroid.append(sq_dist)
+    sq_dists = np.array(per_centroid).T            # list of K (n,) -> (k, n) -> .T -> (n, k)
+    return np.argmin(sq_dists, axis=1)             # (n,)
 ```
 
 ### 3. M-step — Center update
 
 每簇取均值；空簇随机重选一个数据点，否则 `mean()` 在空数组上会触发 NaN。
+
+Empty cluster fallback 是 K-Means 的防御代码，不是常用路径。触发条件：(a) `K > 真实簇数` 时 iter>=1 mean 漂移可让某 cluster 失去所有成员；(b) 数据有重复行 + K-Means++ 抽到两个相同点。`N >> K` + 合理的 K 选择下两种都罕见。**实务上应在 K 选择阶段（elbow / silhouette）解决，不依赖 fallback 兜底**。
 
 ```python
 def _recompute_centers(self, data, labels):
@@ -164,6 +175,7 @@ def predict(self, data):
 - **Elbow**：画 K vs SSE 曲线找拐点；缺点是拐点常不明显，主观性强。
 - **Silhouette**：$$s = (b-a)/\max(a,b)$$，$$a$$ 是簇内均距、$$b$$ 到最近邻簇均距，取均值最大的 K。
 - **Gap statistic**：实际 SSE vs 均匀分布零假设下的期望 SSE，差距最大者。
+- 选错 K 的尾迹：空簇 / silhouette 跌入负值 / SSE 曲线没拐点。
 
 > **Q: K-Means 的局限？**
 
@@ -182,3 +194,17 @@ def predict(self, data):
 > **Q: 大规模数据？**
 
 - **Mini-batch K-Means**：每次随机采 batch 更新 centroid，sklearn 有默认实现。
+
+---
+
+## End-to-end test
+
+```python
+import numpy as np
+N, D, K = 200, 3, 4
+data = np.random.rand(N, D)
+km = KMeans(num_clusters=K, random_state=42).fit(data)
+assert km.cluster_labels.shape == (N,)
+assert km.cluster_centers.shape == (K, D)
+print(f"SSE = {km.total_sse:.3f}")
+```
