@@ -2,7 +2,7 @@
 
 ## TL;DR
 
-Lazy learner: 训练 = 存数据, 所有 compute 推迟到 `predict`. 三步: (1) 算 query 到所有训练点的欧氏距离; (2) `argpartition` 取 Top-K (平均 $$O(n)$$); (3) 投票 (分类) / 平均 (回归). 三种 weighting: `uniform`, `inverse` $$w_i = 1/(d_i + \varepsilon)$$, `gaussian` $$w_i = \exp(-d_i^2 / 2\sigma^2)$$. 失败模式: `inverse` 漏 $$\varepsilon$$ 在 $$d=0$$ 处爆 `inf`; 高维下距离趋同 (curse of dimensionality). 复杂度: 训练 $$O(1)$$, 单 query brute-force $$O(nd)$$, KD-tree 低维 $$O(d \log n)$$, 空间 $$O(nd)$$.
+Lazy learner: 训练 = 存数据, 所有 compute 推迟到 `predict`. 三步: (1) 算 query 到所有训练点的欧氏距离; (2) `argpartition` 取 Top-K (平均 $O(n)$); (3) 投票 (分类) / 平均 (回归). 三种 weighting: `uniform`, `inverse` $w_i = 1/(d_i + \varepsilon)$, `gaussian` $w_i = \exp(-d_i^2 / 2\sigma^2)$. 失败模式: `inverse` 漏 $\varepsilon$ 在 $d=0$ 处爆 `inf`; 高维下距离趋同 (curse of dimensionality). 复杂度: 训练 $O(1)$, 单 query brute-force $O(nd)$, KD-tree 低维 $O(d \log n)$, 空间 $O(nd)$.
 
 ---
 
@@ -48,7 +48,7 @@ def _euclidean(self, Xq):
 
 ### 3. Top-K -- `argpartition`, NOT `argsort`
 
-`argpartition` 平均 $$O(n)$$ (Quickselect, 仅保证第 K 位左小右大, 不排序前 K) -- KNN 只需 SET. `argsort` $$O(n \log n)$$ 在 $$n = 10^6$$ 时多花 ~20×.
+`argpartition` 平均 $O(n)$ (Quickselect, 仅保证第 K 位左小右大, 不排序前 K) -- KNN 只需 SET. `argsort` $O(n \log n)$ 在 $n = 10^6$ 时多花 ~20×.
 
 ```python
 def _topk_idx(self, dist):
@@ -83,20 +83,20 @@ def predict(self, Xq):
 
 ## Weighting Variants
 
-|              | Uniform        | Inverse $$1/(d+\varepsilon)$$  | Gaussian $$e^{-d^2/2\sigma^2}$$  |
+|              | Uniform        | Inverse $1/(d+\varepsilon)$  | Gaussian $e^{-d^2/2\sigma^2}$  |
 | ------------ | -------------- | ------------------------------ | -------------------------------- |
 | 衰减形式     | 阶跃           | 多项式 (慢)                    | 指数 (快)                        |
-| 失败模式     | 偶 K 易 tie    | $$d=0$$ 漏 $$\varepsilon$$ 爆 NaN | $$\sigma$$ 选错退化              |
-| 实践默认值   | 奇 K           | $$\varepsilon = 10^{-9}$$       | $$\sigma$$ = 邻居距离中位数      |
-| 是否需 tune  | 否             | 否 ($$\varepsilon$$ 是常数守卫) | 是 ($$\sigma$$ 是带宽超参)       |
+| 失败模式     | 偶 K 易 tie    | $d=0$ 漏 $\varepsilon$ 爆 NaN | $\sigma$ 选错退化              |
+| 实践默认值   | 奇 K           | $\varepsilon = 10^{-9}$       | $\sigma$ = 邻居距离中位数      |
+| 是否需 tune  | 否             | 否 ($\varepsilon$ 是常数守卫) | 是 ($\sigma$ 是带宽超参)       |
 
 **一句话**: weighted KNN 把 "硬 top-K cutoff" 改成连续权重, 对 K 选错鲁棒性更高 -- 默认 `inverse`, 数据光滑时换 `gaussian`.
 
-**NOTE**: `inverse` 不是 `gaussian` 的特例. 两者是不同衰减族 (多项式 vs 指数); Gaussian 用 $$\sigma$$ 换掉 $$\varepsilon$$, 把 "数值守卫" 问题转移成 "带宽 tune" 问题, 不是免费午餐.
+**NOTE**: `inverse` 不是 `gaussian` 的特例. 两者是不同衰减族 (多项式 vs 指数); Gaussian 用 $\sigma$ 换掉 $\varepsilon$, 把 "数值守卫" 问题转移成 "带宽 tune" 问题, 不是免费午餐.
 
 ---
 
-## Regression 扩展 (假设 $$y \in \mathbb{R}$$ 连续)
+## Regression 扩展 (假设 $y \in \mathbb{R}$ 连续)
 
 KNN regression 的前提是 label 加减取平均有意义 (房价, 温度, **CTR** (Click-Through Rate, 点击率), 停留时长). 聚合方式从 mode -> mean:
 
@@ -106,7 +106,7 @@ $$\hat{y} = \frac{\sum_i w_i \, y_i}{\sum_i w_i}$$
 
 离散标签上做 weighted mean 完全没意义 (类别 0=猫 / 1=狗 / 2=鸟 平均出 1.7 是什么?) -- 所以 classification 用 mode, regression 用 mean, 两种根本不同的聚合, 不是 weighted 与否的差异.
 
-与 K-Means 无关 (K-Means 无监督无 label). 本质是 Nadaraya-Watson kernel regression 的近邻版: 在 query 邻域内假设 $$y$$ 近似常数, 加权平均得到局部估计.
+与 K-Means 无关 (K-Means 无监督无 label). 本质是 Nadaraya-Watson kernel regression 的近邻版: 在 query 邻域内假设 $y$ 近似常数, 加权平均得到局部估计.
 
 ---
 
@@ -131,7 +131,7 @@ print(f"Predicted classes: {np.unique(preds)}")
 
 ### A. Distance expansion trick (内存换数值稳定性)
 
-展开 $$\|a-b\|^2 = \|a\|^2 + \|b\|^2 - 2 a \cdot b$$, 中间张量从 $$(n_q, n_t, d)$$ 降到 $$(n_q, n_t)$$. 代价: 大数相消有 fp 噪声, `sqrt` 前必须 clip $$\geq 0$$ 防 NaN.
+展开 $\|a-b\|^2 = \|a\|^2 + \|b\|^2 - 2 a \cdot b$, 中间张量从 $(n_q, n_t, d)$ 降到 $(n_q, n_t)$. 代价: 大数相消有 fp 噪声, `sqrt` 前必须 clip $\geq 0$ 防 NaN.
 
 ```python
 sq_q  = (Xq ** 2).sum(axis=1, keepdims=True)         # (nq, 1)
@@ -140,17 +140,17 @@ raw   = sq_q + sq_t - 2 * Xq @ self.X.T              # (nq, nt)
 dist  = np.sqrt(np.maximum(raw, 0.0))                # clip <0 fp noise
 ```
 
-何时用: 训练集到百万级, $$d$$ 中等 (几十到几百), 内存吃紧. 否则 naive 更稳更清晰. sklearn 默认 expansion 是为了大规模场景, 不是因为它本身更优.
+何时用: 训练集到百万级, $d$ 中等 (几十到几百), 内存吃紧. 否则 naive 更稳更清晰. sklearn 默认 expansion 是为了大规模场景, 不是因为它本身更优.
 
 ### B. 其他距离 (默认 Euclidean, 1 句话备用知识)
 
-- **Manhattan** (L1) $$\sum |a_i - b_i|$$: 对 outlier 鲁棒, 高维 / 稀疏数据 (文本词袋) 更稳.
-- **Cosine** $$1 - \frac{a \cdot b}{\|a\| \|b\|}$$: 只看方向不看长度, embeddings / **TF-IDF** (Term Frequency--Inverse Document Frequency, 词频--逆文档频率) 标配; 等价于 L2-normalize 后做欧氏.
-- **Mahalanobis** $$\sqrt{(a-b)^T \Sigma^{-1} (a-b)}$$: 用协方差白化, 考虑特征相关性; 等价于 "先用 $$\Sigma^{-1/2}$$ 白化空间, 再做欧氏" -- metric learning (**LMNN** (Large Margin Nearest Neighbor) / **NCA** (Neighbourhood Components Analysis)) 入口.
+- **Manhattan** (L1) $\sum |a_i - b_i|$: 对 outlier 鲁棒, 高维 / 稀疏数据 (文本词袋) 更稳.
+- **Cosine** $1 - \frac{a \cdot b}{\|a\| \|b\|}$: 只看方向不看长度, embeddings / **TF-IDF** (Term Frequency--Inverse Document Frequency, 词频--逆文档频率) 标配; 等价于 L2-normalize 后做欧氏.
+- **Mahalanobis** $\sqrt{(a-b)^T \Sigma^{-1} (a-b)}$: 用协方差白化, 考虑特征相关性; 等价于 "先用 $\Sigma^{-1/2}$ 白化空间, 再做欧氏" -- metric learning (**LMNN** (Large Margin Nearest Neighbor) / **NCA** (Neighbourhood Components Analysis)) 入口.
 
 ### C. Kernel function 统一视角
 
-任何单调递减的 $$k: \mathbb{R}_+ \to \mathbb{R}_+$$ 都可以做 weighting 函数. Uniform / Inverse / Gaussian 是同一家族里的不同选择, **互不包含**. 选 kernel = 选你对 "邻居影响半径" 的先验: 阶跃 (uniform), 慢衰减 (inverse), 快衰减 (gaussian).
+任何单调递减的 $k: \mathbb{R}_+ \to \mathbb{R}_+$ 都可以做 weighting 函数. Uniform / Inverse / Gaussian 是同一家族里的不同选择, **互不包含**. 选 kernel = 选你对 "邻居影响半径" 的先验: 阶跃 (uniform), 慢衰减 (inverse), 快衰减 (gaussian).
 
 ---
 
@@ -158,27 +158,27 @@ dist  = np.sqrt(np.maximum(raw, 0.0))                # clip <0 fp noise
 
 > **Q: K 怎么选?**
 
-5-fold CV 在 $$\{1, 3, 5, \ldots, \sqrt{n}\}$$ 上扫, 选 validation 最优. 太小过拟合 (单点噪声主导), 太大欠拟合 (类边界被平滑); 奇 K 防 tie.
+5-fold CV 在 $\{1, 3, 5, \ldots, \sqrt{n}\}$ 上扫, 选 validation 最优. 太小过拟合 (单点噪声主导), 太大欠拟合 (类边界被平滑); 奇 K 防 tie.
 
 > **Q: Curse of dimensionality?**
 
-高维下所有点距离趋于相等, KNN 失去判别力; 经验 $$d \gtrsim 10$$ 即明显退化. 解法: **PCA** (Principal Component Analysis, 主成分分析) / autoencoder 降维, 或 metric learning (LMNN / NCA) 学 "同类近异类远".
+高维下所有点距离趋于相等, KNN 失去判别力; 经验 $d \gtrsim 10$ 即明显退化. 解法: **PCA** (Principal Component Analysis, 主成分分析) / autoencoder 降维, 或 metric learning (LMNN / NCA) 学 "同类近异类远".
 
 > **Q: 加速 query?**
 
-Brute-force $$O(nd)$$ -> KD-tree 低维 ($$d \leq 20$$) 平均 $$O(d \log n)$$, worst $$O(n)$$. 高维上 **ANN** (Approximate Nearest Neighbor, 近似最近邻) (FAISS / HNSW / ScaNN) 压到亚秒, 召回 < 100%.
+Brute-force $O(nd)$ -> KD-tree 低维 ($d \leq 20$) 平均 $O(d \log n)$, worst $O(n)$. 高维上 **ANN** (Approximate Nearest Neighbor, 近似最近邻) (FAISS / HNSW / ScaNN) 压到亚秒, 召回 < 100%.
 
 > **Q: 为什么必须特征缩放?**
 
-欧氏距离对量级敏感: 收入 ($$10^4$$) 主导年龄 ($$10^1$$). `StandardScaler` 是 distance-based 模型 (KNN / SVM / K-Means) 共同前置.
+欧氏距离对量级敏感: 收入 ($10^4$) 主导年龄 ($10^1$). `StandardScaler` 是 distance-based 模型 (KNN / SVM / K-Means) 共同前置.
 
 > **Q: Lazy vs eager learning?**
 
-KNN 训 $$O(1)$$ / 推 $$O(nd)$$, 增量更新友好但必存 $$O(nd)$$ 训练数据 (大数据退役主因). 决策树 / NN 是 eager: 训练慢, 推理 $$O(d)$$.
+KNN 训 $O(1)$ / 推 $O(nd)$, 增量更新友好但必存 $O(nd)$ 训练数据 (大数据退役主因). 决策树 / NN 是 eager: 训练慢, 推理 $O(d)$.
 
 > **Q: Imbalanced classification 下 KNN 的 trap?**
 
-多数类天然在邻居里占多数, KNN 倾向预测多数类. 解法: (1) `inverse / gaussian` weighting 让最近邻发言权更大; (2) class-prior 反加权 $$w_i \cdot 1/\text{freq}(y_i)$$; (3) **SMOTE** (Synthetic Minority Over-sampling Technique, 合成少数类过采样) 上采样少数类.
+多数类天然在邻居里占多数, KNN 倾向预测多数类. 解法: (1) `inverse / gaussian` weighting 让最近邻发言权更大; (2) class-prior 反加权 $w_i \cdot 1/\text{freq}(y_i)$; (3) **SMOTE** (Synthetic Minority Over-sampling Technique, 合成少数类过采样) 上采样少数类.
 
 > **Q: KNN regression 和 Nadaraya-Watson 的关系?**
 
