@@ -64,9 +64,33 @@ _temp*.py
 *.log
 /tmp
 
-# Runtime databases
+# Crash dumps
+*.stackdump
+
+# Logs and scratch artifacts (matches root workspace convention)
+logs/
+
+# Node modules (root-level too -- frontend has its own .gitignore for src/frontend/node_modules)
+node_modules/
+
+# Ad-hoc DB exports at repo root (use scripts/, not loose .csv files)
+/*.csv
+
+# Runtime databases (root + backend + accidental aliases)
 interview_prep.db
 problems.db
+dev.db
+mle_prep.db
+mli*.db
+mlprep.db
+src/backend/*.db
+
+# Task DB migration backups
+.claude/tasks.db.bak*
+
+# Ad-hoc task exports (use task_db.py, not file dumps)
+tasks_dump.json
+tasks_temp.*
 
 # Claude worktrees
 .claude/worktrees/
