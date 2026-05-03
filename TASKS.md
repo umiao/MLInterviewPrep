@@ -330,6 +330,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 652 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
+- [x] **2026-05-03** -- T-P1-720: [MLI-CONTENT] LR (1102) consolidate orphans + X_design/bias refactor. Two follow-ups on T-P1-719 from user via Discord: (a) global no-duplication: scripts/seed_lr_golden_v1.py + docs/drafts/
+- [x] **2026-05-03** -- T-P1-719: [MLI-CONTENT] Linear Regression (id=1102) golden rewrite: dedupe description+notes. User flagged http://localhost:5173/quick-index?section=ml -> Linear Regression card as 'still not golden, lots of repeti
 - [x] **2026-05-03** -- T-P1-718: Google R2 Coding: 3 interview problems (Gold Chain, Equal-endpoint Max Subarray, LC 2337) -> problems.notes + doc 92 index. Polish 3 R2 interview write-ups to minimal #2337 style; insert into problems table with notes; extend seed_google_r2_cod
 - [x] **2026-05-03** -- T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window. **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wr
 - [x] **2026-05-03** -- T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC). **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_

@@ -2,9 +2,13 @@
 condensed KNN golden draft.
 
 Targets problems.id=1106 ("K-Nearest Neighbors (KNN + Weighted)"). Mirrors
-scripts/seed_lr_golden_v1.py: REPLACES the entire notes column with the
+scripts/seed_logreg_golden_v1.py: REPLACES the entire notes column with the
 rewrite at docs/drafts/knn_golden_v1.md (per the meta-prompt at
 docs/methodology/ml_impl_note_rewrite_spec.md).
+(The original "Mirrors" pointer was scripts/seed_lr_golden_v1.py, retired
+in T-P1-720 along with docs/drafts/lr_golden_v1.md when the user's golden
+Linear Regression rewrite landed inline in
+scripts/seed_linear_regression_20260502.py.)
 
 Length target (per task spec):
 - Baseline notes: 9,246 chars.
