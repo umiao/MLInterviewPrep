@@ -5,61 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
-### P1 -- Should Have (agentic intelligence)
-
-#### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-581
-- **Description**: After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 36 questions in the top 40.
-
-Split into 3-4 sub-batches of ~10 each, each a separate autonomous session per feedback_always_auto_run. Between batches, user spot-check one probe_notes entry to catch style drift early.
-
-Content rules (locked by BQ-DEPTH-09 calibration):
-- 中文叙述 + 英文术语
-- All 4 schema fields required (core_signal, what_good_looks_like, what_L5_adds, common_failure_modes)
-- Reference the is_primary story in what_good_looks_like
-- No angle_label -- angle lives in prose
-
-Deliverables:
-- scripts/seed_bq_probe_notes_batch{1-4}_20260421.py -- each idempotent + DB-backup-guarded
-- After each batch: spot-check doc attached to Discord for user review
-
-AC:
-- All 40 top questions have probe_notes set
-- Each batch script re-runs with [SKIP]
-- No schema field empty; all 4 structured fields populated for every question
-- User spot-check passed between batches
-
-#### T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-581
-- **Description**: src/frontend/src/pages/BehavioralQuestions.tsx redesign.
-
-Journey-first AC (from CLAUDE.md planning rules): user opens /behavioral -> clicks expand on a top-40 question -> sees ONE gold-bordered primary story card (big, with full relevance_note + STAR Situation preview + 'use this angle' hint) -> sees 'Also applies' collapsed panel with 2-3 backup stories -> clicks 'What this question probes' -> sees 4-section probe_notes panel (core_signal / what_good_looks_like / what_L5_adds / common_failure_modes).
-
-Scenario matrix:
-- Question has is_primary link + probe_notes -> full new treatment
-- Question has is_primary link + no probe_notes -> primary card only, probe panel hidden
-- Question has no is_primary link (non-top-40) -> current flat list fallback (no visual regression)
-- Question has 0 links -> current 'no example' red badge
-
-Manual smoke test AC:
-- Launch vite dev (localhost:5173/behavioral); pick OWN-1 (will have probe_notes after Phase C); verify primary card is gold-bordered and renders at top; verify probe_notes panel expands and shows 4 sections with markdown; verify 'Also applies' toggles
-
-Also update frontend type src/frontend/src/types/behavioral.ts to include probe_notes + is_primary.
-
-AC:
-- TypeScript compiles
-- vitest suite passes
-- Manual smoke test path completes without console errors
-- No regression on questions without probe_notes / without is_primary
-
 #### T-P1-713: [AR-12] Working-tree progress signal in run_claude_with_timeout (state machine + porcelain hash + telemetry + kill switch + debug logging)
 - **Priority**: P1
 - **Complexity**: S
@@ -105,51 +50,6 @@ Priority: HEAD-changed branches return BEFORE porcelain check fires. Porcelain c
 7. Idempotency: running the modified wrapper twice in a row does not change behavior vs once.
 8. Debug log dumps porcelain diff lines on extension trigger.
 9. Both root + MLI scripts updated in same commit.
-
-#### T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-713
-- **Description**: **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_P_TIMEOUT (900s). Reduces user-visible recovery time for the (a) cold-start hang class (the dominant failure mode per LESSONS.md 2026-05-02) from 10min -> ~2min.
-
-**Motivation**: Per AR-7 wrapper retry logic, true cold-start hangs (no log activity for full timeout window) currently wait full 900s before retrying. User in 2026-05-03 07:12 hit this and killed early; we want the wrapper to do the kill itself, predictably.
-
-**Implementation (process-group + grace pattern)**:
-1. Snapshot `log_size_start=$(stat -c %s logs/autonomous.log 2>/dev/null || echo 0)` before launching claude.
-2. Launch claude via `setsid` so it gets its own pgid (claude + MCP servers + sub-claude grandchildren are all in same group, killable as one unit). Capture pgid.
-3. Spawn background watchdog: sleep $grace; if log growth < $min_growth_b, send SIGTERM to whole pgid via `kill -TERM -- -$pgid`, sleep 4s grace for log flush, then SIGKILL via `kill -KILL -- -$pgid`.
-4. After main wait, kill the watchdog if claude exited normally.
-5. Treat exit code 137 (SIGKILL) and 143 (SIGTERM) same as 124 (timeout) -> goes into AR-11 / AR-12 retry/classification logic.
-
-**Hyperparameters (env-overridable)**:
-- `CLAUDE_P_COLDSTART_GRACE=120` (seconds) -- start at 120s NOT 90s; tighten after telemetry.
-- `CLAUDE_P_COLDSTART_GROWTH_MIN=200` (bytes) -- below this in grace window = hung. Tune after observation.
-
-**Kill switch**: `CLAUDE_P_DISABLE_COLDSTART_GUARD=1` skips watchdog entirely. For fast revert if false-positive rate is high.
-
-**Telemetry (sub-AC, shared with AR-12)**: append to `logs/wrapper-stats.jsonl` on cold-start kill: `{ts, host, branch=coldstart_kill, log_growth_b, grace_s}`. After 1 week of data, tune `grace_s` and `growth_min_b` to P95 of legitimate cold-starts.
-
-**Risks (must address in implementation)**:
-1. **Process group leakage** if pgid capture fails or setsid not available. Pre-check: `command -v setsid` at script start, error out if missing.
-2. **Race with AR-12 porcelain signal**: cold-start kill may have left working tree dirty from partial work; on retry, AR-12 may see "porcelain changed" and trigger extension based on stale residue. AC test must inject this scenario and verify outer logic does NOT extend on coldstart-killed retry.
-3. **Watchdog leak**: if main claude exits between watchdog's sleep and stat call, watchdog may kill wrong process. Use `kill -0 -- -$pgid` to verify pgid still alive before kill.
-4. **trap vs explicit kill duplication**: per design review, keep ONLY explicit `kill $watchdog_pid` after main wait; drop the `trap RETURN`. Single mechanism, simpler.
-
-**Propagation**: MLI + root scripts/autonomous_run.sh in same commit (per AR-11 precedent). Worktree + tools/ deferred to T-P2-296.
-
-**Acceptance criteria**:
-1. `command -v setsid` precheck at script start; if missing, exit with clear error.
-2. Injected fake `claude` = `sleep 700 && exit 0` (zero log) -> wrapper kills within ${grace}s + 5s, returns 124.
-3. Injected fake `claude` = normal output (echo banner; sleep 5; loop edits) -> watchdog does NOT mis-kill.
-4. Injected fake = exits within grace window (e.g., 30s normal completion) -> watchdog cleanup is clean, no zombie.
-5. AR-12 race AC: fake `claude` writes 1 file then sleeps 700; cold-start kill fires; on retry, AR-12 must NOT extend (working tree changed, but it was the killed run's residue, not new progress).
-6. `logs/wrapper-stats.jsonl` populates branch=coldstart_kill on each kill.
-7. Kill switch `CLAUDE_P_DISABLE_COLDSTART_GUARD=1` verified to skip watchdog.
-8. Process group accounting: spawn fake `claude` that forks 2 grandchildren; on kill, all 3 processes dead (no orphans).
-
-**Complexity**: L (3-4h). Process group + bash subprocess + race testing is non-trivial.
-
-**Depends on**: T-P1-713 (AR-12). Order: AR-12 baseline first (for telemetry schema and porcelain signal); then AR-16 layered on top (with AR-12 race AC).
 
 #### T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window
 - **Priority**: P1
@@ -215,6 +115,128 @@ print(unblocked[0]['id'] if unblocked else '')
 
 **Priority rationale**: P1/S because (a) actual incident already happened, (b) the workaround ("don't commit during autorun") is easy to forget and Stop-hook pressure can force violation, (c) implementation is small (one env var + one regex) once design is settled.
 
+#### T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P1-713
+- **Description**: **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s extension already brings worst-case attempt to 1200s; further bump would double-stack.
+
+**Motivation**: 600s too tight for M-complexity. pytest 1232 = ~95s, MCP cold-start = 30-60s, multi-file Read+Edit ~120s, seed+e2e ~60s. Leaves <8min for reasoning. 900s gives ~13min headroom.
+
+**Why not auto-scale**: orchestrator does not know which task inner session picks. Override available via env var for users needing longer.
+
+**Implementation**:
+- 2 files (MLI + root scripts/autonomous_run.sh): default 600 -> 900
+- CLAUDE.md (root + MLI) Hang auto-recovery section: 600s -> 900s
+
+**AC**:
+1. Default 900s verified via wrapper invocation.
+2. Override CLAUDE_P_TIMEOUT=300 still works.
+3. CLAUDE.md matches code.
+4. AR-12 telemetry counter ingests cleanly.
+
+**Depends on**: T-P1-713 (AR-12). Order: AR-12 first, then this.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
+
+### P1 -- Should Have (agentic intelligence)
+
+#### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P1-581
+- **Description**: After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 36 questions in the top 40.
+
+Split into 3-4 sub-batches of ~10 each, each a separate autonomous session per feedback_always_auto_run. Between batches, user spot-check one probe_notes entry to catch style drift early.
+
+Content rules (locked by BQ-DEPTH-09 calibration):
+- 中文叙述 + 英文术语
+- All 4 schema fields required (core_signal, what_good_looks_like, what_L5_adds, common_failure_modes)
+- Reference the is_primary story in what_good_looks_like
+- No angle_label -- angle lives in prose
+
+Deliverables:
+- scripts/seed_bq_probe_notes_batch{1-4}_20260421.py -- each idempotent + DB-backup-guarded
+- After each batch: spot-check doc attached to Discord for user review
+
+AC:
+- All 40 top questions have probe_notes set
+- Each batch script re-runs with [SKIP]
+- No schema field empty; all 4 structured fields populated for every question
+- User spot-check passed between batches
+
+#### T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-581
+- **Description**: src/frontend/src/pages/BehavioralQuestions.tsx redesign.
+
+Journey-first AC (from CLAUDE.md planning rules): user opens /behavioral -> clicks expand on a top-40 question -> sees ONE gold-bordered primary story card (big, with full relevance_note + STAR Situation preview + 'use this angle' hint) -> sees 'Also applies' collapsed panel with 2-3 backup stories -> clicks 'What this question probes' -> sees 4-section probe_notes panel (core_signal / what_good_looks_like / what_L5_adds / common_failure_modes).
+
+Scenario matrix:
+- Question has is_primary link + probe_notes -> full new treatment
+- Question has is_primary link + no probe_notes -> primary card only, probe panel hidden
+- Question has no is_primary link (non-top-40) -> current flat list fallback (no visual regression)
+- Question has 0 links -> current 'no example' red badge
+
+Manual smoke test AC:
+- Launch vite dev (localhost:5173/behavioral); pick OWN-1 (will have probe_notes after Phase C); verify primary card is gold-bordered and renders at top; verify probe_notes panel expands and shows 4 sections with markdown; verify 'Also applies' toggles
+
+Also update frontend type src/frontend/src/types/behavioral.ts to include probe_notes + is_primary.
+
+AC:
+- TypeScript compiles
+- vitest suite passes
+- Manual smoke test path completes without console errors
+- No regression on questions without probe_notes / without is_primary
+
+#### T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC)
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P1-713
+- **Description**: **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_P_TIMEOUT (900s). Reduces user-visible recovery time for the (a) cold-start hang class (the dominant failure mode per LESSONS.md 2026-05-02) from 10min -> ~2min.
+
+**Motivation**: Per AR-7 wrapper retry logic, true cold-start hangs (no log activity for full timeout window) currently wait full 900s before retrying. User in 2026-05-03 07:12 hit this and killed early; we want the wrapper to do the kill itself, predictably.
+
+**Implementation (process-group + grace pattern)**:
+1. Snapshot `log_size_start=$(stat -c %s logs/autonomous.log 2>/dev/null || echo 0)` before launching claude.
+2. Launch claude via `setsid` so it gets its own pgid (claude + MCP servers + sub-claude grandchildren are all in same group, killable as one unit). Capture pgid.
+3. Spawn background watchdog: sleep $grace; if log growth < $min_growth_b, send SIGTERM to whole pgid via `kill -TERM -- -$pgid`, sleep 4s grace for log flush, then SIGKILL via `kill -KILL -- -$pgid`.
+4. After main wait, kill the watchdog if claude exited normally.
+5. Treat exit code 137 (SIGKILL) and 143 (SIGTERM) same as 124 (timeout) -> goes into AR-11 / AR-12 retry/classification logic.
+
+**Hyperparameters (env-overridable)**:
+- `CLAUDE_P_COLDSTART_GRACE=120` (seconds) -- start at 120s NOT 90s; tighten after telemetry.
+- `CLAUDE_P_COLDSTART_GROWTH_MIN=200` (bytes) -- below this in grace window = hung. Tune after observation.
+
+**Kill switch**: `CLAUDE_P_DISABLE_COLDSTART_GUARD=1` skips watchdog entirely. For fast revert if false-positive rate is high.
+
+**Telemetry (sub-AC, shared with AR-12)**: append to `logs/wrapper-stats.jsonl` on cold-start kill: `{ts, host, branch=coldstart_kill, log_growth_b, grace_s}`. After 1 week of data, tune `grace_s` and `growth_min_b` to P95 of legitimate cold-starts.
+
+**Risks (must address in implementation)**:
+1. **Process group leakage** if pgid capture fails or setsid not available. Pre-check: `command -v setsid` at script start, error out if missing.
+2. **Race with AR-12 porcelain signal**: cold-start kill may have left working tree dirty from partial work; on retry, AR-12 may see "porcelain changed" and trigger extension based on stale residue. AC test must inject this scenario and verify outer logic does NOT extend on coldstart-killed retry.
+3. **Watchdog leak**: if main claude exits between watchdog's sleep and stat call, watchdog may kill wrong process. Use `kill -0 -- -$pgid` to verify pgid still alive before kill.
+4. **trap vs explicit kill duplication**: per design review, keep ONLY explicit `kill $watchdog_pid` after main wait; drop the `trap RETURN`. Single mechanism, simpler.
+
+**Propagation**: MLI + root scripts/autonomous_run.sh in same commit (per AR-11 precedent). Worktree + tools/ deferred to T-P2-296.
+
+**Acceptance criteria**:
+1. `command -v setsid` precheck at script start; if missing, exit with clear error.
+2. Injected fake `claude` = `sleep 700 && exit 0` (zero log) -> wrapper kills within ${grace}s + 5s, returns 124.
+3. Injected fake `claude` = normal output (echo banner; sleep 5; loop edits) -> watchdog does NOT mis-kill.
+4. Injected fake = exits within grace window (e.g., 30s normal completion) -> watchdog cleanup is clean, no zombie.
+5. AR-12 race AC: fake `claude` writes 1 file then sleeps 700; cold-start kill fires; on retry, AR-12 must NOT extend (working tree changed, but it was the killed run's residue, not new progress).
+6. `logs/wrapper-stats.jsonl` populates branch=coldstart_kill on each kill.
+7. Kill switch `CLAUDE_P_DISABLE_COLDSTART_GUARD=1` verified to skip watchdog.
+8. Process group accounting: spawn fake `claude` that forks 2 grandchildren; on kill, all 3 processes dead (no orphans).
+
+**Complexity**: L (3-4h). Process group + bash subprocess + race testing is non-trivial.
+
+**Depends on**: T-P1-713 (AR-12). Order: AR-12 baseline first (for telemetry schema and porcelain signal); then AR-16 layered on top (with AR-12 race AC).
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -238,28 +260,6 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
-
-#### T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P1-713
-- **Description**: **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s extension already brings worst-case attempt to 1200s; further bump would double-stack.
-
-**Motivation**: 600s too tight for M-complexity. pytest 1232 = ~95s, MCP cold-start = 30-60s, multi-file Read+Edit ~120s, seed+e2e ~60s. Leaves <8min for reasoning. 900s gives ~13min headroom.
-
-**Why not auto-scale**: orchestrator does not know which task inner session picks. Override available via env var for users needing longer.
-
-**Implementation**:
-- 2 files (MLI + root scripts/autonomous_run.sh): default 600 -> 900
-- CLAUDE.md (root + MLI) Hang auto-recovery section: 600s -> 900s
-
-**AC**:
-1. Default 900s verified via wrapper invocation.
-2. Override CLAUDE_P_TIMEOUT=300 still works.
-3. CLAUDE.md matches code.
-4. AR-12 telemetry counter ingests cleanly.
-
-**Depends on**: T-P1-713 (AR-12). Order: AR-12 first, then this.
 
 #### T-P2-716: [AR-17] Placeholder ticket: PostToolUse heartbeat as fallback if AR-12 porcelain signal proves insufficient
 - **Priority**: P2
