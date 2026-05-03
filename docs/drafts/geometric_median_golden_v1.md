@@ -10,90 +10,86 @@
 
 ## 实现
 
-### 0. Function signature
+### 0. Class skeleton
 
-无训练状态, 单函数; 输入点集 + 收敛参数, 输出 $$d$$ 维中位数向量.
+无训练状态, 单次 `fit` 后从 `median_` 取结果 (sklearn 风格 trailing-underscore). 默认 `max_iter=200`, `tol=1e-7`.
 
 ```python
 import numpy as np
+from typing import Optional
 
-def geometric_median(points: np.ndarray,
-                     max_iter: int = 200,
-                     tol: float = 1e-7) -> np.ndarray:
-    points = np.asarray(points, dtype=float)         # (n, d)
-    x = points.mean(axis=0)                          # centroid init
-    ...
+class GeometricMedian:
+    def __init__(self, max_iter: int = 200, tol: float = 1e-7):
+        self.max_iter = max_iter
+        self.tol = tol
+        self.median_: Optional[np.ndarray] = None        # (d,)
 ```
 
-### 1. Initialization -- centroid as starting point
+### 1. Standard Weiszfeld step -- IRLS update
 
-Centroid 是 $$L_2^2$$ 最优解, 落在凸包内, 几乎不与样本点重合, 对噪声温和样本最稳; per-axis median 也常用, 但少数样本场景偶尔命中样本点立即触发退化分支.
+权重 $$w_i = 1/d_i$$, 加权重心一次迈过去. 等价于 $$\min \sum w_i \|x - x_i\|^2$$ 的 IRLS 解 (每步基于上步距离重算权重) -- 与 Logistic Regression 的 Newton/IRLS 求解器同族. 调用方保证 `dists` 全 $$> 0$$ (退化情形走 Vardi-Zhang 分支).
 
 ```python
-x = points.mean(axis=0)                              # (d,)
+def _weiszfeld_step(self, points, dists):
+    # points: (n, d), dists: (n,) all > 0
+    inv_d = 1.0 / dists                              # (n,)
+    weighted = points * inv_d[:, None]               # (n, d)
+    numerator = weighted.sum(axis=0)                 # (d,)
+    denominator = inv_d.sum()                        # scalar
+    return numerator / denominator                   # (d,)
 ```
 
-### 2. Standard Weiszfeld step -- IRLS update
-
-权重 $$w_i = 1/d_i$$, 加权重心一次迈过去. 等价于 $$\min \sum w_i \|x - x_i\|^2$$ 的 IRLS 解 (每步基于上步距离重算权重) -- 与 Logistic Regression 的 Newton/IRLS 求解器同族.
-
-```python
-diffs = points - x                                   # (n, d)
-dists = np.linalg.norm(diffs, axis=1)                # (n,)
-inv_d = 1.0 / dists                                  # (n,)
-x_new = (points * inv_d[:, None]).sum(axis=0) / inv_d.sum()
-```
-
-### 3. Degeneracy guard -- Vardi-Zhang variant
+### 2. Degeneracy guard -- Vardi-Zhang variant
 
 iterate 撞到样本点时 $$d_j = 0$$, 朴素 $$1/d_j$$ 触发 `inf` 污染整步. Vardi-Zhang 把 sum 拆"命中 / 未命中"两半: $$T(x)$$ 是只在未命中样本上的标准 Weiszfeld; $$R(x) = \|\sum_{i \notin J} (x - x_i)/d_i\|$$ 是次梯度的 norm. 当 $$R \leq \eta_j$$ (命中样本数), 当前点已是几何中位数 (最优性证书, 无需再迭代); 否则用 $$T(x)$$ 与命中点 $$x$$ 的凸组合更新.
 
 ```python
-singular = dists < tol                               # (n,) bool
-if np.any(singular):
-    eta = int(singular.sum())                        # repeats at x
+def _vardi_zhang_step(self, points, x, dists, singular):
+    # points: (n, d), x: (d,), dists: (n,), singular: (n,) bool
+    eta = int(singular.sum())                        # scalar (count at x)
+    pts_active = points[~singular]                   # (m, d)
     inv_d = 1.0 / dists[~singular]                   # (m,)
-    T = (points[~singular] * inv_d[:, None]).sum(axis=0) / inv_d.sum()
-    R = float(np.linalg.norm(
-        ((x - points[~singular]) * inv_d[:, None]).sum(axis=0)
-    ))
-    if R <= eta:                                     # x IS the geometric median
-        return x
+    weighted = pts_active * inv_d[:, None]           # (m, d)
+    T_num = weighted.sum(axis=0)                     # (d,)
+    T = T_num / inv_d.sum()                          # (d,) standard step on active
+    delta = x - pts_active                           # (m, d)
+    unit_terms = delta * inv_d[:, None]              # (m, d)  (x - x_i)/d_i
+    R_vec = unit_terms.sum(axis=0)                   # (d,)
+    R = float(np.linalg.norm(R_vec))                 # scalar
+    if R <= eta:                                     # optimality certificate
+        return x, True
     gamma = max(0.0, 1.0 - eta / R)                  # else: anchor-point fallback
-    x_new = gamma * T + (1.0 - gamma) * x
+    x_new = gamma * T + (1.0 - gamma) * x            # (d,)
+    return x_new, False
 ```
 
 工程上常见的"$$d_i \to d_i + \varepsilon$$"修补能避免 NaN, 但**改了不动点方程**, 解从真正的几何中位数偏成有偏估计. Vardi-Zhang 是 unbiased 标准修正.
 
-### 4. Main loop -- iterate with stopping criteria
+### 3. fit -- centroid init + main loop
 
-把 step 2/3 编进迭代; 收敛判据是步长 $$\|x_{t+1} - x_t\| < \text{tol}$$, 配合 max_iter 二选一. 命中样本+证书条件触发时直接 return.
+Centroid 是 $$L_2^2$$ 最优解, 落在凸包内, 几乎不与样本点重合, 对噪声温和样本最稳; per-axis median 也常用, 但少数样本场景偶尔命中样本点立即触发退化分支. 主循环每步先算距离, 命中则走 Vardi-Zhang (含证书短路), 否则走标准 Weiszfeld; 步长 $$\|x_{t+1} - x_t\| < \text{tol}$$ 或 max_iter 任一触发即停.
 
 ```python
-for _ in range(max_iter):                            # Criterion 1: max iter
-    diffs = points - x
-    dists = np.linalg.norm(diffs, axis=1)
-
-    singular = dists < tol
-    if np.any(singular):
-        eta = int(singular.sum())
-        inv_d = 1.0 / dists[~singular]
-        T = (points[~singular] * inv_d[:, None]).sum(axis=0) / inv_d.sum()
-        R = float(np.linalg.norm(
-            ((x - points[~singular]) * inv_d[:, None]).sum(axis=0)
-        ))
-        if R <= eta:
-            return x                                 # Criterion 2: optimality cert
-        gamma = max(0.0, 1.0 - eta / R)
-        x_new = gamma * T + (1.0 - gamma) * x
-    else:
-        inv_d = 1.0 / dists
-        x_new = (points * inv_d[:, None]).sum(axis=0) / inv_d.sum()
-
-    if np.linalg.norm(x_new - x) < tol:              # Criterion 3: step size
-        return x_new
-    x = x_new
-return x
+def fit(self, points):
+    points = np.asarray(points, dtype=float)         # (n, d)
+    x = points.mean(axis=0)                          # (d,) centroid init
+    for _ in range(self.max_iter):                   # Criterion 1: max iter
+        diffs = points - x                           # (n, d)
+        dists = np.linalg.norm(diffs, axis=1)        # (n,)
+        singular = dists < self.tol                  # (n,) bool
+        if np.any(singular):
+            x_new, done = self._vardi_zhang_step(points, x, dists, singular)
+            if done:                                 # Criterion 2: optimality cert
+                self.median_ = x_new
+                return self
+        else:
+            x_new = self._weiszfeld_step(points, dists)
+        if np.linalg.norm(x_new - x) < self.tol:     # Criterion 3: step size
+            self.median_ = x_new
+            return self
+        x = x_new
+    self.median_ = x
+    return self
 ```
 
 ---
@@ -145,3 +141,18 @@ return x
 - k=1 K-Means $$+$$ $$L_2^2$$ cost $$=$$ mean (centroid).
 - k=1 K-Means $$+$$ $$L_2$$ cost (不平方) $$=$$ 几何中位数.
 - 推广: **k-medians** 用 $$L_1$$ (逐轴 median); **k-medoids** (PAM) 强制中心是样本点 -- 同族 outlier-robust 聚类.
+
+---
+
+## End-to-end test
+
+```python
+import numpy as np
+np.random.seed(0)
+N, D = 50, 3
+points = np.random.rand(N, D)
+gm = GeometricMedian().fit(points)
+assert gm.median_.shape == (D,)
+print(f"Geometric median: {gm.median_}")
+print(f"Mean for comparison: {points.mean(axis=0)}")
+```

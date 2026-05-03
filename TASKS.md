@@ -9,77 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-706, T-P0-707, T-P0-704
-- **Description**: **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). Anchored to the K-Means golden updated in T-P0-707.
-
-**Edits**:
-
-1. **Shape-per-line rewrite** for every numpy block in the note. Specifically:
-   - Weiszfeld iteration: `diffs = points - x_t  # (N, D)`, `dists = np.linalg.norm(diffs, axis=1)  # (N,)`, `weights = 1 / dists  # (N,)`, `x_next = (weights[:, None] * points).sum(axis=0) / weights.sum()  # (D,)` -- each on its own line.
-   - Vardi-Zhang degenerate-handling branch: shape-per-line for the on-data-point detection + the modified update.
-   - The variant comparison TABLE (from first pass) stays unchanged.
-   - Title rename done in T-P0-704; second pass does NOT redo it.
-
-2. **`## End-to-end test` block** at the very end (after all body sections):
-
-```python
-## End-to-end test
-
-```python
-import numpy as np
-np.random.seed(0)
-N, D = 50, 3
-points = np.random.rand(N, D)
-gm = GeometricMedian().fit(points)
-assert gm.median_.shape == (D,)
-print(f"Geometric median: {gm.median_}")
-print(f"Mean for comparison: {points.mean(axis=0)}")
-```
-```
-
-**Workflow**:
-1. Read updated spec `docs/methodology/ml_impl_note_rewrite_spec.md`.
-2. Read updated K-Means golden (problem 1064) for shape-per-line reference.
-3. Read current `problems.notes` for 1108 (post-first-pass; ~6800 chars from T-P0-707).
-4. Edit notes content in `scripts/seed_geometric_median_20260502.py`.
-5. Run seed script (idempotent UPSERT).
-6. **Run the e2e block** -- save to `/tmp/test_geometric_median_e2e.py` and `python /tmp/test_..._e2e.py`. Must exit 0.
-7. Length check: `len(notes)` <= 6800 (no regression vs first-pass; ideally a slight reduction since we're trimming non-shape comments while adding shape annotations).
-8. Manual smoke on `/quick-index?section=ml`.
-
-**Acceptance criteria (specific)**:
-- Every shape-changing numpy op in the note has its own line + `# (shape)` comment.
-- No 3+ op chains in a single expression.
-- E2e block executes cleanly (exit 0).
-- `len(notes)` <= 6800.
-- TL;DR byte-identical to first-pass version.
-
-**Two new structural rules to apply (added to spec by T-P0-706 first)**:
-
-**Rule 1 -- Shape-per-line decomposition**:
-- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
-- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
-- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
-- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
-
-**Rule 2 -- End-to-end runnable test block**:
-- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
-- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
-- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
-- Must complete in <1s with no external dependencies.
-- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
-
-**Per-task common AC**:
-- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
-- No 3+ op chains in a single expression.
-- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
-- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
-- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
-- TL;DR unchanged from first pass (per user direction).
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -577,6 +506,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 652 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-03** -- T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md`
 - [x] **2026-05-03** -- T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.
 - [x] **2026-05-03** -- T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). 
 - [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch
