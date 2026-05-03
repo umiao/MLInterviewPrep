@@ -9,179 +9,10 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-703: [MLI-GOLDEN-LOGREG] Logistic Regression (1107) golden-style rewrite + dedicated numerical-stability section
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: **Goal**: Rewrite problem 1107 (Logistic Regression) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (problem 1064)). Spec: `docs/methodology/ml_impl_note_rewrite_spec.md`. **Heaviest cut**: 15,964 -> ~11,200 (>=30%).
-
-**Per-problem anchors (from spec section "Logistic Regression" -- this algorithm's soul is numerical stability)**:
-- TL;DR MUST mention the stable BCE form: `np.logaddexp` or `log1p(exp(-|z|))`. This is the deviation-rule case 1 -- soul lives in non-typical place, declare it in TL;DR.
-- DEDICATED section "Numerical stability" -- the RARE case where a math derivation IS allowed inline (per spec deviation rule). Show:
-  - $\log(1 + e^z)$ overflows when $z$ is large positive
-  - the equivalent stable form $\max(z, 0) + \log(1 + e^{-|z|})$
-  - 1-2 lines of prose above explaining WHY each form has different overflow behavior
-- All other followups stay in cheat sheet (1-3 bullets each):
-  - why LR has no closed form (sigmoid -> likelihood non-quadratic, not $X^TX$ form)
-  - softmax extension (multi-class generalization)
-  - class imbalance (class weight / focal loss)
-  - L1 vs L2 regularization geometric meaning (sparsity vs shrinkage)
-
-**Style invariants from `docs/methodology/ml_impl_note_rewrite_spec.md` (AC fails if any violated)**
-
-**Central axis -- "Why in prose, What in code"**:
-- Algorithm motivation, geometric intuition, and contrast reasoning go in PROSE BEFORE each code block (1-2 sentences).
-- Inside code blocks, the ONLY allowed comments are: shape annotations (`# (n, k)`), step/criterion anchors (`# Step 2`, `# Criterion 3: max iter`), edge cases (`# else: empty cluster fallback`), numerical hints (`# avoid log(0)`).
-- Forbidden inside code: algorithm explanations, multi-line comment paragraphs, mixed-CN/EN long sentences, repetition of the prose above. If you see yourself writing inline math-explainer comments, lift them into 1-2 lines of prose ABOVE the code.
-
-**Section granularity = "independently whiteboardable"**:
-- `__init__` / class skeleton standalone (one section).
-- Each helper standalone: init / E-step / M-step / objective / utility / fit / predict each get their own section.
-- Multiple variants of the SAME concept (e.g., uniform vs weighted KNN; vanilla vs ++) live in the SAME section, separated by `**bold subtitle**` -- NOT split into separate sections.
-- Main loop standalone, with `# Step N` or `# Criterion N` anchor comments threading the stopping conditions.
-- `predict()` standalone even if 1-2 lines.
-- Anti-pattern: helpers stuffed into one giant class block. That breaks "whiteboard a single section" usability.
-
-**TL;DR (5-7 lines, blockquote with `>` on every line)**:
-- Must enable a reader to recap the algorithm WITHOUT reading anything else.
-- Required content: positioning (one line), core loop steps (numbered), edge / degenerate handling, complexity ($O(...)$).
-- If the algorithm has a non-typical "soul" (e.g., LR's numerical stability), call it out in TL;DR.
-
-**Variant comparison**:
-- Always a TABLE, never prose paragraphs.
-- <=5 columns, <=12 chars per cell, headers chosen from {选择方式, 失败模式, 实践默认值, 理论保证, 复杂度}.
-- ONE sentence below the table answering "what's the essential difference / when to prefer which".
-
-**Cheat sheet (面试追问)**:
-- Format: `> **Q: question text**` followed by 1-3 bullets, each <=2 lines.
-- If a Q would need a paragraph, EITHER promote to a body section OR delete -- it does not belong in cheat sheet.
-
-**Typography**:
-- All math (including inline complexity) wrapped in `$$...$$`. No bare `$...$`.
-- Key terms first occurrence: `**bold**`.
-- Algorithm names, library names, variable names: backticks.
-- Section dividers: `---`.
-- Lists use `-` (never `*`).
-- No emoji anywhere.
-
-**Aggressive deletion (do not hesitate)**:
-- Paper citations, years, author names.
-- "When else would you use X" pedagogical stretch paragraphs.
-- "关键要点" / "key takeaways" recap blocks (always duplicate intro).
-- Full mathematical proofs (keep only the result formula as a one-liner).
-- Multi-line teaching comments inside code.
-- Length floor: notes byte length must be at LEAST 30% shorter than baseline. If you fall short, you almost certainly haven't deleted enough -- find more.
-
-**Deviation rule (the ONLY two legitimate exceptions)**:
-1. Algorithm's soul lives in a non-typical place (e.g., LR's stable BCE deserves a dedicated section) -- must surface in TL;DR explicitly.
-2. A specific followup is high-frequency for THIS algorithm and 1-2 lines aren't enough -- promote to a body section, do NOT stuff into cheat sheet.
-
-**Doubt rule**: when uncertain whether to keep a passage, default to DELETE.
-
-
-**Workflow**:
-1. Audit `db://1107` propagation: confirm no production references outside the seed script.
-2. Read current `problems.notes` for 1107 (baseline 15,964 chars). Expect substantial cuts -- this is where the spec's "default to delete" rule earns the most.
-3. Edit notes content in `scripts/seed_logistic_regression_20260502.py`.
-4. Run the seed script.
-5. Length check: `len(notes)` <= 11,200.
-6. Manual smoke on `/quick-index?section=ml` -> Logistic Regression card. Confirm the stable-BCE math block renders cleanly in KaTeX.
-
-**Acceptance criteria**:
-- All style invariants above hold.
-- TL;DR explicitly names the stable BCE form (`np.logaddexp` or `log1p(exp(-|z|))`).
-- "Numerical stability" is its OWN top-level section (NOT buried in BCE inline comments). It is the ONLY section where math derivation appears.
-- Followups (no closed form / softmax / imbalance / L1 vs L2) live in cheat sheet, 1-3 bullets each, never as body sections.
-- `len(notes)` <= 11,200 (>=30% cut from 15,964).
-- Manual smoke passes on `/quick-index?section=ml`.
-
-#### T-P0-704: [MLI-GOLDEN-GEOMED] Geometric Median (1108) golden-style rewrite + drop '1999' from title (DB + QuickIndex.tsx)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: **Goal**: Rewrite problem 1108 (Geometric Median) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (problem 1064)). Spec: `docs/methodology/ml_impl_note_rewrite_spec.md`. Includes a title rename across two surfaces.
-
-**Per-problem anchors (from spec section "Geometric Median")**:
-- TITLE RENAME (drop "1999" per spec): two surfaces.
-  - DB title: currently `Geometric Median (Weber 问题, L2 距离和最小)` -> rename to `Geometric Median (Weiszfeld + Vardi-Zhang variant)` via the seed script's `title=` field.
-  - Frontend hardcoded label: `src/frontend/src/pages/QuickIndex.tsx` lines 74-80 currently shows "Geometric Median (Weiszfeld + Vardi-Zhang 1999)" -> change "1999" to "variant".
-- Core formula (TL;DR or first section): Weiszfeld iteration $$x_{t+1} = \frac{\sum w_i x_i}{\sum w_i}, \quad w_i = \frac{1}{\|x_i - x_t\|}$$
-- What Vardi-Zhang fixes: $w_i \to \infty$ degeneracy when iterate lands on a data point. Implementation: detect hit + switch update formula. Show this in code with a clear `# else: anchor-point fallback` style comment.
-- Variant TABLE: vanilla Weiszfeld vs Vardi-Zhang with column headers chosen from {退化处理, 收敛性, 实现复杂度}.
-- Followups (cheat sheet): vs mean / coordinate-wise median ($L_2$ robust center vs $L_1$ per-axis median); why no closed form (一阶条件含 $x$ 的 norm); convergence (convex + Lipschitz -> Weiszfeld a.e. convergence). Reference the existing `db://262` Best Meeting Point problem for the $L_1$ contrast (already cited in current seed).
-
-**Style invariants from `docs/methodology/ml_impl_note_rewrite_spec.md` (AC fails if any violated)**
-
-**Central axis -- "Why in prose, What in code"**:
-- Algorithm motivation, geometric intuition, and contrast reasoning go in PROSE BEFORE each code block (1-2 sentences).
-- Inside code blocks, the ONLY allowed comments are: shape annotations (`# (n, k)`), step/criterion anchors (`# Step 2`, `# Criterion 3: max iter`), edge cases (`# else: empty cluster fallback`), numerical hints (`# avoid log(0)`).
-- Forbidden inside code: algorithm explanations, multi-line comment paragraphs, mixed-CN/EN long sentences, repetition of the prose above. If you see yourself writing inline math-explainer comments, lift them into 1-2 lines of prose ABOVE the code.
-
-**Section granularity = "independently whiteboardable"**:
-- `__init__` / class skeleton standalone (one section).
-- Each helper standalone: init / E-step / M-step / objective / utility / fit / predict each get their own section.
-- Multiple variants of the SAME concept (e.g., uniform vs weighted KNN; vanilla vs ++) live in the SAME section, separated by `**bold subtitle**` -- NOT split into separate sections.
-- Main loop standalone, with `# Step N` or `# Criterion N` anchor comments threading the stopping conditions.
-- `predict()` standalone even if 1-2 lines.
-- Anti-pattern: helpers stuffed into one giant class block. That breaks "whiteboard a single section" usability.
-
-**TL;DR (5-7 lines, blockquote with `>` on every line)**:
-- Must enable a reader to recap the algorithm WITHOUT reading anything else.
-- Required content: positioning (one line), core loop steps (numbered), edge / degenerate handling, complexity ($O(...)$).
-- If the algorithm has a non-typical "soul" (e.g., LR's numerical stability), call it out in TL;DR.
-
-**Variant comparison**:
-- Always a TABLE, never prose paragraphs.
-- <=5 columns, <=12 chars per cell, headers chosen from {选择方式, 失败模式, 实践默认值, 理论保证, 复杂度}.
-- ONE sentence below the table answering "what's the essential difference / when to prefer which".
-
-**Cheat sheet (面试追问)**:
-- Format: `> **Q: question text**` followed by 1-3 bullets, each <=2 lines.
-- If a Q would need a paragraph, EITHER promote to a body section OR delete -- it does not belong in cheat sheet.
-
-**Typography**:
-- All math (including inline complexity) wrapped in `$$...$$`. No bare `$...$`.
-- Key terms first occurrence: `**bold**`.
-- Algorithm names, library names, variable names: backticks.
-- Section dividers: `---`.
-- Lists use `-` (never `*`).
-- No emoji anywhere.
-
-**Aggressive deletion (do not hesitate)**:
-- Paper citations, years, author names.
-- "When else would you use X" pedagogical stretch paragraphs.
-- "关键要点" / "key takeaways" recap blocks (always duplicate intro).
-- Full mathematical proofs (keep only the result formula as a one-liner).
-- Multi-line teaching comments inside code.
-- Length floor: notes byte length must be at LEAST 30% shorter than baseline. If you fall short, you almost certainly haven't deleted enough -- find more.
-
-**Deviation rule (the ONLY two legitimate exceptions)**:
-1. Algorithm's soul lives in a non-typical place (e.g., LR's stable BCE deserves a dedicated section) -- must surface in TL;DR explicitly.
-2. A specific followup is high-frequency for THIS algorithm and 1-2 lines aren't enough -- promote to a body section, do NOT stuff into cheat sheet.
-
-**Doubt rule**: when uncertain whether to keep a passage, default to DELETE.
-
-
-**Workflow**:
-1. Audit `db://1108` propagation: confirm no production references outside the seed script.
-2. Read current `problems.notes` for 1108 (baseline 9,723 chars).
-3. Edit BOTH the title field AND the notes content in `scripts/seed_geometric_median_20260502.py`.
-4. Edit `src/frontend/src/pages/QuickIndex.tsx` to replace "1999" with "variant" in the hardcoded label (lines 74-80 area).
-5. Run the seed script.
-6. Length check: `len(notes)` <= 6,800 (>=30% reduction).
-7. Manual smoke: `/quick-index?section=ml` shows label "Vardi-Zhang variant" (no "1999"); drawer title also says "variant"; renders cleanly.
-
-**Acceptance criteria**:
-- All style invariants above hold.
-- Neither DB title NOR `QuickIndex.tsx` label contains "1999".
-- Vanilla Weiszfeld vs Vardi-Zhang as a TABLE on {退化处理, 收敛性, 实现复杂度} with one-sentence summary.
-- `len(notes)` <= 6,800.
-- Manual smoke passes on `/quick-index?section=ml`.
-
 #### T-P0-705: [MLI-GOLDEN-PROMOTE] Smoke test 4 rewrites on /quick-index?section=ml + mark all 4 is_golden=1
 - **Priority**: P0
 - **Complexity**: S
-- **Depends on**: T-P0-701, T-P0-702, T-P0-703, T-P0-704
+- **Depends on**: T-P0-704
 - **Description**: **Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is_golden=1` with timestamp.
 
 **Workflow**:
@@ -201,6 +32,425 @@
 - Hub doc line 89 summary still accurate (or updated alongside, with the hub seed re-run).
 - URI consistency audit: zero new failures vs pre-rewrite baseline.
 - `mark_4_ml_problems_golden_20260503.py` is committed and idempotent.
+
+#### T-P0-706: [MLI-GOLDEN-2P-SPEC] Update ml_impl_note_rewrite_spec.md: shape-per-line + e2e-test-block rules
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-705
+- **Description**: **Goal**: Update `docs/methodology/ml_impl_note_rewrite_spec.md` to add the two new structural rules from the second-pass discussion. This task gates the 5 downstream rewrites (T-P0-707..711) -- spec must be canonical source before they execute.
+
+**Edits**:
+
+1. **Add new section** between current "## Inline 注释规范" and "## 表格与对比":
+
+   ### Shape-per-line decomposition
+
+   每个产生形状变化的 numpy 操作单独一行，配 `# (shape)` 注释。禁止把 3+ 步链式操作压缩到一个表达式（典型反例：`np.array([... for c in centers]).T`）。"一次只算一个 vector" 是默认姿态——`(d,)` -> `(n, d)` broadcast -> `(n,)` -> list of K -> `(k, n)` -> `.T` -> `(n, k)` -> argmin -> `(n,)` 应该是 7 行 7 个 shape 注释，不是一行链式。
+
+   目标：白板时读者按行追形状变化，不需要心算 numpy 隐式 broadcast / axis 推导。
+
+2. **Add new section** between current "## 排版细节" and "## 验收清单":
+
+   ### End-to-end test block
+
+   每份笔记末尾必须以 `## End-to-end test` 章节收尾（visible, 不要折叠），位置在完整实现之后（main loop / predict 之类全部讲完）。约束：
+   - <=10 行
+   - 用 `np.random.rand` / `np.random.randn` + 命名常量 `N, D` (和 `K` 如适用)
+   - instantiate class -> `fit()` -> 可选 `predict()` -> assert output shape
+   - <1s 内跑完，无外部依赖
+   - 改写时 autonomous session 必须真正执行此块（捕获 stdout 验证无异常），不止静态检查
+
+3. **Update §验收清单** -- add 2 items:
+   - [ ] 所有 shape-changing numpy 操作单独成行，配 `# (shape)` 注释
+   - [ ] `## End-to-end test` 章节存在且执行通过（autonomous session 实跑过）
+
+4. **Update §"4 道题的具体锚点"** -- per-problem note that the e2e block uses `(N, D)` for LR / KNN, `(N, D, K)` for K-Means (already golden), `(N, D)` binary y for LogReg, `(N, D)` for Geometric Median.
+
+**Acceptance criteria**:
+- Spec file gains 2 new top-level sections + 2 checklist items + 4-anchor updates.
+- `git diff` shows clean structural edits, no whole-file rewrite.
+- Spec still <10KB after edits (small addition only).
+- Validate: `git log --oneline docs/methodology/ml_impl_note_rewrite_spec.md` shows the commit; `wc -l docs/methodology/ml_impl_note_rewrite_spec.md` increased reasonably (~20-40 lines).
+
+#### T-P0-707: [MLI-GOLDEN-2P-KMEANS] K-Means golden (1064) second pass: shape-per-line + e2e block + empty-cluster prose
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-706
+- **Description**: **Goal**: Update K-Means golden (problem 1064) with the second-pass rules from `docs/methodology/ml_impl_note_rewrite_spec.md` (after T-P0-706 lands). Plus refine empty-cluster prose. TL;DR unchanged.
+
+**Three concrete edits**:
+
+**Edit 1 -- shape-per-line rewrite** of `_assign_to_nearest_center` and `_init_centers_plusplus` in the seed-script's `notes` content. Current `_assign_to_nearest_center` packs 3 ops in one expression:
+
+```python
+sq_dists = np.array([np.sum((data - c) ** 2, axis=1) for c in self.cluster_centers]).T  # (n, k)
+```
+
+Rewrite to:
+```python
+def _assign_to_nearest_center(self, data):
+    # data: (n, d),  self.cluster_centers: (k, d)
+    per_centroid = []
+    for c in self.cluster_centers:                 # c: (d,)
+        diff = data - c                            # (n, d)  -- broadcast
+        sq_dist = np.sum(diff ** 2, axis=1)        # (n,)
+        per_centroid.append(sq_dist)
+    sq_dists = np.array(per_centroid).T            # list of K (n,) -> (k, n) -> .T -> (n, k)
+    return np.argmin(sq_dists, axis=1)             # (n,)
+```
+
+Same treatment for `_init_centers_plusplus` -- show shape transitions per line.
+
+**Edit 2 -- empty-cluster prose** (above the `_recompute_centers` code block, NOT in TL;DR):
+
+> Empty cluster fallback 是 K-Means 的防御代码，不是常用路径。触发条件：(a) `K > 真实簇数` 时 iter>=1 mean 漂移可让某 cluster 失去所有成员；(b) 数据有重复行 + K-Means++ 抽到两个相同点。N>>K + 合理的 K 选择下两种都罕见。**实务上应在 K 选择阶段（elbow / silhouette）解决，不依赖 fallback 兜底**。
+
+Plus add 1 bullet to "K 怎么选" cheat sheet item: `- 选错 K 的尾迹: 空簇 / silhouette 跌入负值 / SSE 曲线没拐点。`
+
+**Edit 3 -- e2e test block** at the end (visible, after `predict`):
+
+```markdown
+## End-to-end test
+
+```python
+import numpy as np
+N, D, K = 200, 3, 4
+data = np.random.rand(N, D)
+km = KMeans(num_clusters=K, random_state=42).fit(data)
+assert km.cluster_labels.shape == (N,)
+assert km.cluster_centers.shape == (K, D)
+print(f"SSE = {km.total_sse:.3f}")
+```
+```
+
+**Workflow**:
+1. Read `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706) to confirm rules.
+2. Read current `problems.notes` for 1064 from DB (5,755 chars baseline).
+3. Edit notes content in `scripts/seed_kmeans_golden_v1.py` (or wherever 1064's content lives -- audit `seed_kmeans_*` scripts; the doc-source is `docs/drafts/kmeans_golden_v1.md` and the seed reads from there).
+4. Run the seed script (idempotent UPSERT).
+5. **Run the e2e block** as a real Python file -- save to `/tmp/test_kmeans_e2e.py` and `python /tmp/test_kmeans_e2e.py`. Must exit 0.
+6. Length check: `len(notes)` may grow modestly (shape-per-line adds lines) but should stay <=7,500 (a ~30% headroom over baseline 5,755).
+7. Manual smoke on `/quick-index?section=ml` -> K-Means card.
+
+**Acceptance criteria**:
+- All 3 edits land verbatim per above (shape-per-line on 2 helpers, empty-cluster prose, e2e block).
+- TL;DR is byte-identical to pre-edit (per user: "我觉得没必要改TLDR").
+- E2e block executes cleanly when run as a Python file (exit 0, no exceptions).
+- `len(notes)` <= 7,500.
+- K-Means still has `is_golden=1` (don't accidentally clear).
+
+**Two new structural rules to apply (added to spec by T-P0-706 first)**:
+
+**Rule 1 -- Shape-per-line decomposition**:
+- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
+- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
+- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
+- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
+
+**Rule 2 -- End-to-end runnable test block**:
+- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
+- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
+- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
+- Must complete in <1s with no external dependencies.
+- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
+
+**Per-task common AC**:
+- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
+- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
+- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
+- TL;DR unchanged from first pass (per user direction).
+
+#### T-P0-708: [MLI-GOLDEN-2P-LR] Linear Regression (1102) second pass: shape-per-line + e2e block
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-706, T-P0-707
+- **Description**: **Goal**: Apply second-pass rules to problem 1102 (Linear Regression) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). Anchored to the K-Means golden updated in T-P0-707.
+
+**Edits**:
+
+1. **Shape-per-line rewrite** for every numpy block in the note. Specifically:
+   - The closed-form code path: split `X.T @ X`, `X.T @ y`, `np.linalg.lstsq` into separate lines with shape annotations on each intermediate.
+   - The GD code path: per-iteration gradient `(2/N) * X.T @ (X @ w - y)` should split: `pred = X @ w  # (N,)`, `residual = pred - y  # (N,)`, `grad = (2/N) * X.T @ residual  # (D,)`, `w = w - lr * grad  # (D,)`.
+   - The closed-form vs GD comparison TABLE (from first pass) stays unchanged; just the code blocks under each variant get the shape-per-line treatment.
+
+2. **`## End-to-end test` block** at the very end (after all body sections):
+
+```python
+## End-to-end test
+
+```python
+import numpy as np
+np.random.seed(0)
+N, D = 200, 5
+X = np.random.randn(N, D)
+true_w = np.random.randn(D)
+y = X @ true_w + 0.01 * np.random.randn(N)
+lr = LinearRegression().fit(X, y)
+preds = lr.predict(X)
+assert preds.shape == (N,)
+print(f"MSE = {np.mean((preds - y) ** 2):.4f}")
+```
+```
+
+**Workflow**:
+1. Read updated spec `docs/methodology/ml_impl_note_rewrite_spec.md`.
+2. Read updated K-Means golden (problem 1064) for shape-per-line reference.
+3. Read current `problems.notes` for 1102 (post-first-pass; ~6900 chars from T-P0-701).
+4. Edit notes content in `scripts/seed_linear_regression_20260502.py`.
+5. Run seed script (idempotent UPSERT).
+6. **Run the e2e block** -- save to `/tmp/test_linear_regression_e2e.py` and `python /tmp/test_..._e2e.py`. Must exit 0.
+7. Length check: `len(notes)` <= 6900 (no regression vs first-pass; ideally a slight reduction since we're trimming non-shape comments while adding shape annotations).
+8. Manual smoke on `/quick-index?section=ml`.
+
+**Acceptance criteria (specific)**:
+- Every shape-changing numpy op in the note has its own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- E2e block executes cleanly (exit 0).
+- `len(notes)` <= 6900.
+- TL;DR byte-identical to first-pass version.
+
+**Two new structural rules to apply (added to spec by T-P0-706 first)**:
+
+**Rule 1 -- Shape-per-line decomposition**:
+- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
+- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
+- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
+- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
+
+**Rule 2 -- End-to-end runnable test block**:
+- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
+- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
+- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
+- Must complete in <1s with no external dependencies.
+- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
+
+**Per-task common AC**:
+- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
+- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
+- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
+- TL;DR unchanged from first pass (per user direction).
+
+#### T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-706, T-P0-707
+- **Description**: **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). Anchored to the K-Means golden updated in T-P0-707.
+
+**Edits**:
+
+1. **Shape-per-line rewrite** for every numpy block in the note. Specifically:
+   - Distance computation section: split `data - x` (broadcast), squared, sum, sqrt onto separate lines with shape comments.
+   - Top-K selection: `np.argpartition(dists, K)[:K]` gets a shape line; the resulting indices' shape `(K,)` annotated.
+   - Voting: counts/weights array assembly and final argmax each get their own line.
+   - The 3 split predict sections from first pass benefit MOST from this rule -- each section already has prose-before-code, now also has shape-per-line within code.
+
+2. **`## End-to-end test` block** at the very end (after all body sections):
+
+```python
+## End-to-end test
+
+```python
+import numpy as np
+np.random.seed(0)
+N_train, N_test, D, K = 100, 20, 4, 5
+X_train = np.random.rand(N_train, D)
+y_train = np.random.randint(0, 3, N_train)
+X_test = np.random.rand(N_test, D)
+knn = KNN(k=K).fit(X_train, y_train)
+preds = knn.predict(X_test)
+assert preds.shape == (N_test,)
+print(f"Predicted classes: {np.unique(preds)}")
+```
+```
+
+**Workflow**:
+1. Read updated spec `docs/methodology/ml_impl_note_rewrite_spec.md`.
+2. Read updated K-Means golden (problem 1064) for shape-per-line reference.
+3. Read current `problems.notes` for 1106 (post-first-pass; ~6500 chars from T-P0-705).
+4. Edit notes content in `scripts/seed_knn_20260502.py`.
+5. Run seed script (idempotent UPSERT).
+6. **Run the e2e block** -- save to `/tmp/test_knn_e2e.py` and `python /tmp/test_..._e2e.py`. Must exit 0.
+7. Length check: `len(notes)` <= 6500 (no regression vs first-pass; ideally a slight reduction since we're trimming non-shape comments while adding shape annotations).
+8. Manual smoke on `/quick-index?section=ml`.
+
+**Acceptance criteria (specific)**:
+- Every shape-changing numpy op in the note has its own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- E2e block executes cleanly (exit 0).
+- `len(notes)` <= 6500.
+- TL;DR byte-identical to first-pass version.
+
+**Two new structural rules to apply (added to spec by T-P0-706 first)**:
+
+**Rule 1 -- Shape-per-line decomposition**:
+- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
+- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
+- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
+- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
+
+**Rule 2 -- End-to-end runnable test block**:
+- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
+- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
+- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
+- Must complete in <1s with no external dependencies.
+- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
+
+**Per-task common AC**:
+- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
+- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
+- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
+- TL;DR unchanged from first pass (per user direction).
+
+#### T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-706, T-P0-707
+- **Description**: **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). Anchored to the K-Means golden updated in T-P0-707.
+
+**Edits**:
+
+1. **Shape-per-line rewrite** for every numpy block in the note. Specifically:
+   - Sigmoid forward: `z = X @ w + b  # (N,)`, separate from the sigmoid call itself.
+   - Stable BCE section (the dedicated section from first pass): the math derivation stays as-is (allowed exception per spec deviation rule), but the np code implementation MUST be shape-per-line.
+   - GD update: `pred = sigmoid(z)`, `error = pred - y`, `grad_w = X.T @ error / N`, `grad_b = error.mean()` -- each on its own line with shape.
+   - Multi-class softmax (if covered): explicit shape transitions for `(N, K)` logits -> softmax -> per-class CE loss.
+
+2. **`## End-to-end test` block** at the very end (after all body sections):
+
+```python
+## End-to-end test
+
+```python
+import numpy as np
+np.random.seed(0)
+N, D = 200, 4
+X = np.random.randn(N, D)
+y = (X @ np.random.randn(D) > 0).astype(int)
+lr = LogisticRegression().fit(X, y)
+preds = lr.predict(X)
+probs = lr.predict_proba(X)
+assert preds.shape == (N,)
+assert probs.shape == (N,)
+print(f"Train accuracy = {(preds == y).mean():.3f}")
+```
+```
+
+**Workflow**:
+1. Read updated spec `docs/methodology/ml_impl_note_rewrite_spec.md`.
+2. Read updated K-Means golden (problem 1064) for shape-per-line reference.
+3. Read current `problems.notes` for 1107 (post-first-pass; ~11200 chars from T-P0-706).
+4. Edit notes content in `scripts/seed_logistic_regression_20260502.py`.
+5. Run seed script (idempotent UPSERT).
+6. **Run the e2e block** -- save to `/tmp/test_logistic_regression_e2e.py` and `python /tmp/test_..._e2e.py`. Must exit 0.
+7. Length check: `len(notes)` <= 11200 (no regression vs first-pass; ideally a slight reduction since we're trimming non-shape comments while adding shape annotations).
+8. Manual smoke on `/quick-index?section=ml`.
+
+**Acceptance criteria (specific)**:
+- Every shape-changing numpy op in the note has its own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- E2e block executes cleanly (exit 0).
+- `len(notes)` <= 11200.
+- TL;DR byte-identical to first-pass version.
+
+**Two new structural rules to apply (added to spec by T-P0-706 first)**:
+
+**Rule 1 -- Shape-per-line decomposition**:
+- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
+- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
+- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
+- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
+
+**Rule 2 -- End-to-end runnable test block**:
+- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
+- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
+- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
+- Must complete in <1s with no external dependencies.
+- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
+
+**Per-task common AC**:
+- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
+- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
+- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
+- TL;DR unchanged from first pass (per user direction).
+
+#### T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-706, T-P0-707, T-P0-704
+- **Description**: **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). Anchored to the K-Means golden updated in T-P0-707.
+
+**Edits**:
+
+1. **Shape-per-line rewrite** for every numpy block in the note. Specifically:
+   - Weiszfeld iteration: `diffs = points - x_t  # (N, D)`, `dists = np.linalg.norm(diffs, axis=1)  # (N,)`, `weights = 1 / dists  # (N,)`, `x_next = (weights[:, None] * points).sum(axis=0) / weights.sum()  # (D,)` -- each on its own line.
+   - Vardi-Zhang degenerate-handling branch: shape-per-line for the on-data-point detection + the modified update.
+   - The variant comparison TABLE (from first pass) stays unchanged.
+   - Title rename done in T-P0-704; second pass does NOT redo it.
+
+2. **`## End-to-end test` block** at the very end (after all body sections):
+
+```python
+## End-to-end test
+
+```python
+import numpy as np
+np.random.seed(0)
+N, D = 50, 3
+points = np.random.rand(N, D)
+gm = GeometricMedian().fit(points)
+assert gm.median_.shape == (D,)
+print(f"Geometric median: {gm.median_}")
+print(f"Mean for comparison: {points.mean(axis=0)}")
+```
+```
+
+**Workflow**:
+1. Read updated spec `docs/methodology/ml_impl_note_rewrite_spec.md`.
+2. Read updated K-Means golden (problem 1064) for shape-per-line reference.
+3. Read current `problems.notes` for 1108 (post-first-pass; ~6800 chars from T-P0-707).
+4. Edit notes content in `scripts/seed_geometric_median_20260502.py`.
+5. Run seed script (idempotent UPSERT).
+6. **Run the e2e block** -- save to `/tmp/test_geometric_median_e2e.py` and `python /tmp/test_..._e2e.py`. Must exit 0.
+7. Length check: `len(notes)` <= 6800 (no regression vs first-pass; ideally a slight reduction since we're trimming non-shape comments while adding shape annotations).
+8. Manual smoke on `/quick-index?section=ml`.
+
+**Acceptance criteria (specific)**:
+- Every shape-changing numpy op in the note has its own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- E2e block executes cleanly (exit 0).
+- `len(notes)` <= 6800.
+- TL;DR byte-identical to first-pass version.
+
+**Two new structural rules to apply (added to spec by T-P0-706 first)**:
+
+**Rule 1 -- Shape-per-line decomposition**:
+- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
+- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
+- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
+- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
+
+**Rule 2 -- End-to-end runnable test block**:
+- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
+- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
+- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
+- Must complete in <1s with no external dependencies.
+- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
+
+**Per-task common AC**:
+- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
+- No 3+ op chains in a single expression.
+- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
+- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
+- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
+- TL;DR unchanged from first pass (per user direction).
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -489,25 +739,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 652 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch
 - [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
 - [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
-- [x] **2026-05-02** -- T-P2-695: [KMEANS-GOLDEN-1] Add is_golden + golden_at columns to problems table (Alembic migration + ORM model + Problem TS type + /problems API serialization). Schema parity with behavioral_examples / framework_nodes / company_documents — these three already have is_golden + gold
-- [x] **2026-05-02** -- T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252. ## Found during T-P0-693 batch verification (2026-05-02)
-- [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
-- [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
-- [x] **2026-05-02** -- T-P0-702: [MLI-GOLDEN-KNN] KNN (1106) golden-style rewrite per meta-prompt. **Goal**: Rewrite problem 1106 (KNN + Weighted) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (pr
-- [x] **2026-05-02** -- T-P0-701: [MLI-GOLDEN-LR] Linear Regression (1102) golden-style rewrite per meta-prompt. **Goal**: Rewrite problem 1102 (Linear Regression) notes to match the K-Means golden style (docs/drafts/kmeans_golden_v1
-- [x] **2026-05-02** -- T-P0-693: [MLI-F] Post-batch idempotency re-run + global URI audit + ML_PROBLEMS sanity check. ## Goal (per user review feedback: 'Idempotency 验证: design 上 idempotent + 实际跑过没 = 两件事')
-- [x] **2026-05-02** -- T-P0-692: [MLI-E2] Google /companies/3/prep R2 Coding Index doc (links to extended problem 73 via db://). ## Goal
-- [x] **2026-05-02** -- T-P0-691: [MLI-E1] Extend problems.id=73 (Rotate Image) with rectangular n×m generalization. ## Goal
-- [x] **2026-05-02** -- T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld. ## Goal
-- [x] **2026-05-02** -- T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD). ## Goal
-- [x] **2026-05-02** -- T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD). ## Goal
-- [x] **2026-05-02** -- T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row). ## Goal
-- [x] **2026-05-02** -- T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast. ## Goal
-- [x] **2026-05-02** -- T-P0-685: [MLI-A] Remove Lock Combination from quick-index?section=ml (BFS is not ML coding). ## Goal
+- [x] **2026-05-02** -- T-P0-704: [MLI-GOLDEN-GEOMED] Geometric Median (1108) golden-style rewrite + drop '1999' from title (DB + QuickIndex.tsx). **Goal**: Rewrite problem 1108 (Geometric Median) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (
