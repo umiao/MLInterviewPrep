@@ -6,7 +6,8 @@ import { useToast } from "../../contexts/ToastContext";
 export type GoldenItemType =
   | "framework_node"
   | "behavioral_example"
-  | "company_document";
+  | "company_document"
+  | "problem";
 
 interface GoldenToggleButtonProps {
   itemType: GoldenItemType;
@@ -36,6 +37,8 @@ function buildEndpoint(
         );
       }
       return `/companies/${companyId}/documents/${itemId}`;
+    case "problem":
+      return `/problems/${itemId}`;
   }
 }
 
@@ -67,6 +70,16 @@ function invalidationKeys(
         ["companyDocument", companyId, itemId],
         ["companies", companyId],
       ];
+    case "problem":
+      // ProblemDrawer fetches by lc-id or db-id; ProblemDetailPage uses
+      // ["problem", id]; lists/stats/patterns share the ["problems", ...]
+      // prefix. Prefix-matching invalidation covers the latter group.
+      return [
+        ["problem", itemId],
+        ["problemByDbId", itemId],
+        ["problemByLcId"],
+        ["problems"],
+      ];
   }
 }
 
@@ -89,9 +102,9 @@ function StarIcon({ filled }: { filled: boolean }) {
 
 /**
  * Shared toggle for the is_golden curation flag across framework_node,
- * behavioral_example, and company_document items. Optimistically flips the
- * icon, then invalidates the relevant react-query caches on success; reverts
- * on error with a toast.
+ * behavioral_example, company_document, and problem items. Optimistically
+ * flips the icon, then invalidates the relevant react-query caches on
+ * success; reverts on error with a toast.
  */
 export default function GoldenToggleButton({
   itemType,

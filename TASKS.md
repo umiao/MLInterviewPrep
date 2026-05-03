@@ -84,28 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P2-695
-- **Description**: WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the component). To let the ProblemDrawer show a golden toggle, we need the button to know how to call PUT /problems/{id} and which react-query keys to invalidate after a successful flip.
-
-FILES TO TOUCH:
-- src/frontend/src/components/ui/GoldenToggleButton.tsx
-  * Add 'problem' to the ItemType union (line 8 area)
-  * Add endpoint mapping: itemType === 'problem' -> `/problems/${itemId}` (line 31 area where behavioral mapping lives)
-  * Add cache invalidation keys for problem (lines 54-60 area). Look at how QuickIndex.tsx and ProblemDrawer.tsx fetch problems via react-query to identify the keys — common candidates: ['problem', id], ['problems'], ['quick-index-ml'].
-
-REFERENCE: The existing 'behavioral_example' branch is the closest analog — lift its logic for 'problem'.
-
-ACCEPTANCE CRITERIA:
-1. TypeScript compiles (no type errors) after adding 'problem' to the union
-2. The button renders without runtime errors when given itemType='problem'
-3. Clicking the toggle in dev (with backend running) successfully PUTs the flag and the UI re-fetches with the new state — test by mounting the button on a tiny test harness or by completing T4 and clicking through the drawer
-4. No regressions on the existing 3 item types — open a behavioral example drawer and confirm toggle still works
-
-OUT OF SCOPE: Wiring the button into ProblemDrawer (KMEANS-GOLDEN-4) — this task only extends the button's internal config.
-
 #### T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer
 - **Priority**: P2
 - **Complexity**: M
@@ -394,6 +372,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
 - [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
 - [x] **2026-05-02** -- T-P2-695: [KMEANS-GOLDEN-1] Add is_golden + golden_at columns to problems table (Alembic migration + ORM model + Problem TS type + /problems API serialization). Schema parity with behavioral_examples / framework_nodes / company_documents — these three already have is_golden + gold
 - [x] **2026-05-02** -- T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252. ## Found during T-P0-693 batch verification (2026-05-02)
