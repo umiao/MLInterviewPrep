@@ -84,36 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: T-P2-697
-- **Description**: WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — the user opens /quick-index?section=ml, sees a golden badge on K-Means in the grid, and on opening the drawer can see/toggle golden status with the same orange accent treatment as Behavioral.
-
-FILES TO TOUCH:
-
-A) src/frontend/src/pages/QuickIndex.tsx (lines 71-77, 278-295 area)
-   - The ML_PROBLEMS array hardcodes 5 items. We need each card to read is_golden from the problem record. Either:
-     (a) Fetch the full problem record via react-query for each ML_PROBLEMS entry (preferred — keeps source of truth in DB), OR
-     (b) Add is_golden to the ML_PROBLEMS hardcoded entries (rejected — drifts from DB).
-   - Use react-query to fetch /problems/{dbId} for each ML_PROBLEMS entry, render the card with goldenCardClass(is_golden) wrapper (utility at src/frontend/src/utils/goldenStyle.ts) and inline <GoldenBadge golden={is_golden} /> in the card header. Mirror the BehavioralThemePage ExampleCard pattern (lines 156-212 of BehavioralThemePage.tsx).
-
-B) src/frontend/src/components/problems/ProblemDrawer.tsx (lines 1-124)
-   - In the drawer header (where the title is rendered), add <GoldenToggleButton itemType='problem' itemId={problem.id} isGolden={problem.is_golden} /> next to the title — exact placement should mirror BehavioralThemePage.tsx lines 139-145 visually.
-   - Add an orange top-border accent on the SlideOverPanel when problem.is_golden — mirror BehavioralThemePage.tsx lines 147-149.
-
-REFERENCE: BehavioralThemePage.tsx is the canonical golden-treatment page. Read lines 134-212 in full to understand the badge + toggle + accent pattern before implementing.
-
-ACCEPTANCE CRITERIA:
-1. Open http://localhost:5173/quick-index?section=ml — K-Means card (after T6 marks it golden) shows the orange GoldenBadge and golden card styling; the other 4 ML items render normally without the badge
-2. Click K-Means → drawer opens with orange top-border accent + GoldenToggleButton in header showing filled star
-3. Toggle the star OFF in the drawer → after PUT completes, badge disappears from both the drawer header and the card behind it (cache invalidation works)
-4. Toggle back ON → badge reappears on both surfaces
-5. Open another ML item (e.g., Linear Regression 1102) → no golden treatment, but the toggle button is present and clicking it makes that item golden too (no item-type discrimination at UI level)
-6. No regression: open any algorithm-category problem from another route → drawer behaves as before (the toggle+accent should still appear since they're now part of the drawer, but un-toggled by default — confirm no visual breakage)
-
-OUT OF SCOPE: Backfilling content (KMEANS-GOLDEN-5). Marking K-Means specifically as golden (KMEANS-GOLDEN-6). Visual polish beyond mirroring Behavioral — if you notice density/typography issues in the drawer Markdown, do NOT fix them in this task; flag them as a follow-up task instead.
-
 #### T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT)
 - **Priority**: P2
 - **Complexity**: S
@@ -372,6 +342,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
 - [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
 - [x] **2026-05-02** -- T-P2-695: [KMEANS-GOLDEN-1] Add is_golden + golden_at columns to problems table (Alembic migration + ORM model + Problem TS type + /problems API serialization). Schema parity with behavioral_examples / framework_nodes / company_documents — these three already have is_golden + gold

@@ -4,9 +4,12 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import type { BehavioralThemeSummary } from "../types/behavioral";
 import type { FrameworkNode } from "../types/framework";
+import type { Problem } from "../types/problem";
 import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 import ProblemDrawer from "../components/problems/ProblemDrawer";
 import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
+import GoldenBadge from "../components/ui/GoldenBadge";
+import { goldenCardClass } from "../utils/goldenStyle";
 
 const LC_PROBLEMS: {
   dbId: number;
@@ -278,18 +281,15 @@ export default function QuickIndex() {
       {section === "ml" && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {ML_PROBLEMS.map((p) => (
-            <button
+            <MLProblemCard
               key={p.dbId}
-              type="button"
+              dbId={p.dbId}
+              title={p.title}
               onClick={() => {
                 setDrawerLcId(null);
                 setDrawerDbId(p.dbId);
               }}
-              className="text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white"
-            >
-              <span className="text-xs text-gray-400 font-mono">Custom</span>
-              <div className="mt-1 font-medium text-gray-800">{p.title}</div>
-            </button>
+            />
           ))}
         </div>
       )}
@@ -377,6 +377,39 @@ export default function QuickIndex() {
       <ProblemDrawer lcId={drawerLcId} dbId={drawerDbId} onClose={closeDrawer} />
       <FrameworkNodeDrawer nodeId={drawerNodeId} onClose={closeNodeDrawer} />
     </div>
+  );
+}
+
+function MLProblemCard({
+  dbId,
+  title,
+  onClick,
+}: {
+  dbId: number;
+  title: string;
+  onClick: () => void;
+}) {
+  const { data: problem } = useQuery<Problem>({
+    queryKey: ["problemByDbId", dbId],
+    queryFn: () => api.get<Problem>(`/problems/${dbId}`),
+    staleTime: 60_000,
+  });
+  const isGolden = Boolean(problem?.is_golden);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        "text-left block p-4 rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-md transition-all bg-white " +
+        goldenCardClass(isGolden)
+      }
+    >
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-xs text-gray-400 font-mono">Custom</span>
+        <GoldenBadge golden={isGolden} />
+      </div>
+      <div className="mt-1 font-medium text-gray-800">{title}</div>
+    </button>
   );
 }
 

@@ -3,6 +3,7 @@ import { api } from "../../utils/api";
 import type { Problem } from "../../types/problem";
 import SlideOverPanel from "../ui/SlideOverPanel";
 import MarkdownPreview from "../ui/MarkdownPreview";
+import GoldenToggleButton from "../ui/GoldenToggleButton";
 
 interface ProblemDrawerProps {
   /** LeetCode problem number to display. Null/undefined falls back to dbId. */
@@ -49,7 +50,23 @@ export default function ProblemDrawer({ lcId, dbId, onClose }: ProblemDrawerProp
     : "bg-gray-100 text-gray-600";
 
   return (
-    <SlideOverPanel open={open} onClose={onClose} title={title}>
+    <SlideOverPanel
+      open={open}
+      onClose={onClose}
+      title={title}
+      headerActions={
+        problem ? (
+          <GoldenToggleButton
+            itemType="problem"
+            itemId={problem.id}
+            isGolden={Boolean(problem.is_golden)}
+          />
+        ) : null
+      }
+      headerAccentClassName={
+        problem?.is_golden ? "border-t-2 border-t-orange-300" : ""
+      }
+    >
       {isLoading && (
         <div className="text-sm text-gray-400">Loading problem...</div>
       )}
