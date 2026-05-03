@@ -3,16 +3,28 @@
 Adds a new `problems` row mirroring the K-Means(1064) notes style:
 - title='K-Nearest Neighbors (KNN + Weighted)'
 - category='ml_coding', difficulty='medium'
-- notes contain 题目描述 / 核心代码 (vanilla + weighted) / 关键要点 / 面试追问 / 复杂度
+
+Layered-writer split (since 2026-05-03 T-P0-721):
+- This seed is the SoT for `description` (and the bootstrap NOTES for fresh-DB
+  INSERT only).
+- `scripts/seed_knn_golden_v1.py` is the SoT for `notes` and runs AFTER this
+  seed, REPLACE-ing notes with the golden draft (`docs/drafts/knn_golden_v1.md`).
+- To prevent the duplicate-writer race lessoned in T-P1-720 (LR-LESSONS), the
+  UPDATE path here NO LONGER writes the `notes` column -- it touches only
+  `description / difficulty / pattern / category / tags / company_tags /
+  priority`. INSERT path still uses NOTES as the bootstrap value so that a
+  fresh-DB regen yields a usable row even before seed_knn_golden_v1.py runs.
 
 Canonical key for upsert: title + source. Source-of-truth for content lives
-in this file's CONTENT/DESCRIPTION constants, never edited via DB writes.
+in this file's DESCRIPTION constant (and NOTES bootstrap), never edited via
+DB writes.
 
 Idempotency:
 - INSERT skipped if a row with the same title+source already exists.
-- UPDATE skipped if existing description+notes are byte-equal to the
-  canonical payload. Otherwise the row is rewritten in place. Second run
-  with no upstream change = 0 writes.
+- UPDATE skipped if existing description is byte-equal to the canonical
+  payload AND the other tracked columns match. Otherwise the row is
+  description-rewritten in place. Second run with no upstream change = 0
+  writes.
 """
 from __future__ import annotations
 
@@ -34,17 +46,17 @@ PRIORITY = 1
 
 DESCRIPTION = (
     "**K-Nearest Neighbors (KNN + Weighted)**: 从零实现 KNN 分类/回归, 包含 "
-    "vanilla majority-vote 与两种 weighted 变体 (1/(d+epsilon) 与 Gaussian "
-    "kernel w_i = exp(-d_i^2 / (2 sigma^2))). 显式覆盖 classification "
-    "(weighted majority vote / argmax over weighted class probabilities) "
-    "与 regression (weighted average y_hat = sum(w_i * y_i) / sum(w_i)) "
-    "两种任务.\n\n"
+    "vanilla majority-vote 与两种 weighted 变体 ($1/(d+\\varepsilon)$ 与 "
+    "Gaussian kernel $w_i = \\exp(-d_i^2 / (2\\sigma^2))$). 显式覆盖 "
+    "classification (weighted majority vote / argmax over weighted class "
+    "probabilities) 与 regression (weighted average "
+    "$\\hat{y} = \\sum_i w_i y_i / \\sum_i w_i$) 两种任务.\n\n"
     "核心步骤: (1) 计算 query 到所有训练点的欧氏距离; (2) np.argpartition 取 "
-    "Top-K (O(N) 部分排序, 优于 argsort 的 O(N log N)); (3a) 分类: 投票 / "
-    "加权投票; (3b) 回归: 平均 / 加权平均. 关键 ML 讨论点: K 选择 "
-    "(cross-validation), tie-breaking, 1/(d+epsilon) 中 epsilon 的必要性, "
-    "Gaussian 核 sigma 调节, curse of dimensionality, KD-tree / Ball-tree "
-    "把单次 query 从 O(N*d) 降到平均 O(log N * d)."
+    "Top-K ($O(N)$ 部分排序, 优于 argsort 的 $O(N \\log N)$); (3a) 分类: "
+    "投票 / 加权投票; (3b) 回归: 平均 / 加权平均. 关键 ML 讨论点: K 选择 "
+    "(cross-validation), tie-breaking, $1/(d+\\varepsilon)$ 中 $\\varepsilon$ "
+    "的必要性, Gaussian 核 $\\sigma$ 调节, curse of dimensionality, KD-tree "
+    "/ Ball-tree 把单次 query 从 $O(N \\cdot d)$ 降到平均 $O(\\log N \\cdot d)$."
 )
 
 NOTES = r"""## K-Nearest Neighbors (KNN + Weighted)
@@ -306,21 +318,26 @@ def main() -> int:
         old_desc = old_desc or ""
         old_notes = old_notes or ""
 
-        if old_desc == DESCRIPTION and old_notes == NOTES:
+        # Layered-writer split: this seed owns `description`, NOT `notes`.
+        # `notes` is owned by `seed_knn_golden_v1.py` (golden v1 draft).
+        # SKIP only requires description to match the canonical payload here.
+        if old_desc == DESCRIPTION:
             print(
-                f"[SKIP] id={pid} '{TITLE}' description+notes byte-equal "
-                f"(desc={len(old_desc)} notes={len(old_notes)})"
+                f"[SKIP] id={pid} '{TITLE}' description byte-equal "
+                f"(desc={len(old_desc)} notes={len(old_notes)} -- notes "
+                f"governed by seed_knn_golden_v1.py)"
             )
             return 0
 
+        # UPDATE intentionally does NOT touch `notes` -- prevents clobber of
+        # the golden draft written by seed_knn_golden_v1.py.
         conn.execute(
             "UPDATE problems "
-            "SET description = ?, notes = ?, difficulty = ?, pattern = ?, "
+            "SET description = ?, difficulty = ?, pattern = ?, "
             "    category = ?, tags = ?, company_tags = ?, priority = ? "
             "WHERE id = ?",
             (
                 DESCRIPTION,
-                NOTES,
                 DIFFICULTY,
                 PATTERN,
                 CATEGORY,
@@ -333,8 +350,8 @@ def main() -> int:
         conn.commit()
         print(
             f"[UPDATE] id={pid} '{TITLE}' "
-            f"desc {len(old_desc)} -> {len(DESCRIPTION)}, "
-            f"notes {len(old_notes)} -> {len(NOTES)} chars"
+            f"desc {len(old_desc)} -> {len(DESCRIPTION)} chars "
+            f"(notes preserved -- governed by seed_knn_golden_v1.py)"
         )
         return 0
     finally:
