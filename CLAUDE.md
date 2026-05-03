@@ -91,7 +91,13 @@ Where:
 
 **If `claude -p` hangs silently** (zero log output for >60s after the "Session N/N" banner): this is a known transient class — cold-start of MCP/plugin/hook init or transient API slowness, NOT auth, NOT script-form drift. Kill the runner, remove `.claude/autonomous.lock`, retry. See `docs/investigations/autorun_hang_2026-05-02.md` (in the workspace root) and root `LESSONS.md` 2026-05-02 entry for the full diagnosis.
 
-**Hang auto-recovery (AR-7)**: each `claude -p` invocation is wrapped with a 600s timeout (override via `CLAUDE_P_TIMEOUT`); on hang, the wrapper auto-retries once before aborting the session with `claude -p hung 2x; abort`. Manual intervention (kill + clear lockfile) is only needed if the wrapper itself fails to fire.
+**Hang auto-recovery (AR-7 + AR-11)**: each `claude -p` invocation is wrapped with a 600s timeout (override via `CLAUDE_P_TIMEOUT`). As of 2026-05-03 (AR-11), the wrapper distinguishes 3 timeout cases via git HEAD diff:
+
+1. **Exit-time hang with completion** — non-WIP commit landed during the window. Logs `[orchestrator] INFO: claude -p timed out at exit but task committed (...)` and returns 0 (no retry). Common case for the symptom where inner Claude finishes + commits but the parent never exits cleanly.
+2. **WIP-only progress** — only a `[T-XX-N WIP]` checkpoint commit landed. Logs distinct WARN and retries; second consecutive WIP-only timeout aborts with 124.
+3. **True no-progress hang** — HEAD unchanged. Existing AR-7 path: WARN attempt 1/2, retry, ERROR `claude -p hung 2x; abort` on second hang.
+
+Manual intervention (kill + clear lockfile) is only needed if the wrapper itself fails to fire. Telemetry: `grep -c "timed out at exit but task committed" logs/autonomous*.log` counts how often the AR-11 INFO branch fires.
 
 **Do NOT use** `claude -p PROMPT --bare` to test auth — `--bare` skips OAuth by design and will report "Not logged in" regardless of state. Use `claude auth status` (returns structured JSON with `loggedIn`, `email`, `subscriptionType`) for the proper auth probe.
 
