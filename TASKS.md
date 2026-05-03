@@ -84,25 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P2-699
-- **Description**: WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the chain but it's the user-visible deliverable: K-Means becomes the first golden ML example, mirroring the Behavioral golden-example treatment.
-
-APPROACH:
-- Create scripts/mark_kmeans_golden_20260502.py (small one-shot) OR call the PUT endpoint via curl in a verification script.
-- Recommended: a small Python script under scripts/ that uses the same SQLAlchemy session pattern as other seed scripts. Sentinel: check is_golden first; if already True with a non-null golden_at, exit 0 idempotently.
-- SQL equivalent: UPDATE problems SET is_golden=1, golden_at=datetime('now') WHERE id=1064 AND is_golden=0;
-
-ACCEPTANCE CRITERIA:
-1. SELECT is_golden, golden_at FROM problems WHERE id=1064; returns (1, '<some ISO timestamp>') — both populated
-2. Re-running the script is a no-op (no second timestamp overwrite)
-3. Open http://localhost:5173/quick-index?section=ml — K-Means card now shows the golden badge + golden card styling; the drawer header shows the orange accent + filled star toggle (this is the integrated end-to-end test of T1+T2+T3+T4+T5+T6 together)
-4. No other rows in problems have been touched (run: SELECT COUNT(*) FROM problems WHERE is_golden=1; — must be exactly 1)
-
-OUT OF SCOPE: Marking other problems as golden. Adjusting schema or UI.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -317,6 +298,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch
 - [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
