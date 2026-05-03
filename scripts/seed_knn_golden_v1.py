@@ -12,8 +12,9 @@ scripts/seed_linear_regression_20260502.py.)
 
 Length target (per task spec):
 - Baseline notes: 9,246 chars.
-- Cap: <= 6,500 chars (>= 30% reduction).
-- Current draft body + sentinel: ~6,169 chars (33.3% reduction).
+- Cap: <= 8,500 chars (raised 2026-05-03 in T-P0-709 follow-up rewrite that
+  added Regression section + 拓展 B/C + 2 Cheat-Sheet Qs per user golden notes).
+- Current draft body + sentinel: ~7,250 chars (~22% reduction vs baseline).
 
 Idempotency:
 - Sentinel `<!-- KNN_GOLDEN_V1_20260502 -->` prepended as the first line.
@@ -33,7 +34,7 @@ DB_PATH = REPO_ROOT / "data" / "mle_prep.db"
 DRAFT_PATH = REPO_ROOT / "docs" / "drafts" / "knn_golden_v1.md"
 PROBLEM_ID = 1106
 SENTINEL = "<!-- KNN_GOLDEN_V1_20260502 -->"
-LENGTH_CAP = 6500
+LENGTH_CAP = 8500
 
 
 def build_payload() -> str:
