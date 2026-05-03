@@ -84,31 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: T-P2-695
-- **Description**: WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for density and review. The new draft is on disk at docs/drafts/kmeans_golden_v1.md. This task replaces problems.notes for id=1064 with that file's contents, using the same sentinel-based idempotent pattern as scripts/seed_kmeans_vanilla_init_20260502.py.
-
-FILES TO TOUCH:
-- Create scripts/seed_kmeans_golden_v1.py — model it on scripts/seed_kmeans_vanilla_init_20260502.py but with two differences:
-  1. It REPLACES the notes column entirely (not append), since the new draft is a full rewrite
-  2. Sentinel: <!-- KMEANS_GOLDEN_V1_20260502 --> as the first line of the new notes value, so the script is idempotent (re-running detects the sentinel and exits 0 without changes)
-- Source content path (read at script runtime): docs/drafts/kmeans_golden_v1.md
-- Run the script after creating it: `python scripts/seed_kmeans_golden_v1.py` from MLInterviewPrep root
-
-ACCEPTANCE CRITERIA:
-1. Script exits 0 on first run — notes column updated, length matches len(file_contents) + sentinel-comment-line overhead
-2. Script exits 0 on second run with stdout 'already applied' (or similar) — DB row unchanged (verify with: SELECT length(notes) FROM problems WHERE id=1064;)
-3. SELECT substr(notes, 1, 60) FROM problems WHERE id=1064; shows the sentinel as the first line
-4. Open http://localhost:5173/quick-index?section=ml → K-Means → drawer renders the new content correctly: TL;DR blockquote, all code blocks formatted, the math $$D(x)^2$$ renders as inline math (not literal text), the comparison table renders as a table
-5. No FOREIGN KEY or CHECK constraint violations
-6. The seed script does not delete or rename the row, only updates the notes column
-
-OUT OF SCOPE: Marking the row golden (KMEANS-GOLDEN-6). Schema changes (T1).
-
-NOTE FOR THE WORKER: Read scripts/seed_kmeans_vanilla_init_20260502.py first as the canonical seed-script template. Use the same SQLAlchemy session pattern, same sentinel detection style, same logging format.
-
 #### T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff
 - **Priority**: P2
 - **Complexity**: S
@@ -342,6 +317,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 636 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
 - [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
