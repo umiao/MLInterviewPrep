@@ -5,79 +5,6 @@
 
 ## In Progress
 
-#### T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-706, T-P0-707
-- **Description**: **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). Anchored to the K-Means golden updated in T-P0-707.
-
-**Edits**:
-
-1. **Shape-per-line rewrite** for every numpy block in the note. Specifically:
-   - Distance computation section: split `data - x` (broadcast), squared, sum, sqrt onto separate lines with shape comments.
-   - Top-K selection: `np.argpartition(dists, K)[:K]` gets a shape line; the resulting indices' shape `(K,)` annotated.
-   - Voting: counts/weights array assembly and final argmax each get their own line.
-   - The 3 split predict sections from first pass benefit MOST from this rule -- each section already has prose-before-code, now also has shape-per-line within code.
-
-2. **`## End-to-end test` block** at the very end (after all body sections):
-
-```python
-## End-to-end test
-
-```python
-import numpy as np
-np.random.seed(0)
-N_train, N_test, D, K = 100, 20, 4, 5
-X_train = np.random.rand(N_train, D)
-y_train = np.random.randint(0, 3, N_train)
-X_test = np.random.rand(N_test, D)
-knn = KNN(k=K).fit(X_train, y_train)
-preds = knn.predict(X_test)
-assert preds.shape == (N_test,)
-print(f"Predicted classes: {np.unique(preds)}")
-```
-```
-
-**Workflow**:
-1. Read updated spec `docs/methodology/ml_impl_note_rewrite_spec.md`.
-2. Read updated K-Means golden (problem 1064) for shape-per-line reference.
-3. Read current `problems.notes` for 1106 (post-first-pass; ~6500 chars from T-P0-705).
-4. Edit notes content in `scripts/seed_knn_20260502.py`.
-5. Run seed script (idempotent UPSERT).
-6. **Run the e2e block** -- save to `/tmp/test_knn_e2e.py` and `python /tmp/test_..._e2e.py`. Must exit 0.
-7. Length check: `len(notes)` <= 6500 (no regression vs first-pass; ideally a slight reduction since we're trimming non-shape comments while adding shape annotations).
-8. Manual smoke on `/quick-index?section=ml`.
-
-**Acceptance criteria (specific)**:
-- Every shape-changing numpy op in the note has its own line + `# (shape)` comment.
-- No 3+ op chains in a single expression.
-- E2e block executes cleanly (exit 0).
-- `len(notes)` <= 6500.
-- TL;DR byte-identical to first-pass version.
-
-**Two new structural rules to apply (added to spec by T-P0-706 first)**:
-
-**Rule 1 -- Shape-per-line decomposition**:
-- Every numpy operation that produces a shape-changing intermediate gets its OWN line with a `# (shape)` comment.
-- No 3+ op chains in one expression. Specifically: avoid patterns like `np.array([... for c in centers]).T` -- split into list build, np.array, transpose, each on its own line with shape annotation.
-- Inside a code block, prefer "one vector at a time" decomposition: `(d,) -> (n, d) broadcast -> (n,) -> list of K -> (k, n) -> .T -> (n, k) -> argmin -> (n,)` shown as 7 lines, not chained into 1.
-- Goal: a reader whiteboarding from this code can trace shapes step-by-step without mental simulation.
-
-**Rule 2 -- End-to-end runnable test block**:
-- Every implementation note ends with a `## End-to-end test` section (visible, NOT collapsed) placed AFTER the complete implementation (after main loop / predict / etc.).
-- Block must be <=10 lines, use `np.random.rand` (or `np.random.randn`) with named constants `N, D` (and `K` where applicable).
-- Must instantiate the class, run `fit()` (and `predict()` if applicable) ONCE, assert output shape with `assert ... .shape == (...)`.
-- Must complete in <1s with no external dependencies.
-- **Run-and-confirm during the task**: the autonomous session MUST execute the e2e block and confirm it runs cleanly before declaring the task done. Capture stdout to verify no exceptions.
-
-**Per-task common AC**:
-- All numpy ops producing shape-changing intermediates have their own line + `# (shape)` comment.
-- No 3+ op chains in a single expression.
-- Trailing `## End-to-end test` block exists, runs cleanly (verified by execution, not just code inspection).
-- `len(notes)` stays AT or BELOW the first-pass byte target (no regression -- shape-per-line adds lines but pruning fluff compensates).
-- Manual smoke on `/quick-index?section=ml` -- code block renders, e2e test block visually distinct.
-- TL;DR unchanged from first pass (per user direction).
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -294,6 +221,70 @@ Priority: HEAD-changed branches return BEFORE porcelain check fires. Porcelain c
 **Complexity**: L (3-4h). Process group + bash subprocess + race testing is non-trivial.
 
 **Depends on**: T-P1-713 (AR-12). Order: AR-12 baseline first (for telemetry schema and porcelain signal); then AR-16 layered on top (with AR-12 race AC).
+
+#### T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-713
+- **Description**: **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wrappers that classify success via global HEAD diff false-positive"). Current AR-11 "timed out at exit but task committed" branch fires on ANY non-WIP HEAD commit during the 600s window, including unrelated commits from external processes (concurrent main-thread Claude session, IDE auto-commit, etc). The fix: add an attribution dimension so the wrapper only credits commits that belong to the inner session.
+
+**Background (incident)**: 07:42-07:52 UTC autorun Session 1/3 was working on T-P0-709 (KNN 2P, working-tree dirty 64+/52-). I committed unrelated  PROGRESS entry from main thread at 07:51. AR-11 saw HEAD moved, message did not match WIP pattern, emitted INFO + return 0. Orchestrator advanced to Session 2/3 with T-P0-709 still incomplete. Caught + TaskStopped before damage. See LESSONS.md 2026-05-03 entry + PROGRESS.md T-adhoc-ar11-incident.
+
+**Two viable design shapes (pick one in implementation, document the other as alt)**:
+
+**(a) Expected-task-prefix attribution** [recommended, simpler, tighter]:
+- Outer loop in autonomous_run.sh peeks  for the highest-priority unblocked task BEFORE calling wrapper, captures task ID, exports as  env var.
+- Wrapper's AR-11 INFO branch additionally requires latest commit msg to match  (handles both  and ).
+- If env var is unset (e.g., outer loop did not peek), fall back to current AR-11 behavior with a WARN about reduced attribution.
+- Trade-off: requires task-db peek logic in outer loop; what if inner Claude picks a different task than peek predicted? Mitigation: peek result is advisory; if commit prefix differs from peek, the more lenient fallback applies.
+
+**(b) Log-activity correlation** [alt, fuzzier, no orchestrator changes]:
+- Wrapper records  (stat of logs/autonomous.log).
+- On timeout, AR-11 INFO branch additionally requires  (default 200B, env-overridable).
+- Reasoning: a real inner session that ran for 600s and committed would have produced substantial log output; a bare-fork hung claude -p produces ~zero log; an external commit produces commit-hook output but not 600s of session log.
+- Trade-off: still attribution-by-correlation, not direct identity; but does not need outer-loop changes.
+
+**Implementation (shape (a))**:
+
+1. In outer while loop of `autonomous_run.sh`, before calling `run_claude_with_timeout`, get expected task:
+   ```bash
+   EXPECTED_TASK_ID=$(python .claude/hooks/task_db.py list --json 2>/dev/null | python -c "
+import json, sys
+tasks = json.load(sys.stdin)
+unblocked = [t for t in tasks if t['status'] in ('active','in_progress') and not t.get('blocked', False)]
+unblocked.sort(key=lambda t: (t['priority'], t.get('sort_order', 0)))
+print(unblocked[0]['id'] if unblocked else '')
+" 2>/dev/null || echo "")
+   export EXPECTED_TASK_PREFIX="${EXPECTED_TASK_ID}"
+   ```
+2. In `run_claude_with_timeout`, AR-11 INFO branch:
+   ```bash
+   if [ "$current_sha" != "$wrapper_start_sha" ] &&       ! [[ "$latest_msg" =~ ^\[T-[A-Z0-9-]+\ WIP\] ]] &&       [[ -z "$EXPECTED_TASK_PREFIX" || "$latest_msg" =~ ^\[${EXPECTED_TASK_PREFIX}[\]\ ] ]]; then
+     echo "[orchestrator] INFO: claude -p timed out at exit but task committed ($wrapper_start_sha -> $current_sha, msg='${latest_msg:0:80}', expected=$EXPECTED_TASK_PREFIX). Treating as success." >&2
+     return 0
+   fi
+   ```
+3. New diagnostic: AR-11 INFO and WARN log lines now include the latest commit message (truncated to 80 chars) for fast post-mortem.
+
+**Acceptance criteria**:
+1. Injected fake `claude` that times out without committing + EXTERNAL test commit during the window with a non-matching prefix (e.g. `[T-adhoc-other]`) -> wrapper does NOT emit INFO success, falls through to WARN+retry path.
+2. Same setup but EXTERNAL commit has a MATCHING prefix `[T-P0-XXX]` (matching EXPECTED_TASK_PREFIX) -> still false-positives. This is acceptable per design (we cannot disambiguate; prefix-match is good-enough). Document this residual.
+3. Inner session that legitimately commits with matching prefix during timeout window -> still gets INFO success (current happy path preserved).
+4. EXPECTED_TASK_PREFIX unset (legacy/test) -> falls back to current AR-11 behavior with WARN about reduced attribution.
+5. Log lines include  excerpt for diagnostic visibility.
+6. AR-12 (T-P1-713) integration: porcelain hash signal still works alongside attribution. No interaction conflict.
+
+**Telemetry**: append `{ts, host, branch=attribution_blocked, expected, actual_msg}` to `logs/wrapper-stats.jsonl` whenever attribution check rejects a HEAD diff that AR-11 alone would have credited.
+
+**Kill switch**: `CLAUDE_P_DISABLE_ATTRIBUTION=1` skips attribution check (falls back to AR-11 raw behavior). For fast revert.
+
+**Operational rule (interim, until AR-18 lands)**: while autonomous_run.sh is in flight in a repo, NO concurrent git commits from main thread, IDE, or other tools. Documented in CLAUDE.md as a hard rule. AR-18 + AR-12 together remove this rule.
+
+**Propagation**: MLI + root scripts/autonomous_run.sh in same commit (per AR-11 precedent). Worktree + tools/ deferred to T-P2-296.
+
+**Depends on**: T-P1-713 (AR-12). Order: AR-12 first (porcelain signal + telemetry baseline), AR-18 layered on top (attribution check + same telemetry). AR-18 also gives AR-16 (T-P1-715) better post-mortem visibility on cold-start kills since latest commit msg ends up logged.
+
+**Priority rationale**: P1/S because (a) actual incident already happened, (b) the workaround ("don't commit during autorun") is easy to forget and Stop-hook pressure can force violation, (c) implementation is small (one env var + one regex) once design is settled.
 
 ### P2 -- Nice to Have
 
@@ -587,6 +578,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 652 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-03** -- T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.
+- [x] **2026-05-03** -- T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). 
 - [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch
 - [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
