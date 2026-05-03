@@ -172,7 +172,7 @@
 
 ### Geometric Median (Weiszfeld + Vardi-Zhang 1999)
 
-⚠️ 标题里就带了 "1999"——按删除原则**改成 "Vardi-Zhang variant"**，年份和论文引用全部去掉。
+**[NOTE]** 标题里就带了 "1999"——按删除原则**改成 "Vardi-Zhang variant"**，年份和论文引用全部去掉。
 
 - **核心公式**：Weiszfeld iteration $$x_{t+1} = \frac{\sum w_i x_i}{\sum w_i}, \quad w_i = \frac{1}{\|x_i - x_t\|}$$
 - **Vardi-Zhang 修复了什么**：iterate 落在某个 data point 上时 $$w_i \to \infty$$ 的退化（实现要点：检测命中并切换更新公式）
