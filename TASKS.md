@@ -5,34 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
-#### T-P0-705: [MLI-GOLDEN-PROMOTE] Smoke test 4 rewrites on /quick-index?section=ml + mark all 4 is_golden=1
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-704
-- **Description**: **Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is_golden=1` with timestamp.
-
-**Workflow**:
-1. Visit `http://localhost:5173/quick-index?section=ml`. Click each of 1102, 1106, 1107, 1108. For each, verify on the RENDERED output (not just markdown source):
-   - All KaTeX renders cleanly (no `ParseError` overlays).
-   - All code blocks render with syntax highlighting.
-   - Variant tables render as proper HTML tables (not raw markdown).
-   - Followup cheat-sheet blockquotes render as styled quotes.
-2. Cross-check the spec "验收清单" (9 items) against the RENDERED output for each of the 4 problems. The check is whether style invariants hold visually -- not just textually.
-3. Hub-doc audit: re-read `scripts/content_meta_anc_inventory_hub.py` line 89 summary cell. If LR rewrite changed the closed-form discussion (e.g., dropped Ridge from main body), confirm the cell still represents what's actually in the note. Update + re-run the hub seed if drifted.
-4. Write `scripts/mark_4_ml_problems_golden_20260503.py` modeled on `scripts/mark_kmeans_golden_20260502.py`. For each id in (1102, 1106, 1107, 1108), set `is_golden=1, golden_at=CURRENT_TIMESTAMP`. Idempotent (re-running is a no-op if already golden).
-5. Run `python scripts/audit_uri_consistency.py` -- compare findings against pre-rewrite baseline. Zero new failures.
-
-**Acceptance criteria**:
-- All 4 problems show the golden badge on `/quick-index?section=ml`.
-- Spec "验收清单" verified against RENDERED output for each of the 4 (not just source).
-- Hub doc line 89 summary still accurate (or updated alongside, with the hub seed re-run).
-- URI consistency audit: zero new failures vs pre-rewrite baseline.
-- `mark_4_ml_problems_golden_20260503.py` is committed and idempotent.
-
 #### T-P0-706: [MLI-GOLDEN-2P-SPEC] Update ml_impl_note_rewrite_spec.md: shape-per-line + e2e-test-block rules
 - **Priority**: P0
 - **Complexity**: S
@@ -71,6 +43,10 @@
 - `git diff` shows clean structural edits, no whole-file rewrite.
 - Spec still <10KB after edits (small addition only).
 - Validate: `git log --oneline docs/methodology/ml_impl_note_rewrite_spec.md` shows the commit; `wc -l docs/methodology/ml_impl_note_rewrite_spec.md` increased reasonably (~20-40 lines).
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 #### T-P0-707: [MLI-GOLDEN-2P-KMEANS] K-Means golden (1064) second pass: shape-per-line + e2e block + empty-cluster prose
 - **Priority**: P0
@@ -746,4 +722,5 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
 - [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
+- [x] **2026-05-02** -- T-P0-705: [MLI-GOLDEN-PROMOTE] Smoke test 4 rewrites on /quick-index?section=ml + mark all 4 is_golden=1. **Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is
 - [x] **2026-05-02** -- T-P0-704: [MLI-GOLDEN-GEOMED] Geometric Median (1108) golden-style rewrite + drop '1999' from title (DB + QuickIndex.tsx). **Goal**: Rewrite problem 1108 (Geometric Median) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (
