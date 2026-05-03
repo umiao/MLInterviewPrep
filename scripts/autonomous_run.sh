@@ -382,13 +382,26 @@ while [ $session_count -lt $MAX_SESSIONS ]; do
   # inner Claude picks a different unblocked task than peek predicts, the wrapper falls back
   # to "head_legit_unexpected" and still credits the commit (sanity regex still applies).
   EXPECTED_TASK_PREFIX=""
-  _peek_id=$(python .claude/hooks/task_db.py list --status active 2>/dev/null | python -c "
+  _peek_id=$(python .claude/hooks/task_db.py list 2>/dev/null | python -c "
 import json, sys
 try:
     tasks = json.load(sys.stdin)
-    if tasks:
-        # task_db.py list orders by priority/sort_order; first item is the likely pick.
-        print(tasks[0]['id'])
+    by_id = {t['id']: t for t in tasks}
+    def is_unblocked(t):
+        if t['status'] not in ('active','in_progress'):
+            return False
+        deps = (t.get('depends_on') or '').strip()
+        if deps in ('','None'):
+            return True
+        for d in [x.strip() for x in deps.split(',') if x.strip()]:
+            dep = by_id.get(d)
+            if not dep or dep['status'] != 'completed':
+                return False
+        return True
+    runnable = [t for t in tasks if is_unblocked(t)]
+    runnable.sort(key=lambda t: (t.get('priority','P9'), t.get('sort_order',0)))
+    if runnable:
+        print(runnable[0]['id'])
 except Exception:
     pass
 " 2>/dev/null || true)
