@@ -248,3 +248,39 @@ def _stable_bce_loss(z, y):
 ### B. 学习率上界 + 标准化
 
 收敛要求 $\eta < 2 / \lambda_{\max}\!\left(\frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X\right)$. 实战: 先 zero-mean unit-variance, $\lambda_{\max} = O(1)$, $\eta = 0.1$ 即稳, 不收敛再砍半.
+
+### C. 矩阵广义 / multiclass bridge
+
+二分类 vec form ($y \in \mathbb{R}^n$, $w \in \mathbb{R}^d$, sigmoid link)
+的多分类升维: $K$ 类, 每类一个 logit 列, link 换 softmax. 与 LR golden
+`### 8. 矩阵广义 (NN-friendly / multi-output form)` 完全对位——只把
+identity link 换 softmax, 梯度模式 $X^\top \cdot \text{residual}$ 不变.
+
+**Setup (复用 cheat-sheet softmax Q)**: $W \in \mathbb{R}^{d \times K}$,
+$B \in \mathbb{R}^K$, $Z = XW + \mathbf{1}_n B^\top \in \mathbb{R}^{n \times K}$
+(logits 矩阵), $P = \mathrm{softmax}(Z)$ 行内归一 ($\sum_k P_{ik} = 1$ 每行).
+$Y$ 是 $n \times K$ one-hot 标签. 损失 $L = -\frac{1}{n} \sum_{i, k} Y_{ik} \log P_{ik}$
+(categorical CE).
+
+**Gradient**:
+
+$$\nabla_W L = \frac{1}{n} X^\top (P - Y), \qquad \nabla_B L = \frac{1}{n} \mathbf{1}_n^\top (P - Y)$$
+
+形状 $\nabla_W L \in \mathbb{R}^{d \times K}$ 与 $W$ 同形,
+$\nabla_B L \in \mathbb{R}^K$ 与 $B$ 同形. 与二分类 sigmoid + BCE 的
+$\nabla_w L = \frac{1}{n} X^\top (p - y)$ **完全同构**——softmax + categorical
+CE 的"漂亮消去"和上方推导里 sigmoid + BCE 同源, $\partial L / \partial Z = (P - Y)/n$
+不携带 softmax Jacobian ($\mathrm{diag}(p) - p p^\top$ 全部抵消, 与
+$p (1-p)$ 抵消同理).
+
+**对位 LR golden ### 8 矩阵广义节**: 把 softmax 换 identity 即得 LR
+multi-output 的 $\nabla_W L = \frac{2}{n} X^\top (\hat{Y} - Y)$. 这是 GLM
+框架的核心: Linear / Logistic-binary / Logistic-multiclass 共享
+$X^\top \cdot \text{residual}$ 的梯度模式, 只换 link function (identity /
+sigmoid / softmax) 与归一化常数 ($2/n$ vs $1/n$, MSE vs CE 的均值口径).
+
+**何时走哪条路径**: $K = 1$ (binary) 用 sigmoid 路径足矣 (本文件主线,
+$w \in \mathbb{R}^d$, $b$ 标量, BCE + GD); $K \ge 2$ 走 softmax + 矩阵广义
+($W \in \mathbb{R}^{d \times K}$, $B \in \mathbb{R}^K$, categorical CE).
+工业训练循环 PyTorch / JAX 上后者就是 `nn.Linear(d, K)` +
+`F.cross_entropy(logits, labels)` 的精确数学.

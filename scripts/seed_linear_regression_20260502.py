@@ -217,6 +217,53 @@ $X^T X$ 奇异, $\kappa \to \infty$. 优先级: Ridge (一行 $\lambda I$) >
 **Q6. 稀疏 $w^T x$ 怎么算?**
 两边都有序 -> 双指针 $O(\text{nnz}_1 + \text{nnz}_2)$, cache 友好;
 任一边无序 -> 哈希表查表 (hash join).
+
+### 8. 矩阵广义 (NN-friendly / multi-output form)
+
+把单输出 vec form ($y \in \mathbb{R}^n$, $w \in \mathbb{R}^d$) 升一维到
+multi-output: $K$ 个回归目标共享 $X$, 每列是一个独立 LR. 工业训练循环
+(PyTorch / JAX) 上这就是 `nn.Linear(d, K)` 的精确数学形式.
+
+**Setup**: $\hat{Y} = XW + \mathbf{1}_n B^\top$, 其中
+$X \in \mathbb{R}^{n \times d}$, $W \in \mathbb{R}^{d \times K}$,
+$B \in \mathbb{R}^K$, $\hat{Y}, Y \in \mathbb{R}^{n \times K}$.
+$\mathbf{1}_n B^\top$ 把 bias 行向量广播到所有 $n$ 行. $K = 1$ 退化
+为 vec form ($W$ 是 $d \times 1$, $B$ 是标量).
+
+**Loss (Frobenius)**:
+
+$$L = \frac{1}{n K} \|X W + \mathbf{1}_n B^\top - Y\|_F^2$$
+
+**Gradient**:
+
+$$\nabla_W L = \frac{2}{n} X^\top (\hat{Y} - Y), \qquad \nabla_B L = \frac{2}{n} \mathbf{1}_n^\top (\hat{Y} - Y)$$
+
+形状: $\nabla_W L \in \mathbb{R}^{d \times K}$ 与 $W$ 同形,
+$\nabla_B L \in \mathbb{R}^{K}$ 与 $B$ 同形——和 vec form
+$\nabla_w L = \frac{2}{n} X^\top (\hat{y} - y)$ 完全同构, 只是把 $n$ 维残差
+列向量换成 $n \times K$ 残差矩阵, 投影模式 $X^\top \cdot \text{residual}$
+不变. (这里 $1/(nK)$ 与 $2/n$ 相差一个 $1/K$ 系数, 是按总元素数还是按
+样本数取均值的归一化选择, 不影响 argmin.)
+
+**Bridge 1 (NN)**: $K \ge 2$ 即 multi-output 回归 / 一层 `nn.Linear(d, K)`
+的精确数学; 训练循环上 PyTorch / JAX 写完全等价的 forward + autograd.
+`nn.Linear` 内部就是 $XW + \mathbf{1} B^\top$, autograd 反传给出
+$X^\top (\hat{Y} - Y)$ 的等价 grad.
+
+**Bridge 2 (LogReg multiclass)**: 把 identity link 换 softmax 即得
+$\nabla_W L = \frac{1}{n} X^\top (P - Y)$ ($P, Y \in \mathbb{R}^{n \times K}$,
+$Y$ one-hot). 完全同构, 只换 link function 与常数——见 LogReg golden 的
+"矩阵广义 / multiclass bridge" 节, 即 `### C`.
+
+**Bridge 3 (KGE / embedding table)**: 训练 entity / relation embedding 时,
+$X$ 是 sparse one-hot / lookup index, $W$ 是 embedding 矩阵
+($V \times K$, $V$ = 词表/实体表大小); grad 仍是 outer-product
+$X^\top \cdot \text{residual}$, 只是稀疏更新——同形.
+
+**Takeaway**: vec form 是 $K = 1$ 退化, 矩阵广义是 1-layer affine 的
+统一形态; 高维输出场景 (multi-task regression / softmax 多分类 / KGE)
+共享 $X^\top \cdot \text{residual}$ 的梯度模式. 推导一遍 vec form, 升维
+到矩阵广义即得多输出 / softmax / 嵌入表的 closed-form gradient.
 """
 
 

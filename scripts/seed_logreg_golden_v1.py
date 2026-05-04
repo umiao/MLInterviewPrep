@@ -8,8 +8,11 @@ the entire notes column with the rewrite at docs/drafts/logreg_golden_v1.md
 
 Length target (per task spec):
 - Baseline notes: 15,964 chars.
-- Cap: <= 11,200 chars (>= 30% reduction).
-- Current draft body + sentinel: ~7,498 chars (53.0% reduction).
+- Cap: <= 13,500 chars (>= 15% reduction vs baseline).
+  Bumped from 11,200 in T-P1-726 to accommodate the matrix-form / multiclass
+  bridge subsection (### C). Pre-T-P1-726 body was ~7,498 chars (53% reduction);
+  post-bridge body is ~12,849 chars (19.5% reduction vs baseline).
+- Current draft body + sentinel after T-P1-726: ~12,849 chars.
 
 Idempotency:
 - Sentinel `<!-- LOGREG_GOLDEN_V1_20260502 -->` prepended as the first line.
@@ -28,7 +31,7 @@ DB_PATH = REPO_ROOT / "data" / "mle_prep.db"
 DRAFT_PATH = REPO_ROOT / "docs" / "drafts" / "logreg_golden_v1.md"
 PROBLEM_ID = 1107
 SENTINEL = "<!-- LOGREG_GOLDEN_V1_20260502 -->"
-LENGTH_CAP = 11200
+LENGTH_CAP = 13500
 
 
 def build_payload() -> str:
