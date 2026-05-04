@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 636 completed tasks archived as of latest archival.
+> 671 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -959,3 +959,51 @@ Source: src
 - [x] **2026-05-01** -- T-P1-682: [SD-TOC-UX] Fix SystemDesignDetail TOC disappearing at page bottom + CN/EN bilingual labels + mobile drawer. USER CONTEXT (2026-05-01, Discord review thread): right-side section TOC on /system-design/<slug> (a) is English-only an
 - [x] **2026-04-30** -- T-P2-664: Widen .claude/skills/*/SKILL.md permission carve-out across 4 projects. Same class of harness permission gate that bit T-P1-256/258 earlier today bit T-P1-656 again when inner session tried to
 - [x] **2026-05-01** -- T-P2-665: [SYNC] Promote 3 new [UNIVERSAL] LESSONS.md entries (2026-04-30) from MLInterviewPrep to template. Three [UNIVERSAL]-tagged lessons from 2026-04-30 in MLInterviewPrep/LESSONS.md are not in claude-code-project-template/L
+- [x] **2026-05-02** -- T-P0-685: [MLI-A] Remove Lock Combination from quick-index?section=ml (BFS is not ML coding). ## Goal
+Per user clarification (Discord 2026-05-02): BFS is not an ML coding topic. Lock Combination BFS (problems.id=10
+- [x] **2026-05-02** -- T-P0-686: [MLI-B] K-Means(1064): add vanilla random-init helper for pedagogical contrast. ## Goal
+Existing K-Means problem (problems.id=1064) has _init_centers_plusplus. Add a sibling _init_centers_random with 
+- [x] **2026-05-02** -- T-P0-687: [MLI-C] KNN + Weighted KNN ml_coding handwritten solution (new problem row). ## Goal
+Add a new ml_coding problem covering vanilla KNN classifier + weighted-KNN extension. Style mirrors K-Means(1064
+- [x] **2026-05-02** -- T-P0-688: [MLI-D1] Linear Regression handwritten numpy in ml_coding (closed-form + GD). ## Goal
+FILL problems.id=1102 'Meta AI-Native Coding - Linear Regression (closed-form X^TX + Ridge/Lasso/SGD follow-ups)
+- [x] **2026-05-02** -- T-P0-689: [MLI-D2] Logistic Regression handwritten numpy in ml_coding (BCE + GD). ## Goal
+Add Logistic Regression as ml_coding handwritten solution: sigmoid + BCE + GD. Restrained minimal numpy, mirrors
+- [x] **2026-05-02** -- T-P0-690: [MLI-D3] Geometric median (Weber problem): L2 distance-sum minimizer + Weiszfeld. ## Goal
+ml_coding application problem: given N points on plane, find point minimizing sum of L2 distances (Weber 问题 / ge
+- [x] **2026-05-02** -- T-P0-691: [MLI-E1] Extend problems.id=73 (Rotate Image) with rectangular n×m generalization. ## Goal
+Extend problems.id=73 'Rotate Image' (LC 48, currently square-only) notes with the rectangular n×m generalizatio
+- [x] **2026-05-02** -- T-P0-692: [MLI-E2] Google /companies/3/prep R2 Coding Index doc (links to extended problem 73 via db://). ## Goal
+Build a new R2-coding-only indexing doc for Google (company_id=3). Seeded with the FIRST entry: matrix rotation 
+- [x] **2026-05-02** -- T-P0-693: [MLI-F] Post-batch idempotency re-run + global URI audit + ML_PROBLEMS sanity check. ## Goal (per user review feedback: 'Idempotency 验证: design 上 idempotent + 实际跑过没 = 两件事')
+After all 7 content tasks (T-P0-
+- [x] **2026-05-02** -- T-P0-701: [MLI-GOLDEN-LR] Linear Regression (1102) golden-style rewrite per meta-prompt. **Goal**: Rewrite problem 1102 (Linear Regression) notes to match the K-Means golden style (docs/drafts/kmeans_golden_v1
+- [x] **2026-05-02** -- T-P0-702: [MLI-GOLDEN-KNN] KNN (1106) golden-style rewrite per meta-prompt. **Goal**: Rewrite problem 1106 (KNN + Weighted) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (pr
+- [x] **2026-05-02** -- T-P0-703: [MLI-GOLDEN-LOGREG] Logistic Regression (1107) golden-style rewrite + dedicated numerical-stability section. **Goal**: Rewrite problem 1107 (Logistic Regression) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.m
+- [x] **2026-05-02** -- T-P2-666: [SYNC] Promote remaining harness gaps (has-unblocked + session_state.json carve-out) from MLInterviewPrep to template. Two universal harness improvements present in MLInterviewPrep but missing from claude-code-project-template:
+
+1. task_db
+- [x] **2026-05-02** -- T-P2-683: [SD-CHEAT-BULK] Backfill cheat_sheet column for 31 remaining SDs (8 eBay + 20 interview + 3 old Pinterest). Followup to in-session 2026-05-01 fix. After T-2026-05-01 patches, 31 SDs still have empty cheat_sheet column. Each need
+- [x] **2026-05-02** -- T-P2-694: [MLI-F-FOLLOWUP] Fix seed_geometric_median print() Unicode crash on Windows cp1252. ## Found during T-P0-693 batch verification (2026-05-02)
+
+When re-running scripts/seed_geometric_median_20260502.py on W
+- [x] **2026-05-02** -- T-P2-695: [KMEANS-GOLDEN-1] Add is_golden + golden_at columns to problems table (Alembic migration + ORM model + Problem TS type + /problems API serialization). Schema parity with behavioral_examples / framework_nodes / company_documents — these three already have is_golden + gold
+- [x] **2026-05-02** -- T-P0-704: [MLI-GOLDEN-GEOMED] Geometric Median (1108) golden-style rewrite + drop '1999' from title (DB + QuickIndex.tsx). **Goal**: Rewrite problem 1108 (Geometric Median) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (
+- [x] **2026-05-02** -- T-P0-705: [MLI-GOLDEN-PROMOTE] Smoke test 4 rewrites on /quick-index?section=ml + mark all 4 is_golden=1. **Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is
+- [x] **2026-05-02** -- T-P0-706: [MLI-GOLDEN-2P-SPEC] Update ml_impl_note_rewrite_spec.md: shape-per-line + e2e-test-block rules. **Goal**: Update `docs/methodology/ml_impl_note_rewrite_spec.md` to add the two new structural rules from the second-pas
+- [x] **2026-05-02** -- T-P0-707: [MLI-GOLDEN-2P-KMEANS] K-Means golden (1064) second pass: shape-per-line + e2e block + empty-cluster prose. **Goal**: Update K-Means golden (problem 1064) with the second-pass rules from `docs/methodology/ml_impl_note_rewrite_sp
+- [x] **2026-05-02** -- T-P0-708: [MLI-GOLDEN-2P-LR] Linear Regression (1102) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1102 (Linear Regression) per `docs/methodology/ml_impl_note_rewrite_spec.md
+- [x] **2026-05-03** -- T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). 
+- [x] **2026-05-03** -- T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.
+- [x] **2026-05-03** -- T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md`
+- [x] **2026-05-02** -- T-P0-712: [AR-11] MLI run_claude_with_timeout: work-done detection (HEAD diff + WIP exclusion + git fallback). Modify run_claude_with_timeout in MLInterviewPrep/scripts/autonomous_run.sh (around line 102-121). On timeout (rc=124/13
+- [x] **2026-05-03** -- T-P0-721: [MLI-GOLDEN-3P-KNN] KNN (1106) third pass: regression section + 拓展 B/C + 2 cheat-sheet Qs (per user golden notes). Third-pass iteration of docs/drafts/knn_golden_v1.md per user-provided rewrite notes (Discord 2026-05-03). Changes: mini
+- [x] **2026-05-03** -- T-P0-722: [MLI-GOLDEN-3P-KNN-DESC] KNN (1106) description math delimiters + narrow UPDATE to skip notes column. Follow-up to T-P0-721 after user reported the Drawer 'Description' section (problem.description, served by seed_knn_2026
+- [x] **2026-05-03** -- T-P0-723: [MLI-GOLDEN-LOGREG-V2] Logistic Regression (1107) golden v2: gradient derivation + GLM batch form + demote stability to add-on + description math wrap. User Discord ask 2026-05-03: (1) reference fundamentals 'Logistic Regression Loss' to add sigmoid+CE 'beautiful cancella
+- [x] **2026-05-03** -- T-P1-713: [AR-12] Working-tree progress signal in run_claude_with_timeout (state machine + porcelain hash + telemetry + kill switch + debug logging). **Goal**: Extend AR-11's HEAD-diff-only timeout classification with a working-tree (`git status --porcelain`) hash signa
+- [x] **2026-05-03** -- T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC). **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_
+- [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
+- [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
+- [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
+- [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
+- [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch

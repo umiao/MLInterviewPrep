@@ -1,10 +1,34 @@
 # Logistic Regression (Sigmoid + Stable BCE + GD)
 
-> **TL;DR** -- 二分类 GLM, $$p = \sigma(Xw)$$, MLE 等价最小化 BCE; 全程在 logits 上算, 永不 `log(0)`.
-> **灵魂 = 数值稳定性**: stable BCE $$L = \max(z,0) - zy + \log(1 + e^{-|z|})$$ (= `np.logaddexp(0, z) - z*y` = `F.binary_cross_entropy_with_logits`).
-> **核心三步**: (1) 前向 $$z = Xw, p = \sigma(z)$$; (2) 梯度 $$\nabla L = \frac{1}{n} X^T(p - y)$$; (3) GD 到 $$|\Delta L| < \text{tol}$$ 或 max iter.
-> **凸保证**: Hessian $$\frac{1}{n} X^T \mathrm{diag}(p(1-p)) X \succeq 0$$, GD 必收敛全局最优; **无闭式解** (sigmoid 把似然变非二次).
-> **复杂度**: GD 单步 $$O(nd)$$, 总 $$O(Tnd)$$; Newton/IRLS 单步 $$O(nd^2 + d^3)$$; 推理 $$O(d)$$.
+## TL;DR
+
+二分类 GLM, 单样本 $z = w^\top x + b$ (logit), $p = \sigma(z) = 1/(1 + e^{-z})$. Bernoulli MLE 等价最小化 BCE. **核心三步**: (1) 前向 $z = Xw + b\mathbf{1}$, $p = \sigma(z)$; (2) sigmoid + CE "漂亮消去" 给出 $\nabla_w L = \frac{1}{n} X^\top (p - y)$ — 与 Linear Regression MSE 同形 (GLM 框架); (3) full-batch GD 直到 loss 收敛. 凸优化 (Hessian $\frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X \succeq 0$), 但**无闭式解** (sigmoid 把似然变非二次). 复杂度: GD 单步 $O(nd)$; Newton/IRLS 单步 $O(nd^2 + d^3)$. 工业灵魂在拓展 A: logits-space stable BCE $L = \max(z, 0) - zy + \log(1 + e^{-|z|})$ — 防 $\log(0)$ 的标准把戏.
+
+---
+
+## 推导 — sigmoid + CE 的"漂亮消去"
+
+单样本 logit $z = w^\top x + b$, 预测 $p = \sigma(z)$. Bernoulli 似然 $p^y (1-p)^{1-y}$ 取负对数得 BCE:
+
+$$\ell(w, b) = -y \log p - (1 - y) \log(1 - p)$$
+
+链式求 $\partial \ell / \partial w$, 用恒等式 $\sigma'(z) = p(1 - p)$:
+
+$$\frac{\partial \ell}{\partial w} = \underbrace{\left(-\frac{y}{p} + \frac{1 - y}{1 - p}\right)}_{\partial \ell / \partial p} \cdot \underbrace{p(1 - p)}_{\partial p / \partial z} \cdot \underbrace{x}_{\partial z / \partial w}$$
+
+前两段直接合并: $-y(1-p) + (1-y)p = p - y$. 整段塌缩到
+
+$$\boxed{\nabla_w \ell = (p - y)\, x, \quad \frac{\partial \ell}{\partial b} = p - y}$$
+
+这是 sigmoid 与 log 的共轭关系: $\sigma'$ 的 $p(1-p)$ 被 $\partial \ell / \partial p$ 里的 $1/p$, $1/(1-p)$ 精确抵消, 留下"残差 × 输入"的干净形式. MSE + sigmoid 没这个性质 — $\sigma'$ 不消, 大 $|z|$ 处梯度 $\propto p(1-p) \to 0$, 错得越离谱学得越慢.
+
+**Batch 形式 (GLM 框架)**: 把 $n$ 个样本堆成 $X \in \mathbb{R}^{n \times d}$, $z = Xw + b\mathbf{1} \in \mathbb{R}^n$, $p = \sigma(z)$. 全局损失 $L = \frac{1}{n} \sum_i \ell_i$ 的梯度
+
+$$\nabla_w L = \frac{1}{n} X^\top (p - y), \qquad \frac{\partial L}{\partial b} = \frac{1}{n} \mathbf{1}^\top (p - y)$$
+
+与 Linear Regression 的 $\nabla_w L_{\text{MSE}} = \frac{2}{n} X^\top (\hat y - y)$ **完全同构** — $X^\top$ 把 $n$ 维残差投回 $d$ 维参数空间, 只换 link function ($\sigma$ vs identity). 这就是 GLM (Generalized Linear Model) 的统一形态: Linear / Logistic / Poisson 共享 $X^\top \cdot \text{residual}$ 的梯度模式.
+
+> **记号约定**: 单样本用 $w^\top x$ (列向量内积, 与 fundamentals / 教科书一致); batch 用 $Xw$ ($X$ 是 $n \times d$ 行堆, numpy `X @ w`). 不混用 $wx$ — 在 row-vector 约定下成立但与本项目列向量约定冲突.
 
 ---
 
@@ -28,113 +52,73 @@ class LogisticRegression:
         self.l2_lambda = l2_lambda
         self.fit_intercept = fit_intercept
         self.coef_: Optional[np.ndarray] = None         # (d,)
-        self.intercept_: float = 0.0                     # scalar
-        self.training_loss_history: list[float] = []     # per-iter BCE
+        self.intercept_: float = 0.0                    # scalar
+        self.training_loss_history: list[float] = []    # per-iter BCE
 ```
 
-### 1. Bias augmentation
+### 1. Sigmoid (vanilla)
 
-把 intercept 折成 $$w_0$$, design matrix 多一列 1; 梯度 / 更新代码与无 bias 共用一份, 仅在 L2 时把 `w_reg[0] = 0` 排除掉 (bias 不该被惩罚).
-
-```python
-@staticmethod
-def _augment_with_bias(X):
-    # X: (n, d)
-    n = X.shape[0]
-    ones = np.ones((n, 1))                            # (n, 1)
-    return np.hstack([ones, X])                       # (n, d+1)
-```
-
-### 2. Sigmoid -- branched to avoid overflow
-
-朴素 `1 / (1 + exp(-z))` 在 $$z$$ 大负时 $$e^{-z}$$ 上溢. 按符号分支保证 `exp` argument 始终 $$\leq 0$$, 落在 $$(0, 1]$$ 安全区.
+教科书形式 $1 / (1 + e^{-z})$ 直接写. 大负 $z$ 时 $e^{-z}$ 上溢 `inf` → 结果 `0.0` (sigmoid 真值确实近 0, 但下游 BCE 的 $\log(0)$ 才是火药 — 拓展 A 集中处理). 数值改进版按 $z$ 符号分支让 `exp` arg 永远 $\leq 0$, 与拓展 A / softmax LSE 同源.
 
 ```python
 @staticmethod
 def _sigmoid(z):
-    # z: (n,)
-    out = np.empty_like(z, dtype=float)              # (n,)
-    pos = z >= 0                                      # (n,) bool
-    out[pos] = 1.0 / (1.0 + np.exp(-z[pos]))
-    exp_z = np.exp(z[~pos])                          # exp arg <= 0
-    out[~pos] = exp_z / (1.0 + exp_z)
-    return out                                        # (n,)
+    return 1.0 / (1.0 + np.exp(-z))                   # (n,)
 ```
 
-### 3. Numerical stability -- 这道题的灵魂
+### 2. BCE loss (vanilla)
 
-**这是规范唯一允许内嵌数学推导的 section** -- LR 的工业含金量 80% 落在这一行公式上.
-
-**朴素 BCE 的两路爆炸**: $$L = -[y \log p + (1-y) \log(1-p)]$$ 中, $$z \to +\infty$$ 时 $$p \to 1$$, $$1-p$$ 触底 `0.0`, $$\log(1-p) = -\infty$$ 整个 loss 变 NaN; $$z \to -\infty$$ 同理 $$\log p$$ 爆. Clip $$p$$ 到 $$[\varepsilon, 1-\varepsilon]$$ 是把错误藏起来 -- 大 $$|z|$$ 时梯度仍偏离 sigma 真梯度, 训练不收敛.
-
-**正确做法: 全程在 logits $$z$$ 上算**. 先把 BCE 改写到 $$z$$ 上:
-
-$$L_i = z_i - z_i y_i + \log(1 + e^{-z_i})$$
-
-但 $$z < 0$$ 时 $$e^{-z}$$ 仍上溢 ($$e^{800}$$ 即 `inf`). 用恒等式 $$\log(1 + e^{-z}) = -z + \log(1 + e^{z})$$ 换边再合并两支:
-
-$$\boxed{L_i = \max(z_i, 0) - z_i y_i + \log(1 + e^{-|z_i|})}$$
-
-- $$\max(z, 0)$$ 提出 "$$z$$ 大正时主导项" (本质是 ReLU on logits), 把 $$z$$ 大正时 $$z \cdot 1$$ 这一项显式吃掉.
-- $$\log(1 + e^{-|z|})$$ 永远在 $$[0, \log 2] = [0, 0.693]$$, 既不上溢也不下溢.
-- 等价写法: `np.logaddexp(0, z) - z * y`. 这是 PyTorch `F.binary_cross_entropy_with_logits` / TF `sigmoid_cross_entropy_with_logits` 的实现核心.
-
-**Softmax 同源 trick**: 减 $$\max_j z_j$$ 再 exp, 把指数 argument 拉回 $$\leq 0$$. 所有"在 logits 空间算"的 loss (BCE-with-logits / cross-entropy-from-logits) 共享同一思想.
-
-### 4. Stable BCE loss
-
-照抄推出来的公式, mean over batch.
+照搬 per-sample $-[y \log p + (1-y) \log(1-p)]$, mean over batch. $\varepsilon$-clip 是 textbook 防御 (`log(0)` → `log(eps)` 不爆 `nan`), 但大 $|z|$ 时梯度仍偏离真值; 工业用 logits-space 形式 (拓展 A).
 
 ```python
 @staticmethod
-def _stable_bce_loss(z, y):
-    # z: (n,) logits, y: (n,) in {0, 1}
-    pos_part = np.maximum(z, 0.0)                     # (n,)  ReLU on logits
-    log_part = np.log1p(np.exp(-np.abs(z)))           # (n,)  in [0, log 2], no overflow
-    per_sample = pos_part - z * y + log_part          # (n,)
+def _bce_loss(p, y):
+    # p: (n,) in (0, 1), y: (n,) in {0, 1}
+    eps = 1e-12                                       # clip 防 log(0); 真正解法见拓展 A
+    p = np.clip(p, eps, 1 - eps)
+    per_sample = -(y * np.log(p) + (1 - y) * np.log(1 - p))   # (n,)
     return float(per_sample.mean())                   # scalar
 ```
 
-### 5. fit -- full-batch GD with optional L2
+### 3. fit — full-batch GD with optional L2
 
-梯度 $$\nabla_w L = \frac{1}{n} X^T (\sigma(Xw) - y)$$ 与 Linear Regression 同构 (GLM 框架: $$X^T$$ 乘"预测残差"). L2 在梯度上加 $$2\lambda w_{\text{reg}}$$, $$w_{\text{reg}}[0] = 0$$ 排除 bias. 收敛判据 $$|L_{t-1} - L_t| < \text{tol}$$ 等价于权重不再实质更新.
+NN-style: `w` / `b` 是两个独立参数, 各算各的梯度 (`grad_w`, `grad_b`) 各自 update — 上方推导给出 $\nabla_w \ell = (p - y) x$ 与 $\partial \ell / \partial b = p - y$, 实现照搬. L2 仅作用在 `w`, `b` 永不参与 (augment-bias 反模式见 Takeaway / cheat-sheet).
 
 ```python
 def fit(self, X, y):
     # X: (n, d), y: (n,) in {0, 1}
-    X_design = self._augment_with_bias(X) if self.fit_intercept else X
-    n, d_aug = X_design.shape
-    w = np.zeros(d_aug)                                    # (d_aug,)
+    n, d = X.shape
+    w = np.zeros(d)                                        # (d,)
+    b = 0.0                                                # scalar
     previous_loss = float("inf")
     self.training_loss_history = []
 
     for _ in range(self.max_iterations):                   # Criterion 1: max iter
-        z = X_design @ w                                   # (n,)
+        z = X @ w + b                                      # (n,)
         p = self._sigmoid(z)                               # (n,)
-        error = p - y                                      # (n,)  prediction residual
-        gradient = (X_design.T @ error) / n                # (d_aug,)
+        residual = p - y                                   # (n,)  prediction residual
+        grad_w = (X.T @ residual) / n                      # (d,)
         if self.l2_lambda > 0.0:
-            w_reg = w.copy()                               # (d_aug,)
-            if self.fit_intercept:
-                w_reg[0] = 0.0                              # don't penalize bias
-            gradient = gradient + 2.0 * self.l2_lambda * w_reg
-        w = w - self.learning_rate * gradient              # (d_aug,)
+            grad_w = grad_w + 2.0 * self.l2_lambda * w     # L2 only on w, never on b
+        w = w - self.learning_rate * grad_w                # (d,)
+        if self.fit_intercept:
+            grad_b = float(residual.mean())                # scalar
+            b = b - self.learning_rate * grad_b            # scalar
 
-        current_loss = self._stable_bce_loss(z, y)
+        current_loss = self._bce_loss(p, y)
         self.training_loss_history.append(current_loss)
         # Criterion 2: loss change below tol
         if abs(previous_loss - current_loss) < self.convergence_threshold:
             break
         previous_loss = current_loss
 
-    if self.fit_intercept:
-        self.coef_, self.intercept_ = w[1:], float(w[0])
-    else:
-        self.coef_, self.intercept_ = w, 0.0
+    self.coef_, self.intercept_ = w, b
     return self
 ```
 
-### 6. predict / predict_proba
+**Takeaway**: `w` / `b` 各算各梯度各自 update — NN 训练循环的通用范式 (一层 affine + bias). LR 闭式解里"拼一列 1 折成 $w_0$"是 lstsq 专属技巧 (一次只解一个 $Ax = b$); LogReg 无闭式解 (sigmoid 让 NLL 非二次), 一开始就该 NN-style — 把 augment-bias 移植到 GD / LogReg / NN 是 anti-pattern.
+
+### 4. predict / predict_proba
 
 `predict_proba` 给概率, `predict` 用阈值 (默认 0.5) 切硬标签. **调阈值**是应对 class imbalance 的第一招 (不动模型即可).
 
@@ -147,57 +131,6 @@ def predict_proba(self, X):
 def predict(self, X, threshold: float = 0.5):
     return (self.predict_proba(X) >= threshold).astype(int)   # (m,)
 ```
-
----
-
-## 面试追问 (Cheat Sheet)
-
-> **Q: 为什么 LR 没有闭式解?**
-
-- Sigmoid 让对数似然变成关于 $$w$$ 的非二次函数, 一阶条件 $$X^T(\sigma(Xw) - y) = 0$$ 不能 algebraic 解出 $$w$$.
-- LR 仍是凸 (Hessian PSD), GD / Newton / L-BFGS 都全局收敛 -- 没闭式不代表难解.
-- 对比: Linear Regression 损失二次, 一阶条件线性, 所以有 $$\hat w = (X^TX)^{-1} X^Ty$$.
-
-> **Q: Softmax 多分类怎么扩展?**
-
-- $$p_k = e^{z_k} / \sum_j e^{z_j}$$, 损失 $$L = -\frac{1}{n}\sum_i \sum_k y_{ik} \log p_{ik}$$ ($$Y$$ one-hot).
-- 梯度 $$\nabla_W L = \frac{1}{n} X^T (P - Y)$$ -- 与二分类**完全同构**, $$W$$ 升到 $$(d, K)$$.
-- Stable softmax: 减 $$\max_j z_j$$ 再 exp (与 stable BCE 的 $$|z|$$ 同源).
-
-> **Q: Newton / IRLS 与 GD 的关系?**
-
-- Newton: $$w \leftarrow w - H^{-1} \nabla L$$, $$H = \frac{1}{n} X^T \mathrm{diag}(p(1-p)) X$$, 二阶收敛 (误差平方下降).
-- IRLS = Newton 在 LR 上的具体形式, 每步解加权 least squares $$X^T W X \cdot \Delta w = X^T (y - p)$$.
-- 代价 $$O(nd^2 + d^3)$$; $$d \geq 10^4$$ 时退到 GD; **L-BFGS** 是常见折中 (sklearn 默认 solver).
-
-> **Q: 类别不平衡怎么办?**
-
-- **调阈值** (训练不变, predict 时把 0.5 降到 ROC 上 recall/precision 平衡处) -- 单这一步解决大多数实际问题.
-- **class weight / pos_weight**: BCE 给正样本乘 $$\beta$$ = neg/pos 比例.
-- **Focal loss** $$-(1-p_t)^\gamma \log p_t$$ 对易分样本降权, $$\gamma=2$$ (RetinaNet 标配).
-
-> **Q: L1 vs L2 正则的几何含义?**
-
-- **L2 (Ridge)**: $$+\lambda \|w\|_2^2$$, 梯度 $$+2\lambda w$$; Gaussian prior $$\Rightarrow$$ 各 $$w_j$$ shrinkage 但**不为 0**.
-- **L1 (Lasso)**: $$+\lambda \|w\|_1$$, 次梯度 $$\lambda \mathrm{sign}(w)$$; Laplace prior $$\Rightarrow$$ **稀疏解** (一些 $$w_j$$ 严格为 0, 自带特征选择).
-- 几何: L2 等高线是圆 (各方向 shrink), L1 是菱形 (顶点在轴上 $$\Rightarrow$$ 解落在轴上 = 稀疏).
-
-> **Q: Calibration -- 输出 $$p$$ 是真概率吗?**
-
-- LR 在 BCE 训练下**理论上 calibrated**, 但 class imbalance / 强正则可能偏离.
-- 检查: **reliability diagram** (predict_proba 分箱, 看实际频率 vs 预测均值, 完美应贴对角线).
-- **Platt scaling**: 验证集再训一个 1D LR $$P_{\text{cal}} = \sigma(a z + b)$$. **Isotonic** 更灵活但需 >1000 验证样本.
-
-> **Q: SGD vs full-batch GD?**
-
-- Full-batch: 梯度无偏方差 0, 但 $$n$$ 大单步装不下.
-- SGD / mini-batch (32-256): 方差大但 GPU SIMD 友好, 噪声有助跳出鞍点 (LR 凸不重要, NN 关键).
-- LR 凸, 三者最终都收敛同一全局最优, 只差路径.
-
-> **Q: 学习率上界与标准化?**
-
-- 收敛要求 $$\eta < 2 / \lambda_{\max}(X^T \mathrm{diag}(p(1-p)) X / n)$$.
-- 实战: 先 zero-mean unit-variance standardize, $$\lambda_{\max}$$ 落在 $$O(1)$$, $$\eta = 0.1$$ 即稳, 不收敛再砍半.
 
 ---
 
@@ -216,3 +149,102 @@ assert preds.shape == (N,)
 assert probs.shape == (N,)
 print(f"Train accuracy = {(preds == y).mean():.3f}")
 ```
+
+---
+
+## 面试追问 (Cheat Sheet)
+
+> **Q: 为什么 LR 没有闭式解?**
+
+- Sigmoid 让对数似然变成关于 $w$ 的非二次函数, 一阶条件 $X^\top(\sigma(Xw) - y) = 0$ 不能 algebraic 解出 $w$.
+- LR 仍是凸 (Hessian $\frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X \succeq 0$), GD / Newton / L-BFGS 都全局收敛 — 没闭式不代表难解.
+- 对比: Linear Regression 损失二次, 一阶条件线性, $\hat w = (X^\top X)^{-1} X^\top y$ 即 closed-form.
+
+> **Q: Bias 应该怎么处理? 为什么不学 LR 闭式那种 augment 一列 1?**
+
+- **GD 路径 (LogReg / NN 通用)**: `w` / `b` 两个独立参数, `grad_w = X^T(p-y)/n`, `grad_b = mean(p-y)`, 各自 update — Section 3 即此范式.
+- **augment 一列 1 折 $w_0$** 是 LR **闭式解**专属 (`lstsq` 一次解一个 $Ax = b$, 拼列让 lstsq 同时吃 bias). LogReg 无闭式解, 这个 trick 在 LogReg 上**无任何合法用途**; 移植到 NN 更是 anti-pattern — 失去 freeze / warm-start bias 的独立控制, 而 NN 训练循环正建立在"每参数独立 grad / 独立 step"原语上.
+- **L2 不作用到 bias** (`grad_w += 2λw`, `grad_b` 纯残差均值): 等价于 $\lambda \mathrm{diag}([0,1,\dots,1]) w$, bias 整体平移自由度不该被惩罚.
+
+> **Q: 为什么用 BCE 不用 MSE?**
+
+- **凸性**: BCE + sigmoid 凸; MSE + sigmoid 非凸 (有多个 local minima).
+- **梯度饱和**: MSE 梯度 $= (\hat y - y)\, p(1-p)\, x$, 大 $|z|$ 处 $p(1-p) \to 0$ — 错得越离谱学得越慢; BCE 把 $p(1-p)$ 消掉留 $(p-y) x$, 错得越离谱越饱满.
+- **概率解释**: BCE 是 Bernoulli MLE; MSE 对应 Gaussian noise, 二分类上属于模型误设.
+
+> **Q: Softmax 多分类怎么扩展?**
+
+- $p_k = e^{z_k} / \sum_j e^{z_j}$, 损失 $L = -\frac{1}{n} \sum_i \sum_k y_{ik} \log p_{ik}$ ($Y$ one-hot).
+- 梯度 $\nabla_W L = \frac{1}{n} X^\top (P - Y)$ — 与二分类**完全同构**, $W$ 升到 $(d, K)$.
+- Stable softmax: 减 $\max_j z_j$ 再 exp (与拓展 A 的 $|z|$ 同源 LSE trick).
+
+> **Q: Newton / IRLS 与 GD 的关系?**
+
+- Newton: $w \leftarrow w - H^{-1} \nabla L$, $H = \frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X$, 二阶收敛.
+- IRLS = Newton 在 LR 上的具体形式 (每步解 weighted least squares).
+- 代价 $O(nd^2 + d^3)$; $d \geq 10^4$ 退到 GD; **L-BFGS** 是常见折中 (sklearn 默认).
+
+> **Q: 类别不平衡怎么办?**
+
+- **调阈值** (训练不变, predict 时把 0.5 降到 ROC 上 recall/precision 平衡处) — 单这一步解决大多数实际问题.
+- **class weight / pos_weight**: BCE 给正样本乘 $\beta = $ neg/pos 比例.
+- **Focal loss** $-(1 - p_t)^\gamma \log p_t$ 对易分样本降权, $\gamma = 2$ (RetinaNet 标配).
+
+> **Q: L1 vs L2 正则的几何含义?**
+
+- **L2 (Ridge)**: $+\lambda \|w\|_2^2$, 梯度 $+2\lambda w$; Gaussian prior, 各 $w_j$ shrinkage 但**不为 0**.
+- **L1 (Lasso)**: $+\lambda \|w\|_1$, 次梯度 $\lambda \mathrm{sign}(w)$; Laplace prior, **稀疏解** (自带特征选择).
+- 几何: L2 等高线圆 (各方向 shrink); L1 菱形 (顶点在轴上 $\Rightarrow$ 解落在轴上 = 稀疏).
+
+> **Q: Calibration — 输出 $p$ 是真概率吗?**
+
+- LR 在 BCE 训练下**理论上 calibrated**, class imbalance / 强正则可能偏离.
+- 检查: **reliability diagram** (predict_proba 分箱, 完美应贴对角线).
+- **Platt scaling**: 验证集再训 $P_{\text{cal}} = \sigma(a z + b)$; **Isotonic** 更灵活但需 >1000 验证样本.
+
+> **Q: SGD vs full-batch GD?**
+
+- Full-batch: 梯度无偏方差 0, $n$ 大单步装不下. SGD / mini-batch (32-256): 方差大但 GPU SIMD 友好, 噪声跳鞍点 (LR 凸不重要, NN 关键).
+- LR 凸, 三者最终都收敛同一全局最优, 只差路径.
+
+---
+
+## 拓展
+
+### A. 数值稳定性 — logits-space stable BCE (这道题的工业灵魂)
+
+**朴素 BCE 的两路爆炸**: $L = -[y \log p + (1-y) \log(1-p)]$ 中, $z \to +\infty$ 时 $p \to 1$, $1 - p$ 触底 `0.0`, $\log(1 - p) = -\infty$ → loss 变 `nan`; $z \to -\infty$ 同理 $\log p$ 爆. Clip $p$ 到 $[\varepsilon, 1 - \varepsilon]$ (vanilla 实现里那行 `np.clip`) 是把错误**藏起来** — 大 $|z|$ 时梯度仍偏离 sigmoid 真梯度, 训练发散.
+
+**正确做法: 全程在 logits $z$ 上算**. 先把 $\log p$ / $\log(1-p)$ 直接展成 $z$:
+
+$$\log p = \log \sigma(z) = -\log(1 + e^{-z}), \qquad \log(1 - p) = -z - \log(1 + e^{-z}) = -\log(1 + e^z)$$
+
+代回 BCE 并合并:
+
+$$\ell = y \log(1 + e^{-z}) + (1 - y) \log(1 + e^z) = \log(1 + e^z) - z y$$
+
+但 $\log(1 + e^z)$ 在大 $z$ 上仍上溢 ($e^{800}$ 即 `inf`). 用恒等式 $\log(1 + e^z) = \max(z, 0) + \log(1 + e^{-|z|})$ 把主导项显式抽出 ($z > 0$: 主导 $z$; $z < 0$: 主导 $0$, 余项 $\log(1 + e^z)$ 自然安全):
+
+$$\boxed{\ell = \max(z, 0) - z y + \log(1 + e^{-|z|})}$$
+
+- $\max(z, 0)$: ReLU on logits, 把 $z$ 大正时主导项显式吃掉.
+- $\log(1 + e^{-|z|})$: 永远在 $[0, \log 2] \approx [0, 0.693]$, 既不上溢也不下溢.
+- 等价 numpy: `np.logaddexp(0, z) - z * y`. 这是 PyTorch `F.binary_cross_entropy_with_logits` / TF `sigmoid_cross_entropy_with_logits` 的实现核心.
+
+```python
+@staticmethod
+def _stable_bce_loss(z, y):
+    # z: (n,) logits, y: (n,) in {0, 1}
+    pos_part = np.maximum(z, 0.0)                     # (n,)  ReLU on logits
+    log_part = np.log1p(np.exp(-np.abs(z)))           # (n,)  in [0, log 2], safe
+    per_sample = pos_part - z * y + log_part          # (n,)
+    return float(per_sample.mean())                   # scalar
+```
+
+替换 `fit` 里 `_bce_loss(p, y)` 为 `_stable_bce_loss(z, y)` 即可上线. 梯度 $\nabla_w L = X^\top (p - y) / n$ 不变 — 推导阶段 $\sigma'$ 已被消掉, 数值上和 logit-space loss 自洽; 只有 forward loss 值需要换写法.
+
+**Sigmoid sign-branch & softmax LSE 同源**: 按 $z$ 符号分支让 `exp` arg $\leq 0$; softmax 减 $\max_j z_j$ 同源. BCE-with-logits / cross-entropy-from-logits / log-sum-exp 共享 "在 logits 空间算" 这一招.
+
+### B. 学习率上界 + 标准化
+
+收敛要求 $\eta < 2 / \lambda_{\max}\!\left(\frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X\right)$. 实战: 先 zero-mean unit-variance, $\lambda_{\max} = O(1)$, $\eta = 0.1$ 即稳, 不收敛再砍半.

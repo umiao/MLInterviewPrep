@@ -9,6 +9,86 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-727: [MLI-CONTENT] Geometric Median note v2: GD lens reframe + adaptive-lr/Weiszfeld bridge
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Reframe MLInterviewPrep/docs/drafts/geometric_median_golden_v1.md from current "Weiszfeld + Vardi-Zhang code-heavy" lens to "GD-first" lens. In-place edit (NO new file). Re-run scripts/seed_geometric_median_20260502.py to UPSERT problems.id=1108.
+
+CONSTRAINTS:
+- Title stays unchanged: "Geometric Median (Weiszfeld + Vardi-Zhang variant)"
+- Length cap: payload (sentinel + body) <= 6800 chars; sentinel "<!-- GEOMETRIC_MEDIAN_GOLDEN_V1_20260502 -->\n" = 47 chars; body cap ~6750
+- Sentinel kept (in-place v2 within v1 sentinel; file content change forces UPDATE path in seed script's SKIP/UPDATE logic)
+- KaTeX: use $$...$$ for display math (matches v1)
+- Style: Chinese narration + English terms (memory feedback_content_style_cn_en); algorithm names + complexity stay English
+
+V2 SECTION STRUCTURE (replaces v1 entirely):
+
+1. TL;DR (~600 chars): f(x)=sum_i ||x-p_i||_2, gradient is sum of unit vectors -> GD natural lens. Subgradient at sample points. Weiszfeld = adaptive-lr GD. Vardi-Zhang = subgradient optimality certificate. Linear convergence. Complexity O(Tnd).
+
+2. NEW Section "Derivation" (~600 chars, no code):
+- f(x)=sum_i ||x-p_i||_2, convex but not smooth (norms non-differentiable at 0)
+- Where x is not any p_i: gradient nabla f(x) = sum_i (x-p_i)/||x-p_i||. EACH TERM IS A UNIT VECTOR pointing from p_i toward x.
+- At sample point p_j: that term blows up. Subdifferential partial f(p_j) = { sum_{i!=j} u_i + v : ||v|| <= 1 } where u_i = (p_j-p_i)/||p_j-p_i||.
+- Optimality: 0 in partial f(p_j) iff || sum_{i!=j} u_i || <= 1 (later: <= eta_j for multiplicity).
+
+3. NEW Section "Plain GD" (~500 chars + 4-line code from user's prompt):
+```python
+def geometric_median_gd(points, lr=0.01, max_iter=1000, eps=1e-8):
+    x = points.mean(axis=0)
+    for _ in range(max_iter):
+        diff = x - points
+        dist = np.maximum(np.linalg.norm(diff, axis=1, keepdims=True), eps)
+        grad = (diff / dist).sum(axis=0)
+        x = x - lr * grad
+    return x
+```
+Two observations: (a) ||grad f|| <= N (sum of N unit vectors) - never diverges. (b) Near optimum, unit vectors cancel -> gradient norm shrinks -> slow convergence; constant lr hard to tune (too big = oscillation, too small = slow).
+
+4. Section "Adaptive lr is exactly Weiszfeld" (~500 chars + 4-line code):
+- Pick lr_t = 1 / sum_i(1/d_i). Substitute into GD update:
+  x_{t+1} = x - (1/sum(1/d)) * sum (x-p_i)/d_i = (sum p_i/d_i) / (sum 1/d_i)
+- THIS IS the Weiszfeld update - weighted barycenter, weights w_i = 1/d_i
+- One-liner: "Weiszfeld step = adaptive GD with lr = harmonic_mean(d) / N (i.e., 1/sum(1/d_i)). Conservatively shrinks near sample points, expands in open space - parameter-free."
+- Code: 4-line _weiszfeld_step (top-level function, no class skeleton)
+
+5. Section "Zero-distance: subgradient certificate (Vardi-Zhang)" (~700 chars + ~12-line code):
+- When iterate hits sample point p_j with multiplicity eta_j: singular term breaks sum(1/d_i)
+- Geometric content from sec 2: optimality at p_j requires R := || sum_{i not in J} (p_j-p_i)/d_i || <= eta_j. R <= eta_j IS THE KKT CERTIFICATE that p_j is the geometric median.
+- If R > eta_j: T(x) = Weiszfeld on non-singular points; gamma = max(0, 1 - eta_j/R); x_{t+1} = gamma*T + (1-gamma)*x. Projected subgradient respecting the certificate.
+- Adding epsilon to d_i avoids NaN but changes the fixed point -> biased. Vardi-Zhang is unbiased.
+- Keep the existing _vardi_zhang_step code from v1 (~12 lines), but introduce it via the geometric optimality story above.
+
+6. Section "fit" (~250 chars + ~12-line code):
+- Centroid init (L2^2 optimum, in convex hull, rarely hits a sample)
+- Main loop: dist -> singular check -> Weiszfeld OR Vardi-Zhang (with done short-circuit) -> step-size tol stop
+- DROP sklearn-style class skeleton from v1 sec 0; use top-level fit function: def fit(points, max_iter=200, tol=1e-7) -> ndarray
+
+7. 3-column comparison table (Plain GD / Adaptive-lr Weiszfeld / Vardi-Zhang variant):
+- 退化处理 / lr 调优 / 收敛 / 实现复杂度 (~300 chars)
+
+8. Cheat sheet (~1500 chars):
+- CUT: "为啥没闭式解" Q (subsumed by sec 2 first-order condition)
+- ADD: "Constant-lr GD 为啥难调, fix 是啥?" -> lr 难选 (太大震荡 / 太小慢); adaptive lr = harmonic_mean(d)/N = Weiszfeld is parameter-free
+- KEEP: mean/coord-median 关系, 收敛保证, breakdown 鲁棒性, N 太大 batch/coreset, k=1 K-Means 桥梁 (5 Qs)
+
+9. End-to-end test: keep v1's existing block (numpy seed + assert + print)
+
+ACCEPTANCE CRITERIA:
+1. Run: python -c "import os; n=os.path.getsize('docs/drafts/geometric_median_golden_v1.md'); print('body+sentinel=', n+47)" -> must be <= 6800
+2. Run: python scripts/seed_geometric_median_20260502.py -> must output [UPDATE] id=1108 ... notes <old> -> <new> chars (NOT [FAIL] payload exceeds cap, NOT [SKIP])
+3. After seed runs, verify: python -c "import sqlite3; c=sqlite3.connect('data/mle_prep.db'); r=c.execute('select length(notes) from problems where id=1108').fetchone(); print(r)" -> <= 6800
+4. Append PROGRESS.md entry per CLAUDE.md format
+5. Mark this task completed via task_db.py update <ID> --status completed
+6. Commit with [<TASK-ID>] prefix
+
+REFERENCE: User-confirmed plan from Discord conversation 2026-05-04 ~01:12 UTC. Five questions resolved:
+Q1 title unchanged; Q2 drop sklearn class skeleton; Q3 keep Vardi-Zhang code with new geometric explanation; Q4 in-place edit; Q5 cut "no closed form" Q + add "GD lr tuning + adaptive fix" Q.
+
+CONTEXT: Source file is canonical content; seed reads it at runtime and writes problems.notes. The cross-link block in problems.id=262 (Best Meeting Point) does NOT need updating (template references unchanged title and unchanged db://1108 -- byte-equal SKIP path will fire).
+
+DO NOT: change title, change sentinel, edit the seed script, edit the cross-link template, create a v2 file, modify problems.description (separate field, not the notes content), modify problems.id=262.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -60,6 +140,91 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-726: [MLI-CONTENT] LR golden + LogReg golden: add multi-output / NN-friendly matrix form extension subsection
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-724
+- **Description**: Per user-approved discussion 2026-05-04: keep vec-form as primary derivation
+in both LR golden + LogReg golden, but add a parallel "matrix广义" subsection
+that bridges to industrial / NN-friendly form. Single narrative ("先看 K=1
+→ 一行广义化"), no double-derivation.
+
+Scope: edits to TWO files, kept structurally parallel:
+
+(1) scripts/seed_linear_regression_20260502.py NOTES -- add new subsection
+   `### 8. 矩阵广义 (NN-friendly / multi-output form)` after the existing
+   `### 7. Follow-up Q&A`. Body must include:
+   - Setup: $\hat{Y} = XW + \mathbf{1}_n B^\top$, $W \in \mathbb{R}^{d \times K}$,
+     $B \in \mathbb{R}^K$. $K=1$ collapses to vec form.
+   - Loss: $L = \frac{1}{nK}\|XW + \mathbf{1} B^\top - Y\|_F^2$ (Frobenius norm).
+   - Gradient: $\nabla_W L = \frac{2}{n} X^\top(\hat{Y} - Y)$ (independent of K
+     for the per-column scale; same shape pattern as vec form).
+   - Bias gradient: $\nabla_B L = \frac{2}{n} \mathbf{1}^\top(\hat{Y} - Y)$.
+   - Bridge 1 (NN): "$K \geq 2$ 即 multi-output 回归 / 一层 `nn.Linear(d, K)`
+     的精确数学; 训练循环上 PyTorch / JAX 写完全等价的 forward + autograd."
+   - Bridge 2 (LogReg multiclass): "把 identity link 换 softmax 即得
+     $\nabla_W L = \frac{1}{n} X^\top(P - Y)$ -- 完全同构, 见 LogReg golden
+     softmax cheat-sheet Q."
+   - Bridge 3 (KGE / embedding table): outer-product 梯度同形.
+   - One-line takeaway: "vec form 是 K=1 退化, 矩阵广义是 1-layer affine
+     的统一形态; 高维输出场景 (multi-task regression / softmax / KGE) 共享
+     `X^\top \cdot residual` 的梯度模式."
+
+(2) docs/drafts/logreg_golden_v1.md -- add a parallel "矩阵广义 / multiclass
+   bridge" subsection AFTER the cheat-sheet softmax Q (currently ends
+   prematurely after the Q&A bullet). Body must include:
+   - Reuse softmax setup: $W \in \mathbb{R}^{d \times K}$, $P = \mathrm{softmax}(XW + \mathbf{1} B^\top)$.
+   - Gradient: $\nabla_W L = \frac{1}{n} X^\top(P - Y)$ where $Y$ is one-hot.
+   - Cross-reference: "对位 LR golden ### 8 矩阵广义节; 把 softmax 换 identity
+     即得 LR multi-output." -- this is the structural-isomorphism punchline.
+   - Note "K=1 (binary) 用 sigmoid 路径足矣 (本文件主线); K >= 2 走 softmax."
+
+Acceptance criteria:
+
+- AC1 (LR seed): grep `^### 8\. 矩阵广义` in seed_linear_regression_20260502.py
+  returns 1 match. grep `nn.Linear` returns >= 1 (NN bridge present).
+  Reseed runs `[UPDATE]` then `[SKIP]` on second run (idempotent).
+
+- AC2 (LogReg draft): the file contains a "矩阵广义" or "multiclass bridge"
+  subsection with explicit cross-reference to LR ### 8. The cross-reference
+  string contains both "LR golden" and "### 8" (exact form flexible).
+  Reseed via seed_logreg_golden_v1.py runs `[REWRITE]` then `[SKIP]`.
+
+- AC3 (math sanity): manual verify both gradients shape-correct in numpy:
+  ```
+  X = np.random.randn(50, 4); W = np.random.randn(4, 3)
+  Y = np.random.randn(50, 3); B = np.random.randn(3)
+  Y_hat = X @ W + B
+  grad_W = (2.0 / 50) * X.T @ (Y_hat - Y)
+  assert grad_W.shape == (4, 3)
+  ```
+  Print "[OK] grad_W shape (4, 3), grad_B shape (3,)".
+
+- AC4 (backend smoke): GET /api/problems/1102 returns notes containing
+  `### 8.`; GET /api/problems/1107 returns notes containing the multiclass
+  bridge text. ProblemDrawer renders both without KaTeX errors.
+
+- AC5 (consistency): user decision -- vec form stays as PRIMARY derivation
+  in both files. Section 8 / multiclass bridge is a parallel extension,
+  NOT a replacement. If at any point during edit the impulse is to strip
+  vec-form derivation, STOP and re-read this AC.
+
+Write path (Invariant 3):
+- Edit scripts/seed_linear_regression_20260502.py NOTES constant + re-run
+  the script (it directly UPDATEs problems.id=1102.notes, idempotent via
+  byte-equal check).
+- Edit docs/drafts/logreg_golden_v1.md + re-run scripts/seed_logreg_golden_v1.py
+  (sentinel-based UPDATE on problems.id=1107.notes).
+- No raw SQL writes.
+
+Out of scope:
+- Backfill to fundamentals chapter (user decision: NOT in scope; vec form is
+  textbook standard at that abstraction level, matrix广义 lives in golden only).
+- TL;DR rewrite -- LogReg's TL;DR already mentions GLM framework.
+
+Depends on T-P0-724 (LogReg P0 fixes -- explicit-(w,b) GD must land first;
+otherwise the LogReg multiclass bridge would still describe the wrong fit).
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -83,6 +248,54 @@ AC:
 - Empty output when no drift (silent-on-no-work rule)
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
+
+#### T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: T-P0-724, T-P1-726
+- **Description**: Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
+LR golden (scripts/seed_linear_regression_20260502.py). Pure cosmetics; no
+correctness changes. Runs LAST in the chain (T-P0-724 -> T-P1-726 -> T-P2-725)
+so renumbering accounts for the matrix广义 section that T-P1-726 adds.
+
+Deltas:
+
+7. Section 1 ("Bias augmentation"): T-P0-724 should already have removed
+   the prose; this task ensures the heading itself is gone (or folded into
+   Section 4 fit).
+
+8. Reorganize top-level structure into LR-style numbered subsections:
+   `### 1. 题面 / ### 2. 推导 / ### 3. Dimension argument /
+    ### 4. 实现 / ### 5. End-to-end test / ### 6. 面试追问 /
+    ### 7. 拓展 / ### 8. 矩阵广义 (multiclass bridge)`
+   The 8 sections match LR golden's post-T-P1-726 structure.
+
+   PRESERVE LogReg's existing TL;DR (5-line interview-ready distillation)
+   as a pre-### block; do NOT delete it.
+
+9. Notation: USER DECISION 2026-05-04 -- canonical = `w^\top x` (`^\top`).
+   Backfill scripts/seed_linear_regression_20260502.py to use `^\top`.
+   AC: grep `\^T[^o]` in both files = 0 matches; `\^\top` >= 5 matches.
+
+Acceptance criteria:
+
+- AC1: grep `^### [0-9]\.` in logreg_golden_v1.md returns 8 numbered sections.
+
+- AC2: both LR seed script + LogReg draft use `^\top` exclusively.
+
+- AC3: ProblemDrawer rendering of 1102 + 1107 still passes; curl
+  `/api/problems/1102` and `/api/problems/1107` both return notes containing
+  `### 8` substring.
+
+- AC4: idempotent reseed -- both seed_linear_regression_20260502.py and
+  seed_logreg_golden_v1.py UPDATE then SKIP on second run.
+
+Depends on T-P1-726 (which itself depends on T-P0-724). Full chain:
+P0-724 (LogReg bias refactor) -> P1-726 (matrix广义 in both files) ->
+P2-725 (cosmetic + notation backfill).
+
+Out of scope: TL;DR backfill onto LR golden; LR's 7+1=8 section structure
+stays, only LogReg gets renumbered.
 
 ### P3 -- Stretch Goals
 
@@ -297,7 +510,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 #### T-P2-716: [AR-17] Placeholder ticket: PostToolUse heartbeat as fallback if AR-12 porcelain signal proves insufficient
 - **Priority**: P2
 - **Complexity**: S
-- **Depends on**: T-P1-713
+- **Depends on**: None
 - **Description**: **Status**: PLACEHOLDER ONLY. Do NOT implement until trigger condition met.
 
 **Trigger condition** (do not start work until this is observed):
@@ -327,28 +540,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 652 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
 - [x] **2026-05-03** -- T-P1-720: [MLI-CONTENT] LR (1102) consolidate orphans + X_design/bias refactor. Two follow-ups on T-P1-719 from user via Discord: (a) global no-duplication: scripts/seed_lr_golden_v1.py + docs/drafts/
 - [x] **2026-05-03** -- T-P1-719: [MLI-CONTENT] Linear Regression (id=1102) golden rewrite: dedupe description+notes. User flagged http://localhost:5173/quick-index?section=ml -> Linear Regression card as 'still not golden, lots of repeti
 - [x] **2026-05-03** -- T-P1-718: Google R2 Coding: 3 interview problems (Gold Chain, Equal-endpoint Max Subarray, LC 2337) -> problems.notes + doc 92 index. Polish 3 R2 interview write-ups to minimal #2337 style; insert into problems table with notes; extend seed_google_r2_cod
 - [x] **2026-05-03** -- T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window. **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wr
-- [x] **2026-05-03** -- T-P1-715: [AR-16] Cold-start fast-fail watchdog (setsid pgid + SIGTERM grace + race-with-AR12 AC). **Goal**: Detect MCP/plugin cold-start hang at session start within ~120s and fast-kill, instead of waiting full CLAUDE_
-- [x] **2026-05-03** -- T-P1-713: [AR-12] Working-tree progress signal in run_claude_with_timeout (state machine + porcelain hash + telemetry + kill switch + debug logging). **Goal**: Extend AR-11's HEAD-diff-only timeout classification with a working-tree (`git status --porcelain`) hash signa
-- [x] **2026-05-03** -- T-P0-722: [MLI-GOLDEN-3P-KNN-DESC] KNN (1106) description math delimiters + narrow UPDATE to skip notes column. Follow-up to T-P0-721 after user reported the Drawer 'Description' section (problem.description, served by seed_knn_2026
-- [x] **2026-05-03** -- T-P0-721: [MLI-GOLDEN-3P-KNN] KNN (1106) third pass: regression section + 拓展 B/C + 2 cheat-sheet Qs (per user golden notes). Third-pass iteration of docs/drafts/knn_golden_v1.md per user-provided rewrite notes (Discord 2026-05-03). Changes: mini
-- [x] **2026-05-03** -- T-P0-711: [MLI-GOLDEN-2P-GEOMED] Geometric Median (1108) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1108 (Geometric Median) per `docs/methodology/ml_impl_note_rewrite_spec.md`
-- [x] **2026-05-03** -- T-P0-710: [MLI-GOLDEN-2P-LOGREG] Logistic Regression (1107) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1107 (Logistic Regression) per `docs/methodology/ml_impl_note_rewrite_spec.
-- [x] **2026-05-03** -- T-P0-709: [MLI-GOLDEN-2P-KNN] KNN (1106) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1106 (KNN) per `docs/methodology/ml_impl_note_rewrite_spec.md` (post-706). 
-- [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch
-- [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
-- [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
-- [x] **2026-05-02** -- T-P2-697: [KMEANS-GOLDEN-3] Extend GoldenToggleButton to support 'problem' item type (cache invalidation + endpoint mapping). WHY: GoldenToggleButton.tsx currently supports framework_node, behavioral_example, company_document (line 8 of the compo
-- [x] **2026-05-02** -- T-P2-696: [KMEANS-GOLDEN-2] Add PUT /problems/{id} support for is_golden field (mirrors behavioral PUT pattern). WHY: GoldenToggleButton (frontend) calls PUT {endpoint} with body { is_golden: bool }. Behavioral examples have a workin
-- [x] **2026-05-02** -- T-P0-712: [AR-11] MLI run_claude_with_timeout: work-done detection (HEAD diff + WIP exclusion + git fallback). Modify run_claude_with_timeout in MLInterviewPrep/scripts/autonomous_run.sh (around line 102-121). On timeout (rc=124/13
-- [x] **2026-05-02** -- T-P0-708: [MLI-GOLDEN-2P-LR] Linear Regression (1102) second pass: shape-per-line + e2e block. **Goal**: Apply second-pass rules to problem 1102 (Linear Regression) per `docs/methodology/ml_impl_note_rewrite_spec.md
-- [x] **2026-05-02** -- T-P0-707: [MLI-GOLDEN-2P-KMEANS] K-Means golden (1064) second pass: shape-per-line + e2e block + empty-cluster prose. **Goal**: Update K-Means golden (problem 1064) with the second-pass rules from `docs/methodology/ml_impl_note_rewrite_sp
-- [x] **2026-05-02** -- T-P0-706: [MLI-GOLDEN-2P-SPEC] Update ml_impl_note_rewrite_spec.md: shape-per-line + e2e-test-block rules. **Goal**: Update `docs/methodology/ml_impl_note_rewrite_spec.md` to add the two new structural rules from the second-pas
-- [x] **2026-05-02** -- T-P0-705: [MLI-GOLDEN-PROMOTE] Smoke test 4 rewrites on /quick-index?section=ml + mark all 4 is_golden=1. **Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is
-- [x] **2026-05-02** -- T-P0-704: [MLI-GOLDEN-GEOMED] Geometric Median (1108) golden-style rewrite + drop '1999' from title (DB + QuickIndex.tsx). **Goal**: Rewrite problem 1108 (Geometric Median) notes to match K-Means golden style (docs/drafts/kmeans_golden_v1.md (
+- [x] **2026-05-03** -- T-P0-724: [MLI-CONTENT] LogReg golden: explicit-(w,b) GD refactor per LR T-P1-720 standard. Align docs/drafts/logreg_golden_v1.md (problems.id=1107) with the explicit-bias
