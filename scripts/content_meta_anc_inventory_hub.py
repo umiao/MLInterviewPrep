@@ -89,7 +89,7 @@ CONTENT = SENTINEL + r"""
 | 5 | Linear Regression | 闭式解 + Ridge/Lasso/SGD | $O(n d^2 + d^3)$ | $w = (X^T X)^{-1} X^T y$, np.linalg.lstsq 不显式求逆 | [打开 -> Linear Regression](db://1102) |
 | 6 | Compiler Optimization | cost-model regression | $O(P \cdot N) \cdot$ search | 8-block Meta-Prompt, lstsq 反推 cost, B/C 解耦 | [打开 -> Compiler](db://1103) |
 | 7 | Find Words Containing Other Words | 5-tier 字符串匹配 | $O(\sum |w_i|)$ | Trie + end-of-word, 走到途中遇 end = 命中 | [打开 -> Find Words](db://1104) |
-| 8 | Card Game Sum-15 | 5-tier game strategy | MC rollout 实战 | (table, deck) state, lru_cache, MC rollout > 实写 DP | [打开 -> Card Game](db://1105) |
+| 8 | Card Game Sum-15 | 5-tier game strategy | state $\le 15^9 \approx 4 \times 10^{10}$ | Tier 2 (heuristic) + measure 必交; Tier 4 (MC rollout) 时间够再加; Tier 5 DP 只口述 | [打开 -> Card Game](db://1105) |
 
 ---
 
@@ -195,11 +195,12 @@ LeetCode 1239 变种, 字典里挑词集合 = 互不相交字母 (each word -> 2
 
 36 张牌 (1..9 各 4 张), 每回合挑 3 张和=15 拿走得 15 分, 直到台面凑不出 valid triple = game over。完美局 = 12 对 = 180 分。
 
-- 澄清四问开场: 数值能否重复? 花色须互异? input 上帝视角 vs 局部视角? 终止条件? -- senior signal 第 1 关。
-- 5-tier ladder 口头爬: greedy ~30% -> heuristic ~55% -> backtrack ~60% -> MC rollout ~80%+ -> expectimax DP 最优。
-- 实战选 Tier 4 (MC rollout) -- hold 得住 + 讲得透; Tier 5 DP `state=(table, deck)` + Bellman + 多元超几何只口述。
-- AI-trap signature: 楼主第 4 问让 AI 写了 150 行 DP 没 validate 就贴 -- 跑过 test 但解释不出。**算法选你 hold 得住的那一档**。
-- 反例 "完美策略每次拿满分?": 否 -- 初始台面 4*9 + 4*8 + 4*7 + 4*6 没任何 triple sum=15, 直接 game over。
+- 澄清**五**问开场: (1) 数值能否重复? (2) 花色须互异? (3) input 上帝视角 vs 局部视角? (4) 终止条件? (5) **目标 = 最大化期望分 vs 最大化 perfect 180 概率?** -- 第 5 问让面试官眼前一亮 (Bellman V vs P 两个版本)。
+- 5-tier ladder 口头爬: greedy -> heuristic -> backtrack (跳过) -> MC rollout -> expectimax DP。**不报具体百分比** (除非真跑过), 改口 "baseline / heuristic 提升 / MC 接近最优"。
+- 实战 (Q4 ~10-15min): **先交 Tier 2 (heuristic) + measure 拿数字**; 时间够再加 Tier 4 (MC rollout); Tier 5 DP `state=(table, deck)` + Bellman + 多元超几何**只口述**。
+- AI-trap signature: 楼主第 4 问让 AI 写了 150 行 DP 没 validate 就贴 -- 跑过 test 但解释不出。**算法选你 hold 得住的那一档**。CoderPad 里的 AI 可能是小模型, DP 错率更高 -- 越要 1 个具体例子纸笔 trace (e.g. `table=(4,0,0,0,0,0,0,0,4)` -> `find_triples` 应返 `[]`)。
+- 反例 "完美策略每次拿满分?": 否, 双层答 -- (理论极端) 初始台面 4*9+4*8+4*7+4*6 直接 game over, P~1/7.3 亿; (现实 failure) 中后期连抽 4 张同 rank 卡死 table。
+- **复杂度算对**: state 上界 $15^9 \approx 4 \times 10^{10}$ (用约束 t+d<=4, per-rank 15 个有效 (t,d) 对), 可达 $10^7 \sim 10^8$ -- Python `lru_cache` 顶不住, 现场用 MC 采样近似。
 
 **[打开完整题解 -> Card Game Sum-15](db://1105)**
 
@@ -209,7 +210,7 @@ LeetCode 1239 变种, 字典里挑词集合 = 互不相交字母 (each word -> 2
 
 1. **状态空间设计是核心考点** -- Maze (key + bomb mask), Card Game ((table, deck)), Max Unique (26-bit) 三题都吃这点。新机制就问"要不要加 mask 维度"。
 2. **复杂度自己复算** -- AI 给的复杂度公式 100% review 一遍。Compiler 反射 / Find Words 字符串没 log / Maze 路径长度从公式里消失 -- 这三个 trap 都中过。
-3. **理论下界先想** -- Find Words 的 $\Omega(N \cdot L)$ / Card Game 的 ~$10^6$ 状态空间 / Sparse Matrix 的 $\Theta(\text{nnz})$ -- 知道下界才知道优化天花板在哪。
+3. **理论下界先想** -- Find Words 的 $\Omega(N \cdot L)$ / Card Game 的 $15^9 \approx 4 \times 10^{10}$ 状态空间上界 (可达 $10^7 \sim 10^8$) / Sparse Matrix 的 $\Theta(\text{nnz})$ -- 知道下界才知道优化天花板在哪。
 4. **离散 + 连续混合时分两步** -- Compiler 阶段 B (建模 lstsq) 和 C (pass 组合搜索) 解耦。Max Unique 也是 (bitmap 预处理离散 + DP 转移连续 mask)。
 5. **LLM 给的常数没引用源 = 默认错** -- Compiler 反射出场, Maze 复杂度复算同源。看到 magic number 就反问"你怎么得到的"。
 6. **idiom 自己写, 模板代码 AI 帮** -- bitmask 编解码 / 双指针 dot / 闭式解推导 = 自己写到肌肉记忆; 边界 case 测试 / blast-area helper / `parse_ir` 模板 = AI 帮写。

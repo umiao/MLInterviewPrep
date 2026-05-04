@@ -378,6 +378,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
+- [x] **2026-05-03** -- T-P1-729: Card Game Sum-15 笔记 v2 重写: 修硬伤(state space 数学/百分比/反例) + 加 Q5/§10 代码骨架/AI 反向坑 +2 + 时间预算. User Discord critique 9KB. 改进 db://1105 description (6.5KB->12.4KB) + doc 90 cheat-sheet card §8 + 共通考点 §3。重点: state spa
 - [x] **2026-05-03** -- T-P1-726: [MLI-CONTENT] LR golden + LogReg golden: add multi-output / NN-friendly matrix form extension subsection. Per user-approved discussion 2026-05-04: keep vec-form as primary derivation
 - [x] **2026-05-03** -- T-P1-720: [MLI-CONTENT] LR (1102) consolidate orphans + X_design/bias refactor. Two follow-ups on T-P1-719 from user via Discord: (a) global no-duplication: scripts/seed_lr_golden_v1.py + docs/drafts/
 - [x] **2026-05-03** -- T-P1-719: [MLI-CONTENT] Linear Regression (id=1102) golden rewrite: dedupe description+notes. User flagged http://localhost:5173/quick-index?section=ml -> Linear Regression card as 'still not golden, lots of repeti
