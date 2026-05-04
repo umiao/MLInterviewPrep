@@ -9,7 +9,7 @@ import { useRouteScrollRestore } from "../hooks/useRouteScrollRestore";
 import ProblemDrawer from "../components/problems/ProblemDrawer";
 import FrameworkNodeDrawer from "../components/framework/FrameworkNodeDrawer";
 import GoldenBadge from "../components/ui/GoldenBadge";
-import { goldenCardClass } from "../utils/goldenStyle";
+import { goldenCardClass, referenceCardClass } from "../utils/goldenStyle";
 
 const LC_PROBLEMS: {
   dbId: number;
@@ -77,6 +77,20 @@ const ML_PROBLEMS: { dbId: number; title: string }[] = [
   { dbId: 1106, title: "K-Nearest Neighbors (KNN + Weighted)" },
   { dbId: 1107, title: "Logistic Regression (Sigmoid + Stable BCE + GD)" },
   { dbId: 1108, title: "Geometric Median (Weiszfeld + Vardi-Zhang variant)" },
+];
+
+const ML_REFERENCE_CARDS: {
+  dbId: number;
+  title: string;
+  tagline: string;
+  chips: string[];
+}[] = [
+  {
+    dbId: 1112,
+    title: "ML 朴素实现汇总",
+    tagline: "Side-by-side reference, common variable conventions (N/M/D/k/C)",
+    chips: ["KNN", "KMeans", "LogReg"],
+  },
 ];
 
 const CLUSTER_FAMILIES: { id: string; label: string; theme_slugs: string[] }[] = [
@@ -279,18 +293,39 @@ export default function QuickIndex() {
       )}
 
       {section === "ml" && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {ML_PROBLEMS.map((p) => (
-            <MLProblemCard
-              key={p.dbId}
-              dbId={p.dbId}
-              title={p.title}
-              onClick={() => {
-                setDrawerLcId(null);
-                setDrawerDbId(p.dbId);
-              }}
-            />
-          ))}
+        <div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {ML_PROBLEMS.map((p) => (
+              <MLProblemCard
+                key={p.dbId}
+                dbId={p.dbId}
+                title={p.title}
+                onClick={() => {
+                  setDrawerLcId(null);
+                  setDrawerDbId(p.dbId);
+                }}
+              />
+            ))}
+          </div>
+          <hr className="my-8 border-gray-200" />
+          <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">
+            朴素实现汇总 / Naive Reference Implementations
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {ML_REFERENCE_CARDS.map((c) => (
+              <MLReferenceCard
+                key={c.dbId}
+                dbId={c.dbId}
+                title={c.title}
+                tagline={c.tagline}
+                chips={c.chips}
+                onClick={() => {
+                  setDrawerLcId(null);
+                  setDrawerDbId(c.dbId);
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -409,6 +444,46 @@ function MLProblemCard({
         <GoldenBadge golden={isGolden} />
       </div>
       <div className="mt-1 font-medium text-gray-800">{title}</div>
+    </button>
+  );
+}
+
+function MLReferenceCard({
+  dbId,
+  title,
+  tagline,
+  chips,
+  onClick,
+}: {
+  dbId: number;
+  title: string;
+  tagline: string;
+  chips: string[];
+  onClick: () => void;
+}) {
+  void dbId;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={
+        "text-left block p-4 rounded-lg border-2 border-purple-300 hover:border-purple-500 hover:shadow-md transition-all " +
+        referenceCardClass(true)
+      }
+    >
+      <span className="text-xs text-purple-700 font-mono">Reference</span>
+      <div className="mt-1 font-medium text-gray-800">{title}</div>
+      <div className="mt-1 text-xs text-gray-500">{tagline}</div>
+      <div className="flex flex-wrap gap-1 mt-2">
+        {chips.map((chip) => (
+          <span
+            key={chip}
+            className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 font-medium"
+          >
+            {chip}
+          </span>
+        ))}
+      </div>
     </button>
   );
 }
