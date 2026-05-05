@@ -9,6 +9,283 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-731
+- **Description**: Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
+
+Context: step 2 of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731 (sd:// URI scheme). After this task and T-P0-733, clicking sd://pinterest-ad-ctr in doc 47 markdown will open this drawer instead of navigating away.
+
+Scope:
+- New file: src/frontend/src/components/SystemDesignDrawer.tsx
+- New file: src/frontend/src/components/SystemDesignDrawer.test.tsx
+- No changes to PrepNotesPage or MarkdownPreview (already done in T-P0-731).
+
+Architecture (mirror CompanyDocDrawer):
+1. Props interface: `{ slug: string | null; onClose: () => void; onLcLinkClick?; onDbLinkClick?; onCdLinkClick? }`. NO onSdLinkClick at this layer -- recursive sd:// inside the drawer REPLACES activeSlug (same pattern as cd:// inside CompanyDocDrawer).
+2. State: `activeSlug` mirrors prop via useEffect (so parent close + reopen with new slug works).
+3. Data fetch: useQuery({ queryKey: ['system-design', activeSlug], queryFn: () => api.get<SystemDesign>(`/system-designs/${activeSlug}`), enabled: activeSlug !== null, retry: false }).
+4. Status discriminated union: 'loading' | 'success' | 'not_found' | 'error' (use ApiRequestError 404 detection like CompanyDocDrawer).
+5. Render: SlideOverPanel + body. Body shows all 9 sections from src/frontend/src/types/system-design.ts SECTION_LABELS in order: overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline, cheat_sheet. Each section: bold Chinese+English label, MarkdownPreview of content (or muted '尚未填写' placeholder if section is null/empty).
+6. Architecture section gets the diagram inline (ImageLightbox of /static/system-designs/<diagram_filename>) when present -- match SystemDesignDetail.tsx behavior.
+7. 404 inline UI: 'System design module not found (slug=...). Link may be stale or the module was renamed -- check system_designs.slug.'
+8. console.warn on fetch failure: prefix '[SystemDesignDrawer] sd://<slug> fetch failed: <msg>'.
+9. Title in header: design.title on success, 'Loading system design (slug=...)' / 'Module not found' / 'Failed to load module' on other states.
+10. Pure helpers exported for vitest pinning: `formatSystemDesignFetchWarning(slug, msg)` and `systemDesignDrawerTitle(status, slug, design?)` -- mirror CompanyDocDrawer pattern so DOM-free unit tests are possible.
+
+Recursive link handling within drawer body (matches CompanyDocDrawer):
+- lc:// db:// cd:// links inside section markdown: bubble UP to parent via onLcLinkClick / onDbLinkClick / onCdLinkClick props (parent typically swaps to ProblemDrawer or CompanyDocDrawer, NOT nested).
+- sd:// links inside section markdown: REPLACE activeSlug locally (no history stack -- YAGNI).
+- Pass onSdLinkClick={(s) => setActiveSlug(s)} into the inner MarkdownPreview.
+
+Scenario matrix:
+| State            | Drawer body                                              |
+|------------------|----------------------------------------------------------|
+| slug=null        | drawer closed (open=false)                               |
+| loading          | 'Loading system design...'                               |
+| success          | 9 sections rendered; missing sections show placeholder   |
+| 404              | inline red error: 'module not found (slug=...)'          |
+| network error    | inline red error: 'Failed to load: <msg>'                |
+| cheat_sheet only | overview/etc placeholders + cheat_sheet markdown shown   |
+| diagram present  | ImageLightbox in architecture section                    |
+| diagram missing  | architecture section renders normally without image      |
+
+Journey AC: After T-P0-733 wires this in, click sd://pinterest-ad-ctr in /companies/29/prep?tab=docs&doc=47 -> drawer opens on right, header shows 'Pinterest ML System Design: Ad CTR Prediction', body shows all 9 sections, ESC closes drawer, scroll position on prep page preserved.
+
+Cross-boundary integration AC: backend GET /system-designs/<slug> already exists (verified 2026-05-04 via routers/system_design.py). Frontend type SystemDesign in src/frontend/src/types/system-design.ts is the authoritative shape. No backend changes required. If 404 path is ever hit, console.warn fires for observability.
+
+Tests (mirror CompanyDocDrawer.test.tsx):
+- formatSystemDesignFetchWarning('foo', 'bar') returns expected prefix
+- systemDesignDrawerTitle returns correct title per status
+- Body renders all 9 section labels in order
+- Body shows 404 message with slug for not_found
+- Body shows error message for error
+- diagram_filename present -> ImageLightbox rendered in architecture section
+- diagram_filename absent -> architecture section has no img
+
+Manual smoke test (after T-P0-733): `cd src/frontend && npm run dev` -> /companies/29/prep?tab=docs&doc=47 -> click each of the 7 SD table links -> drawer renders correct title + 9 sections; lc://322 link inside drawer body bubbles to ProblemDrawer (not nested); back button does NOT pollute history (drawer state is local).
+
+Definition of Done:
+- SystemDesignDrawer.tsx created and typechecks
+- SystemDesignDrawer.test.tsx with 7+ cases above, all green
+- `cd src/frontend && npm run typecheck` green
+- `npx vitest run components/SystemDesignDrawer` green
+- No changes to PrepNotesPage / MarkdownPreview / backend
+
+#### T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-732
+- **Description**: Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the SystemDesignDrawer instead of route-navigating.
+
+Context: step 3 of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731 + T-P0-732. After this task, the dev-server smoke test for the original bug succeeds even before content migration -- though doc 47 still uses path-form links until T-P0-734.
+
+Scope:
+- Edit src/frontend/src/pages/PrepNotesPage.tsx (DrawerTarget + DocumentViewer only).
+- Edit/extend src/frontend/src/pages/PrepNotesPage.test.tsx if drawer-state branching is covered there.
+
+Required changes:
+1. Extend DrawerTarget union (line ~37):
+   ```ts
+   export type DrawerTarget =
+     | { type: 'lc'; id: number }
+     | { type: 'problem'; id: number }
+     | { type: 'company_doc'; id: number }
+     | { type: 'system_design'; slug: string }   // <-- NEW
+     | null;
+   ```
+2. Import SystemDesignDrawer at top of file.
+3. Inside DocumentViewer, the inner MarkdownPreview gets a new prop:
+   `onSdLinkClick={(slug) => setDrawer({ type: 'system_design', slug })}`
+4. Add a sibling drawer render at bottom of DocumentViewer's return (peer to ProblemDrawer + CompanyDocDrawer):
+   ```tsx
+   <SystemDesignDrawer
+     slug={drawer?.type === 'system_design' ? drawer.slug : null}
+     onClose={() => setDrawer(null)}
+     onLcLinkClick={(id) => setDrawer({ type: 'lc', id })}
+     onDbLinkClick={(id) => setDrawer({ type: 'problem', id })}
+     onCdLinkClick={(id) => setDrawer({ type: 'company_doc', id })}
+   />
+   ```
+   This mirrors how CompanyDocDrawer routes its lc:// db:// links UP to swap target type.
+5. Verify CompanyDocDrawer and ProblemDrawer keep working unchanged (DrawerTarget union widening must not break existing branch checks -- the discriminated union pattern handles this for free).
+
+Scenario matrix:
+| User action in doc 47 preview                         | DrawerTarget transition          | Render                            |
+|-------------------------------------------------------|----------------------------------|-----------------------------------|
+| Click sd://pinterest-ad-ctr (after T-P0-734)          | null -> {type:sd, slug}          | SystemDesignDrawer opens          |
+| Click lc://322 inside open SystemDesignDrawer body    | {type:sd,...} -> {type:lc, id}   | Drawer swaps to ProblemDrawer     |
+| Click cd://48 inside open SystemDesignDrawer body     | {type:sd,...} -> {type:cd, id}   | Drawer swaps to CompanyDocDrawer  |
+| Click sd://pinterest-embeddings inside open drawer    | activeSlug replaces locally      | Same drawer, different content    |
+| Press ESC                                             | -> null                          | All drawers close                 |
+| Mode = edit (textarea)                                | onSdLinkClick never wired        | sd:// links not interactive       |
+
+Journey AC: `cd src/frontend && npm run dev` -> /companies/29/prep?tab=docs&doc=47 -> Preview mode -> verify the existing /system-design/<slug> path links still navigate away (pre-migration state) AND inject a temporary `[test](sd://pinterest-ad-ctr)` markdown line manually in the dev DB or via React DevTools -> click test -> SystemDesignDrawer opens.
+
+Cross-boundary integration AC: backend already serves /system-designs/<slug>; frontend now resolves sd:// to a drawer. No new API surface.
+
+Other-case gate ("when condition is false"):
+- effectiveTab !== 'docs' -> DocumentViewer not rendered, sd:// no-op (this is fine; user isn't viewing markdown).
+- mode === 'edit' -> MarkdownPreview not rendered (textarea instead) -> sd:// not interactive. Not a regression.
+- drawer.type already set to non-system_design when sd:// clicked: setDrawer overwrites, single drawer stays open. Verified by discriminated union ordering.
+
+Tests:
+- Type-level check: TypeScript compilation succeeds with widened DrawerTarget union (run `npm run typecheck`).
+- Vitest: if PrepNotesPage.test.tsx already has DocumentViewer drawer scenarios, add an analogous case for sd:// -- click handler -> setDrawer called with {type:'system_design', slug:'foo'} -> SystemDesignDrawer mounted with slug=foo.
+
+Manual smoke test (mandatory):
+1. `cd src/frontend && npm run dev` -> http://localhost:5173/companies/29/prep?tab=docs&doc=47.
+2. Stay in Preview mode. Currently links should still be path-form (T-P0-734 not yet run).
+3. Verify clicking a /system-design/<slug> link still does the broken behavior (control sample).
+4. After T-P0-734 ships, repeat: clicking sd:// link opens SystemDesignDrawer; ESC closes; lc:// inside drawer swaps to ProblemDrawer.
+5. Verify no console errors. Verify back button on browser does NOT take you out of the prep page (drawer is local state, not URL).
+
+Definition of Done:
+- PrepNotesPage.tsx changes typecheck.
+- DrawerTarget union widened.
+- SystemDesignDrawer rendered as sibling to ProblemDrawer + CompanyDocDrawer in DocumentViewer.
+- onSdLinkClick wired to MarkdownPreview.
+- Manual smoke test passes (per checklist above) -- record observation in PROGRESS.md entry.
+
+#### T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-733
+- **Description**: Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pinterest LC Must-Do: Review & Index, company_id=29) with `sd://<slug>` URIs.
+
+Context: step 4 of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731 + T-P0-732 + T-P0-733 (the URI scheme + drawer + wiring must exist before content references the new scheme, otherwise links 404 silently to user). After this task, the original bug (drawer view doesn't render, page navigates away) is fixed for the user's reported URL.
+
+Invariant 3 compliance (CRITICAL): DB content edits MUST go through a git-tracked, idempotent Python seed script. NO ad-hoc SQL. The script must be named scripts/seed_pinterest_lc_must_do_sd_drawer_links.py (matches `seed_<company>_<doc>.py` convention).
+
+Concrete content changes (verified 2026-05-04 from DB):
+| Old href                                                          | New href                          |
+|-------------------------------------------------------------------|-----------------------------------|
+| /system-design/pinterest-ad-ctr                                   | sd://pinterest-ad-ctr             |
+| /system-design/pinterest-embeddings                               | sd://pinterest-embeddings         |
+| /system-design/pinterest-chatbot-pins                             | sd://pinterest-chatbot-pins       |
+| /system-design/pinterest-pin-ranking                              | sd://pinterest-pin-ranking        |
+| /system-design/pinterest-pins-search                              | sd://pinterest-pins-search        |
+| /system-design/pinterest-notification-reco                        | sd://pinterest-notification-reco  |
+| /system-design/pinterest-catalog-bulk-update                      | sd://pinterest-catalog-bulk-update |
+
+Idempotent seed script requirements:
+1. Connect to data/mle_prep.db.
+2. SELECT current content for id=47, company_id=29 (defensive double-check on company_id).
+3. Apply the 7 string replacements using `re.sub` with literal-anchored pattern `r']\(/system-design/(pinterest-[a-z-]+)\)'` -> `r'](sd://\1)'`.
+4. Verify the post-replace content has exactly 7 `sd://pinterest-` occurrences AND zero `/system-design/pinterest-` occurrences. Abort with non-zero exit if assertion fails.
+5. Compute new content_hash (SHA256 of new content) and write content + content_hash + updated_at via UPDATE in a single transaction.
+6. Idempotent: re-running the script after success is a no-op (detect by counting `sd://pinterest-` in pre-content; if all 7 already migrated, log 'already migrated' and exit 0).
+7. Print before/after diff summary (line count, link counts) for review.
+
+Acceptance Criteria:
+- File created: scripts/seed_pinterest_lc_must_do_sd_drawer_links.py.
+- Script run produces: 7 path-form links removed, 7 sd:// links inserted, 0 other content changes.
+- Re-run is no-op (logs 'already migrated').
+- Run `python scripts/audit_uri_consistency.py --hub 47` (after T-P0-735's sd:// support lands; or pre-T-P0-735 just visually verify sd:// count) -> all 7 sd:// links resolve to existing system_designs.slug.
+
+Sanity-check protocol:
+1. Backup current data/mle_prep.db -> data/mle_prep.db.bak_T-P0-734.
+2. Dry-run: `python -c" pull content, run regex, print before+after, count links"` -> verify exactly 7-for-7 swap.
+3. Real run: execute the seed -> commit changes.
+4. Verify in dev server: /companies/29/prep?tab=docs&doc=47 -> Preview mode -> 7 SD table links now render as drawer-trigger buttons (clicking opens SystemDesignDrawer per T-P0-733 wiring).
+5. Round-trip: refresh page, click each of the 7 links, observe drawer opens for each. Note in PROGRESS.md.
+
+Other-case gate:
+- If user has unsaved local edits to doc 47 in dev: warn and require explicit consent (script is meant for clean state).
+- If any of the 7 slugs becomes missing from system_designs (future schema change): T-P0-735's audit catches it.
+
+Manual smoke test (mandatory acceptance gate):
+http://localhost:5173/companies/29/prep?tab=docs&doc=47 in Preview mode -> click each of 7 SD table links one by one -> drawer renders correct title for each -> ESC closes -> page state preserved.
+
+Definition of Done:
+- scripts/seed_pinterest_lc_must_do_sd_drawer_links.py committed.
+- Doc 47 content migrated in data/mle_prep.db.
+- Script idempotency verified (re-run = no-op).
+- Manual smoke test pass recorded in PROGRESS.md.
+
+#### T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-734
+- **Description**: Add sd://<slug> validation to scripts/audit_uri_consistency.py so future drift between company_documents.content sd:// links and the system_designs.slug catalog is caught at audit time (just like the existing db:// / cd:// audit).
+
+Context: step 5 of the 6-step Pinterest System Design drawer fix. Soft dependency on T-P0-734 (so the audit can verify the migrated doc 47 round-trip), but the audit logic itself can be added before content migration.
+
+Scope:
+- Edit scripts/audit_uri_consistency.py.
+- (No-op for tests/audit_uri_consistency_test.py if exists -- extend to cover sd:// case.)
+
+Required changes:
+1. Add module-level constant `SD_LINK_RE = re.compile(r'sd://([a-z0-9-]+)')` parallel to DB_LINK_RE / CD_LINK_RE.
+2. Add helper `_existing_slugs(conn, table, slug_col)` (return set of all values in table.slug_col) parallel to `_existing_ids`.
+3. In the main scan loop, also extract sd:// matches from each doc and validate target slug is present in `system_designs.slug`. Record findings:
+   - VALID: slug found.
+   - ERROR / dangling: slug missing from system_designs (link is broken; system_designs row was deleted/renamed).
+   - WARNING (cross-table): not applicable for sd:// since system_designs uses string slugs and the other tables use integer ids -- cross-confusion physically impossible. Document this in code comment for future reader.
+4. Update the Finding dataclass scheme field doc to mention 'sd' as a valid value.
+5. Update the docstring at the top of the file to describe sd:// auditing.
+6. Update CLI help / error class summary to include sd:// counts.
+7. Update --hub semantics: --hub now accepts either int (company_documents.id) or string (system_designs.slug)? Out of scope for this task -- keep --hub int-only.
+
+Acceptance Criteria:
+- After T-P0-734 ships AND this task ships, `python scripts/audit_uri_consistency.py` exits 0.
+- If a test scenario inserts `[bad](sd://no-such-slug)` into doc 47, audit exits 1 with ERROR finding listing the dangling slug.
+- Existing db:// and cd:// findings unchanged (no false positives, no false negatives -- diff stat the output before/after this change with a clean DB to confirm).
+- --json output includes sd:// findings in the same array shape as db:// findings.
+
+Tests:
+- If audit has a unit-test counterpart: extend it. If not: a self-contained dry-run with a temp DB containing system_designs.slug='valid' + a doc with [a](sd://valid) and [b](sd://invalid) -> exit 1, ERROR for invalid only.
+
+Manual smoke test:
+- Pre-T-P0-734: run audit -> sees 7 sd:// links in doc 47 (assuming T-P0-734 is also done by now) all VALID.
+- Inject a typo: temporarily edit data/mle_prep.db (DEV ONLY) to change one slug to 'pinterest-ad-ctr-typo' -> audit exits 1 with that finding -> revert.
+
+Definition of Done:
+- audit_uri_consistency.py recognizes sd:// scheme + system_designs catalog.
+- Exit-0 on clean DB; exit-1 with ERROR on dangling sd://.
+- Existing db://, cd:// behavior unchanged.
+- Audit runs in CI same way it did before (no new dependencies).
+
+#### T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-735
+- **Description**: Document the new 4th URI scheme in workspace memory and capture the bug class as a lesson so future content authors don't repeat the path-form mistake.
+
+Context: final step of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731..735 all completed.
+
+Scope:
+1. Update C:/Users/Shenghui Xu/.claude/projects/C--Users-Shenghui-Xu-Desktop-Gen-AI-Proj/memory/reference_dblc_drawer_links.md to mention the 4th scheme `sd://<slug>` -> SystemDesignDrawer with explicit 404 UI + warn-on-fail. Keep the existing 3-scheme guidance and add: 'Four URI schemes in MLI markdown' + the slug-vs-id distinction (sd uses system_designs.slug not problems.id).
+2. Update memory description in MEMORY.md to match (one-line update only).
+3. Append a LESSONS.md entry under MLInterviewPrep/LESSONS.md with the failure class:
+   - **What broke**: doc 47 used `/system-design/<slug>` route paths in markdown table, which navigate the page away instead of opening a drawer.
+   - **Why this is a class, not a one-off**: any future author who knows about `/system-design/...` routes but is unaware of the drawer convention can introduce the same bug for any markdown surface that wires onSdLinkClick.
+   - **The general rule**: drawer-eligible cross-references in company_documents.content MUST use a URI scheme (lc:// db:// cd:// sd://). Path-form links navigate.
+   - **The catch**: `scripts/audit_uri_consistency.py` now scans sd:// (T-P0-735); it does NOT yet scan for `/system-design/<slug>` path-form misuses. Future task could add that.
+4. Update workspace memory MEMORY.md index entry for reference_dblc_drawer_links.md if the description line needs to mention the 4th scheme.
+
+Acceptance Criteria:
+- reference_dblc_drawer_links.md mentions 4 schemes (was 3); the audit command in the memory body still works.
+- LESSONS.md has a new entry dated 2026-05-04 (or later if work spans days) titled '[SD-DRAWER] system-design path-form -> sd:// scheme migration'.
+- MEMORY.md description still <=150 chars on its line.
+- (Optional) PROGRESS.md final entry consolidates all 6 sub-task outcomes with a single 'Status: [DONE]' line.
+
+Manual smoke test (final integration):
+1. Open http://localhost:5173/companies/29/prep?tab=docs&doc=47 in Preview mode.
+2. Click each of the 7 System Design table links (Ad CTR, Embeddings, Chatbot Pins, Pin Ranking, Pins Search, Notification Reco, Catalog Bulk Update).
+3. Each click: drawer slides in from right, header shows correct title, body shows 9 sections.
+4. Inside drawer, click any lc:// link in the body -> drawer swaps to ProblemDrawer (NOT nested).
+5. Inside drawer, click sd:// link if present -> active slug replaces (same drawer, new content).
+6. Press ESC -> drawer closes, prep page state preserved.
+7. Run `python scripts/audit_uri_consistency.py` -> exit 0.
+
+Definition of Done:
+- Memory updated.
+- LESSONS.md entry added.
+- Final smoke test pass recorded in PROGRESS.md.
+- All 6 SD-DRAWER tasks closed in tasks.db.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -377,6 +654,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
+- [x] **2026-05-04** -- T-P0-731: [SD-DRAWER-1] Add sd://<slug> URI scheme to MarkdownPreview. Add a 4th drawer URI handler in src/frontend/src/components/ui/MarkdownPreview.tsx, parallel to existing lc:// db:// cd:
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
 - [x] **2026-05-03** -- T-P1-729: Card Game Sum-15 笔记 v2 重写: 修硬伤(state space 数学/百分比/反例) + 加 Q5/§10 代码骨架/AI 反向坑 +2 + 时间预算. User Discord critique 9KB. 改进 db://1105 description (6.5KB->12.4KB) + doc 90 cheat-sheet card §8 + 共通考点 §3。重点: state spa
 - [x] **2026-05-03** -- T-P1-726: [MLI-CONTENT] LR golden + LogReg golden: add multi-output / NN-friendly matrix form extension subsection. Per user-approved discussion 2026-05-04: keep vec-form as primary derivation

@@ -32,6 +32,13 @@ interface MarkdownPreviewProps {
    * company-document id, opening the company-doc drawer.
    */
   onCdLinkClick?: (cdId: number) => void;
+  /**
+   * Called when the user clicks a link with href of form `sd://<slug>` (e.g.
+   * `sd://pinterest-ad-ctr`). When provided, those links render as buttons
+   * invoking this handler with the system-design slug, opening the system-design
+   * drawer. Slugs are lowercase kebab-case per the `system_designs` table.
+   */
+  onSdLinkClick?: (slug: string) => void;
 }
 
 /** Green checkmark SVG (GitHub PR style). */
@@ -78,6 +85,7 @@ export default function MarkdownPreview({
   onLcLinkClick,
   onDbLinkClick,
   onCdLinkClick,
+  onSdLinkClick,
 }: MarkdownPreviewProps) {
   const headingsRef = useRef<TocHeading[]>([]);
   const prevJsonRef = useRef<string>("");
@@ -176,6 +184,27 @@ export default function MarkdownPreview({
                     e.preventDefault();
                     e.stopPropagation();
                     onCdLinkClick(cdId);
+                  }}
+                  className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
+                >
+                  {children}
+                </button>
+              );
+            }
+            // `sd://<slug>` opens the system-design drawer. Slug is lowercase
+            // kebab-case per system_designs table (case-strict so we don't
+            // silently accept malformed links). Optional `#anchor` accepted
+            // but ignored at the link layer.
+            const sdMatch = typeof href === "string" ? href.match(/^sd:\/\/([a-z0-9-]+)(?:#[^\s]*)?$/) : null;
+            if (sdMatch && onSdLinkClick) {
+              const slug = sdMatch[1];
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSdLinkClick(slug);
                   }}
                   className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
                 >

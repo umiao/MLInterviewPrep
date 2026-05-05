@@ -153,6 +153,74 @@ describe("MarkdownPreview link handling", () => {
     expect(html).toMatch(/<a[^>]*target="_blank"/);
   });
 
+  it("renders sd://<slug> as button when onSdLinkClick provided", () => {
+    // T-P0-731: sd:// is the system-design drawer scheme, peer to cd://.
+    // Slug is lowercase kebab-case per system_designs table.
+    const handler = (slug: string) => slug;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview
+        markdown="[ctr](sd://pinterest-ad-ctr)"
+        onSdLinkClick={handler}
+      />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*sd:\/\//);
+    expect(html).toContain("ctr");
+  });
+
+  it("renders sd://<slug>#anchor as button (anchor stripped at link layer)", () => {
+    // Mirror cd:// / db:// optional anchor behavior — drawer opens, anchor
+    // ignored at link layer (future task may scroll inside drawer).
+    const handler = (slug: string) => slug;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview
+        markdown="[ctr](sd://pinterest-ad-ctr#features)"
+        onSdLinkClick={handler}
+      />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*sd:\/\//);
+  });
+
+  it("sd:// falls through to anchor when onSdLinkClick not provided", () => {
+    // Backward-compat: surfaces that have not opted in still see a link.
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[ctr](sd://pinterest-ad-ctr)" />
+    );
+    expect(html).toMatch(/<a[^>]*href="sd:\/\/pinterest-ad-ctr"/);
+    expect(html).toMatch(/<a[^>]*target="_blank"/);
+  });
+
+  it("sd:// with uppercase slug falls back to anchor (regex case-strict)", () => {
+    // Regex is intentionally [a-z0-9-]+ — uppercase = malformed slug, must
+    // not silently route to drawer. Falls through to default <a target=_blank>.
+    const handler = (slug: string) => slug;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview
+        markdown="[ctr](sd://Pinterest-AD-CTR)"
+        onSdLinkClick={handler}
+      />
+    );
+    expect(html).not.toContain("<button");
+    expect(html).toMatch(/<a[^>]*href="sd:\/\/Pinterest-AD-CTR"/);
+    expect(html).toMatch(/<a[^>]*target="_blank"/);
+  });
+
+  it("plain route /system-design/<slug> is NOT intercepted (regression guard)", () => {
+    // Regression: only sd://<slug> URI form should match. Plain route paths
+    // must continue to render as anchors so existing pre-migration links
+    // still navigate (until docs are migrated to sd:// form).
+    const handler = (slug: string) => slug;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview
+        markdown="[ctr](/system-design/pinterest-ad-ctr)"
+        onSdLinkClick={handler}
+      />
+    );
+    expect(html).not.toContain("<button");
+    expect(html).toMatch(/<a[^>]*href="\/system-design\/pinterest-ad-ctr"/);
+  });
+
   it("renders cd:// inside an inline HTML <table rowspan> as drawer-button", () => {
     // T-P0-677: the Meta AI-Native hub schedule (doc 82) uses inline HTML
     // <table> with rowspan="2" on the merged 11:00/13:00 coding row to fold
