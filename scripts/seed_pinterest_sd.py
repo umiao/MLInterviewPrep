@@ -25,6 +25,7 @@ DEFAULT_DB = REPO_ROOT / "data" / "mle_prep.db"
 
 # (source_file_stem, slug, company_scope_subtitle)
 SD_FILES: list[tuple[str, str]] = [
+    ("system_design_concepts", "pinterest-system-design-concepts"),
     ("system_design_ad_ctr", "pinterest-ad-ctr"),
     ("system_design_embeddings", "pinterest-embeddings"),
     ("system_design_chatbot_pins", "pinterest-chatbot-pins"),
@@ -225,7 +226,9 @@ def main() -> int:
         h1, _ = split_sections(md)
         title = h1 or stem.replace("_", " ").title()
         fields = map_to_columns(md)
-        display_order = 100 + i  # After interview-* entries.
+        # display_order 199..206: SD_FILES[0]=concept doc -> 199, then ad-ctr..catalog
+        # land at 200..206 (matches existing DB state and the >= 199 frontend filter).
+        display_order = 199 + i
         actions.append(upsert_sd(cur, slug, title, fields, display_order, args.dry_run))
 
     # Seed company_documents for the 3 non-SD files.

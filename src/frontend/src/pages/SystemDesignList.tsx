@@ -202,6 +202,13 @@ const TOPIC_META: Record<string, TopicMeta> = {
     tags: ["Two-Tower", "DLRM", "MMoE", "Multi-task"],
     category: "Recommendation & ML",
   },
+  "pinterest-system-design-concepts": {
+    description:
+      "Pinterest 核心概念与术语 deep-dive 索引: 多任务排序架构 (MMoE/PLE/DLRM/DCN-v2)、检索与 ANN (HNSW/IVF/Faiss)、LTR 方法、评估指标、纠偏与 LLM 微调、基础设施与业务 KPI、Pinterest 专属系统 (PinSAGE/SearchSAGE/Catalog)。",
+    difficulty: "Hard",
+    tags: ["Concepts", "Glossary", "Index"],
+    category: "Pinterest",
+  },
   "pinterest-ad-ctr": {
     description:
       "Pinterest ad CTR prediction: feature engineering for pins/users/context, GBDT vs deep model tradeoffs, calibration, online learning loop, exploration via Thompson sampling.",
@@ -285,12 +292,14 @@ export default function SystemDesignList() {
     [modules],
   );
 
-  // Interview topics: display_order in [100, 200), grouped by category.
-  // Pinterest 200-206 is a separate tab to avoid interleaving with general
-  // interview prep (T-2026-05-01: user request).
+  // Interview topics: display_order in [100, 199), grouped by category.
+  // Pinterest 199-206 (concept index doc at 199; SD docs at 200..206) is a
+  // separate tab to avoid interleaving with general interview prep
+  // (T-2026-05-01: user request; T-P1-740: bumped lower bound to 199 for
+  // the Pinterest concept-doc index).
   const interviewTopics = useMemo(() => {
     const topics = modules.filter(
-      (m) => m.display_order >= 100 && m.display_order < 200,
+      (m) => m.display_order >= 100 && m.display_order < 199,
     );
     const grouped: Record<string, SystemDesignSummary[]> = {};
     for (const cat of CATEGORY_ORDER) {
@@ -308,9 +317,10 @@ export default function SystemDesignList() {
     return grouped;
   }, [modules]);
 
-  // Pinterest topics: display_order >= 200 (separate section, sorted at bottom).
+  // Pinterest topics: display_order >= 199 (concept index doc at 199; 7 SD
+  // docs at 200..206), separate section sorted at bottom.
   const pinterestTopics = useMemo(() => {
-    const topics = modules.filter((m) => m.display_order >= 200);
+    const topics = modules.filter((m) => m.display_order >= 199);
     const grouped: Record<string, SystemDesignSummary[]> = {};
     for (const cat of PINTEREST_CATEGORY_ORDER) {
       grouped[cat] = [];
@@ -328,11 +338,11 @@ export default function SystemDesignList() {
   }, [modules]);
 
   const interviewCount = useMemo(
-    () => modules.filter((m) => m.display_order >= 100 && m.display_order < 200).length,
+    () => modules.filter((m) => m.display_order >= 100 && m.display_order < 199).length,
     [modules],
   );
   const pinterestCount = useMemo(
-    () => modules.filter((m) => m.display_order >= 200).length,
+    () => modules.filter((m) => m.display_order >= 199).length,
     [modules],
   );
 
@@ -526,7 +536,8 @@ export default function SystemDesignList() {
       )}
 
       {/* Pinterest tab — separated from general interview prep so it doesn't
-          interfere with the main study list. Sorted at display_order 200+. */}
+          interfere with the main study list. Sorted at display_order 199+
+          (concept index doc at 199; 7 SD docs at 200..206). */}
       {activeTab === "pinterest" && (
         <div>
           <p className="text-sm text-gray-600 mb-6">

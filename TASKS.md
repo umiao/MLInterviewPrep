@@ -60,6 +60,371 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-741: [PINT-CONCEPTS-B] Concept doc: fill Section 1 - Multi-Task & Ranking Architectures
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Multi-Task & Ranking Architectures` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: DCN-v2, MMOE, PLE, Two-Tower, DSSM, DLRM, Wide & Deep, DeepFM, AutoInt
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#b-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-742: [PINT-CONCEPTS-C] Concept doc: fill Section 2 - Retrieval & Approximate Nearest Neighbor
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Retrieval & Approximate Nearest Neighbor` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: ANN, HNSW, IVF, PQ, Faiss, ScaNN, GraphSAGE, PinSage, ItemSage, cold-start
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#c-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-743: [PINT-CONCEPTS-D] Concept doc: fill Section 3 - Learning-to-Rank Methods
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Learning-to-Rank Methods` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: LTR, LambdaRank, ListNet, ListMLE, DPP, Submodular, Pareto frontier
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#d-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-744: [PINT-CONCEPTS-E] Concept doc: fill Section 4 - Evaluation Metrics
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Evaluation Metrics` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: NDCG@K, MRR, MAP, AUC, ECE, PSI, KS-test, Recall@K, calibration metrics
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#e-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-745: [PINT-CONCEPTS-F] Concept doc: fill Section 5 - Debiasing & LLM Fine-Tuning
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Debiasing & LLM Fine-Tuning` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: IPS, LogQ correction, CUPED, DML, DPO, RLHF, SFT, PPO, InfoNCE, RAG, RRF, MMR
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#f-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-746: [PINT-CONCEPTS-G] Concept doc: fill Section 6 - Infrastructure & Business KPIs
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Infrastructure & Business KPIs` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: NDJSON, 2PC, CDC, DLQ, RPO/RTO, WAU/DAU/MAU, QPS, CTR, pCTR, pCVR, oCPM, APNs/FCM
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#g-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-747: [PINT-CONCEPTS-H] Concept doc: fill Section 7 - Pinterest-Specific Systems
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-740
+- **Description**: Fill the body of `## Pinterest-Specific Systems` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: Pinnability, Pixie random-walk, Homefeed blender, PinSage paper, ItemSage, Pinterest Lens
+
+Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
+  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
+  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
+  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
+  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
+
+Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#h-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
+
+After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
+
+AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
+AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
+AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
+AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
+AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
+
+#### T-P1-748: [PINT-CONCEPTS-I] Inline acronym expansion: pinterest-ad-ctr
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_ad_ctr.md` (system_designs.id=29), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: DCN-v2, GBDT, CVR/pCVR, oCPM, FM, AutoInt, AUC, ECE, BCE, IPS, PSI, KS-test, Wide & Deep, LightGBM
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-ad-ctr returns updated content; frontend at /system-design/pinterest-ad-ctr renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-749: [PINT-CONCEPTS-J] Inline acronym expansion: pinterest-embeddings
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_embeddings.md` (system_designs.id=30), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: ANN, HNSW, ScaNN, ViT, mBERT, CLIP, PQ, IVF, Faiss, GraphSAGE, NDCG@K, GradNorm, PCGrad
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-embeddings returns updated content; frontend at /system-design/pinterest-embeddings renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-750: [PINT-CONCEPTS-K] Inline acronym expansion: pinterest-chatbot-pins
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_chatbot_pins.md` (system_designs.id=31), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: BiLSTM-CRF, NER, SBERT, DistilBERT, vLLM, DPO, RLHF, SFT, PPO, DML, CLIP, ViT-L/14
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-chatbot-pins returns updated content; frontend at /system-design/pinterest-chatbot-pins renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-751: [PINT-CONCEPTS-L] Inline acronym expansion: pinterest-pin-ranking
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_pin_ranking.md` (system_designs.id=32), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: MMOE, PLE, DLRM, DPP, LambdaRank, CUPED, IPS, position bias
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-pin-ranking returns updated content; frontend at /system-design/pinterest-pin-ranking renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-752: [PINT-CONCEPTS-M] Inline acronym expansion: pinterest-pins-search
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_pins_search.md` (system_designs.id=33), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: LTR, HNSW, IVF, ScaNN, Faiss, ListNet, ListMLE, mBERT, LaBSE, BM25, InfoNCE
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-pins-search returns updated content; frontend at /system-design/pinterest-pins-search renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-753: [PINT-CONCEPTS-N] Inline acronym expansion: pinterest-notification-reco
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_notification_reco.md` (system_designs.id=34), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: WAU/DAU/MAU, QPS, APNs, FCM, IPS, Submodular, Lagrangian dual
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-notification-reco returns updated content; frontend at /system-design/pinterest-notification-reco renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
+
+Acronyms to expand: NDJSON, 2PC, CDC, DLQ, RPO/RTO, SQS, MirrorMaker
+
+Rules:
+- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
+- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
+- DO NOT add explanatory paragraphs. Just the bracketed expansion.
+- If an acronym is already expanded inline (✓ in original audit), SKIP it.
+- Format edge cases: 
+  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
+  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
+  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
+- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
+
+AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
+AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
+AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
+AC4: re-seed clean; GET /system-designs/pinterest-catalog-bulk-update returns updated content; frontend at /system-design/pinterest-catalog-bulk-update renders without markdown errors.
+AC5: idempotent re-run of seed produces UPDATE not INSERT.
+
+#### T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P1-740
+- **Description**: Final QA pass after all section + inline tasks complete.
+
+Steps:
+1. Run `python scripts/audit_uri_consistency.py` (per memory `reference_dblc_drawer_links`). Confirm zero broken `sd://` / `cd://` / `lc://` links across all touched files.
+2. Frontend smoke at /system-design?tab=pinterest:
+   - 8 Pinterest cards visible, concept doc card included
+   - Click concept doc → all 7 H2 sections render with 中文 + English mix
+   - KaTeX renders in concept doc without errors
+   - Click each of the 7 existing Pinterest topic docs → confirm acronym expansions visible at first occurrence
+3. Confirm `python scripts/seed_pinterest_sd.py` is idempotent (8 UPDATEs, no INSERTs).
+4. Append a PROGRESS.md close-out entry summarizing the 16-task batch.
+5. Delete `scripts/_apply_pinterest_concepts_tasks.py` (this script's source; matches `_apply_*.py` post-run cleanup convention).
+
+AC1: audit_uri_consistency.py exits 0 with no findings against any of the 8 Pinterest docs.
+AC2: manual frontend smoke confirms 8 cards + KaTeX-clean concept doc + acronym expansions in topic docs.
+AC3: PROGRESS.md has a close-out entry referencing T-A through T-P task IDs.
+AC4: `_apply_pinterest_concepts_tasks.py` deleted; tree-clean except for the new concept_md and the 7 patched topic mds + the seed script edit.
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -377,6 +742,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-05** -- T-P1-740: [PINT-CONCEPTS-A] Create concept-doc skeleton + register seed + fix display_order alignment. Goal: bootstrap a new Pinterest-tab system-design doc that will house all core-concept deep-dives (no inline body yet, s
 - [x] **2026-05-05** -- T-P1-739: [Google] Add 蛋糕水平分割线 (sweep line + 离散化 + 线段树 进阶精讲) to R2 Coding Index. User Discord drop 2026-05-05: add new Google custom problem with shallow-easy 'advanced segment tree' deep-dive. Created
 - [x] **2026-05-04** -- T-P1-738: Card Game Sum-15 (db://1105 + cd://90 §8) major refactor: dedup/tablify/code-up/kill puffery. User-driven 2026-05-04: compress problems.id=1105 description from 12379→6151 chars; sync §8 card in cd://90; fix '12 对'
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
