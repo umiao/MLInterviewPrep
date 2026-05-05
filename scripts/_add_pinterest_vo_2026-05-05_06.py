@@ -8,7 +8,10 @@ interviewer_name is parsed from the trailing "| <Interviewer>" suffix in title.
 This is more stable than title-as-key because round labels (e.g. "ML Systems
 Design" vs "ML SD") may be edited later without breaking uniqueness.
 
-Source: VO schedule confirmed 2026-04-29 (Pinterest VO May 5-6).
+Source: VO schedule confirmed 2026-04-29 (Pinterest VO May 5-6); interviewer
+roster + CoderPad links updated 2026-05-04 from emails 5 + 6 (Day 1 R1
+Yiyang Zhang -> Xiao Su; Day 2 R1 Jiankai Sun -> Eric Kim; Day 2 R2
+Yijian Xiang -> Paulo Soares; CoderPad URLs added to all 5 rounds).
 Timezone: naive Pacific time (PDT = GMT-07:00 on 2026-05-05 / 2026-05-06),
 per project convention.
 
@@ -34,13 +37,14 @@ TITLE_PREFIX = "Pinterest VO Day"
 EVENTS = [
     {
         "event_type": "system_design",
-        "title": "Pinterest VO Day 1 R1 -- ML Systems Design | Yiyang Zhang",
+        "title": "Pinterest VO Day 1 R1 -- ML Systems Design | Xiao Su",
         "description": (
             "Pinterest virtual onsite - Day 1, Round 1.\n"
             "Tuesday 2026-05-05, 3:00-4:00 PM PDT (GMT-07:00).\n"
             "ML Systems Design.\n"
-            "Interviewer: Yiyang Zhang.\n"
+            "Interviewer: Xiao Su (Sr. Machine Learning Engineer).\n"
             "Platform: Zoom.\n"
+            "CoderPad: https://app.coderpad.io/6M4XZEG9\n"
             "Reference: company_documents id=83 (Pinterest VO prep doc)."
         ),
         "scheduled_at": "2026-05-05 15:00:00",
@@ -53,8 +57,9 @@ EVENTS = [
             "Pinterest virtual onsite - Day 1, Round 2.\n"
             "Tuesday 2026-05-05, 4:00-4:45 PM PDT (GMT-07:00).\n"
             "Hiring Manager / Competency (behavioral).\n"
-            "Interviewer: Daniel Liu.\n"
+            "Interviewer: Daniel Liu (Manager II, Machine Learning Engineering).\n"
             "Platform: Zoom.\n"
+            "CoderPad: https://app.coderpad.io/AQD3MMCC\n"
             "Reference: company_documents id=83 (Pinterest VO prep doc)."
         ),
         "scheduled_at": "2026-05-05 16:00:00",
@@ -62,13 +67,14 @@ EVENTS = [
     },
     {
         "event_type": "technical",
-        "title": "Pinterest VO Day 2 R1 -- Data/Algos | Jiankai Sun",
+        "title": "Pinterest VO Day 2 R1 -- Data/Algos | Eric Kim",
         "description": (
             "Pinterest virtual onsite - Day 2, Round 1.\n"
             "Wednesday 2026-05-06, 1:00-1:45 PM PDT (GMT-07:00).\n"
             "Data Structures & Algorithms (coding).\n"
-            "Interviewer: Jiankai Sun.\n"
+            "Interviewer: Eric Kim (Staff Machine Learning Engineer).\n"
             "Platform: Zoom.\n"
+            "CoderPad: https://app.coderpad.io/YNE499CY\n"
             "Note: 15-min break before Day 2 R2.\n"
             "Reference: company_documents id=83 (Pinterest VO prep doc)."
         ),
@@ -77,13 +83,14 @@ EVENTS = [
     },
     {
         "event_type": "technical",
-        "title": "Pinterest VO Day 2 R2 -- Data/Algos | Yijian Xiang",
+        "title": "Pinterest VO Day 2 R2 -- Data/Algos | Paulo Soares",
         "description": (
             "Pinterest virtual onsite - Day 2, Round 2.\n"
             "Wednesday 2026-05-06, 2:00-2:45 PM PDT (GMT-07:00).\n"
             "Data Structures & Algorithms (coding).\n"
-            "Interviewer: Yijian Xiang.\n"
+            "Interviewer: Paulo Soares (he/him, Sr. Machine Learning Engineer).\n"
             "Platform: Zoom.\n"
+            "CoderPad: https://app.coderpad.io/2RDZ3QD3\n"
             "Note: 15-min break before Day 2 R3.\n"
             "Reference: company_documents id=83 (Pinterest VO prep doc)."
         ),
@@ -97,8 +104,9 @@ EVENTS = [
             "Pinterest virtual onsite - Day 2, Round 3.\n"
             "Wednesday 2026-05-06, 3:00-4:00 PM PDT (GMT-07:00).\n"
             "ML Practitioner (applied ML coding/discussion).\n"
-            "Interviewer: Zihao Zhang.\n"
+            "Interviewer: Zihao Zhang (he/him, Sr. Machine Learning Engineer).\n"
             "Platform: Zoom.\n"
+            "CoderPad: https://app.coderpad.io/AWAF43ZX\n"
             "Reference: company_documents id=83 (Pinterest VO prep doc)."
         ),
         "scheduled_at": "2026-05-06 15:00:00",
