@@ -1,19 +1,25 @@
-"""T-P0-675: Audit `db://N` and `cd://N` URI consistency in company_documents.content.
+"""T-P0-675 / T-P0-735: Audit drawer URI consistency in company_documents.content.
 
-Markdown drawer links inside `company_documents.content` use two schemes:
-  - `db://N` -- ProblemDrawer target; N must reference `problems.id`
-  - `cd://N` -- CompanyDocDrawer target; N must reference `company_documents.id`
+Markdown drawer links inside `company_documents.content` use three schemes:
+  - `db://N`     -- ProblemDrawer target; N must reference `problems.id`
+  - `cd://N`     -- CompanyDocDrawer target; N must reference `company_documents.id`
+  - `sd://<slug>` -- SystemDesignDrawer target; slug must reference
+                    `system_designs.slug` (string-keyed, not numeric)
 
 Because `problems` and `company_documents` are independent auto-increment tables,
 the same numeric N can validly exist in BOTH tables. The URI scheme is the ONLY
-disambiguator. This audit scans every doc, extracts every link of each scheme,
-and verifies the target row exists in the correct table.
+disambiguator for db:// vs cd://. This audit scans every doc, extracts every
+link of each scheme, and verifies the target row exists in the correct table.
+
+For `sd://` cross-table confusion is physically impossible: `system_designs.slug`
+is a string slug while `problems.id` / `company_documents.id` are integers. The
+sd:// audit therefore only emits VALID or ERROR (dangling), never WARNING.
 
 Outputs three result classes per (doc, link):
   - VALID   -- target found in the expected table.
-  - WARNING -- target found in expected table, but ALSO exists in the other
-               table; the URI scheme makes the resolver unambiguous, so this
-               is informational, not an error.
+  - WARNING -- (db:// / cd:// only) target found in expected table, but ALSO
+               exists in the other table; the URI scheme makes the resolver
+               unambiguous, so this is informational, not an error.
   - ERROR   -- target NOT found in expected table. Sub-categorised:
                * cross-table corruption: `db://N` where N is missing from
                  `problems` but present in `company_documents` (link should
@@ -21,7 +27,7 @@ Outputs three result classes per (doc, link):
                * cross-table corruption: `cd://N` where N is missing from
                  `company_documents` but present in `problems` (link should
                  be `db://N`).
-               * dangling: target absent from BOTH tables.
+               * dangling: target absent from the relevant table(s).
 
 Exits 0 if zero ERRORs, 1 otherwise. CI-friendly. Wire into
 `.github/workflows/ci.yml` as a separate job (see README -- the audit only
@@ -48,6 +54,7 @@ DB_PATH = Path(__file__).resolve().parents[1] / "data" / "mle_prep.db"
 
 DB_LINK_RE = re.compile(r"db://(\d+)")
 CD_LINK_RE = re.compile(r"cd://(\d+)")
+SD_LINK_RE = re.compile(r"sd://([a-z0-9-]+)")
 
 
 @dataclass(frozen=True)
@@ -57,8 +64,8 @@ class Finding:
     doc_id: int
     doc_title: str
     company_id: int
-    scheme: str           # "db" or "cd"
-    target_id: int
+    scheme: str           # "db", "cd", or "sd"
+    target_id: int | str  # int for db://N / cd://N; str slug for sd://slug
     severity: str         # "VALID", "WARNING", "ERROR"
     message: str
 
@@ -81,6 +88,17 @@ def _existing_ids(conn: sqlite3.Connection, table: str) -> set[int]:
     return {row[0] for row in cur.fetchall()}
 
 
+def _existing_slugs(conn: sqlite3.Connection, table: str, slug_col: str) -> set[str]:
+    """Return the set of all `slug_col` values in `table`.
+
+    Parallel to `_existing_ids` but for string-keyed catalogs (e.g.
+    `system_designs.slug`). Identifiers must be statically known -- callers
+    pass literal strings, never user input.
+    """
+    cur = conn.execute(f"SELECT {slug_col} FROM {table}")
+    return {row[0] for row in cur.fetchall()}
+
+
 def _scan_doc(
     *,
     doc_id: int,
@@ -89,9 +107,10 @@ def _scan_doc(
     content: str,
     problem_ids: set[int],
     doc_ids: set[int],
+    sd_slugs: set[str],
     target_doc_id: int | None,
 ) -> list[Finding]:
-    """Extract every db:// and cd:// link from `content` and classify each."""
+    """Extract every db://, cd://, sd:// link from `content` and classify each."""
     if target_doc_id is not None and doc_id != target_doc_id:
         return []
     findings: list[Finding] = []
@@ -150,6 +169,24 @@ def _scan_doc(
                 f"dangling: cd://{n} not found in company_documents OR problems",
             ))
 
+    # sd://<slug> -- string-keyed system_designs catalog. Cross-table confusion
+    # with db://N / cd://N is physically impossible because slug is a string
+    # while problems.id / company_documents.id are integers; the only failure
+    # mode is dangling (slug missing from system_designs because the row was
+    # deleted or renamed).
+    for match in SD_LINK_RE.finditer(content):
+        slug = match.group(1)
+        if slug in sd_slugs:
+            findings.append(Finding(
+                doc_id, doc_title, company_id, "sd", slug, "VALID",
+                f"system_designs.slug={slug!r} resolved",
+            ))
+        else:
+            findings.append(Finding(
+                doc_id, doc_title, company_id, "sd", slug, "ERROR",
+                f"dangling: sd://{slug} not found in system_designs.slug",
+            ))
+
     return findings
 
 
@@ -159,6 +196,7 @@ def audit(db_path: Path, target_doc_id: int | None = None) -> list[Finding]:
     try:
         problem_ids = _existing_ids(conn, "problems")
         doc_ids = _existing_ids(conn, "company_documents")
+        sd_slugs = _existing_slugs(conn, "system_designs", "slug")
         cur = conn.execute(
             "SELECT id, title, company_id, content FROM company_documents"
         )
@@ -171,6 +209,7 @@ def audit(db_path: Path, target_doc_id: int | None = None) -> list[Finding]:
                 content=row["content"] or "",
                 problem_ids=problem_ids,
                 doc_ids=doc_ids,
+                sd_slugs=sd_slugs,
                 target_doc_id=target_doc_id,
             ))
         return all_findings
@@ -193,7 +232,7 @@ def _print_summary(findings: Iterable[Finding]) -> tuple[int, int, int]:
         elif f.severity == "ERROR":
             total_e += 1
     if not by_doc:
-        print("[INFO] no db:// or cd:// links found in any company_documents.")
+        print("[INFO] no db://, cd://, or sd:// links found in any company_documents.")
         return total_v, total_w, total_e
 
     print("=" * 88)

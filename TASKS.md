@@ -9,49 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-734
-- **Description**: Add sd://<slug> validation to scripts/audit_uri_consistency.py so future drift between company_documents.content sd:// links and the system_designs.slug catalog is caught at audit time (just like the existing db:// / cd:// audit).
-
-Context: step 5 of the 6-step Pinterest System Design drawer fix. Soft dependency on T-P0-734 (so the audit can verify the migrated doc 47 round-trip), but the audit logic itself can be added before content migration.
-
-Scope:
-- Edit scripts/audit_uri_consistency.py.
-- (No-op for tests/audit_uri_consistency_test.py if exists -- extend to cover sd:// case.)
-
-Required changes:
-1. Add module-level constant `SD_LINK_RE = re.compile(r'sd://([a-z0-9-]+)')` parallel to DB_LINK_RE / CD_LINK_RE.
-2. Add helper `_existing_slugs(conn, table, slug_col)` (return set of all values in table.slug_col) parallel to `_existing_ids`.
-3. In the main scan loop, also extract sd:// matches from each doc and validate target slug is present in `system_designs.slug`. Record findings:
-   - VALID: slug found.
-   - ERROR / dangling: slug missing from system_designs (link is broken; system_designs row was deleted/renamed).
-   - WARNING (cross-table): not applicable for sd:// since system_designs uses string slugs and the other tables use integer ids -- cross-confusion physically impossible. Document this in code comment for future reader.
-4. Update the Finding dataclass scheme field doc to mention 'sd' as a valid value.
-5. Update the docstring at the top of the file to describe sd:// auditing.
-6. Update CLI help / error class summary to include sd:// counts.
-7. Update --hub semantics: --hub now accepts either int (company_documents.id) or string (system_designs.slug)? Out of scope for this task -- keep --hub int-only.
-
-Acceptance Criteria:
-- After T-P0-734 ships AND this task ships, `python scripts/audit_uri_consistency.py` exits 0.
-- If a test scenario inserts `[bad](sd://no-such-slug)` into doc 47, audit exits 1 with ERROR finding listing the dangling slug.
-- Existing db:// and cd:// findings unchanged (no false positives, no false negatives -- diff stat the output before/after this change with a clean DB to confirm).
-- --json output includes sd:// findings in the same array shape as db:// findings.
-
-Tests:
-- If audit has a unit-test counterpart: extend it. If not: a self-contained dry-run with a temp DB containing system_designs.slug='valid' + a doc with [a](sd://valid) and [b](sd://invalid) -> exit 1, ERROR for invalid only.
-
-Manual smoke test:
-- Pre-T-P0-734: run audit -> sees 7 sd:// links in doc 47 (assuming T-P0-734 is also done by now) all VALID.
-- Inject a typo: temporarily edit data/mle_prep.db (DEV ONLY) to change one slug to 'pinterest-ad-ctr-typo' -> audit exits 1 with that finding -> revert.
-
-Definition of Done:
-- audit_uri_consistency.py recognizes sd:// scheme + system_designs catalog.
-- Exit-0 on clean DB; exit-1 with ERROR on dangling sd://.
-- Existing db://, cd:// behavior unchanged.
-- Audit runs in CI same way it did before (no new dependencies).
-
 #### T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry
 - **Priority**: P0
 - **Complexity**: S
@@ -460,6 +417,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
+- [x] **2026-05-04** -- T-P0-737: [META-ANC-9-fix] Escape pipe in doc=90 table row 7 (Find Words O-complexity). Discord ad-hoc request 2026-05-04: doc=90 (Meta AI-Native Coding Inventory hub, company_id=31) row 7 broken because $O(\
+- [x] **2026-05-04** -- T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme. Add sd://<slug> validation to scripts/audit_uri_consistency.py so future drift between company_documents.content sd:// l
 - [x] **2026-05-04** -- T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs. Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pint
 - [x] **2026-05-04** -- T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer. Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the Sys
 - [x] **2026-05-04** -- T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component. Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
