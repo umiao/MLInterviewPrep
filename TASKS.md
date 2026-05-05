@@ -60,30 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-744: [PINT-CONCEPTS-E] Concept doc: fill Section 4 - Evaluation Metrics
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-740
-- **Description**: Fill the body of `## Evaluation Metrics` in `docs/company/pinterest/system_design_concepts.md`.
-
-Terms covered: NDCG@K, MRR, MAP, AUC, ECE, PSI, KS-test, Recall@K, calibration metrics
-
-Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
-  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
-  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
-  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
-  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
-
-Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#e-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
-
-After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
-
-AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
-AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
-AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
-AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
-AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
-
 #### T-P1-745: [PINT-CONCEPTS-F] Concept doc: fill Section 5 - Debiasing & LLM Fine-Tuning
 - **Priority**: P1
 - **Complexity**: M
@@ -670,6 +646,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-05** -- T-P1-744: [PINT-CONCEPTS-E] Concept doc: fill Section 4 - Evaluation Metrics. Fill the body of `## Evaluation Metrics` in `docs/company/pinterest/system_design_concepts.md`.
 - [x] **2026-05-05** -- T-P1-743: [PINT-CONCEPTS-D] Concept doc: fill Section 3 - Learning-to-Rank Methods. Fill the body of `## Learning-to-Rank Methods` in `docs/company/pinterest/system_design_concepts.md`.
 - [x] **2026-05-05** -- T-P1-742: [PINT-CONCEPTS-C] Concept doc: fill Section 2 - Retrieval & Approximate Nearest Neighbor. Fill the body of `## Retrieval & Approximate Nearest Neighbor` in `docs/company/pinterest/system_design_concepts.md`.
 - [x] **2026-05-05** -- T-P1-741: [PINT-CONCEPTS-B] Concept doc: fill Section 1 - Multi-Task & Ranking Architectures. Fill the body of `## Multi-Task & Ranking Architectures` in `docs/company/pinterest/system_design_concepts.md`.

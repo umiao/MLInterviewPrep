@@ -438,10 +438,202 @@
 
 ## 4. 评估指标 (Evaluation Metrics)
 
-> 待补充于 T-P1-744 (PINT-CONCEPTS-E)。
->
-> 涵盖: AUC / GAUC / NDCG@k / MAP / MRR / Hit-Rate@k / Precision-Recall / log-loss /
-> calibration error (ECE), online vs offline 一致性、proxy metric 选择陷阱。
+> 这一节按推荐/搜索流水线顺序展开离线评估的标准指标集: **Recall@K** (检索/CG 召回质量) →
+> **NDCG@K / MAP / MRR** (排序质量, 三种 top-heavy 假设) → **AUC / GAUC** (二分类 head
+> 的判别力) → **calibration / ECE** (概率绝对值是否可信, 给 oCPM/threshold 用) →
+> **PSI / KS-test** (上线后特征/预测分布漂移监控)。Pinterest 7 个 SD 文档里这些指标
+> 反复出现, 这一节的目的是把"为什么用这个不用那个"集中讲清楚, 子文档里只需引用
+> `sd://pinterest-system-design-concepts#e-N` 而不再展开。注: 业务侧北极星 KPI
+> (DAU / time-spent / repin rate / ROAS / guardrail) 留到 §6 (PINT-CONCEPTS-G) 与
+> 基础设施一起展开, 此处只覆盖**模型自身**的离线/在线评估指标。
+
+### E-1. Recall@K (Recall at K, top-K 召回率)
+
+- **Full Name**: Recall@K, 即"前 $K$ 个候选里命中真相关 doc 的比例"。
+- **直觉解释**: 检索 / candidate generation (CG) 阶段不要求精排, 只要求**真正相关的 doc
+  出现在 top-K 池里**, 给后续 ranker 兜底。定义:
+  $$\mathrm{Recall@K} = \frac{|\{\text{relevant docs}\} \cap \{\text{top-}K\text{ retrieved}\}|}{|\{\text{relevant docs}\}|}$$
+  典型 ground-truth: 用户在 hold-out 当天的 repin/click pin 集合; "retrieved" 是 ANN
+  query 的 top-K。$K$ 取值依下游漏斗: CG 出口 1k 量级时看 Recall@1000, embedding 评估
+  常看 Recall@100/@500。**关键陷阱**: Recall@K 不看顺序, top-1 和 top-$K$ 等价计 1 次
+  命中, 所以只能评估"召得到不到", 不能评估"排得对不对" —— 排序质量留给 NDCG@K。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §3 写明 "Offline: Recall@K (K=500,
+  1000) 针对 held-out engaged pins" 作为 L1 candidate gen 的核心离线指标;
+  `system_design_embeddings.md` §6 把 Recall@100/@500 列为 embedding 评测核心 (hold-out
+  当日用户 repin 的 pin, 用 query user embedding 看从 5B 池子能否 top-K 召回),
+  并给出"A/B 增益: Recall@1000 从 0.25 → 0.33"的真实数字; `system_design_chatbot_pins.md`
+  §6 也用 "Retrieval Recall@50 > 0.75" 作为 chatbot pin 检索的发版门槛。
+- **何时选 vs 替代**: 漏斗的检索 / CG 阶段 + 候选池规模 (10⁵–10⁹) 远大于精排 (10²)
+  时, Recall@K 是首选 (因为这一阶段顺序不重要, 不被淘汰才重要)。**vs Precision@K**:
+  Precision@K 看 "top-$K$ 里有几个真相关", 适合"展示给用户的 K 已经很小"的场景
+  (e.g., top-3 hero card); Recall@K 假设下游还有 ranker, 重点是召回完备性。
+  **vs Hit-Rate@K**: Hit-Rate@K 是 Recall@K 在"每个 query 只有 1 个相关 doc"
+  特殊情况下的退化形式 (此时 Recall@K ∈ {0, 1}, 平均后即 hit rate)。
+
+### E-2. NDCG@K (Normalized Discounted Cumulative Gain at K, 归一化折损累积增益)
+
+- **Full Name**: Normalized Discounted Cumulative Gain at $K$。
+- **直觉解释**: ranking 评估的 gold standard, 兼顾**相关度强弱** (graded relevance) 和
+  **位置折损** (top-heavy)。定义分三步: (1) DCG —— 在位置 $i$ 上的 gain 按 $\log_2$
+  discount:
+  $$\mathrm{DCG@K} = \sum_{i=1}^{K} \frac{2^{\mathrm{rel}_i} - 1}{\log_2(i + 1)}$$
+  (2) IDCG —— 把 top-$K$ 按 ideal ranking (label 从大到小) 算的 DCG 上限;
+  (3) NDCG = DCG / IDCG ∈ [0, 1]。两个细节: $2^{\mathrm{rel}} - 1$ 是 graded gain
+  (label=3 比 label=2 重要程度的 4× 而非 1.5×), $\log_2(i+1)$ 让 top-3 拿到大权重而第
+  20 名以后近乎噪音。Pinterest 用 engagement 强度作 graded label: repin=3, click=2,
+  long-dwell=1, impression-only=0。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §6 把 NDCG@K 定为 ranker 阶段的
+  primary metric, 连同公式 $\sum \frac{2^{\mathrm{rel}}-1}{\log_2(i+1)} / \mathrm{IDCG}$
+  显式列在评估表里; `system_design_pin_ranking.md` §6 用 "NDCG@25 over repin label,
+  GAUC (per-user AUC)" 评估 L2 ranker, 并把 IPS-counterfactual NDCG 作为 uplift 指标;
+  `system_design_embeddings.md` §6 进一步把"下游 ranker offline NDCG@10"作为 embedding
+  作为 ranker 特征时的最终评估指标; LambdaRank (§3 D-2) 的整个 lambda trick
+  $|\Delta\mathrm{NDCG}_{ij}|$ 的存在意义就是直接对齐 NDCG@K。
+- **何时选 vs 替代**: 排序任务 + 有 graded relevance label (engagement 强度分级) +
+  关心 top-heavy 时 NDCG 是默认选择。**vs MAP**: MAP 假设 binary relevance (相关/不相关),
+  对 engagement 强度等级敏感的任务 (Pinterest 的 repin > click > impression) 损失信息;
+  NDCG 用 $2^{\mathrm{rel}}$ 编码强度。**vs MRR**: MRR 只看第一个相关 doc 的位置,
+  适合"用户找到一个就走"的导航式 query (e.g., "official Nike logo"); NDCG 评估整个
+  top-$K$ 的相对序, 适合 home feed / search 这种用户会浏览多个的场景。
+
+### E-3. MAP (Mean Average Precision, 平均精度均值)
+
+- **Full Name**: Mean Average Precision —— "对每个 query 算 AP, 再对所有 query 求均值"。
+- **直觉解释**: 假设 binary relevance (每个 doc 要么相关要么不相关), AP 是 Precision-Recall
+  曲线下的离散面积 —— 在每个**相关 doc 出现的位置** $k$ 算一次 Precision@k, 再除以
+  相关 doc 总数:
+  $$\mathrm{AP} = \frac{1}{|R|} \sum_{k=1}^{n} \mathbb{1}[d_k \in R] \cdot \mathrm{Precision@k}, \quad
+  \mathrm{MAP} = \frac{1}{|Q|} \sum_{q \in Q} \mathrm{AP}_q$$
+  其中 $R$ 是相关 doc 集合。直观: 相关 doc 排得越靠前, 每次命中时的 Precision@k 越高,
+  AP 越大。MAP 把所有 query 的 AP 平均, 给出"整个 query 集上排序质量的单一标量"。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §6 评估表把 MAP 与 NDCG@K / MRR
+  并列为 ranker 阶段 metric ("mean Average Precision across queries, Ranking 阶段");
+  实际生产 pins-search 的主指标是 NDCG@K (因为 graded label 信息更密), MAP 作为对照
+  (binary relevance: clicked vs not-clicked) 来验证两种 label 假设下结论一致。
+- **何时选 vs 替代**: query 集较大 (能稳定平均掉单 query 噪声) + label 是 binary
+  relevance (没分级强度) + 评估的是 "整个 ranking list 上 precision-recall trade-off"
+  时选 MAP。**vs NDCG**: NDCG 用 graded relevance + 对数折损, 信息量更大且对 top
+  位置更敏感; MAP 在 label binary 时仍胜任, 且公式直观, 仍是 academic IR (TREC) 的标配。
+  **vs MRR**: MAP 看所有相关 doc 的位置加权平均, MRR 只看第一个 —— query 有多个相关
+  doc 时 MAP 更全面。
+
+### E-4. MRR (Mean Reciprocal Rank, 平均倒数排名)
+
+- **Full Name**: Mean Reciprocal Rank —— "第一个相关 doc 排名倒数的平均"。
+- **直觉解释**: 假设每个 query 用户只关心**找到第一个**对的答案, 评估方法是
+  $1/\mathrm{rank}_q$ 再对所有 query 平均:
+  $$\mathrm{MRR} = \frac{1}{|Q|} \sum_{q \in Q} \frac{1}{\mathrm{rank}_q}$$
+  其中 $\mathrm{rank}_q$ 是 query $q$ 第一个相关 doc 在 ranking list 中的位置 (没找到
+  则 $1/\infty = 0$)。直观: 第一个相关 doc 排第 1 时 MRR=1, 排第 2 时 0.5, 排第 10
+  时 0.1, 衰减比 NDCG 的 $1/\log_2(i+1)$ 更陡, 强奖励"第一名就对"。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §6 评估表把 MRR 标注为
+  "导航类 query" 适用 —— 用户搜 "Nike Air Jordan 1 official photo" 这类 navigational
+  intent 时, 第一个对的 pin 就是答案, MRR 比 NDCG 更贴用户体验; informational query
+  (e.g., "fall outfit ideas") 用户会浏览多个 pin, 仍以 NDCG@K 为主。所以 Pinterest
+  的做法是**按 query 类型切片**: navigational slice 看 MRR, informational/exploratory
+  slice 看 NDCG@K, 整体加权后给 PM。
+- **何时选 vs 替代**: 单一答案场景 (FAQ / Q&A / navigational search / 知识图谱实体
+  消歧) 选 MRR。**vs NDCG**: NDCG 看 top-$K$ 整体排序, MRR 只看 top-1 的 rank;
+  query 性质决定选哪个。**vs Precision@1**: P@1 是 MRR 的"硬阈值"版 (第一名对就 1
+  否则 0), MRR 因为 reciprocal 衰减给"第二名对"也部分信用, 噪声更小、更稳。
+
+### E-5. AUC & GAUC (Area Under ROC Curve, ROC 曲线下面积)
+
+- **Full Name**: Area Under the ROC Curve (AUC), Group-AUC (GAUC, per-user AUC)。
+- **直觉解释**: AUC 是二分类器**判别力**的标量 —— 等价于"随机抽一对正负样本, 模型给正样本
+  打分高于负样本的概率":
+  $$\mathrm{AUC} = P(s_+ > s_- \mid y_+ = 1, y_- = 0)$$
+  AUC ∈ [0.5, 1.0], 0.5 = 随机, 1.0 = 完美分类。**关键性质**: AUC **只看相对序, 不看
+  绝对值** —— 把所有 score 整体加 100 / 乘 0.001 / 过 sigmoid 都不变。所以 AUC 高
+  ≠ pCTR 准, AUC 只能保证排序对。**GAUC** (Group AUC) 是改进: 对每个 user (或 query)
+  分别算 AUC, 再用 impression 数作权重平均:
+  $$\mathrm{GAUC} = \frac{\sum_u w_u \cdot \mathrm{AUC}_u}{\sum_u w_u}$$
+  解决"全局 AUC 被高活/低活 user 行为差异污染"的问题 (e.g., 高活 user 大量正样本会
+  inflate global AUC, 但单个 user 内的排序质量未必好)。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §6 列出 "AUC per head, NDCG@25
+  over repin label, GAUC (per-user AUC)" 三件套, 把 GAUC 作为 multi-task L2 ranker
+  的核心排序质量指标; `system_design_pins_search.md` §6 用 "AUC / PR-AUC" 评估 L2
+  multi-task per head (CTR / Repin head); `system_design_ad_ctr.md` §6 把 AUC 列入
+  "排序能力" 但**显式注明 "仅 ranking, 不反映 calibration"** —— 这就是为什么 Ad CTR
+  生产同时监控 AUC 和 ECE; `system_design_notification_reco.md` §6 用 "Open-rate AUC
+  / PR-AUC" 评估 pOpen head, 并配合 "Disable AUC" 评估负向 head 识别能力。
+- **何时选 vs 替代**: 二分类排序质量评估 (CTR / Repin / Conversion head) + 不关心
+  概率绝对值时选 AUC; 多用户 / 多 query 场景且想消除 cross-group 差异选 GAUC。
+  **vs PR-AUC** (Precision-Recall AUC): 正负极度不均衡 (正样本 < 1%, 例如 ad CVR /
+  notification disable rate) 时 PR-AUC 比 AUC 更敏感; 平衡数据集二者一致。
+  **vs log-loss**: log-loss 同时反映排序 + calibration, 但不像 AUC/GAUC 直接给
+  "排序对不对"的几何解释; 工程上常**两者都报**。
+
+### E-6. ECE & Calibration (Expected Calibration Error, 期望校准误差)
+
+- **Full Name**: Expected Calibration Error (ECE) —— 衡量预测概率与实际频率的偏差。
+- **直觉解释**: AUC 高只保证"正样本分高于负样本", 不保证 pCTR=0.3 的样本里**真有 30%**
+  会点击。**Calibration** 就是模型预测概率与真实频率的对齐程度。**ECE** 量化校准误差:
+  把 [0, 1] 的预测概率分成 $M$ 个 bin (e.g., $M=10$, [0, 0.1), [0.1, 0.2), ..., [0.9, 1.0]),
+  每个 bin 算"该 bin 内平均预测概率 conf$(B_m)$"和"该 bin 内真实正样本比例 acc$(B_m)$",
+  按 bin size 加权差值绝对值:
+  $$\mathrm{ECE} = \sum_{m=1}^{M} \frac{|B_m|}{N} \cdot |\mathrm{acc}(B_m) - \mathrm{conf}(B_m)|$$
+  完美校准 ECE = 0。常见 calibration 修正方法 (post-hoc, 不改模型主干): **Platt scaling**
+  (训一个 sigmoid 后处理), **Isotonic regression** (单调非参拟合, 无 sigmoid 函数形式假设),
+  **Beta calibration** (sigmoid 的 3-param 推广, 对 logit 尾部更稳)。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §5.3 把 ECE 写进发版 guardrail
+  ("calibration ratio ∈ [0.9, 1.1], 偏离触发 isotonic 重拟合") —— 因为 oCPM 计费下
+  $\mathrm{eCPM} = \mathrm{bid} \times \mathrm{pCTR}$, pCTR 偏高 2× 广告主多扣钱、偏低
+  Pinterest 损失 revenue, **校准是合规要求不是性能优化**; `system_design_pin_ranking.md`
+  §6 用 "ECE per head" 评估 pRepin / hide-rate head 的校准 (它们驱动 threshold 决策);
+  `system_design_notification_reco.md` §6 用 ECE 验证 pOpen 概率"是否可直接用于
+  threshold/budget 分配" —— 推送预算分配按 pOpen 排序+阈值, 校准失误直接错配预算。
+- **何时选 vs 替代**: 预测概率会被**绝对地使用** (出价 / threshold / budget allocation)
+  时必须看 ECE; 只用作排序信号 (ranker 内部 score) 时 AUC 足够。**vs log-loss**:
+  log-loss 同时受 calibration + sharpness 影响, 不能单独反映 calibration error;
+  ECE 直接对应"概率值多准"。**vs reliability diagram**: ECE 是把 reliability diagram
+  压成单一标量, 适合 monitoring / A/B 决策; reliability diagram 适合人工 debug
+  (能看出哪个 bin 偏得最多)。
+
+### E-7. PSI (Population Stability Index, 总体稳定性指数)
+
+- **Full Name**: Population Stability Index —— 来自信用风控, 量化两个分布的偏差。
+- **直觉解释**: 上线后 feature / prediction 分布会随时间漂移 (用户行为变化、节假日、
+  上游 logging bug、外部事件), 必须有指标自动告警。PSI 把变量值域分成 $B$ 个 bin
+  (如 quantile 等分), 比较 baseline 分布 $p_b$ 和当前分布 $q_b$:
+  $$\mathrm{PSI} = \sum_{b=1}^{B} (q_b - p_b) \cdot \log \frac{q_b}{p_b}$$
+  数学上是**对称化的 KL divergence** ($\mathrm{KL}(q\|p) + \mathrm{KL}(p\|q)$ 的离散版)。
+  工业经验阈值: PSI < 0.1 稳定, 0.1–0.2 轻度漂移可观察, **> 0.2 显著漂移触发告警**,
+  > 0.25 通常需要重训。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §6 monitoring 流程明确写
+  "Feature drift: PSI (Population Stability Index) > 0.2 告警";
+  `system_design_pin_ranking.md` §6 同样把 "PSI / KS test 每日跑, alert 超阈值" 列入
+  feature drift 监控, 配合 "PSI daily alert, auto fall-back to older checkpoint"
+  作为 holiday / 事件触发特征跳变时的回滚策略。
+- **何时选 vs 替代**: 分类 / 离散化的 feature drift / prediction drift 监控 + 需要
+  单一阈值告警时选 PSI。**vs KL divergence**: PSI 是对称化 KL, 工程上比 KL 更稳
+  (KL 不对称会让 baseline / current 顺序敏感); PSI 数值范围相对集中, 阈值经验丰富。
+  **vs KS-test**: PSI 看分布**整体差异** (按 bin 加权), KS-test 看**最大局部差异**;
+  PSI 适合渐变漂移, KS-test 适合检测分布尾部跳变 (见 E-8)。**vs Wasserstein**:
+  Wasserstein (Earth Mover Distance) 数学性质好但计算贵, 工业落地极少, PSI 仍是
+  风控 + 推荐系统的事实标准。
+
+### E-8. KS-test (Kolmogorov-Smirnov Test, KS 双样本检验)
+
+- **Full Name**: Kolmogorov-Smirnov two-sample test —— 检验两个样本是否来自同一分布。
+- **直觉解释**: 分布漂移除了 PSI 还有一种更"统计正经"的工具: KS-test。它比较两个样本
+  的**经验累积分布函数** (ECDF) 的最大垂直距离:
+  $$D = \sup_x |F_1(x) - F_2(x)|$$
+  其中 $F_i$ 是样本 $i$ 的 ECDF。$D$ 越大两分布差异越大; 在原假设"同分布"下, $D$
+  服从已知分布, 可以查表得到 $p$-value。$p < 0.05$ 拒绝同分布假设, 说明显著漂移。
+  KS-test 优势: **非参** (不假设正态 / 任何参数族), 对**尾部跳变**特别敏感 (因为是
+  $\sup$ 不是积分)。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §6 monitoring 用 KS-test 监控 pCTR
+  分布漂移 ("每 5min 计算 serving pCTR 分布, 与昨日同时段比较, KS-test 阈值");
+  `system_design_pin_ranking.md` §6 把 "PSI / KS test 每日跑" 作为 feature drift 双
+  保险, PSI 抓**整体**偏移、KS-test 抓**尾部跳变** (例如某个 ad campaign 突然爆量
+  导致预测 CTR 分布右尾肥大, PSI 在分桶平均下可能不显著, 但 KS-test 的 $\sup$ 立刻报)。
+- **何时选 vs 替代**: 连续型 score / probability 分布的漂移监控 + 关心尾部异常时选
+  KS-test。**vs PSI**: PSI 抓整体加权差异, KS-test 抓最大局部差异; 工程上**两者并行**
+  最稳。**vs Chi-square test**: Chi-square 对 categorical / binned 数据, KS-test
+  对连续型数据; pCTR 这种连续 score 用 KS-test, categorical feature drift 用 PSI 或
+  Chi-square。**vs MMD (Maximum Mean Discrepancy)**: MMD 在 RKHS 里算分布距离, 数学
+  更通用 (能处理高维), 但需选 kernel + 计算贵, 工业 monitoring 极少用。
 
 ---
 
