@@ -933,11 +933,306 @@
 
 ## 6. 基础设施与业务 KPI (Infrastructure & Business KPIs)
 
-> 待补充于 T-P1-746 (PINT-CONCEPTS-G)。
->
-> 涵盖: Feature Store (Online vs Offline, point-in-time correctness), Model Serving
-> (Triton / TorchServe / Ray Serve), A/B testing 平台、北极星指标 (DAU, time-spent,
-> repin rate, ad CTR, ROAS), guardrail metrics。
+> 这一节按 "**数据管道格式 → 一致性与可靠性 → 规模指标 → 排序/广告 KPI → 推送通道**"
+> 五块展开。**数据管道格式** (G-1 NDJSON) 是 catalog bulk pipeline 的 wire format;
+> **一致性与可靠性** (G-2 2PC / G-3 CDC / G-4 DLQ / G-5 RPO/RTO) 串起 producer-consumer
+> 异步管道的 exactly-once / change-stream / 故障路由 / 灾备 SLO 工具箱; **规模指标**
+> (G-6 WAU/DAU/MAU / G-7 QPS) 是 capacity planning 与北极星指标的两条腿; **排序/广告
+> KPI** (G-8 CTR / G-9 pCTR / G-10 pCVR / G-11 oCPM) 是 ad ranker 的 utility 与计费
+> 公式骨架; **推送通道** (G-12 APNs / FCM) 是 notification 系统的最后一公里 channel
+> sender。与本节概念交叉的 Pinterest 文档: `system_design_catalog_bulk_update.md`
+> (NDJSON / 2PC / DLQ / RPO/RTO), `system_design_ad_ctr.md` (CTR / pCTR / pCVR / oCPM),
+> `system_design_notification_reco.md` (WAU / APNs / FCM), `system_design_pin_ranking.md`
+> + `system_design_pins_search.md` (QPS / MAU)。
+
+### G-1. NDJSON (Newline-Delimited JSON, 行分隔 JSON)
+
+- **Full Name**: Newline-Delimited JSON —— 每行一个独立 JSON object, 行间用 `\n` 分隔,
+  整个文件**不**是一个合法 JSON array。
+- **直觉解释**: 大文件批量场景里, 标准 JSON `[{...}, {...}, ...]` 必须**整文件 parse**
+  才拿到第一条记录, 1TB 文件直接 OOM。NDJSON 把每条记录独立成行, **streaming 解析友好**:
+  reader 读一行 → `json.loads(line)` 即可拿到一个对象, memory footprint $O(1)$。同时
+  天然支持 `gzip` 压缩 + Spark/Hadoop 的 `TextInputFormat` 行级切片, 是 data lake / S3
+  bulk drop 的事实标准 wire format。与 Parquet 的对比: Parquet 是列存 + 二进制, 适合
+  分析查询; NDJSON 是行存 + 文本, 适合 ingestion 接口 (人/外部系统易写易调试)。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` §0 把 ingestion 接口
+  定为 "每日凌晨卖家侧 upload 一次 S3 zipped NDJSON, 单条 ~2KB, 总 ~1TB"; §1 高层架构
+  里 raw zone 直接 "read raw(dt, p) # NDJSON" 进 Spark, 中间不做 schema 强约束 ——
+  schema validation 放到下游 Spark job 里做, 让外部卖家上传无门槛。
+- **何时选 vs 替代**: 外部 vendor / 异构系统 bulk drop + 文本调试需求 + 单条记录可
+  独立处理时 NDJSON 是首选。**vs Parquet**: Parquet 列存压缩比高 3-5×、列裁剪查询快,
+  但**写入需要 schema + 库依赖**, 不适合外部上传; Pinterest catalog 的最终归档层会从
+  NDJSON 转 Parquet。**vs Avro**: Avro 自带 schema + 二进制紧凑, 适合**内部** Kafka
+  topic; 外部接口选 NDJSON 因为 schema-on-read 更宽容。**vs CSV**: CSV 不支持嵌套
+  结构, catalog 的 `attributes: {color, size, ...}` 嵌套字段无法表达, 故选 NDJSON。
+
+### G-2. 2PC (Two-Phase Commit, 两阶段提交)
+
+- **Full Name**: Two-Phase Commit Protocol (Gray 1978) —— 分布式事务里跨多个 resource
+  manager 保证 atomicity 的经典协议。
+- **直觉解释**: producer 写 Kafka + consumer 写 DB, 想要 "要么都成功要么都失败" 的
+  exactly-once 语义。2PC 的两个阶段: (1) **Prepare**: coordinator 问所有 participant
+  "能 commit 吗?" 各方写 prepare log + lock 资源, 回 "yes/no"; (2) **Commit/Abort**:
+  全员 yes → coordinator 广播 commit, 全员各自 commit + 释放锁; 任一 no → 广播 abort。
+  问题: coordinator crash 后 participant 卡在 prepared 状态 (锁无法释放, blocking
+  protocol), 工程上少用; 替代是 **at-least-once + idempotent consumer** —— producer 用
+  `enable_idempotence=true` 保证 per-partition 不重复, consumer 端写 DB 时带
+  `(record_id, version)` 唯一键去重, 正常 99.99% 路径就是 exactly-once, 异常路径靠
+  幂等吃下重复。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` §0.1 一致性假设里
+  明确把 "**Kafka transactions + 2PC 下游**" 列为 exactly-once 的实现路径之一, 但
+  最终选择是 "**at-least-once + idempotent**" —— producer 端 `acks=all,
+  enable_idempotence=true, transactional_id=<partition_id>` 保证 per-session 不重复,
+  consumer 端按 `catalog_id` upsert 幂等吃下重复。这是工业界绝大多数高吞吐管道的标准
+  trade-off (放弃理论 exactly-once 换工程简洁性)。
+- **何时选 vs 替代**: 跨 RDBMS 的强一致事务 (银行转账) + 低吞吐 + 短事务时 2PC 仍是
+  正解。**vs Saga Pattern**: saga 把长事务拆成补偿动作链 (forward + compensation),
+  适合微服务跨服务调用, 不需要锁; 但需要业务层定义补偿逻辑。**vs Outbox + CDC** (见
+  G-3): 把 "写 DB + 发 Kafka" 转化为 "写 DB outbox 表" 单一事务 + CDC 异步搬运到 Kafka,
+  避免 2PC 的 blocking, 是当前主流做法。**vs Idempotent + at-least-once**: Pinterest
+  catalog 选这条, 牺牲理论 exactly-once 换工程简洁与高吞吐, 99.99% 路径无差别。
+
+### G-3. CDC (Change Data Capture, 变更数据捕获)
+
+- **Full Name**: Change Data Capture —— 从数据库的 redo log / binlog / WAL 里实时捕获
+  增量变更并发到下游 (Kafka, Elastic, data lake) 的技术统称, 代表实现 Debezium / AWS
+  DMS / Kafka Connect。
+- **直觉解释**: 应用层"写 DB 后再发 Kafka"会面临 dual-write 问题 —— 两步任一失败都
+  导致状态分裂 (DB 有但 Kafka 没有, 或反之), 还要 2PC 才能 atomic, 复杂且慢。CDC 的
+  idea: **DB 自己写 binlog 是 atomic 的**, 用一个 source connector tail binlog,
+  把每一行变更 (`INSERT/UPDATE/DELETE` + before/after image) 转成 Kafka event。这样
+  应用层只写 DB 一次, change stream 由 CDC 异步派生。配合 outbox pattern 更稳:
+  应用写业务表 + outbox 表在**同一事务**, CDC 只 tail outbox 表, 避免业务变更 schema
+  影响下游。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` §10 follow-up 隐含
+  CDC 的应用场景 —— "未来加 **delta update** (<100K/次, 准实时), 可加条 quick-async
+  API: API 接收 + 写 Kafka 直接到 change-events topic, bypass S3, 5 秒内可见"。
+  这条 delta 通道实质就是 application-level CDC: catalog DB 单条 update → 直接 emit
+  Kafka event, 与 daily NDJSON bulk pipeline 互补, 形成 lambda 架构 (bulk + speed
+  layer)。`system_design_pin_ranking.md` §3 实时 feature pipeline 里 user 的
+  click/repin 事件流也是同样模式 (从 mobile event log → Kafka → feature store)。
+- **何时选 vs 替代**: 已有 RDBMS 作 source-of-truth + 下游需要实时同步 + 不想改应用代码
+  时 CDC 是首选。**vs Application-level Dual Write**: 应用层 "写 DB 后写 Kafka" 简单
+  但有 dual-write 问题; CDC 单点 atomic。**vs Periodic Polling**: 每 N 秒 `SELECT *
+  WHERE updated_at > last_sync`, 简单但延迟高 + DB 压力大; CDC 用 binlog 是 push 模式,
+  $O(1)$ 开销。**vs Bulk Daily Replay** (本系统选的): bulk 简单但 1 天延迟, CDC 实时
+  但需要部署 Debezium 集群 + schema evolution 治理; 两者**互补**, 形成 bulk +
+  incremental 的 lambda 架构。
+
+### G-4. DLQ (Dead-Letter Queue, 死信队列)
+
+- **Full Name**: Dead-Letter Queue —— 消费失败的消息被路由到的备用队列, 区别于主 topic
+  的"成功路径", 用于解耦 producer/consumer 的可靠性边界。
+- **直觉解释**: 异步管道里下游 consumer 处理某条消息总是失败 (脏数据 / schema 不兼容
+  / 下游服务挂), 死循环 retry 会**阻塞整个 partition** (Kafka 按 offset 顺序消费,
+  一条卡住后面全卡), 业务停摆。DLQ 的 idea: retry $N$ 次仍失败后**主动把消息踢到
+  DLQ topic**, 主流程继续往后消费, DLQ 由人工或运维 job 异步处理。重要原则: DLQ
+  **不是垃圾桶**, 每个 DLQ 必须有 SLA + owner + runbook, 否则消息会无限堆积。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` §4.3 给出三类 failure
+  的 DLQ 路由设计: (1) **Parse error** (source 侧): 进 `s3://catalog-dlq/parse/dt=.../`
+  (S3 object DLQ); (2) **Schema validation error**: 进 `catalog-change-events.parse-dlq`
+  Kafka topic, schema team 每日审; (3) **Downstream apply error**: per-consumer DLQ,
+  e.g., `catalog-change-events.search-dlq`, search team 自己审。原则明确写 "**DLQ
+  不是垃圾桶 —— 每个 DLQ 有 SLA + owner + runbook**, 超过 24h 未处理触发 PagerDuty"。
+  这是 Pinterest 区分 producer/consumer 错误责任的标准模式。
+- **何时选 vs 替代**: 任何 Kafka / SQS / RabbitMQ 消费链路都需要 DLQ, 这是默认配置。
+  **vs Infinite Retry**: 不加 DLQ 直接死循环 retry 会 head-of-line blocking 整个
+  partition, **绝不可取**。**vs Drop Silently**: 直接丢消息无可观测性, 出问题无法
+  追溯, 也不可取。**vs Per-Error-Type DLQ** (Pinterest 选的): 按 error type 拆 DLQ
+  让 owner 责任清晰 (parse 归 source team, schema 归 schema team, apply 归 consumer
+  team), 比单一大 DLQ 便于运维。
+
+### G-5. RPO / RTO (Recovery Point / Time Objective, 恢复点 / 恢复时间目标)
+
+- **Full Name**: Recovery Point Objective / Recovery Time Objective —— 灾备 SLO 的两个
+  正交维度。
+- **直觉解释**: 灾难恢复 (disaster recovery) 不是单点指标, 而是两个独立目标:
+  (1) **RPO** = "**能容忍丢多少数据**" = 灾难时刻到最近一次 backup 的时间窗口。RPO=0
+  意味同步复制 (强一致 multi-region), RPO=1d 意味每日 snapshot。(2) **RTO** = "**能
+  容忍多久不可用**" = 灾难发生到完全恢复 serving 的耗时。RTO=0 意味 hot-standby
+  (秒级 failover), RTO=4h 意味需要从 backup 还原。两个目标决定备份策略: RPO 严
+  → 同步复制成本高; RTO 严 → 多副本热备成本高。两者都是 业务可承受损失 vs 工程成本
+  的 trade-off。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` §6.2 给出明确 SLO:
+  "**RPO** = 1 天 (因为每日全量 re-ingest, 丢一天可下一次补)" + "**RTO** = 2h, 机制:
+  Airflow retry + partition-level replay + S3 历史保留 30 天"; §summary 直接写
+  "SLO: T+6h freshness, RPO=1d, RTO=2h"。这套 RPO=1d / RTO=2h 是典型 batch pipeline
+  的 SLO, 因为 catalog bulk 本身是 daily 节奏, 跑丢一天下一天补即可。换成 ad serving
+  pCTR 模型则要 RPO≈0 / RTO<5min, 故选不同的灾备方案 (multi-region active-active +
+  shadow traffic)。
+- **何时选 vs 替代**: 任何有用户数据或业务连续性要求的系统都必须显式给出 RPO/RTO 数字,
+  这是 SRE 设计的起点。**Single-region async backup** (低成本, RPO=24h, RTO=4-8h):
+  日志/分析类。**Cross-region async replication** (中成本, RPO=分钟级, RTO=30min):
+  catalog/user data。**Multi-region active-active** (高成本, RPO≈0, RTO<1min): ad
+  serving/payment 等不能丢数据的链路。Pinterest catalog 选第一档因为 daily batch
+  天然容忍, ad ranking 选第三档因为每秒 150K QPS 不能停。
+
+### G-6. WAU / DAU / MAU (Weekly / Daily / Monthly Active Users, 周/日/月活跃用户)
+
+- **Full Name**: Weekly / Daily / Monthly Active Users —— 不同时间窗口去重的活跃用户数,
+  $\mathrm{DAU} \le \mathrm{WAU} \le \mathrm{MAU}$。
+- **直觉解释**: 三个指标度量同一件事 (产品粘性) 在不同 horizon 上的健康度。**DAU**
+  适合度量"每天打开的核心用户"(news feed / IM 类高频产品), **MAU** 适合度量"广义
+  覆盖人群"(电商 / 社交), **WAU** 介于两者之间是 retention 的最常用 north-star 因为
+  它对 day-of-week 噪声免疫 (周末 vs 工作日 DAU 波动大)。重要派生: **DAU/MAU ratio**
+  叫 **stickiness** —— Facebook 类产品 ~70%, 通用社交 ~30%, 电商 ~10%, 这个比例直接
+  决定 product-market fit 的 narrative。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §0 把 "**500M MAU**" 作为
+  scale assumption (与 80K QPS / 5B active pin 并列, 决定 capacity planning);
+  `system_design_pins_search.md` §0 写 "**500M MAU**, 数十亿 Pins, peak ~100K QPS";
+  最关键的应用在 `system_design_notification_reco.md` §7 北极星指标 ——
+  "**WAU retention** 或 **weekly sessions per user** (7-28 天 window)" 作 north-star,
+  并解释 "**选 WAU 而不是 open-rate 是因为 open-rate 可以靠 spam 堆高; WAU 是业务真实
+  价值**" —— 这是防止 notification 系统 over-send 损伤长期 retention 的关键 guardrail。
+- **何时选 vs 替代**: capacity planning 用 MAU (粗粒度上限); 短期产品迭代 A/B 用 DAU
+  (敏感但噪声大); **长期 retention 北极星用 WAU** (兼顾敏感与稳定)。**vs L7/L28**:
+  L7 / L28 是 "过去 7/28 天里有多少天活跃" 的细粒度 retention metric, 比 WAU 更精细
+  但口径更复杂; Pinterest notification 选 WAU 是 simplicity 与可解释性优先。
+  **vs Session Length / Time-Spent**: 时长指标更接近"价值消费"但易被低质内容劫持
+  (用户被困在低质 feed 里), 必须配 guardrail。
+
+### G-7. QPS (Queries Per Second, 每秒查询数)
+
+- **Full Name**: Queries Per Second (有时也写 RPS = Requests Per Second) —— 系统每秒
+  处理的请求数, 是 capacity planning 的基本单位。
+- **直觉解释**: QPS 是 throughput 的最常用度量; 与 latency (p50/p99) 互补构成性能两
+  个轴。**peak QPS** 通常是 daily QPS 的 2-3× (用户活跃高峰), capacity planning 必须
+  按 peak 算。Little's Law 给出 QPS 与 concurrency / latency 的关系:
+  $$\mathrm{Concurrency} = \mathrm{QPS} \times \mathrm{Latency}$$
+  e.g., 10K QPS × 100ms latency = 1000 in-flight requests, 决定线程池/连接池大小。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §0 写 "peak ~**150K QPS pCTR**"
+  (ad ranking 每秒要算 15 万次 pCTR, 这决定了 L2 ranker 必须 GPU + batch + INT8);
+  `system_design_pin_ranking.md` §0.2 写 "peak **80K QPS** ranking";
+  `system_design_pins_search.md` §0 写 "peak ~**100K QPS**";
+  `system_design_chatbot_pins.md` §0 写 "估 10M DAU × 5 turn ⇒ **600 QPS peak**"
+  (LLM 推理 QPS 比传统 ranking 低 100×, 因为单 query 成本高 100ms+)。这四个数字
+  量级差异显著, 直接决定模型架构选型 (GPU/CPU、batching 策略、cache 命中率要求)。
+- **何时选 vs 替代**: 任何 serving 系统必须给出 peak QPS。**vs Daily Volume**: 日总量
+  不直接决定容量 (峰值才决定), 但用于成本估算。**vs Sustained QPS**: 长期稳态 QPS,
+  决定 baseline 容量; **peak QPS** 决定 burst headroom。**vs Concurrent Users**:
+  并发用户数对 LLM/long-poll 类有意义, 对 stateless ranking 用 QPS 即可。
+
+### G-8. CTR (Click-Through Rate, 点击率)
+
+- **Full Name**: Click-Through Rate $= \frac{\#\mathrm{clicks}}{\#\mathrm{impressions}}$
+  —— 给定 N 次曝光中被点击的比例, 是推荐与广告里最古老最直接的 engagement KPI。
+- **直觉解释**: CTR 是 user-level micro-engagement 的代表, $\sim 1\text{-}5\%$ 量级
+  对一般 feed, $\sim 0.5\text{-}2\%$ 对广告。优点: 易测量、信号密集、模型 ground truth
+  清晰 (label 即 click)。缺点: (1) **clickbait 易优化**, 标题党/低质图刷高 CTR 损害
+  长期满意度; (2) **position bias 严重**, 高 slot CTR 天然高 (见 §5 F-1 IPS); (3) 与
+  长期 retention 不直接挂钩。所以**单 CTR objective 已被业界淘汰**, 必须配 dwell
+  time / repin / long-term head 一起做 multi-objective。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §5 multi-objective 节明确
+  "**单 objective (CTR) 会诱发低质内容**", 故 home feed ranker utility =
+  $w_1 \cdot \mathrm{pCTR} + w_2 \cdot \mathrm{pRepin} + w_3 \cdot \mathrm{pLongClick}
+  + w_4 \cdot \mathrm{pSession} - w_5 \cdot \mathrm{pHide}$, CTR 只是其中一个 head;
+  `system_design_ad_ctr.md` 整篇围绕 CTR 但与 CVR 联合优化 (eCPM = bid × pCTR × pCVR);
+  `system_design_concepts.md` §4 (评估指标) 把 CTR 列为 online metric 之一, 但配 NDCG /
+  long-dwell rate / negative feedback rate 共同构成 metric 组合。
+- **何时选 vs 替代**: CTR 适合作 **secondary** engagement metric, 配多 head 一起优化。
+  **vs CVR (Conversion Rate)**: CVR 是 click 后转化率 (购买/订阅), 信号稀疏但价值高;
+  广告系统两者并用 (eCPM 公式)。**vs Dwell Time / Long-Click**: dwell-time 抓"点完
+  后是否真的看了" 比 CTR 更抗 clickbait, 已成 home feed ranker 标配 head。
+  **vs Repin / Save Rate**: Pinterest-specific, 比 click 更强信号 (用户主动保存意图),
+  是 home feed ranker 的核心 head 之一。
+
+### G-9. pCTR (predicted Click-Through Rate, 预测点击率)
+
+- **Full Name**: predicted Click-Through Rate —— ranker 对 (user, item) pair 输出的
+  $\hat{p}(\mathrm{click} \mid u, i) \in [0, 1]$, 是 ad ranking 与 home feed ranking
+  的 primary head。
+- **直觉解释**: pCTR 不是单纯排序分数, 而是 **calibrated probability** —— 模型输出
+  $\hat{p} = 0.05$ 应该真的对应 5% 的实际点击率。calibration 重要性分两档: **pure
+  ranking** 场景 (home feed) 只看 ordering, calibration 错没事, AUC 即可; **pricing
+  / billing** 场景 (oCPM 广告计费) 必须 calibrated, 否则按 $\mathrm{eCPM} = \mathrm{bid}
+  \times \hat{p}_{\mathrm{CTR}}$ 收费会系统性多收/少收钱。常用 calibration 方法:
+  Platt scaling / isotonic regression / **bin-wise calibration plot** (§4 metrics
+  里的 ECE - Expected Calibration Error)。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §0 把 calibration 列为开篇关键
+  问题 "pCTR used for ranking? pricing (oCPM)? budget pacing? 决定是否必须 **calibrated**
+  (pricing 必须, pure ranking 可不必)"; §0.2 假设里直接写 "Promoted pin (静态图/视频)
+  在 home feed + search surface, **oCPM 计费 ⇒ pCTR 必须校准**"; §1 高层架构里
+  "[Ad L2 Heavy Ranker] (DeepFM / AutoInt, **pCTR head**)"; §5 calibration 节用
+  isotonic regression 做 post-hoc 校正, 配 ECE/PR-AUC/log-loss 监控。
+- **何时选 vs 替代**: 广告系统必须 pCTR + 校准。**vs raw CTR (历史)**: 用历史窗口
+  CTR 直接排序 cold-start 问题严重 (新 pin 无历史), pCTR 模型能泛化。**vs CTR head
+  + sigmoid only**: 不做 calibration 时 sigmoid 输出在 oCPM 下系统性偏差; 必须配
+  isotonic / Platt 校正。**vs uncalibrated logit ordering**: home feed 可省校准成本,
+  ad serving 不可。
+
+### G-10. pCVR (predicted Conversion Rate, 预测转化率)
+
+- **Full Name**: predicted Conversion Rate —— ranker 对 (user, item) pair 输出
+  $\hat{p}(\mathrm{conversion} \mid u, i, \mathrm{click})$, 即点击后发生 desired
+  action (购买 / signup / 收藏) 的概率, 是广告系统与 CTR 并列的核心 head。
+- **直觉解释**: pCVR 比 pCTR 信号更稀疏 (转化率 $\sim 1$-5% × pCTR $\sim 1$-5%
+  $\Rightarrow$ 整体 0.01-0.25%)、但**业务价值更高** (广告主真正在乎的是 ROAS
+  - return on ad spend, 而非 click)。建模挑战: (1) **delayed feedback** —— 转化可能
+  在 click 后 1-7 天才发生, label 收集慢; (2) **稀疏正样本** —— 一般用 multi-task
+  + shared bottom + hard negative mining 缓解; (3) **selection bias** —— 只能在
+  click 样本上学, 但要在所有候选上预测, 需要 ESMM (Entire Space Multi-task Model)
+  解 selection bias。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §1 高层架构里 ad ranker 输出
+  "[**eCPM = bid × pCTR × pCVR**] + pacing multiplier"; §4.2 model architecture
+  明确 "**Multi-task**: 共享 bottom, 分别 head pCTR / pCVR / pCloseup, 用 MMoE 或
+  PLE 动态路由" —— pCTR 与 pCVR 共享底层 user/item embedding, 上层独立 head 让
+  task-specific 信号不互相干扰 (PLE 解 task-conflict 见 §1 A-3)。
+- **何时选 vs 替代**: 广告系统必须 pCVR (与 pCTR 并列)。**vs single-task pCTR-only**:
+  纯 CTR 优化导致 high-CTR-low-CVR 广告 (clickbait) 拿走流量, 广告主 ROAS 下降。
+  **vs ESMM (Entire Space Multi-task)**: ESMM 用 $p(\mathrm{CVR}) = p(\mathrm{CTR}) \times
+  p(\mathrm{CVR} \mid \mathrm{click})$ 在全空间训练解 selection bias, 是 Alibaba 2018
+  的代表方案; Pinterest 用 MMoE/PLE shared bottom 是另一条路 (架构层 shared bottom
+  + selection bias 靠 IPS 权重补偿)。
+
+### G-11. oCPM (optimized Cost Per Mille, 千次曝光优化出价)
+
+- **Full Name**: optimized Cost Per Mille (mille = 1000), 即"按千次曝光收费 + 平台
+  自动按 conversion 优化出价", Facebook 2017 起广泛使用的广告竞价模式。
+- **直觉解释**: 传统 **CPM** (按 1000 次曝光收 X 美元) 让广告主出价决定, 但广告主
+  不知道哪个用户更可能转化; 传统 **CPC** (按点击收费) 鼓励 clickbait。oCPM 的核心:
+  广告主只设定**目标转化成本** (CPA target), 平台用 pCTR + pCVR 自动算 eCPM
+  (effective CPM):
+  $$\mathrm{eCPM} = \mathrm{bid}_\text{CPA} \times \hat{p}_\mathrm{CTR} \times \hat{p}_\mathrm{CVR} \times 1000$$
+  按这个 eCPM 排序竞价, 实际曝光后按千次曝光数 × eCPM 计费。结果: 广告主只关心
+  "我愿意为一次转化付多少钱", 平台帮他找最可能转化的人。这要求 pCTR/pCVR **必须
+  校准** (见 G-9), 否则系统性收错钱。
+- **Pinterest 实际应用**: `system_design_ad_ctr.md` §0.2 把 "**oCPM 计费 ⇒ pCTR
+  必须校准**" 列为开篇核心约束; §5 calibration 节明确 "**oCPM 计费要求 pCTR 是概率
+  (期望频率), 不仅是 ranking score**"; FAQ 进一步解释 "**AUC 只看排序. oCPM 计费下
+  eCPM = bid × pCTR, 若 pCTR 整体偏高 2×, 广告主被多扣钱**" —— 这条直接连接 G-8 CTR
+  + G-9 pCTR + G-11 oCPM 三个概念, 是 Pinterest ad system design 的核心计费链。
+- **何时选 vs 替代**: 广告系统目标是 **conversion-driven** + 平台有 pCTR/pCVR 模型时
+  oCPM 最优。**vs CPC**: 广告主出价 per click, 平台无法保证转化, 易出 clickbait。
+  **vs CPM**: 广告主出价 per 1000 impressions, 平台无法优化, 转化率低。**vs
+  CPA (Cost Per Action)**: 广告主只为转化付费, 平台风险大 (转化是延迟稀疏信号);
+  oCPM 是 platform-bears-prediction-risk 的折中, 业界主流。
+
+### G-12. APNs / FCM (Apple Push Notification service / Firebase Cloud Messaging)
+
+- **Full Name**: Apple Push Notification service (APNs, iOS 推送) / Firebase Cloud
+  Messaging (FCM, Android 推送, 前身 GCM) —— 移动端 push notification 的两大平台
+  原生通道。
+- **直觉解释**: 推送通知最后一公里必须经过 device OS vendor 的官方通道 (Apple/Google),
+  无法绕开。APNs/FCM 接受 server 端发送的 (device_token, payload) 并在用户设备上
+  弹通知; 关键工程约束: (1) **rate limit** APNs 推荐每连接 1000-4000 msg/s, FCM
+  500K/min/project; (2) **token 失效** 用户卸载/换设备 → token 无效, 需要 cleanup
+  pipeline; (3) **batching** APNs HTTP/2 支持多路复用, FCM 支持 single request 最多
+  500 token —— batch 化是吞吐关键; (4) **silent push vs alert push** silent 不弹
+  banner 但能唤起 app 后台。
+- **Pinterest 实际应用**: `system_design_notification_reco.md` §1 高层架构最后一层
+  明确 "[**Channel Senders**] -- **APNs / FCM** / SendGrid / inbox DB" —— 四种 channel
+  共存 (push iOS / push Android / email / 站内信); §2.3 budget & pacing 节明确
+  "全局 budget: 日发送上限 / email 成本 / **APNs throttle**"; §8.1 implementation
+  细节里 "Delivery: rule engine + channel queue (**APNs batch 100 tokens/req**, email
+  via SendGrid)" —— APNs batch 100 是工程经验值 (太小吞吐低, 太大单 batch 失败影响
+  面广)。这层是整个 notification reco 系统的 last-mile, 上游 ML ranker 算出来再好,
+  这一层挂掉就全废。
+- **何时选 vs 替代**: iOS push 必须 APNs (Apple 强制), Android push 必须 FCM (Google
+  强制), 无替代方案。**vs Email (SendGrid / SES)**: email 成本低 + 长内容友好, 但
+  open rate 远低于 push; 通常 push 主战场 + email 长尾召回。**vs Web Push**: 浏览器
+  端用 web push protocol (Chrome / Firefox 各自实现), Pinterest web 端有但量级远低
+  于 mobile。**vs SMS**: 高到达率 + 高成本, 一般只用于 critical 通知 (登录验证), 不用
+  于 reco notification。
 
 ---
 
