@@ -97,6 +97,27 @@ def _fetch_problem_meta_by_title(
     return row
 
 
+def _fetch_problem_meta_by_leetcode_id(
+    conn: sqlite3.Connection, leetcode_id: int
+) -> tuple[int, int | None, str, str | None, str | None, str | None]:
+    """Return (id, leetcode_id, title, difficulty, family, pattern) for the row matching leetcode_id.
+
+    Canonical key for LC-numbered problems per CLAUDE.md
+    `Idempotent seed pattern per row type`.
+    """
+    row = conn.execute(
+        "SELECT id, leetcode_id, title, difficulty, family, pattern "
+        "FROM problems WHERE leetcode_id = ?",
+        (leetcode_id,),
+    ).fetchone()
+    if row is None:
+        raise SystemExit(
+            f"[FAIL] problems.leetcode_id={leetcode_id} missing -- "
+            "the corresponding seed_*.py must run first"
+        )
+    return row
+
+
 def _fmt_index_row(
     meta: tuple[int, int | None, str, str | None, str | None, str | None],
     summary: str,
@@ -152,6 +173,15 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "R 只允许 i_start <= i_target.",
     )
 
+    # Sliding Window -- LC 3859 (leetcode.cn weekly contest, 双条件容斥)
+    lc3859 = _fetch_problem_meta_by_leetcode_id(conn, 3859)
+    lc3859_row = _fmt_index_row(
+        lc3859,
+        "双条件容斥: `atLeast(k, k) - atLeast(k+1, k)`; "
+        "滑窗内维护 `freq` 和 `numFreqGeM` 两个量, 缩窗到刚好不满足后 "
+        "`ans += left` 利用单调性一次性加 left 个左端点.",
+    )
+
     lines: list[str] = [
         INDEX_SENTINEL,
         "",
@@ -182,6 +212,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### String / Two Pointers",
         "",
         lc2337_row,
+        "",
+        "### Sliding Window",
+        "",
+        lc3859_row,
         "",
         "---",
         "",
