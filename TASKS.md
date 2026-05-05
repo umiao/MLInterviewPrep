@@ -9,70 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-731
-- **Description**: Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
-
-Context: step 2 of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731 (sd:// URI scheme). After this task and T-P0-733, clicking sd://pinterest-ad-ctr in doc 47 markdown will open this drawer instead of navigating away.
-
-Scope:
-- New file: src/frontend/src/components/SystemDesignDrawer.tsx
-- New file: src/frontend/src/components/SystemDesignDrawer.test.tsx
-- No changes to PrepNotesPage or MarkdownPreview (already done in T-P0-731).
-
-Architecture (mirror CompanyDocDrawer):
-1. Props interface: `{ slug: string | null; onClose: () => void; onLcLinkClick?; onDbLinkClick?; onCdLinkClick? }`. NO onSdLinkClick at this layer -- recursive sd:// inside the drawer REPLACES activeSlug (same pattern as cd:// inside CompanyDocDrawer).
-2. State: `activeSlug` mirrors prop via useEffect (so parent close + reopen with new slug works).
-3. Data fetch: useQuery({ queryKey: ['system-design', activeSlug], queryFn: () => api.get<SystemDesign>(`/system-designs/${activeSlug}`), enabled: activeSlug !== null, retry: false }).
-4. Status discriminated union: 'loading' | 'success' | 'not_found' | 'error' (use ApiRequestError 404 detection like CompanyDocDrawer).
-5. Render: SlideOverPanel + body. Body shows all 9 sections from src/frontend/src/types/system-design.ts SECTION_LABELS in order: overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline, cheat_sheet. Each section: bold Chinese+English label, MarkdownPreview of content (or muted '尚未填写' placeholder if section is null/empty).
-6. Architecture section gets the diagram inline (ImageLightbox of /static/system-designs/<diagram_filename>) when present -- match SystemDesignDetail.tsx behavior.
-7. 404 inline UI: 'System design module not found (slug=...). Link may be stale or the module was renamed -- check system_designs.slug.'
-8. console.warn on fetch failure: prefix '[SystemDesignDrawer] sd://<slug> fetch failed: <msg>'.
-9. Title in header: design.title on success, 'Loading system design (slug=...)' / 'Module not found' / 'Failed to load module' on other states.
-10. Pure helpers exported for vitest pinning: `formatSystemDesignFetchWarning(slug, msg)` and `systemDesignDrawerTitle(status, slug, design?)` -- mirror CompanyDocDrawer pattern so DOM-free unit tests are possible.
-
-Recursive link handling within drawer body (matches CompanyDocDrawer):
-- lc:// db:// cd:// links inside section markdown: bubble UP to parent via onLcLinkClick / onDbLinkClick / onCdLinkClick props (parent typically swaps to ProblemDrawer or CompanyDocDrawer, NOT nested).
-- sd:// links inside section markdown: REPLACE activeSlug locally (no history stack -- YAGNI).
-- Pass onSdLinkClick={(s) => setActiveSlug(s)} into the inner MarkdownPreview.
-
-Scenario matrix:
-| State            | Drawer body                                              |
-|------------------|----------------------------------------------------------|
-| slug=null        | drawer closed (open=false)                               |
-| loading          | 'Loading system design...'                               |
-| success          | 9 sections rendered; missing sections show placeholder   |
-| 404              | inline red error: 'module not found (slug=...)'          |
-| network error    | inline red error: 'Failed to load: <msg>'                |
-| cheat_sheet only | overview/etc placeholders + cheat_sheet markdown shown   |
-| diagram present  | ImageLightbox in architecture section                    |
-| diagram missing  | architecture section renders normally without image      |
-
-Journey AC: After T-P0-733 wires this in, click sd://pinterest-ad-ctr in /companies/29/prep?tab=docs&doc=47 -> drawer opens on right, header shows 'Pinterest ML System Design: Ad CTR Prediction', body shows all 9 sections, ESC closes drawer, scroll position on prep page preserved.
-
-Cross-boundary integration AC: backend GET /system-designs/<slug> already exists (verified 2026-05-04 via routers/system_design.py). Frontend type SystemDesign in src/frontend/src/types/system-design.ts is the authoritative shape. No backend changes required. If 404 path is ever hit, console.warn fires for observability.
-
-Tests (mirror CompanyDocDrawer.test.tsx):
-- formatSystemDesignFetchWarning('foo', 'bar') returns expected prefix
-- systemDesignDrawerTitle returns correct title per status
-- Body renders all 9 section labels in order
-- Body shows 404 message with slug for not_found
-- Body shows error message for error
-- diagram_filename present -> ImageLightbox rendered in architecture section
-- diagram_filename absent -> architecture section has no img
-
-Manual smoke test (after T-P0-733): `cd src/frontend && npm run dev` -> /companies/29/prep?tab=docs&doc=47 -> click each of the 7 SD table links -> drawer renders correct title + 9 sections; lc://322 link inside drawer body bubbles to ProblemDrawer (not nested); back button does NOT pollute history (drawer state is local).
-
-Definition of Done:
-- SystemDesignDrawer.tsx created and typechecks
-- SystemDesignDrawer.test.tsx with 7+ cases above, all green
-- `cd src/frontend && npm run typecheck` green
-- `npx vitest run components/SystemDesignDrawer` green
-- No changes to PrepNotesPage / MarkdownPreview / backend
-
 #### T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer
 - **Priority**: P0
 - **Complexity**: S
@@ -655,6 +591,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
+- [x] **2026-05-04** -- T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component. Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
 - [x] **2026-05-04** -- T-P0-731: [SD-DRAWER-1] Add sd://<slug> URI scheme to MarkdownPreview. Add a 4th drawer URI handler in src/frontend/src/components/ui/MarkdownPreview.tsx, parallel to existing lc:// db:// cd:
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
 - [x] **2026-05-03** -- T-P1-729: Card Game Sum-15 笔记 v2 重写: 修硬伤(state space 数学/百分比/反例) + 加 Q5/§10 代码骨架/AI 反向坑 +2 + 时间预算. User Discord critique 9KB. 改进 db://1105 description (6.5KB->12.4KB) + doc 90 cheat-sheet card §8 + 共通考点 §3。重点: state spa
