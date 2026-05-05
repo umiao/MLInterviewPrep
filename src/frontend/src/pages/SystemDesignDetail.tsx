@@ -7,14 +7,20 @@ import MarkdownPreview from "../components/ui/MarkdownPreview";
 import ImageLightbox from "../components/ui/ImageLightbox";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import SlideOverPanel from "../components/ui/SlideOverPanel";
+import DynamicTocSidebar from "../components/ui/DynamicTocSidebar";
 import type {
   SystemDesign,
   SystemDesignSummary,
   SystemDesignSection,
 } from "../types/system-design";
 import { SECTION_LABELS } from "../types/system-design";
+import type { TocHeading } from "../utils/slugify";
 
 const SECTIONS = Object.keys(SECTION_LABELS) as SystemDesignSection[];
+
+/** When the rendered body has many H3 sub-sections (e.g., concept-glossary docs),
+ *  swap the schema-section TOC for a keyword-driven H2/H3 TOC with search. */
+const KEYWORD_TOC_H3_THRESHOLD = 15;
 
 /**
  * Full-screen system design detail page at /system-design/:slug.
@@ -73,9 +79,32 @@ export default function SystemDesignDetail() {
   // --- IntersectionObserver for bookmark highlighting ---
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  // Track scroll container as state too, so DynamicTocSidebar's effects re-run on mount.
+  const [scrollContainerEl, setScrollContainerEl] = useState<HTMLDivElement | null>(null);
 
   // Mobile (<lg) drawer state for the section TOC.
   const [tocDrawerOpen, setTocDrawerOpen] = useState(false);
+
+  // Per-schema-section markdown headings, aggregated from each MarkdownPreview's
+  // onHeadingsExtracted callback. Flattened in SECTIONS order to feed DynamicTocSidebar.
+  const [bodyHeadings, setBodyHeadings] = useState<Record<string, TocHeading[]>>({});
+
+  const flatHeadings = useMemo<TocHeading[]>(
+    () => SECTIONS.flatMap((s) => bodyHeadings[s] ?? []),
+    [bodyHeadings],
+  );
+
+  // Heuristic: when a doc carries enough H3 sub-sections OR its slug ends with
+  // "-concepts", switch from the schema-column TOC to a keyword-driven H2/H3 TOC.
+  const useKeywordToc =
+    (slug?.endsWith("-concepts") ?? false) ||
+    flatHeadings.filter((h) => h.level === 3).length >= KEYWORD_TOC_H3_THRESHOLD;
+
+  // Sync the ref into state so DynamicTocSidebar (which takes an HTMLElement value,
+  // not a ref) gets a stable scroll-container reference.
+  useEffect(() => {
+    setScrollContainerEl(scrollContainerRef.current);
+  }, [design]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -225,7 +254,7 @@ export default function SystemDesignDetail() {
           release at flex-bottom and the TOC vanishes on the last section. */}
       <div ref={scrollContainerRef} className="flex-1 overflow-auto min-h-0">
         <div className="max-w-6xl mx-auto">
-          <div className="min-w-0 px-6 py-6 space-y-10 lg:pr-60">
+          <div className={`min-w-0 px-6 py-6 space-y-10 ${useKeywordToc ? "lg:pr-72" : "lg:pr-60"}`}>
             {SECTIONS.map((section) => (
               <section
                 key={section}
@@ -279,7 +308,14 @@ export default function SystemDesignDetail() {
                 ) : (
                   <div className="prep-prose">
                     {sectionContents[section] ? (
-                      <MarkdownPreview markdown={sectionContents[section]} />
+                      <MarkdownPreview
+                        markdown={sectionContents[section]}
+                        onHeadingsExtracted={(h) =>
+                          setBodyHeadings((prev) =>
+                            prev[section] === h ? prev : { ...prev, [section]: h },
+                          )
+                        }
+                      />
                     ) : (
                       <p className="text-gray-400 italic">
                         No content yet. Switch to Edit mode to add content.
@@ -298,6 +334,7 @@ export default function SystemDesignDetail() {
           right offset hugs the right edge of the centered max-w-6xl
           content on wide screens, falling back to a 1rem gutter on
           narrower screens. */}
+      {!useKeywordToc && (
       <aside
         className="hidden lg:block fixed top-20 z-10 w-52 max-h-[calc(100vh-6rem)] overflow-y-auto"
         style={{ right: "max(1rem, calc((100vw - 72rem) / 2 + 1rem))" }}
@@ -326,6 +363,18 @@ export default function SystemDesignDetail() {
           </ul>
         </nav>
       </aside>
+      )}
+
+      {/* Keyword-driven H2/H3 TOC for concept-glossary docs (slug ends with -concepts
+          or H3 count exceeds threshold). Replaces the schema-section TOC above. */}
+      {useKeywordToc && (
+        <DynamicTocSidebar
+          headings={flatHeadings}
+          scrollContainer={scrollContainerEl}
+          parentLevel={2}
+          filterable
+        />
+      )}
 
       {/* Mobile (<lg) toggle: vertical "Sections" tab pinned to right edge
           mid-height. Tapping opens the drawer below. */}
