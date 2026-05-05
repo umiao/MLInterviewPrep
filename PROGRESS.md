@@ -488,3 +488,10 @@
 - **Sanity check result**: pytest 67 tests pinterest/system_design/seed all pass in 3.60s. Re-seed idempotent (second run: 8 UPDATEs, 0 INSERTs). DB content verified: all 9 distinct markers present across overview/architecture/dataflow/formulas/production_constraints/tradeoffs columns (Approximate Nearest Neighbor, Graph SAmple and AGgregatE, Projecting Conflicting Gradients, Gradient Normalization, Vision Transformer, multilingual BERT, Normalized Discounted Cumulative Gain, Scalable Nearest Neighbors, Hierarchical Navigable Small World). AC1-AC5 met.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-749 --status completed
+
+## 2026-05-05 22:30 -- [T-P1-750] [PINT-CONCEPTS-K] Inline acronym expansion: pinterest-chatbot-pins
+- **What I did**: Expanded 8 of 12 listed acronyms inline at first prose-readable occurrence in docs/company/pinterest/system_design_chatbot_pins.md, using format `**Full Name** (ACRONYM, chinese)`. Edits: CLIP at line 16 (clarifying-questions table cell), ViT-L/14 at line 110 (multi-modal context-compression bullet), DistilBERT at line 132 (intent classifier fallback bullet), vLLM at line 189 (generation LLM serving bullet), SFT at line 237 (training stage 1), RLHF/DPO/PPO all at line 238 (training stage 2 -- three expansions in one line). Skipped BiLSTM-CRF, NER, SBERT, DML (NOT present in doc; grep confirmed zero matches; only false-positive partials inside "Generation").
+- **Deliverables**: docs/company/pinterest/system_design_chatbot_pins.md (5 distinct edit sites, 8 expansions, line count 338->337), DB system_designs.id=31 updated.
+- **Sanity check result**: pytest 67 tests pinterest/system_design/seed all pass in 3.63s. Re-seed idempotent (second run: 8 UPDATEs, 0 INSERTs). DB content verified: all 8 distinct markers present (Contrastive Language-Image, Vision Transformer Large, Distilled BERT, paged-attention, Supervised Fine-Tuning, Reinforcement Learning from Human Feedback, Direct Preference Optimization, Proximal Policy Optimization). AC1-AC5 met.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-750 --status completed

@@ -13,7 +13,7 @@
 | 维度 | 问题 | 为什么重要 |
 |------|------|----------|
 | 产品形态 | 独立 chat tab? home feed 里的 inline assistant? 还是 search 页的 AI refine? | 决定 UI 约束 + latency SLA + turn 长度 |
-| 输入模态 | 纯文本? 允许图片上传 (visual search)? 语音? | 多模态决定 encoder; 图片 ⇒ CLIP / unified embedding |
+| 输入模态 | 纯文本? 允许图片上传 (visual search)? 语音? | 多模态决定 encoder; 图片 ⇒ **Contrastive Language-Image Pre-training** (CLIP, 对比图文预训练) / unified embedding |
 | 输出模态 | 纯 pin grid? 文本 + pin 混排? 有 "reasoning" 文字解释吗? | 混排需要 LLM 做 grounded generation, 不仅仅 retrieval |
 | 个性化深度 | 用 user 历史 repin/board 吗? cross-session 记忆? 还是单 session 隐私隔离? | 决定是否拉 user embedding / long-term profile |
 | 会话长度 | 平均 turn 数? 上下文窗口多大? | 多轮 ⇒ dialog state tracking; 单轮 ⇒ 退化为 search |
@@ -107,7 +107,7 @@
 
 ### 2.2 Context Compression
 - Window 8K tokens, 接近饱和时用 **summarization** (同一个轻量 LLM), 保留 active_topic + constraints + negative + 最近 2 turn 原文.
-- 图片输入: CLIP ViT-L/14 抽 image embedding, 存入 state (而非 raw pixels), 减少后续 turn cost.
+- 图片输入: CLIP **Vision Transformer Large (patch size 14)** (ViT-L/14, 视觉 Transformer 大型/14 像素 patch) 抽 image embedding, 存入 state (而非 raw pixels), 减少后续 turn cost.
 
 ### 2.3 Coreference & Follow-up
 用户说 "show me more like the third one" ⇒ 需要把 pin grid index 映射回 pin_id. 前端把最近一次展示的 pin_ids + 序号塞回 state, LLM 做 coref resolution.
@@ -129,7 +129,7 @@
 
 ### 3.2 Model Choice
 - **首选**: 让生成 LLM 自己输出 `intent` 字段 (structured decoding). 省一次调用.
-- **兜底**: 独立 DistilBERT classifier (6-layer, 256 dim) 做 guardrail, 只在生成 LLM 给出低置信度时介入.
+- **兜底**: 独立 **Distilled BERT** (DistilBERT, 蒸馏 BERT) classifier (6-layer, 256 dim) 做 guardrail, 只在生成 LLM 给出低置信度时介入.
 - 训练数据: 100K 人工标注 + 1M weak-label (用 GPT-4 在历史 chat 上打标).
 
 ### 3.3 为什么不用 pure zero-shot LLM
@@ -186,7 +186,7 @@ Output JSON: {"reply": "...", "pin_ids": ["p_123", ...], "intent": "ask-pins"}.
 ```
 
 ### 5.3 模型选择
-- **生成 LLM**: 7B instruction-tuned (Llama-3 / Mistral fine-tune on Pinterest conv data). INT8 quantized, vLLM serving, ~80 tok/s per GPU.
+- **生成 LLM**: 7B instruction-tuned (Llama-3 / Mistral fine-tune on Pinterest conv data). INT8 quantized, **virtual LLM (paged-attention inference engine)** (vLLM, 高吞吐 LLM 推理引擎) serving, ~80 tok/s per GPU.
 - 为什么不用 70B: latency (first-token 预算 1.5s) + cost. 7B fine-tune on domain data 在相关性评测上比 70B zero-shot 高 6%.
 - **Structured decoding**: 用 outlines / xgrammar 强制 JSON schema, 杜绝 pin_id 格式错误.
 
@@ -234,8 +234,8 @@ Output JSON: {"reply": "...", "pin_ids": ["p_123", ...], "intent": "ask-pins"}.
 - **Refine → success**: 若 refine turn 后用户有 repin, 视为 positive.
 
 ### 7.2 Stage-wise 训练
-1. **SFT**: 100K 高质量人写 conversation (Pinterest 内部 annotator), 学 pin citation 格式 + 风格.
-2. **RLHF / DPO**: 用 human preference 对 (reply_A, reply_B), DPO 比 PPO 更稳定, 用 50K pair.
+1. **Supervised Fine-Tuning** (SFT, 监督微调): 100K 高质量人写 conversation (Pinterest 内部 annotator), 学 pin citation 格式 + 风格.
+2. **Reinforcement Learning from Human Feedback** (RLHF, 人类反馈强化学习) / **Direct Preference Optimization** (DPO, 直接偏好优化): 用 human preference 对 (reply_A, reply_B), DPO 比 **Proximal Policy Optimization** (PPO, 近端策略优化) 更稳定, 用 50K pair.
 3. **Retrieval alignment**: 用对比学习把 LLM query encoder 对齐到 pin embedding 空间 (in-batch negatives + hard negatives from BM25 mismatches).
 4. **Intent classifier**: 独立训练, 每周增量.
 
