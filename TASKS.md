@@ -9,62 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-733
-- **Description**: Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pinterest LC Must-Do: Review & Index, company_id=29) with `sd://<slug>` URIs.
-
-Context: step 4 of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731 + T-P0-732 + T-P0-733 (the URI scheme + drawer + wiring must exist before content references the new scheme, otherwise links 404 silently to user). After this task, the original bug (drawer view doesn't render, page navigates away) is fixed for the user's reported URL.
-
-Invariant 3 compliance (CRITICAL): DB content edits MUST go through a git-tracked, idempotent Python seed script. NO ad-hoc SQL. The script must be named scripts/seed_pinterest_lc_must_do_sd_drawer_links.py (matches `seed_<company>_<doc>.py` convention).
-
-Concrete content changes (verified 2026-05-04 from DB):
-| Old href                                                          | New href                          |
-|-------------------------------------------------------------------|-----------------------------------|
-| /system-design/pinterest-ad-ctr                                   | sd://pinterest-ad-ctr             |
-| /system-design/pinterest-embeddings                               | sd://pinterest-embeddings         |
-| /system-design/pinterest-chatbot-pins                             | sd://pinterest-chatbot-pins       |
-| /system-design/pinterest-pin-ranking                              | sd://pinterest-pin-ranking        |
-| /system-design/pinterest-pins-search                              | sd://pinterest-pins-search        |
-| /system-design/pinterest-notification-reco                        | sd://pinterest-notification-reco  |
-| /system-design/pinterest-catalog-bulk-update                      | sd://pinterest-catalog-bulk-update |
-
-Idempotent seed script requirements:
-1. Connect to data/mle_prep.db.
-2. SELECT current content for id=47, company_id=29 (defensive double-check on company_id).
-3. Apply the 7 string replacements using `re.sub` with literal-anchored pattern `r']\(/system-design/(pinterest-[a-z-]+)\)'` -> `r'](sd://\1)'`.
-4. Verify the post-replace content has exactly 7 `sd://pinterest-` occurrences AND zero `/system-design/pinterest-` occurrences. Abort with non-zero exit if assertion fails.
-5. Compute new content_hash (SHA256 of new content) and write content + content_hash + updated_at via UPDATE in a single transaction.
-6. Idempotent: re-running the script after success is a no-op (detect by counting `sd://pinterest-` in pre-content; if all 7 already migrated, log 'already migrated' and exit 0).
-7. Print before/after diff summary (line count, link counts) for review.
-
-Acceptance Criteria:
-- File created: scripts/seed_pinterest_lc_must_do_sd_drawer_links.py.
-- Script run produces: 7 path-form links removed, 7 sd:// links inserted, 0 other content changes.
-- Re-run is no-op (logs 'already migrated').
-- Run `python scripts/audit_uri_consistency.py --hub 47` (after T-P0-735's sd:// support lands; or pre-T-P0-735 just visually verify sd:// count) -> all 7 sd:// links resolve to existing system_designs.slug.
-
-Sanity-check protocol:
-1. Backup current data/mle_prep.db -> data/mle_prep.db.bak_T-P0-734.
-2. Dry-run: `python -c" pull content, run regex, print before+after, count links"` -> verify exactly 7-for-7 swap.
-3. Real run: execute the seed -> commit changes.
-4. Verify in dev server: /companies/29/prep?tab=docs&doc=47 -> Preview mode -> 7 SD table links now render as drawer-trigger buttons (clicking opens SystemDesignDrawer per T-P0-733 wiring).
-5. Round-trip: refresh page, click each of the 7 links, observe drawer opens for each. Note in PROGRESS.md.
-
-Other-case gate:
-- If user has unsaved local edits to doc 47 in dev: warn and require explicit consent (script is meant for clean state).
-- If any of the 7 slugs becomes missing from system_designs (future schema change): T-P0-735's audit catches it.
-
-Manual smoke test (mandatory acceptance gate):
-http://localhost:5173/companies/29/prep?tab=docs&doc=47 in Preview mode -> click each of 7 SD table links one by one -> drawer renders correct title for each -> ESC closes -> page state preserved.
-
-Definition of Done:
-- scripts/seed_pinterest_lc_must_do_sd_drawer_links.py committed.
-- Doc 47 content migrated in data/mle_prep.db.
-- Script idempotency verified (re-run = no-op).
-- Manual smoke test pass recorded in PROGRESS.md.
-
 #### T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme
 - **Priority**: P0
 - **Complexity**: S
@@ -516,6 +460,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
+- [x] **2026-05-04** -- T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs. Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pint
 - [x] **2026-05-04** -- T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer. Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the Sys
 - [x] **2026-05-04** -- T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component. Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
 - [x] **2026-05-04** -- T-P0-731: [SD-DRAWER-1] Add sd://<slug> URI scheme to MarkdownPreview. Add a 4th drawer URI handler in src/frontend/src/components/ui/MarkdownPreview.tsx, parallel to existing lc:// db:// cd:
