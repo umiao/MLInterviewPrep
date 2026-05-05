@@ -14,7 +14,7 @@
 |------|------|----------|
 | Ad 形态 | Promoted pin? Shopping ad? Video ad? Carousel? | 不同形态的 creative feature 与 label 定义不同 |
 | Surface | Home feed / search / related pins / shopping tab? | 不同 surface 分布差异大, 需要 surface-aware 特征或分模型 |
-| 目标 | pCTR used for ranking? pricing (oCPM)? budget pacing? | 决定是否必须 calibrated (pricing 必须, pure ranking 可不必) |
+| 目标 | pCTR used for ranking? pricing via **optimized Cost Per Mille** (oCPM, 优化千次曝光出价)? budget pacing? | 决定是否必须 calibrated (pricing 必须, pure ranking 可不必) |
 | Click 定义 | repin 算 click? closeup? outbound click (到广告主落地页)? | 决定 label source 与 attribution 窗口 |
 | Scale | 每日 impression? QPS peak? 广告主数? | 500M MAU × 10 ad impr/session × 2 session/day ≈ 10B impr/day; peak ~150K QPS pCTR |
 | Latency | Ranking SLA? | 典型 ad scoring P99 < 80ms (在 organic ranker 之后, 时间预算紧) |
@@ -119,17 +119,17 @@ click(request_id, ad_id, ts)                   ─┘      window: [impr_ts, imp
 ## 4. Model
 
 ### 4.1 L1 light ranker (2k → 200)
-- GBDT (LightGBM) 或 2-tower dot product. ~100 特征, P99 < 5ms.
+- **Gradient Boosted Decision Trees** (GBDT, 梯度提升决策树) — 实现用 **LightGBM** (Microsoft 2017 高效梯度提升库) — 或 2-tower dot product. ~100 特征, P99 < 5ms.
 - 目标: recall 高, 不要 drop 真正好的 ads; 对 pCTR 绝对值精度要求低.
 
 ### 4.2 L2 heavy ranker — DeepFM / AutoInt
 选择对比:
 | 模型 | 优势 | 劣势 |
 |------|------|------|
-| Wide & Deep | 简单, wide 部分可解释 | cross 特征需手工 |
-| **DeepFM** | FM 自动学 2nd-order cross + DNN 学高阶 | 2nd-order 之外的交叉效率一般 |
-| AutoInt | multi-head self-attention on features, 自动学高阶交叉 | 训练慢, 解释性差 |
-| DCN-v2 | 显式 cross layer + DNN, Google 线上验证 | 参数量大 |
+| **Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联) | 简单, wide 部分可解释 | cross 特征需手工 |
+| **DeepFM** | **Factorization Machines** (FM, 因子分解机) 自动学 2nd-order cross + DNN 学高阶 | 2nd-order 之外的交叉效率一般 |
+| **Automatic Feature Interaction Learning** (AutoInt, 自动特征交互) | multi-head self-attention on features, 自动学高阶交叉 | 训练慢, 解释性差 |
+| **Deep & Cross Network v2** (DCN-v2, 深度与交叉网络 v2) | 显式 cross layer + DNN, Google 线上验证 | 参数量大 |
 
 **推荐**: DeepFM 或 DCN-v2 作为 baseline, AutoInt 作为 A/B 候选.
 
@@ -146,8 +146,8 @@ dense features (counts, age, bias) ───────────────
 position bias tower ──────────────────────────────────────────┘
 ```
 
-- **Loss**: BCE(y, σ(logit)). 考虑 focal loss 缓解 class imbalance.
-- **Multi-task**: 共享 bottom, 分别 head pCTR / pCVR / pCloseup, 用 MMoE 或 PLE 动态路由. 好处: 更好 generalize, 对 sparse conversion 标签更 robust.
+- **Loss**: **Binary Cross-Entropy** (BCE, 二元交叉熵), 即 BCE(y, σ(logit)). 考虑 focal loss 缓解 class imbalance.
+- **Multi-task**: 共享 bottom, 分别 head pCTR / **predicted Conversion Rate** (pCVR, 预估转化率) / pCloseup, 用 MMoE 或 PLE 动态路由. 好处: 更好 generalize, 对 sparse conversion 标签更 robust.
 
 ### 4.3 训练
 - Daily incremental fine-tune (昨日数据), weekly full retrain (过去 30 天).
@@ -204,7 +204,7 @@ p̂ = p' / (p' + (1 − p') / α)
 - **Online-offline 一致性**: dual-write 到 Kafka, Spark 消费后固化; 所有 feature 读都打 metric (cache hit, staleness).
 
 ### 6.3 模型部署
-- Triton / TF-Serving, 每次上线新模型前 **shadow traffic 1 天**, 比较 pCTR distribution + offline replay AUC.
+- Triton / TF-Serving, 每次上线新模型前 **shadow traffic 1 天**, 比较 pCTR distribution + offline replay **Area Under ROC Curve** (AUC, ROC 曲线下面积).
 - Canary 1% → 5% → 50% → 100%, 每阶段自动 guardrail 检查 (calibration ratio, ECE, CTR).
 - **Embedding hot reload**: 新广告 embedding 每 10 min 增量 push, 不用重启服务.
 
@@ -227,7 +227,7 @@ p̂ = p' / (p' + (1 − p') / α)
 
 ### 7.3 监控告警
 - **Feature drift**: PSI (Population Stability Index) > 0.2 告警.
-- **Prediction drift**: 每 5min 计算 serving pCTR 分布, 与昨日同时段比较, KS-test 阈值.
+- **Prediction drift**: 每 5min 计算 serving pCTR 分布, 与昨日同时段比较, **Kolmogorov-Smirnov test** (KS-test, KS 检验) 阈值.
 - **Calibration monitor**: hourly calibration ratio, 偏离 [0.9, 1.1] 报警 → 触发 isotonic 重拟合.
 
 ---
@@ -236,7 +236,7 @@ p̂ = p' / (p' + (1 − p') / α)
 
 1. **Cold start 新广告**: 前 1000 impressions 进 explore 桶 (Thompson sampling on Beta prior), 同时用 creative embedding (image + text) 做 warm-start.
 2. **Delayed feedback** (长尾 click): 参考 Criteo 2014 delayed feedback model — 每个 example 带一个 delay distribution, 联合训练 click prob 与 delay prob.
-3. **Position bias 校正**: training 用 position feature, serving 固定 position=1; 或用 Inverse Propensity Weighting.
+3. **Position bias 校正**: training 用 position feature, serving 固定 position=1; 或用 **Inverse Propensity Scoring** (IPS, 逆倾向加权).
 4. **Budget pacing**: pacing_multiplier 在 eCPM 之外, 由独立 PID 控制器根据剩余预算 + 剩余时间调整; 不混入模型.
 5. **Exploration vs exploitation**: ε-greedy 或 UCB 给新 creative 机会; 记录 explore bucket 作为 unbiased holdout.
 6. **Multi-objective** (CTR + CVR + long-term value): MMoE 多头, 加权求和 (权重由业务负责人定), 或用 Pareto 前沿作为候选集.
