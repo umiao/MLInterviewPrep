@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 671 completed tasks archived as of latest archival.
+> 687 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1007,3 +1007,24 @@ When re-running scripts/seed_geometric_median_20260502.py on W
 - [x] **2026-05-02** -- T-P2-698: [KMEANS-GOLDEN-4] Wire golden badge + toggle + drawer accent into QuickIndex ML cards and ProblemDrawer. WHY: With schema (T1), endpoint (T2), and button extension (T3) in place, this task is the actual UX-visible change — th
 - [x] **2026-05-02** -- T-P2-699: [KMEANS-GOLDEN-5] Replace problems.id=1064 notes with condensed K-Means golden draft (sentinel-based idempotent UPSERT). WHY: User has produced a condensed K-Means / K-Means++ rewrite (~7KB, vs the existing ~9.8KB notes) optimized for densit
 - [x] **2026-05-02** -- T-P2-700: [KMEANS-GOLDEN-6] Mark K-Means (problems.id=1064) as is_golden=1, set golden_at=now() — the visible payoff. WHY: After T1 adds the schema and T5 lands the new content, this task flips the bit. This is the smallest task in the ch
+- [x] **2026-05-03** -- T-P0-724: [MLI-CONTENT] LogReg golden: explicit-(w,b) GD refactor per LR T-P1-720 standard. Align docs/drafts/logreg_golden_v1.md (problems.id=1107) with the explicit-bias
+GD pattern that LR golden (T-P1-720, scr
+- [x] **2026-05-03** -- T-P0-727: [MLI-CONTENT] Geometric Median note v2: GD lens reframe + adaptive-lr/Weiszfeld bridge. Reframe MLInterviewPrep/docs/drafts/geometric_median_golden_v1.md from current "Weiszfeld + Vardi-Zhang code-heavy" lens
+- [x] **2026-05-03** -- T-P0-728: [MLI-CONTENT] ML Naive Reference Card on QuickIndex: KNN+KMeans+LogReg side-by-side ref doc + divider/chip card + ProblemDrawer wiring. GOAL
+Add a "Naive Reference Implementations" summary card to the ML section of QuickIndex (/quick-index?section=ml). Car
+- [x] **2026-05-04** -- T-P0-731: [SD-DRAWER-1] Add sd://<slug> URI scheme to MarkdownPreview. Add a 4th drawer URI handler in src/frontend/src/components/ui/MarkdownPreview.tsx, parallel to existing lc:// db:// cd:
+- [x] **2026-05-04** -- T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component. Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
+
+Con
+- [x] **2026-05-04** -- T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer. Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the Sys
+- [x] **2026-05-04** -- T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs. Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pint
+- [x] **2026-05-04** -- T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme. Add sd://<slug> validation to scripts/audit_uri_consistency.py so future drift between company_documents.content sd:// l
+- [x] **2026-05-04** -- T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry. Document the new 4th URI scheme in workspace memory and capture the bug class as a lesson so future content authors don'
+- [x] **2026-05-03** -- T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window. **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wr
+- [x] **2026-05-03** -- T-P1-718: Google R2 Coding: 3 interview problems (Gold Chain, Equal-endpoint Max Subarray, LC 2337) -> problems.notes + doc 92 index. Polish 3 R2 interview write-ups to minimal #2337 style; insert into problems table with notes; extend seed_google_r2_cod
+- [x] **2026-05-03** -- T-P1-719: [MLI-CONTENT] Linear Regression (id=1102) golden rewrite: dedupe description+notes. User flagged http://localhost:5173/quick-index?section=ml -> Linear Regression card as 'still not golden, lots of repeti
+- [x] **2026-05-03** -- T-P1-720: [MLI-CONTENT] LR (1102) consolidate orphans + X_design/bias refactor. Two follow-ups on T-P1-719 from user via Discord: (a) global no-duplication: scripts/seed_lr_golden_v1.py + docs/drafts/
+- [x] **2026-05-03** -- T-P1-726: [MLI-CONTENT] LR golden + LogReg golden: add multi-output / NN-friendly matrix form extension subsection. Per user-approved discussion 2026-05-04: keep vec-form as primary derivation
+in both LR golden + LogReg golden, but add 
+- [x] **2026-05-03** -- T-P1-729: Card Game Sum-15 笔记 v2 重写: 修硬伤(state space 数学/百分比/反例) + 加 Q5/§10 代码骨架/AI 反向坑 +2 + 时间预算. User Discord critique 9KB. 改进 db://1105 description (6.5KB->12.4KB) + doc 90 cheat-sheet card §8 + 共通考点 §3。重点: state spa
+- [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex

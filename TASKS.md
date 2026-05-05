@@ -60,30 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-741: [PINT-CONCEPTS-B] Concept doc: fill Section 1 - Multi-Task & Ranking Architectures
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-740
-- **Description**: Fill the body of `## Multi-Task & Ranking Architectures` in `docs/company/pinterest/system_design_concepts.md`.
-
-Terms covered: DCN-v2, MMOE, PLE, Two-Tower, DSSM, DLRM, Wide & Deep, DeepFM, AutoInt
-
-Format per term (4-piece template, in 中文 narration with English technical terms per memory `feedback_content_style_cn_en.md`):
-  - **English Full Name** (ACRONYM, 中文翻译) — first occurrence
-  - 直觉解释: 1-2 句话讲清楚它解决什么问题，关键 idea
-  - Pinterest 实际应用: 引用对应的 system_design_*.md 中的具体场景 (1-2 句)
-  - 何时选它 vs 替代方案: 一句对比 (e.g., MMOE vs PLE: PLE 解 task-conflict via shared-vs-task-specific expert split)
-
-Use H3 anchors `### {LETTER}-1`, `### {LETTER}-2`, ... so future docs can link via `sd://pinterest-system-design-concepts#b-1`. Add KaTeX formulas where applicable (e.g., DCN-v2 cross layer: $x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$).
-
-After write, run `python scripts/seed_pinterest_sd.py` to upsert. Verify body length non-empty in DB.
-
-AC1: section body in markdown file contains 1 H3 sub-section per term listed above.
-AC2: each H3 follows the 4-piece template (Full Name expansion + 直觉 + Pinterest 应用 + vs alternative).
-AC3: KaTeX-friendly formulas where math is involved (use `$...$` and `$$...$$`).
-AC4: re-run seed → DB body updated; localhost:5173/system-design/pinterest-system-design-concepts renders the section without KaTeX errors.
-AC5: no Pinterest-specific systems leaked into wrong section (those go in T-H section 7).
-
 #### T-P1-742: [PINT-CONCEPTS-C] Concept doc: fill Section 2 - Retrieval & Approximate Nearest Neighbor
 - **Priority**: P1
 - **Complexity**: M
@@ -452,7 +428,7 @@ AC:
 #### T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation)
 - **Priority**: P2
 - **Complexity**: S
-- **Depends on**: T-P0-724, T-P1-726
+- **Depends on**: None
 - **Description**: Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
 LR golden (scripts/seed_linear_regression_20260502.py). Pure cosmetics; no
 correctness changes. Runs LAST in the chain (T-P0-724 -> T-P1-726 -> T-P2-725)
@@ -740,26 +716,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-05** -- T-P1-741: [PINT-CONCEPTS-B] Concept doc: fill Section 1 - Multi-Task & Ranking Architectures. Fill the body of `## Multi-Task & Ranking Architectures` in `docs/company/pinterest/system_design_concepts.md`.
 - [x] **2026-05-05** -- T-P1-740: [PINT-CONCEPTS-A] Create concept-doc skeleton + register seed + fix display_order alignment. Goal: bootstrap a new Pinterest-tab system-design doc that will house all core-concept deep-dives (no inline body yet, s
 - [x] **2026-05-05** -- T-P1-739: [Google] Add 蛋糕水平分割线 (sweep line + 离散化 + 线段树 进阶精讲) to R2 Coding Index. User Discord drop 2026-05-05: add new Google custom problem with shallow-easy 'advanced segment tree' deep-dive. Created
 - [x] **2026-05-04** -- T-P1-738: Card Game Sum-15 (db://1105 + cd://90 §8) major refactor: dedup/tablify/code-up/kill puffery. User-driven 2026-05-04: compress problems.id=1105 description from 12379→6151 chars; sync §8 card in cd://90; fix '12 对'
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
 - [x] **2026-05-04** -- T-P0-737: [META-ANC-9-fix] Escape pipe in doc=90 table row 7 (Find Words O-complexity). Discord ad-hoc request 2026-05-04: doc=90 (Meta AI-Native Coding Inventory hub, company_id=31) row 7 broken because $O(\
-- [x] **2026-05-04** -- T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry. Document the new 4th URI scheme in workspace memory and capture the bug class as a lesson so future content authors don'
-- [x] **2026-05-04** -- T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme. Add sd://<slug> validation to scripts/audit_uri_consistency.py so future drift between company_documents.content sd:// l
-- [x] **2026-05-04** -- T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs. Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pint
-- [x] **2026-05-04** -- T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer. Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the Sys
-- [x] **2026-05-04** -- T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component. Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
-- [x] **2026-05-04** -- T-P0-731: [SD-DRAWER-1] Add sd://<slug> URI scheme to MarkdownPreview. Add a 4th drawer URI handler in src/frontend/src/components/ui/MarkdownPreview.tsx, parallel to existing lc:// db:// cd:
-- [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
-- [x] **2026-05-03** -- T-P1-729: Card Game Sum-15 笔记 v2 重写: 修硬伤(state space 数学/百分比/反例) + 加 Q5/§10 代码骨架/AI 反向坑 +2 + 时间预算. User Discord critique 9KB. 改进 db://1105 description (6.5KB->12.4KB) + doc 90 cheat-sheet card §8 + 共通考点 §3。重点: state spa
-- [x] **2026-05-03** -- T-P1-726: [MLI-CONTENT] LR golden + LogReg golden: add multi-output / NN-friendly matrix form extension subsection. Per user-approved discussion 2026-05-04: keep vec-form as primary derivation
-- [x] **2026-05-03** -- T-P1-720: [MLI-CONTENT] LR (1102) consolidate orphans + X_design/bias refactor. Two follow-ups on T-P1-719 from user via Discord: (a) global no-duplication: scripts/seed_lr_golden_v1.py + docs/drafts/
-- [x] **2026-05-03** -- T-P1-719: [MLI-CONTENT] Linear Regression (id=1102) golden rewrite: dedupe description+notes. User flagged http://localhost:5173/quick-index?section=ml -> Linear Regression card as 'still not golden, lots of repeti
-- [x] **2026-05-03** -- T-P1-718: Google R2 Coding: 3 interview problems (Gold Chain, Equal-endpoint Max Subarray, LC 2337) -> problems.notes + doc 92 index. Polish 3 R2 interview write-ups to minimal #2337 style; insert into problems table with notes; extend seed_google_r2_cod
-- [x] **2026-05-03** -- T-P1-717: [AR-18] AR-11 attribution check: prevent false-positive when external process commits during wrapper window. **Goal**: Close the AR-11 wrapper false-positive demonstrated 2026-05-03 (incident logged in LESSONS.md "Orchestrator wr
-- [x] **2026-05-03** -- T-P0-728: [MLI-CONTENT] ML Naive Reference Card on QuickIndex: KNN+KMeans+LogReg side-by-side ref doc + divider/chip card + ProblemDrawer wiring. GOAL
-- [x] **2026-05-03** -- T-P0-727: [MLI-CONTENT] Geometric Median note v2: GD lens reframe + adaptive-lr/Weiszfeld bridge. Reframe MLInterviewPrep/docs/drafts/geometric_median_golden_v1.md from current "Weiszfeld + Vardi-Zhang code-heavy" lens
-- [x] **2026-05-03** -- T-P0-724: [MLI-CONTENT] LogReg golden: explicit-(w,b) GD refactor per LR T-P1-720 standard. Align docs/drafts/logreg_golden_v1.md (problems.id=1107) with the explicit-bias
