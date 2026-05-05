@@ -182,6 +182,16 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "`ans += left` 利用单调性一次性加 left 个左端点.",
     )
 
+    # Sweep Line / 离散化 / 线段树 -- 蛋糕水平分割线 (T-P1-XXX 2026-05-05 prep)
+    cake = _fetch_problem_meta_by_title(conn, "蛋糕水平分割线")
+    cake_row = _fmt_index_row(
+        cake,
+        "水平线平分蛋糕面积. 三种解法层层递进: 二分 L 暴力 -> 扫描线 + 线性插值 "
+        "(独立面积 O(n log n)) -> 扫描线 + 离散化 + 线段树 (几何并集 O(n log n)). "
+        "重点讲透 `CoverageSegTree`: cover/length 双字段; 仅根 length[1] 对外语义正确; "
+        "成对 +1/-1 不变量 -> 不需要 pushdown.",
+    )
+
     lines: list[str] = [
         INDEX_SENTINEL,
         "",
@@ -216,6 +226,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Sliding Window",
         "",
         lc3859_row,
+        "",
+        "### Sweep Line / 离散化 / 线段树",
+        "",
+        cake_row,
         "",
         "---",
         "",
