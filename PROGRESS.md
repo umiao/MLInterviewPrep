@@ -502,3 +502,13 @@
 - **Sanity check result**: pytest 162 tests (system_design_cheat_sheet + router_problems + router_companies) pass in 7.56s. Re-seed idempotent (second run: 8 UPDATEs, 0 INSERTs). DB content verified: all 5 distinct English markers present across multiple text columns (Multi-gate Mixture of Experts, Inverse Propensity Scoring, Controlled-experiment Using Pre-Experiment Data, Position bias, Google 2016). AC1-AC5 met.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-751 --status completed
+
+## 2026-05-05 16:55 -- [T-adhoc-lyra-2026-05-08] Add Lyra Therapy Session 6 (Jacqueline Hurt-Coppola) to dashboard
+- **What I did**: Out-of-band Discord ad-hoc request landed mid-autorun (msg `1501371531886858270`): user asked to add a new Lyra therapy session — Jacqueline Hurt-Coppola, Therapy • Session 6, Fri 2026-05-08 10:00 AM PDT — to the MLI dashboard timeline. Per surface-identification rule (CLAUDE.md `Surface Identification` table): schedule + interviewer + ISO date → `interview_events` table (NEVER `company_documents.content`). Wrote idempotent seed script mirroring the existing `_add_lyra_jacqueline_apr2830.py` pattern (canonical key `(company_id=25, scheduled_at, title)`, UPSERT on conflict). Used lowercase `[T-adhoc-...]` commit prefix so AR-18's mandatory regex (`^\[T-[A-Z0-9-]+(\ WIP)?\]`) classifies it as `head_external` — autorun's in-flight T-P1-752 attribution stays uncontaminated.
+- **Deliverables**:
+  - `scripts/_add_lyra_jacqueline_2026-05-08.py` (new, 100 lines)
+  - DB row: `interview_events.id=60` — Lyra session with Jacqueline @ 2026-05-08 10:00:00, 60 min, status=upcoming
+  - Commit `a275dc6 [T-adhoc-lyra-2026-05-08]`
+- **Sanity check result**: First run inserted id=60; second run produced `[SYNC] id=60` with 0 INSERTs (idempotent ✓). DB row verified by direct SELECT — all fields match request. Timeline neighbor check confirms placement: 05-07 (Mary MD 07:30 + Google onsite 15:15/16:00) → 05-08 10:00 NEW Jacqueline session. No conflict with autorun's TASKS.md staged work (left out of commit).
+- **Status**: [DONE]
+- **Request**: No task_db change (ad-hoc, no tracked task). Autorun continues on T-P1-752/753/754/772 in parallel.
