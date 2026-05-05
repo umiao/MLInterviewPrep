@@ -287,11 +287,152 @@
 
 ## 3. 排序方法 (Learning-to-Rank Methods)
 
-> 待补充于 T-P1-743 (PINT-CONCEPTS-D)。
->
-> 涵盖: Pointwise / Pairwise / Listwise (RankNet, LambdaRank, LambdaMART, ListNet),
-> NDCG-aware loss, position-bias correction (IPS / DLA), Pinterest 在 home feed +
-> search 中的实际选型。
+> 这一节集中展开排序 loss 的三大范式 (**pointwise / pairwise / listwise**) 与对应的
+> 代表方法 (**LambdaRank / ListNet / ListMLE**), 以及在 ranker 输出之后做多样性 / 多目标
+> 调整的工具 (**DPP** 行列式点过程 / **Submodular** 子模优化 / **Pareto frontier** 多目标
+> 前沿)。Pinterest 的实践是: ranking model 内部的 loss 选型按场景挑 LambdaRank 或 listwise,
+> ranker 输出之后用 MMR/DPP/submodular 做 re-rank, 多目标头之间的权重则用 Pareto front 扫描
+> 选点。注: position-bias 纠偏 (IPS / DLA) 留到 §5 (PINT-CONCEPTS-F) 与 LLM 微调一起讨论,
+> 此处不展开。
+
+### D-1. LTR (Learning-to-Rank, 学习排序)
+
+- **Full Name**: Learning-to-Rank。
+- **直觉解释**: 给定 query $q$ 和候选文档列表 $\{d_1, \ldots, d_n\}$, 学习一个打分函数
+  $f(q, d)$ 让相关 doc 排在前面。三大 loss 范式的核心区别是**计算 loss 时同时看几个 doc**:
+  **(a) pointwise** 单个 (q, d) 一例, 把 ranking 退化成回归 / 二分类
+  ($\mathcal{L} = \sum_i \ell(f(q, d_i), y_i)$, 例如 BCE/MSE);
+  **(b) pairwise** 一对 $(d_+, d_-)$, 学 margin
+  ($\mathcal{L} = \sum_{(i,j): y_i > y_j} \log(1 + e^{-(f_i - f_j)})$, 即 RankNet 损失);
+  **(c) listwise** 整个候选列表, 直接对齐 NDCG/MAP 等 list-level metric。pointwise 简单但
+  忽略 doc 间相对关系; pairwise 对齐排序信号但只用局部对; listwise 最贴合指标但训练开销大。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §4.2 明确写出三范式选型对比表,
+  生产线选择是 **L1 用 pairwise LambdaRank** (粗排一遍学相对序更直接),
+  **L2 用 pointwise multi-task** (多目标 head 各自独立 BCE, 方便组合 MMoE)。
+  `system_design_pin_ranking.md` §4 同样在 L2 用 pointwise BCE per-head + MMoE 共享底层,
+  避免 listwise 的训练 batch 内列表组装开销。
+- **何时选 vs 替代**: 候选量大、需要 GPU batch 训练时选 pointwise; 排序敏感 + label 是相对
+  偏好 (click vs no-click 对) 时选 pairwise; 评估指标是 NDCG@k 且能拼出列表 (例如搜索 query
+  日志) 时选 listwise。**vs RL-based ranking**: RL (例如 SlateQ) 能建模 list 内交互但训练
+  不稳, 工业 baseline 仍是 LTR 三范式。
+
+### D-2. LambdaRank (Lambda Ranking, λ 加权对偶排序)
+
+- **Full Name**: LambdaRank (Burges et al., MSR 2006), pairwise/listwise 混合。
+- **直觉解释**: 痛点 —— RankNet 用 pairwise logistic loss 学相对序, 但所有 (i, j) 对权重相同,
+  对 NDCG 这种 top-heavy 指标不友好 (排第 1 的错误比排第 100 的错误重要得多)。
+  LambdaRank 的关键 trick 是把 RankNet 梯度乘以 **$|\Delta \mathrm{NDCG}_{ij}|$** ——
+  即"交换 $i, j$ 两 doc 后 NDCG 变化的绝对值":
+  $$\lambda_{ij} = \frac{-\sigma}{1 + e^{\sigma(s_i - s_j)}} \cdot |\Delta \mathrm{NDCG}_{ij}|$$
+  其中 $s_i = f(q, d_i)$。直观: 高位的 swap 拿到大梯度, 低位的 swap 拿到小梯度,
+  让模型把"力气"花在 head positions 上。后续 LambdaMART 把该 lambda 接到 GBDT 上是
+  Yahoo / Bing learn-to-rank 的经典工业方案。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §4.2 中, **L1 light ranker**
+  (双塔 DNN) 用 LambdaRank loss 训练: $(query, pin_+, pin_-)$ pair, label 是 engagement
+  权重 (repin > click > impression), $\Delta \mathrm{NDCG}$ 用 ideal ranking 算。这样
+  L1 出口 top-1k 已对齐 NDCG, L2 才能在窄候选集上做精细多目标。
+- **何时选 vs 替代**: 单一 ranking metric (NDCG@k 或 MAP) + 有明确相对偏好对的训练数据时选
+  LambdaRank。**vs ListNet/ListMLE**: LambdaRank 工程更稳 (pairwise sample 容易组 batch),
+  ListNet/MLE 更贴 listwise objective 但训练数据每条都要拼整列表; 工业搜索/推荐里
+  LambdaRank/LambdaMART 仍是首选。
+
+### D-3. ListNet (List-wise Neural network, 列表级神经网络排序)
+
+- **Full Name**: Learning to Rank: from Pairwise Approach to Listwise Approach (Cao et al.,
+  Microsoft 2007)。
+- **直觉解释**: 第一个真正 listwise 的 LTR 方法。把整个候选列表的打分 $\{s_i\}$ 通过 softmax
+  转为**top-1 概率分布**, 真实 label 也转为 top-1 分布 (label 越高概率越大), 然后两个分布
+  之间算 cross-entropy:
+  $$\mathcal{L}_{\text{ListNet}} = -\sum_{i=1}^n \frac{e^{y_i}}{\sum_j e^{y_j}} \log \frac{e^{s_i}}{\sum_j e^{s_j}}$$
+  解决了 pairwise 方法的"对内独立性"假设 (RankNet 把每对当独立样本忽略列表结构)。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §4.2 在三范式对比表中把 ListNet
+  列为 listwise 候选之一, 与 ListMLE 并列 ("Pointwise (BCE) | Pairwise (LambdaRank) |
+  Listwise (ListNet/ListMLE)"); Pinterest 当前生产没采用 ListNet 主线, 因为 L2 multi-task
+  pointwise + MMoE 已能拿到大头收益, listwise 上线 ROI 不够清晰, 但保留作为 challenger 选项。
+- **何时选 vs 替代**: 训练数据天然成列表 (一次 query 的全部候选有相对序 label) + 列表长度
+  适中 (≤ 几十) + 主要看 top-1/top-3 时选 ListNet。**vs LambdaRank**: ListNet 直接 listwise,
+  对齐 list-level metric 更彻底, 但训练 batch 设计复杂; LambdaRank 用 $\Delta\mathrm{NDCG}$
+  trick 在 pairwise 框架里近似 listwise, 工程上更友好。
+
+### D-4. ListMLE (List-wise Maximum Likelihood Estimation, 列表级极大似然)
+
+- **Full Name**: Listwise Approach to Learning to Rank: Theory and Algorithm (Xia et al.,
+  ICML 2008)。
+- **直觉解释**: ListNet 用 top-1 分布只匹配第一名, 对靠后的位置不敏感。ListMLE 改用
+  **Plackett-Luce 模型** —— 假设观察到的排列 $\pi^*$ 是依概率从分数分布逐位置抽样得到的,
+  目标是最大化该排列的似然:
+  $$\mathcal{L}_{\text{ListMLE}} = -\log \prod_{i=1}^n \frac{\exp(s_{\pi^*(i)})}{\sum_{k=i}^n \exp(s_{\pi^*(k)})}$$
+  即"在剩余候选中, $\pi^*(i)$ 被选为第 $i$ 名的概率"连乘。优势: 对整条排列建模而不仅 top-1,
+  对靠后位置也提供梯度信号。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §4.2 的三范式对比表把 ListMLE
+  与 ListNet 并列为 listwise 选项之一; 生产同样未直接上 ListMLE, 但在面试里作为
+  "为什么 listwise 不如 pairwise 落地" 的对照点 —— 训练效率 + label 噪声敏感性是主要阻力。
+- **何时选 vs 替代**: 完整排列 label (而非仅相对偏好对) + 重视靠后位置的相对序时选 ListMLE。
+  **vs ListNet**: ListMLE 用 Plackett-Luce 全排列似然, 比 ListNet 的 top-1 分布信息量更大,
+  但对 label 噪声敏感 (一个错的中间位置会污染整个似然链); ListNet 对 label 噪声更鲁棒。
+
+### D-5. DPP (Determinantal Point Process, 行列式点过程)
+
+- **Full Name**: Determinantal Point Process (来自量子物理的概率模型, Macchi 1975, ML
+  改造 Kulesza & Taskar 2012)。
+- **直觉解释**: 从候选集 $\mathcal{Y} = \{1, \ldots, N\}$ 中**采样一个子集** $S \subseteq \mathcal{Y}$,
+  每个子集的概率正比于一个**核矩阵 $L$ 的子矩阵行列式**:
+  $$P(S) \propto \det(L_S)$$
+  其中 $L = D^\top D$, $D$ 行向量是 item embedding, 对角元 $L_{ii}$ 编码 item 质量,
+  非对角元 $L_{ij}$ 编码 item $i, j$ 的相似度。**核心数学性质**: 行列式 $\det(L_S)$ 几何上等于
+  embedding 张成空间的体积平方 → 体积大需要 (a) 每个 item quality 高、(b) item 间夹角大
+  (彼此差异大), 所以采样自然倾向 "high-quality + diverse" 子集。比 MMR 的贪心多样性更
+  principled, 且有多项式时间精确推断算法。
+- **Pinterest 实际应用**: 没有公开宣称在生产中采用 DPP, 但作为 `system_design_pin_ranking.md`
+  §5 re-ranking 阶段的"理论备选" —— 当前生产用 MMR (Maximal Marginal Relevance, 贪心
+  多样性) 但 PM/researcher 在面试/blog 中常以 DPP 作为"如果要严格证明多样性最优解"
+  时的 next-step 选项。是讨论"为什么不用 DPP 而用 MMR"的标准对比锚点 (答: MMR 工程
+  $O(K^2)$ 简单, DPP 数学美但 $O(K^3)$ 矩阵分解 + 调参复杂)。
+- **何时选 vs 替代**: 候选集小 (≤ 数百) + 多样性约束严格 + 有 budget 调核函数时选 DPP。
+  **vs MMR**: MMR 是 DPP 的一阶贪心近似, 实战 90% 场景效果接近且简单; DPP 在小池+严格
+  diversity (例如新闻头条 5 条) 才显出优势。
+
+### D-6. Submodular (Submodular Optimization, 子模优化)
+
+- **Full Name**: Submodular function maximization (组合优化分支, 推荐系统中用于 coverage +
+  diversity 选择)。
+- **直觉解释**: 集合函数 $f: 2^V \to \mathbb{R}$ 称为**子模 (submodular)** 当且仅当对任意
+  $A \subseteq B \subseteq V$ 和 $v \notin B$, **边际收益递减**:
+  $$f(A \cup \{v\}) - f(A) \geq f(B \cup \{v\}) - f(B)$$
+  直观: 第 11 个 item 的"新增价值"小于第 1 个。重要性: 对单调 (monotone) submodular 函数
+  $f$, 在 cardinality constraint $|S| \leq k$ 下用**贪心算法** (每次选边际收益最大的 item)
+  能保证 $\geq (1 - 1/e) \approx 0.63$ 倍最优解 (Nemhauser 1978)。常见 submodular 目标: 覆盖
+  $f(S) = |\bigcup_{i \in S} \mathrm{topics}(i)|$, facility location, log-determinant
+  ($\log \det L_S$, 即 DPP 的 log 形式)。
+- **Pinterest 实际应用**: `system_design_notification_reco.md` §3 中 Email digest 选 5-10 个
+  pin 时, 用**submodular selection (coverage + diversity)** 在 ranker 输出之后做 second pass:
+  目标函数 = 覆盖的 topic 数 + 创作者多样性 - 同 creator 重复惩罚, 贪心选 top-k 即可保证
+  接近最优。这种 second-pass 比直接在 ranker loss 里加 diversity 项更模块化, 也好 A/B 调权重。
+- **何时选 vs 替代**: 选 top-$k$ 子集 + 目标可表达成 coverage / facility location / 分散度
+  + $k$ 不大 (~10) 时选 submodular 贪心。**vs MMR**: MMR 是一种特殊的 submodular surrogate
+  (相似度惩罚项); submodular 框架更通用, 能直接编码 "覆盖 N 个 topic" 这种约束。
+  **vs DPP**: 二者都给出 quality+diversity, submodular 适合 coverage 类目标, DPP 适合
+  embedding-based 几何多样性。
+
+### D-7. Pareto Frontier (Pareto 前沿, 多目标最优面)
+
+- **Full Name**: Pareto Frontier / Pareto Front, 借自经济学的多目标最优概念。
+- **直觉解释**: 推荐 ranker 同时优化 N 个目标 (pCTR / pRepin / pHide / time-spent / ROAS),
+  这些目标常**冲突**: 提 CTR 可能掉 long-term retention, 提多样性可能掉 CTR。一个解 $w$ 称为
+  **Pareto-optimal** 当且仅当不存在另一个解 $w'$ 在所有目标上都不更差且至少一个目标更好;
+  所有 Pareto-optimal 解构成 **Pareto frontier**。工程做法: 离线对多目标加权
+  $\mathcal{L} = \sum_t w_t \mathcal{L}_t$, **网格搜索 $\{w_t\}$** 跑出大量配置, 在 (objective_1,
+  objective_2, ...) 空间画散点, 取前沿曲线给 PM 选点 (PM 在前沿上挑"最符合本季度业务取舍"
+  的那个 $w^*$)。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §5 明确写出 Pareto front scan 流程:
+  "离线对权重网格搜索, 画 (repin, hide) / (repin, session) trade-off 曲线, PM 选点", 然后
+  把选定的 $w^*$ 喂给 L2 multi-task 头的加权融合 ($\hat{y} = \sum_t w_t \hat{y}_t$);
+  `system_design_ad_ctr.md` §6 的多目标 (CTR + CVR + LTV) 同样用 Pareto 前沿作候选集。
+  此外 ANN 索引选型 (HNSW vs IVF-PQ) 也常画 (recall, latency) 的 Pareto 看 (见 §2 C-1)。
+- **何时选 vs 替代**: 多目标 ranker / 多目标 retrieval 选型 + 没有单一标量目标统治时用
+  Pareto frontier。**vs Lagrangian / weighted sum 单点优化**: 单点权重需要先验, Pareto front
+  把"探所有 trade-off"和"按业务挑点"解耦, 工程上更稳。**vs scalarization (固定 $w$)**:
+  固定 $w$ 假定业务取舍永不变, Pareto 留住灵活性 (业务转向时可换前沿上别的点而无需重训)。
 
 ---
 
