@@ -80,7 +80,7 @@ Final 25 Pins -> SRP
 
 ### 2.4 Query Embedding
 - **Text encoder** (query tower): fine-tuned SBERT / DistilBERT, 输出 256-dim vector
-- 训练: (query, clicked_pin) positive pairs + in-batch negatives, InfoNCE loss
+- 训练: (query, clicked_pin) positive pairs + in-batch negatives, **Information Noise-Contrastive Estimation** (InfoNCE, 信息噪声对比估计) loss
 - 缓存: Redis, top-1M query 命中率 > 70%, 省掉 online BERT 推理成本
 
 ---
@@ -93,8 +93,8 @@ Final 25 Pins -> SRP
 
 | Source | Method | 解决的问题 |
 |--------|--------|----------|
-| **Token / Inverted Index** | Elasticsearch / Lucene, BM25 on title+description+board-name | 精确关键词匹配, 长尾 rare query |
-| **Semantic ANN** | Two-tower + HNSW, query emb -> top-K pin emb | 语义相似 ("home office setup" vs "desk ideas") |
+| **Token / Inverted Index** | Elasticsearch / Lucene, **Best Matching 25** (BM25, 概率检索权重模型) on title+description+board-name | 精确关键词匹配, 长尾 rare query |
+| **Semantic ANN** | Two-tower + **Hierarchical Navigable Small World** (HNSW, 分层可导航小世界图), query emb -> top-K pin emb | 语义相似 ("home office setup" vs "desk ideas") |
 | **Personalized** | User history pins -> similar pins (item-item) | 冷启动 query 下的个性化 |
 | **Trending / Popular** | 按类目/地域 top pins | Cold-start user, 流行词 |
 | **Board-based** | User followed boards -> pins in those boards | 长期兴趣 |
@@ -138,7 +138,7 @@ $\tau$ temperature 通常 0.05-0.1.
 
 ### 3.3 ANN Index (HNSW)
 
-- **Why HNSW**: 比 IVF 召回更高 (recall@100 ~99% vs ~95%), 查询延迟 < 10ms on 1B vectors
+- **Why HNSW**: 比 **Inverted File Index** (IVF, 倒排文件索引) 召回更高 (recall@100 ~99% vs ~95%), 查询延迟 < 10ms on 1B vectors
 - **Sharding**: by geo + category, each shard 50M-100M vectors
 - **Rebuild**: nightly full rebuild + online incremental add (append-only delta index, merged每 4h)
 - **Quantization**: PQ (product quantization) 压缩到 32 bytes/vec, 5B pins * 32B = 160GB, 可全装内存
@@ -204,7 +204,7 @@ $$ L = \sum_k \alpha_k \cdot \text{BCE}(y_k, \hat{y}_k) $$
 
 ### 4.3 Pairwise vs Pointwise 选择
 
-| | Pointwise (BCE) | Pairwise (LambdaRank) | Listwise (ListNet/ListMLE) |
+| | Pointwise (BCE) | Pairwise (LambdaRank) | Listwise (**ListNet** (Cao 2007 listwise 排序, top-1 概率分布) / **List Maximum Likelihood Estimation** (ListMLE, 列表级极大似然排序)) |
 |-|----------------|----------------------|---------------------------|
 | L1 GBDT | rarely | **常用** | rare |
 | L2 DNN | **常用** (多任务好加) | 可用, 训练慢 | 少用, 梯度复杂 |
@@ -358,7 +358,7 @@ Kafka events -> S3 parquet (daily)
 6. **"Cost vs quality tradeoff?"**
    -> L2 DNN is 70% of cost; use distillation (teacher = big DNN, student = small DNN) to cut 3x; dynamic depth based on query importance
 7. **"Multi-lingual?"**
-   -> Multilingual BERT / LaBSE for query tower; maintain per-locale fresh index; translate at query-time as fallback for low-resource languages
+   -> Multilingual BERT / **Language-agnostic BERT Sentence Embedding** (LaBSE, 语言无关 BERT 句嵌入) for query tower; maintain per-locale fresh index; translate at query-time as fallback for low-resource languages
 
 ---
 
