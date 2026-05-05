@@ -9,81 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-732
-- **Description**: Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the SystemDesignDrawer instead of route-navigating.
-
-Context: step 3 of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731 + T-P0-732. After this task, the dev-server smoke test for the original bug succeeds even before content migration -- though doc 47 still uses path-form links until T-P0-734.
-
-Scope:
-- Edit src/frontend/src/pages/PrepNotesPage.tsx (DrawerTarget + DocumentViewer only).
-- Edit/extend src/frontend/src/pages/PrepNotesPage.test.tsx if drawer-state branching is covered there.
-
-Required changes:
-1. Extend DrawerTarget union (line ~37):
-   ```ts
-   export type DrawerTarget =
-     | { type: 'lc'; id: number }
-     | { type: 'problem'; id: number }
-     | { type: 'company_doc'; id: number }
-     | { type: 'system_design'; slug: string }   // <-- NEW
-     | null;
-   ```
-2. Import SystemDesignDrawer at top of file.
-3. Inside DocumentViewer, the inner MarkdownPreview gets a new prop:
-   `onSdLinkClick={(slug) => setDrawer({ type: 'system_design', slug })}`
-4. Add a sibling drawer render at bottom of DocumentViewer's return (peer to ProblemDrawer + CompanyDocDrawer):
-   ```tsx
-   <SystemDesignDrawer
-     slug={drawer?.type === 'system_design' ? drawer.slug : null}
-     onClose={() => setDrawer(null)}
-     onLcLinkClick={(id) => setDrawer({ type: 'lc', id })}
-     onDbLinkClick={(id) => setDrawer({ type: 'problem', id })}
-     onCdLinkClick={(id) => setDrawer({ type: 'company_doc', id })}
-   />
-   ```
-   This mirrors how CompanyDocDrawer routes its lc:// db:// links UP to swap target type.
-5. Verify CompanyDocDrawer and ProblemDrawer keep working unchanged (DrawerTarget union widening must not break existing branch checks -- the discriminated union pattern handles this for free).
-
-Scenario matrix:
-| User action in doc 47 preview                         | DrawerTarget transition          | Render                            |
-|-------------------------------------------------------|----------------------------------|-----------------------------------|
-| Click sd://pinterest-ad-ctr (after T-P0-734)          | null -> {type:sd, slug}          | SystemDesignDrawer opens          |
-| Click lc://322 inside open SystemDesignDrawer body    | {type:sd,...} -> {type:lc, id}   | Drawer swaps to ProblemDrawer     |
-| Click cd://48 inside open SystemDesignDrawer body     | {type:sd,...} -> {type:cd, id}   | Drawer swaps to CompanyDocDrawer  |
-| Click sd://pinterest-embeddings inside open drawer    | activeSlug replaces locally      | Same drawer, different content    |
-| Press ESC                                             | -> null                          | All drawers close                 |
-| Mode = edit (textarea)                                | onSdLinkClick never wired        | sd:// links not interactive       |
-
-Journey AC: `cd src/frontend && npm run dev` -> /companies/29/prep?tab=docs&doc=47 -> Preview mode -> verify the existing /system-design/<slug> path links still navigate away (pre-migration state) AND inject a temporary `[test](sd://pinterest-ad-ctr)` markdown line manually in the dev DB or via React DevTools -> click test -> SystemDesignDrawer opens.
-
-Cross-boundary integration AC: backend already serves /system-designs/<slug>; frontend now resolves sd:// to a drawer. No new API surface.
-
-Other-case gate ("when condition is false"):
-- effectiveTab !== 'docs' -> DocumentViewer not rendered, sd:// no-op (this is fine; user isn't viewing markdown).
-- mode === 'edit' -> MarkdownPreview not rendered (textarea instead) -> sd:// not interactive. Not a regression.
-- drawer.type already set to non-system_design when sd:// clicked: setDrawer overwrites, single drawer stays open. Verified by discriminated union ordering.
-
-Tests:
-- Type-level check: TypeScript compilation succeeds with widened DrawerTarget union (run `npm run typecheck`).
-- Vitest: if PrepNotesPage.test.tsx already has DocumentViewer drawer scenarios, add an analogous case for sd:// -- click handler -> setDrawer called with {type:'system_design', slug:'foo'} -> SystemDesignDrawer mounted with slug=foo.
-
-Manual smoke test (mandatory):
-1. `cd src/frontend && npm run dev` -> http://localhost:5173/companies/29/prep?tab=docs&doc=47.
-2. Stay in Preview mode. Currently links should still be path-form (T-P0-734 not yet run).
-3. Verify clicking a /system-design/<slug> link still does the broken behavior (control sample).
-4. After T-P0-734 ships, repeat: clicking sd:// link opens SystemDesignDrawer; ESC closes; lc:// inside drawer swaps to ProblemDrawer.
-5. Verify no console errors. Verify back button on browser does NOT take you out of the prep page (drawer is local state, not URL).
-
-Definition of Done:
-- PrepNotesPage.tsx changes typecheck.
-- DrawerTarget union widened.
-- SystemDesignDrawer rendered as sibling to ProblemDrawer + CompanyDocDrawer in DocumentViewer.
-- onSdLinkClick wired to MarkdownPreview.
-- Manual smoke test passes (per checklist above) -- record observation in PROGRESS.md entry.
-
 #### T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs
 - **Priority**: P0
 - **Complexity**: S
@@ -591,6 +516,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
+- [x] **2026-05-04** -- T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer. Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the Sys
 - [x] **2026-05-04** -- T-P0-732: [SD-DRAWER-2] Build SystemDesignDrawer component. Create src/frontend/src/components/SystemDesignDrawer.tsx that mirrors CompanyDocDrawer.tsx but for system_designs.
 - [x] **2026-05-04** -- T-P0-731: [SD-DRAWER-1] Add sd://<slug> URI scheme to MarkdownPreview. Add a 4th drawer URI handler in src/frontend/src/components/ui/MarkdownPreview.tsx, parallel to existing lc:// db:// cd:
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex

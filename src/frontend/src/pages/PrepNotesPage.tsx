@@ -7,6 +7,7 @@ import { useScrollRestore } from "../hooks/useScrollRestore";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import ProblemDrawer from "../components/problems/ProblemDrawer";
 import CompanyDocDrawer from "../components/CompanyDocDrawer";
+import SystemDesignDrawer from "../components/SystemDesignDrawer";
 import PrevNextNav from "../components/ui/PrevNextNav";
 import ForumPostsTab from "../components/companies/ForumPostsTab";
 import KnowledgeCardsPanel from "../components/companies/KnowledgeCardsPanel";
@@ -38,6 +39,7 @@ export type DrawerTarget =
   | { type: "lc"; id: number }
   | { type: "problem"; id: number }
   | { type: "company_doc"; id: number }
+  | { type: "system_design"; slug: string }
   | null;
 
 /** Threshold: only show TOC sidebar for documents >= 20K chars */
@@ -644,6 +646,7 @@ function DocumentViewer({
                 onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
                 onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
                 onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
+                onSdLinkClick={(slug) => setDrawer({ type: "system_design", slug })}
               />
             ) : (
               <p className="text-gray-400 italic">
@@ -663,6 +666,13 @@ function DocumentViewer({
         onClose={() => setDrawer(null)}
         onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
         onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+      />
+      <SystemDesignDrawer
+        slug={drawer?.type === "system_design" ? drawer.slug : null}
+        onClose={() => setDrawer(null)}
+        onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
+        onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+        onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
       />
     </>
   );

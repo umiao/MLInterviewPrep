@@ -36,7 +36,7 @@ describe("PrepNotesPage drawer-target refactor (T-P0-674)", () => {
     );
   }
 
-  it("exports a DrawerTarget union covering lc / problem / company_doc / null", async () => {
+  it("exports a DrawerTarget union covering lc / problem / company_doc / system_design / null", async () => {
     const file = await readSource();
     // Single source-of-truth type. Exported so downstream callers (tests,
     // future shared drawer code) can import rather than redefine.
@@ -44,6 +44,9 @@ describe("PrepNotesPage drawer-target refactor (T-P0-674)", () => {
     expect(file).toMatch(/\{\s*type:\s*"lc";\s*id:\s*number\s*\}/);
     expect(file).toMatch(/\{\s*type:\s*"problem";\s*id:\s*number\s*\}/);
     expect(file).toMatch(/\{\s*type:\s*"company_doc";\s*id:\s*number\s*\}/);
+    // sd:// added in T-P0-733 -- slug-keyed (string), unlike the id-keyed
+    // peers, because system_designs is identified by slug not numeric pk.
+    expect(file).toMatch(/\{\s*type:\s*"system_design";\s*slug:\s*string\s*\}/);
     // Null is the "closed" state -- without it, callers would need a separate
     // boolean flag, which would re-create the multi-state hazard.
     expect(file).toMatch(/\|\s*null;/);
@@ -68,11 +71,12 @@ describe("PrepNotesPage drawer-target refactor (T-P0-674)", () => {
     );
   });
 
-  it("wires onLcLinkClick / onDbLinkClick / onCdLinkClick into setDrawer with correct discriminators", async () => {
+  it("wires onLcLinkClick / onDbLinkClick / onCdLinkClick / onSdLinkClick into setDrawer with correct discriminators", async () => {
     const file = await readSource();
-    // cd:// wiring is the new behavior added in this task. The other two are
-    // pre-existing but locked here so the refactor does not silently drop
-    // them (a hidden regression we'd only catch by clicking in prod).
+    // cd:// + sd:// wiring is the new behavior added in T-P0-672/T-P0-733.
+    // The other two are pre-existing but locked here so the refactor does
+    // not silently drop them (a hidden regression we'd only catch by
+    // clicking in prod).
     expect(file).toMatch(
       /onLcLinkClick=\{\(id\)\s*=>\s*setDrawer\(\{\s*type:\s*"lc",\s*id\s*\}\)\}/,
     );
@@ -82,9 +86,14 @@ describe("PrepNotesPage drawer-target refactor (T-P0-674)", () => {
     expect(file).toMatch(
       /onCdLinkClick=\{\(id\)\s*=>\s*setDrawer\(\{\s*type:\s*"company_doc",\s*id\s*\}\)\}/,
     );
+    // sd:// uses slug (string), not id (number) -- system_designs is
+    // identified by slug.
+    expect(file).toMatch(
+      /onSdLinkClick=\{\(slug\)\s*=>\s*setDrawer\(\{\s*type:\s*"system_design",\s*slug\s*\}\)\}/,
+    );
   });
 
-  it("ProblemDrawer + CompanyDocDrawer both read from the same drawer state via type guards", async () => {
+  it("ProblemDrawer + CompanyDocDrawer + SystemDesignDrawer all read from the same drawer state via type guards", async () => {
     const file = await readSource();
     // Type-guard reads -- this is what makes "two drawers open" unrepresentable:
     // ProblemDrawer's lcId/dbId go null whenever drawer.type !== "lc" / "problem".
@@ -99,11 +108,17 @@ describe("PrepNotesPage drawer-target refactor (T-P0-674)", () => {
     expect(file).toMatch(
       /docId=\{drawer\?\.type\s*===\s*"company_doc"\s*\?\s*drawer\.id\s*:\s*null\}/,
     );
-    // Both drawers share onClose=() => setDrawer(null) -- there is no
-    // independent close path that could leave the other drawer's state stale.
+    // SystemDesignDrawer mounted alongside the other two (T-P0-733).
+    // Note: slug, not id, because system_designs is identified by slug.
+    expect(file).toContain("import SystemDesignDrawer from");
+    expect(file).toMatch(
+      /slug=\{drawer\?\.type\s*===\s*"system_design"\s*\?\s*drawer\.slug\s*:\s*null\}/,
+    );
+    // All three drawers share onClose=() => setDrawer(null) -- there is no
+    // independent close path that could leave another drawer's state stale.
     const onCloseMatches = file.match(/onClose=\{\(\)\s*=>\s*setDrawer\(null\)\}/g);
     expect(onCloseMatches).not.toBeNull();
-    expect(onCloseMatches!.length).toBeGreaterThanOrEqual(2);
+    expect(onCloseMatches!.length).toBeGreaterThanOrEqual(3);
     // CompanyDocDrawer bubbles lc:// / db:// up to setDrawer so embedded LC
     // and problem links inside a doc swap drawers at the outer level rather
     // than nesting inside the company-doc drawer (matches the contract
@@ -113,6 +128,17 @@ describe("PrepNotesPage drawer-target refactor (T-P0-674)", () => {
     );
     expect(file).toMatch(
       /<CompanyDocDrawer[\s\S]*?onDbLinkClick=\{\(id\)\s*=>\s*setDrawer\(\{\s*type:\s*"problem",\s*id\s*\}\)\}/,
+    );
+    // SystemDesignDrawer bubbles lc:// / db:// / cd:// up the same way --
+    // see SystemDesignDrawer.tsx point #3 in the file header.
+    expect(file).toMatch(
+      /<SystemDesignDrawer[\s\S]*?onLcLinkClick=\{\(id\)\s*=>\s*setDrawer\(\{\s*type:\s*"lc",\s*id\s*\}\)\}/,
+    );
+    expect(file).toMatch(
+      /<SystemDesignDrawer[\s\S]*?onDbLinkClick=\{\(id\)\s*=>\s*setDrawer\(\{\s*type:\s*"problem",\s*id\s*\}\)\}/,
+    );
+    expect(file).toMatch(
+      /<SystemDesignDrawer[\s\S]*?onCdLinkClick=\{\(id\)\s*=>\s*setDrawer\(\{\s*type:\s*"company_doc",\s*id\s*\}\)\}/,
     );
   });
 });
