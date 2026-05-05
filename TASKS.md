@@ -377,6 +377,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 671 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-04** -- T-P1-738: Card Game Sum-15 (db://1105 + cd://90 §8) major refactor: dedup/tablify/code-up/kill puffery. User-driven 2026-05-04: compress problems.id=1105 description from 12379→6151 chars; sync §8 card in cd://90; fix '12 对'
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
 - [x] **2026-05-04** -- T-P0-737: [META-ANC-9-fix] Escape pipe in doc=90 table row 7 (Find Words O-complexity). Discord ad-hoc request 2026-05-04: doc=90 (Meta AI-Native Coding Inventory hub, company_id=31) row 7 broken because $O(\
 - [x] **2026-05-04** -- T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry. Document the new 4th URI scheme in workspace memory and capture the bug class as a lesson so future content authors don'
