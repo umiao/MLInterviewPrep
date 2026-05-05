@@ -639,11 +639,295 @@
 
 ## 5. 纠偏与 LLM 微调 (Debiasing & LLM Fine-Tuning)
 
-> 待补充于 T-P1-745 (PINT-CONCEPTS-F)。
->
-> 涵盖: Position Bias / Selection Bias / Popularity Bias / Exposure Bias 的成因与
-> 缓解 (IPS, DR, DLA, counterfactual logging), LLM SFT vs RLHF vs DPO vs ORPO,
-> Pinterest chatbot 微调流水线。
+> 这一节按 "**纠偏 → 因果 → LLM 训练 → RAG 检索增强**" 四块展开。
+> **纠偏** (F-1 IPS / F-2 LogQ correction) 处理推荐与广告里"点击 ≠ 偏好"的 logged-data
+> 偏差; **因果 / 方差缩减** (F-3 CUPED / F-4 DML) 是 A/B 与 long-term head 训练的工具;
+> **LLM 微调** (F-5 SFT / F-6 RLHF / F-7 PPO / F-8 DPO) 是 chatbot pin 与 query rewriter
+> 的训练管线主线; **检索增强** (F-9 InfoNCE / F-10 RAG / F-11 RRF / F-12 MMR) 串起
+> embedding 训练 (InfoNCE) → 多路检索融合 (RAG/RRF) → 结果多样化 (MMR) 的端到端链路。
+> 与本节概念交叉的 Pinterest 文档: `system_design_pin_ranking.md` (counterfactual head + CUPED),
+> `system_design_ad_ctr.md` (position-bias tower), `system_design_embeddings.md` (LogQ + InfoNCE),
+> `system_design_chatbot_pins.md` (SFT/DPO + RAG + RRF + MMR pipeline)。
+
+### F-1. IPS (Inverse Propensity Scoring, 逆倾向加权)
+
+- **Full Name**: Inverse Propensity Scoring / Score Weighting (Horvitz-Thompson 1952 estimator
+  在因果推断里的现代名字)。
+- **直觉解释**: logged data 里高 slot / 热门内容**被点击的概率天然更高**, 直接拿 click 当
+  正样本会让 ranker 学到"位置高 = 好",这是 position bias / popularity bias 的根。IPS 的
+  核心 idea: 给每个观察样本除以**它被记录的概率** $p(o = 1 \mid x, a)$ —— 概率越小权重越大,
+  从而把 logged distribution 重加权到 uniform exposure 假设下。Counterfactual estimator:
+  $$\hat{V}_{\mathrm{IPS}}(\pi) = \frac{1}{N} \sum_{i=1}^{N} \frac{\pi(a_i \mid x_i)}{\pi_0(a_i \mid x_i)} \cdot r_i$$
+  其中 $\pi_0$ 是 logging policy (旧 ranker), $\pi$ 是评估的新 policy, $r_i$ 是 reward (click)。
+  **Doubly-Robust (DR)** 是 IPS 的方差缩减升级: $\hat{V}_{\mathrm{DR}} = \hat{V}_{\mathrm{IPS}} + \mathbb{E}_{\pi}[\hat{r}(x, a)] - \mathbb{E}_{\pi_0}[\hat{r}(x, a) \cdot \frac{\pi}{\pi_0}]$ ——
+  当 $\hat{r}$ 或 $\pi_0$ 任一估准都无偏, 鲁棒性更强。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §6 把 "counterfactual NDCG via IPS
+  on logged exploration slots" 列为 uplift 评估指标 —— 用 10% Thompson-sampling 探索流量
+  作为 propensity 已知的"干净样本"反事实评估新 ranker; `system_design_pin_ranking.md` §5
+  的 LongTermValue head 用 DML/doubly-robust 估"展示该 pin 对 next-7d session 的因果效应",
+  本质是 IPS+回归补偿的 hybrid; `system_design_embeddings.md` §FAQ 的 popularity bias 问答
+  也把"长期看要有 debias 数据 (随机小流量, uniform 采样) 校准"作为根治方案 —— 那条小流量
+  就是 IPS 估计器的低方差 propensity 来源。
+- **何时选 vs 替代**: 已有 logging policy + 想做 off-policy evaluation 时 IPS 是首选;
+  方差太大时升级到 DR。**vs DLA (Dual Learning Algorithm)**: DLA 把 position bias 当作
+  $r = (\text{rel}) \times (\text{exam})$ 的乘积联合估计 (Joachims 2017), 不需要显式 propensity,
+  但要求假设 examination 只依赖 position; IPS 更通用 (任意 propensity), DLA 更省工程。
+  **vs Position-Bias Tower (Google PAL 2019)**: PAL 把 position 作为 shallow tower 输入,
+  serving 时 mask 掉 (位置 = 1) 即可消偏, 工程上最简单, 但只解 position bias 一种偏差;
+  Pinterest `system_design_ad_ctr.md` L2 ranker 就是用这个 tower 方案 (§3.2 + §4.2 结构图)。
+
+### F-2. LogQ Correction (Log-Q 采样修正)
+
+- **Full Name**: Log-$Q$ Correction (Google YouTube two-tower 2019 论文, "Sampling-Bias-Corrected
+  Neural Modeling")。
+- **直觉解释**: 双塔召回的训练用 **in-batch negatives** —— 同 batch 里其他 user 的正样本 pin
+  当负样本, 几乎免费拿到 $B-1$ 个负例。问题: pin 出现在 batch 里的概率与其**全局 popularity**
+  正相关 (热门 pin 更常被某用户 repin), 所以热门 pin 永远被选为负样本 → 被压低 → 学到
+  "popularity 就是不相似" 的 popularity bias。修正: 在 logit 上减去采样概率的 log:
+  $$s'(u, p) = s(u, p) - \log Q(p)$$
+  其中 $Q(p)$ 是 pin $p$ 在 batch 内被采样的频率 (常用 streaming frequency estimator 在线统计)。
+  数学上, 这是把 sampled-softmax 还原成"无偏 full-softmax"的标准修正。
+- **Pinterest 实际应用**: `system_design_embeddings.md` §3 写明 InfoNCE loss 中
+  "**LogQ correction** (Google YouTube two-tower 论文): 对 in-batch negatives 按采样概率
+  $q(p)$ 做 logit 修正 $s' = s - \log q(p)$, 否则热门 pin 永远被选为负样本 → 被压低
+  → popularity bias"; §FAQ Q2 把 LogQ 列为 popularity bias 防治四件套之一 (与 hard negatives
+  / diversity-aware loss / debias 数据并列); §7.3 monitoring 用 "top-k 召回中 pin 的 impression
+  分位数分布" 验证 LogQ 是否生效, 失效时重调温度或加硬负。
+- **何时选 vs 替代**: 双塔 + in-batch negatives + 候选分布长尾 (popularity 跨 5 个数量级) 时
+  必加。**vs Hard Negative Mining**: hard negatives 取 ANN 召回中用户没 repin 的 pin 作为
+  困难负样本, 提升 top-k precision 但不修 popularity bias 本身; 工程上**两者并行最稳**
+  (LogQ 修偏 + hard negatives 提精度)。**vs Frequency Capping at serving**: 在 serving
+  时对 top-k 内热门 pin 做粗粒度限流是补救方案, 治标不治本; LogQ 在训练时治本。
+
+### F-3. CUPED (Controlled-Experiment Using Pre-Experiment Data, 实验前数据方差缩减)
+
+- **Full Name**: Controlled-experiment Using Pre-Experiment Data (Microsoft Deng et al., 2013)。
+- **直觉解释**: A/B 实验里 metric 方差大 → 需要更多流量或更长时间才显著, 业务上昂贵。CUPED
+  的 idea: 用每个用户**实验前**的 metric $X$ 作 covariate 来扣除其个体基线波动。回归调整后
+  的 metric:
+  $$Y_{\mathrm{cv}} = Y - \theta \cdot (X - \bar{X}), \quad \theta = \frac{\mathrm{Cov}(Y, X)}{\mathrm{Var}(X)}$$
+  此时方差缩减比例 $\approx \rho^2$ ($\rho$ = $Y$ 与 $X$ 的相关系数)。Pinterest 这种用户行为
+  metric (session_len, repin_count) 的实验前/实验中相关系数 $\rho \approx 0.5$, 方差缩减
+  $\approx 25\%$ —— 等价于免费拿到 1.33× 流量。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §7.2 在 Online A/B 配置里明确
+  "Statistical design: 1% exposure, 14-day, **CUPED 方差缩减**, Bonferroni 校正 multi-metric";
+  §10 时间分配建议 "A/B duration 14 day, 1% traffic, **CUPED variance reduction**" ——
+  这两处都把 CUPED 作为 home-feed ranker 实验的标配, 因为 multi-task ranker 改动小、效应量
+  $\sim 1\%$, 不靠 CUPED 缩方差就需要 30 天才显著。
+- **何时选 vs 替代**: 用户 panel 实验 + 有可靠 pre-period metric + 实验效应量小 (< 5%) 时
+  CUPED 是首选。**vs Stratification (按 country / device 分层)**: stratification 减少
+  cross-stratum 方差, CUPED 减少 within-user 时间方差, **两者可叠加**。**vs Sequential
+  testing (mSPRT)**: 序贯检验靠 early-stopping 省时间, CUPED 靠协变量调整省方差; 两者正交,
+  生产 A/B 平台一般同时支持。
+
+### F-4. DML (Double / Debiased Machine Learning, 双重机器学习)
+
+- **Full Name**: Double / Debiased Machine Learning (Chernozhukov et al., 2018)。
+- **直觉解释**: 想估计"展示 pin $a$ 对未来 7 天 session 的因果效应"$\theta = \mathbb{E}[Y(1) - Y(0)]$,
+  直接回归 $Y \sim a + X$ 会因 $X$ 高维 (用户特征千维) + 模型 misspecification 引入偏差。DML
+  的解法: (1) 用 ML 模型 $\hat{m}(X)$ 拟合 $\mathbb{E}[Y \mid X]$, $\hat{e}(X)$ 拟合 $\mathbb{E}[a \mid X]$
+  (propensity); (2) 在残差 $\tilde{Y} = Y - \hat{m}(X), \tilde{a} = a - \hat{e}(X)$ 上做 OLS:
+  $$\hat{\theta}_{\mathrm{DML}} = \frac{\sum_i \tilde{a}_i \tilde{Y}_i}{\sum_i \tilde{a}_i^2}$$
+  (3) 用 **cross-fitting** (k-fold) 防止 ML 模型在自己样本上 overfit 污染估计。这等价于
+  Robinson 1988 的部分线性模型, 但允许 $\hat{m}, \hat{e}$ 用 random forest / GBM / NN, 收敛
+  速度只需 $n^{-1/4}$ 即可让 $\hat{\theta}$ 达到 $n^{-1/2}$ 的 root-n consistency。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §5 Long-term head 明确写
+  "**counterfactual uplift model (DML / doubly-robust) 估 '展示该 pin 对 next-7d session
+  的因果效应'**, 加入 utility" —— DML 是 home-feed ranker 跳出 "短期 click 优化" 走向
+  "长期 retention 优化" 的核心因果工具, 配合 Thompson-sampling 探索 (§5) 拿到的 propensity-known
+  数据, 估出来的 uplift 直接进 utility function 与 pCTR / pRepin 等 head 一起加权。
+- **何时选 vs 替代**: 想估 ATE / CATE + 协变量高维 + 不愿手工指定 functional form 时选 DML。
+  **vs vanilla IPS**: IPS 只用 propensity, 方差大; DML 同时用 outcome model + propensity
+  做 doubly-robust, 方差小且对 nuisance estimator 误差不敏感。**vs Causal Forest**:
+  Causal Forest 估 CATE 的非线性异质性 (per-user uplift), 适合个性化 treatment 决策;
+  DML 估 ATE 或半参数 CATE, 适合 ranker utility 加权。
+
+### F-5. SFT (Supervised Fine-Tuning, 有监督微调)
+
+- **Full Name**: Supervised Fine-Tuning。
+- **直觉解释**: LLM 训练三阶段的第一阶段。Pretrain 后的 base model 只会"续写", 不会"按指令
+  回答"。SFT 用高质量人工标注 `(prompt, response)` 对做最大似然训练:
+  $$\mathcal{L}_{\mathrm{SFT}} = -\mathbb{E}_{(x, y) \sim D_{\mathrm{SFT}}} \sum_{t} \log p_\theta(y_t \mid x, y_{<t})$$
+  让模型学到"指令 → 应答" 的映射 + 任务特定格式 (e.g., JSON schema, pin citation 格式)。
+  数据量典型 10K-100K, 训练 1-3 epoch (epoch 太多容易 catastrophic forgetting)。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §7.2 把 SFT 列为训练流水线第一步:
+  "**SFT**: 100K 高质量人写 conversation (Pinterest 内部 annotator), 学 pin citation 格式 +
+  风格", 训练 7B Llama-3 base 让它输出 `{"reply": ..., "pin_ids": [...], "intent": ...}`
+  结构化 JSON; §9.3 monitoring 也把 "每周 SFT 增量 (新 annotator 数据)" 列为模型刷新节奏。
+  SFT 是 Pinterest chatbot 拿到"能用的初版 LLM"的最快路径 —— DPO/RLHF 都依赖 SFT 后的
+  policy 作为起点。
+- **何时选 vs 替代**: 有标注预算 + 任务格式要求严格 (JSON / 引用) + 行为可定义 (而非偏好排序)
+  时 SFT 是必走的第一步。**vs ICL (In-Context Learning, few-shot prompt)**: ICL 不更新参数,
+  靠 prompt 演示, 适合 PoC 或低频任务; SFT 改参数, 适合高频生产服务 (latency 与 cost 决定
+  必须把演示 baked-in 而非每次喂)。**vs Continued Pretraining**: continued pretraining 用
+  domain corpus (Pinterest 全量 pin description) 做 next-token, 学 domain knowledge; SFT
+  学 task format。两者顺序: continued pretraining → SFT → preference tuning。
+
+### F-6. RLHF (Reinforcement Learning from Human Feedback, 人类反馈强化学习)
+
+- **Full Name**: Reinforcement Learning from Human Feedback (OpenAI InstructGPT 2022)。
+- **直觉解释**: SFT 后的模型有"格式对 + 内容尚可"的能力, 但要进一步对齐**人类偏好** (helpful /
+  harmless / honest), 单纯加更多 SFT 数据收益边际递减。RLHF 三步走: (1) 训 **reward model**
+  $r_\phi(x, y)$, 数据是人工偏好对 $(x, y_w \succ y_l)$, loss = $-\log \sigma(r(x, y_w) - r(x, y_l))$
+  (Bradley-Terry 排序模型); (2) **PPO 阶段**: 用 reward model 当奖励信号, 加 KL 惩罚保持
+  policy 不偏离 SFT 太远:
+  $$\mathcal{L}_{\mathrm{RLHF}} = \mathbb{E}_{x \sim D, y \sim \pi_\theta}\big[r_\phi(x, y)\big] - \beta \cdot \mathrm{KL}\big(\pi_\theta \| \pi_{\mathrm{SFT}}\big)$$
+  (3) **iterate**: 新 policy 生成新样本 → 标新偏好 → 训新 reward model → 新 PPO。InstructGPT
+  / ChatGPT / Claude 都是 RLHF 流派。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §7.2 把 RLHF 列为训练第二步, 但
+  **生产实际选 DPO 替代 RLHF**: "**RLHF / DPO**: 用 human preference 对 (reply_A, reply_B),
+  **DPO 比 PPO 更稳定**, 用 50K pair" —— DPO 在 Pinterest 这种工程团队 < 10 人的产品下
+  胜过完整 RLHF 流水线 (省掉 reward model + PPO replay buffer 两块工程债)。RLHF 在文档里
+  是"技术参考", DPO 是"实际生产"。
+- **何时选 vs 替代**: 偏好数据量大 (>100K pair) + 工程团队能维护 RM/PPO 双训练循环 + 想要
+  迭代式 alignment 时选 RLHF。**vs DPO**: DPO 把 RLHF 闭式改写, 单步监督训练, 工程复杂度
+  从 3 → 1, 大多数中等规模团队 (< 10 人) 直接选 DPO 跳过 RLHF; RLHF 仍是大型 frontier
+  lab (Anthropic / OpenAI) 的首选, 因为其能持续 online iterate。**vs Constitutional AI
+  (CAI)**: CAI 用 LLM 自己生成偏好数据替代部分人工标注 (Anthropic 2022), 节省标注成本;
+  Pinterest 量级用人工标注更可控, 没用 CAI。
+
+### F-7. PPO (Proximal Policy Optimization, 近端策略优化)
+
+- **Full Name**: Proximal Policy Optimization (Schulman et al., OpenAI 2017)。
+- **直觉解释**: RLHF 第二阶段用的 RL 算法。原始 policy gradient 对 step size 敏感, 一步走
+  太远就崩。PPO 用 **clipped surrogate objective** 限制每次更新:
+  $$\mathcal{L}_{\mathrm{PPO}} = \mathbb{E}_t\Big[\min\big(r_t(\theta) \hat{A}_t, \mathrm{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \hat{A}_t\big)\Big]$$
+  其中 $r_t(\theta) = \pi_\theta(a_t \mid s_t) / \pi_{\theta_{\mathrm{old}}}(a_t \mid s_t)$
+  是 importance ratio, $\hat{A}_t$ 是 advantage estimate, $\epsilon$ 典型 0.2。clip 让 ratio
+  不出 $[1-\epsilon, 1+\epsilon]$ 区间, policy 一次更新最多走一小步, 避免训练崩塌。
+  RLHF 里的"奖励"= reward model + KL 罚项 (见 F-6 公式)。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §7.2 显式比较 "**DPO 比 PPO 更稳定**,
+  用 50K pair", 这就是 Pinterest **不用** PPO 的明确理由 —— PPO 训练曲线波动大、KL coefficient
+  $\beta$ 难调、需要 reward model + value model + actor 三个模型同时跑, 工程复杂度高;
+  生产首选 DPO 闭式解。PPO 在 Pinterest doc 里是"被替换的方法", 提名是为了说明 DPO 选型动机。
+- **何时选 vs 替代**: 完整 RLHF 流水线 + 有 reward model + 想做 online iteration 时选 PPO。
+  **vs DPO**: DPO 用 Bradley-Terry 假设导出闭式解, 不需 reward model + RL loop, 训练
+  10× 简单且更稳; 缺点是没法做 online RL (需新偏好数据重训)。**vs REINFORCE / A2C**:
+  REINFORCE 高方差, A2C 比 PPO 更早, 现代 RLHF 几乎全用 PPO。**vs GRPO (Group Relative
+  Policy Optimization)**: GRPO (DeepSeek 2024) 去掉 value model, 用 group baseline 替代,
+  比 PPO 更省内存; 是 PPO 的工程改进版, Pinterest 量级用不上。
+
+### F-8. DPO (Direct Preference Optimization, 直接偏好优化)
+
+- **Full Name**: Direct Preference Optimization (Rafailov et al., Stanford 2023)。
+- **直觉解释**: RLHF 工程很重 (RM + PPO + replay buffer)。DPO 的关键洞察: 在 Bradley-Terry
+  偏好假设 + KL 约束下, RLHF 的最优 policy 有**闭式解**:
+  $$\pi^*(y \mid x) \propto \pi_{\mathrm{SFT}}(y \mid x) \cdot \exp\big(r(x, y) / \beta\big)$$
+  反过来 reward 可以用 policy ratio 表达 $r(x, y) = \beta \log \frac{\pi^*(y \mid x)}{\pi_{\mathrm{SFT}}(y \mid x)} + Z(x)$。
+  代回 Bradley-Terry loss 得 DPO 目标:
+  $$\mathcal{L}_{\mathrm{DPO}} = -\mathbb{E}_{(x, y_w, y_l)}\Big[\log \sigma\Big(\beta \log \frac{\pi_\theta(y_w \mid x)}{\pi_{\mathrm{SFT}}(y_w \mid x)} - \beta \log \frac{\pi_\theta(y_l \mid x)}{\pi_{\mathrm{SFT}}(y_l \mid x)}\Big)\Big]$$
+  全过程 = 一个监督学习 loss, 不需 RL, 训练**单遍走一次 preference 数据集即可**, 比 PPO
+  快 10× 且稳。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §7.2 训练流水线第二步直接选 DPO:
+  "**DPO 比 PPO 更稳定, 用 50K pair**"; §9.1 offline 评估指标里 "**DPO win-rate vs baseline**:
+  pairwise human eval, 目标 >55%" 把 DPO 训练后的 policy 跟 SFT baseline 做盲对比, 是发版
+  门槛; §7.3 online learning 节奏 "每月 DPO 重训" 让模型跟随新偏好数据漂移更新。
+- **何时选 vs 替代**: 偏好对数据 + 中小团队 (< 10 人) + 想最简化训练流水线时 DPO 是默认选择。
+  **vs RLHF/PPO**: DPO 跳过 reward model + PPO 两步, 工程简单、训练稳; 缺点是没法 online
+  iterate (新数据要重新跑全集)。**vs ORPO (Odds Ratio Preference Optimization)**: ORPO
+  (2024) 把 SFT loss 与 preference loss 合并到一步训练, 进一步去掉 reference model, 比 DPO
+  又省 1× 内存; ORPO 是 DPO 的工程改进版, 适合 GPU 紧张场景。**vs IPO (Identity Preference
+  Optimization)**: IPO 用平方损失替代 sigmoid, 对数据 noise 更鲁棒; DPO 主流, IPO 是细分
+  改进。
+
+### F-9. InfoNCE (Information Noise-Contrastive Estimation, 信息对比噪声估计)
+
+- **Full Name**: Information Noise-Contrastive Estimation (van den Oord et al., DeepMind 2018,
+  CPC 论文)。
+- **直觉解释**: 自监督表示学习的标准 loss。给定 query $q$ + 正样本 $k_+$ + $K$ 个负样本 $\{k_i\}$,
+  InfoNCE 把对比学习写成 softmax 分类:
+  $$\mathcal{L}_{\mathrm{InfoNCE}} = -\log \frac{\exp(\mathrm{sim}(q, k_+) / \tau)}{\exp(\mathrm{sim}(q, k_+) / \tau) + \sum_{i=1}^{K} \exp(\mathrm{sim}(q, k_i) / \tau)}$$
+  其中 sim 是 cosine 或 dot product, $\tau$ 是 temperature (越小越锐化 top-k)。理论上,
+  $\mathcal{L}_{\mathrm{InfoNCE}}$ 是互信息 $I(q; k_+)$ 的下界, 优化它即拉近正样本互信息上界。
+  现代 retrieval / embedding 训练 (DSSM 后继 / SimCLR / CLIP / two-tower 推荐) 几乎都用
+  InfoNCE 变体。
+- **Pinterest 实际应用**: `system_design_embeddings.md` §3 **训练 loss 主体就是 InfoNCE**:
+  $\mathcal{L} = -\log \frac{\exp(s(u, p_+)/\tau)}{\exp(s(u, p_+)/\tau) + \sum \exp(s(u, p_-)/\tau)}$,
+  $\tau = 0.07$, batch B=8192 ⇒ 等效 8K 负样本; 配合 LogQ correction (F-2) 修 popularity bias、
+  hard negatives 提精度。`system_design_pins_search.md` §3.2 Two-Tower query/doc embedding
+  也是 in-batch InfoNCE 训练。`system_design_chatbot_pins.md` §7.2 第三步 "Retrieval alignment:
+  用对比学习把 LLM query encoder 对齐到 pin embedding 空间 (in-batch negatives + hard negatives
+  from BM25 mismatches)" 也是 InfoNCE。
+- **何时选 vs 替代**: 自监督 / 弱监督表示学习 + 有"自然正样本对" (user-pin / image-text /
+  augmented view) + 有大 batch (B≥1024) 拿足够负样本时选 InfoNCE。**vs Triplet Loss**:
+  triplet 一次只用 1 正 1 负, 信息稀; InfoNCE 一次用 1 正 K-1 负, 收敛快得多。**vs
+  Sampled Softmax**: sampled-softmax 是 InfoNCE 的祖先, 必须配 LogQ 修正; InfoNCE 在
+  in-batch sampling 设定下相当于 sampled-softmax + LogQ, 是更现代的统一表达。
+  **vs Cross-encoder BCE**: cross-encoder 直接对 (q, d) 拼接过 BERT 出 logit + BCE, 精度高
+  但无法离线索引; InfoNCE 双塔分别编码可 ANN, 是检索阶段的唯一可行方案 (cross-encoder 留
+  作精排)。
+
+### F-10. RAG (Retrieval-Augmented Generation, 检索增强生成)
+
+- **Full Name**: Retrieval-Augmented Generation (Lewis et al., Meta 2020)。
+- **直觉解释**: LLM 参数里的知识有 cutoff + 易 hallucinate (尤其细粒度 entity)。RAG 的 idea:
+  生成前先**检索**外部知识库的 top-K 文档, 把它们塞进 prompt 作 context, 让 LLM 基于 retrieved
+  文档生成答案。两阶段: (1) Retriever (DPR / BM25 / dense ANN) 从 KB 取 top-K; (2) Generator
+  (LLM) 在 prompt = $[$ instruction; retrieved docs; query $]$ 下生成 reply, 并要求**引用**
+  doc id。RAG 把"参数化记忆"变成"参数化推理 + 显式记忆", 知识更新只需更新索引, 不用重训
+  LLM, 同时 hallucination 显著降低 (有 grounding 可校验)。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §1 标题就是 "**Scope: 对话理解 →
+  意图分类 → RAG pin 检索 → grounding → safety → 评估**", 整个 chatbot pins 系统就是 RAG
+  应用 —— 用户问 "show me Scandinavian living rooms", LLM **不能从参数里捏 pin**, 必须从
+  retriever 返回的 top-50 真实 pin id 里选 (§5.4 citation enforcement 把不在 retrieved set
+  里的 pin_id 强制丢弃)。§4.2 multi-retriever fusion (dense ANN + BM25 + personalized) 是
+  RAG 的 retriever 实现; §5.2 prompt 结构是 RAG 的 generator 输入模板; §9.1 "Grounding
+  faithfulness >0.95 (LLM-as-judge)" 是 RAG 评估核心指标。
+- **何时选 vs 替代**: 知识更新频繁 (新 pin 每天百万级) + 需要 citation / 可解释性 + LLM 容量
+  不够装下全部 KB 时 RAG 是默认。**vs Long-Context LLM (1M context)**: long-context 把全部
+  doc 塞 prompt, 简单但贵 (token cost 与 latency 均 1000×); RAG 只塞 top-K 相关 doc, 经济。
+  **vs Fine-tuning on KB**: SFT/continued pretraining 把 KB 烧进参数, 推理快但更新需重训,
+  且 hallucination 不可控; RAG 显式检索, 更新只更新索引。**vs ReAct (Reasoning + Acting)**:
+  ReAct 让 LLM 多轮调用检索工具 (agentic), 适合复杂多跳推理; 单跳 QA / 推荐场景 vanilla
+  RAG 已足够, Pinterest chatbot 主用单跳 RAG + 必要时 follow-up turn 触发新检索。
+
+### F-11. RRF (Reciprocal Rank Fusion, 倒数排名融合)
+
+- **Full Name**: Reciprocal Rank Fusion (Cormack et al., 2009)。
+- **直觉解释**: 多路检索 (dense / sparse / personalized) 各自返回 ranked list, 怎么融合成
+  一个 list? RRF 的 idea: **不依赖原始 score 量纲, 只用排名**。每个 doc 的 fused score:
+  $$\mathrm{RRF}(d) = \sum_{r \in R} \frac{1}{k + \mathrm{rank}_r(d)}$$
+  其中 $R$ 是各路 retriever, $k$ 是平滑常数 (典型 60), $\mathrm{rank}_r(d)$ 是 doc 在
+  retriever $r$ 中的排名 (没出现则贡献 0)。优点: 不需 score normalization (BM25 是 raw score,
+  cosine sim 是 [-1,1], 量纲完全不同), 工程极简; 实证在 TREC 上常胜过加权平均。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §4.2 multi-retriever fusion 明确
+  "**Fusion: RRF (reciprocal rank fusion, k=60), 得 top-400 候选**" —— Pinterest chatbot
+  把 dense ANN (pin embedding) + BM25 (title + board + OCR) + personalized (user · pin) 三路
+  各取 top-200, 用 RRF 融合到 top-400 喂下游 stage-1 LightGBM ranker (§4.3)。RRF 是 Pinterest
+  RAG retriever 多路融合的事实选型, 因为 dense / sparse / personalized 三路 score 量纲完全
+  不同 (cosine vs BM25 raw vs dot), 学一个 calibration 太脆弱。
+- **何时选 vs 替代**: 多路 retriever + score 量纲不一致 + 不愿训练 fusion model 时 RRF 是
+  零调参首选。**vs Weighted Linear Combination**: $\sum w_r \cdot \mathrm{score}_r$ 需先
+  normalize (z-score / min-max) 再调权, 工程脆弱; RRF 用 rank 完全规避 score 问题。
+  **vs Learning-to-Rank Fusion (LTR)**: 训练一个 GBDT 把多路 retriever score 当 feature
+  学最终排序 (Pinterest §4.3 stage-1 LightGBM ranker 实质就是 LTR fusion); LTR 上限更高
+  但需训练数据 + 上线复杂度, RRF 是 zero-shot baseline。**vs Cross-Encoder Reranking**:
+  cross-encoder rerank 把 RRF top-K 喂 BERT 现场打分, 精度更高 (`chatbot_pins.md` §4.3
+  stage-2 LLM reranker), 但成本高, 默认关闭, 仅 compare/refine 意图开。
+
+### F-12. MMR (Maximal Marginal Relevance, 最大边际相关)
+
+- **Full Name**: Maximal Marginal Relevance (Carbonell & Goldstein, 1998)。
+- **直觉解释**: 检索 / 推荐结果的 top-K 经常**冗余** (同一个 board 刷屏, 同一个产品多个角度),
+  用户体验差。MMR 在 ranker 输出基础上做后处理, 贪心选下一个 doc:
+  $$d^* = \arg\max_{d \in C \setminus S} \Big[\lambda \cdot \mathrm{rel}(d, q) - (1-\lambda) \cdot \max_{d' \in S} \mathrm{sim}(d, d')\Big]$$
+  其中 $S$ 是已选 set, $C$ 是候选池, $\lambda \in [0, 1]$ 平衡相关性 vs 多样性 ($\lambda=1$
+  退化为按 relevance 贪心, $\lambda=0$ 完全多样最大化)。直观: 每次选**与 query 相关 + 与已
+  选不相似** 的 doc, 实现"既相关又多样"。
+- **Pinterest 实际应用**: `system_design_chatbot_pins.md` §4.4 Diversity & Anti-Repetition
+  写明 "**MMR (λ=0.3) on pin embedding**, 避免同一 board 刷屏" —— Pinterest chatbot 在
+  stage-1 ranker top-50 上用 MMR (低 $\lambda$ 强调多样性) 做最后一步 re-rank, 配合
+  `already_shown_pin_ids` 过滤 + L2 category cap (top-12 中最多 6 个同 L2 类目) 形成三层
+  diversity 防御。`system_design_concepts.md` §3 (D-7 / D-8 等) 已介绍 DPP / Submodular
+  作为 MMR 的高阶替代; MMR 是工程最简方案。
+- **何时选 vs 替代**: 后处理 diversity + ranker 已给 relevance score + 候选池小 (≤200) 可
+  贪心遍历时 MMR 是首选。**vs DPP (Determinantal Point Process)**: DPP 用 kernel 矩阵的
+  determinant 同时建模 quality + diversity, 全局最优; MMR 贪心, 局部最优。DPP 数学优雅但
+  inference 贵 ($O(K^3)$), Pinterest 用 MMR 因为足够好且 1ms 内搞定。**vs Submodular
+  Diversification**: submodular 优化 (e.g., facility location) 与 DPP 本质同源, MMR 是其
+  贪心特例。**vs Category Cap (Hard Constraint)**: 直接 "top-12 里同 L2 category 最多 6 个"
+  是 hard rule, 与 MMR 互补 —— MMR 软多样化 + cap 硬保底, **两者并行最稳**, 这就是
+  Pinterest §4.4 的设计。
 
 ---
 
