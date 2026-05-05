@@ -12,10 +12,10 @@
 
 | 维度 | 问题 | 为什么重要 |
 |------|------|----------|
-| 消费场景 | 用于 candidate gen (ANN)? ranking 特征? similar-pins 展示? 全要? | 不同消费对 dim / freshness / calibration 要求不同 |
+| 消费场景 | 用于 candidate gen (**Approximate Nearest Neighbor**, ANN, 近似最近邻搜索)? ranking 特征? similar-pins 展示? 全要? | 不同消费对 dim / freshness / calibration 要求不同 |
 | 实体 | 只 user + pin, 还是 board / advertiser / query? | 多实体联合训练 vs 单塔分别训练 |
 | 目标 | 单一 objective (repin) 还是 multi-task (click, repin, long-click, hide)? | 决定 loss 结构, label 噪声处理 |
-| 语义 vs 行为 | 要 "兴趣语义" 还是 "协同过滤"? | 语义重: GraphSAGE/文本塔; 协同重: two-tower + in-batch negatives |
+| 语义 vs 行为 | 要 "兴趣语义" 还是 "协同过滤"? | 语义重: **Graph SAmple and AGgregatE** (GraphSAGE, 图采样与聚合)/文本塔; 协同重: two-tower + in-batch negatives |
 | 冷启动 | 新 pin (<100 impression) 与 新用户如何处理? | 决定是否必须 content-based (图像+文本) 塔 |
 | Freshness SLA | user embedding 分钟级 / 小时级 / 天级? | 分钟级 ⇒ streaming 推理; 天级 ⇒ batch 足够 |
 | Scale | 活跃 pin / user 数? | 5B pins × 500M MAU ⇒ ANN index + shard 必须 |
@@ -109,7 +109,7 @@ $$\mathcal{L} = -\log \frac{\exp(u \cdot p^{+} / \tau)}{\exp(u \cdot p^{+}/\tau)
 
 主 label 长尾, 辅 label 丰富. 直接 $\sum w_i \mathcal{L}_i$ 会让辅 label 主导. 方案:
 - **Shared-bottom + task-specific head**: bottom 出 256-dim shared embedding, 每个 task 有独立小 MLP head 算该 task 的相似度. 共享 embedding 即为下游使用的 embedding.
-- 或 **PCGrad / GradNorm** 处理梯度冲突 (long-click 与 click 可能冲突: 误点 click 为正但 long-click 为负).
+- 或 **Projecting Conflicting Gradients** (PCGrad, 冲突梯度投影) / **Gradient Normalization** (GradNorm, 梯度归一化) 处理梯度冲突 (long-click 与 click 可能冲突: 误点 click 为正但 long-click 为负).
 
 ---
 
@@ -125,8 +125,8 @@ $$\mathcal{L} = -\log \frac{\exp(u \cdot p^{+} / \tau)}{\exp(u \cdot p^{+}/\tau)
  graph embedding (PinSage pretrained) ─► 256-d ─────────┘
 ```
 
-- **ViT frozen**: 成本 (5B pins 全量算 ViT = $$$); 只在 fine-tune 阶段开尾部 2 层.
-- **Text encoder**: mBERT (multilingual, Pinterest 用户 50% 非英语). Fine-tune 尾部.
+- **Vision Transformer** (ViT, 视觉Transformer) **frozen**: 成本 (5B pins 全量算 ViT = $$$); 只在 fine-tune 阶段开尾部 2 层.
+- **Text encoder**: **multilingual BERT** (mBERT, 多语言BERT, Pinterest 用户 50% 非英语). Fine-tune 尾部.
 - **PinSage 图特征**: 独立 GraphSAGE 预训练 (board co-occurrence graph), 输出固定 256-d 作为 **特征**, 不在 two-tower 里重新训练 graph (避免训练图 scale 爆炸). 这里 graph tower 是 "frozen feature provider".
 - **输出**: 256-d, L2-normalized.
 
@@ -197,7 +197,7 @@ $$h_v^{(k)} = \sigma\left(W^{(k)} \cdot \text{AGG}\left(\{h_u^{(k-1)}: u \in \ma
 
 - **Retrieval @ k**: hold-out 当日用户 repin 的 pin, 看 query user embedding 从 5B 池子中能否 top-k 召回. Recall@100, Recall@500.
 - **Cold pin Recall**: 专门评估 < 100 impression 的新 pin 能否被正确召回 (content tower 的价值).
-- **NDCG on downstream ranker**: 把 embedding 接到现有 ranker 作特征, 看 NDCG@10 是否提升 (最终指标).
+- **Normalized Discounted Cumulative Gain on downstream ranker** (NDCG@K, 归一化折损累计增益): 把 embedding 接到现有 ranker 作特征, 看 NDCG@10 是否提升 (最终指标).
 - **Embedding diversity**: 抽样看 intra-user top-k 的 category 分布, 避免 "全是同一个 topic".
 
 ---
@@ -232,7 +232,7 @@ Kafka topic `user_engagement` ─► Flink windowed aggregator
 
 ### 5.2 ANN index
 
-- **Algorithm**: ScaNN (Google, quantization + tree-based) 或 HNSW.
+- **Algorithm**: **Scalable Nearest Neighbors** (ScaNN, 可扩展最近邻搜索; Google, quantization + tree-based) 或 **Hierarchical Navigable Small World** (HNSW, 分层可导航小世界图).
 - **Sharding**: 5B pins ÷ 50M per shard = 100 shards. Each shard 处理 ~2k QPS.
 - **Build cadence**: 每日 rebuild full, hourly delta merge.
 - **Memory**: 5B × 256 × 2 byte (fp16) = 2.5 TB; 量化到 int8 + PQ (product quantization) → ~500 GB, 可分 100 × 5 GB shard.
