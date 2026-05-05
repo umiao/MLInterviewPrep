@@ -1238,10 +1238,311 @@
 
 ## 7. Pinterest 专属系统 (Pinterest-Specific Systems)
 
-> 待补充于 T-P1-747 (PINT-CONCEPTS-H)。
->
-> 涵盖: PinSAGE / Pin2Vec / SearchSAGE / Homefeed Ranker / Shopping Graph /
-> Catalog Pipeline 的内部架构与演进史，以及 Pinterest engineering blog 中已公开
-> 的设计决策。
+本节覆盖 Pinterest 在 engineering blog / KDD-WSDM-WWW paper 中已公开的内部系统。
+区别于 §1-§6 的通用算法/基础设施 (DCN-v2、HNSW、PLE 等业界共识工具), 这里每条
+都是 **Pinterest 自家造的产品系统**: 它们要么是 Pinterest **首发** (PinSAGE,
+Pin2Vec, ItemSage, SearchSAGE, Pinterest Lens), 要么是 Pinterest 上 **特定 surface
+的核心组件** (Pinnability, Pixie, Homefeed Blender, Shopping Graph, Catalog Pipeline).
+面试官常问 "你了解我们的 X 吗", 这一节就是 X 的 cheat sheet —— 配合 §1-§6 通用工具
+连成完整图景 (例: PinSAGE = §C-7 GraphSAGE 的 Pinterest 工业落地; Homefeed Blender
+= §B-9 PLE 的 Pinterest home feed 实例; Pixie 是 §C 检索家族里 Pinterest 选的图随机
+游走方案, 与 ANN 互补)。
+
+每条按 4 段展开: (1) Full English Name + 中文 + 出处 (paper / blog 年份);
+(2) 直觉解释 (1-2 句解决什么问题); (3) Pinterest 实际应用 (引用 system_design_*.md
+中具体场景); (4) 何时选 vs 替代方案。
+
+### H-1. Pinnability (Pin 质量模型)
+
+- **Full Name**: "Pinnability" 不是缩写, 是 Pinterest 内部对一个 **pin-level quality
+  score** 的命名 —— 模型输出 "这条 pin 有多大可能被任何用户 save (= pin)" 的概率。
+  最早出现在 Pinterest engineering blog 2014-2017, 是 home feed ranker 的元老 head 之一。
+- **直觉解释**: home feed ranker 不能只看 "**这个用户对这条 pin** 的 click/save 概率"
+  (= personalized pCTR), 还需要一个 **content-quality 先验** 防止低质内容被某些
+  niche 用户的 noise 信号顶上去。Pinnability 就是这个先验: 用一个 **user-agnostic**
+  模型预测 "**任意 high-engagement 用户看到这条 pin 会 save 吗**", 输出 $[0, 1]$
+  分数。Loss 通常是
+  $$\mathcal{L}_\text{pinnability} = -\sum_{(p, y_\text{save}) \in \mathcal{D}} y_\text{save} \log \sigma(f(p)) + (1 - y_\text{save}) \log (1 - \sigma(f(p)))$$
+  其中 $f(p)$ 只吃 pin-side 特征 (image emb, text emb, board taxonomy, creator stats)
+  —— **故意不吃 user-side 特征**。这条 score 在 home feed final blending 时作为
+  乘数或 reranker 输入。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §3 ranking model 多目标
+  utility 的工程版本里, "pin quality / safety classifier" 是一个独立 head,
+  Pinnability 即此类 head 的代表; §5 multi-objective 节明确 "**单 CTR objective 会
+  诱发低质内容**" 是 Pinnability 这种 quality prior 存在的理由; `system_design_concepts.md`
+  §G-8 CTR 节已点出 "**CTR 易被 clickbait 拉高 → 必须叠 quality / save / dwell head**",
+  Pinnability 就是其中 quality head 的工程实现。它独立于 personalized pCTR 之外,
+  与 ranking score 相乘后参与最终排序。
+- **何时选 vs 替代**: home feed / 推荐流场景, 当用户行为 noise 大 (短期点击不能反映
+  长期满意度) 时, 必须叠 Pinnability 这种 user-agnostic quality prior。
+  **vs Watch-time / Dwell head**: dwell 是 implicit quality 信号但**只在曝光后**
+  才有, 冷 pin 没有; Pinnability 用 pin-side 静态特征解 cold start。
+  **vs Safety / Policy classifier**: safety 是 hard filter (违规直接屏蔽),
+  Pinnability 是 soft score (低质降权但不屏蔽)。**vs PinSAGE embedding cosine**:
+  PinSAGE 是 representation, Pinnability 是 task-specific scalar; 通常 PinSAGE
+  emb 是 Pinnability 的输入特征之一。
+
+### H-2. Pixie (随机游走推荐引擎)
+
+- **Full Name**: "Pixie" 是 Pinterest 2018 在 WWW 上发表的 paper "Pixie: A System
+  for Recommending 3+ Billion Items to 200+ Million Users in Real-Time" 中提出的
+  **random-walk-based real-time recommender**, 名字是 Pinterest 内部代号 (无展开)。
+- **直觉解释**: 传统 ANN 检索 (HNSW / IVF, 见 §C-2/C-3) 给定一个 query embedding 找
+  top-K, 但 Pinterest 想做的是 "**给定用户当前看的 5 条 pin (= seed set), 推荐相关
+  pin**" —— 是 **multi-seed query**, 而且要 real-time (<60ms)。Pixie 的核心 idea:
+  在 **pin-board bipartite graph** 上从 seed pins 做 **biased random walk**, 统计
+  访问频次 (visit count), 高频访问的 pin 就是推荐结果。关键工程: (1) **personalized
+  bias** 偏向 seed pins 类似的板; (2) **pruning** 早停低频 walk; (3) **graph 全部
+  in-memory** 装在大 RAM 机器 (~3B edges, ~150GB), 单机响应; (4) **early-stopping**
+  和 multi-hit boosting (访问 >$T$ 次的 pin 优先返回)。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §2 retrieval funnel 列出
+  多源 candidate "**PinSage ANN / 2-tower ANN / 关注的 board / popularity / 实时
+  context-based**", Pixie 属于 **关注的 board / 实时 context-based** 这条路 (graph-walk
+  从 user 当前关注的板出发); `system_design_concepts.md` §C-7 GraphSAGE 节解释
+  "**bipartite pin-board graph 给冷尾 pin 注入语义邻居信号**" 时同样指向 Pixie 数据
+  来源。Pixie 是 PinSAGE **之前** 的主力 retrieval, 之后 **共存** —— PinSAGE 给静态
+  embedding (ANN 检索), Pixie 给实时 multi-seed walk (related pins / 长尾 board)。
+- **何时选 vs 替代**: 当查询是 **multi-seed + 实时 + 短 session** (related pins,
+  "more like this") 时 Pixie 比 ANN 更自然。**vs HNSW ANN**: ANN 适合
+  **single-query → top-K**, 不擅长 multi-seed 加权; Pixie 直接吃 seed set 做 walk。
+  **vs PinSAGE GNN**: PinSAGE 是 **离线训练 embedding**, 在线只查 ANN; Pixie 是
+  **在线图算法**, 不需要训练但需要 graph 全 in-memory。**vs PageRank**: PageRank
+  是 global score, Pixie 是 personalized random walk with restart (PPR), 每次
+  query 都重做。Pinterest 同时用两者: PinSAGE 主流量, Pixie 专攻 related-pins。
+
+### H-3. PinSAGE (Pin Sample and Aggregate, KDD 2018)
+
+- **Full Name**: PinSAGE = **Pin Sample and Aggregate**, Pinterest 2018 在 KDD 上
+  发表的 paper "Graph Convolutional Neural Networks for Web-Scale Recommender
+  Systems"。是 GraphSAGE (§C-7) 的 Pinterest 工业落地版本, 也是首个跑在 **billion-node
+  graph** 上的 GCN。
+- **直觉解释**: GraphSAGE 用 sampling + aggregation 解 GCN 内存爆炸, 但学界版本
+  最大跑 reddit (~200K nodes)。PinSAGE 把它推到 Pinterest **3B pins + 18B
+  pin-board edges** 的工业 scale, 关键工程贡献:
+  (1) **Random-walk neighbor sampling** —— 不是均匀采样邻居, 而是用 short random
+  walk 选 "重要邻居" (top-$T$ walks 里访问最多的节点);
+  (2) **Importance pooling** —— 邻居聚合时按 walk visit count 加权, 不是 mean/max;
+  (3) **MapReduce inference** —— 离线把所有 pin embedding 跑出来存 KV store
+  (Hadoop pipeline);
+  (4) **Hard negative mining** —— 在 minibatch 内用 random-walk 找 "中等相似但 negative"
+  的样本, 避免全用 random negative 训练崩塌。
+  数学上, 一层 PinSAGE aggregation 大致是
+  $$h_v^{(k)} = \sigma\left(W^{(k)} \cdot \text{CONCAT}\left(h_v^{(k-1)}, \text{POOL}\left(\{ \alpha_{vu} h_u^{(k-1)} : u \in \mathcal{N}_T(v) \}\right)\right)\right)$$
+  其中 $\mathcal{N}_T(v)$ 是 random-walk top-$T$ 邻居, $\alpha_{vu}$ 是 walk visit
+  count 归一化后的 importance 权重。
+- **Pinterest 实际应用**: `system_design_embeddings.md` §3.2-3.3 把 PinSAGE 列为
+  pin tower 的 **frozen graph feature provider** (256-d 输出, 不在 two-tower 里
+  re-train 避免 graph scale 爆炸); `system_design_pin_ranking.md` §2.2 单独一节
+  "**PinSage 嵌入 (重点讲)**" 详述 pin-board bipartite graph + neighbor aggregation
+  + ANN serving; `system_design_ad_ctr.md` §3 把 PinSAGE 64-d 作为 ad creative
+  feature 一路。简言之, PinSAGE embedding 是 Pinterest 几乎所有 ranking/retrieval
+  surface 的标配特征。
+- **何时选 vs 替代**: 当 graph 节点 >100M + 邻居数高度不均 (long-tail) 时 PinSAGE
+  比 vanilla GraphSAGE 优势明显。**vs Node2Vec / DeepWalk**: 这些是 unsupervised
+  random-walk embedding, **不吃 node features**; PinSAGE 是 supervised + 吃
+  rich content features (image emb, text emb)。**vs vanilla GraphSAGE**: 后者
+  uniform sample 邻居, PinSAGE random-walk sample 解高度倾斜邻居。**vs LightGCN
+  (KDD 2020)**: LightGCN 去掉非线性 + 自学习 embedding, 适合 explicit collab
+  filtering; PinSAGE 适合 inductive (新 pin 来了能立刻 embed)。Pinterest 选 PinSAGE
+  因为 **新 pin 每秒诞生 + 必须 inductive**。
+
+### H-4. Pin2Vec (Pinterest 2017 早期 item embedding)
+
+- **Full Name**: "Pin2Vec" 是 Pinterest 2017 engineering blog "Applying deep
+  learning to Related Pins" 中介绍的 **item-id-only embedding**, 是 PinSAGE 之前的
+  上一代方案。命名是对 word2vec 的致敬, 没有学术 paper。
+- **直觉解释**: 把每个 pin 当成 word2vec 里的一个 word, 用 user session 当 sentence
+  (用户在一个 session 内点的 pin 序列), 训 Skip-gram 得每个 pin 一个 embedding。
+  数学上和 word2vec 一样:
+  $$\mathcal{L} = -\sum_{(\text{center}, \text{context}) \in S} \log \sigma(v_\text{center}^\top v_\text{context}) + \sum_{\text{neg}} \log \sigma(-v_\text{center}^\top v_\text{neg})$$
+  局限非常明显: (1) **冷 pin 无 embedding** (没出现在 session 里); (2) **不吃 content**
+  (image / text 全浪费); (3) embedding 漂移快 (session 分布变 → embedding 失效)。
+- **Pinterest 实际应用**: `system_design_embeddings.md` §3 设计史里隐含 —— "**纯
+  ID embedding 对冷尾 pin 不友好**" 正是 Pin2Vec 的痛点, 之后才升级到 PinSAGE
+  (吃 content + GNN aggregation 解冷启动)。在面试场景里 Pin2Vec 是 "演进史" 的起点,
+  通常会被问 "**为什么 Pin2Vec 不够, 要做 PinSAGE?**" —— 答案就是 cold start +
+  feature richness。今天的 Pinterest 已经下线 Pin2Vec, 只在 historical context
+  讨论。
+- **何时选 vs 替代**: 在 **小规模 + 行为密集 + 无 content feature** 的早期阶段
+  (e.g., 创业初期 MVP), Pin2Vec / item2vec 仍是 baseline。**vs PinSAGE**: PinSAGE
+  解决冷启动 + content feature 利用率, Pin2Vec 完败。**vs YouTube Recommender
+  ID-emb (2016)**: YouTube 也是 ID-only embedding 起步, 后来加 content/contextual
+  feature。基本所有大厂都走过这条路。
+
+### H-5. ItemSage (KDD 2022, 多模态多任务 item 表征)
+
+- **Full Name**: ItemSage = **Item Sample and Aggregate** (命名沿用 PinSAGE 套路),
+  Pinterest 2022 在 KDD 发表的 paper "ItemSage: Learning Product Embeddings for
+  Shopping Recommendations at Pinterest"。
+- **直觉解释**: PinSAGE 是 **organic pin** 的 embedding, ItemSage 是 **shopping
+  product (= ad/catalog item)** 的 embedding。挑战不同: (1) shopping item 没有
+  pin-board graph (商品不被 user save 到 board), graph signal 稀疏;
+  (2) 多 surface (home / search / shopping tab / related products) 各自分布不同;
+  (3) 训练目标多 (CTR / save / add-to-cart / checkout)。
+  ItemSage 的核心 idea:
+  - **Multi-modal input** —— concat image emb (CLIP-style ViT) + text emb
+    (BERT on title/desc) + categorical (taxonomy / brand) + structured (price / rating)
+  - **Multi-task heads** —— 同一个 base encoder, 顶部多 head 同时学 (CTR, save,
+    add-to-cart), 用 PLE (§B-9) 或 MMoE (§B-8) 做 task-specific gating
+  - **Surface-aware attention** —— 不同 surface 用不同 query token 召唤 base
+    encoder 的 representation
+  - **Hard negative mining** —— in-batch negative + cross-batch random negative
+- **Pinterest 实际应用**: `system_design_embeddings.md` §3 多塔多模态架构 + §4
+  multi-task training 都是 ItemSage style 的体现 (concat 多模态 + multi-task head);
+  `system_design_ad_ctr.md` §3 ad creative emb 表里 "creative text emb / image
+  CLIP emb / past CTR (smoothed)" 正是 ItemSage 的 input feature 集合;
+  `system_design_concepts.md` §B-8/B-9 MMoE/PLE 节是 ItemSage multi-task head 的
+  具体算法选择。简言之, ItemSage = "**PinSAGE 思想 + 多模态 input + 多任务 head**"
+  的 shopping 版本。
+- **何时选 vs 替代**: shopping/电商 item embedding + 多 surface + 多目标 时 ItemSage
+  范式最优。**vs PinSAGE**: PinSAGE graph-driven, ItemSage content-driven (商品没
+  user-board graph)。**vs Amazon DIN (Deep Interest Network)**: DIN 用 attention
+  over user history, 是 **user-side** 的; ItemSage 是 **item-side** representation,
+  上游 ranker 还会有 user-side encoder。**vs CLIP-only embedding**: CLIP 是
+  general-purpose, ItemSage 加 multi-task supervision 对齐 Pinterest 业务目标
+  (engagement, conversion)。
+
+### H-6. SearchSAGE (搜索专用图嵌入)
+
+- **Full Name**: SearchSAGE = **Search Sample and Aggregate**, Pinterest 内部代号
+  (engineering blog 多次提及, 无独立 paper, 通常作为 PinSAGE 的搜索扩展介绍)。
+- **直觉解释**: PinSAGE 学的是 "pin 与 pin 在 board 上的共现关系", 适合 home feed
+  related pins。但 search 场景下用户输入的是 **query (text)**, 需要的是 "**query
+  与 pin 的语义匹配**"; 直接用 PinSAGE pin emb 配 BERT query emb 会 modality 不
+  对齐。SearchSAGE 的 idea: 在 PinSAGE 的 pin-board bipartite graph 上加一个
+  **query node** 维度 —— 把 "query → click → pin" 作为 query-pin 边, 训练时
+  query 和 pin 在同一空间, query embedding 可以直接做 ANN 检索 pin。
+- **Pinterest 实际应用**: `system_design_pins_search.md` 整篇是 SearchSAGE 的应用
+  场景 —— §1-§2 retrieval 路径包含 "two-tower (query→pin) + token-based BM25 +
+  graph-based search emb"; `system_design_concepts.md` §B-7 Two-Tower 节解释
+  "**用户塔 BERT(query) + 物品塔 PinSage/SearchSAGE**" 是 Pinterest search 标配组合。
+  SearchSAGE 是 search-side 的 pin embedding, 与 PinSAGE 互补 (PinSAGE 主供
+  home feed, SearchSAGE 主供 search)。
+- **何时选 vs 替代**: search surface + query 与 item 跨 modality 对齐 时
+  SearchSAGE/cross-modal graph emb 最优。**vs PinSAGE**: PinSAGE 不吃 query 维度,
+  search 场景 cross-modal 对齐弱。**vs BERT bi-encoder (DPR-style)**: BERT bi-encoder
+  纯 text pairs 训练, **不吃 graph**; SearchSAGE 加 graph signal 解长尾 pin。
+  **vs ColBERT (late interaction)**: ColBERT token-level 交互 latency 高, 不适合
+  Pinterest 100K QPS 的 search; SearchSAGE 是 dual-encoder + ANN, latency 友好。
+
+### H-7. Pinterest Lens (视觉搜索)
+
+- **Full Name**: "Pinterest Lens" 是 Pinterest 2017 上线的 **visual search** 功能 ——
+  用户用手机摄像头拍一张照片, 系统返回视觉相似的 pins。后端在 KDD 2017 paper
+  "Visual Search at Pinterest" 中介绍, 后续在 KDD 2019 "Complete the Look: Scene-based
+  Complementary Product Recommendation" 扩展。
+- **直觉解释**: 不是 text search, 是 **image-as-query** —— 输入一张图, 输出视觉相似
+  的 pins。流程: (1) 客户端拍照 → 上传 (或本地 mobilenet 预 embed); (2) 服务端
+  用 CNN/ViT 提取 query image embedding (与 pin 端用同一编码器, 保证空间对齐);
+  (3) ANN (HNSW / IVF-PQ) 检索 top-K 相似 pin; (4) re-ranker 用 quality + diversity
+  + (可选) text query 修饰。挑战: (a) **mobile latency** — 端上 embedding 节省带宽
+  但模型必须小; (b) **object detection** — 用户拍的整张图可能有多个 object,
+  Pinterest Lens 用 detector 切出主体再 embed; (c) **scene → product mapping** ——
+  "客厅照片" 检索 "沙发/灯/挂画" 等 complementary products。
+- **Pinterest 实际应用**: `system_design_pins_search.md` §1 提到 search 不只 keyword
+  还有 visual (Pinterest Lens 是 visual surface); `system_design_embeddings.md` §3
+  pin tower 的 image embedding (CNN/ViT 512-d) 正是 Pinterest Lens 的查询编码器
+  (同一模型 query 和 pin 共用, 保证空间对齐); `system_design_chatbot_pins.md` 提到
+  multi-modal input (图 + 文) 是 chatbot 的扩展形态, 与 Lens 同一系 image embedding
+  基础。
+- **何时选 vs 替代**: image-as-query + 端到端视觉相似检索 时 Lens-style 系统是唯一
+  选择。**vs Google Lens / Amazon StyleSnap**: 同类竞品, 区别在 Pinterest 的 corpus
+  以 home / fashion / food 为主, vs Amazon 偏 shopping。**vs CLIP zero-shot**: CLIP
+  能做 image-to-image 但 latency 高且对 Pinterest domain (家居/时尚/食物) 微调过
+  的模型更准 —— Pinterest 内部 CNN/ViT 通常是从 CLIP 或 DINO 起 fine-tune。
+  **vs object detector + text retrieval**: 先 detect 物体 → text label → keyword
+  search, latency 高且丢视觉细节 (材质/颜色/风格); 直接 image emb + ANN 端到端最优。
+
+### H-8. Homefeed Blender (主信息流融合层)
+
+- **Full Name**: "Homefeed Blender" 是 Pinterest home feed 系统的 **final-stage
+  reranker / blender** 命名, 接在 ranker 之后, 负责 multi-source candidate 融合 +
+  business rule 注入 + diversity / freshness 调节。Pinterest blog 与 system design
+  内部讲座都用这个名字, 没有学术 paper。
+- **直觉解释**: ranker 输出每条 pin 的多 head score (pCTR, pSave, pCloseup,
+  Pinnability, ...), 但 home feed 最终输出还要做四件事:
+  (1) **多目标加权** —— $\text{utility} = w_1 \cdot p_\text{CTR} + w_2 \cdot p_\text{save} + w_3 \cdot p_\text{closeup} - w_4 \cdot p_\text{hide}$
+  ($w_i$ 由 PM 与离线实验定);
+  (2) **business rule 注入** —— ads quota (每 N 条插一个广告), shopping pin 配额,
+  policy filter;
+  (3) **diversity / dedup** —— 同 board / 同 creator 限频, MMR (§F-12) 或 DPP
+  (§D-5) 重排;
+  (4) **freshness boost** —— 新 pin (24h 内) 加权防止系统僵化。
+  Blender 是 **business logic + ML score** 的最后融合点, 输出最终 25-pin 一页。
+- **Pinterest 实际应用**: `system_design_pin_ranking.md` §3-§4 ranking + blending
+  完整描述 — §3 multi-objective utility 公式, §4 final blender 加 ads/shopping
+  insertion + diversity (DPP/MMR) + freshness; §5 multi-objective 节明确 "**单
+  CTR objective 会诱发低质内容**" → 多 head 融合是 Blender 存在的根本理由;
+  `system_design_concepts.md` §D-5 DPP / §D-6 Submodular / §F-12 MMR 都是 Blender
+  diversity 阶段的算法选择。简言之, Blender 把 §B (ranking models) + §D (LTR /
+  diversity) + §F (debiasing) + §G-8/9 (CTR/pCTR) 全部串起来。
+- **何时选 vs 替代**: 多 head ML score + business rule + diversity 同时存在时
+  必须有 Blender 这一层。**vs ranker 直接输出**: 单 head 单目标 OK, 多目标必须
+  blender 加权。**vs Bandit / RL final layer**: Bandit 在 long-term reward 优化时
+  优于 rule-based blender, Pinterest 在 ads quota 上有用 RL 探索, 但 main feed
+  仍是 utility 加权 + diversity rerank 的可解释方案 (PM 能调权重)。**vs Two-stage
+  rank-then-rerank**: 等价表述, Blender = Stage-2 reranker 的 Pinterest 命名。
+
+### H-9. Shopping Graph (购物知识图谱)
+
+- **Full Name**: "Shopping Graph" 是 Pinterest 内部对 **product knowledge graph**
+  的命名 — 节点是 (product, brand, category, attribute), 边是 (product belongs to
+  category, product made by brand, product variant of, ...)。Pinterest blog 多次
+  提及, 是 catalog pipeline 的下游服务之一。
+- **直觉解释**: shopping pin 与 organic pin 的关键差异是 shopping pin 背后有
+  **结构化 product entity** —— 同一双鞋可能在 100 个 retailer catalog 里出现 100
+  次 (不同 SKU), Shopping Graph 把它们 deduplicate 为同一 product node, 建立
+  brand / category / variant 关系。这样下游可以做:
+  (1) **跨 retailer 比价** —— 同 product 不同 retailer 列价格;
+  (2) **product taxonomy retrieval** —— 用户搜 "Nike running shoes" 时检索的是
+  category node 的所有 product, 不是 keyword 匹配;
+  (3) **complementary recommendation** —— Lens 拍客厅 → 检索同 scene 下 complementary
+  products (沙发 → 茶几 / 地毯), 走 graph 的 "scene-product" 关系而不是 visual
+  similarity。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` §1 high-level
+  pipeline 列出下游 7 个系统其中之一就是 "**shopping graph**", §2 节 worker 列表
+  里 "`shopping-graph-updater`" 是专属 worker; `system_design_concepts.md` §C-3 IVF /
+  §C-4 PQ / §C-5 Faiss 的 Pinterest 应用提到 "**ad-side 与 shopping-graph 的标准
+  方案**" — 检索后端服务于 Shopping Graph 上的 product entity。Shopping Graph
+  本身是 catalog ingestion → entity resolution → graph DB 的最终产物。
+- **何时选 vs 替代**: 电商场景需要 entity-level (而非 SKU-level) 推荐 + 跨 retailer
+  比价 + complementary recommendation 时 必须有 Shopping Graph。**vs flat product
+  catalog**: flat catalog 同款产品多份 SKU, 推荐重复 + 比价无法做。**vs general
+  knowledge graph (Wikidata)**: Wikidata 太通用, Pinterest 自己的 Shopping Graph
+  专攻 fashion / home / food taxonomy, 比 Wikidata 细。**vs Amazon Product Graph**:
+  同类系统; Amazon 强在 e-commerce, Pinterest 强在 inspiration→shopping 链条
+  (Lens / scene-based completion 是 Pinterest 独门)。
+
+### H-10. Catalog Pipeline (广告主商品目录批量摄入)
+
+- **Full Name**: "Catalog Pipeline" 是 Pinterest 处理 **广告主商品 catalog 上传**
+  的端到端工程系统 — 接收 advertiser 推送的产品 feed (CSV / NDJSON / XML),
+  做 schema validation → entity resolution → 进 Shopping Graph + ad-serving index +
+  search index 等下游。`system_design_catalog_bulk_update.md` 整篇专门讲它。
+- **直觉解释**: 大型 retailer (e.g., Walmart, Macy's) 每天向 Pinterest push **几亿
+  product update** (price / inventory / new SKU), 全量 reload 太慢, 必须支持:
+  (1) **bulk full snapshot** (每天 1 次, ~1TB NDJSON, 见 §G-1);
+  (2) **incremental delta** (CDC stream, 见 §G-3, RPO=1d / freshness=T+6h, 见 §G-5);
+  (3) **dead-letter queue** 收异常行 (见 §G-4);
+  (4) **fanout 到下游 7 个系统** (search index, ads serving, home-feed candidate
+  store, recommender feature store, shopping graph, policy/safety, analytics warehouse)。
+  关键设计: lambda 架构 (batch + speed layer 共存), exactly-once via 2PC vs
+  idempotent at-least-once 取舍 (见 §G-2)。
+- **Pinterest 实际应用**: `system_design_catalog_bulk_update.md` 整篇是 Catalog
+  Pipeline 的 system design — §0/§1 NDJSON 1TB/day + 7 下游系统全景, §0.1 2PC vs
+  idempotent at-least-once 选型, §2 worker 列表 (`shopping-graph-updater`,
+  `search-index-updater`, ...), §4.3 三级 DLQ (severity × owner × runbook),
+  §6.2/§summary RPO=1d / RTO=2h / freshness=T+6h SLO; `system_design_concepts.md`
+  §G-1..G-5 整组都是 Catalog Pipeline 的工程基石 (NDJSON 是 wire format, CDC 是
+  delta 通道, DLQ 是异常落地, RPO/RTO 是灾备 SLO)。简言之, Catalog Pipeline =
+  §G-1..G-5 + §H-9 (Shopping Graph 是它的下游消费者之一) 的 Pinterest 实例。
+- **何时选 vs 替代**: 大型 advertiser 上传 + 多下游 fanout + freshness SLO 时
+  必须有 Catalog Pipeline 这种专属系统。**vs ad-hoc CSV upload**: 小广告主一次性
+  CSV 上传 OK, 大广告主 daily 1TB + delta 必须 pipeline 化。**vs 单纯 batch**:
+  纯 batch (Spark daily) 满足不了 T+6h freshness, 必须叠 CDC speed layer (lambda)。
+  **vs 纯 streaming**: 纯 streaming 无 full snapshot, 数据漂移后无法 reconcile,
+  必须 batch + stream 双轨。**vs Google Merchant Center**: 同类系统; Pinterest
+  Catalog Pipeline 的特殊点是要 fanout 到 organic + ads + shopping graph 多个
+  surface, Google 主要是 ads/shopping。
 
 ---
