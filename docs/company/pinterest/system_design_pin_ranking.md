@@ -147,7 +147,7 @@ Side infra:
 
 ### 4.2 L2 Heavy Ranker (600 -> scored)
 
-选型: **MMOE (Multi-gate Mixture of Experts)** + shared-bottom cross layers.
+选型: **Multi-gate Mixture of Experts** (MMOE, 多门混合专家) + shared-bottom cross layers.
 - **Bottom**: embedding lookup + DCN-v2 cross (显式 feature interaction) + 3 层 MLP.
 - **Experts**: 8 个 expert, each 2 层 MLP.
 - **Task gates**: 每个 task 有独立 softmax gate 选 expert 组合.
@@ -166,7 +166,7 @@ Side infra:
 
 | 方案 | 优点 | 缺点 | 为什么不选 |
 |------|------|------|----------|
-| Wide & Deep | 简单, memorization 强 | 多任务差, cross feature 手工 | 已被 MMOE + DCN-v2 超过 |
+| **Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联) | 简单, memorization 强 | 多任务差, cross feature 手工 | 已被 MMOE + DCN-v2 超过 |
 | DIN/DIEN (attention over user seq) | 序列建模强 | 训练/serving 复杂 | 可作为 user tower 子模块, 不是顶层结构 |
 | Transformer-based ranker (HSTU / GR) | SOTA, unified generation+rank | GPU 成本高, latency 压力 | 放 follow-up: 下一代方案, 本设计用 MMOE 作为 baseline |
 | Pure GBDT | 训练快, 可解释 | 序列/emb 特征弱, 多任务差 | 仅作 L1 或 feature importance 工具 |
@@ -252,7 +252,7 @@ utility = Σ w_i * pHead_i  -  Σ w_neg_j * pNegHead_j  +  γ * DiversityBonus
 ### 7.1 Offline
 - **Ranking quality**: AUC per head, NDCG@25 over repin label, GAUC (per-user AUC).
 - **Calibration**: ECE (expected calibration error) per head (对 pRepin, hide-rate 阈值触发 business 决策, 必须 calibrate).
-- **Uplift**: counterfactual NDCG via IPS on logged exploration slots.
+- **Uplift**: counterfactual NDCG via **Inverse Propensity Scoring** (IPS, 逆倾向加权) on logged exploration slots.
 - **Fairness / coverage**: creator Gini coefficient, topic entropy.
 
 ### 7.2 Online A/B
@@ -265,7 +265,7 @@ utility = Σ w_i * pHead_i  -  Σ w_neg_j * pNegHead_j  +  γ * DiversityBonus
 | Ecosystem | new-creator pin impression share | guardrail (防 rich-get-richer) |
 | Infra | P99 latency, error rate, cost/request | guardrail |
 
-Statistical design: 1% exposure, 14-day, CUPED 方差缩减, Bonferroni 校正 multi-metric.
+Statistical design: 1% exposure, 14-day, **Controlled-experiment Using Pre-Experiment Data** (CUPED, 实验前数据方差缩减), Bonferroni 校正 multi-metric.
 
 ### 7.3 Long-term holdout
 - 1% 永久 holdout (用户级), 追踪 6-month retention / paid conversion, 防 short-term proxy 过拟合.
@@ -296,7 +296,7 @@ Statistical design: 1% exposure, 14-day, CUPED 方差缩减, Bonferroni 校正 m
 | Filter bubble | 用户 topic entropy 单调下降 | diversity 约束 + exploration slot 硬配额 |
 | Clickbait 过推 | click 高但 repin 低 longclick 短 | multi-head + w_hide + quality score feature |
 | Creator 马太 | top 1% creator 占 50% impression | 在 MMR 加 creator penalty, monitor Gini |
-| Position bias 学偏 | 模型学成 "第一位总是高分" | shallow position-tower, serving 清零 |
+| **Position bias** (位置偏差) 学偏 | 模型学成 "第一位总是高分" | shallow position-tower, serving 清零 |
 | Feature drift | holiday / 事件导致特征分布跳变 | PSI daily alert, auto fall-back to older checkpoint |
 | Label delay | repin 可能 hours 后才发生 | 7-day conversion window, 区分 immediate vs delayed head |
 | Training-serving skew | offline AUC 涨 online 不涨 | feature parity check + online replay |
