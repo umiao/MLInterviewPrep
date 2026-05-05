@@ -9,45 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-735
-- **Description**: Document the new 4th URI scheme in workspace memory and capture the bug class as a lesson so future content authors don't repeat the path-form mistake.
-
-Context: final step of the 6-step Pinterest System Design drawer fix. Depends on T-P0-731..735 all completed.
-
-Scope:
-1. Update C:/Users/Shenghui Xu/.claude/projects/C--Users-Shenghui-Xu-Desktop-Gen-AI-Proj/memory/reference_dblc_drawer_links.md to mention the 4th scheme `sd://<slug>` -> SystemDesignDrawer with explicit 404 UI + warn-on-fail. Keep the existing 3-scheme guidance and add: 'Four URI schemes in MLI markdown' + the slug-vs-id distinction (sd uses system_designs.slug not problems.id).
-2. Update memory description in MEMORY.md to match (one-line update only).
-3. Append a LESSONS.md entry under MLInterviewPrep/LESSONS.md with the failure class:
-   - **What broke**: doc 47 used `/system-design/<slug>` route paths in markdown table, which navigate the page away instead of opening a drawer.
-   - **Why this is a class, not a one-off**: any future author who knows about `/system-design/...` routes but is unaware of the drawer convention can introduce the same bug for any markdown surface that wires onSdLinkClick.
-   - **The general rule**: drawer-eligible cross-references in company_documents.content MUST use a URI scheme (lc:// db:// cd:// sd://). Path-form links navigate.
-   - **The catch**: `scripts/audit_uri_consistency.py` now scans sd:// (T-P0-735); it does NOT yet scan for `/system-design/<slug>` path-form misuses. Future task could add that.
-4. Update workspace memory MEMORY.md index entry for reference_dblc_drawer_links.md if the description line needs to mention the 4th scheme.
-
-Acceptance Criteria:
-- reference_dblc_drawer_links.md mentions 4 schemes (was 3); the audit command in the memory body still works.
-- LESSONS.md has a new entry dated 2026-05-04 (or later if work spans days) titled '[SD-DRAWER] system-design path-form -> sd:// scheme migration'.
-- MEMORY.md description still <=150 chars on its line.
-- (Optional) PROGRESS.md final entry consolidates all 6 sub-task outcomes with a single 'Status: [DONE]' line.
-
-Manual smoke test (final integration):
-1. Open http://localhost:5173/companies/29/prep?tab=docs&doc=47 in Preview mode.
-2. Click each of the 7 System Design table links (Ad CTR, Embeddings, Chatbot Pins, Pin Ranking, Pins Search, Notification Reco, Catalog Bulk Update).
-3. Each click: drawer slides in from right, header shows correct title, body shows 9 sections.
-4. Inside drawer, click any lc:// link in the body -> drawer swaps to ProblemDrawer (NOT nested).
-5. Inside drawer, click sd:// link if present -> active slug replaces (same drawer, new content).
-6. Press ESC -> drawer closes, prep page state preserved.
-7. Run `python scripts/audit_uri_consistency.py` -> exit 0.
-
-Definition of Done:
-- Memory updated.
-- LESSONS.md entry added.
-- Final smoke test pass recorded in PROGRESS.md.
-- All 6 SD-DRAWER tasks closed in tasks.db.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -418,6 +379,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
 - [x] **2026-05-04** -- T-P0-737: [META-ANC-9-fix] Escape pipe in doc=90 table row 7 (Find Words O-complexity). Discord ad-hoc request 2026-05-04: doc=90 (Meta AI-Native Coding Inventory hub, company_id=31) row 7 broken because $O(\
+- [x] **2026-05-04** -- T-P0-736: [SD-DRAWER-6] Update reference_dblc_drawer_links memory + LESSONS.md entry. Document the new 4th URI scheme in workspace memory and capture the bug class as a lesson so future content authors don'
 - [x] **2026-05-04** -- T-P0-735: [SD-DRAWER-5] Extend audit_uri_consistency.py with sd:// scheme. Add sd://<slug> validation to scripts/audit_uri_consistency.py so future drift between company_documents.content sd:// l
 - [x] **2026-05-04** -- T-P0-734: [SD-DRAWER-4] Migrate doc 47: replace 7 path links with sd:// URIs. Write idempotent seed script that replaces the 7 `/system-design/<slug>` markdown links in company_documents.id=47 (Pint
 - [x] **2026-05-04** -- T-P0-733: [SD-DRAWER-3] Wire SystemDesignDrawer into PrepNotesPage.DocumentViewer. Extend PrepNotesPage's DocumentViewer to handle the new sd:// drawer kind so doc 47 (and any future doc) can pop the Sys
