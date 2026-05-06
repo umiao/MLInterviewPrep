@@ -60,28 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-740
-- **Description**: Final QA pass after all section + inline tasks complete.
-
-Steps:
-1. Run `python scripts/audit_uri_consistency.py` (per memory `reference_dblc_drawer_links`). Confirm zero broken `sd://` / `cd://` / `lc://` links across all touched files.
-2. Frontend smoke at /system-design?tab=pinterest:
-   - 8 Pinterest cards visible, concept doc card included
-   - Click concept doc → all 7 H2 sections render with 中文 + English mix
-   - KaTeX renders in concept doc without errors
-   - Click each of the 7 existing Pinterest topic docs → confirm acronym expansions visible at first occurrence
-3. Confirm `python scripts/seed_pinterest_sd.py` is idempotent (8 UPDATEs, no INSERTs).
-4. Append a PROGRESS.md close-out entry summarizing the 16-task batch.
-5. Delete `scripts/_apply_pinterest_concepts_tasks.py` (this script's source; matches `_apply_*.py` post-run cleanup convention).
-
-AC1: audit_uri_consistency.py exits 0 with no findings against any of the 8 Pinterest docs.
-AC2: manual frontend smoke confirms 8 cards + KaTeX-clean concept doc + acronym expansions in topic docs.
-AC3: PROGRESS.md has a close-out entry referencing T-A through T-P task IDs.
-AC4: `_apply_pinterest_concepts_tasks.py` deleted; tree-clean except for the new concept_md and the 7 patched topic mds + the seed script edit.
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -399,6 +377,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-05** -- T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out. Final QA pass after all section + inline tasks complete.
 - [x] **2026-05-05** -- T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update. In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of 
 - [x] **2026-05-05** -- T-P1-753: [PINT-CONCEPTS-N] Inline acronym expansion: pinterest-notification-reco. In `docs/company/pinterest/system_design_notification_reco.md` (system_designs.id=34), locate the FIRST occurrence of ea
 - [x] **2026-05-05** -- T-P1-752: [PINT-CONCEPTS-M] Inline acronym expansion: pinterest-pins-search. In `docs/company/pinterest/system_design_pins_search.md` (system_designs.id=33), locate the FIRST occurrence of each acr
