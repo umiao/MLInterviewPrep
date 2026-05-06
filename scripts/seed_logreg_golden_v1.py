@@ -10,9 +10,10 @@ Length target (per task spec):
 - Baseline notes: 15,964 chars.
 - Cap: <= 13,500 chars (>= 15% reduction vs baseline).
   Bumped from 11,200 in T-P1-726 to accommodate the matrix-form / multiclass
-  bridge subsection (### C). Pre-T-P1-726 body was ~7,498 chars (53% reduction);
-  post-bridge body is ~12,849 chars (19.5% reduction vs baseline).
-- Current draft body + sentinel after T-P1-726: ~12,849 chars.
+  bridge subsection (### 8 post-T-P2-725 / formerly ### C).
+- Post-T-P2-725 (LR-style numbered subsections + ^\top notation):
+  payload ~13,358 chars (16.3% reduction vs baseline; section 1 题面 +
+  section 3 Dimension argument added; bridge promoted from ### C to ### 8).
 
 Idempotency:
 - Sentinel `<!-- LOGREG_GOLDEN_V1_20260502 -->` prepended as the first line.

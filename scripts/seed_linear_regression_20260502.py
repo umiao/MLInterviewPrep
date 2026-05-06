@@ -17,7 +17,7 @@ History:
 
 Conventions:
 - Code uses np.linalg.lstsq (SVD on X, kappa(X) not kappa(X)^2). Never inv.
-- Ridge follow-up uses np.linalg.solve (LU on X^TX + lambda*I). Never inv.
+- Ridge follow-up uses np.linalg.solve (LU on X^\top X + lambda*I). Never inv.
 - Chinese narration + English terms; no emoji.
 
 Idempotency:
@@ -53,27 +53,27 @@ $\text{MSE}(w) = \frac{1}{n}\|Xw - y\|^2$. 手推 closed-form + numpy
 
 丢掉常数 $1/n$, 最小化 $L(w) = \|Xw - y\|^2$:
 
-- 展开: $L(w) = w^T X^T X w - 2 y^T X w + y^T y$
-- 求导: $\nabla_w L = 2 X^T X w - 2 X^T y = 2 X^T (Xw - y)$
-- 令梯度为零: $X^T X w = X^T y \implies \boxed{w = (X^T X)^{-1} X^T y}$
+- 展开: $L(w) = w^\top X^\top X w - 2 y^\top X w + y^\top y$
+- 求导: $\nabla_w L = 2 X^\top X w - 2 X^\top y = 2 X^\top (Xw - y)$
+- 令梯度为零: $X^\top X w = X^\top y \implies \boxed{w = (X^\top X)^{-1} X^\top y}$
 
 ### 3. Dimension argument
 
 $\nabla_w L \in \mathbb{R}^d$, 残差 $Xw - y \in \mathbb{R}^n$; 前面乘
-$X^T \in \mathbb{R}^{d \times n}$ 是为了把残差从 $n$ 维空间投回 $w$
+$X^\top \in \mathbb{R}^{d \times n}$ 是为了把残差从 $n$ 维空间投回 $w$
 所在的 $d$ 维空间——维度对齐, 不是 chain rule 的魔法.
 
 ### 4. numpy 实现对照
 
 | 写法 | 算法 | 何时用 | 何时翻车 |
 |------|------|--------|----------|
-| `inv(X.T @ X) @ X.T @ y` | 显式求逆 | 永远别用 | $\kappa(X^T X) = \kappa(X)^2$, 误差放大一阶 |
-| `solve(X.T @ X, X.T @ y)` | LU | $X$ 满秩, $d$ 小 | $X^T X$ 奇异 -> `LinAlgError` |
+| `inv(X.T @ X) @ X.T @ y` | 显式求逆 | 永远别用 | $\kappa(X^\top X) = \kappa(X)^2$, 误差放大一阶 |
+| `solve(X.T @ X, X.T @ y)` | LU | $X$ 满秩, $d$ 小 | $X^\top X$ 奇异 -> `LinAlgError` |
 | `lstsq(X, y, rcond=None)` | SVD on $X$ | **默认推荐** | 比 `solve` 慢 ~2x |
 | `pinv(X) @ y` | SVD 伪逆 | 奇异 / $n < d$ | 同 `lstsq` 但多一步构造伪逆 |
 
-**金句**: `solve` 走 LU 仍构造 $X^T X$, 中等稳; `lstsq` / `pinv` 直接对
-$X$ SVD, 不构造 $X^T X$, $\kappa$ 不平方, 最稳.
+**金句**: `solve` 走 LU 仍构造 $X^\top X$, 中等稳; `lstsq` / `pinv` 直接对
+$X$ SVD, 不构造 $X^\top X$, $\kappa$ 不平方, 最稳.
 
 ### 5. 复杂度
 
@@ -172,7 +172,7 @@ augment-bias 技巧是 LR 闭式解专属, 因为 lstsq 一次只能解一个 $A
 | 失败模式 | $d^3$ 爆炸 | $\eta$ 大则发散 |
 | Bias 怎么处理 | 拼一列 1, 折进 $w$ 一起解 (LR 专属技巧) | 独立参数 $b$, 独立 grad / update (NN 通用范式) |
 | 复杂度 | $O(n d^2 + d^3)$ | $O(T \cdot n d)$ |
-| LR 上界 | -- | $\eta < 2/\lambda_{\max}(X^T X / n)$; 先 standardize |
+| LR 上界 | -- | $\eta < 2/\lambda_{\max}(X^\top X / n)$; 先 standardize |
 
 凸目标两者收敛到同一 $(w, b)$, 不一致 -> LR / iters 配错.
 
@@ -191,7 +191,7 @@ print(f"MSE = {np.mean((preds - y) ** 2):.4f}")
 ### 7. Follow-up Q&A
 
 **Q1. Ridge closed-form?**
-$w = (X^T X + \lambda I)^{-1} X^T y$. $\lambda I$ 把所有特征值抬高
+$w = (X^\top X + \lambda I)^{-1} X^\top y$. $\lambda I$ 把所有特征值抬高
 $\lambda$ -> 永远可逆, 即便 $d > n$ 或 $X$ 共线. 实现:
 `solve(X.T @ X + lam * I, X.T @ y)`, 且 `I[0, 0] = 0` (不惩罚 intercept).
 
@@ -202,7 +202,7 @@ $w_j \leftarrow \text{sign}(z_j) \cdot \max(|z_j| - \lambda, 0)$.
 这是 ISTA / coordinate descent 的基础.
 
 **Q3. 共线 / $d \gg n$ 怎么办?**
-$X^T X$ 奇异, $\kappa \to \infty$. 优先级: Ridge (一行 $\lambda I$) >
+$X^\top X$ 奇异, $\kappa \to \infty$. 优先级: Ridge (一行 $\lambda I$) >
 `lstsq` / `pinv` > VIF 删冗余 > PCA. $d \gg n$ (文本 / 基因) 必须正则化;
 想要稀疏 $w$ + 特征选择则用 Lasso.
 
@@ -214,7 +214,7 @@ $X^T X$ 奇异, $\kappa \to \infty$. 优先级: Ridge (一行 $\lambda I$) >
 其他特征不变时, $x_j$ 加 1 单位 -> $y$ 期望变化 $w_j$
 (ceteris paribus). 前提: 特征不共线 (否则 $w_j$ 不唯一).
 
-**Q6. 稀疏 $w^T x$ 怎么算?**
+**Q6. 稀疏 $w^\top x$ 怎么算?**
 两边都有序 -> 双指针 $O(\text{nnz}_1 + \text{nnz}_2)$, cache 友好;
 任一边无序 -> 哈希表查表 (hash join).
 
@@ -253,7 +253,7 @@ $X^\top (\hat{Y} - Y)$ 的等价 grad.
 **Bridge 2 (LogReg multiclass)**: 把 identity link 换 softmax 即得
 $\nabla_W L = \frac{1}{n} X^\top (P - Y)$ ($P, Y \in \mathbb{R}^{n \times K}$,
 $Y$ one-hot). 完全同构, 只换 link function 与常数——见 LogReg golden 的
-"矩阵广义 / multiclass bridge" 节, 即 `### C`.
+"矩阵广义 / multiclass bridge" 节, 即 `### 8`.
 
 **Bridge 3 (KGE / embedding table)**: 训练 entity / relation embedding 时,
 $X$ 是 sparse one-hot / lookup index, $W$ 是 embedding 矩阵

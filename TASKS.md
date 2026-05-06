@@ -84,54 +84,6 @@ AC:
 - False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
 - True-positive rate: manually mutate a test risk_statement; expect 1 report
 
-#### T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
-LR golden (scripts/seed_linear_regression_20260502.py). Pure cosmetics; no
-correctness changes. Runs LAST in the chain (T-P0-724 -> T-P1-726 -> T-P2-725)
-so renumbering accounts for the matrix广义 section that T-P1-726 adds.
-
-Deltas:
-
-7. Section 1 ("Bias augmentation"): T-P0-724 should already have removed
-   the prose; this task ensures the heading itself is gone (or folded into
-   Section 4 fit).
-
-8. Reorganize top-level structure into LR-style numbered subsections:
-   `### 1. 题面 / ### 2. 推导 / ### 3. Dimension argument /
-    ### 4. 实现 / ### 5. End-to-end test / ### 6. 面试追问 /
-    ### 7. 拓展 / ### 8. 矩阵广义 (multiclass bridge)`
-   The 8 sections match LR golden's post-T-P1-726 structure.
-
-   PRESERVE LogReg's existing TL;DR (5-line interview-ready distillation)
-   as a pre-### block; do NOT delete it.
-
-9. Notation: USER DECISION 2026-05-04 -- canonical = `w^\top x` (`^\top`).
-   Backfill scripts/seed_linear_regression_20260502.py to use `^\top`.
-   AC: grep `\^T[^o]` in both files = 0 matches; `\^\top` >= 5 matches.
-
-Acceptance criteria:
-
-- AC1: grep `^### [0-9]\.` in logreg_golden_v1.md returns 8 numbered sections.
-
-- AC2: both LR seed script + LogReg draft use `^\top` exclusively.
-
-- AC3: ProblemDrawer rendering of 1102 + 1107 still passes; curl
-  `/api/problems/1102` and `/api/problems/1107` both return notes containing
-  `### 8` substring.
-
-- AC4: idempotent reseed -- both seed_linear_regression_20260502.py and
-  seed_logreg_golden_v1.py UPDATE then SKIP on second run.
-
-Depends on T-P1-726 (which itself depends on T-P0-724). Full chain:
-P0-724 (LogReg bias refactor) -> P1-726 (matrix广义 in both files) ->
-P2-725 (cosmetic + notation backfill).
-
-Out of scope: TL;DR backfill onto LR golden; LR's 7+1=8 section structure
-stays, only LogReg gets renumbered.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -377,6 +329,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-05** -- T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation). Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
 - [x] **2026-05-05** -- T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out. Final QA pass after all section + inline tasks complete.
 - [x] **2026-05-05** -- T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update. In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of 
 - [x] **2026-05-05** -- T-P1-753: [PINT-CONCEPTS-N] Inline acronym expansion: pinterest-notification-reco. In `docs/company/pinterest/system_design_notification_reco.md` (system_designs.id=34), locate the FIRST occurrence of ea

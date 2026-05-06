@@ -4,9 +4,11 @@
 
 二分类 GLM, 单样本 $z = w^\top x + b$ (logit), $p = \sigma(z) = 1/(1 + e^{-z})$. Bernoulli MLE 等价最小化 BCE. **核心三步**: (1) 前向 $z = Xw + b\mathbf{1}$, $p = \sigma(z)$; (2) sigmoid + CE "漂亮消去" 给出 $\nabla_w L = \frac{1}{n} X^\top (p - y)$ — 与 Linear Regression MSE 同形 (GLM 框架); (3) full-batch GD 直到 loss 收敛. 凸优化 (Hessian $\frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X \succeq 0$), 但**无闭式解** (sigmoid 把似然变非二次). 复杂度: GD 单步 $O(nd)$; Newton/IRLS 单步 $O(nd^2 + d^3)$. 工业灵魂在拓展 A: logits-space stable BCE $L = \max(z, 0) - zy + \log(1 + e^{-|z|})$ — 防 $\log(0)$ 的标准把戏.
 
----
+### 1. 题面
 
-## 推导 — sigmoid + CE 的"漂亮消去"
+给 $X \in \mathbb{R}^{n \times d}$ 和 $y \in \{0, 1\}^n$, 求 $w \in \mathbb{R}^d$, $b \in \mathbb{R}$ 使 $p_i = \sigma(w^\top x_i + b)$ 在 Bernoulli MLE 下最小化 BCE. 手推 + numpy 实现 (sigmoid + stable BCE + full-batch GD), 禁用 sklearn.
+
+### 2. 推导 — sigmoid + CE 的"漂亮消去"
 
 单样本 logit $z = w^\top x + b$, 预测 $p = \sigma(z)$. Bernoulli 似然 $p^y (1-p)^{1-y}$ 取负对数得 BCE:
 
@@ -26,15 +28,17 @@ $$\boxed{\nabla_w \ell = (p - y)\, x, \quad \frac{\partial \ell}{\partial b} = p
 
 $$\nabla_w L = \frac{1}{n} X^\top (p - y), \qquad \frac{\partial L}{\partial b} = \frac{1}{n} \mathbf{1}^\top (p - y)$$
 
-与 Linear Regression 的 $\nabla_w L_{\text{MSE}} = \frac{2}{n} X^\top (\hat y - y)$ **完全同构** — $X^\top$ 把 $n$ 维残差投回 $d$ 维参数空间, 只换 link function ($\sigma$ vs identity). 这就是 GLM (Generalized Linear Model) 的统一形态: Linear / Logistic / Poisson 共享 $X^\top \cdot \text{residual}$ 的梯度模式.
+与 Linear Regression 的 $\nabla_w L_{\text{MSE}} = \frac{2}{n} X^\top (\hat y - y)$ **完全同构** — 只换 link function ($\sigma$ vs identity). 这就是 GLM (Generalized Linear Model) 的统一形态: Linear / Logistic / Poisson 共享 $X^\top \cdot \text{residual}$ 的梯度模式.
 
 > **记号约定**: 单样本用 $w^\top x$ (列向量内积, 与 fundamentals / 教科书一致); batch 用 $Xw$ ($X$ 是 $n \times d$ 行堆, numpy `X @ w`). 不混用 $wx$ — 在 row-vector 约定下成立但与本项目列向量约定冲突.
 
----
+### 3. Dimension argument
 
-## 实现
+$\nabla_w L \in \mathbb{R}^d$, 残差 $p - y \in \mathbb{R}^n$; 前面乘 $X^\top \in \mathbb{R}^{d \times n}$ 把残差从 $n$ 维投回 $w$ 所在的 $d$ 维参数空间——维度对齐, 不是 chain rule 的魔法. 与 LR 推导同构, 只把 $\hat y - y$ 换成 $p - y$, link function 从 identity 换成 $\sigma$; $X^\top \cdot \text{residual}$ 的形状不变.
 
-### 0. Class skeleton
+### 4. 实现
+
+#### Class skeleton
 
 ```python
 import numpy as np
@@ -56,7 +60,7 @@ class LogisticRegression:
         self.training_loss_history: list[float] = []    # per-iter BCE
 ```
 
-### 1. Sigmoid (vanilla)
+#### Sigmoid (vanilla)
 
 教科书形式 $1 / (1 + e^{-z})$ 直接写. 大负 $z$ 时 $e^{-z}$ 上溢 `inf` → 结果 `0.0` (sigmoid 真值确实近 0, 但下游 BCE 的 $\log(0)$ 才是火药 — 拓展 A 集中处理). 数值改进版按 $z$ 符号分支让 `exp` arg 永远 $\leq 0$, 与拓展 A / softmax LSE 同源.
 
@@ -66,7 +70,7 @@ def _sigmoid(z):
     return 1.0 / (1.0 + np.exp(-z))                   # (n,)
 ```
 
-### 2. BCE loss (vanilla)
+#### BCE loss (vanilla)
 
 照搬 per-sample $-[y \log p + (1-y) \log(1-p)]$, mean over batch. $\varepsilon$-clip 是 textbook 防御 (`log(0)` → `log(eps)` 不爆 `nan`), 但大 $|z|$ 时梯度仍偏离真值; 工业用 logits-space 形式 (拓展 A).
 
@@ -80,7 +84,7 @@ def _bce_loss(p, y):
     return float(per_sample.mean())                   # scalar
 ```
 
-### 3. fit — full-batch GD with optional L2
+#### fit — full-batch GD with optional L2
 
 NN-style: `w` / `b` 是两个独立参数, 各算各的梯度 (`grad_w`, `grad_b`) 各自 update — 上方推导给出 $\nabla_w \ell = (p - y) x$ 与 $\partial \ell / \partial b = p - y$, 实现照搬. L2 仅作用在 `w`, `b` 永不参与 (augment-bias 反模式见 Takeaway / cheat-sheet).
 
@@ -118,7 +122,7 @@ def fit(self, X, y):
 
 **Takeaway**: `w` / `b` 各算各梯度各自 update — NN 训练循环的通用范式 (一层 affine + bias). LR 闭式解里"拼一列 1 折成 $w_0$"是 lstsq 专属技巧 (一次只解一个 $Ax = b$); LogReg 无闭式解 (sigmoid 让 NLL 非二次), 一开始就该 NN-style — 把 augment-bias 移植到 GD / LogReg / NN 是 anti-pattern.
 
-### 4. predict / predict_proba
+#### predict / predict_proba
 
 `predict_proba` 给概率, `predict` 用阈值 (默认 0.5) 切硬标签. **调阈值**是应对 class imbalance 的第一招 (不动模型即可).
 
@@ -132,9 +136,7 @@ def predict(self, X, threshold: float = 0.5):
     return (self.predict_proba(X) >= threshold).astype(int)   # (m,)
 ```
 
----
-
-## End-to-end test
+### 5. End-to-end test
 
 ```python
 import numpy as np
@@ -150,9 +152,7 @@ assert probs.shape == (N,)
 print(f"Train accuracy = {(preds == y).mean():.3f}")
 ```
 
----
-
-## 面试追问 (Cheat Sheet)
+### 6. 面试追问 (Cheat Sheet)
 
 > **Q: 为什么 LR 没有闭式解?**
 
@@ -162,7 +162,7 @@ print(f"Train accuracy = {(preds == y).mean():.3f}")
 
 > **Q: Bias 应该怎么处理? 为什么不学 LR 闭式那种 augment 一列 1?**
 
-- **GD 路径 (LogReg / NN 通用)**: `w` / `b` 两个独立参数, `grad_w = X^T(p-y)/n`, `grad_b = mean(p-y)`, 各自 update — Section 3 即此范式.
+- **GD 路径 (LogReg / NN 通用)**: `w` / `b` 两个独立参数, `grad_w = X^\top(p-y)/n`, `grad_b = mean(p-y)`, 各自 update — Section 4 fit 即此范式.
 - **augment 一列 1 折 $w_0$** 是 LR **闭式解**专属 (`lstsq` 一次解一个 $Ax = b$, 拼列让 lstsq 同时吃 bias). LogReg 无闭式解, 这个 trick 在 LogReg 上**无任何合法用途**; 移植到 NN 更是 anti-pattern — 失去 freeze / warm-start bias 的独立控制, 而 NN 训练循环正建立在"每参数独立 grad / 独立 step"原语上.
 - **L2 不作用到 bias** (`grad_w += 2λw`, `grad_b` 纯残差均值): 等价于 $\lambda \mathrm{diag}([0,1,\dots,1]) w$, bias 整体平移自由度不该被惩罚.
 
@@ -175,7 +175,7 @@ print(f"Train accuracy = {(preds == y).mean():.3f}")
 > **Q: Softmax 多分类怎么扩展?**
 
 - $p_k = e^{z_k} / \sum_j e^{z_j}$, 损失 $L = -\frac{1}{n} \sum_i \sum_k y_{ik} \log p_{ik}$ ($Y$ one-hot).
-- 梯度 $\nabla_W L = \frac{1}{n} X^\top (P - Y)$ — 与二分类**完全同构**, $W$ 升到 $(d, K)$.
+- 梯度 $\nabla_W L = \frac{1}{n} X^\top (P - Y)$ — 与二分类**完全同构**, $W$ 升到 $(d, K)$. 详见 ### 8.
 - Stable softmax: 减 $\max_j z_j$ 再 exp (与拓展 A 的 $|z|$ 同源 LSE trick).
 
 > **Q: Newton / IRLS 与 GD 的关系?**
@@ -207,11 +207,9 @@ print(f"Train accuracy = {(preds == y).mean():.3f}")
 - Full-batch: 梯度无偏方差 0, $n$ 大单步装不下. SGD / mini-batch (32-256): 方差大但 GPU SIMD 友好, 噪声跳鞍点 (LR 凸不重要, NN 关键).
 - LR 凸, 三者最终都收敛同一全局最优, 只差路径.
 
----
+### 7. 拓展
 
-## 拓展
-
-### A. 数值稳定性 — logits-space stable BCE (这道题的工业灵魂)
+#### A. 数值稳定性 — logits-space stable BCE (这道题的工业灵魂)
 
 **朴素 BCE 的两路爆炸**: $L = -[y \log p + (1-y) \log(1-p)]$ 中, $z \to +\infty$ 时 $p \to 1$, $1 - p$ 触底 `0.0`, $\log(1 - p) = -\infty$ → loss 变 `nan`; $z \to -\infty$ 同理 $\log p$ 爆. Clip $p$ 到 $[\varepsilon, 1 - \varepsilon]$ (vanilla 实现里那行 `np.clip`) 是把错误**藏起来** — 大 $|z|$ 时梯度仍偏离 sigmoid 真梯度, 训练发散.
 
@@ -245,42 +243,22 @@ def _stable_bce_loss(z, y):
 
 **Sigmoid sign-branch & softmax LSE 同源**: 按 $z$ 符号分支让 `exp` arg $\leq 0$; softmax 减 $\max_j z_j$ 同源. BCE-with-logits / cross-entropy-from-logits / log-sum-exp 共享 "在 logits 空间算" 这一招.
 
-### B. 学习率上界 + 标准化
+#### B. 学习率上界 + 标准化
 
 收敛要求 $\eta < 2 / \lambda_{\max}\!\left(\frac{1}{n} X^\top \mathrm{diag}(p(1-p)) X\right)$. 实战: 先 zero-mean unit-variance, $\lambda_{\max} = O(1)$, $\eta = 0.1$ 即稳, 不收敛再砍半.
 
-### C. 矩阵广义 / multiclass bridge
+### 8. 矩阵广义 (multiclass bridge)
 
-二分类 vec form ($y \in \mathbb{R}^n$, $w \in \mathbb{R}^d$, sigmoid link)
-的多分类升维: $K$ 类, 每类一个 logit 列, link 换 softmax. 与 LR golden
-`### 8. 矩阵广义 (NN-friendly / multi-output form)` 完全对位——只把
-identity link 换 softmax, 梯度模式 $X^\top \cdot \text{residual}$ 不变.
+二分类 vec form ($y \in \mathbb{R}^n$, $w \in \mathbb{R}^d$, sigmoid link) 的多分类升维: $K$ 类, 每类一个 logit 列, link 换 softmax. 与 LR golden `### 8. 矩阵广义 (NN-friendly / multi-output form)` 完全对位——只把 identity link 换 softmax, 梯度模式 $X^\top \cdot \text{residual}$ 不变.
 
-**Setup (复用 cheat-sheet softmax Q)**: $W \in \mathbb{R}^{d \times K}$,
-$B \in \mathbb{R}^K$, $Z = XW + \mathbf{1}_n B^\top \in \mathbb{R}^{n \times K}$
-(logits 矩阵), $P = \mathrm{softmax}(Z)$ 行内归一 ($\sum_k P_{ik} = 1$ 每行).
-$Y$ 是 $n \times K$ one-hot 标签. 损失 $L = -\frac{1}{n} \sum_{i, k} Y_{ik} \log P_{ik}$
-(categorical CE).
+**Setup (复用 cheat-sheet softmax Q)**: $W \in \mathbb{R}^{d \times K}$, $B \in \mathbb{R}^K$, $Z = XW + \mathbf{1}_n B^\top \in \mathbb{R}^{n \times K}$ (logits 矩阵), $P = \mathrm{softmax}(Z)$ 行内归一 ($\sum_k P_{ik} = 1$ 每行). $Y$ 是 $n \times K$ one-hot 标签. 损失 $L = -\frac{1}{n} \sum_{i, k} Y_{ik} \log P_{ik}$ (categorical CE).
 
 **Gradient**:
 
 $$\nabla_W L = \frac{1}{n} X^\top (P - Y), \qquad \nabla_B L = \frac{1}{n} \mathbf{1}_n^\top (P - Y)$$
 
-形状 $\nabla_W L \in \mathbb{R}^{d \times K}$ 与 $W$ 同形,
-$\nabla_B L \in \mathbb{R}^K$ 与 $B$ 同形. 与二分类 sigmoid + BCE 的
-$\nabla_w L = \frac{1}{n} X^\top (p - y)$ **完全同构**——softmax + categorical
-CE 的"漂亮消去"和上方推导里 sigmoid + BCE 同源, $\partial L / \partial Z = (P - Y)/n$
-不携带 softmax Jacobian ($\mathrm{diag}(p) - p p^\top$ 全部抵消, 与
-$p (1-p)$ 抵消同理).
+形状 $\nabla_W L \in \mathbb{R}^{d \times K}$ 与 $W$ 同形, $\nabla_B L \in \mathbb{R}^K$ 与 $B$ 同形. 与二分类 sigmoid + BCE 的 $\nabla_w L = \frac{1}{n} X^\top (p - y)$ **完全同构**——softmax + categorical CE 的"漂亮消去"和上方推导里 sigmoid + BCE 同源, $\partial L / \partial Z = (P - Y)/n$ 不携带 softmax Jacobian ($\mathrm{diag}(p) - p p^\top$ 全部抵消, 与 $p (1-p)$ 抵消同理).
 
-**对位 LR golden ### 8 矩阵广义节**: 把 softmax 换 identity 即得 LR
-multi-output 的 $\nabla_W L = \frac{2}{n} X^\top (\hat{Y} - Y)$. 这是 GLM
-框架的核心: Linear / Logistic-binary / Logistic-multiclass 共享
-$X^\top \cdot \text{residual}$ 的梯度模式, 只换 link function (identity /
-sigmoid / softmax) 与归一化常数 ($2/n$ vs $1/n$, MSE vs CE 的均值口径).
+**对位 LR golden ### 8 矩阵广义节**: 把 softmax 换 identity 即得 LR multi-output 的 $\nabla_W L = \frac{2}{n} X^\top (\hat{Y} - Y)$. 这是 GLM 框架的核心: Linear / Logistic-binary / Logistic-multiclass 共享 $X^\top \cdot \text{residual}$ 的梯度模式, 只换 link function (identity / sigmoid / softmax) 与归一化常数 ($2/n$ vs $1/n$, MSE vs CE 的均值口径).
 
-**何时走哪条路径**: $K = 1$ (binary) 用 sigmoid 路径足矣 (本文件主线,
-$w \in \mathbb{R}^d$, $b$ 标量, BCE + GD); $K \ge 2$ 走 softmax + 矩阵广义
-($W \in \mathbb{R}^{d \times K}$, $B \in \mathbb{R}^K$, categorical CE).
-工业训练循环 PyTorch / JAX 上后者就是 `nn.Linear(d, K)` +
-`F.cross_entropy(logits, labels)` 的精确数学.
+**何时走哪条路径**: $K = 1$ (binary) 用 sigmoid 路径足矣 (本文件主线, $w \in \mathbb{R}^d$, $b$ 标量, BCE + GD); $K \ge 2$ 走 softmax + 矩阵广义 ($W \in \mathbb{R}^{d \times K}$, $B \in \mathbb{R}^K$, categorical CE). 工业训练循环 PyTorch / JAX 上后者就是 `nn.Linear(d, K)` + `F.cross_entropy(logits, labels)` 的精确数学.
