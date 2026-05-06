@@ -229,6 +229,17 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "(local top-k merge)、多 k (必须 sorted/OST). 一句话: 先问 k 是否固定.",
     )
 
+    # Graph / 连通分量 -- 文件与指令的级联故障 (2026-05-05 Discord drop)
+    cascade = _fetch_problem_meta_by_title(conn, "文件与指令的级联故障")
+    cascade_row = _fmt_index_row(
+        cascade,
+        "Doc + Query 二部图, 初始坏 Query 触发对称级联损坏; 核心洞察: "
+        "Doc 损坏 ⟺ 与某初始坏 Query 同一连通分量, 退化成多源可达性. "
+        "BFS 一次性求解 O(N+M) 首选 (反向索引 q->docs + 双 visited 集合); "
+        "Union-Find 适合在线/多组查询, 易错点 visited 必须用 set, "
+        "初始 Query 可能不在任何 Doc 中要 .get 兜底.",
+    )
+
     lines: list[str] = [
         INDEX_SENTINEL,
         "",
@@ -280,6 +291,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Design / Data Structure / 方法论",
         "",
         kth_method_row,
+        "",
+        "### Graph / 连通分量",
+        "",
+        cascade_row,
         "",
         "---",
         "",

@@ -571,3 +571,11 @@
 - **Sanity check result**: First seed run -> `[INSERTED] problem id=1118`. Index re-run -> `[UPDATED] doc 92` + `[UNCHANGED] hub doc 53` (sentinel idempotency holds). Smoke-tested embedded code: size-k heap reproduces LC 703 sample sequence `[4,5,5,8,8]` exactly; SortedList variant returns the right rank for k=1, k=3, then k=2 after inserting 10. Both render-ready.
 - **Status**: [DONE]
 - **Request**: No change (ad-hoc, no task row).
+
+## 2026-05-05 21:58 -- [T-adhoc-google-doc-query-collapse] Add 文件与指令的级联故障 (Doc & Query Collapse) under Google R2
+
+- **What I did**: Discord drop msg `1501447393235963904` (2026-05-05): user supplied a 题解 framing the bipartite-graph cascade-failure pattern (Doc + Query nodes, contains-edges, symmetric damage cascade -> reduces to multi-source connected-components reachability). Created `scripts/seed_google_r2_doc_query_collapse_20260505.py` to insert problem id=1119 title="文件与指令的级联故障" (family=graph, pattern=bfs, tags incl. union-find/bipartite/connected-components) with both BFS and Union-Find solutions in `problems.notes`; extended `scripts/seed_google_r2_coding_index_20260502.py` with new `### Graph / 连通分量` section linking via `db://1119`. Index lookup by title for run-order independence.
+- **Deliverables**: `scripts/seed_google_r2_doc_query_collapse_20260505.py` (new), `scripts/seed_google_r2_coding_index_20260502.py` (extended +12 lines), DB rows `problems.id=1119`, `company_documents.id=92` content updated.
+- **Sanity check result**: First seed run -> `[INSERTED] problem id=1119`. Index re-run -> `[UPDATED] doc 92` + `[UNCHANGED] hub doc 53`. Smoke-tested BOTH `find_broken_docs` (BFS) and `find_broken_docs_uf` (Union-Find) against 5 cases including: 2-step cascade chain, isolated component, initial bad-query-not-in-any-doc edge, full bipartite clique, and duplicate query in same doc -> all 10 (5 cases x 2 solvers) pass.
+- **Status**: [DONE]
+- **Request**: No change (ad-hoc, no task row).
