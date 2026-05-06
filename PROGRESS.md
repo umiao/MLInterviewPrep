@@ -563,3 +563,11 @@
 - **Sanity check result**: First seed run -> `[INSERTED] problem id=1117`. Index re-run -> `[UPDATED] index doc id=92` + `[UNCHANGED] hub doc id=53` (sentinel idempotency holds). Smoke-tested the embedded `count_combinations` against all 5 user-listed test cases (N=10 d=5 -> 250; N=10 d=0 -> 125; N=10 d=1 -> 186; N=8 d=4 -> 242 [the wrap-around case]; N=4 -> 64), all OK. Verified doc 92 tail renders the new section with `db://1117` link and family/pattern metadata.
 - **Status**: [DONE]
 - **Request**: No change (ad-hoc, no task row).
+
+## 2026-05-05 21:49 -- [T-adhoc-google-kth-largest] Add K-th Largest Collection 方法论 note under Google R2
+
+- **What I did**: Discord drop msg `1501445042567512144` (2026-05-05): user supplied a methodology / decision-tree note covering the entire "insert(x) + kLargest()" design class (k 固定 vs k 变化, size-k heap vs SortedList/OST vs bucket, plus delete/streaming/distributed/multi-k followups), strictly broader than the existing LC 703 row (id=587, fixed-k size-k-heap only). Created `scripts/seed_google_r2_kth_largest_collection_20260505.py` to insert problem id=1118 title="K-th Largest Collection 方法论" (family=design, pattern=heap-vs-bst-vs-bucket) with the full Chinese methodology in `problems.notes`; extended `scripts/seed_google_r2_coding_index_20260502.py` with new `### Design / Data Structure / 方法论` section linking via `db://1118`, looking up by title for run-order independence. Same two-tier shape as the previous combination-lock add.
+- **Deliverables**: `scripts/seed_google_r2_kth_largest_collection_20260505.py` (new), `scripts/seed_google_r2_coding_index_20260502.py` (extended +14 lines), DB rows `problems.id=1118`, `company_documents.id=92` content updated.
+- **Sanity check result**: First seed run -> `[INSERTED] problem id=1118`. Index re-run -> `[UPDATED] doc 92` + `[UNCHANGED] hub doc 53` (sentinel idempotency holds). Smoke-tested embedded code: size-k heap reproduces LC 703 sample sequence `[4,5,5,8,8]` exactly; SortedList variant returns the right rank for k=1, k=3, then k=2 after inserting 10. Both render-ready.
+- **Status**: [DONE]
+- **Request**: No change (ad-hoc, no task row).

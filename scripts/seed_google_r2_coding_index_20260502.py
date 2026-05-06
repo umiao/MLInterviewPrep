@@ -219,6 +219,16 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "省掉闭式 5 - d 的脑力开销; O(1).",
     )
 
+    # Design / Data Structure / 方法论 -- K-th Largest 决策树 (2026-05-05 Discord drop)
+    kth_method = _fetch_problem_meta_by_title(conn, "K-th Largest Collection 方法论")
+    kth_method_row = _fmt_index_row(
+        kth_method,
+        "支持 insert(x) + kLargest() 的设计题方法论决策树: k 固定首选 size-k "
+        "min-heap (LC 703), k 变化用 SortedList / Order Statistic Tree; "
+        "次级维度 insert/query 比、值域 (桶)、删除 (双 heap lazy)、分布式 "
+        "(local top-k merge)、多 k (必须 sorted/OST). 一句话: 先问 k 是否固定.",
+    )
+
     lines: list[str] = [
         INDEX_SENTINEL,
         "",
@@ -266,6 +276,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Math / Combinatorics / 容斥",
         "",
         combo_lock_row,
+        "",
+        "### Design / Data Structure / 方法论",
+        "",
+        kth_method_row,
         "",
         "---",
         "",
