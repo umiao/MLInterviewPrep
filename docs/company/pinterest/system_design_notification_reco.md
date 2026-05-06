@@ -12,7 +12,7 @@
 
 | 维度 | 问题 | 为什么重要 |
 |------|------|----------|
-| Scale | DAU/MAU? 每日发送 notification 总量? 用户平均接收频次? | 决定 pipeline 规模与 frequency-cap 策略. Pinterest 约 500M MAU, 日发送可达数十亿 |
+| Scale | **Daily/Monthly Active Users** (DAU/MAU, 日/月活跃用户)? 每日发送 notification 总量? 用户平均接收频次? | 决定 pipeline 规模与 frequency-cap 策略. Pinterest 约 500M MAU, 日发送可达数十亿 |
 | Channel | Push (iOS/Android), Email, In-app inbox, SMS? | 不同 channel 成本/SLA/metric 不同 (push 秒级, email 分钟级) |
 | Notification type | Engagement (new pin from followed board), Transactional (shopping order), Marketing, Re-engagement (dormant user)? | 决定 触发源 与 ranking 目标 |
 | Latency | 必须实时? (event-triggered 秒级) 或批量? (daily digest) | 决定 streaming vs batch 架构 |
@@ -24,7 +24,7 @@
 **假设 (本设计默认)**:
 - 500M MAU, 日发送 ~3B push notifications (peak), P99 触发-投递 < 30s
 - 4 大类: Engagement / Re-engagement / Transactional / Marketing
-- 业务目标: 长期 weekly active user (WAU) + session count, 约束 unsubscribe-rate < 基线
+- 业务目标: 长期 **Weekly Active Users** (WAU, 周活跃用户) + session count, 约束 unsubscribe-rate < 基线
 - 3 个核心 channel: mobile push, email, in-app inbox
 
 ---
@@ -55,7 +55,7 @@
    - policy/unsubscribe filter
        |
        v
-  [Channel Senders] -- APNs / FCM / SendGrid / inbox DB
+  [Channel Senders] -- APNs (Apple Push Notification service, 苹果推送) / FCM (Firebase Cloud Messaging, 谷歌推送) / SendGrid / inbox DB
        |
        v
   [Feedback Loop] -- impressions, opens, clicks, disables, uninstalls
@@ -89,7 +89,7 @@
 ### 2.3 Budget & Pacing
 - 全局 budget: 日发送上限 / email 成本 / APNs throttle
 - 个人 budget: 每用户 daily/weekly cap (e.g. push ≤ 3/day, ≤ 10/week)
-- 使用 **Lagrangian dual** 或简单的 utility/cost ratio 排序, 在 budget 约束内挑最高 utility 的触发
+- 使用 **Lagrangian dual** (拉格朗日对偶) 或简单的 utility/cost ratio 排序, 在 budget 约束内挑最高 utility 的触发
 
 ---
 
@@ -114,7 +114,7 @@
 - Size: retrieve top 500 candidates per user, downstream ranker 精排
 
 ### 3.3 Multi-item notification (digest)
-- Email 可打包 5-10 个 pin. 使用 **submodular selection** (coverage + diversity) 在 ranking 后做 second pass, 避免同一 creator 重复
+- Email 可打包 5-10 个 pin. 使用 **submodular selection** (子模优化, coverage + diversity) 在 ranking 后做 second pass, 避免同一 creator 重复
 
 ---
 
@@ -184,7 +184,7 @@ ranking 给出候选排序后, 在投递前还要过一层硬规则:
 | **Disable AUC** | 负向 head, 越高越能识别骚扰 |
 | **NDCG@K** (per user per day) | 多候选排序 (digest 场景) |
 | **Calibration error (ECE)** | pOpen 概率是否可直接用于 threshold/budget 分配 |
-| **Counterfactual uplift** | long-term value model 预测 vs 观测 (IPS-weighted) |
+| **Counterfactual uplift** | long-term value model 预测 vs 观测 (**Inverse Propensity Scoring** (IPS, 逆倾向加权)-weighted) |
 | **Coverage** | 被打通知的 DAU 占比, 避免只打熟客 |
 
 ---
@@ -231,7 +231,7 @@ ranking 给出候选排序后, 在投递前还要过一层硬规则:
 
 ### 8.4 Capacity math (sanity check)
 - 3B candidates/day -> send-gate keep ~30% -> 1B rank -> 800M deliver
-- Ranking QPS peak: 1B / 86400 * 3 (peak factor) ≈ 35K QPS, 每 req 50 candidates => ~1.75M scores/s. 需要 ~100-200 GPU instances.
+- Ranking **Queries Per Second** (QPS, 每秒查询数) peak: 1B / 86400 * 3 (peak factor) ≈ 35K QPS, 每 req 50 candidates => ~1.75M scores/s. 需要 ~100-200 GPU instances.
 - Storage: user profile 500M users * 2KB ≈ 1TB; pin embedding 5B * 64 * 4B = 1.2TB on disk
 
 ---
