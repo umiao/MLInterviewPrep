@@ -192,6 +192,33 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "成对 +1/-1 不变量 -> 不需要 pushdown.",
     )
 
+    # Bipartite Matching / König -- 2 problems from 2026-05-05 Discord drop
+    roof = _fetch_problem_meta_by_title(conn, "屋顶补漏（最小行列覆盖）")
+    roof_row = _fmt_index_row(
+        roof,
+        "m*n 0/1 矩阵, 用整行/整列木板盖所有 1; 行/列 -> bipartite 左/右, "
+        "1 -> 边; 最少木板 = 最小点覆盖 = (König) 最大匹配; Hungarian DFS 增广路, "
+        "易错点 visited 必须每个 u 重置.",
+    )
+
+    rook = _fetch_problem_meta_by_title(conn, "棋盘放最多车（带阻挡型障碍）")
+    rook_row = _fmt_index_row(
+        rook,
+        "n*m 棋盘带阻挡 #, 求最多互不攻击的车; 障碍把行/列切成段, "
+        "互斥单位从整行整列下沉到 (水平段, 垂直段); 每个空格 (H, V) 唯一 -> "
+        "天然无重边的二分图最大匹配; 屋顶补漏的段细化推广.",
+    )
+
+    # Math / Combinatorics / 容斥 -- 循环密码锁 Combination 计数 (2026-05-05 Discord drop)
+    combo_lock = _fetch_problem_meta_by_title(conn, "循环密码锁 Combination 计数")
+    combo_lock_row = _fmt_index_row(
+        combo_lock,
+        "3 位循环转盘锁, 两个密码 user/bypass, 每位循环距离 <= 2 算通过; "
+        "整体 OR 不可拆成逐位 OR; 容斥 |A union B| = |A| + |B| - |A cap B|, "
+        "每位独立用集合交集统一处理 N <= 9 双侧 wrap-around 边界, "
+        "省掉闭式 5 - d 的脑力开销; O(1).",
+    )
+
     lines: list[str] = [
         INDEX_SENTINEL,
         "",
@@ -230,6 +257,15 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Sweep Line / 离散化 / 线段树",
         "",
         cake_row,
+        "",
+        "### Bipartite Matching / König",
+        "",
+        roof_row,
+        rook_row,
+        "",
+        "### Math / Combinatorics / 容斥",
+        "",
+        combo_lock_row,
         "",
         "---",
         "",
