@@ -240,6 +240,17 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "初始 Query 可能不在任何 Doc 中要 .get 兜底.",
     )
 
+    # Heap / Simulation -- LC 1882 Process Tasks Using Servers (2026-05-05 Discord drop)
+    lc1882 = _fetch_problem_meta_by_leetcode_id(conn, 1882)
+    lc1882_row = _fmt_index_row(
+        lc1882,
+        "事件驱动模拟双堆: available 按 (weight, idx)、busy 按 "
+        "(free_time, weight, idx); 任务 i 先释放 free_time <= i 的 busy "
+        "回 available, 空了则弹 busy 顶部并把 taskTime 跳到该 free_time, "
+        "避免按 tick 推进; busy 顶部已处理 tie-breaking 不需 release-all-then-pick. "
+        "O((n+m) log n).",
+    )
+
     lines: list[str] = [
         INDEX_SENTINEL,
         "",
@@ -295,6 +306,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Graph / 连通分量",
         "",
         cascade_row,
+        "",
+        "### Heap / Simulation",
+        "",
+        lc1882_row,
         "",
         "---",
         "",

@@ -579,3 +579,11 @@
 - **Sanity check result**: First seed run -> `[INSERTED] problem id=1119`. Index re-run -> `[UPDATED] doc 92` + `[UNCHANGED] hub doc 53`. Smoke-tested BOTH `find_broken_docs` (BFS) and `find_broken_docs_uf` (Union-Find) against 5 cases including: 2-step cascade chain, isolated component, initial bad-query-not-in-any-doc edge, full bipartite clique, and duplicate query in same doc -> all 10 (5 cases x 2 solvers) pass.
 - **Status**: [DONE]
 - **Request**: No change (ad-hoc, no task row).
+
+## 2026-05-05 23:43 -- [T-adhoc-google-lc1882] LC 1882 Process Tasks Using Servers: 题解 + Google 链接
+
+- **What I did**: Discord drop msg `1501473584600584313` (2026-05-05): user supplied a working two-heap simulation solution for LC 1882 and asked to add a 题解 + link from Google R2. LC 1882 already exists at problems.id=539 from the bulk LC import but with notes=NULL and no family/pattern/source/Google-tag. Created `scripts/seed_google_r2_lc1882_process_tasks_servers_20260505.py` to UPDATE row 539: fill notes (full Chinese 题解 wrapping the user's code with 思路/代码/复杂度/易错点 sections), set family=heap / pattern=two-heap-simulation / tags=[heap,simulation,priority-queue] / source="Google R2 2026-05" / is_completed=1, and merge "Google" into company_tags WITHOUT clobbering existing [LinkedIn, Uber, Adobe]. Extended `scripts/seed_google_r2_coding_index_20260502.py` with new `### Heap / Simulation` section linking via `db://539`, looked up by leetcode_id=1882 (canonical key for LC-numbered problems).
+- **Deliverables**: `scripts/seed_google_r2_lc1882_process_tasks_servers_20260505.py` (new), `scripts/seed_google_r2_coding_index_20260502.py` (extended +14 lines), DB row `problems.id=539` updated, `company_documents.id=92` content updated.
+- **Sanity check result**: First seed run -> `[UPDATED] problem id=539`. Index re-run -> `[UPDATED] doc 92` + `[UNCHANGED] hub doc 53`. company_tags now `["LinkedIn", "Uber", "Adobe", "Google"]` (merge worked). Smoke-tested user's solver against LC 1882 official examples: `servers=[3,3,2], tasks=[1,2,3,2,1,2] -> [2,2,0,2,1,2]` ✓; `servers=[5,1,4,3,2], tasks=[2,1,2,4,5,2,1] -> [1,4,1,4,1,3,2]` ✓; single-server stress `[1] / [1,2,3] -> [0,0,0]` ✓.
+- **Status**: [DONE]
+- **Request**: No change (ad-hoc, no task row).
