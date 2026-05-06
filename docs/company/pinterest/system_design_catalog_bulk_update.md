@@ -18,11 +18,11 @@
 | 下游系统 | 有几个? 各自延迟容忍? 数据格式一致吗? | 决定 fan-out 策略 (Kafka topic 粒度) |
 | 一致性要求 | 下游最终一致即可, 还是需强一致? | 决定 exactly-once vs at-least-once |
 | Schema | 是否演化? 字段类型有冲突? | 决定是否需要 schema registry (Avro/Protobuf) |
-| 失败处理 | 单行错误丢弃还是整 batch 回滚? SLA 是什么? | 决定 DLQ 粒度与 checkpoint 策略 |
+| 失败处理 | 单行错误丢弃还是整 batch 回滚? SLA 是什么? | 决定 **Dead Letter Queue** (DLQ, 死信队列) 粒度与 checkpoint 策略 |
 | 回放能力 | 下游重建时要不要能 replay 历史? | 决定是否保留 S3 raw + Kafka retention |
 
 **假设 (本设计默认)**:
-- 500M records = daily full catalog, 每日凌晨卖家侧 upload 一次 S3 zipped NDJSON, 单条 ~2KB, 总 ~1TB
+- 500M records = daily full catalog, 每日凌晨卖家侧 upload 一次 S3 zipped **Newline-Delimited JSON** (NDJSON, 行分隔 JSON), 单条 ~2KB, 总 ~1TB
 - 下游 7 个系统: search index, ads serving, home-feed candidate store, recommender feature store, shopping graph, policy/safety, analytics warehouse
 - SLA: T+6h (凌晨 2 点 S3 drop, 早 8 点前所有下游可见)
 - 一致性: 下游 eventual consistency, exactly-once 不强制但 duplicate 要 idempotent
@@ -40,7 +40,7 @@
   |   S3 raw zone               |   s3://catalog-raw/dt=YYYY-MM-DD/part-*.ndjson.gz
   +-----------------------------+
            |
-           v  S3 event -> SQS trigger
+           v  S3 event -> SQS (Simple Queue Service, AWS 简单队列) trigger
   +-----------------------------+
   |   Ingestion Coordinator     |   Airflow DAG / Flink job manager
   |   - validate manifest       |
@@ -297,8 +297,8 @@ Schema Registry 强制 `BACKWARD` compat: 新 producer 可加 optional 字段, �
 
 ### 6.2 RPO / RTO
 
-- **RPO** (Recovery Point Objective): 数据丢失容忍 = 1 天 (因为每日全量 re-ingest, 丢一天可下一次补). 但如果连 S3 都丢, seller 需重传.
-- **RTO** (Recovery Time Objective): 从失败到恢复 = 2h. 机制: Airflow retry + partition-level replay + S3 历史保留 30 天.
+- **Recovery Point Objective** (RPO, 恢复点目标 / 数据丢失容忍): 1 天 (因为每日全量 re-ingest, 丢一天可下一次补). 但如果连 S3 都丢, seller 需重传.
+- **Recovery Time Objective** (RTO, 恢复时间目标 / 服务恢复时长): 2h. 机制: Airflow retry + partition-level replay + S3 历史保留 30 天.
 
 ### 6.3 关键 dashboard
 
@@ -327,7 +327,7 @@ Grafana 分 3 行:
 
 | | Exactly-once | At-least-once + idempotent (本设计) |
 |---|------|------|
-| 实现 | Kafka transactions + 2PC 下游 | producer idempotent + consumer 幂等 apply |
+| 实现 | Kafka transactions + **Two-Phase Commit** (2PC, 两阶段提交) 下游 | producer idempotent + consumer 幂等 apply |
 | 延迟 | 高 (transaction commit) | 低 |
 | 复杂度 | 极高 (跨系统) | 中 |
 | 正确性 | 真 exactly-once (消息级) | 最终 exactly-once (业务级) |
@@ -348,7 +348,7 @@ Range vs Hash 见 3.1. 另一个隐藏 tradeoff: **partition 数 vs 并行度**:
 
 Per-consumer topic: producer 写 7 次, 每个下游有自己的 retention + schema, 解耦更彻底. 缺点: 存储 x7, producer 失败组合复杂.
 
-→ 选单 topic. 若未来某下游需独立 retention (e.g., warehouse 要 30d), 可加 **mirrored topic** (MirrorMaker 复制一份).
+→ 选单 topic. 若未来某下游需独立 retention (e.g., warehouse 要 30d), 可加 **mirrored topic** (用 **Kafka MirrorMaker**, 跨集群镜像复制工具).
 
 ---
 

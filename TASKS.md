@@ -60,31 +60,6 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
-#### T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-740
-- **Description**: In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of each acronym below and expand to `**English Full Name** (ACRONYM, 中文)`. Subsequent occurrences keep the bare acronym. Per user direction (Discord 2026-05-05): only do full-name expansion in-line; deep explanations live in the concept doc, not here.
-
-Acronyms to expand: NDJSON, 2PC, CDC, DLQ, RPO/RTO, SQS, MirrorMaker
-
-Rules:
-- Only first occurrence per acronym. Use `Ctrl-F` to verify uniqueness.
-- DO NOT add cross-doc deep-dive links (`sd://pinterest-system-design-concepts#...`) -- per user direction inline patches stay minimal.
-- DO NOT add explanatory paragraphs. Just the bracketed expansion.
-- If an acronym is already expanded inline (✓ in original audit), SKIP it.
-- Format edge cases: 
-  - `pCTR` → `**predicted Click-Through Rate** (pCTR, 预估点击率)`
-  - `oCPM` → `**optimized Cost Per Mille** (oCPM, 优化千次曝光出价)`
-  - `Wide & Deep` → `**Wide & Deep** (Google 2016 推荐架构, 宽-深双路并联)` (no acronym)
-- After edits, run `python scripts/seed_pinterest_sd.py` to upsert into DB.
-
-AC1: each acronym in the list above appears in expanded form `**Full Name** (ACRONYM, 中文)` at its first occurrence in the file.
-AC2: subsequent occurrences of the same acronym remain bare (no double-expansion).
-AC3: no new prose paragraphs added (line count delta ≤ +50% of acronym count).
-AC4: re-seed clean; GET /system-designs/pinterest-catalog-bulk-update returns updated content; frontend at /system-design/pinterest-catalog-bulk-update renders without markdown errors.
-AC5: idempotent re-run of seed produces UPDATE not INSERT.
-
 #### T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out
 - **Priority**: P1
 - **Complexity**: S
@@ -424,6 +399,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-05** -- T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update. In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of 
 - [x] **2026-05-05** -- T-P1-753: [PINT-CONCEPTS-N] Inline acronym expansion: pinterest-notification-reco. In `docs/company/pinterest/system_design_notification_reco.md` (system_designs.id=34), locate the FIRST occurrence of ea
 - [x] **2026-05-05** -- T-P1-752: [PINT-CONCEPTS-M] Inline acronym expansion: pinterest-pins-search. In `docs/company/pinterest/system_design_pins_search.md` (system_designs.id=33), locate the FIRST occurrence of each acr
 - [x] **2026-05-05** -- T-P1-751: [PINT-CONCEPTS-L] Inline acronym expansion: pinterest-pin-ranking. In `docs/company/pinterest/system_design_pin_ranking.md` (system_designs.id=32), locate the FIRST occurrence of each acr
