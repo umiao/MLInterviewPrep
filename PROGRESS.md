@@ -684,3 +684,10 @@
 - **Sanity check result**: First run INSERTED problem 1125 + UPDATED doc 92 (hub UNCHANGED); second run all UNCHANGED (idempotent ✓). Verified String/Two Pointers section lists LC 777 (db://1125) above LC 2337 (db://1111) with consistent family/pattern. ruff check passed.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-784 --status completed (already done)
+
+## 2026-05-06 21:47 -- [T-P1-785] Add LC 276 Paint Fence + 环形 follow-up 题解 + Google + index
+- **What I did**: User Discord msg 1501806250248376431 attached message.txt (~7KB) with polished 题解 covering linear LC 276 (3D DP -> same/diff 2D -> 1D recurrence `a(n) = (k-1)*(a(n-1)+a(n-2))` closed form) + circular fence follow-up (failed 容斥 attempt: missed second wrap triple `(p_n,p_1,p_2)` -- 48 vs truth 54 for k=3,n=4; correct approach: enumerate `(p_1,p_2)` to lock coupling, run linear DP, check both wrap triples at end). Closing 思维顺序 lesson: don't reach for 容斥 first, let DP carry the load. Created scripts/seed_google_r2_lc276_paint_fence_20260507.py inserting problems id=1126 (LC 276, medium, family=dp, pattern=constraint-counting-dp -- forward-compatible name for sibling problems LC 198/213/790, company_tags=[Google], notes ~5.1KB preserving full exposition + 6-item 易错 + 一句话总结). Extended seed_google_r2_coding_index_20260502.py to add NEW "### DP / Counting" section at end of section list (before maintenance footer) -- DP did not previously exist in the index; this seeds the section for future DP entries. Also added the orphan catch-up commit 6684df6 for 10 prior-session seeds preceding this work.
+- **Deliverables**: scripts/seed_google_r2_lc276_paint_fence_20260507.py (new, ~330 lines), scripts/seed_google_r2_coding_index_20260502.py (+18 lines: lc276 fetch + fmt + new section block).
+- **Sanity check result**: First run INSERTED problem 1126 + UPDATED doc 92 (hub UNCHANGED); second run all UNCHANGED (idempotent ✓). Verified new "### DP / Counting" section renders LC 276 (db://1126) with consistent family/pattern. ruff check passed.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-785 --status completed (already done)

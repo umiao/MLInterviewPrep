@@ -311,6 +311,19 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "最大坑: 时间跳跃后**必须**把 prev 设回 idle 否则方向继承错乱. O(n log n) 排序.",
     )
 
+    # DP / Counting -- LC 276 Paint Fence + 环形 follow-up (2026-05-07 Discord drop)
+    lc276 = _fetch_problem_meta_by_leetcode_id(conn, 276)
+    lc276_row = _fmt_index_row(
+        lc276,
+        "n 柱 k 色, 任意三连不全同色 (注意不是相邻不同色). "
+        "线性版同色对称性把颜色维度消掉得 `same(i)=diff(i-1)`、"
+        "`diff(i)=(k-1)*(same(i-1)+diff(i-1))`, 等价闭式 "
+        "`a(n)=(k-1)*(a(n-1)+a(n-2))`. **环形 follow-up** 别试容斥, "
+        "wrap 三连有两个 `(p_{n-1},p_n,p_1)` 和 `(p_n,p_1,p_2)` 容易漏; "
+        "通用套路: 枚举头两位 `(p_1,p_2)` 锁住耦合, 剩下用同款线性 DP, "
+        "末态查两个 wrap 三连即可. 教训: **不确定容斥就让 DP 兜底**.",
+    )
+
     # Heap / Simulation -- LC 1606 Find Servers That Handled Most Number of Requests (2026-05-07 Discord drop)
     lc1606 = _fetch_problem_meta_by_leetcode_id(conn, 1606)
     lc1606_row = _fmt_index_row(
@@ -413,6 +426,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "",
         lc1606_row,
         lc1882_row,
+        "",
+        "### DP / Counting",
+        "",
+        lc276_row,
         "",
         "---",
         "",
