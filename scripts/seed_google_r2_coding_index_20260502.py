@@ -218,6 +218,20 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "`ans += left` 利用单调性一次性加 left 个左端点.",
     )
 
+    # Stack / 单调栈 -- Fountain Flood (Google R2 custom, 2026-05-07 Discord drop)
+    fountain = _fetch_problem_meta_by_title(conn, "Fountain Flood")
+    fountain_row = _fmt_index_row(
+        fountain,
+        "升序 fountains 列表, 每个喷泉淹**严格小于**自身高度的左右连续段, "
+        "遇到 `>=` 阻挡; 输出 64-bit chunk bitmask. **LC 84 单调栈一族**: "
+        "递减栈一遍扫求 L[i] / R[i] = 两侧最近 `>= heights[i]` 的下标, "
+        "弹栈条件**严格 `<`** -- 等高不弹否则等高喷泉互穿. "
+        "每个喷泉 -> `[L+1, R-1]` 闭区间, 升序 fountains -> ranges 升序, "
+        "interval merge 一遍降到不重叠. Bitmask 染色按 chunk 切, "
+        "in-chunk partial `((1<<len)-1)<<off` / 整 chunk `~0ULL`. "
+        "总 O(n+k) + O(n/64) 染色.",
+    )
+
     # Sweep Line / 离散化 / 线段树 -- 蛋糕水平分割线 (T-P1-XXX 2026-05-05 prep)
     cake = _fetch_problem_meta_by_title(conn, "蛋糕水平分割线")
     cake_row = _fmt_index_row(
@@ -421,6 +435,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Sliding Window",
         "",
         lc3859_row,
+        "",
+        "### Stack / 单调栈",
+        "",
+        fountain_row,
         "",
         "### Sweep Line / 离散化 / 线段树",
         "",

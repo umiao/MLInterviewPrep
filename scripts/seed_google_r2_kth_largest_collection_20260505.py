@@ -237,6 +237,8 @@ def upsert_problem(conn: sqlite3.Connection, spec: dict) -> tuple[int, str]:
 
 def main() -> int:
     """Insert-or-update the K-th Largest methodology problem. Return 0 on success."""
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")          # CJK TITLE -> avoid cp1252 stdout crash
     if not DB_PATH.exists():
         print(f"[FAIL] db missing at {DB_PATH}", file=sys.stderr)
         return 1
