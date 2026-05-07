@@ -739,3 +739,13 @@
 - **Sanity check result**: First run -- INSERTED problem id=1129 (DB backup .bak.20260506_225637); index seed UPDATED doc 92 (new section added) + UNCHANGED hub. Second run idempotent: [UNCHANGED] both surfaces. ruff check passed on both modified scripts. Verified problems.id=1129 row state (notes_len=4650, family="matrix", pattern="flood-fill") and doc 92 now contains "### Matrix / Flood Fill" section with the Number of Square Islands entry rendering family/pattern suffix correctly.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-791 --status completed (already done)
+
+## 2026-05-07 06:05 -- [T-P1-792] Custom 文件系统总大小计算 problem + Google R2 index entry
+- **What I did**: Discord drop msg 1501825987753672826: tree-DFS custom problem with the realism move being the opening **澄清三连** (tree vs graph / 单次 vs 多次查询 / 深度多大), followed by 4-level solution evolution. Two-tier wire-up.
+- **Deliverables**:
+  - **NEW** scripts/seed_google_r2_filesystem_total_size_20260507.py: idempotent INSERT-or-UPDATE keyed on title="文件系统总大小计算". Sets family="tree", pattern="postorder-dfs", source="Google R2 2026-05", company_tags=[Google], 2900-byte notes preserving 题面 + 澄清三连 + Level 1-4 解法 (cycle-detect DFS / strict-tree / cache / iterative postorder) + 易错 + 复盘 takeaway + 一句话总结.
+  - **MODIFIED** scripts/seed_google_r2_coding_index_20260502.py: added fs_total_row + new "### Tree / Traversal" section between Tree/Graph Validation and BST/Tree Manipulation.
+  - **MODIFIED** TASKS.md auto-projection.
+- **Sanity check result**: First run -- INSERTED problem id=1130 (DB backup .bak.20260506_230159); index seed UPDATED doc 92 + UNCHANGED hub. Second run idempotent: [UNCHANGED] both surfaces. ruff check passed. Verified problems.id=1130 row state and doc 92 Tree / Traversal section renders correctly with family/pattern suffix.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-792 --status completed (already done)

@@ -350,6 +350,17 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "优化口子换根 DP O(N) 或异色对划禁止区域 (路径中点偶距离才约束).",
     )
 
+    # Tree / Traversal -- 文件系统总大小计算 (Google R2 custom, 2026-05-07 Discord drop)
+    fs_total = _fetch_problem_meta_by_title(conn, "文件系统总大小计算")
+    fs_total_row = _fmt_index_row(
+        fs_total,
+        "文件系统树, 文件有 size, 目录 size = 子节点和, 求总大小. "
+        "**真正的考点是开场澄清三连**: tree vs graph (symlink 成环)? 单次 vs 多次查询? 深度多大 (爆栈)? "
+        "四档解法演进: Level 1 cycle-detection DFS (graph) -> Level 2 strict-tree 递归 -> "
+        "Level 3 cache (多次查询; 最优做法是**直接挂 size 字段到节点**省 hash) -> "
+        "Level 4 颜色标记法迭代后序 (防爆栈). **复盘**: 优化要分清是为时间 / 空间 / 健壮性, 三者手段完全不同.",
+    )
+
     # BST / Tree Manipulation -- LC 450 Delete Node in a BST (2026-05-07 Discord drop)
     lc450 = _fetch_problem_meta_by_leetcode_id(conn, 450)
     lc450_row = _fmt_index_row(
@@ -497,6 +508,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Tree / Graph Validation",
         "",
         uag_btree_row,
+        "",
+        "### Tree / Traversal",
+        "",
+        fs_total_row,
         "",
         "### BST / Tree Manipulation",
         "",
