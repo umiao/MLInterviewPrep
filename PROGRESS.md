@@ -749,3 +749,13 @@
 - **Sanity check result**: First run -- INSERTED problem id=1130 (DB backup .bak.20260506_230159); index seed UPDATED doc 92 + UNCHANGED hub. Second run idempotent: [UNCHANGED] both surfaces. ruff check passed. Verified problems.id=1130 row state and doc 92 Tree / Traversal section renders correctly with family/pattern suffix.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-792 --status completed (already done)
+
+## 2026-05-07 06:10 -- [T-P1-793] LC 496 简略 notes + Google R2 index entry
+- **What I did**: Discord drop msg 1501827921680138421 ("简略"): single-solution monotonic-stack notes for LC 496 (problems.id=299) + entry in Google R2 Coding Index Stack/单调栈 section between Fountain Flood and LC 1673.
+- **Deliverables**:
+  - **NEW** scripts/seed_lc_496_notes_20260507.py: idempotent notes UPSERT for problems.id=299 -- sets is_completed=1, family="stack", pattern="monotonic-stack", framework_node_id=46, 1272-byte 简略 notes (思路 / 解法 / 关键点 3 条 / 易错 + 变体 LC 503/739 一行).
+  - **MODIFIED** scripts/seed_google_r2_coding_index_20260502.py: lc496_row inserted between fountain_row and lc1673_row in Stack / 单调栈 section.
+  - **MODIFIED** TASKS.md auto-projection.
+- **Sanity check result**: First run -- LC 496 seed UPDATED (1272-byte notes, was NULL); index seed UPDATED doc 92. Second run idempotent: [SKIP]/[UNCHANGED]. ruff passes. Verified Stack section now has 3 entries (Fountain Flood / LC 496 / LC 1673) all with consistent family=stack pattern=monotonic-stack suffix.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-793 --status completed (already done)

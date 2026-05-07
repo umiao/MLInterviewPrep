@@ -244,6 +244,15 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "总 O(n+k) + O(n/64) 染色.",
     )
 
+    # Stack / 单调栈 -- LC 496 Next Greater Element I (2026-05-07 Discord drop, 简略)
+    lc496 = _fetch_problem_meta_by_leetcode_id(conn, 496)
+    lc496_row = _fmt_index_row(
+        lc496,
+        "**单调递减栈模板题** -- nums1 是 nums2 子集, 求每个 nums1 元素在 nums2 中右侧第一个更大值. "
+        "一遍扫 nums2: 栈顶 `<` 当前值时 pop 并赋 next-greater 到 hash 表; nums1 查表 (默认 -1). "
+        "O(n+m) 时间. **变体**: LC 503 循环数组 (串两遍 i%n), LC 739 Daily Temperatures (栈存下标).",
+    )
+
     # Stack / 单调栈 -- LC 1673 Find the Most Competitive Subsequence (2026-05-07 Discord drop)
     lc1673 = _fetch_problem_meta_by_leetcode_id(conn, 1673)
     lc1673_row = _fmt_index_row(
@@ -477,6 +486,7 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Stack / 单调栈",
         "",
         fountain_row,
+        lc496_row,
         lc1673_row,
         "",
         "### Sweep Line / 离散化 / 线段树",
