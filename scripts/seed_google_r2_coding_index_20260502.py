@@ -178,6 +178,17 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "步长 in {-2,0,+2} 且 g 始终偶 (因 m 偶), 不可能跳过 0. O(n) 时间, O(1) 空间.",
     )
 
+    # String / Two Pointers -- LC 777 Swap Adjacent in LR String (2026-05-07 Discord drop)
+    lc777 = _fetch_problem_meta_by_leetcode_id(conn, 777)
+    lc777_row = _fmt_index_row(
+        lc777,
+        "L/R/X 三字符串经 `LX -> XL` (L 左移) / `XR -> RX` (R 右移) 互转可达性. "
+        "**智力题, 两条不变量**: (1) 滤 X 后字符序列必须完全相同 -- L/R 相对顺序"
+        "锁死 (swap 都涉及 X, L/R 永远不交叉); (2) L 起始 idx >= 目标 idx, "
+        "R 起始 idx <= 目标 idx -- 方向单向. 双方满足 ⇔ 可达; O(n) 双指针一遍扫."
+        " 同 LC 2337 `_` 替换 `X` 是同一族.",
+    )
+
     # String / Two Pointers -- LC 2337 from T-P1-718 (R2 2026-05)
     lc2337 = _fetch_problem_meta_by_title(conn, "Move Pieces to Obtain a String")
     lc2337_row = _fmt_index_row(
@@ -354,6 +365,7 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "",
         "### String / Two Pointers",
         "",
+        lc777_row,
         lc2337_row,
         "",
         "### Sliding Window",

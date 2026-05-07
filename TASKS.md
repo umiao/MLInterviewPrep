@@ -335,6 +335,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-06** -- T-P1-784: Add LC 777 Swap Adjacent in LR String 题解 + Google + index. Discord 2026-05-07 msg 1501803587943010336. User's filter-X-then-position-invariant solution: filter out X chars keeping
 - [x] **2026-05-06** -- T-P1-783: Add LC 1606 Find Servers That Handled Most Number of Requests 题解 + Google + index. Discord 2026-05-07 msg 1501791307402838107. User dropped full Chinese 题解 (two methods: SortedList+heap with bisect-wrapa
 - [x] **2026-05-06** -- T-P1-782: Add Necklace 均分 (D/R 两人公平切分) 题解 + Google + index. User Discord 2026-05-07 msg 1501779766720594093 attached message.txt with full Chinese 题解 for custom Google problem: spl
 - [x] **2026-05-06** -- T-P1-781: Add door-access simulation 题解 + tag Google + index. User Discord 2026-05-07 msg 1501776064647663656 attached message.txt with full Chinese 题解 for custom Google problem 门禁通行
