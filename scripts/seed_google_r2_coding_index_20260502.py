@@ -264,6 +264,17 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "初始 Query 可能不在任何 Doc 中要 .get 兜底.",
     )
 
+    # Graph / Dijkstra -- LC 778 Swim in Rising Water (2026-05-07 Discord index-only drop)
+    lc778 = _fetch_problem_meta_by_leetcode_id(conn, 778)
+    lc778_row = _fmt_index_row(
+        lc778,
+        "**最小瓶颈路径** (minimax path) -- 不是最短距离, 是路径上**最大值最小化**. "
+        "改良 Dijkstra: 最小堆按 grid 值 push, 弹出时 `ret = max(ret, curCost)` 而非"
+        "累加; 第一次到达终点即最优. visited 入堆即标记防重复. O(n^2 log n). "
+        "替代: 二分答案 + BFS/DFS, 或 Union Find 按值升序合并到起终点连通. "
+        "**同族**: LC 1631 (相邻差最大值最小化) / LC 1102 (路径最小值最大化, maximin).",
+    )
+
     # Graph / 连通分量 -- LC 1101 Earliest Moment Everyone Become Friends + breakup follow-up (2026-05-07 Discord drop)
     lc1101 = _fetch_problem_meta_by_leetcode_id(conn, 1101)
     lc1101_row = _fmt_index_row(
@@ -419,6 +430,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "",
         cascade_row,
         lc1101_row,
+        "",
+        "### Graph / Dijkstra",
+        "",
+        lc778_row,
         "",
         "### Tree / Graph Validation",
         "",
