@@ -178,6 +178,18 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "步长 in {-2,0,+2} 且 g 始终偶 (因 m 偶), 不可能跳过 0. O(n) 时间, O(1) 空间.",
     )
 
+    # String / Two Pointers -- 字符串至多一次交换判等 (Google R1 custom, 2026-05-07 Discord drop)
+    one_swap = _fetch_problem_meta_by_title(conn, "字符串至多一次交换判等")
+    one_swap_row = _fmt_index_row(
+        one_swap,
+        "**Google R1 简单题** -- str1 经至多一次字母交换变 str2? "
+        "一遍扫收集 `str1[i] != str2[i]` 的下标 diff: `len==0` -> True "
+        "(至多一次允许零次); `len==2` 且交叉匹配 "
+        "`str1[i]==str2[j] AND str1[j]==str2[i]` -> True; 其他 -> False. "
+        "短路版 O(1) 空间 (>=3 diff 立即返回). **辨析 LC 859 'Buddy Strings' "
+        "是恰好一次**, str1==str2 还要求 str1 有重复字母, 边界微差面试要先问清楚.",
+    )
+
     # String / Two Pointers -- LC 777 Swap Adjacent in LR String (2026-05-07 Discord drop)
     lc777 = _fetch_problem_meta_by_leetcode_id(conn, 777)
     lc777_row = _fmt_index_row(
@@ -402,6 +414,7 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "",
         "### String / Two Pointers",
         "",
+        one_swap_row,
         lc777_row,
         lc2337_row,
         "",

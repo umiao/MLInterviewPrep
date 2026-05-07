@@ -335,6 +335,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-06** -- T-P1-788: Add 字符串至多一次交换判等 (Google R1) 题解 + index. Discord 2026-05-07 msg 1501812416131108915. User-described custom Google R1 problem: given two strings, return True if s
 - [x] **2026-05-06** -- T-P1-787: Index LC 778 Swim in Rising Water under Google R2 + family/pattern upgrade. Discord 2026-05-07 msg 1501810532360130685 'same as before, add LC 778 to the Google index'. LC 778 row already exists (
 - [x] **2026-05-06** -- T-P1-786: Add LC 1101 Earliest Moment Everyone Become Friends 题解 + breakup follow-up + Google + index. Discord 2026-05-07 msg 1501807001548623912. User asked for short 题解 (vanilla DSU) plus a follow-up: allow friend breakup
 - [x] **2026-05-06** -- T-P1-785: Add LC 276 Paint Fence 题解 + 环形 follow-up + Google + index. Discord 2026-05-07 msg 1501806250248376431 attachment ~7KB. User-provided 题解 covers: (1) linear version derivation from 
