@@ -264,6 +264,19 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "初始 Query 可能不在任何 Doc 中要 .get 兜底.",
     )
 
+    # Graph / 连通分量 -- LC 1101 Earliest Moment Everyone Become Friends + breakup follow-up (2026-05-07 Discord drop)
+    lc1101 = _fetch_problem_meta_by_leetcode_id(conn, 1101)
+    lc1101_row = _fmt_index_row(
+        lc1101,
+        "Vanilla DSU: 按 timestamp 升序合并, 真合并时 count -= 1, "
+        "count == 1 即返回; O(m log m). **Follow-up 允许 breakup**: "
+        "**禁用路径压缩** (与 rollback 互斥), union-by-rank only; 每次 "
+        "union 压 snapshot 栈 `(rx, ry, old_rank_rx)`, breakup 弹栈反向"
+        "赋值即可. 同 root 占位 op 也要压栈否则 op 流对不齐. "
+        "**LIFO 假设**: 栈式 rollback 只能撤销最近 union; 任意时间点 "
+        "breakup 是全动态连通性, 离线 D&C + rollback DSU 或 Link-Cut Trees.",
+    )
+
     # Tree / Graph Validation -- UAG 是否为 valid binary tree (2026-05-07 Discord drop)
     uag_btree = _fetch_problem_meta_by_title(
         conn, "Undirected Acyclic Graph 是否为 Valid Binary Tree"
@@ -405,6 +418,7 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Graph / 连通分量",
         "",
         cascade_row,
+        lc1101_row,
         "",
         "### Tree / Graph Validation",
         "",
