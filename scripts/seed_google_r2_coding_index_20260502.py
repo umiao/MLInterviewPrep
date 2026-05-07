@@ -404,6 +404,16 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "最大坑: 时间跳跃后**必须**把 prev 设回 idle 否则方向继承错乱. O(n log n) 排序.",
     )
 
+    # DP / Interval -- LC 312 Burst Balloons (2026-05-07 Discord drop)
+    lc312 = _fetch_problem_meta_by_leetcode_id(conn, 312)
+    lc312_row = _fmt_index_row(
+        lc312,
+        "**区间 DP 经典 + \"最后戳爆\"反向枚举**. 正向枚举\"先戳哪个\"会让左右子区间耦合 (戳掉 i 后 i-1/i+1 变相邻); "
+        "反过来枚举 k 作为闭区间 [L,R] 内**最后**被戳的气球, 其左右邻居就是区间外的 nums[L-1]/nums[R+1] (区间内已全爆), "
+        "左右子区间天然解耦. 首尾 padding 1 统一边界. $O(n^3)$ 时间 / $O(n^2)$ 空间. "
+        "**易错**: 闭区间 vs 开区间, 邻居取区间外 vs 区间端点差一格. **同族**: LC 1547/1000/516/1130/87.",
+    )
+
     # DP / Counting -- LC 276 Paint Fence + 环形 follow-up (2026-05-07 Discord drop)
     lc276 = _fetch_problem_meta_by_leetcode_id(conn, 276)
     lc276_row = _fmt_index_row(
@@ -543,6 +553,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### DP / Counting",
         "",
         lc276_row,
+        "",
+        "### DP / Interval",
+        "",
+        lc312_row,
         "",
         "---",
         "",

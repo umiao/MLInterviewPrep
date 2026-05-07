@@ -759,3 +759,13 @@
 - **Sanity check result**: First run -- LC 496 seed UPDATED (1272-byte notes, was NULL); index seed UPDATED doc 92. Second run idempotent: [SKIP]/[UNCHANGED]. ruff passes. Verified Stack section now has 3 entries (Fountain Flood / LC 496 / LC 1673) all with consistent family=stack pattern=monotonic-stack suffix.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-793 --status completed (already done)
+
+## 2026-05-07 06:30 -- [T-P1-794] LC 312 Burst Balloons interval-DP notes + Google R2 index entry
+- **What I did**: Discord drop msg 1501832530905661570: classic interval DP -- key insight is reverse enumeration of which balloon bursts LAST in interval (not first) so left/right subintervals decouple. Two-tier wire-up.
+- **Deliverables**:
+  - **NEW** scripts/seed_lc_312_notes_20260507.py: idempotent UPSERT for problems.id=124 -- sets is_completed=1, family="dp", pattern="interval-dp" (specialized from prior "dp"), framework_node_id=54, 2097-byte notes preserving 核心思路 (倒着想) + 状态转移 (KaTeX) + 代码 + 闭/开区间易错 + 同族 (LC 1547/1000/516/1130/87) + 一句话总结.
+  - **MODIFIED** scripts/seed_google_r2_coding_index_20260502.py: lc312_row added in new "### DP / Interval" section after "### DP / Counting".
+  - **MODIFIED** TASKS.md auto-projection.
+- **Sanity check result**: First run -- LC 312 seed UPDATED (was pattern="dp" framework_node_id=None notes=NULL, now pattern="interval-dp" framework_node_id=54 notes_len=2097); index seed UPDATED doc 92. Second run idempotent. ruff passes. Verified DP section now has Counting + Interval subsections.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-794 --status completed (already done)
