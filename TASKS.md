@@ -60,6 +60,12 @@ AC:
 - Manual smoke test path completes without console errors
 - No regression on questions without probe_notes / without is_primary
 
+#### T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + variable naming/comments 太简单. Audit complete (see PROGRESS 2026-05-06 16:50 [planning] entry): identified 6 verbosity patterns (P1 section duplication, P2 AI-explainer padding, P3 tutorial-tone code comments, P4 retained code-review nits, P5 dense-prose lemmas, P6 worked-example tables). Concrete deltas drafted: LC 465 5375c -> ~2400-2800c, LC 1723 5604c -> ~3000c. Propagation surface clean (only doc 47 + 66 link, no SD/framework/BQ refs). Awaiting user answers to 3 open Qs before executing: (1) cut depth approval, (2) voice anchor (LC 322 vs LC 426/1293), (3) drop Approach C in LC 1723. On approval: execute as seed_pinterest_lc_voice_refactor_465_1723_20260506.py with sentinel-guarded UPDATE on problems.notes for ids 214 + 1067; verify byte-level via re-run [SKIP], API smoke, drawer render.
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -329,6 +335,16 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-06** -- T-P1-783: Add LC 1606 Find Servers That Handled Most Number of Requests 题解 + Google + index. Discord 2026-05-07 msg 1501791307402838107. User dropped full Chinese 题解 (two methods: SortedList+heap with bisect-wrapa
+- [x] **2026-05-06** -- T-P1-782: Add Necklace 均分 (D/R 两人公平切分) 题解 + Google + index. User Discord 2026-05-07 msg 1501779766720594093 attached message.txt with full Chinese 题解 for custom Google problem: spl
+- [x] **2026-05-06** -- T-P1-781: Add door-access simulation 题解 + tag Google + index. User Discord 2026-05-07 msg 1501776064647663656 attached message.txt with full Chinese 题解 for custom Google problem 门禁通行
+- [x] **2026-05-06** -- T-P1-780: Add LC 289 Game of Life 题解 + tag Google + index. User Discord 2026-05-07 msg 1501771626813849741: same treatment as LC 450 -- distill user's two-pass set-based solution 
+- [x] **2026-05-06** -- T-P1-779: Add LC 450 Delete Node in BST 题解 + tag Google + index. User Discord 2026-05-07 msg 1501769443758575656: previous request to add LC 450 to Google R2 Coding Index didn't land. C
+- [x] **2026-05-06** -- T-P1-778: Add UAG-valid-binary-tree problem to Google R2 Coding Index. User Discord 2026-05-07 msg 1501766944410439730: new R2 Coding 题解 -- judge undirected acyclic graph as valid binary tree
+- [x] **2026-05-06** -- T-P1-776: Sync LC 426 + LC 1293 to Pinterest card_index (BFS + DFS cards). User correction msg 1501611345597169696: my earlier T-P1-774 batch updated LC index doc 47 but skipped card_index doc 66
+- [x] **2026-05-06** -- T-P1-775: Add PARSPEC company + 2026-05-08 phone screen to dashboard. Discord ad-hoc 2026-05-06: insert new companies row (PARSPEC, status=phone_screen) and interview_events row (Fri 2026-05
+- [x] **2026-05-06** -- T-P1-774: Pinterest tag + 题解 for LC 426 + LC 1293; append to LC index. Discord ad-hoc 2026-05-06: fill notes (Chinese 题解 with best-practice / user-provided code), merge Pinterest into company
+- [x] **2026-05-06** -- T-P1-773: Add Pinterest screening problem 'Reverse Count and Say' (custom, no LC#). Discord ad-hoc 2026-05-06: insert custom problem with Chinese description+notes (user-provided Python backtracking solut
 - [x] **2026-05-05** -- T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation). Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
 - [x] **2026-05-05** -- T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out. Final QA pass after all section + inline tasks complete.
 - [x] **2026-05-05** -- T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update. In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of 

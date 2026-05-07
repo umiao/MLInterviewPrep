@@ -165,6 +165,19 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "followup 严格 O(1) 退回 O(n^2).",
     )
 
+    # Prefix Sum / Hash -- Necklace 均分 D/R 两人公平切分 (2026-05-07 Discord drop)
+    necklace = _fetch_problem_meta_by_title(
+        conn, "Necklace 均分 (D/R 两人公平切分)"
+    )
+    necklace_row = _fmt_index_row(
+        necklace,
+        "D/R 两色字符串均分给两人 (#D=#R 偶): **<= 2 刀必存在** "
+        "(Necklace Splitting Theorem k=2 特例) -> 化归为长度 n/2 的"
+        "**固定窗口** 找 f(j)=f(j-m) (其中 f(k)=D(k)-R(k) 前缀差). "
+        "存在性证明用**离散 IVT + 奇偶性**: g(k)=f(k)-f(k-m), 边界 g(m)=f(m), g(n)=-f(m), "
+        "步长 in {-2,0,+2} 且 g 始终偶 (因 m 偶), 不可能跳过 0. O(n) 时间, O(1) 空间.",
+    )
+
     # String / Two Pointers -- LC 2337 from T-P1-718 (R2 2026-05)
     lc2337 = _fetch_problem_meta_by_title(conn, "Move Pieces to Obtain a String")
     lc2337_row = _fmt_index_row(
@@ -240,6 +253,66 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "初始 Query 可能不在任何 Doc 中要 .get 兜底.",
     )
 
+    # Tree / Graph Validation -- UAG 是否为 valid binary tree (2026-05-07 Discord drop)
+    uag_btree = _fetch_problem_meta_by_title(
+        conn, "Undirected Acyclic Graph 是否为 Valid Binary Tree"
+    )
+    uag_btree_row = _fmt_index_row(
+        uag_btree,
+        "无向无环图判定为 binary tree: 三件套 acyclic + edges = N-1 + max_degree <= 3; "
+        "等价 \"无环 + N-1 边 ⇔ 连通\" 来自 N 点 k 块森林必有 N-k 边; "
+        "任一 degree <= 2 的点 (挑叶子) 即合法 root. "
+        "Follow-up 同层同色: 候选 root 限定 degree <= 2, 暴力 O(N^2) BFS 早退; "
+        "优化口子换根 DP O(N) 或异色对划禁止区域 (路径中点偶距离才约束).",
+    )
+
+    # BST / Tree Manipulation -- LC 450 Delete Node in a BST (2026-05-07 Discord drop)
+    lc450 = _fetch_problem_meta_by_leetcode_id(conn, 450)
+    lc450_row = _fmt_index_row(
+        lc450,
+        "BST 删除两步走: 递归 BST 二分找; 命中后三 case (0/1 child 直顶替, "
+        "2 child 结构嫁接 -- 把 left 整团挂到 right 子树最左叶的 .left). "
+        "封装为 `root.left = deleteNode(...)` 模板, 调用方挂回去. "
+        "结构嫁接 vs successor-copy 两种主流写法: 前者短不改值但可能加深, 后者经典稳树高但改 root.val. "
+        "O(h) 时间, 平均 O(log N) 最坏 O(N).",
+    )
+
+    # Matrix / Simulation -- LC 289 Game of Life (2026-05-07 Discord drop)
+    lc289 = _fetch_problem_meta_by_leetcode_id(conn, 289)
+    lc289_row = _fmt_index_row(
+        lc289,
+        "GoL 同时性更新核心是读写分离: 双 set 暂存 (O(mn) 空间) -> 原地状态编码 "
+        "0/1/2/3 四态同时编码 \"原值+新值\" + 收尾 %2 归一化 (O(1) 额外); "
+        "判邻居用 `in (1, 2)` 不是 `==1`. "
+        "Follow-up 无限稀疏板: live set + 邻居计数 dict, 复杂度脱离板大小. "
+        "易错 8 邻域别漏对角, dead+L=3 复活分支别漏.",
+    )
+
+    # Queue / Simulation -- 门禁通行模拟 (2026-05-07 Discord drop)
+    door = _fetch_problem_meta_by_title(conn, "门禁通行模拟")
+    door_row = _fmt_index_row(
+        door,
+        "口述题: 门每秒过 1 人, 同秒冲突按\"前一秒方向\"决优先 (idle/start 默认出门, "
+        "同方向按原索引). **重点先问 6 个澄清** (吞吐量 / \"前一秒\"语义 / timestamp 重复 / "
+        "已排序? / state 类型 / 数据规模) -- 上来就写代码反被反问。"
+        "实现: 两 deque (enter_q/exit_q) + prev 状态 (-1/0/1) + 4 步主循环 "
+        "(admit / 都空则跳时间-重置 prev / 按 prev 选队 / 出队). "
+        "最大坑: 时间跳跃后**必须**把 prev 设回 idle 否则方向继承错乱. O(n log n) 排序.",
+    )
+
+    # Heap / Simulation -- LC 1606 Find Servers That Handled Most Number of Requests (2026-05-07 Discord drop)
+    lc1606 = _fetch_problem_meta_by_leetcode_id(conn, 1606)
+    lc1606_row = _fmt_index_row(
+        lc1606,
+        "环形找下一个空闲 server (i % k 起顺时针, 一圈不到就丢). "
+        "方法一 SortedList(free) + min-heap(busy): `bisect_left(target)` "
+        "二分, 落到末尾回卷 `free[0]`. 方法二只用 `heapq` + 编码技巧: "
+        "把 idx 编码成 `i + (idx - i) % k`, 单堆 pop 即得 -- 滑窗不变量 "
+        "(处理请求 i 之前堆里所有编码都在 [i, i+k-1]) 保证堆顶就是顺时针最近的空闲. "
+        "Python `%` 永非负所以代码简洁, 移植 C++/Java/Go 须 `((idx - i) % k + k) % k`. "
+        "O(n log k).",
+    )
+
     # Heap / Simulation -- LC 1882 Process Tasks Using Servers (2026-05-05 Discord drop)
     lc1882 = _fetch_problem_meta_by_leetcode_id(conn, 1882)
     lc1882_row = _fmt_index_row(
@@ -277,6 +350,7 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "",
         gold_row,
         eq_row,
+        necklace_row,
         "",
         "### String / Two Pointers",
         "",
@@ -307,8 +381,25 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "",
         cascade_row,
         "",
+        "### Tree / Graph Validation",
+        "",
+        uag_btree_row,
+        "",
+        "### BST / Tree Manipulation",
+        "",
+        lc450_row,
+        "",
+        "### Matrix / Simulation",
+        "",
+        lc289_row,
+        "",
+        "### Queue / Simulation",
+        "",
+        door_row,
+        "",
         "### Heap / Simulation",
         "",
+        lc1606_row,
         lc1882_row,
         "",
         "---",
