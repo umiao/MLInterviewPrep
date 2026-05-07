@@ -150,6 +150,18 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "`Theta(nm)` 下界完整推导.",
     )
 
+    # Matrix / Flood Fill -- Number of Square Islands (Google R2 custom, 2026-05-07 Discord drop)
+    square_islands = _fetch_problem_meta_by_title(conn, "Number of Square Islands")
+    square_islands_row = _fmt_index_row(
+        square_islands,
+        "n*m grid 4-连通极大 1-块, 数恰好填满 k*k 实心正方形的 island 个数. "
+        "**首选 BFS + bounding box O(nm)**: 每块记 size + (rmin,rmax,cmin,cmax), "
+        "判定 (rmax-rmin == cmax-cmin) AND size == side^2, 极大性靠 BFS 自然保证. "
+        "**进阶 2D 前缀和 O(nm * min(n,m))**: 枚举 (r1,c1,k), 内部 sum == k^2 + "
+        "**护城河四边 sum == 0** (越界 clip) 显式约束极大, 内层 break 单调剪枝. "
+        "L 形里嵌的全 1 子矩形是关键反例 -- 缺护城河会误判.",
+    )
+
     # Prefix Sum / Hash -- 2 custom-interview problems from T-P1-718 (R2 2026-05)
     gold = _fetch_problem_meta_by_title(conn, "Gold Chain 平分")
     gold_row = _fmt_index_row(
@@ -430,6 +442,10 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Matrix / Geometry",
         "",
         lc48_row,
+        "",
+        "### Matrix / Flood Fill",
+        "",
+        square_islands_row,
         "",
         "### Prefix Sum / Hash",
         "",

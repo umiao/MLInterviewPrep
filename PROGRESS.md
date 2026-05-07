@@ -729,3 +729,13 @@
 - **Sanity check result**: First run -- LC 1673 seed: INSERTED notes + family/pattern/fw_node + is_completed (DB backup .bak.20260506_224843); index seed: UPDATED doc 92 (hash changed) + UNCHANGED hub. Second run idempotent: LC 1673 [SKIP] already in target state, index [UNCHANGED] both surfaces. ruff check passed on both modified scripts. Verified problems.id=804 row state (notes_len=2024) and doc 92 Stack section now contains both Fountain Flood and LC 1673 entries with consistent family/pattern formatting.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-790 --status completed (already done)
+
+## 2026-05-07 06:00 -- [T-P1-791] Custom Square Islands problem + Google R2 index entry
+- **What I did**: Discord drop msg 1501824183984717895: user-provided 题解 for custom Google R2 problem "Number of Square Islands" (count 4-connected 1-components in n*m grid that fill exactly a k*k square). Two solutions: BFS + bounding-box O(nm) and 2D prefix sum + 护城河 O(nm * min(n,m)). Two-tier wire-up per memory feedback_pinterest_two_tier_notes.md.
+- **Deliverables**:
+  - **NEW** scripts/seed_google_r2_square_islands_20260507.py: idempotent INSERT-or-UPDATE keyed on title (custom problem, no LC id) following the seed_google_r2_fountain_flood_20260507.py template. Sets family="matrix", pattern="flood-fill", source="Google R2 2026-05", company_tags=[Google], 4650-byte notes preserving user verbatim solutions + house-style 易错 + 一句话总结.
+  - **MODIFIED** scripts/seed_google_r2_coding_index_20260502.py: added square_islands_row in build_index_content() and inserted new "### Matrix / Flood Fill" section between Matrix/Geometry and Prefix Sum/Hash.
+  - **MODIFIED** TASKS.md auto-projection.
+- **Sanity check result**: First run -- INSERTED problem id=1129 (DB backup .bak.20260506_225637); index seed UPDATED doc 92 (new section added) + UNCHANGED hub. Second run idempotent: [UNCHANGED] both surfaces. ruff check passed on both modified scripts. Verified problems.id=1129 row state (notes_len=4650, family="matrix", pattern="flood-fill") and doc 92 now contains "### Matrix / Flood Fill" section with the Number of Square Islands entry rendering family/pattern suffix correctly.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-791 --status completed (already done)
