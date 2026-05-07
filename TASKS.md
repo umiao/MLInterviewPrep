@@ -335,6 +335,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 687 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-06** -- T-P1-790: LC 1673 notes + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501821359590867046: per-problem notes for LC 1673 (problems.id=804) + new entry in Google R2 Coding In
 - [x] **2026-05-06** -- T-P1-789: Add Fountain Flood (Google R2 custom) 题解 + index. Discord 2026-05-07 msg 1501814166435139644 attached message.txt (~4KB) with full Chinese 题解 for custom Google R2 'Founta
 - [x] **2026-05-06** -- T-P1-788: Add 字符串至多一次交换判等 (Google R1) 题解 + index. Discord 2026-05-07 msg 1501812416131108915. User-described custom Google R1 problem: given two strings, return True if s
 - [x] **2026-05-06** -- T-P1-787: Index LC 778 Swim in Rising Water under Google R2 + family/pattern upgrade. Discord 2026-05-07 msg 1501810532360130685 'same as before, add LC 778 to the Google index'. LC 778 row already exists (

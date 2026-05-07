@@ -232,6 +232,17 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "总 O(n+k) + O(n/64) 染色.",
     )
 
+    # Stack / 单调栈 -- LC 1673 Find the Most Competitive Subsequence (2026-05-07 Discord drop)
+    lc1673 = _fetch_problem_meta_by_leetcode_id(conn, 1673)
+    lc1673_row = _fmt_index_row(
+        lc1673,
+        "**单调栈 + 删除预算** -- 选长度 k 字典序最小子序列 ⇔ 删 (n-k) 个数字. "
+        "递增栈一遍扫: 栈非空 + 栈顶 `>` num + 还有预算时 pop, 否则 append; "
+        "末尾 `stack[:k]` 处理预算没花完的递增数组. 三件套缺一不可 (尤其预算耗尽要立刻停 pop). "
+        "O(n) 时间 / O(k) 空间. **LC 402 同模板** (预算变 k, 字典序递增栈), "
+        "**LC 316/1081** 多一层 \"保留约束\", **LC 321** 双数组拓展.",
+    )
+
     # Sweep Line / 离散化 / 线段树 -- 蛋糕水平分割线 (T-P1-XXX 2026-05-05 prep)
     cake = _fetch_problem_meta_by_title(conn, "蛋糕水平分割线")
     cake_row = _fmt_index_row(
@@ -439,6 +450,7 @@ def build_index_content(conn: sqlite3.Connection) -> str:
         "### Stack / 单调栈",
         "",
         fountain_row,
+        lc1673_row,
         "",
         "### Sweep Line / 离散化 / 线段树",
         "",

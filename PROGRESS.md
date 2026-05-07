@@ -719,3 +719,13 @@
 - **Sanity check result**: Fountain Flood: first run INSERTED problem 1128 + UPDATED doc 92 (hub UNCHANGED); second run all UNCHANGED (idempotent ✓). Stack/单调栈 section renders correctly. 6 sibling seeds: each UNCHANGED on re-run with the new fix applied (no DB drift). ruff check passed across all 7 modified files.
 - **Status**: [DONE]
 - **Request**: task_db.py update T-P1-789 --status completed (already done)
+
+## 2026-05-07 05:50 -- [T-P1-790] LC 1673 notes + Google R2 Coding Index entry
+- **What I did**: Discord drop msg 1501821359590867046 ("尽快和低成本"): user provided 单调栈 + 删除预算 solution for LC 1673 "Find the Most Competitive Subsequence" and asked it be wired into both surfaces -- per-problem notes (problems.id=804) AND the Google R2 Coding Index (doc 92, Stack / 单调栈 section). Two-tier pattern per memory feedback_pinterest_two_tier_notes.md.
+- **Deliverables**:
+  - **NEW** scripts/seed_lc_1673_notes_20260507.py: idempotent seed for problems.id=804 -- sets is_completed=1, family="stack", pattern="monotonic-stack", framework_node_id=46 (Stack/Queue), notes=2024-byte 5-section markdown (思路 / 解法 / 关键不变量 / 易错点 / 同族+Follow-up). Mirrors the user-provided concise voice + adds LC 402/316/1081/321 same-family disambiguation per feedback_match_golden_voice.md.
+  - **MODIFIED** scripts/seed_google_r2_coding_index_20260502.py: appended lc1673_row in build_index_content() Stack / 单调栈 section after Fountain Flood (db://804 entry, [medium] tag, family/pattern suffix from problems row). Re-run regenerated doc 92 content (UPDATED + content_hash refresh).
+  - **MODIFIED** TASKS.md auto-projection.
+- **Sanity check result**: First run -- LC 1673 seed: INSERTED notes + family/pattern/fw_node + is_completed (DB backup .bak.20260506_224843); index seed: UPDATED doc 92 (hash changed) + UNCHANGED hub. Second run idempotent: LC 1673 [SKIP] already in target state, index [UNCHANGED] both surfaces. ruff check passed on both modified scripts. Verified problems.id=804 row state (notes_len=2024) and doc 92 Stack section now contains both Fountain Flood and LC 1673 entries with consistent family/pattern formatting.
+- **Status**: [DONE]
+- **Request**: task_db.py update T-P1-790 --status completed (already done)
