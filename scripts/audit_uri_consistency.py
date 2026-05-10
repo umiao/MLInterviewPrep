@@ -1,10 +1,12 @@
-"""T-P0-675 / T-P0-735: Audit drawer URI consistency in company_documents.content.
+"""T-P0-675 / T-P0-735 / T-P1-802: Audit drawer URI consistency in company_documents.content.
 
-Markdown drawer links inside `company_documents.content` use three schemes:
+Markdown drawer links inside `company_documents.content` use four schemes:
   - `db://N`     -- ProblemDrawer target; N must reference `problems.id`
   - `cd://N`     -- CompanyDocDrawer target; N must reference `company_documents.id`
   - `sd://<slug>` -- SystemDesignDrawer target; slug must reference
                     `system_designs.slug` (string-keyed, not numeric)
+  - `kg://N`     -- FrameworkNodeDrawer target; N must reference
+                    `framework_nodes.id` (T-P1-799 KG-INT B2a)
 
 Because `problems` and `company_documents` are independent auto-increment tables,
 the same numeric N can validly exist in BOTH tables. The URI scheme is the ONLY
@@ -14,6 +16,14 @@ link of each scheme, and verifies the target row exists in the correct table.
 For `sd://` cross-table confusion is physically impossible: `system_designs.slug`
 is a string slug while `problems.id` / `company_documents.id` are integers. The
 sd:// audit therefore only emits VALID or ERROR (dangling), never WARNING.
+
+For `kg://` cross-table confusion with db:// / cd:// is technically possible at
+the integer-key level, but kg:// targets a distinct table (`framework_nodes`)
+that is semantically separate from problems / company_documents -- a stray
+db://N or cd://N that happens to numerically match a framework_node id is NOT
+a "should-be-kg" corruption (it just means problems.id == framework_nodes.id by
+coincidence). The kg:// audit therefore only emits VALID or ERROR (dangling),
+matching the sd:// pattern.
 
 Outputs three result classes per (doc, link):
   - VALID   -- target found in the expected table.
@@ -55,6 +65,10 @@ DB_PATH = Path(__file__).resolve().parents[1] / "data" / "mle_prep.db"
 DB_LINK_RE = re.compile(r"db://(\d+)")
 CD_LINK_RE = re.compile(r"cd://(\d+)")
 SD_LINK_RE = re.compile(r"sd://([a-z0-9-]+)")
+# T-P1-802: kg://N mirrors the frontend MarkdownPreview regex
+# (^kg:\/\/(\d+)(?:#[^\s]*)?$). Optional #anchor fragment is stripped from
+# capture group 1, which is the integer framework_nodes.id only.
+KG_LINK_RE = re.compile(r"kg://(\d+)")
 
 
 @dataclass(frozen=True)
@@ -64,8 +78,8 @@ class Finding:
     doc_id: int
     doc_title: str
     company_id: int
-    scheme: str           # "db", "cd", or "sd"
-    target_id: int | str  # int for db://N / cd://N; str slug for sd://slug
+    scheme: str           # "db", "cd", "sd", or "kg"
+    target_id: int | str  # int for db://N / cd://N / kg://N; str slug for sd://slug
     severity: str         # "VALID", "WARNING", "ERROR"
     message: str
 
@@ -88,6 +102,24 @@ def _existing_ids(conn: sqlite3.Connection, table: str) -> set[int]:
     return {row[0] for row in cur.fetchall()}
 
 
+def _existing_ids_optional(conn: sqlite3.Connection, table: str) -> set[int]:
+    """Like `_existing_ids`, but returns empty set if the table is absent.
+
+    Used for tables introduced after the original schema (e.g. `framework_nodes`
+    for kg:// URIs in T-P1-802). Allows the audit to run cleanly against legacy
+    DBs and minimal test fixtures that pre-date the table -- any kg:// links
+    in such DBs will then be reported as dangling, which is the correct
+    semantic when the target catalog is unavailable.
+    """
+    cur = conn.execute(
+        "SELECT 1 FROM sqlite_master WHERE type='table' AND name=?",
+        (table,),
+    )
+    if cur.fetchone() is None:
+        return set()
+    return _existing_ids(conn, table)
+
+
 def _existing_slugs(conn: sqlite3.Connection, table: str, slug_col: str) -> set[str]:
     """Return the set of all `slug_col` values in `table`.
 
@@ -108,9 +140,10 @@ def _scan_doc(
     problem_ids: set[int],
     doc_ids: set[int],
     sd_slugs: set[str],
+    framework_node_ids: set[int],
     target_doc_id: int | None,
 ) -> list[Finding]:
-    """Extract every db://, cd://, sd:// link from `content` and classify each."""
+    """Extract every db://, cd://, sd://, kg:// link from `content` and classify each."""
     if target_doc_id is not None and doc_id != target_doc_id:
         return []
     findings: list[Finding] = []
@@ -187,6 +220,24 @@ def _scan_doc(
                 f"dangling: sd://{slug} not found in system_designs.slug",
             ))
 
+    # kg://N -- framework_nodes.id (T-P1-802 / KG-INT B2d). Distinct table from
+    # problems / company_documents; the only failure mode is dangling (the node
+    # was deleted, renumbered, or never seeded). Numeric collision with
+    # problems.id or company_documents.id is not treated as cross-table
+    # corruption because kg:// targets a semantically separate catalog.
+    for match in KG_LINK_RE.finditer(content):
+        n = int(match.group(1))
+        if n in framework_node_ids:
+            findings.append(Finding(
+                doc_id, doc_title, company_id, "kg", n, "VALID",
+                f"framework_nodes.id={n} resolved",
+            ))
+        else:
+            findings.append(Finding(
+                doc_id, doc_title, company_id, "kg", n, "ERROR",
+                f"dangling: kg://{n} not found in framework_nodes.id",
+            ))
+
     return findings
 
 
@@ -197,6 +248,7 @@ def audit(db_path: Path, target_doc_id: int | None = None) -> list[Finding]:
         problem_ids = _existing_ids(conn, "problems")
         doc_ids = _existing_ids(conn, "company_documents")
         sd_slugs = _existing_slugs(conn, "system_designs", "slug")
+        framework_node_ids = _existing_ids_optional(conn, "framework_nodes")
         cur = conn.execute(
             "SELECT id, title, company_id, content FROM company_documents"
         )
@@ -210,6 +262,7 @@ def audit(db_path: Path, target_doc_id: int | None = None) -> list[Finding]:
                 problem_ids=problem_ids,
                 doc_ids=doc_ids,
                 sd_slugs=sd_slugs,
+                framework_node_ids=framework_node_ids,
                 target_doc_id=target_doc_id,
             ))
         return all_findings
@@ -232,7 +285,9 @@ def _print_summary(findings: Iterable[Finding]) -> tuple[int, int, int]:
         elif f.severity == "ERROR":
             total_e += 1
     if not by_doc:
-        print("[INFO] no db://, cd://, or sd:// links found in any company_documents.")
+        print(
+            "[INFO] no db://, cd://, sd://, or kg:// links found in any company_documents."
+        )
         return total_v, total_w, total_e
 
     print("=" * 88)

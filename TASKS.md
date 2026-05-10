@@ -78,12 +78,6 @@ AC:
 - **Depends on**: None
 - **Description**: Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + variable naming/comments 太简单. Audit complete (see PROGRESS 2026-05-06 16:50 [planning] entry): identified 6 verbosity patterns (P1 section duplication, P2 AI-explainer padding, P3 tutorial-tone code comments, P4 retained code-review nits, P5 dense-prose lemmas, P6 worked-example tables). Concrete deltas drafted: LC 465 5375c -> ~2400-2800c, LC 1723 5604c -> ~3000c. Propagation surface clean (only doc 47 + 66 link, no SD/framework/BQ refs). Awaiting user answers to 3 open Qs before executing: (1) cut depth approval, (2) voice anchor (LC 322 vs LC 426/1293), (3) drop Approach C in LC 1723. On approval: execute as seed_pinterest_lc_voice_refactor_465_1723_20260506.py with sentinel-guarded UPDATE on problems.notes for ids 214 + 1067; verify byte-level via re-run [SKIP], API smoke, drawer render.
 
-#### T-P1-802: [KG-INT B2d] audit_uri_consistency.py: extend with kg:// scheme support
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-799
-- **Description**: scripts/audit_uri_consistency.py currently covers db:// cd:// sd:// (see file's docstring lines 1-30). Add kg://N regex + check N exists in framework_nodes.id. Surface as 4th audit class with VALID/ERROR (no cross-table WARNING since kg targets a distinct table). Update docstring + --json output schema. AC: audit script processes a company_documents row containing kg://1 link with a valid framework_node id=1, reports VALID; with id=99999 (nonexistent) reports ERROR.
-
 #### T-P1-803: [KG-INT B3-1] Shared substrate: behavioral patterns -> meta-prep/behavioral-clusters
 - **Priority**: P1
 - **Complexity**: M
@@ -545,6 +539,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 724 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-10** -- T-P1-802: [KG-INT B2d] audit_uri_consistency.py: extend with kg:// scheme support. scripts/audit_uri_consistency.py currently covers db:// cd:// sd:// (see file's docstring lines 1-30). Add kg://N regex 
 - [x] **2026-05-10** -- T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold. Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple cau
 - [x] **2026-05-10** -- T-P1-800: [KG-INT B2b] Add 'meta-prep' pillar + 5 sub-node stubs. Idempotent seed scripts/seed_meta_prep_pillar.py: insert depth-0 node path='meta-prep' (title 'Cross-Company Interview M
 - [x] **2026-05-10** -- T-P1-799: [KG-INT B2a] kg://N URI scheme: frontend parser + dispatch callback. src/frontend/src/components/ui/MarkdownPreview.tsx: add 5th regex ^kg://(\d+)(?:#[^\s]*)?$ + onKgLinkClick(nodeId) callb
