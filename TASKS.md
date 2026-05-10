@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-809: [KG-INT B4a-lyra] Lyra dry-run: archive plan + causal-proof matrix
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
-- **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Lyra. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-lyra_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -516,6 +510,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-10** -- T-P1-797: [KG-INT A2] Frontend: replace hasPrepNotes with has_meaningful_note + tooltip + test. src/frontend/src/pages/Companies.tsx:509-521: replace hasPrepNotes with has_meaningful_note from API response. Keep inPi
 - [x] **2026-05-10** -- T-P1-796: [KG-INT A1] Backend: GET /companies returns has_meaningful_note bool. Implement composite threshold rule in src/backend/routers/companies.py: (prep_notes >= T_PREP) OR (notes >= T_NOTES AND 
 - [x] **2026-05-10** -- T-P1-795: [KG-INT A0] EDA: red-dot threshold percentile distribution + recommendation. Compute P25/P50/P75/P95 of length(prep_notes), length(notes), length(company_documents.content), length(*_company_tags.n
+- [x] **2026-05-10** -- T-P0-809: [KG-INT B4a-lyra] Lyra dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Lyra. Read all 6 note-surfaces for company_id=see aud
 - [x] **2026-05-10** -- T-P0-808: [KG-INT B4a-google] Google dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Google. Read all 6 note-surfaces for company_id=see a
 - [x] **2026-05-06** -- T-P1-794: LC 312 Burst Balloons interval-DP notes + Google R2 index entry. Discord drop msg 1501832530905661570: classic interval DP, reverse enumeration of last balloon to burst.
 - [x] **2026-05-06** -- T-P1-793: LC 496 简略题解 + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501827921680138421: simple single-solution notes for LC 496 (problems.id=299) + add to Google R2 Codin
