@@ -499,14 +499,14 @@ function CompanyDetailPanel({
 
 /* ---------- Company Card ---------- */
 
-function CompanyCard({
+export function CompanyCard({
   company,
   onClick,
 }: {
   company: Company;
   onClick: () => void;
 }) {
-  const hasPrepNotes = !!company.prep_notes?.trim();
+  const hasMeaningfulNote = company.has_meaningful_note === true;
   const inPipeline = company.status !== "rejected";
   return (
     <button
@@ -516,8 +516,11 @@ function CompanyCard({
       <div className="flex items-start justify-between gap-2">
         <span className="font-medium text-sm truncate flex items-center gap-1.5">
           {company.name}
-          {hasPrepNotes && inPipeline && (
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full shrink-0" title="Has prep notes" />
+          {hasMeaningfulNote && inPipeline && (
+            <span
+              className="inline-block w-2 h-2 bg-red-500 rounded-full shrink-0"
+              title="Has prep notes / docs / tagged content"
+            />
           )}
         </span>
         {company.group_tag && (

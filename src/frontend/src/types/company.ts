@@ -14,6 +14,7 @@ export interface Company {
   applied_at: string | null;
   notes: string | null;
   prep_notes: string | null;
+  has_meaningful_note?: boolean;
 }
 
 export interface CompanyWithWeights extends Company {
