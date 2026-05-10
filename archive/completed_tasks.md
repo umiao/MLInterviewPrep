@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 724 completed tasks archived as of latest archival.
+> 740 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1083,3 +1083,19 @@ Steps:
 - [x] **2026-05-06** -- T-P1-789: Add Fountain Flood (Google R2 custom) 题解 + index. Discord 2026-05-07 msg 1501814166435139644 attached message.txt (~4KB) with full Chinese 题解 for custom Google R2 'Founta
 - [x] **2026-05-05** -- T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation). Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
 LR golden (scripts/seed_linear_regress
+- [x] **2026-05-10** -- T-P0-808: [KG-INT B4a-google] Google dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Google. Read all 6 note-surfaces for company_id=see a
+- [x] **2026-05-10** -- T-P0-809: [KG-INT B4a-lyra] Lyra dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Lyra. Read all 6 note-surfaces for company_id=see aud
+- [x] **2026-05-10** -- T-P0-810: [KG-INT B4a-pinterest-toc] Pinterest-TOC dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-TOC. Read all 6 note-surfaces for company_i
+- [x] **2026-05-06** -- T-P1-790: LC 1673 notes + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501821359590867046: per-problem notes for LC 1673 (problems.id=804) + new entry in Google R2 Coding In
+- [x] **2026-05-06** -- T-P1-791: Custom Square Islands problem + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501824183984717895: user-provided 题解 for custom Google R2 problem 'Number of Square Islands'. INSERT n
+- [x] **2026-05-06** -- T-P1-792: Custom 文件系统总大小计算 problem + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501825987753672826: tree-DFS custom problem covering澄清问题 + 4-level evolution (DFS w/ cycle detect -> s
+- [x] **2026-05-06** -- T-P1-793: LC 496 简略题解 + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501827921680138421: simple single-solution notes for LC 496 (problems.id=299) + add to Google R2 Codin
+- [x] **2026-05-06** -- T-P1-794: LC 312 Burst Balloons interval-DP notes + Google R2 index entry. Discord drop msg 1501832530905661570: classic interval DP, reverse enumeration of last balloon to burst.
+- [x] **2026-05-10** -- T-P1-795: [KG-INT A0] EDA: red-dot threshold percentile distribution + recommendation. Compute P25/P50/P75/P95 of length(prep_notes), length(notes), length(company_documents.content), length(*_company_tags.n
+- [x] **2026-05-10** -- T-P1-796: [KG-INT A1] Backend: GET /companies returns has_meaningful_note bool. Implement composite threshold rule in src/backend/routers/companies.py: (prep_notes >= T_PREP) OR (notes >= T_NOTES AND 
+- [x] **2026-05-10** -- T-P1-797: [KG-INT A2] Frontend: replace hasPrepNotes with has_meaningful_note + tooltip + test. src/frontend/src/pages/Companies.tsx:509-521: replace hasPrepNotes with has_meaningful_note from API response. Keep inPi
+- [x] **2026-05-10** -- T-P1-798: [KG-INT B1] Full per-company audit dump across 6 note surfaces. Script scripts/_audit_company_kg_internalization.py: for each of 32 companies, dump bytes/topics/KG-coverage/drawer-link
+- [x] **2026-05-10** -- T-P1-799: [KG-INT B2a] kg://N URI scheme: frontend parser + dispatch callback. src/frontend/src/components/ui/MarkdownPreview.tsx: add 5th regex ^kg://(\d+)(?:#[^\s]*)?$ + onKgLinkClick(nodeId) callb
+- [x] **2026-05-10** -- T-P1-800: [KG-INT B2b] Add 'meta-prep' pillar + 5 sub-node stubs. Idempotent seed scripts/seed_meta_prep_pillar.py: insert depth-0 node path='meta-prep' (title 'Cross-Company Interview M
+- [x] **2026-05-10** -- T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold. Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple cau
+- [x] **2026-05-10** -- T-P1-802: [KG-INT B2d] audit_uri_consistency.py: extend with kg:// scheme support. scripts/audit_uri_consistency.py currently covers db:// cd:// sd:// (see file's docstring lines 1-30). Add kg://N regex 

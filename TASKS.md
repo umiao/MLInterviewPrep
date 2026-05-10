@@ -69,7 +69,7 @@ AC:
 #### T-P1-821: [KG-INT B4-promotion] Consolidate flagged promotion candidates -> meta-prep updates
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P0-808, T-P0-809, T-P0-810, T-P0-811, T-P0-812, T-P0-813, T-P0-814, T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
+- **Depends on**: T-P0-811, T-P0-812, T-P0-813, T-P0-814, T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
 ### P2 -- Nice to Have
@@ -112,52 +112,46 @@ AC:
 
 ## Blocked
 
-#### T-P0-810: [KG-INT B4a-pinterest-toc] Pinterest-TOC dry-run: archive plan + causal-proof matrix
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
-- **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-TOC. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-pinterest-toc_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
-
 #### T-P0-811: [KG-INT B4a-pinterest-concepts] Pinterest-CONCEPTS dry-run: archive plan + causal-proof matrix
 - **Priority**: P0
 - **Complexity**: L
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-CONCEPTS. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-pinterest-concepts_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P0-812: [KG-INT B4a-pinterest-prep] Pinterest-prep dry-run: archive plan + causal-proof matrix
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-prep. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-pinterest-prep_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P0-813: [KG-INT B4a-uber] Uber dry-run: archive plan + causal-proof matrix
 - **Priority**: P0
 - **Complexity**: L
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Uber. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-uber_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix
 - **Priority**: P0
 - **Complexity**: L
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-meta_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P0-822: [KG-INT B4b-google] Google execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: L
-- **Depends on**: T-P0-808
+- **Depends on**: None
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-google_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-google_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-google_2026-05-10.md, (3) move source seed scripts (scripts/seed_google_*.py / scripts/content_*google*.py / scripts/patch_google_*.py) -> archive/seed_scripts/B4a-google/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_google_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-823: [KG-INT B4b-lyra] Lyra execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-809, T-P0-822
+- **Depends on**: T-P0-822
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-lyra_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-lyra_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-lyra_2026-05-10.md, (3) move source seed scripts (scripts/seed_lyra_*.py / scripts/content_*lyra*.py / scripts/patch_lyra_*.py) -> archive/seed_scripts/B4a-lyra/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_lyra_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-824: [KG-INT B4b-pinterest-toc] Pinterest-TOC execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-810, T-P0-823
+- **Depends on**: T-P0-823
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-pinterest-toc_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-toc_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-toc_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_toc_*.py / scripts/content_*pinterest_toc*.py / scripts/patch_pinterest_toc_*.py) -> archive/seed_scripts/B4a-pinterest-toc/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_toc_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-825: [KG-INT B4b-pinterest-concepts] Pinterest-CONCEPTS execute: hard-archive + skeleton seed + acceptance proof
@@ -336,37 +330,37 @@ COMPLEXITY: M
 #### T-P1-815: [KG-INT B4a-adobe] Adobe dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Adobe. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-adobe_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P1-816: [KG-INT B4a-linkedin] LinkedIn dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for LinkedIn. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-linkedin_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P1-817: [KG-INT B4a-tiktok] TikTok dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for TikTok. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-tiktok_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P1-818: [KG-INT B4a-slack] Slack dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Slack. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-slack_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P1-819: [KG-INT B4a-doordash] DoorDash dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: S
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for DoorDash. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-doordash_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P1-820: [KG-INT B4a-parspec] PARSPEC dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: S
-- **Depends on**: T-P1-798, T-P1-799, T-P1-800, T-P1-801, T-P1-802, T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
+- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for PARSPEC. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-parspec_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
 #### T-P1-829: [KG-INT B4b-adobe] Adobe execute: hard-archive + skeleton seed + acceptance proof
@@ -495,25 +489,10 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 724 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 740 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-10** -- T-P1-807: [KG-INT B3-5] Shared substrate: onsite loop templates -> meta-prep/onsite-loop-templates. Extract general onsite loop structures (4-round VO, hiring committee, team match) appearing in >=3 P0+P1 docs. AC: onsit
 - [x] **2026-05-10** -- T-P1-806: [KG-INT B3-4] Shared substrate: LC keywords -> meta-prep/lc-keyword-checklists. Cross-company LC keyword frequency: which problem types/tags appear in >=3 P0+P1 prep docs. Build per-tag checklist + fr
 - [x] **2026-05-10** -- T-P1-805: [KG-INT B3-3] Shared substrate: AI-native code-pad -> meta-prep/code-pad-best-practices. Extract AI-native coding playbook (Meta-style 3-step prompt drill, AI tool usage best practices) from companies whose in
 - [x] **2026-05-10** -- T-P1-804: [KG-INT B3-2] Shared substrate: SD vocab -> meta-prep/system-design-must-knows. Same protocol as B3-1 but for system-design vocabulary: ANN/HNSW/IVF/PQ, LTR/NDCG, MMoE/PLE, calibration metrics, etc. E
 - [x] **2026-05-10** -- T-P1-803: [KG-INT B3-1] Shared substrate: behavioral patterns -> meta-prep/behavioral-clusters. Scan all 11 P0+P1 companies' surfaces (prep_notes, notes, company_documents). Extract behavioral patterns appearing in >
-- [x] **2026-05-10** -- T-P1-802: [KG-INT B2d] audit_uri_consistency.py: extend with kg:// scheme support. scripts/audit_uri_consistency.py currently covers db:// cd:// sd:// (see file's docstring lines 1-30). Add kg://N regex 
-- [x] **2026-05-10** -- T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold. Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple cau
-- [x] **2026-05-10** -- T-P1-800: [KG-INT B2b] Add 'meta-prep' pillar + 5 sub-node stubs. Idempotent seed scripts/seed_meta_prep_pillar.py: insert depth-0 node path='meta-prep' (title 'Cross-Company Interview M
-- [x] **2026-05-10** -- T-P1-799: [KG-INT B2a] kg://N URI scheme: frontend parser + dispatch callback. src/frontend/src/components/ui/MarkdownPreview.tsx: add 5th regex ^kg://(\d+)(?:#[^\s]*)?$ + onKgLinkClick(nodeId) callb
-- [x] **2026-05-10** -- T-P1-798: [KG-INT B1] Full per-company audit dump across 6 note surfaces. Script scripts/_audit_company_kg_internalization.py: for each of 32 companies, dump bytes/topics/KG-coverage/drawer-link
-- [x] **2026-05-10** -- T-P1-797: [KG-INT A2] Frontend: replace hasPrepNotes with has_meaningful_note + tooltip + test. src/frontend/src/pages/Companies.tsx:509-521: replace hasPrepNotes with has_meaningful_note from API response. Keep inPi
-- [x] **2026-05-10** -- T-P1-796: [KG-INT A1] Backend: GET /companies returns has_meaningful_note bool. Implement composite threshold rule in src/backend/routers/companies.py: (prep_notes >= T_PREP) OR (notes >= T_NOTES AND 
-- [x] **2026-05-10** -- T-P1-795: [KG-INT A0] EDA: red-dot threshold percentile distribution + recommendation. Compute P25/P50/P75/P95 of length(prep_notes), length(notes), length(company_documents.content), length(*_company_tags.n
-- [x] **2026-05-10** -- T-P0-809: [KG-INT B4a-lyra] Lyra dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Lyra. Read all 6 note-surfaces for company_id=see aud
-- [x] **2026-05-10** -- T-P0-808: [KG-INT B4a-google] Google dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Google. Read all 6 note-surfaces for company_id=see a
-- [x] **2026-05-06** -- T-P1-794: LC 312 Burst Balloons interval-DP notes + Google R2 index entry. Discord drop msg 1501832530905661570: classic interval DP, reverse enumeration of last balloon to burst.
-- [x] **2026-05-06** -- T-P1-793: LC 496 简略题解 + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501827921680138421: simple single-solution notes for LC 496 (problems.id=299) + add to Google R2 Codin
-- [x] **2026-05-06** -- T-P1-792: Custom 文件系统总大小计算 problem + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501825987753672826: tree-DFS custom problem covering澄清问题 + 4-level evolution (DFS w/ cycle detect -> s
-- [x] **2026-05-06** -- T-P1-791: Custom Square Islands problem + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501824183984717895: user-provided 题解 for custom Google R2 problem 'Number of Square Islands'. INSERT n
-- [x] **2026-05-06** -- T-P1-790: LC 1673 notes + Google R2 index entry (Discord 2026-05-07). Discord drop msg 1501821359590867046: per-problem notes for LC 1673 (problems.id=804) + new entry in Google R2 Coding In
