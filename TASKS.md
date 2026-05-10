@@ -90,12 +90,6 @@ AC:
 - **Depends on**: None
 - **Description**: Idempotent seed scripts/seed_meta_prep_pillar.py: insert depth-0 node path='meta-prep' (title 'Cross-Company Interview Meta-Knowledge') + 5 depth-1 children: meta-prep/behavioral-clusters, meta-prep/lc-keyword-checklists, meta-prep/system-design-must-knows, meta-prep/onsite-loop-templates, meta-prep/code-pad-best-practices. Stubs only (one-line description each); B3 fills content. AC: framework_nodes count +6; KG view at /kg/graph shows new pillar.
 
-#### T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple causal-proof: (原 prose 摘要, 原覆盖, 现迁移到, 可验证查询)). Write docs/workflow/promotion_criteria.md: locks 'appears in >=3 of 11 P0+P1 companies AND wording can be de-companied' as the meta-prep promotion threshold. Create archive/company_internalized/.gitkeep + archive/seed_scripts/.gitkeep. AC: 2 protocol docs committed; archive/ subdirs exist.
-
 #### T-P1-802: [KG-INT B2d] audit_uri_consistency.py: extend with kg:// scheme support
 - **Priority**: P1
 - **Complexity**: S
@@ -563,6 +557,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 724 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-10** -- T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold. Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple cau
 - [x] **2026-05-10** -- T-P1-798: [KG-INT B1] Full per-company audit dump across 6 note surfaces. Script scripts/_audit_company_kg_internalization.py: for each of 32 companies, dump bytes/topics/KG-coverage/drawer-link
 - [x] **2026-05-10** -- T-P1-797: [KG-INT A2] Frontend: replace hasPrepNotes with has_meaningful_note + tooltip + test. src/frontend/src/pages/Companies.tsx:509-521: replace hasPrepNotes with has_meaningful_note from API response. Keep inPi
 - [x] **2026-05-10** -- T-P1-796: [KG-INT A1] Backend: GET /companies returns has_meaningful_note bool. Implement composite threshold rule in src/backend/routers/companies.py: (prep_notes >= T_PREP) OR (notes >= T_NOTES AND 
