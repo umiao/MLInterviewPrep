@@ -11,10 +11,11 @@ const EXPECTED_FULL_ORDER = [
   "pillar6",
   "pillar7",
   "pillar8",
+  "meta-prep",
 ];
 
 describe("PILLAR_ORDER map", () => {
-  it("contains step=10 entries with ml-fundamentals at 25 between pillar2 and pillar3", () => {
+  it("contains step=10 entries with ml-fundamentals at 25 and meta-prep at 85", () => {
     expect(PILLAR_ORDER).toEqual({
       pillar1: 10,
       pillar2: 20,
@@ -25,6 +26,7 @@ describe("PILLAR_ORDER map", () => {
       pillar6: 60,
       pillar7: 70,
       pillar8: 80,
+      "meta-prep": 85,
     });
   });
 
@@ -35,6 +37,10 @@ describe("PILLAR_ORDER map", () => {
     expect(PILLAR_ORDER["ml-fundamentals"]).toBeLessThan(PILLAR_ORDER.pillar3);
   });
 
+  it("ranks meta-prep strictly after pillar8", () => {
+    expect(PILLAR_ORDER["meta-prep"]).toBeGreaterThan(PILLAR_ORDER.pillar8);
+  });
+
   it("uses step=10 numbering for the eight numeric pillars", () => {
     for (let i = 1; i <= 8; i++) {
       expect(PILLAR_ORDER[`pillar${i}`]).toBe(i * 10);
@@ -43,7 +49,7 @@ describe("PILLAR_ORDER map", () => {
 });
 
 describe("pillarSortKey full-order behavior (AC3)", () => {
-  it("sorts the full known set into pillar1, pillar2, ml-fundamentals, pillar3..pillar8", () => {
+  it("sorts the full known set into pillar1, pillar2, ml-fundamentals, pillar3..pillar8, meta-prep", () => {
     const shuffled = [
       "pillar7",
       "pillar3",
@@ -51,6 +57,7 @@ describe("pillarSortKey full-order behavior (AC3)", () => {
       "pillar1",
       "pillar5",
       "pillar2",
+      "meta-prep",
       "pillar8",
       "pillar4",
       "pillar6",

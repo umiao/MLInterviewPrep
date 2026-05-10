@@ -11,6 +11,7 @@ const KNOWN_PILLAR_KEYS = [
   "pillar7",
   "pillar8",
   "ml-fundamentals",
+  "meta-prep",
 ] as const;
 
 const FALLBACK_NAME = "Other";
@@ -38,6 +39,22 @@ describe("PILLAR_STYLES coverage", () => {
     const target = PILLAR_STYLES["ml-fundamentals"].border;
     for (const key of KNOWN_PILLAR_KEYS) {
       if (key === "ml-fundamentals") continue;
+      expect(PILLAR_STYLES[key].border).not.toBe(target);
+    }
+  });
+
+  it("meta-prep uses fuchsia palette", () => {
+    expect(PILLAR_STYLES["meta-prep"]).toEqual({
+      border: "#c026d3",
+      bg: "#fdf4ff",
+      name: "Cross-Company Meta-Prep",
+    });
+  });
+
+  it("meta-prep border is distinct from every other pillar border", () => {
+    const target = PILLAR_STYLES["meta-prep"].border;
+    for (const key of KNOWN_PILLAR_KEYS) {
+      if (key === "meta-prep") continue;
       expect(PILLAR_STYLES[key].border).not.toBe(target);
     }
   });

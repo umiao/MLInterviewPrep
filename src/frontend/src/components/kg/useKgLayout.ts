@@ -90,6 +90,7 @@ export const PILLAR_ORDER: Record<string, number> = {
   pillar6: 60,
   pillar7: 70,
   pillar8: 80,
+  "meta-prep": 85,
 };
 
 const UNKNOWN_PILLAR_RANK = 9999;

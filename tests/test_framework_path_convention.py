@@ -33,11 +33,14 @@ DB_PATH = REPO_ROOT / "data" / "mle_prep.db"
 
 # Permanent registry of ratified slash-separated top-level taxonomies.
 # T-P2-614 (KG-DESIGN-DUAL-VIEW) ratified ml-fundamentals as a permanent root
-# alongside the dot-separated pillar1..pillar8. To add a new entry, follow
-# Section 2 of docs/design/kg_dual_view_decision_20260425.md (distinct
-# cognitive mode + non-overlapping leaf set OR explicit alternate-projection)
-# AND extend frontend PILLAR_STYLES + PILLAR_ORDER in the same change set.
-RATIFIED_SLASH_ROOTS: set[str] = {"ml-fundamentals"}
+# alongside the dot-separated pillar1..pillar8. T-P1-800 (KG-INT B2b) ratified
+# meta-prep as the cross-company synthesis root per Section 2 Criterion A
+# of docs/design/kg_dual_view_decision_20260425.md (decision doc:
+# docs/design/kg_meta_prep_root_decision_20260510.md). To add a new entry,
+# follow Section 2 (distinct cognitive mode + non-overlapping leaf set OR
+# explicit alternate-projection) AND extend frontend PILLAR_STYLES +
+# PILLAR_ORDER in the same change set.
+RATIFIED_SLASH_ROOTS: set[str] = {"ml-fundamentals", "meta-prep"}
 
 pytestmark = pytest.mark.skipif(
     not DB_PATH.exists(), reason="runtime DB data/mle_prep.db not present"

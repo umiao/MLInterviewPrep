@@ -22,6 +22,11 @@ export const PILLAR_STYLES: Record<string, PillarStyle> = {
   pillar6: { border: "#e11d48", bg: "#fff1f2", name: "Deep Learning & LLM" },
   pillar7: { border: "#0d9488", bg: "#f0fdfa", name: "Math & Statistics" },
   pillar8: { border: "#ea580c", bg: "#fff7ed", name: "Behavioral & Leadership" },
+  "meta-prep": {
+    border: "#c026d3",
+    bg: "#fdf4ff",
+    name: "Cross-Company Meta-Prep",
+  },
 };
 
 const FALLBACK_STYLE: PillarStyle = {
