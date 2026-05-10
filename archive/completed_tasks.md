@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 687 completed tasks archived as of latest archival.
+> 724 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1028,3 +1028,58 @@ Con
 in both LR golden + LogReg golden, but add 
 - [x] **2026-05-03** -- T-P1-729: Card Game Sum-15 笔记 v2 重写: 修硬伤(state space 数学/百分比/反例) + 加 Q5/§10 代码骨架/AI 反向坑 +2 + 时间预算. User Discord critique 9KB. 改进 db://1105 description (6.5KB->12.4KB) + doc 90 cheat-sheet card §8 + 共通考点 §3。重点: state spa
 - [x] **2026-05-03** -- T-P2-714: [AR-15] Bump default CLAUDE_P_TIMEOUT 600s -> 900s in autonomous_run.sh wrapper. **Goal**: Raise default CLAUDE_P_TIMEOUT from 600s -> 900s. Locked at 900s (NOT 1200s) per design review: AR-12 +300s ex
+- [x] **2026-05-04** -- T-P0-737: [META-ANC-9-fix] Escape pipe in doc=90 table row 7 (Find Words O-complexity). Discord ad-hoc request 2026-05-04: doc=90 (Meta AI-Native Coding Inventory hub, company_id=31) row 7 broken because $O(\
+- [x] **2026-05-04** -- T-P1-730: Pinterest VO 2026-05-05/06 interviewer roster + CoderPad URL sync (emails 5+6). Update interview_events for Pinterest VO Day 1+2 (5 rounds) per latest schedule emails: Day 1 R1 interviewer Yiyang Zhan
+- [x] **2026-05-04** -- T-P1-738: Card Game Sum-15 (db://1105 + cd://90 §8) major refactor: dedup/tablify/code-up/kill puffery. User-driven 2026-05-04: compress problems.id=1105 description from 12379→6151 chars; sync §8 card in cd://90; fix '12 对'
+- [x] **2026-05-05** -- T-P1-739: [Google] Add 蛋糕水平分割线 (sweep line + 离散化 + 线段树 进阶精讲) to R2 Coding Index. User Discord drop 2026-05-05: add new Google custom problem with shallow-easy 'advanced segment tree' deep-dive. Created
+- [x] **2026-05-05** -- T-P1-740: [PINT-CONCEPTS-A] Create concept-doc skeleton + register seed + fix display_order alignment. Goal: bootstrap a new Pinterest-tab system-design doc that will house all core-concept deep-dives (no inline body yet, s
+- [x] **2026-05-05** -- T-P1-741: [PINT-CONCEPTS-B] Concept doc: fill Section 1 - Multi-Task & Ranking Architectures. Fill the body of `## Multi-Task & Ranking Architectures` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms c
+- [x] **2026-05-05** -- T-P1-742: [PINT-CONCEPTS-C] Concept doc: fill Section 2 - Retrieval & Approximate Nearest Neighbor. Fill the body of `## Retrieval & Approximate Nearest Neighbor` in `docs/company/pinterest/system_design_concepts.md`.
+
+T
+- [x] **2026-05-05** -- T-P1-743: [PINT-CONCEPTS-D] Concept doc: fill Section 3 - Learning-to-Rank Methods. Fill the body of `## Learning-to-Rank Methods` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: LT
+- [x] **2026-05-05** -- T-P1-744: [PINT-CONCEPTS-E] Concept doc: fill Section 4 - Evaluation Metrics. Fill the body of `## Evaluation Metrics` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: NDCG@K, 
+- [x] **2026-05-05** -- T-P1-745: [PINT-CONCEPTS-F] Concept doc: fill Section 5 - Debiasing & LLM Fine-Tuning. Fill the body of `## Debiasing & LLM Fine-Tuning` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered:
+- [x] **2026-05-05** -- T-P1-746: [PINT-CONCEPTS-G] Concept doc: fill Section 6 - Infrastructure & Business KPIs. Fill the body of `## Infrastructure & Business KPIs` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms cover
+- [x] **2026-05-05** -- T-P1-747: [PINT-CONCEPTS-H] Concept doc: fill Section 7 - Pinterest-Specific Systems. Fill the body of `## Pinterest-Specific Systems` in `docs/company/pinterest/system_design_concepts.md`.
+
+Terms covered: 
+- [x] **2026-05-05** -- T-P1-748: [PINT-CONCEPTS-I] Inline acronym expansion: pinterest-ad-ctr. In `docs/company/pinterest/system_design_ad_ctr.md` (system_designs.id=29), locate the FIRST occurrence of each acronym 
+- [x] **2026-05-05** -- T-P1-749: [PINT-CONCEPTS-J] Inline acronym expansion: pinterest-embeddings. In `docs/company/pinterest/system_design_embeddings.md` (system_designs.id=30), locate the FIRST occurrence of each acro
+- [x] **2026-05-05** -- T-P1-750: [PINT-CONCEPTS-K] Inline acronym expansion: pinterest-chatbot-pins. In `docs/company/pinterest/system_design_chatbot_pins.md` (system_designs.id=31), locate the FIRST occurrence of each ac
+- [x] **2026-05-05** -- T-P1-751: [PINT-CONCEPTS-L] Inline acronym expansion: pinterest-pin-ranking. In `docs/company/pinterest/system_design_pin_ranking.md` (system_designs.id=32), locate the FIRST occurrence of each acr
+- [x] **2026-05-05** -- T-P1-752: [PINT-CONCEPTS-M] Inline acronym expansion: pinterest-pins-search. In `docs/company/pinterest/system_design_pins_search.md` (system_designs.id=33), locate the FIRST occurrence of each acr
+- [x] **2026-05-05** -- T-P1-753: [PINT-CONCEPTS-N] Inline acronym expansion: pinterest-notification-reco. In `docs/company/pinterest/system_design_notification_reco.md` (system_designs.id=34), locate the FIRST occurrence of ea
+- [x] **2026-05-05** -- T-P1-754: [PINT-CONCEPTS-O] Inline acronym expansion: pinterest-catalog-bulk-update. In `docs/company/pinterest/system_design_catalog_bulk_update.md` (system_designs.id=35), locate the FIRST occurrence of 
+- [x] **2026-05-05** -- T-P1-772: [PINT-CONCEPTS-P] URI consistency audit + Pinterest tab smoke + close-out. Final QA pass after all section + inline tasks complete.
+
+Steps:
+1. Run `python scripts/audit_uri_consistency.py` (per m
+- [x] **2026-05-06** -- T-P1-773: Add Pinterest screening problem 'Reverse Count and Say' (custom, no LC#). Discord ad-hoc 2026-05-06: insert custom problem with Chinese description+notes (user-provided Python backtracking solut
+- [x] **2026-05-06** -- T-P1-774: Pinterest tag + 题解 for LC 426 + LC 1293; append to LC index. Discord ad-hoc 2026-05-06: fill notes (Chinese 题解 with best-practice / user-provided code), merge Pinterest into company
+- [x] **2026-05-06** -- T-P1-775: Add PARSPEC company + 2026-05-08 phone screen to dashboard. Discord ad-hoc 2026-05-06: insert new companies row (PARSPEC, status=phone_screen) and interview_events row (Fri 2026-05
+- [x] **2026-05-06** -- T-P1-776: Sync LC 426 + LC 1293 to Pinterest card_index (BFS + DFS cards). User correction msg 1501611345597169696: my earlier T-P1-774 batch updated LC index doc 47 but skipped card_index doc 66
+- [x] **2026-05-06** -- T-P1-778: Add UAG-valid-binary-tree problem to Google R2 Coding Index. User Discord 2026-05-07 msg 1501766944410439730: new R2 Coding 题解 -- judge undirected acyclic graph as valid binary tree
+- [x] **2026-05-06** -- T-P1-779: Add LC 450 Delete Node in BST 题解 + tag Google + index. User Discord 2026-05-07 msg 1501769443758575656: previous request to add LC 450 to Google R2 Coding Index didn't land. C
+- [x] **2026-05-06** -- T-P1-780: Add LC 289 Game of Life 题解 + tag Google + index. User Discord 2026-05-07 msg 1501771626813849741: same treatment as LC 450 -- distill user's two-pass set-based solution 
+- [x] **2026-05-06** -- T-P1-781: Add door-access simulation 题解 + tag Google + index. User Discord 2026-05-07 msg 1501776064647663656 attached message.txt with full Chinese 题解 for custom Google problem 门禁通行
+- [x] **2026-05-06** -- T-P1-782: Add Necklace 均分 (D/R 两人公平切分) 题解 + Google + index. User Discord 2026-05-07 msg 1501779766720594093 attached message.txt with full Chinese 题解 for custom Google problem: spl
+- [x] **2026-05-06** -- T-P1-783: Add LC 1606 Find Servers That Handled Most Number of Requests 题解 + Google + index. Discord 2026-05-07 msg 1501791307402838107. User dropped full Chinese 题解 (two methods: SortedList+heap with bisect-wrapa
+- [x] **2026-05-06** -- T-P1-784: Add LC 777 Swap Adjacent in LR String 题解 + Google + index. Discord 2026-05-07 msg 1501803587943010336. User's filter-X-then-position-invariant solution: filter out X chars keeping
+- [x] **2026-05-06** -- T-P1-785: Add LC 276 Paint Fence 题解 + 环形 follow-up + Google + index. Discord 2026-05-07 msg 1501806250248376431 attachment ~7KB. User-provided 题解 covers: (1) linear version derivation from 
+- [x] **2026-05-06** -- T-P1-786: Add LC 1101 Earliest Moment Everyone Become Friends 题解 + breakup follow-up + Google + index. Discord 2026-05-07 msg 1501807001548623912. User asked for short 题解 (vanilla DSU) plus a follow-up: allow friend breakup
+- [x] **2026-05-06** -- T-P1-787: Index LC 778 Swim in Rising Water under Google R2 + family/pattern upgrade. Discord 2026-05-07 msg 1501810532360130685 'same as before, add LC 778 to the Google index'. LC 778 row already exists (
+- [x] **2026-05-06** -- T-P1-788: Add 字符串至多一次交换判等 (Google R1) 题解 + index. Discord 2026-05-07 msg 1501812416131108915. User-described custom Google R1 problem: given two strings, return True if s
+- [x] **2026-05-06** -- T-P1-789: Add Fountain Flood (Google R2 custom) 题解 + index. Discord 2026-05-07 msg 1501814166435139644 attached message.txt (~4KB) with full Chinese 题解 for custom Google R2 'Founta
+- [x] **2026-05-05** -- T-P2-725: [MLI-CONTENT] LogReg golden: structural alignment with LR golden (numbered subsections + notation). Optional structural / stylistic alignment of docs/drafts/logreg_golden_v1.md with
+LR golden (scripts/seed_linear_regress
