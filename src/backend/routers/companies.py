@@ -27,12 +27,23 @@ from src.backend.schemas.company import (
     CompanyUpdate,
     TopicWeightCreate,
 )
+from src.backend.services.meaningful_note import (
+    compute_meaningful_note_map,
+    has_meaningful_note,
+)
 
 router = APIRouter()
 
 
-def _company_to_response(c: Company) -> dict:
-    """Convert Company ORM to response dict."""
+def _company_to_response(c: Company, meaningful: bool = False) -> dict:
+    """Convert Company ORM to response dict.
+
+    Args:
+        c: Company ORM instance.
+        meaningful: Pre-computed ``has_meaningful_note`` flag. Callers that
+            return many companies should batch via ``compute_meaningful_note_map``;
+            single-row endpoints can call ``has_meaningful_note(db, c.id)``.
+    """
     return {
         "id": c.id,
         "name": c.name,
@@ -42,6 +53,7 @@ def _company_to_response(c: Company) -> dict:
         "applied_at": c.applied_at,
         "notes": c.notes,
         "prep_notes": c.prep_notes,
+        "has_meaningful_note": meaningful,
     }
 
 
@@ -51,13 +63,18 @@ def list_companies(
     group_tag: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ) -> list[dict]:
-    """List companies with optional filters."""
+    """List companies with optional filters and ``has_meaningful_note`` flag."""
     query = db.query(Company)
     if status:
         query = query.filter(Company.status == status)
     if group_tag:
         query = query.filter(Company.group_tag == group_tag)
-    return [_company_to_response(c) for c in query.all()]
+    companies = query.all()
+    meaningful_map = compute_meaningful_note_map(db)
+    return [
+        _company_to_response(c, meaningful_map.get(c.id, False))
+        for c in companies
+    ]
 
 
 @router.post("/companies", response_model=CompanyResponse, status_code=201)
@@ -84,7 +101,7 @@ def create_company(
     db.add(db_company)
     db.commit()
     db.refresh(db_company)
-    return _company_to_response(db_company)
+    return _company_to_response(db_company, has_meaningful_note(db, db_company.id))
 
 
 @router.put("/companies/{company_id}", response_model=CompanyResponse)
@@ -107,7 +124,7 @@ def update_company(
 
     db.commit()
     db.refresh(db_company)
-    return _company_to_response(db_company)
+    return _company_to_response(db_company, has_meaningful_note(db, db_company.id))
 
 
 @router.delete("/companies/{company_id}")
@@ -163,7 +180,7 @@ async def import_prep_notes(
 
     db.commit()
     db.refresh(company)
-    return _company_to_response(company)
+    return _company_to_response(company, has_meaningful_note(db, company.id))
 
 
 @router.post("/companies/{company_id}/weights", status_code=200)
@@ -237,7 +254,7 @@ def get_company(company_id: int, db: Session = Depends(get_db)) -> dict:
         .all()
     )
 
-    resp = _company_to_response(company)
+    resp = _company_to_response(company, has_meaningful_note(db, company.id))
     resp["topic_weights"] = [
         {
             "node_id": w[0].framework_node_id,
@@ -672,6 +689,10 @@ def get_company_prep(
             })
     knowledge_cards = list(card_map.values())
 
+    # Note: has_meaningful_note is intentionally omitted here (defaults to False)
+    # to keep this endpoint within its strict N+1 query budget. The flag is
+    # consumed by the company-card red dot (Companies.tsx, T-P1-797), which
+    # reads it from GET /companies, not GET /companies/:id/prep.
     return {
         "company": _company_to_response(company),
         "hub_doc": hub_doc,

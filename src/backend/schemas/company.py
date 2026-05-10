@@ -44,6 +44,7 @@ class CompanyResponse(BaseModel):
     applied_at: date | None = None
     notes: str | None = None
     prep_notes: str | None = None
+    has_meaningful_note: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

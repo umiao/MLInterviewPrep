@@ -112,9 +112,86 @@ def _create_views(engine) -> None:
         GROUP BY strftime('%Y-%W', sl.date)
     """)
 
+    # T-P1-796 [KG-INT A1]: per-company has_meaningful_note flag.
+    # Mirrors src.backend.services.meaningful_note. Cutoffs from EDA report
+    # docs/audit/red_dot_threshold_eda_2026-05-10.md.
+    # add new surface here (also extend services.meaningful_note RED_DOT_CUTOFFS).
+    v_company_meaningful_note = text(_company_meaningful_note_view_sql())
+
     with engine.begin() as conn:
         conn.execute(v_problem_stats)
         conn.execute(v_weekly_progress)
+        # The view depends on companies/company_documents/*_company_tags tables.
+        # Skip silently if any are missing (test fixtures with partial schemas).
+        try:
+            conn.execute(v_company_meaningful_note)
+        except Exception as exc:  # noqa: BLE001
+            logger.debug("Skipping company_meaningful_note_v: %s", exc)
+
+
+def _company_meaningful_note_view_sql() -> str:
+    """Build the SQL DDL for ``company_meaningful_note_v``.
+
+    The view returns ``(company_id, has_meaningful_note INTEGER 0/1)``. A
+    company is meaningful iff at least one of 6 note surfaces is non-placeholder
+    AND meets its cutoff. Cutoffs and placeholder patterns mirror
+    ``src.backend.services.meaningful_note`` exactly.
+    """
+    # Order matters in SQL placeholder LIKE: 'to do' must precede 'todo' would
+    # not matter because we OR them all. Keep aligned with PLACEHOLDER_PATTERNS.
+    placeholder_patterns = (
+        "tbd", "todo", "to do", "n/a", "na", "placeholder", "stub",
+        "fill me in", "fill in", "[ ]", "lorem ipsum",
+    )
+    # SQL fragment that is True when ``col`` is placeholder-shaped.
+    # Mirrors meaningful_note.is_placeholder():
+    #   None / whitespace-only -> True
+    #   len(stripped) < 5 -> True
+    #   len(stripped) < 80 AND contains any pattern -> True
+    def placeholder_expr(col: str) -> str:
+        like_clauses = " OR ".join(
+            f"LOWER(TRIM({col})) LIKE '%{p}%'" for p in placeholder_patterns
+        )
+        return (
+            f"({col} IS NULL OR LENGTH(TRIM({col})) = 0 "
+            f"OR LENGTH(TRIM({col})) < 5 "
+            f"OR (LENGTH(TRIM({col})) < 80 AND ({like_clauses})))"
+        )
+
+    def meaningful_expr(col: str, cutoff: int) -> str:
+        return (
+            f"(NOT {placeholder_expr(col)} AND LENGTH({col}) >= {cutoff})"
+        )
+
+    return f"""
+        CREATE VIEW IF NOT EXISTS company_meaningful_note_v AS
+        SELECT c.id AS company_id,
+            CASE WHEN
+                {meaningful_expr('c.prep_notes', 50)}
+                OR {meaningful_expr('c.notes', 50)}
+                OR EXISTS (
+                    SELECT 1 FROM company_documents cd
+                    WHERE cd.company_id = c.id
+                    AND {meaningful_expr('cd.content', 100)}
+                )
+                OR EXISTS (
+                    SELECT 1 FROM problem_company_tags pct
+                    WHERE pct.company_id = c.id
+                    AND {meaningful_expr('pct.notes', 20)}
+                )
+                OR EXISTS (
+                    SELECT 1 FROM node_company_tags nct
+                    WHERE nct.company_id = c.id
+                    AND {meaningful_expr('nct.notes', 20)}
+                )
+                OR EXISTS (
+                    SELECT 1 FROM behavioral_example_company_tags bect
+                    WHERE bect.company_id = c.id
+                    AND {meaningful_expr('bect.notes', 20)}
+                )
+            THEN 1 ELSE 0 END AS has_meaningful_note
+        FROM companies c
+    """
 
 
 # ---------------------------------------------------------------------------
