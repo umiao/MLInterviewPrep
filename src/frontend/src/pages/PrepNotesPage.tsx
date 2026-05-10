@@ -647,6 +647,7 @@ function DocumentViewer({
                 onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
                 onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
                 onSdLinkClick={(slug) => setDrawer({ type: "system_design", slug })}
+                onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
               />
             ) : (
               <p className="text-gray-400 italic">
@@ -666,6 +667,7 @@ function DocumentViewer({
         onClose={() => setDrawer(null)}
         onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
         onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+        onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
       />
       <SystemDesignDrawer
         slug={drawer?.type === "system_design" ? drawer.slug : null}
@@ -673,6 +675,7 @@ function DocumentViewer({
         onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
         onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
         onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
+        onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
       />
     </>
   );

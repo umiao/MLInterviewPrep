@@ -291,6 +291,7 @@ export default function FrameworkNotesPage() {
               <MarkdownPreview
                 markdown={notes}
                 onCheckboxClick={handleCheckboxClick}
+                onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
               />
             ) : groupedLeaves.length > 0 ? (
               <div className="max-w-4xl">

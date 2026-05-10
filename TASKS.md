@@ -78,12 +78,6 @@ AC:
 - **Depends on**: None
 - **Description**: Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + variable naming/comments 太简单. Audit complete (see PROGRESS 2026-05-06 16:50 [planning] entry): identified 6 verbosity patterns (P1 section duplication, P2 AI-explainer padding, P3 tutorial-tone code comments, P4 retained code-review nits, P5 dense-prose lemmas, P6 worked-example tables). Concrete deltas drafted: LC 465 5375c -> ~2400-2800c, LC 1723 5604c -> ~3000c. Propagation surface clean (only doc 47 + 66 link, no SD/framework/BQ refs). Awaiting user answers to 3 open Qs before executing: (1) cut depth approval, (2) voice anchor (LC 322 vs LC 426/1293), (3) drop Approach C in LC 1723. On approval: execute as seed_pinterest_lc_voice_refactor_465_1723_20260506.py with sentinel-guarded UPDATE on problems.notes for ids 214 + 1067; verify byte-level via re-run [SKIP], API smoke, drawer render.
 
-#### T-P1-799: [KG-INT B2a] kg://N URI scheme: frontend parser + dispatch callback
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: src/frontend/src/components/ui/MarkdownPreview.tsx: add 5th regex ^kg://(\d+)(?:#[^\s]*)?$ + onKgLinkClick(nodeId) callback prop. Wire dispatcher: either reuse existing /kg/graph view focused on the node id, OR build new lightweight KgNodeDrawer component (decide based on existing FrameworkNode endpoint shape). Backend: ensure GET endpoint for framework_nodes by id exists (likely src/backend/routers/kg.py). AC: clicking kg://1 link in any markdown opens the node drawer/view; vitest snapshot for parser regex.
-
 #### T-P1-800: [KG-INT B2b] Add 'meta-prep' pillar + 5 sub-node stubs
 - **Priority**: P1
 - **Complexity**: M
@@ -558,6 +552,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 724 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-10** -- T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold. Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple cau
+- [x] **2026-05-10** -- T-P1-799: [KG-INT B2a] kg://N URI scheme: frontend parser + dispatch callback. src/frontend/src/components/ui/MarkdownPreview.tsx: add 5th regex ^kg://(\d+)(?:#[^\s]*)?$ + onKgLinkClick(nodeId) callb
 - [x] **2026-05-10** -- T-P1-798: [KG-INT B1] Full per-company audit dump across 6 note surfaces. Script scripts/_audit_company_kg_internalization.py: for each of 32 companies, dump bytes/topics/KG-coverage/drawer-link
 - [x] **2026-05-10** -- T-P1-797: [KG-INT A2] Frontend: replace hasPrepNotes with has_meaningful_note + tooltip + test. src/frontend/src/pages/Companies.tsx:509-521: replace hasPrepNotes with has_meaningful_note from API response. Keep inPi
 - [x] **2026-05-10** -- T-P1-796: [KG-INT A1] Backend: GET /companies returns has_meaningful_note bool. Implement composite threshold rule in src/backend/routers/companies.py: (prep_notes >= T_PREP) OR (notes >= T_NOTES AND 

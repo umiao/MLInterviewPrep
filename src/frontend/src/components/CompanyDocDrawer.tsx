@@ -26,6 +26,12 @@ interface CompanyDocDrawerProps {
    * id. Same outer-drawer handling as `onLcLinkClick`.
    */
   onDbLinkClick?: (dbId: number) => void;
+  /**
+   * If a doc body contains `kg://N` links, this fires with the framework
+   * node id. Bubbles to parent so it can navigate to /kg?node=nN -- do NOT
+   * nest inside this drawer.
+   */
+  onKgLinkClick?: (kgId: number) => void;
 }
 
 interface CompanyDocDrawerBodyProps {
@@ -36,6 +42,7 @@ interface CompanyDocDrawerBodyProps {
   onLcLinkClick?: (lcId: number) => void;
   onDbLinkClick?: (dbId: number) => void;
   onCdLinkClick?: (cdId: number) => void;
+  onKgLinkClick?: (kgId: number) => void;
 }
 
 interface CompanyDocDrawerViewProps extends CompanyDocDrawerBodyProps {
@@ -84,6 +91,7 @@ export function CompanyDocDrawerBody({
   onLcLinkClick,
   onDbLinkClick,
   onCdLinkClick,
+  onKgLinkClick,
 }: CompanyDocDrawerBodyProps) {
   if (status === "loading") {
     return <div className="text-sm text-gray-400">Loading document...</div>;
@@ -125,6 +133,7 @@ export function CompanyDocDrawerBody({
               onLcLinkClick={onLcLinkClick}
               onDbLinkClick={onDbLinkClick}
               onCdLinkClick={onCdLinkClick}
+              onKgLinkClick={onKgLinkClick}
             />
           ) : (
             <p className="text-sm text-gray-400 italic">
@@ -151,6 +160,7 @@ export function CompanyDocDrawerView({
   onLcLinkClick,
   onDbLinkClick,
   onCdLinkClick,
+  onKgLinkClick,
 }: CompanyDocDrawerViewProps) {
   const open = docId !== null;
   const title = companyDocDrawerTitle(status, docId, doc);
@@ -174,6 +184,7 @@ export function CompanyDocDrawerView({
         onLcLinkClick={onLcLinkClick}
         onDbLinkClick={onDbLinkClick}
         onCdLinkClick={onCdLinkClick}
+        onKgLinkClick={onKgLinkClick}
       />
     </SlideOverPanel>
   );
@@ -199,6 +210,7 @@ export default function CompanyDocDrawer({
   onClose,
   onLcLinkClick,
   onDbLinkClick,
+  onKgLinkClick,
 }: CompanyDocDrawerProps) {
   const [activeDocId, setActiveDocId] = useState<number | null>(docId);
 
@@ -248,6 +260,7 @@ export default function CompanyDocDrawer({
       onLcLinkClick={onLcLinkClick}
       onDbLinkClick={onDbLinkClick}
       onCdLinkClick={(nextId) => setActiveDocId(nextId)}
+      onKgLinkClick={onKgLinkClick}
     />
   );
 }

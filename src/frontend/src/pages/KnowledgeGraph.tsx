@@ -578,6 +578,7 @@ function KgGraphInner({
       <FrameworkNodeDrawer
         nodeId={selectedRawId}
         onClose={() => setSelectedId(null)}
+        onKgLinkClick={(kgId) => activateNode(nodeIdOf(kgId))}
       />
     </>
   );

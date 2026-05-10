@@ -221,6 +221,49 @@ describe("MarkdownPreview link handling", () => {
     expect(html).toMatch(/<a[^>]*href="\/system-design\/pinterest-ad-ctr"/);
   });
 
+  it("renders kg://N as button when onKgLinkClick provided", () => {
+    // T-P1-799: kg:// is the framework-node URI scheme. Numeric id is the
+    // framework_nodes.id (peer to db:// / cd:// for problems / company-docs).
+    const handler = (id: number) => id;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[hashing](kg://7)" onKgLinkClick={handler} />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*kg:\/\//);
+    expect(html).toContain("hashing");
+  });
+
+  it("renders kg://N#anchor as button (anchor stripped at link layer)", () => {
+    // Mirror cd:// / db:// / sd:// optional anchor behavior -- drawer/route
+    // opens, anchor ignored at the link layer (future task may scroll inside).
+    const handler = (id: number) => id;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[hashing](kg://7#consistent-hashing)" onKgLinkClick={handler} />
+    );
+    expect(html).toContain("<button");
+    expect(html).not.toMatch(/<a[^>]*target="_blank"[^>]*kg:\/\//);
+  });
+
+  it("kg:// falls through to anchor when onKgLinkClick not provided", () => {
+    // Backward-compat: surfaces that have not opted in still see a link.
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[hashing](kg://7)" />
+    );
+    expect(html).toMatch(/<a[^>]*href="kg:\/\/7"/);
+    expect(html).toMatch(/<a[^>]*target="_blank"/);
+  });
+
+  it("kg:// with non-numeric id falls back to anchor (regex strict)", () => {
+    // Regex is intentionally \d+ -- non-numeric = malformed kg URI, must not
+    // silently route to handler. Falls through to default <a target=_blank>.
+    const handler = (id: number) => id;
+    const html = renderToStaticMarkup(
+      <MarkdownPreview markdown="[bad](kg://abc)" onKgLinkClick={handler} />
+    );
+    expect(html).not.toContain("<button");
+    expect(html).toMatch(/<a[^>]*href="kg:\/\/abc"/);
+  });
+
   it("renders cd:// inside an inline HTML <table rowspan> as drawer-button", () => {
     // T-P0-677: the Meta AI-Native hub schedule (doc 82) uses inline HTML
     // <table> with rowspan="2" on the merged 11:00/13:00 coding row to fold

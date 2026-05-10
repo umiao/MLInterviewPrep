@@ -39,6 +39,13 @@ interface MarkdownPreviewProps {
    * drawer. Slugs are lowercase kebab-case per the `system_designs` table.
    */
   onSdLinkClick?: (slug: string) => void;
+  /**
+   * Called when the user clicks a link with href of form `kg://N` (e.g.
+   * `kg://7`). N is the framework_nodes.id. When provided, those links render
+   * as buttons invoking this handler with the node id, typically dispatched
+   * to navigate to `/kg?node=nN` or open a node drawer.
+   */
+  onKgLinkClick?: (nodeId: number) => void;
 }
 
 /** Green checkmark SVG (GitHub PR style). */
@@ -86,6 +93,7 @@ export default function MarkdownPreview({
   onDbLinkClick,
   onCdLinkClick,
   onSdLinkClick,
+  onKgLinkClick,
 }: MarkdownPreviewProps) {
   const headingsRef = useRef<TocHeading[]>([]);
   const prevJsonRef = useRef<string>("");
@@ -205,6 +213,29 @@ export default function MarkdownPreview({
                     e.preventDefault();
                     e.stopPropagation();
                     onSdLinkClick(slug);
+                  }}
+                  className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
+                >
+                  {children}
+                </button>
+              );
+            }
+            // `kg://N` opens (or navigates to) the framework_nodes node id N
+            // -- peer to db:// / cd:// for problems / company-docs. The
+            // dispatcher (provided by the consumer) typically navigates to
+            // /kg?node=nN; the URL state hook there auto-expands ancestors and
+            // focuses the canvas. Optional `#anchor` suffix is accepted but
+            // ignored at the link layer.
+            const kgMatch = typeof href === "string" ? href.match(/^kg:\/\/(\d+)(?:#[^\s]*)?$/) : null;
+            if (kgMatch && onKgLinkClick) {
+              const kgId = Number(kgMatch[1]);
+              return (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onKgLinkClick(kgId);
                   }}
                   className="text-blue-600 underline hover:text-blue-800 bg-transparent border-0 p-0 cursor-pointer font-inherit"
                 >

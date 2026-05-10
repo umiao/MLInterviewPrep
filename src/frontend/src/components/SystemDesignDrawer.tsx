@@ -40,6 +40,8 @@ interface SystemDesignDrawerProps {
   onDbLinkClick?: (dbId: number) => void;
   /** Same outer-drawer handling as `onLcLinkClick` for cd://. */
   onCdLinkClick?: (cdId: number) => void;
+  /** Same outer-drawer handling as `onLcLinkClick` for kg:// (framework nodes). */
+  onKgLinkClick?: (kgId: number) => void;
 }
 
 interface SystemDesignDrawerBodyProps {
@@ -51,6 +53,7 @@ interface SystemDesignDrawerBodyProps {
   onDbLinkClick?: (dbId: number) => void;
   onCdLinkClick?: (cdId: number) => void;
   onSdLinkClick?: (slug: string) => void;
+  onKgLinkClick?: (kgId: number) => void;
 }
 
 interface SystemDesignDrawerViewProps extends SystemDesignDrawerBodyProps {
@@ -100,6 +103,7 @@ export function SystemDesignDrawerBody({
   onDbLinkClick,
   onCdLinkClick,
   onSdLinkClick,
+  onKgLinkClick,
 }: SystemDesignDrawerBodyProps) {
   if (status === "loading") {
     return (
@@ -145,6 +149,7 @@ export function SystemDesignDrawerBody({
                   onDbLinkClick={onDbLinkClick}
                   onCdLinkClick={onCdLinkClick}
                   onSdLinkClick={onSdLinkClick}
+                  onKgLinkClick={onKgLinkClick}
                 />
               ) : (
                 <p className="text-sm text-gray-400 italic">
@@ -174,6 +179,7 @@ export function SystemDesignDrawerView({
   onDbLinkClick,
   onCdLinkClick,
   onSdLinkClick,
+  onKgLinkClick,
 }: SystemDesignDrawerViewProps) {
   const open = slug !== null;
   const title = systemDesignDrawerTitle(status, slug, design);
@@ -189,6 +195,7 @@ export function SystemDesignDrawerView({
         onDbLinkClick={onDbLinkClick}
         onCdLinkClick={onCdLinkClick}
         onSdLinkClick={onSdLinkClick}
+        onKgLinkClick={onKgLinkClick}
       />
     </SlideOverPanel>
   );
@@ -215,6 +222,7 @@ export default function SystemDesignDrawer({
   onLcLinkClick,
   onDbLinkClick,
   onCdLinkClick,
+  onKgLinkClick,
 }: SystemDesignDrawerProps) {
   const [activeSlug, setActiveSlug] = useState<string | null>(slug);
 
@@ -265,6 +273,7 @@ export default function SystemDesignDrawer({
       onDbLinkClick={onDbLinkClick}
       onCdLinkClick={onCdLinkClick}
       onSdLinkClick={(nextSlug) => setActiveSlug(nextSlug)}
+      onKgLinkClick={onKgLinkClick}
     />
   );
 }

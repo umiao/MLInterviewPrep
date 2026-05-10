@@ -8,9 +8,15 @@ import type { FrameworkNode } from "../../types/framework";
 interface FrameworkNodeDrawerProps {
   nodeId: number | null;
   onClose: () => void;
+  /**
+   * Called when the node's markdown body contains a `kg://N` link. Wired by
+   * the KnowledgeGraph page to swap the active node id in-place (re-uses the
+   * same drawer instance, no full-page navigation).
+   */
+  onKgLinkClick?: (kgId: number) => void;
 }
 
-export default function FrameworkNodeDrawer({ nodeId, onClose }: FrameworkNodeDrawerProps) {
+export default function FrameworkNodeDrawer({ nodeId, onClose, onKgLinkClick }: FrameworkNodeDrawerProps) {
   const open = nodeId !== null;
   const { data: node, isLoading } = useQuery<FrameworkNode>({
     queryKey: ["framework", "node", nodeId],
@@ -43,7 +49,7 @@ export default function FrameworkNodeDrawer({ nodeId, onClose }: FrameworkNodeDr
         <div className="text-gray-400 italic">Loading...</div>
       ) : description ? (
         <div className="prep-prose">
-          <MarkdownPreview markdown={description} />
+          <MarkdownPreview markdown={description} onKgLinkClick={onKgLinkClick} />
         </div>
       ) : (
         <div className="text-gray-400 italic">
