@@ -576,6 +576,7 @@ function DocumentViewer({
     enabled: docId > 0,
   });
   const updateDoc = useUpdateDocument(companyId);
+  const navigate = useNavigate();
   const [localContent, setLocalContent] = useState<string | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(null);
   const [tocHeadings, setTocHeadings] = useState<TocHeading[]>([]);
