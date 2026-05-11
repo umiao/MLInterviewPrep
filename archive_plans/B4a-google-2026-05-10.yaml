@@ -1,0 +1,275 @@
+project_id: MLInterviewPrep
+task_id: T-P0-810
+human_review: true
+sections:
+  inventory:
+    s1_bytes: 0
+    s2_bytes: 523
+    s3_bytes: 234079
+    s3_doc_count: 18
+    s3_kg_refs: 50
+    s3_drawer_links: 53
+    s4_rows: 13
+    s4_kg_refs: 13
+    s5_rows: 5
+    s5_kg_refs: 5
+    s6_rows: 3
+    s6_kg_refs: 3
+  matrix:
+  - surface: S2
+    original_summary: '"Positions applied" + 3-job 30-day window note'
+    original_coverage: S2 char 0-220
+    target: drop
+    verifying_query: SELECT name, status FROM companies WHERE id=3 -- already onsite (post-recruiter-call)
+  - surface: S2
+    original_summary: '"Round 1 ML Domain + G&L; Round 2 Coding x2; coding moved to physical onsite"'
+    original_coverage: S2 char 221-523
+    target: kg://297 + kg://298
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (297, 298) -- both contain Google as a source (verified by KG-INT B3-5 promotion)
+  - surface: S2
+    original_summary: '"ML Domain: paradigm iteration, data analysis, ML+product insight, modeling basics"'
+    original_coverage: S2 (within R1 line)
+    target: kg://299
+    verifying_query: SELECT description FROM framework_nodes WHERE id=299 -- verify R1 ML round axes table includes Google
+  - surface: S2
+    original_summary: '"G&L: leadership affecting multiple teams, user-first mindset"'
+    original_coverage: S2 (within R1 line)
+    target: kg://300
+    verifying_query: SELECT description FROM framework_nodes WHERE id=300 AND SELECT title, company_attribute FROM behavioral_examples be JOIN behavioral_example_company_tags bect ON be.id=bect.example_id WHERE bect.company_id=3
+  - surface: S3:doc=38
+    original_summary: 面试结构表 (R1 ML Domain 45m + G&L 45m; R2 Coding x2 45m)
+    original_coverage: id=38 §"面试结构"
+    target: kg://297 + kg://298
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (297, 298)
+  - surface: S3:doc=38
+    original_summary: ML Domain 4 evaluation axes (paradigm, data, product, modeling)
+    original_coverage: id=38 §"ML Domain Interview 考察方向"
+    target: kg://299
+    verifying_query: SELECT description FROM framework_nodes WHERE id=299 -- R1 ML round axes
+  - surface: S3:doc=38
+    original_summary: G&L 4 Hiring Attributes + 5 Googleyness sub-signals
+    original_coverage: id=38 §"G&L 考察方向"
+    target: kg://300
+    verifying_query: SELECT description FROM framework_nodes WHERE id=300 AND S6 query above
+  - surface: S3:doc=38
+    original_summary: Day-of logistics list (Zoom 5min early, 双屏, 纸笔)
+    original_coverage: id=38 (mid-doc)
+    target: kg://297
+    verifying_query: '`grep -l "day-of logistics\'
+  - surface: S3:doc=51
+    original_summary: '日程表 4/20 mock + 4/21 R1 #1 + R1 #2 (Pacific Time)'
+    original_coverage: id=51 §"日程"
+    target: interview_events rows (per dashboard surface table; schedule prose NOT allowed in company_documents.content)
+    verifying_query: SELECT scheduled_at, interviewer_name, round_type FROM interview_events WHERE company_id=3 ORDER BY scheduled_at -- expect 3 rows for 4/20 + 4/21 x2
+  - surface: S3:doc=51
+    original_summary: Round 1 high-signal topic list (Ranking losses, Calibration, Counterfactual eval, LTR -> Two-tower, A/B test, Drift)
+    original_coverage: id=51 §"Round 1 深度问答准备"
+    target: kg://257 + kg://262 + kg://266 + kg://252 + kg://264
+    verifying_query: SELECT path, title FROM framework_nodes WHERE id IN (257, 262, 266, 252, 264) -- 5 rows expected
+  - surface: S3:doc=51
+    original_summary: Round 1 self-intro 90s template ("我是 Shenghui ... search diversity ... debiased NDCG ... SIGIR")
+    original_coverage: id=51 §"开场 / 自我介绍"
+    target: kg://251
+    verifying_query: SELECT title, content FROM behavioral_examples WHERE id IN (2, 3) -- self-intro overlaps story 2 + 3 (search ranking + diversity)
+  - surface: S3:doc=51
+    original_summary: Round 2 BQ Story Short-list (6 stories tagged to Hiring Attributes / Googleyness sub-signals)
+    original_coverage: id=51 §"Story Short-list" table
+    target: kg://300
+    verifying_query: SELECT be.id, be.title, bect.company_attribute FROM behavioral_examples be JOIN behavioral_example_company_tags bect ON be.id=bect.example_id WHERE bect.company_id=3 (currently 3 rows; 3 more to add for EX-01/03/04 -- see §5 / §4 INSERT list)
+  - surface: S3:doc=51
+    original_summary: Last-minute mindset bullets ("不要背公式，要讲真实经验; 被挑战时先澄清 assumption ...")
+    original_coverage: id=51 §"Last-minute 心态"
+    target: kg://297
+    verifying_query: '`grep -l "round-of-day mindset\'
+    promotion_id: meta-prep/onsite-loop-templates/round-of-day-mindset
+  - surface: S3:doc=52
+    original_summary: 10-paper gist (YouTube DNN, Two-Tower, Wide&Deep, DCN/DCN-V2, DLRM, MMoE, PLE, BERT4Rec, SASRec, SimCLR/BYOL contrastive)
+    original_coverage: id=52 entire body
+    target: promote
+    verifying_query: (post-promotion) SELECT path, title FROM framework_nodes WHERE path LIKE 'meta-prep/famous-papers/%' ORDER BY path -- expect 10 rows
+    promotion_id: meta-prep/famous-papers
+  - surface: S3:doc=53
+    original_summary: Tier-1 landing + Tier-2 现场执行 + Tier-3 复习材料 (drawer-link list)
+    original_coverage: id=53 entire body
+    target: cd://5x + cd://72
+    verifying_query: SELECT title, length(content), content_hash FROM company_documents WHERE id=53 -- after apply, content matches §3 skeleton hash
+  - surface: S3:doc=55
+    original_summary: L1 / L2 几何推导 + KKT 条件 + canonical hub link
+    original_coverage: id=55 entire body (already links to /framework/195)
+    target: kg://195 + kg://194 + kg://210
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (194, 195, 210) -- contains L1/L2 geometric + KKT
+  - surface: S3:doc=56
+    original_summary: 偏差方差分解 + overfitting 5 诊断信号
+    original_coverage: id=56 entire body (already links to pillar2.supervised_learning.bias_variance_tradeoff)
+    target: kg://67 + kg://209
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (67, 209)
+  - surface: S3:doc=57
+    original_summary: 13 张 2-min 口述卡片 (bias-variance, regularization, calibration, contrastive, MoE, scaling law, A/B)
+    original_coverage: id=57 entire body
+    target: kg://209/210/262/254/230/232/235
+    verifying_query: SELECT path, title FROM framework_nodes WHERE id IN (209, 210, 262, 254, 230, 232, 235) -- expect 7 rows
+  - surface: S3:doc=57
+    original_summary: '"2-min oral answer pacing" pattern (per-card 1 anchor formula + 1 gotcha)'
+    original_coverage: id=57 (the recipe itself)
+    target: promote
+    verifying_query: (post-promotion) SELECT path FROM framework_nodes WHERE path = 'meta-prep/code-pad-best-practices/oral-flashcard-2min-pacing'
+    promotion_id: meta-prep/code-pad-best-practices/oral-flashcard-2min-pacing
+  - surface: S3:doc=60
+    original_summary: LambdaRank lambda 推导 + LambdaMART = MART + Lambda gradient
+    original_coverage: id=60 entire body
+    target: kg://257 + kg://114
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (114, 257)
+  - surface: S3:doc=61
+    original_summary: DCG / NDCG / MAP / MRR 公式 + Position Bias examination model
+    original_coverage: id=61 entire body
+    target: kg://261 + kg://266
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (261, 266)
+  - surface: S3:doc=62
+    original_summary: Platt sigmoid + Isotonic 单调回归 + Temperature scaling 公式
+    original_coverage: id=62 entire body
+    target: kg://262 + kg://88
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (88, 262)
+  - surface: S3:doc=62
+    original_summary: GMB Bidding Trap (二价拍卖中校准误差放大期望出价误差)
+    original_coverage: id=62 §"GMB Bidding Trap"
+    target: promote
+    verifying_query: (post-promotion) verify path exists
+    promotion_id: meta-prep/system-design-must-knows/bidding-calibration-coupling
+  - surface: S3:doc=63
+    original_summary: IPS weighting + Horvitz-Thompson + PBM/cascade click model + debiased NDCG
+    original_coverage: id=63 entire body
+    target: kg://266
+    verifying_query: SELECT description FROM framework_nodes WHERE id=266
+  - surface: S3:doc=63
+    original_summary: SIGIR 2018 paper talking points (User's published work)
+    original_coverage: id=63 §"SIGIR Paper Talking Points"
+    target: kg://266
+    verifying_query: SELECT title FROM behavioral_examples WHERE id=3
+  - surface: S3:doc=64
+    original_summary: Two-Tower 架构 + InfoNCE + sampled softmax + popularity correction + ANN serving
+    original_coverage: id=64 entire body
+    target: kg://252 + kg://254 + kg://253 + kg://98 + kg://112
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (98, 112, 252, 253, 254)
+  - surface: S3:doc=65
+    original_summary: MMR 贪心 + DPP determinantal + Etsy diversity 多目标 ranking
+    original_coverage: id=65 entire body
+    target: kg://263 + kg://258 + kg://198
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (198, 258, 263)
+  - surface: S3:doc=65
+    original_summary: Uncertainty Weighting (Kendall 2018) + GradNorm + PCGrad / MGDA
+    original_coverage: id=65 §"Multi-task scalarization"
+    target: kg://258
+    verifying_query: SELECT description FROM framework_nodes WHERE id=258
+  - surface: S3:doc=67
+    original_summary: 样本量 + MDE + power + SRM + CUPED + novelty effect
+    original_coverage: id=67 entire body
+    target: kg://264 + kg://104 + kg://235 + kg://193
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (104, 193, 235, 264)
+  - surface: S3:doc=67
+    original_summary: GMB Bidding Trap callback (calibration tie-in)
+    original_coverage: id=67 §"Etsy GMB Trap"
+    target: kg://262 + kg://264
+    verifying_query: (post-promotion) verify cross-link
+  - surface: S3:doc=68
+    original_summary: PSI / KL / JS / KS 公式 + concept-vs-covariate shift + alert thresholds
+    original_coverage: id=68 entire body
+    target: kg://139
+    verifying_query: (post-promotion) SELECT path, title FROM framework_nodes WHERE path = 'meta-prep/system-design-must-knows/feature-drift-detection'
+    promotion_id: meta-prep/system-design-must-knows/feature-drift-detection
+  - surface: S3:doc=69
+    original_summary: Target encoding leakage + OOF + As-of-time joins + temporal split + future-only aggregates + feature store parity
+    original_coverage: id=69 entire body
+    target: kg://267 + kg://101 + kg://136
+    verifying_query: (post-promotion) verify path exists
+    promotion_id: meta-prep/system-design-must-knows/train-serve-skew-leakage
+  - surface: S3:doc=72
+    original_summary: Funk-SVD -> PMF -> NCF -> Two-Tower 历史桥接 + 数学等价性
+    original_coverage: id=72 entire body
+    target: kg://252 + kg://108 + kg://110
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (108, 110, 252)
+  - surface: S3:doc=92
+    original_summary: 24 R2 coding problems with db:// URIs + family/pattern tags
+    original_coverage: id=92 entire body
+    target: id=53 §"## R2 Coding" subsection (consolidate) OR id=92 stays as aux index linked from id=53; per §3 skeleton choice
+    verifying_query: SELECT id, title FROM problems WHERE id IN (SELECT problem_id FROM problem_company_tags WHERE company_id=3) -- 13 problems linked via S4
+promotion_candidates:
+- id: meta-prep/famous-papers
+  kind: cluster
+  cross_refs:
+  - google
+  - doordash
+  - uber
+  - pinterest
+  rationale: '4-section gist (What / Why-mattered / Architecture / Gotcha) for each of: YouTube DNN, Two-Tower, Wide&Deep, DCN/DCN-V2, DLRM, MMoE, PLE, BERT4Rec, SASRec, SimCLR/BYOL. | meta-prep/famous-papers/{youtube-dnn, two-tower-paper, wide-and-deep, dcn-v1-v2, dlrm, mmoe, ple, bert4rec, sasrec, simclr-byol-contrastive} (10 children under a new sibling of meta-prep/system-design-must-knows).'
+  diff_preview: 'DLRM (Naumov 2019) -- Facebook''s reference deep recsys: dense-feature MLP + sparse-embedding interactions + top MLP. Why mattered: open-sourced reference for DLRM throughput benchmarking. Gotcha: embedding tables dominate memory; sharding strategy != model parallelism.'
+  target_path: meta-prep/famous-papers
+- id: meta-prep/system-design-must-knows/feature-drift-detection
+  kind: new_node
+  cross_refs:
+  - google
+  - pinterest
+  - uber
+  - doordash
+  rationale: PSI / KL / JS / KS distance metrics + concept vs covariate shift framing + alert thresholds.
+  diff_preview: PSI (Population Stability Index) = sum_i (p_i - q_i) * ln(p_i / q_i) over discretized bins; PSI < 0.1 stable, 0.1-0.25 moderate, > 0.25 alert. KL/JS for continuous; KS for full distribution shape.
+  target_path: meta-prep/system-design-must-knows/feature-drift-detection
+- id: meta-prep/system-design-must-knows/train-serve-skew-leakage
+  kind: new_node
+  cross_refs:
+  - google
+  - linkedin
+  - doordash
+  - uber
+  rationale: target encoding leakage + OOF + as-of-time joins + temporal split (rolling-origin CV) + future-only aggregates + feature store online/offline parity.
+  diff_preview: 'Target encoding leakage: encoding a category by mean-target on the full training set leaks the holdout. Fix = OOF: encode fold k using only folds != k. Same trap on as-of-time joins -- always use the feature value visible at the prediction timestamp.'
+  target_path: meta-prep/system-design-must-knows/train-serve-skew-leakage
+- id: meta-prep/system-design-must-knows/bidding-calibration-coupling
+  kind: new_node
+  cross_refs:
+  - google
+  - etsy
+  rationale: in二价拍卖 / sponsored search, calibration error multiplies expected bid error (E[bid] = value * P(click) * margin -- non-linearity in P amplifies miscalibration).
+  diff_preview: 'Calibration matters more in bidding than in classification: a 10% Platt overestimate doubles the second-price expected GMB shortfall when bids cluster near reserve.'
+  target_path: meta-prep/system-design-must-knows/bidding-calibration-coupling
+- id: meta-prep/code-pad-best-practices/oral-flashcard-2min-pacing
+  kind: new_node
+  cross_refs:
+  - google
+  - linkedin
+  - doordash
+  rationale: per-topic 2-min oral answer pacing -- 1 anchor formula + 1 numeric example + 1 gotcha; per card, no narration drift.
+  diff_preview: '2-min oral answer card structure: (1) one core formula or 1 numeric anchor; (2) one example showing the formula in motion; (3) one gotcha or anti-pattern. Do NOT recite from memory; reconstruct the formula on the spot.'
+  target_path: meta-prep/code-pad-best-practices/oral-flashcard-2min-pacing
+- id: meta-prep/onsite-loop-templates/round-of-day-mindset
+  kind: new_node
+  cross_refs:
+  - google
+  rationale: last-minute mindset bullets -- "don't recite formulas, tell real stories", "when challenged, clarify assumption first, then adjust", "on details, admit uncertainty + give range + reasoning".
+  diff_preview: 'Round-of-day mindset: when challenged, do not flip your answer immediately. Clarify the assumption being challenged, then adjust. On numeric details you can''t recall, give a range + the reasoning that bounds it.'
+  target_path: meta-prep/onsite-loop-templates/round-of-day-mindset
+- id: meta-prep/system-design-must-knows
+  kind: drill_depth_merge
+  cross_refs: []
+  rationale: the existing meta-prep/system-design-must-knows/* nodes (calibration, ndcg, two-tower, ltr, ab-testing, mmoe, diversity, feature-store, popularity-bias, infonce) have descriptions that summarize the topic but do not include the derivation depth present in the Google drill docs (id=55, 56, 60-69, 72). | T-P1-821 reads each drill, extracts the de-companied derivation + formula + gotcha, and appends to the corresponding meta-prep node's description (or a description_drill field if it exists).
+  diff_preview: the existing meta-prep/system-design-must-knows/* nodes (calibration, ndcg, two-tower, ltr, ab-testing, mmoe, diversity, feature-store, popularity-bias, infonce) have descriptions that summarize the topic but do not include the derivation depth present in the Google drill docs (id=55, 56, 60-69, 72).
+  target_path: meta-prep/system-design-must-knows
+diff_files:
+- archive/company_internalized/google_2026-05-10/restore.sql
+- scripts/_archive_google_2026-05-10.py
+- scripts/seed_node_195_*.py
+- src/backend/seed_data/companies/google_hub_skeleton.md
+metadata:
+  created_at: '2026-05-10T22:00:00Z'
+  company_id: 3
+  audit_source: docs/audit/company_kg_internalization_audit_2026-05-10.md
+  surfaces_in_scope:
+  - S2
+  - S3
+  - S1
+  - S4
+  - S5
+  - S6
+  project_specific:
+    mle_prep:
+      audit_task_id: T-P1-798
+      source_md: MLInterviewPrep/docs/archive_plans/B4a-google_2026-05-10.md

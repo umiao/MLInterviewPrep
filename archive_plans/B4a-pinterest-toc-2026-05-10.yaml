@@ -1,0 +1,205 @@
+project_id: MLInterviewPrep
+task_id: T-P0-810
+human_review: true
+sections:
+  inventory:
+    s1_bytes: 0
+    s2_bytes: 446
+    s4_rows: 0
+    s5_rows: 0
+    s6_rows: 0
+  matrix:
+  - surface: S2
+    original_summary: Senior MLE TC $500K + ~5 HC + competitive Team Match
+    original_coverage: S2 char 0-130
+    target: keep
+    verifying_query: 'SELECT notes FROM companies WHERE id=29 -- post-archive expected ~150 B "Senior ML Engineer position / TC ~$500K/yr / Hiring model: general pool, ~5 HC available, competitive Team Match required"'
+  - surface: S2
+    original_summary: 'Phone screen structure (60min: ML proj + 3 ML fund + coding)'
+    original_coverage: S2 char 131-260
+    target: kg://298
+    verifying_query: SELECT description FROM framework_nodes WHERE id=298 -- 60-min phone-screen template
+  - surface: S2
+    original_summary: 5-round VO structure (Coding x2 / ML Deep Dive / ML SD / BQ)
+    original_coverage: S2 char 261-380
+    target: kg://297 + kg://297 + kg://299 + kg://300
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (297, 299, 300)
+  - surface: S2
+    original_summary: Environment (Google Meet + CoderPad, no compiler)
+    original_coverage: S2 char 381-430
+    target: kg://297 + kg://281
+    verifying_query: SELECT description FROM framework_nodes WHERE id IN (281, 297) -- expect "CoderPad" / "no compiler" mention
+  - surface: S2
+    original_summary: '"Phone screen time TBD -- need to send 3+ slots to David"'
+    original_coverage: S2 char 431-446
+    target: drop
+    verifying_query: SELECT name, status FROM companies WHERE id=29 -- already onsite; recruiter-call action item resolved
+  - surface: S3:doc=47
+    original_summary: 14 核心 must-do LC 表 (LC 332/465/815/322/282/1055/311/2402/1110/1244/410/43/642/1723)
+    original_coverage: id=47 §"核心 14 道" table
+    target: 'S4 tags: 14 INSERT rows in problem_company_tags (relevance=core, source=B4a-pinterest-toc-archive-2026-05-10, notes preserves the 考察要点 中文 hint per row) -- target problems'
+    verifying_query: SELECT pct.problem_id, p.leetcode_id, p.title, pct.relevance, pct.notes FROM problem_company_tags pct JOIN problems p ON p.id=pct.problem_id WHERE pct.company_id=29 ORDER BY pct.problem_id -- expect 14 core rows post-apply
+  - surface: S3:doc=47
+    original_summary: Pattern column (Hierholzer / Bitmask DP / BFS on route graph / Knapsack / Backtrack+prev / Greedy / Sparse / 双堆 / DFS 状态 / Hash+heap / 二分答案 / 数字模拟 / Trie+TopK / 二分答案+回溯)
+    original_coverage: id=47 §"核心 14 道" Pattern col
+    target: kg://285 + kg://286 + kg://284 + kg://287 + kg://288 + kg://289 + kg://292 + kg://293
+    verifying_query: SELECT path, title FROM framework_nodes WHERE id IN (282,283,284,285,286,287,288,289,290,291,292,293,294,295) -- 12+ rows expected (lc-keyword-checklists family)
+    promotion_id: meta-prep/lc-keyword-checklists
+  - surface: S3:doc=47
+    original_summary: 12 扩展 / Follow-up LC 表 (LC 84/85/392/1135/1526/1564/1570/1580/1851/3229/426/1293) + 来源 col (2025-11 dump / LC X follow-up / 2026-05 user dump)
+    original_coverage: id=47 §"扩展 & Follow-up 题" table
+    target: 'S4 tags: 12 INSERT rows in problem_company_tags (relevance=likely, source preserves the 来源 hint, notes preserves 考察要点) -- target problems'
+    verifying_query: (same query above) -- post-apply expect 14 core + 12 likely = 26 LC rows
+  - surface: S3:doc=47
+    original_summary: Pinterest Custom 题 表 (Escape Room id=1068, Lighthouse id=1071, Prefix-Match id=1072, Grant-Access id=1075, Pin-Connectivity id=1076, round-from-scratch id=1073, round-by-precision id=1074, LC 332 loop-followup, Reverse-Count-and-Say id=1120)
+    original_coverage: id=47 §"Pinterest Custom 题" table
+    target: 'S4 tags: 8 INSERT rows in problem_company_tags (relevance=core, source=B4a-pinterest-toc-archive-2026-05-10, notes preserves Core Pattern + 考察要点) -- target problems'
+    verifying_query: SELECT pct.problem_id, p.title FROM problem_company_tags pct JOIN problems p ON p.id=pct.problem_id WHERE pct.company_id=29 AND p.leetcode_id IS NULL ORDER BY pct.problem_id -- expect 8 rows
+  - surface: S3:doc=47
+    original_summary: System Design 模块 表 (Ad CTR / Embeddings / Chatbot Pins / Pin Ranking / Pins Search / Notification Reco / Catalog Bulk Update) -- 7 rows with sd://pinterest-<slug> URIs
+    original_coverage: id=47 §"System Design 模块" table
+    target: sd://pinterest- + kg://255 + kg://252 + kg://259 + kg://258 + kg://253 + kg://272
+    verifying_query: SELECT path FROM framework_nodes WHERE path LIKE 'meta-prep/system-design-must-knows/%' AND path IN ('meta-prep/system-design-must-knows/multi-stage-funnel','meta-prep/system-design-must-knows/two-tower-dual-encoder','meta-prep/system-design-must-knows/dlrm-deepfm-dcn-feature-cross','meta-prep/system-design-must-knows/mmoe-ple-multitask','meta-prep/system-design-must-knows/ann-hnsw-ivf-pq') -- expect 5+ rows
+    promotion_id: meta-prep/system-design-must-knows
+  - surface: S3:doc=47
+    original_summary: 'BQ section (1 line: link to id=48 BQ map)'
+    original_coverage: id=47 §"BQ" 1-bullet section
+    target: S6 tags directly
+    verifying_query: (same as id=48 row below)
+  - surface: S3:doc=47
+    original_summary: '"面试准备前的最后 sanity check" 1-bullet block (recruiter call prep link + 进度 35 题 done + 来源 2026-04-12 + 2025-11 + 2026-04-15)'
+    original_coverage: id=47 §"sanity check" trailer
+    target: drop
+    verifying_query: n/a (information is in commit log + PROGRESS.md)
+  - surface: S3:doc=48
+    original_summary: Q1 "独立主导端到端项目" -> EX-06 / EX-23 / EX-14 (priority 1/2/3)
+    original_coverage: id=48 §"Q1" table
+    target: 'S6 tags (3 rows): example_id 6 / 27 / 18 paired with company_id=29, company_attribute=''end-to-end-ownership'', relevance=core/core/likely, notes preserves 一句话 angle'
+    verifying_query: SELECT be.example_id, be.title, bect.company_attribute, bect.relevance, bect.notes FROM behavioral_examples be JOIN behavioral_example_company_tags bect ON be.id=bect.example_id WHERE bect.company_id=29 AND bect.company_attribute='end-to-end-ownership' ORDER BY bect.relevance DESC -- expect 3 rows
+  - surface: S3:doc=48
+    original_summary: Q2 "需求从何而来" -> EX-01 / EX-03 / EX-09
+    original_coverage: id=48 §"Q2" table
+    target: 'S6 tags (3 rows): example_id 1 / 3 / 9 paired with company_attribute=''problem-framing'''
+    verifying_query: (same query, attribute = problem-framing) -- expect 3 rows
+  - surface: S3:doc=48
+    original_summary: Q3 "stepping ahead / 主动出击" -> EX-08 / EX-01 / EX-15
+    original_coverage: id=48 §"Q3" table
+    target: S6 tags (3 rows; EX-01 is reused with second company_attribute='ambiguity-self-initiated'
+    verifying_query: SELECT bect.* FROM behavioral_example_company_tags bect WHERE bect.company_id=29 AND bect.example_id IN (1,8,19) -- expect 3 rows; if EX-01 row carries primary='problem-framing' from Q2, notes mention secondary='ambiguity-self-initiated'
+  - surface: S3:doc=48
+    original_summary: Q4 "受到负面反馈 / difficult feedback" -> EX-17 / EX-13 / EX-02
+    original_coverage: id=48 §"Q4" table
+    target: kg://249
+    verifying_query: SELECT bect.* FROM behavioral_example_company_tags bect WHERE bect.company_id=29 AND bect.example_id IN (2,17,21) AND bect.company_attribute='failure-and-difficult-feedback' -- expect 3 rows
+  - surface: S3:doc=48
+    original_summary: Q5 "与错过 deadline 的同事合作" -> EX-11 / EX-22 / EX-15
+    original_coverage: id=48 §"Q5" table
+    target: kg://245
+    verifying_query: SELECT bect.* FROM behavioral_example_company_tags bect WHERE bect.company_id=29 AND bect.example_id IN (15,19,26) AND bect.company_attribute='conflict-resolution-cross-team' -- expect 3 rows
+  - surface: S3:doc=48
+    original_summary: 使用说明 1-paragraph (优先级 / 跨题复用规则 / EX-XX -> bq_behavioral_examples.json reference)
+    original_coverage: id=48 §"使用说明" footer
+    target: kg://251
+    verifying_query: SELECT description FROM framework_nodes WHERE id=251 -- contains generic story-reuse / "no double-use across questions" guidance
+  - surface: S3:doc=66
+    original_summary: 10 pattern cards (字符串/数字运算 / Monotonic Stack / Greedy diff / Warehouse / Graph-Eulerian-BFS / Backtracking / DP-binsearch / Heap-Sim-Design / Interval-Subseq / Pinterest-Custom)
+    original_coverage: id=66 entire body (JSON)
+    target: kg://289 + kg://290 + kg://285 + kg://286 + kg://284 + kg://287 + kg://288 + kg://291 + kg://282
+    verifying_query: SELECT path, title FROM framework_nodes WHERE path LIKE 'meta-prep/lc-keyword-checklists/%' -- 14 rows; verify each id=66 card has a path it maps to
+  - surface: S3:doc=66
+    original_summary: Problems within each card (one_liner per problem)
+    original_coverage: id=66 cards[].problems[]
+    target: keep
+    verifying_query: SELECT id, title, length(notes) FROM problems WHERE id IN (135,1073,1074,85,242,236,157,1069,1070,148,217,214,451,439,1066,1067,332,55,265,498,258,199,237,277,144,417,1068,1071,1072,1075,1076,1120) AND notes IS NOT NULL -- pre-apply baseline; verify post-promotion that one_liner is appended
+  - surface: S3:doc=66
+    original_summary: Card "name_zh" / "name_en" / "summary_zh" 中英对照 + 1-line pattern summary
+    original_coverage: id=66 cards[].name_*/summary_zh
+    target: promote
+    verifying_query: (post-promotion) SELECT description FROM framework_nodes WHERE path='meta-prep/lc-keyword-checklists/bfs-dfs-grid-traversal' -- contains "Hierholzer\
+    promotion_id: meta-prep/lc-keyword-checklists
+  - surface: S3:doc=66
+    original_summary: '"字符串/数字运算" card (LC 43 + 2 Pinterest-custom round() problems)'
+    original_coverage: id=66 cards[0]
+    target: promote
+    verifying_query: (post-promotion) SELECT path FROM framework_nodes WHERE path = 'meta-prep/lc-keyword-checklists/string-digit-arithmetic'
+    promotion_id: meta-prep/lc-keyword-checklists/string-digit-arithmetic
+  - surface: S3:doc=66
+    original_summary: '"仓储/箱子装填" card (LC 1564 + LC 1580)'
+    original_coverage: id=66 cards[3]
+    target: kg://282
+    verifying_query: n/a until promotion lands
+    promotion_id: meta-prep/lc-keyword-checklists/two-pointers
+  - surface: S3:doc=66
+    original_summary: '"Pinterest 定制题" card (8 custom problems)'
+    original_coverage: id=66 cards[9]
+    target: S4 tags above (custom-relevance=core); the card itself is a per-company group, not a generic pattern -- card-level row drops, problems survive via S4 + the §3 skeleton's "## R2 Coding (Custom)" subsec
+    verifying_query: (already covered above)
+promotion_candidates:
+- id: meta-prep/lc-keyword-checklists/string-digit-arithmetic
+  kind: new_node
+  cross_refs:
+  - pinterest
+  - google
+  - uber
+  rationale: carry propagation / partition('.') 解析 / shift-based precision rounding / banker's vs half-up rounding distinction / no-float() constraint. | meta-prep/lc-keyword-checklists/string-digit-arithmetic -- new sibling under kg://241 lc-keyword-checklists.
+  diff_preview: 'String-digit arithmetic: carry propagation in pos[i+j+1] += d_i*d_j; pos[i+j] += carry; shift-based precision rounding by aligning to position p then restoring; banker''s vs half-up rounding distinction; the no-float() constraint forces explicit decimal-point partition + integer-arithmetic chain.'
+  target_path: meta-prep/lc-keyword-checklists/string-digit-arithmetic
+- id: problems.notes-column
+  kind: other
+  cross_refs:
+  - pinterest
+  rationale: 'id=66''s JSON card_index stores a 1-liner Chinese hint per problem (e.g. "逐位乘法 pos[i+j] / pos[i+j+1]" for LC 43). This is finer-grained than current problems.notes (which is the full solution writeup). | T-P1-821 either adds a problems.one_liner column OR establishes a problems.notes prefix convention (<ONE_LINER>: ... \n\n<DETAIL>: ...) so the JSON card_index can be reconstructed from problems table directly.'
+  diff_preview: '(schema extension) problems.one_liner: short Chinese hint, ≤40 chars, suitable for card-index display in side-drawer browser.'
+- id: meta-prep/onsite-loop-templates/standard-4-round-mle-vo
+  kind: new_node
+  cross_refs:
+  - pinterest
+  rationale: 'Pinterest does 5-round VO instead of standard 4-round (2× DSA + ML Practitioner + ML SD + BQ). The 5-round shape is non-Pinterest-specific: many production-MLE companies (Reddit / Snap / Roblox / Coinbase) likely follow similar. | T-P1-821 extends kg://297 description with a "5-round variants" subsection enumerating 4-round vs 5-round vs 6-round shapes + which axis the extra round adds (DSA-2 / project-deep-dive / coding-2).'
+  diff_preview: 'Pinterest does 5-round VO instead of standard 4-round (2× DSA + ML Practitioner + ML SD + BQ). The 5-round shape is non-Pinterest-specific: many production-MLE companies (Reddit / Snap / Roblox / Coinbase) likely follow similar.'
+  target_path: meta-prep/onsite-loop-templates/standard-4-round-mle-vo
+- id: meta-prep/onsite-loop-templates/code-pad-environment-quirks
+  kind: new_node
+  cross_refs:
+  - pinterest
+  - google
+  - meta
+  - doordash
+  rationale: CoderPad-no-compiler / Google-internal-CIDER / VSCode-Live-Share / Replit / etc. -- the per-company code-pad environment list affects how to dry-run code mentally. | extend kg://281 (language-choice-python-default) with a "code-pad environments matrix" subsection.
+  diff_preview: CoderPad-no-compiler / Google-internal-CIDER / VSCode-Live-Share / Replit / etc. -- the per-company code-pad environment list affects how to dry-run code mentally.
+  target_path: meta-prep/onsite-loop-templates/code-pad-environment-quirks
+- id: meta-prep/behavioral-clusters
+  kind: cluster
+  cross_refs:
+  - pinterest
+  - google
+  rationale: id=48 gives a 5-Q × 2-3-priority story matrix. The matrix shape (rows = company-typical BQ Q's, cols = priority-ranked stories) is generic and reusable. | T-P1-821 adds a UX convention to kg://300 behavioral-bq-round playbook §"per-company Q->Story matrix" describing how S6 tags + company_attribute + notes reconstruct this matrix in the frontend BQ drawer.
+  diff_preview: id=48 gives a 5-Q × 2-3-priority story matrix. The matrix shape (rows = company-typical BQ Q's, cols = priority-ranked stories) is generic and reusable.
+  target_path: meta-prep/behavioral-clusters
+- id: meta-prep/lc-keyword-checklists/warehouse-prefix-min
+  kind: new_node
+  cross_refs:
+  - pinterest
+  rationale: warehouse / box-packing problems with prefix-min monotonicity (LC 1564) and 2-pointer dual-direction (LC 1580).
+  diff_preview: warehouse / box-packing problems with prefix-min monotonicity (LC 1564) and 2-pointer dual-direction (LC 1580).
+  target_path: meta-prep/lc-keyword-checklists/warehouse-prefix-min
+diff_files:
+- archive/company_internalized/pinterest_2026-05-10/restore.sql
+- scripts/_archive_pinterest_2026-05-10.py
+- scripts/seed_pinterest_companies_row.py
+- scripts/seed_pinterest_lc_problems.py
+- src/backend/seed_data/companies/pinterest_hub_skeleton.md
+metadata:
+  created_at: '2026-05-10T22:00:00Z'
+  company_id: 29
+  audit_source: docs/audit/company_kg_internalization_audit_2026-05-10.md
+  surfaces_in_scope:
+  - S2
+  - S3
+  - S4
+  - S6
+  - S1
+  - S5
+  project_specific:
+    mle_prep:
+      audit_task_id: T-P1-798
+      source_md: MLInterviewPrep/docs/archive_plans/B4a-pinterest-toc_2026-05-10.md
