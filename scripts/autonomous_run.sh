@@ -11,6 +11,24 @@
 
 set -euo pipefail
 
+# --- INFRA-HITL A2.2: --allow-dirty flag parsing (consumed before AR-1) ---
+# Strip --allow-dirty from positional args BEFORE AR-1 validates max_sessions
+# regex. Export ALLOW_DIRTY for preflight_clean_wt (in scripts/lib/claude_wrapper.sh).
+_A22_ALLOW_DIRTY="${ALLOW_DIRTY:-0}"
+_A22_POS=()
+for _A22_arg in "$@"; do
+  case "$_A22_arg" in
+    --allow-dirty) _A22_ALLOW_DIRTY=1 ;;
+    *) _A22_POS+=("$_A22_arg") ;;
+  esac
+done
+if [ ${#_A22_POS[@]} -gt 0 ]; then
+  set -- "${_A22_POS[@]}"
+else
+  set --
+fi
+export ALLOW_DIRTY="$_A22_ALLOW_DIRTY"
+
 # --- AR-1: arg validation (workspace-wide invariant INV-AUTORUN-2) ---
 # Reject non-integer first arg before main loop. Without this, MAX_SESSIONS=$1
 # silently accepts strings like a project name; the script reaches the
@@ -65,7 +83,12 @@ if [ -f "$LOCKFILE" ] && kill -0 "$(cat "$LOCKFILE")" 2>/dev/null; then
   exit 1
 fi
 echo $$ > "$LOCKFILE"
-trap 'rm -f "$LOCKFILE"' EXIT
+# --- INFRA-HITL A2.3: pgid file co-located with lockfile ---
+# write_pgid_file is implemented in scripts/lib/claude_wrapper.sh (sourced below).
+# Cleanup is wired into the EXIT trap alongside the lockfile so SIGTERM-driven
+# teardown by scripts/stop_autorun.sh leaves no stale .claude/run-pgid behind.
+PGID_FILE=".claude/run-pgid"
+trap 'rm -f "$LOCKFILE" "$PGID_FILE"' EXIT
 
 MAX_SESSIONS=${1:-5}
 
@@ -107,6 +130,17 @@ if [ ! -f "$_WRAPPER_LIB_DIR/scripts/lib/claude_wrapper.sh" ]; then
   exit 2
 fi
 source "$_WRAPPER_LIB_DIR/scripts/lib/claude_wrapper.sh"
+
+# --- INFRA-HITL A2.2: dirty working-tree preflight ---
+# Abort if working tree has uncommitted/untracked files unless --allow-dirty
+# was passed. Prevents stale-file leakage into task commits (2026-05-10 incident class).
+if ! preflight_clean_wt; then
+  exit 2
+fi
+
+# --- INFRA-HITL A2.3: record orchestrator pgid for stop_autorun.sh ---
+# Written AFTER preflight so an aborted preflight does not leave a stale file.
+write_pgid_file "$PGID_FILE"
 
 session_count=0
 consecutive_failures=0
