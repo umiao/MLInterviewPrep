@@ -9,51 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-847
-- **Description**: Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 twist: multimodal short-form video + session-based continuous consumption + within-session dynamics').
-
-REPLACE WITH full card following Q1-Q12 structure (Unique Twist 段 → Puzzle Pieces 表 → Anti-patterns 列表 → Strong Moment 引文):
-
-1. Unique Twist (2-3 sentences synthesizing 7 twists into paragraph form):
-   'Reels homefeed 是无显式 query intent 的 user-conditioned ranking, 内容是多模态 UGC, 主信号是 watch-completion-ratio 而非秒数, slate-level 上有 session fatigue, 平台层有 creator marketplace 长尾保护, 整个 logged data 受 feedback loop 污染.'
-
-2. Puzzle Pieces (6-row table picked from 7 twists' design-implications):
-   - Hybrid serving (active 离线 batch + fresh 在线 incremental, blend at retrieval): freshness vs latency 双重 trade-off
-   - Multi-modal encoders (visual / audio / text) + 融合: UGC metadata 不可信
-   - 2-tower (user side ≠ optional): no explicit query, user 本身就是 query
-   - Multi-task heads (click + completion + watch-time, completion-ratio weighted): 短视频 watch-time 用绝对秒数会偏向长视频
-   - Slate-level reranking (MMR / DPP) + session metrics: 单点最优 ≠ session 最优
-   - IPS + exploration policy + counterfactual replay (= 第 10 积木): logged data 严重有偏
-
-3. Anti-patterns (4-5 entries):
-   - 用绝对 watch-time 当 label (短视频被打低)
-   - 单 tower content-only retrieval (忽略 user query nature)
-   - 套 search results page 的 query-intent 思路
-   - 忽略 creator 长尾保护 (marketplace supply 死亡螺旋)
-   - 每个 item 独立 score (忽略 session fatigue)
-
-4. Strong Moment (一句 verbatim, 现场就这么说):
-   'Reels homefeed 不是 search results — 用户没有显式 query, user 表征本身就是 query. 这把 retrieval 强制推向 user-conditioned 2-tower, serving 上 active user 走离线 batch cache 但还要并行跑 online incremental 把 fresh content 拉进来. 这是 cold-start 和 freshness 两个问题同时被同一架构解掉.'
-
-5. 尾部 dual-pointer:
-   '→ 完整方法论 derivation: cd://96 (Twist 挖掘方法论 section) | 实战 45min 8段台词 verbatim: sd://meta-reels-golden'
-
-VALIDATOR BUMP: seed_meta_mlsd_family_taxonomy.py 当前 [9000, 14200], 上界 +1500 → [9000, 15700]
-
-POST-SEED: 必须 re-run scripts/retrofit_meta_mlsd_94_drawer_header.py
-
-ACCEPTANCE CRITERIA:
-- [AC1] seed re-run 成功, doc 94 长度增加 ~1KB
-- [AC2] grep DB content for: 'Reels homefeed', 'completion-ratio', 'Hybrid serving', 'creator 长尾', 'session fatigue', 'cd://96', 'sd://meta-reels-golden' — 全部 hit
-- [AC3] Q13 card 长度 (1 stub line → ~1KB full card)
-- [AC4] Drawer 入口 顶部 table 仍存在 (retrofit 已 re-run)
-- [AC5] Self-link exclusion: cd://94 NOT in Q13 body
-
-DEPENDENCY RATIONALE: 引用 cd://96 的 'Twist 挖掘方法论 section', 该 section 在 T-P0-847 落地
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -611,6 +566,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
 - [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str
 - [x] **2026-05-12** -- T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section. Retrofit system_designs.id=41 (slug='meta-reels-golden', title='Meta MLSD Golden Example: Reels Home Feed Recommendation
 - [x] **2026-05-12** -- T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list. Retrofit existing company_documents.id=96 ('[Meta-MLSD] 45min Playbook + 4 Strong Moments', is_golden=1 default first pa

@@ -110,11 +110,13 @@ def validate_content(content: str, existing_body: str) -> None:
             f"got {first_visible!r}"
         )
 
-    # AC #1: length(content) (SQLite char count) in ~14400-15000.
+    # AC #1: length(content) (SQLite char count). Original window
+    # [14400, 15200]; upper bound bumped to 16500 in T-P0-848 to accommodate
+    # Q13 stub -> full card promotion (+~1000 chars to seed body).
     n_chars = len(content)
-    if not (14400 <= n_chars <= 15200):
+    if not (14400 <= n_chars <= 16500):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [14400, 15200]"
+            f"content char-length {n_chars} not in [14400, 16500]"
         )
 
     # AC #3: 5 unique drawer URIs each appear at least once IN PREPENDED BLOCK;

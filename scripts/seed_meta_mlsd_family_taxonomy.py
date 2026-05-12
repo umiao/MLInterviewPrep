@@ -351,11 +351,31 @@ CONTENT = f"""{SENTINEL}
 
 **Strong Moment** (这一句话救场): "Before designing this, the most important question is: who consumes the prediction? If it's recommendation ranking, we need calibrated probability for every (user, event) pair. If it's notification gating, we only score the events the user has been recommended. If it's host-side capacity planning, we aggregate. The architecture differs significantly. My default assumption is recommendation ranking—is that the intended use?"
 
-#### Q13. Reels (reference only)
+### Q13. Reels Homefeed
 
-完整 45-min walkthrough + 4 strong moment verbatim 英文台词见 canonical golden example: [sd://meta-reels-golden](sd://meta-reels-golden). 核心 twist: multimodal short-form video + session-continuous ranking (within-session diversity collapse / fatigue / drift).
+**Unique Twist**: Reels homefeed 是无显式 query intent 的 user-conditioned ranking, 内容是多模态 UGC, 主信号是 watch-completion-ratio 而非秒数, slate-level 上有 session fatigue, 平台层有 creator marketplace 长尾保护, 整个 logged data 受 feedback loop 污染.
 
-**Strong Moment** (mini-preview): "Reels is session-continuous ranking—the next item depends on what the user watched in this session, not just their long-term profile."
+**Puzzle Pieces**:
+
+| Piece | Why |
+| --- | --- |
+| Hybrid serving (active 离线 batch + fresh 在线 incremental, blend at retrieval) | freshness vs latency 双重 trade-off |
+| Multi-modal encoders (visual / audio / text) + 融合 | UGC metadata 不可信 |
+| 2-tower (user side ≠ optional) | no explicit query, user 本身就是 query |
+| Multi-task heads (click + completion + watch-time, completion-ratio weighted) | 短视频 watch-time 用绝对秒数会偏向长视频 |
+| Slate-level reranking (MMR / DPP) + session metrics | 单点最优 ≠ session 最优 |
+| IPS + exploration policy + counterfactual replay (= 第 10 积木) | logged data 严重有偏 |
+
+**Anti-patterns**:
+- {X} 用绝对 watch-time 当 label (短视频被打低)
+- {X} 单 tower content-only retrieval (忽略 user query nature)
+- {X} 套 search results page 的 query-intent 思路
+- {X} 忽略 creator 长尾保护 (marketplace supply 死亡螺旋)
+- {X} 每个 item 独立 score (忽略 session fatigue)
+
+**Strong Moment**: "Reels homefeed 不是 search results — 用户没有显式 query, user 表征本身就是 query. 这把 retrieval 强制推向 user-conditioned 2-tower, serving 上 active user 走离线 batch cache 但还要并行跑 online incremental 把 fresh content 拉进来. 这是 cold-start 和 freshness 两个问题同时被同一架构解掉."
+
+→ 完整方法论 derivation: [cd://96](cd://96) (Twist 挖掘方法论 section) | 实战 45min 8 段台词 verbatim: [sd://meta-reels-golden](sd://meta-reels-golden)
 
 ---
 
@@ -375,11 +395,13 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # Length bounds: 9000-14000 chars per original task spec; bumped to 14200
-    # (2026-05-12) to accommodate PYMK acronym expansion in Q3 header.
+    # Length bounds: 9000-14000 chars original; 14200 (2026-05-12) for PYMK
+    # acronym; 15700 (T-P0-848) for Q13 Reels stub -> full card promotion
+    # (Unique Twist + Puzzle Pieces + Anti-patterns + Strong Moment + dual
+    # pointer to cd://96 + sd://meta-reels-golden).
     n = len(content)
-    if not (9000 <= n <= 14200):
-        raise RuntimeError(f"content length {n} not in [9000, 14200]")
+    if not (9000 <= n <= 15700):
+        raise RuntimeError(f"content length {n} not in [9000, 15700]")
 
     # Section markers
     for marker in (
@@ -391,30 +413,29 @@ def validate_content(content: str) -> None:
         if marker not in content:
             raise RuntimeError(f"section marker missing: {marker!r}")
 
-    # Q13 Reels golden link
+    # Q13 Reels golden link (sd) + methodology dual-pointer (cd://96, T-P0-848)
     if "sd://meta-reels-golden" not in content:
         raise RuntimeError("sd://meta-reels-golden link missing")
+    if "cd://96" not in content:
+        raise RuntimeError("cd://96 methodology dual-pointer missing")
 
-    # 12 '### Q' headers (Q1-Q12; Q13 uses '#### Q13' to keep grep clean).
-    # '#### Q13' starts with '### Q' substring too -- count exact '### Q1.'..'### Q12.' patterns instead.
+    # 13 '### Q' headers (Q1-Q13; Q13 promoted from h4 stub to full h3 card
+    # in T-P0-848). Exact '### Q1.'..'### Q13.' pattern matches.
     q_top_headers = sum(
         1
-        for i in range(1, 13)
+        for i in range(1, 14)
         if f"### Q{i}." in content
     )
-    if q_top_headers != 12:
+    if q_top_headers != 13:
         raise RuntimeError(
-            f"expected 12 top-level Q1-Q12 headers, got {q_top_headers}"
+            f"expected 13 top-level Q1-Q13 headers, got {q_top_headers}"
         )
-    # Also assert Q13 is reference-only (h4, not h3)
-    if "#### Q13. Reels" not in content:
-        raise RuntimeError("Q13 must be reference-only (#### header)")
 
-    # 'Strong Moment' >= 12 (one per Q1-Q12 + Q13 mini = 13)
+    # 'Strong Moment' >= 13 (one per Q1-Q13).
     sm_count = content.count("**Strong Moment**")
-    if sm_count < 12:
+    if sm_count < 13:
         raise RuntimeError(
-            f"expected >=12 '**Strong Moment**' markers, got {sm_count}"
+            f"expected >=13 '**Strong Moment**' markers, got {sm_count}"
         )
 
     # Taxonomy table: 13 data rows + header + separator >= 15 lines starting with '|'
@@ -432,14 +453,17 @@ def validate_content(content: str) -> None:
         if f"| {i} |" not in content:
             raise RuntimeError(f"taxonomy row '| {i} |' missing")
 
-    # Forbid db:// / cd:// hardcoded ids (this doc uses sd:// only; cd:// id is
-    # resolved by the consuming hub doc T-P0-840, not by this drawer).
-    for scheme in ("cd://", "db://", "lc://"):
+    # T-P0-848: cd:// now permitted (Q13 card cross-refs cd://96 methodology
+    # section). db:// / lc:// still forbidden.
+    for scheme in ("db://", "lc://"):
         if scheme in content:
             raise RuntimeError(
-                f"forbidden URI scheme {scheme!r} present -- "
-                "this drawer must only emit sd:// links"
+                f"forbidden URI scheme {scheme!r} present"
             )
+
+    # Self-link exclusion: Q13 body must NOT reference cd://94 (this doc).
+    if "cd://94" in content:
+        raise RuntimeError("self-link cd://94 must not appear in this doc")
 
 
 def main() -> int:
