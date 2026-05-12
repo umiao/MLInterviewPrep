@@ -9,46 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-837: [Meta-MLSD A] Reels Golden Example → system_designs (slug=meta-reels-golden)
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: INSERT a system_designs row that becomes Meta MLSD 的 canonical golden example, slug-addressable via sd://meta-reels-golden, drawer-reachable from main hub (T-P0-832).
-
-SOURCE: docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md
-- Lines 1-138: pacing theory, 4 strong moment 框架, ML-native vocab YES/NO rules, framing 元结构
-- Lines 142-362: Reels Home Feed Recommendation golden example 全文（0-5/5-12/12-18/18-26/26-32/32-38/38-42/42-45 八段, 每段英文台词 + 4 strong moment 完整投放台词）
-- Lines 330-362: 元结构 (Framing/Body/Strong/Zoom-out 一图概览) + 偏好节奏 meta-rules 8 条
-
-DB TARGET: data/mle_prep.db, table=system_designs
-COLUMNS TO FILL:
-- slug = 'meta-reels-golden'
-- title = 'Meta MLSD Golden Example: Reels Home Feed Recommendation (45min walkthrough)'
-- subtitle = 'Canonical pacing + 4 strong moments + production-aware 英文台词. 适用于 Reels / Feed / Notification / Friend-rec / Ads 等 Meta MLSD 题型 (80% 结构复用). Reference back ← Meta hub via cd://<main hub id>.'
-- display_order = 130 (空号区间, 在 123 interview-recommendation-system 之后, 199 pinterest-system-design-concepts 之前)
-- overview: 整体节奏哲学 (3 段, ~600 字) — 前 5 分钟独裁 framing / 中段 30 分钟主导但邀请方向 / 最后 10 分钟 zoom-out; 4 strong moment 预分配到固定位置; ML-native vocabulary only
-- architecture: 2-stage retrieval+ranking + multi-channel retrieval (60/20/20 personalized / trending / diversity) + DLRM-style ranking with multi-task heads; multimodal embedding pipeline (visual + audio + text → fused content embedding, precomputed at upload, quarterly refresh)
-- dataflow: 八段时间表完整 narrative — 0-5 framing (declarative open, 2 specialty thesis, yes/no close) / 5-12 data & labels (3-part walk: sources / label schema multi-head / biases hold) / 12-18 features (4 buckets, expand 1) / 18-26 model (two-tower + multi-channel + DLRM + multi-task heads, invite deepen) / 26-32 bias & objectives (exposure bias reframe + 3 mitigation layers + objective composition) / 32-38 evaluation (offline + counterfactual replay + online + long-term holdout, slice by confounder) / 38-42 zoom-out + top 3 risks / 42-45 serving + Q&A (graceful exit)
-- formulas: label schema 三类 — normalized watch ratio = watch_time / video_duration capped 1.0; strong positive (binary, sparse high-precision: like/comment/share/follow/save); strong negative (binary: early-swipe <2-3s or <20% completion); ambiguous middle (50% watch → weakly positive on watch-ratio head, excluded from early-skip head). Loss weighting: start equal, Pareto search on offline metrics post-train tune (NOT gradient-based loss balancing — interpretability reason)
-- production_constraints: multimodal embedding precomputed at upload (decouples content understanding from serving cost), quarterly encoder refresh, content features cached, user features fresh at request, async candidate precompute for active users
-- tradeoffs: pretrained backbone + fine-tune vs from scratch (cost decoupling); IPS / propensity weighting (data correction) vs active exploration policy (data acquisition — stronger lever, cross-functional cost); watch-ratio optimization vs retention (clickbait risk, long-term holdout 防御); compliance as hard filter NOT soft loss (category error if treated as 'less engagement'); shared backbone + head-specific top layers (correlated heads benefit from sharing)
-- defense: 4 strong moment 完整英文台词 verbatim — Moment #1 (framing, multimodal lifecycle + decoupling, 见 source line 164-167 'First, Reels are short-form videos...'); Moment #2 (label schema with ambiguous middle + duration confounder, 见 source line 192-196 'Label 1: normalized watch ratio...'); Moment #3 (exposure bias reframe as data acquisition + 3 intervention places + failure modes + IPS comparison, 见 source line 262-266 'But I want to push the framing further...'); Moment #4 (zoom-out + top 3 risks + mechanism + alarm signal, 见 source line 307-313 'Let me zoom out...')
-- verbal_outline: 关键 verbal patterns + drift-recovery 句式 — 'Let me walk through this in N parts: A, B, C' / 'And this is where Reels diverges...' / 'One thing I want to flag: [a non-obvious risk]' / 'Let me hold that thought and move to X unless you want to deepen Y first' / 'I want to push the framing further—I'd reframe X as Y, not just Z' / 'Why this matters more than [standard approach]: [trade-off]' / 'Treating X as a soft Y is a category error' / 'Let me park that, more important is...' / 'I won't go deeper unless you'd like'; ML-native YES/NO 对照表 (YES: model class / label / feature / bias / objective / evaluation / freshness / drift / calibration; NO: SLA / NFR / FR / QPS / read/write ratio / service / API / cache / network)
-- cheat_sheet: 元结构一图概览 (Framing 60-90s / Body 每段 sub-section announce + bullet expand 1 + flag 1 risk + transition / Strong moment 4 个: reframe + 3 actions + failure modes + trade-off / Zoom-out 3 min: summary + top-3 risks + invite deepen); 偏好节奏 meta-rules 8 条 (前 90s 不澄清 / 每开放问题 60-90s / 列完 N bullet 立刻 expand 1 / 每 strong moment 含 trade-off / 每 8-10 分钟主动 zoom-out / 困惑表情时立刻 park / serving 段主动短 / wrap 时一定 top-N risks)
-
-VALIDATION (sanity check after INSERT):
-1. SELECT id, slug, title, subtitle, display_order FROM system_designs WHERE slug='meta-reels-golden' returns exactly 1 row
-2. All 9 列 (overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline, cheat_sheet) non-NULL and length > 200 each
-3. Total content sum > 8000 bytes
-4. defense column 含 4 段完整英文台词 (grep 'First, Reels are short-form' / 'Label 1: normalized watch ratio' / 'But I want to push the framing further' / 'Let me zoom out for a moment')
-5. subtitle 含 'Meta MLSD Golden Example' substring
-6. content_hash 自动计算; updated_at = today
-7. display_order = 130 不与现有 row 冲突 (SELECT COUNT WHERE display_order=130 == 1)
-
-STYLE: 中文叙述 + 英文术语 first-occurrence `**English** (acronym, 中文)`; 金句台词保留英文原文 (面试就这么说); 表格 markdown 直接渲染; 匹配用户 source_01 的 sentence-fragment voice (NOT AI explainer mode).
-
-NO DEPS — 可立刻拣。 Sibling tasks T-P0-830 / T-P0-831 也无依赖, autonomous_run 三选一按 priority order. T-P0-832 (main hub) 依赖本任务的 slug 'meta-reels-golden' (固定值, 不依赖 auto-assigned id).
-
 #### T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents
 - **Priority**: P0
 - **Complexity**: L
@@ -764,6 +724,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
+- [x] **2026-05-11** -- T-P0-837: [Meta-MLSD A] Reels Golden Example → system_designs (slug=meta-reels-golden). INSERT a system_designs row that becomes Meta MLSD 的 canonical golden example, slug-addressable via sd://meta-reels-gold
 - [x] **2026-05-11** -- T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see aud
 - [x] **2026-05-11** -- T-P0-813: [KG-INT B4a-uber] Uber dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Uber. Read all 6 note-surfaces for company_id=see aud
 - [x] **2026-05-11** -- T-P0-812: [KG-INT B4a-pinterest-prep] Pinterest-prep dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-prep. Read all 6 note-surfaces for company_
