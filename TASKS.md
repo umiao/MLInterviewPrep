@@ -9,61 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-839: [Meta-MLSD C] Cross-cutting 积木库 → company_documents
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: INSERT a company_documents row holding the 9 跨题通用 ML 积木 (cross-cutting reusable pieces), 让用户面试中遇到任何 recommendation/ranking/classification 题都能即时套用. Drawer-reachable from main hub (T-P0-832) via cd://<this row id>.
-
-SOURCE: docs/prep/meta_mlsd_2026-05-11/source_02_family_taxonomy.md
-- Lines 4-6: 第二节 cross-cutting reusable pieces — 9 个积木 (积木 / 何时套用 / 一句 justification) inline format
-
-DB TARGET: data/mle_prep.db, table=company_documents
-COLUMNS TO FILL:
-- company_id = 31 (Meta)
-- title = '[Meta-MLSD] Cross-cutting 积木库 (drawer)'
-- doc_kind = 'prep_note'
-- source_type = 'manual'
-- is_golden = 0
-- content = markdown body (~3-4 KB)
-
-CONTENT STRUCTURE:
-**Header**: 1 段简短开场 (50-80 字), 解释这 9 个积木是 Meta MLSD 跨题通用的 ML 思维模块, 记熟一次到处用. 链接回 sd://meta-reels-golden (golden example) + cd://<family taxonomy doc id> (13 题卡片) — 但 since this doc 的 id 是 unknown 直到 INSERT 完成, 查询 SELECT id FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%Family Taxonomy%' 得到 family taxonomy doc id.
-
-**主表 (markdown table)**:
-| # | 积木 | 何时套用 | Justification |
-| - | --- | --- | --- |
-| 1 | Two-tower retrieval + deep ranking | Standard rec/feed/search 默认架构 | retrieval 走 ANN, ranking 走 latency 富余下的 deep model |
-| 2 | Multimodal embedding precomputed at upload | 内容为视频/图/音频 | 把内容理解开销跟 serving cost 解耦, 刷新只在 encoder 升级时 |
-| 3 | Multi-task heads (engagement / quality / strong negative) | 任何 user feedback 非单一信号 | 单 binary label 损失信息; 多 head 还能 post-train tune 权重 |
-| 4 | IPS / counterfactual replay | 任何讨论 exposure bias / A/B safety | offline 数据有 bias, replay 在 A/B 前过滤明显 broken candidate |
-| 5 | Active exploration policy (onboarding + re-explore + content ramp) | 想 push 到 E5 信号 | 重构 exposure bias 为 data acquisition 问题 (高级 reframe) |
-| 6 | LLM-as-teacher → distilled student | Label scarcity / 内容理解任务 | Teacher 离线 bulk inference, student 在线 serving (2025 Meta 实践) |
-| 7 | Long-term holdout (~5% users, 30+ days) | 任何讨论 evaluation 完整性 | 短 A/B 抓不到 retention / filter bubble / fatigue |
-| 8 | Calibration check across surfaces | 多 surface 混排或概率被下游消费 | 跨 head 的 score 不可比时 ranking 失真 |
-| 9 | Slice metrics by confounder | 任何 evaluation 段 | aggregate 数字会掩盖 sub-group failure (duration / new vs return user) |
-
-**Section 2 (每积木一小段 expanded note)**: 9 个 H4 小标题, 每段 60-100 字, 引用 source_02 line 4-6 原文 + Reels golden example 的具体用例 (link 到 sd://meta-reels-golden#bias-section / sd://meta-reels-golden#evaluation 这种 anchor 形式 OK, 若 SD drawer 不支持 anchor 则用文字描述 'see Reels golden 26-32 min bias section').
-
-**Section 3 (Decision Tree, 60-80 字)**: '遇到新题, 30 秒判断 → 套哪些积木' — 给一个简短 if-tree, e.g. 'rec/ranking 题 → 积木 1+3+4+5+7; classification 题 → 积木 6+7+9; cold-start heavy → 积木 2+5'.
-
-STYLE:
-- 中文叙述, 积木名 + ML 术语保留英文 (first-occurrence `**English** (acronym, 中文)`)
-- 表格紧凑, 一行一个积木, 不展开
-- 不要 hallucinate 积木 — 严格照搬 source_02 lines 4-6 的 9 个
-
-VALIDATION (sanity check after INSERT):
-1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%积木%' returns exactly 1 row
-2. length(content) BETWEEN 3000 AND 5500
-3. content 含主 markdown 表格 (9 + 2 = 11 行至少: header + separator + 9 数据行)
-4. content 含 'Two-tower retrieval' / 'IPS' / 'LLM-as-teacher' / 'Long-term holdout' / 'Slice metrics' 5 个 keyword spotcheck
-5. content 含至少 1 个 'sd://meta-reels-golden' link 或 cd:// link
-6. doc_kind='prep_note' AND is_golden=0
-
-NO DEPS — 可立刻拣 (并行 A/B/C 三选一). T-P0-832 main hub 完成本任务后需要查询 doc id 写 cd:// 链接.
-
-OUTPUT to PROGRESS.md after completion: 1 entry, 5 段 (what / deliverables / sanity / status / request).
-
 #### T-P0-840: [Meta-MLSD D] Main Hub Page → company_documents (45min Playbook + 4 Strong Moments)
 - **Priority**: P0
 - **Complexity**: M
@@ -668,6 +613,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
+- [x] **2026-05-11** -- T-P0-839: [Meta-MLSD C] Cross-cutting 积木库 → company_documents. INSERT a company_documents row holding the 9 跨题通用 ML 积木 (cross-cutting reusable pieces), 让用户面试中遇到任何 recommendation/ranki
 - [x] **2026-05-11** -- T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents. INSERT a company_documents row holding Meta MLSD 的 13 题 family taxonomy 总表 + 每题 Twist → Puzzle pieces → Anti-patterns → 
 - [x] **2026-05-11** -- T-P0-837: [Meta-MLSD A] Reels Golden Example → system_designs (slug=meta-reels-golden). INSERT a system_designs row that becomes Meta MLSD 的 canonical golden example, slug-addressable via sd://meta-reels-gold
 - [x] **2026-05-11** -- T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see aud
