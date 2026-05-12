@@ -9,6 +9,313 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-837: [Meta-MLSD A] Reels Golden Example → system_designs (slug=meta-reels-golden)
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: INSERT a system_designs row that becomes Meta MLSD 的 canonical golden example, slug-addressable via sd://meta-reels-golden, drawer-reachable from main hub (T-P0-832).
+
+SOURCE: docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md
+- Lines 1-138: pacing theory, 4 strong moment 框架, ML-native vocab YES/NO rules, framing 元结构
+- Lines 142-362: Reels Home Feed Recommendation golden example 全文（0-5/5-12/12-18/18-26/26-32/32-38/38-42/42-45 八段, 每段英文台词 + 4 strong moment 完整投放台词）
+- Lines 330-362: 元结构 (Framing/Body/Strong/Zoom-out 一图概览) + 偏好节奏 meta-rules 8 条
+
+DB TARGET: data/mle_prep.db, table=system_designs
+COLUMNS TO FILL:
+- slug = 'meta-reels-golden'
+- title = 'Meta MLSD Golden Example: Reels Home Feed Recommendation (45min walkthrough)'
+- subtitle = 'Canonical pacing + 4 strong moments + production-aware 英文台词. 适用于 Reels / Feed / Notification / Friend-rec / Ads 等 Meta MLSD 题型 (80% 结构复用). Reference back ← Meta hub via cd://<main hub id>.'
+- display_order = 130 (空号区间, 在 123 interview-recommendation-system 之后, 199 pinterest-system-design-concepts 之前)
+- overview: 整体节奏哲学 (3 段, ~600 字) — 前 5 分钟独裁 framing / 中段 30 分钟主导但邀请方向 / 最后 10 分钟 zoom-out; 4 strong moment 预分配到固定位置; ML-native vocabulary only
+- architecture: 2-stage retrieval+ranking + multi-channel retrieval (60/20/20 personalized / trending / diversity) + DLRM-style ranking with multi-task heads; multimodal embedding pipeline (visual + audio + text → fused content embedding, precomputed at upload, quarterly refresh)
+- dataflow: 八段时间表完整 narrative — 0-5 framing (declarative open, 2 specialty thesis, yes/no close) / 5-12 data & labels (3-part walk: sources / label schema multi-head / biases hold) / 12-18 features (4 buckets, expand 1) / 18-26 model (two-tower + multi-channel + DLRM + multi-task heads, invite deepen) / 26-32 bias & objectives (exposure bias reframe + 3 mitigation layers + objective composition) / 32-38 evaluation (offline + counterfactual replay + online + long-term holdout, slice by confounder) / 38-42 zoom-out + top 3 risks / 42-45 serving + Q&A (graceful exit)
+- formulas: label schema 三类 — normalized watch ratio = watch_time / video_duration capped 1.0; strong positive (binary, sparse high-precision: like/comment/share/follow/save); strong negative (binary: early-swipe <2-3s or <20% completion); ambiguous middle (50% watch → weakly positive on watch-ratio head, excluded from early-skip head). Loss weighting: start equal, Pareto search on offline metrics post-train tune (NOT gradient-based loss balancing — interpretability reason)
+- production_constraints: multimodal embedding precomputed at upload (decouples content understanding from serving cost), quarterly encoder refresh, content features cached, user features fresh at request, async candidate precompute for active users
+- tradeoffs: pretrained backbone + fine-tune vs from scratch (cost decoupling); IPS / propensity weighting (data correction) vs active exploration policy (data acquisition — stronger lever, cross-functional cost); watch-ratio optimization vs retention (clickbait risk, long-term holdout 防御); compliance as hard filter NOT soft loss (category error if treated as 'less engagement'); shared backbone + head-specific top layers (correlated heads benefit from sharing)
+- defense: 4 strong moment 完整英文台词 verbatim — Moment #1 (framing, multimodal lifecycle + decoupling, 见 source line 164-167 'First, Reels are short-form videos...'); Moment #2 (label schema with ambiguous middle + duration confounder, 见 source line 192-196 'Label 1: normalized watch ratio...'); Moment #3 (exposure bias reframe as data acquisition + 3 intervention places + failure modes + IPS comparison, 见 source line 262-266 'But I want to push the framing further...'); Moment #4 (zoom-out + top 3 risks + mechanism + alarm signal, 见 source line 307-313 'Let me zoom out...')
+- verbal_outline: 关键 verbal patterns + drift-recovery 句式 — 'Let me walk through this in N parts: A, B, C' / 'And this is where Reels diverges...' / 'One thing I want to flag: [a non-obvious risk]' / 'Let me hold that thought and move to X unless you want to deepen Y first' / 'I want to push the framing further—I'd reframe X as Y, not just Z' / 'Why this matters more than [standard approach]: [trade-off]' / 'Treating X as a soft Y is a category error' / 'Let me park that, more important is...' / 'I won't go deeper unless you'd like'; ML-native YES/NO 对照表 (YES: model class / label / feature / bias / objective / evaluation / freshness / drift / calibration; NO: SLA / NFR / FR / QPS / read/write ratio / service / API / cache / network)
+- cheat_sheet: 元结构一图概览 (Framing 60-90s / Body 每段 sub-section announce + bullet expand 1 + flag 1 risk + transition / Strong moment 4 个: reframe + 3 actions + failure modes + trade-off / Zoom-out 3 min: summary + top-3 risks + invite deepen); 偏好节奏 meta-rules 8 条 (前 90s 不澄清 / 每开放问题 60-90s / 列完 N bullet 立刻 expand 1 / 每 strong moment 含 trade-off / 每 8-10 分钟主动 zoom-out / 困惑表情时立刻 park / serving 段主动短 / wrap 时一定 top-N risks)
+
+VALIDATION (sanity check after INSERT):
+1. SELECT id, slug, title, subtitle, display_order FROM system_designs WHERE slug='meta-reels-golden' returns exactly 1 row
+2. All 9 列 (overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, verbal_outline, cheat_sheet) non-NULL and length > 200 each
+3. Total content sum > 8000 bytes
+4. defense column 含 4 段完整英文台词 (grep 'First, Reels are short-form' / 'Label 1: normalized watch ratio' / 'But I want to push the framing further' / 'Let me zoom out for a moment')
+5. subtitle 含 'Meta MLSD Golden Example' substring
+6. content_hash 自动计算; updated_at = today
+7. display_order = 130 不与现有 row 冲突 (SELECT COUNT WHERE display_order=130 == 1)
+
+STYLE: 中文叙述 + 英文术语 first-occurrence `**English** (acronym, 中文)`; 金句台词保留英文原文 (面试就这么说); 表格 markdown 直接渲染; 匹配用户 source_01 的 sentence-fragment voice (NOT AI explainer mode).
+
+NO DEPS — 可立刻拣。 Sibling tasks T-P0-830 / T-P0-831 也无依赖, autonomous_run 三选一按 priority order. T-P0-832 (main hub) 依赖本任务的 slug 'meta-reels-golden' (固定值, 不依赖 auto-assigned id).
+
+#### T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: INSERT a company_documents row holding Meta MLSD 的 13 题 family taxonomy 总表 + 每题 Twist → Puzzle pieces → Anti-patterns → Strong moment hook 卡片. Drawer-reachable from main hub (T-P0-832) via cd://<this row id>.
+
+SOURCE:
+- docs/prep/meta_mlsd_2026-05-11/source_02_family_taxonomy.md
+  - Lines 1-3: 第一节 family taxonomy 13 行表格 (题目 / family / unique twist 一句话)
+  - Lines 8-160: 第三节 Q1-Q12 详细卡片 (Q13 Reels 在 source_01)
+- docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md
+  - Lines 396-428: 题目列表 raw enumeration (Yelp饭馆 / FB Newsfeed / IG Story / Spotify / event / location / weapon 等), 用作 Q1-Q12 卡片的 cross-reference verification
+
+DB TARGET: data/mle_prep.db, table=company_documents
+COLUMNS TO FILL:
+- company_id = 31 (Meta)
+- title = '[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)'
+- doc_kind = 'prep_note'
+- source_type = 'manual'
+- is_golden = 0 (not the default first page)
+- content = markdown body with the structure below
+- content_hash auto-computed
+- created_at / updated_at auto
+
+CONTENT STRUCTURE (~10-12 KB):
+1. **Section 1: Family Taxonomy 总表** — 一张 13 行 markdown 表格, 列: #, 题目, Family, 核心 unique twist 一句话. 直接照搬 source_02 lines 1-3 内容, 修正 markdown 渲染（原文是 inline 拼接的, 改为标准 `|` 分隔表格）.
+2. **Section 2: Per-Question Cards Q1-Q13** — 每题一节, 用四级结构:
+   - **Q{N}. {题目名}**
+     - **Unique Twist**: 1-2 句话, 解释这题 vs 其他题最大区别
+     - **Puzzle Pieces**: markdown 表格 (Piece | Why), 列出 6-7 个构件
+     - **Anti-patterns**: 3-item bullet list, 用户常踩的坑
+     - **Strong Moment Hook**: 1 段英文金句台词 verbatim, 用于面试中投放
+   - Q1 Top 3 Comments / Q2 Video-to-Video Search / Q3 Friend Recommendation / Q4 Ads / Q5 Event / Q6 Location / Q7 Weapon Ad / Q8 Yelp Restaurant / Q9 FB News Feed / Q10 IG Story / Q11 Spotify Music / Q12 Predict Event Attendance — 这 12 题照搬 source_02 lines 11-157
+   - **Q13 Reels** — **只放 1 段 1-2 句话 'see full 45-min walkthrough'**, 直接 link 到 sd://meta-reels-golden (NOT db://, NOT 路径形式). 标记此处为整本笔记的 canonical golden example.
+3. **Section 3: 如何使用这本 drawer** — 1 段简短指南 (40-60 字), 说明 30 秒判断题型 → 找到对应卡片 → 套 puzzle pieces + 投 strong moment hook.
+
+STYLE:
+- 中文叙述 + 英文 ML 术语 (first-occurrence `**English** (acronym, 中文)`)
+- 金句台词 (strong moment hook) **保留英文原文 verbatim** (面试就这么说), 不要翻译, 不要 paraphrase
+- Puzzle pieces 表格保持紧凑, 不要展开成长句
+- Anti-patterns 用 ❌ 前缀
+- 匹配 source_02 voice — 直接, 不啰嗦, sentence fragment OK
+
+VALIDATION (sanity check after INSERT):
+1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%Family Taxonomy%' returns exactly 1 row
+2. length(content) BETWEEN 9000 AND 14000 (估计区间)
+3. content 含 'sd://meta-reels-golden' substring (Q13 Reels 卡片链接)
+4. content 含 12 个独立的 '### Q' (Q1..Q12) headers (Q13 是 reference-only, header 可以是简短形式)
+5. content 含 'Strong Moment' 至少 12 次 (每卡 1 次)
+6. doc_kind='prep_note' AND is_golden=0
+7. content 含 13 行 taxonomy 表格 (grep '^\| \d' 或 markdown table row pattern, count >= 13 行 + 1 header + 1 separator = >= 15 行包括表格框架)
+
+NO DEPS — 可立刻拣. T-P0-832 main hub 完成本任务后需要查询 SELECT id FROM company_documents WHERE title LIKE '[Meta-MLSD]%Family Taxonomy%' 拿到 id 写 cd://N 链接.
+
+OUTPUT to PROGRESS.md after completion: 1 entry under '## 2026-05-XX [T-P0-XXX / Meta-MLSD B]' 含 what/deliverables/sanity check/status/request 5 段.
+
+#### T-P0-839: [Meta-MLSD C] Cross-cutting 积木库 → company_documents
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: INSERT a company_documents row holding the 9 跨题通用 ML 积木 (cross-cutting reusable pieces), 让用户面试中遇到任何 recommendation/ranking/classification 题都能即时套用. Drawer-reachable from main hub (T-P0-832) via cd://<this row id>.
+
+SOURCE: docs/prep/meta_mlsd_2026-05-11/source_02_family_taxonomy.md
+- Lines 4-6: 第二节 cross-cutting reusable pieces — 9 个积木 (积木 / 何时套用 / 一句 justification) inline format
+
+DB TARGET: data/mle_prep.db, table=company_documents
+COLUMNS TO FILL:
+- company_id = 31 (Meta)
+- title = '[Meta-MLSD] Cross-cutting 积木库 (drawer)'
+- doc_kind = 'prep_note'
+- source_type = 'manual'
+- is_golden = 0
+- content = markdown body (~3-4 KB)
+
+CONTENT STRUCTURE:
+**Header**: 1 段简短开场 (50-80 字), 解释这 9 个积木是 Meta MLSD 跨题通用的 ML 思维模块, 记熟一次到处用. 链接回 sd://meta-reels-golden (golden example) + cd://<family taxonomy doc id> (13 题卡片) — 但 since this doc 的 id 是 unknown 直到 INSERT 完成, 查询 SELECT id FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%Family Taxonomy%' 得到 family taxonomy doc id.
+
+**主表 (markdown table)**:
+| # | 积木 | 何时套用 | Justification |
+| - | --- | --- | --- |
+| 1 | Two-tower retrieval + deep ranking | Standard rec/feed/search 默认架构 | retrieval 走 ANN, ranking 走 latency 富余下的 deep model |
+| 2 | Multimodal embedding precomputed at upload | 内容为视频/图/音频 | 把内容理解开销跟 serving cost 解耦, 刷新只在 encoder 升级时 |
+| 3 | Multi-task heads (engagement / quality / strong negative) | 任何 user feedback 非单一信号 | 单 binary label 损失信息; 多 head 还能 post-train tune 权重 |
+| 4 | IPS / counterfactual replay | 任何讨论 exposure bias / A/B safety | offline 数据有 bias, replay 在 A/B 前过滤明显 broken candidate |
+| 5 | Active exploration policy (onboarding + re-explore + content ramp) | 想 push 到 E5 信号 | 重构 exposure bias 为 data acquisition 问题 (高级 reframe) |
+| 6 | LLM-as-teacher → distilled student | Label scarcity / 内容理解任务 | Teacher 离线 bulk inference, student 在线 serving (2025 Meta 实践) |
+| 7 | Long-term holdout (~5% users, 30+ days) | 任何讨论 evaluation 完整性 | 短 A/B 抓不到 retention / filter bubble / fatigue |
+| 8 | Calibration check across surfaces | 多 surface 混排或概率被下游消费 | 跨 head 的 score 不可比时 ranking 失真 |
+| 9 | Slice metrics by confounder | 任何 evaluation 段 | aggregate 数字会掩盖 sub-group failure (duration / new vs return user) |
+
+**Section 2 (每积木一小段 expanded note)**: 9 个 H4 小标题, 每段 60-100 字, 引用 source_02 line 4-6 原文 + Reels golden example 的具体用例 (link 到 sd://meta-reels-golden#bias-section / sd://meta-reels-golden#evaluation 这种 anchor 形式 OK, 若 SD drawer 不支持 anchor 则用文字描述 'see Reels golden 26-32 min bias section').
+
+**Section 3 (Decision Tree, 60-80 字)**: '遇到新题, 30 秒判断 → 套哪些积木' — 给一个简短 if-tree, e.g. 'rec/ranking 题 → 积木 1+3+4+5+7; classification 题 → 积木 6+7+9; cold-start heavy → 积木 2+5'.
+
+STYLE:
+- 中文叙述, 积木名 + ML 术语保留英文 (first-occurrence `**English** (acronym, 中文)`)
+- 表格紧凑, 一行一个积木, 不展开
+- 不要 hallucinate 积木 — 严格照搬 source_02 lines 4-6 的 9 个
+
+VALIDATION (sanity check after INSERT):
+1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%积木%' returns exactly 1 row
+2. length(content) BETWEEN 3000 AND 5500
+3. content 含主 markdown 表格 (9 + 2 = 11 行至少: header + separator + 9 数据行)
+4. content 含 'Two-tower retrieval' / 'IPS' / 'LLM-as-teacher' / 'Long-term holdout' / 'Slice metrics' 5 个 keyword spotcheck
+5. content 含至少 1 个 'sd://meta-reels-golden' link 或 cd:// link
+6. doc_kind='prep_note' AND is_golden=0
+
+NO DEPS — 可立刻拣 (并行 A/B/C 三选一). T-P0-832 main hub 完成本任务后需要查询 doc id 写 cd:// 链接.
+
+OUTPUT to PROGRESS.md after completion: 1 entry, 5 段 (what / deliverables / sanity / status / request).
+
+#### T-P0-840: [Meta-MLSD D] Main Hub Page → company_documents (45min Playbook + 4 Strong Moments)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-837, T-P0-838, T-P0-839
+- **Description**: INSERT the **main hub page** for Meta MLSD prep — 高密度 ~6 KB summary, 重内容全部 drawer 链接到 T-P0-837/838/839. 这页将在 T-P0-833 promoted 为 is_golden=1 成为 Meta company 默认首页.
+
+DEPS: T-P0-837 (Reels SD), T-P0-838 (Family Cards doc), T-P0-839 (积木库 doc) — 三者完成后才可执行本任务. 进入时 SELECT id FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%Family Taxonomy%' 得 family doc id; SELECT id FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%积木%' 得 jimu doc id; sd 用固定 slug 'meta-reels-golden'.
+
+SOURCE: docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md
+- Lines 1-68: 节奏分配 / strong moment ROI / 减少澄清的取舍 / E4 vs E5 / 4 个 strong moment 类型
+- Lines 93-138: 整体节奏哲学 (Framing/Body/Strong/Zoom-out 元结构) + ML-native vocabulary rules + timing skeleton + E4 NOT E5 警告 + 'IF YOU FEEL YOU'RE DRIFTING' 句式
+- Lines 353-362: 偏好节奏的 8 条 meta-rules
+
+DB TARGET: data/mle_prep.db, table=company_documents
+COLUMNS TO FILL:
+- company_id = 31 (Meta)
+- title = '[Meta-MLSD] 45min Playbook + 4 Strong Moments'
+- doc_kind = 'prep_note'
+- source_type = 'manual'
+- is_golden = 0 (T-P0-833 will promote to 1)
+- content = markdown body (target ~5500-7500 bytes — 高密度 summary, 不灌水)
+
+CONTENT STRUCTURE (按这个 outline 写, 顺序固定):
+
+# Meta MLSD 45-min Playbook (加面 2026-05-XX)
+
+> **当一次面试通知**：用户被临时通知 Meta ML Design 加面. 这本 hub 是 30 分钟可读完的高密度 playbook. 重内容全部下沉到 drawer.
+
+## 1. 节奏 Timing Skeleton (45min)
+markdown 表格 9 行: time-window / phase / strong moment / 应做的事 (一句话). 内容照搬 source_01 lines 121-128 + 8-16.
+
+## 2. 4 Strong Moments — 预分配到固定位置
+4 个 H3 小节, 每个含: mechanism (60-80 字, 为什么这是 strong) + 何时投放 (timing-window) + hook phrase (1 句英文金句). 内容来自 source_01 lines 44-66 + 110-118.
+- Strong Moment #1: 一个出乎意料的 trade-off 洞察 (data section, 12-15 min) — 'exposure bias is a feedback loop with retrieval...'
+- Strong Moment #2: 一个量化的直觉 (model section, 25-28 min) — 'two-tower with 128-dim embeddings can do ~10k candidate scoring in single-digit ms...'
+- Strong Moment #3: 一个 production scar (model or eval, 25-28 min) — 'In my eBay work, we found that adding more features beyond ~200 actually hurt...'
+- Strong Moment #4: framework-level summary (35-40 min) — 'Let me zoom out for a sec—we've covered X. The three biggest risks I see in this design are...'
+
+→ **完整 Reels Golden Example 走全套 4 moments**: [Reels Home Feed (45min walkthrough) →](sd://meta-reels-golden)
+
+## 3. ML-Native Vocabulary — YES/NO 对照
+紧凑双列表:
+- ❌ NO: SLA / NFR / FR / QPS / read/write ratio / service / API / cache / network — 这些是 SDE-system-design 词, 进 MLSD 会被 calibrate 为 'didn't show ML depth'
+- ✅ YES: model class / label / feature / bias / objective / evaluation / freshness / drift / calibration / counterfactual
+
+## 4. Framing / Body / Strong / Zoom-out 元结构
+4 个 sub-block, 每个 50-80 字描述结构 (对应 source_01 lines 331-353). 重点说 'list bullets → pick 1 expand 60s' 机械规则.
+
+## 5. 偏好节奏 Meta-rules (8 条)
+紧凑 bullet 列表照搬 source_01 lines 354-362.
+
+## 6. 减少澄清广度 NOT 深度
+1 段 80-120 字, 引用 source_01 lines 30-37 — 不要 triage email/push/in-app 这种 surface 维度 / 不要展开 FR/NFR/QPS; **要** 快速锁一句话假设 + 每决策点 surface trade-off 自己给推荐答案.
+
+## 7. E4 标准 vs E5 上限
+markdown 双列对比表 (E4 必须做到 / E5 加分): 来自 source_01 lines 68-89 + 135-139. E4 4 条 (pick model + justify trade-off / top 2-3 risks / production sense / drive conversation forward); E5 加分: novel reframe / cross-functional thinking / paper citation.
+
+## 8. Drawer — 深内容入口
+**bullet 列表 with drawer URI**:
+- [Reels Golden Example (full 45min walkthrough, 8 段台词, 4 strong moment verbatim) →](sd://meta-reels-golden)
+- [Family Taxonomy + 13 题型卡片 (Q1-Q13 Twist/Puzzle pieces/Anti-patterns/Hook) →](cd://<family_doc_id>)
+- [Cross-cutting 9 个 ML 积木库 (跨题通用思维模块) →](cd://<jimu_doc_id>)
+
+## 9. 30 秒判题流程
+1 段 100-150 字 if-tree: 看到题 → 30 秒判断 family (rec / ranking / classification / search / event) → 跳到 cd://family-cards 找对应卡片 → 套 puzzle pieces + 投 hook phrase → 按 timing skeleton 走 45 分钟.
+
+STYLE:
+- 中文叙述 + 英文 ML 术语 (first-occurrence `**English** (acronym, 中文)`)
+- 金句 hook phrase 保留**英文原文 verbatim**
+- 表格紧凑
+- 不要展开任何 strong moment 全文台词 (那是 sd://meta-reels-golden drawer 的内容)
+- 主页 ~6 KB 是硬目标; 写超过 8 KB 说明应该往 drawer 下沉
+
+VALIDATION (sanity check after INSERT):
+1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%45min Playbook%' returns exactly 1 row
+2. length(content) BETWEEN 5500 AND 7500
+3. content 含全部 3 个 drawer URI: 'sd://meta-reels-golden' + 'cd://<family_doc_id>' + 'cd://<jimu_doc_id>' (具体 id 替换为查询结果, NOT placeholder)
+4. content 含 9 个 H2 sections (Section 1-9) 全部存在: grep '^## ' count == 9
+5. content 含 4 个 'Strong Moment #' (Moment #1-#4)
+6. content 含 'YES/NO 对照' 表 (NO 列含 'SLA' 'QPS' 至少 2 个; YES 列含 'label' 'feature' 至少 2 个)
+7. doc_kind='prep_note' AND is_golden=0 (T-P0-833 promote)
+8. drawer URI verify reachable: SELECT id FROM company_documents WHERE id=<family_doc_id> AND company_id=31 returns 1 row; SELECT id FROM company_documents WHERE id=<jimu_doc_id> AND company_id=31 returns 1 row; SELECT id FROM system_designs WHERE slug='meta-reels-golden' returns 1 row.
+
+DEPS RESOLUTION at task start:
+```sql
+-- Family Cards doc id
+SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)';
+-- 积木库 doc id  
+SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] Cross-cutting 积木库 (drawer)';
+-- SD slug (constant)
+SELECT slug FROM system_designs WHERE slug='meta-reels-golden';
+```
+若任何 query 返回 0 行 → 报错 + 不要 INSERT (说明上游 task 还没真正完成, fail loud).
+
+OUTPUT to PROGRESS.md after completion: 1 entry, 5 段.
+
+#### T-P0-841: [Meta-MLSD E] Promote new Main Hub to is_golden=1 + audit URI consistency
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-840
+- **Description**: Promote the new T-P0-840 main hub doc 到 is_golden=1 (Meta company 默认第一个页面 convention), demote 旧 golden doc 82 到 is_golden=0 (保留, 不删 — 旧的 AI-Native Onsite Prep round 仍可能用到). 收尾跑 URI consistency audit.
+
+DEPS: T-P0-840 (main hub doc created).
+
+DB OPERATIONS (data/mle_prep.db):
+
+```sql
+-- Step 1: Find new main hub id
+SELECT id FROM company_documents 
+WHERE company_id=31 AND title='[Meta-MLSD] 45min Playbook + 4 Strong Moments';
+-- Expected: exactly 1 row, id ≠ 82
+
+-- Step 2: Demote existing golden (doc 82)
+UPDATE company_documents 
+SET is_golden=0, golden_at=NULL, updated_at=CURRENT_TIMESTAMP
+WHERE id=82 AND company_id=31;
+
+-- Step 3: Promote new main hub
+UPDATE company_documents 
+SET is_golden=1, golden_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP
+WHERE id=<new_main_hub_id> AND company_id=31;
+
+-- Step 4: Verify only 1 row is golden for company_id=31
+SELECT COUNT(*) FROM company_documents WHERE company_id=31 AND is_golden=1;
+-- Expected: exactly 1
+```
+
+VALIDATION (mandatory checks):
+1. After UPDATE: SELECT id, is_golden, golden_at FROM company_documents WHERE company_id=31 AND is_golden=1 returns exactly 1 row, id = new main hub id (NOT 82).
+2. Doc 82 still exists with is_golden=0 (NOT deleted).
+3. Run `python scripts/audit_uri_consistency.py` (per memory `reference_dblc_drawer_links.md`); if exits 0 → pass. If exits non-zero → report flagged URIs and STOP (do not mark task complete).
+4. Run smoke check: SELECT id, title, is_golden FROM company_documents WHERE company_id=31 ORDER BY is_golden DESC, id ASC. First row should be new main hub (id confirmed in step 1).
+5. Verify all 3 drawer URIs in new main hub still resolve:
+   - SELECT slug FROM system_designs WHERE slug='meta-reels-golden' → 1 row
+   - SELECT id FROM company_documents WHERE id=<cd referenced family doc id> AND company_id=31 → 1 row
+   - SELECT id FROM company_documents WHERE id=<cd referenced jimu doc id> AND company_id=31 → 1 row
+
+OPTIONAL DASHBOARD SMOKE: If MLI dashboard is running locally (curl localhost:5174 or :8765 — check src/ or scripts/run_dashboard.* for port), curl /companies/31 and verify new main hub shows as default first page. If dashboard not running, skip but note in PROGRESS.
+
+DELIVERABLES:
+- 2 UPDATE statements executed (demote 82, promote new hub)
+- 1 audit script run with PASS
+- PROGRESS.md entry, 5 段
+- Discord ping (optional, user can pull when interactive): summarize 5-task batch landed + new Meta default first page slug/title
+
+ROLLBACK PLAN (if anything fails):
+```sql
+UPDATE company_documents SET is_golden=1, golden_at='2026-05-01 07:13:16' WHERE id=82;
+UPDATE company_documents SET is_golden=0, golden_at=NULL WHERE id=<new_main_hub_id>;
+```
+Old golden_at value from prior session: doc 82 had golden_at NULL initially but updated_at=2026-05-01 07:13:16 — set golden_at to that as best-effort restore.
+
+NO further deps — this is the last task of the 5-task batch.
+
+OUTPUT to PROGRESS.md after completion: 1 entry (5 段) + 1 summary mini-section noting all 5 tasks (T-P0-837 .. T-P0-841) closed and Meta default first page now points to new main hub.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
