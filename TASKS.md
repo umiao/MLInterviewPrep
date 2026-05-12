@@ -66,28 +66,6 @@ AC:
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
-#### T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (after '局限' 段, before '---' separator).
-
-CONTENT:
-'**轴的澄清** (一个常见误用): 学习目标轴 (pointwise / pairwise / listwise) 与 打分函数输入轴 (user-independent / personalized) **正交**, 不是同一件事. DLRM 本身就是 personalized + pointwise: score = f(user_feat, item_feat, context), 逐 item 打分但是 user-conditioned. 现场如果说"这题不适用 pointwise"是错的, 正确表述应该是"user-independent ranking (PageRank / global quality score / CTR-rank) 不适用". 真正决定 architecture 的是 user side 是否参与打分, 不是 pointwise/pairwise/listwise 的选择.'
-
-PLACEMENT RATIONALE: §2 是 DLRM 节, DLRM 的 'dot product → top MLP → sigmoid' flow 正是 personalized + pointwise 的教科书实例, 在这里澄清最自然. (备选: §5 multi-task 节, 但 §2 锚定更紧)
-
-POST-EDIT: re-run scripts/seed_meta_mlsd_recsys_models.py (validator bound 已是 [14000, 24000], 当前 ~14KB 还在范围; 但需要验证一次)
-
-ACCEPTANCE CRITERIA:
-- [AC1] source_03 文件 §2 末尾出现 '轴的澄清' / '正交' / 'personalized + pointwise' / 'DLRM 本身就是' markers
-- [AC2] seed 重新跑通过, doc 97 DB 内容 grep 同样 markers 命中
-- [AC3] doc 97 长度增量 ~500 字节, validator 不需要再 bump
-- [AC4] 自链接排除仍保持 (cd://97 不在自身 Drawer 入口)
-- [AC5] cross-reference 思路: T-P0-847 (doc 96) AI 补充段也提到这条, 两处都点出但不重复 verbatim
-
-DEPENDENCY: none (independent)
-
 #### T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module)
 - **Priority**: P1
 - **Complexity**: S
@@ -566,6 +544,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
 - [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
 - [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str
 - [x] **2026-05-12** -- T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section. Retrofit system_designs.id=41 (slug='meta-reels-golden', title='Meta MLSD Golden Example: Reels Home Feed Recommendation

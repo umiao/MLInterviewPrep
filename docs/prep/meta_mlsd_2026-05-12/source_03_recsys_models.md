@@ -61,6 +61,8 @@ $$x_{l+1} = x_0 \odot (W_l x_l + b_l) + x_l$$
 
 **局限**:特征工程不可避免(几百个手工 feature field),scale 起来收益递减——这是后来 **HSTU**(Hierarchical Sequential Transduction Units,Meta 2024)提出 "DLRM doesn't scale with compute" 的批评。
 
+**轴的澄清**(一个常见误用):学习目标轴(pointwise / pairwise / listwise)与打分函数输入轴(user-independent / personalized)**正交**,不是同一件事。DLRM 本身就是 personalized + pointwise:$\text{score} = f(\text{user\_feat}, \text{item\_feat}, \text{context})$,逐 item 打分但是 user-conditioned。现场如果说"这题不适用 pointwise"是错的,正确表述应该是"user-independent ranking(PageRank / global quality score / CTR-rank)不适用"。真正决定 architecture 的是 **user side 是否参与打分**,不是 pointwise/pairwise/listwise 的选择。
+
 ---
 
 ## 3. Collaborative Filtering 主流方法和策略
