@@ -9,55 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-842
-- **Description**: Retrofit existing company_documents.id=96 ('[Meta-MLSD] 45min Playbook + 4 Strong Moments', is_golden=1 default first page) by:
-1. **Prepending** a prominent Drawer 入口 顶部 section
-2. **Dedupe**: REMOVE the existing old 'Section 8 Drawer — 深内容入口' (which was a mid-doc drawer list at section 8 from T-P0-840 initial seed) since its 3 entries are now in the new top section
-
-DEP RESOLUTION at task start:
-- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)' → T-A's doc id
-
-DB TARGET: data/mle_prep.db
-UPDATE company_documents SET content = <new_drawer_index_top + hr + body_with_old_section8_removed>, updated_at=CURRENT_TIMESTAMP WHERE id=96 AND company_id=31
-
-NEW PREPENDED SECTION (5 entries, NO cd://96 self-link):
-
-```
-> ## Drawer 入口（点击展开详读）
->
-> | 入口 | 内容 | 何时打开 |
-> | --- | --- | --- |
-> | **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
-> | **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
-> | **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
-> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
-> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
-
----
-
-```
-
-DEDUPE INSTRUCTIONS for doc 96 specifically:
-- 找到现有的 'Section 8 Drawer — 深内容入口' (a markdown H2 + bullet list with 3 drawer URI: sd://meta-reels-golden / cd://94 / cd://95). EXACT pattern from T-P0-840 seed: '## 8. Drawer — 深内容入口' followed by bullet list of `[label →](URI)` entries.
-- **REMOVE the entire Section 8** (header + bullet list). 重新编号: 原 Section 9 (30 秒判题流程) 改为 Section 8.
-- Section 2 中有 1 处 inline reference `[Reels Home Feed (45min walkthrough) →](sd://meta-reels-golden)` — 此为 narrative inline reference, KEEP (dedupe only applies to drawer-index style sections, not inline prose).
-
-STYLE / VALIDATION / IDEMPOTENCY:
-1. content STARTS WITH '> ## Drawer 入口（点击展开详读）'
-2. 5 drawer URI in Drawer 入口 (sd://meta-reels-golden + cd://94 + cd://95 + cd://<T-A> + sd://interview-recommendation-system); cd://96 NOT in Drawer 入口
-3. 原 '## 8. Drawer — 深内容入口' header 和其下的 bullet list **完全 removed** (grep '## 8. Drawer' returns 0 hits after edit)
-4. 原 '## 9. 30 秒判题流程' renamed to '## 8. 30 秒判题流程' (renumber)
-5. body 仍含 sections 1-7 + new section 8 (was 9); H2 count after edit: 1 (Drawer 入口 inside blockquote) + 8 (Sections 1-8) = 9 total '## '
-6. length(content) range: 现 ~7331; after prepend ~+700 byte + remove ~150 byte section 8 = 7800-8200
-7. ruff/pytest pass
-8. Sentinel: `<!-- META_MLSD_DRAWER_HEADER_96_20260512 -->`
-9. updated_at = today
-
-OUTPUT: `scripts/retrofit_meta_mlsd_96_drawer_header.py` (idempotent via sentinel + body-state check); PROGRESS 5-段; commit `[T-P0-{this_id}] [Meta-MLSD I] Retrofit doc 96 main hub: prepend Drawer 入口 + remove old Section 8 + renumber`.
-
 #### T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section
 - **Priority**: P0
 - **Complexity**: S
@@ -549,6 +500,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 740 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list. Retrofit existing company_documents.id=96 ('[Meta-MLSD] 45min Playbook + 4 Strong Moments', is_golden=1 default first pa
 - [x] **2026-05-12** -- T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=95 ('[Meta-MLSD] Cross-cutting 积木库 (drawer)') by prepending a prominent Drawer 入口
 - [x] **2026-05-12** -- T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a p
 - [x] **2026-05-12** -- T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents. INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level d
