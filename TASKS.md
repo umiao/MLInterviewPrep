@@ -9,58 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level deep-dive drawer for Meta MLSD prep — referenced from main hub (doc 96) and all sibling drawers.
-
-SOURCE: docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md (full file, ~14 KB, 8 H2 sections + 跨工作脉络梳理 H2)
-
-DB TARGET: data/mle_prep.db, table=company_documents
-COLUMNS:
-- company_id = 31 (Meta)
-- title = '[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)'
-- doc_kind = 'prep_note'
-- source_type = 'manual'
-- is_golden = 0
-- content = markdown body (see structure below; ~16-18 KB after Drawer 入口 prepend)
-
-CONTENT STRUCTURE:
-1. **TOP: Drawer 入口 section** (blockquote + 3-column table, per spec in docs/prep/meta_mlsd_2026-05-12/README.md). Entries (5 total, NO self-reference, NO emoji):
-   - **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排
-   - **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family
-   - **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块
-   - **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework
-   - **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta
-   (注意 self-link 排除：本 doc 不列自身的 cd://N)
-   Wrap entire section in blockquote `> `; H2 = '## Drawer 入口（点击展开详读）' (inside blockquote, so `> ## ...`). After table, close blockquote and add markdown horizontal rule `---` to separate from body.
-2. **Body**: 直接照搬 source_03_recsys_models.md 第 1 行以后所有内容 (从 '# 推荐系统核心模型复习笔记' 开始). 8 个 H2 section + 跨工作脉络梳理 H2. 用户措辞 verbatim, **不要 paraphrase**, **不要 reformatting math** ($ / $$ 保留), **不要修改 takeaway 文字**.
-
-DRAWER URI CONVENTIONS (per memory `reference_dblc_drawer_links.md`):
-- cd://N → CompanyDocDrawer (company_documents.id)
-- sd://<slug> → SystemDesignDrawer (system_designs.slug, NOT id)
-
-STYLE:
-- NO emoji (user reluctance signal — '如果你实在想用 emoji 可以事后把对应脚本清理了')
-- Markdown-native visual prominence: blockquote + bold link labels + table + horizontal rule
-- 中文叙述 (照搬 source_03 verbatim)
-- 英文 ML 术语 first-occurrence `**English** (acronym, 中文)` — source_03 已经按这个 style 写好, 不要改
-
-VALIDATION (sanity check after INSERT):
-1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%推荐系统核心模型%' returns exactly 1 row
-2. length(content) BETWEEN 14000 AND 20000 (source 14KB + drawer index ~1KB + structure overhead)
-3. content 第一段是 Drawer 入口 blockquote (grep '^> ## Drawer 入口' at line 1 or first non-empty line)
-4. content 含 5 个 unique drawer URI 在 Drawer 入口 table (sd://meta-reels-golden + cd://94 + cd://95 + cd://96 + sd://interview-recommendation-system)
-5. content 含 8 个 '## ' body H2 headers (DCN v1/v2, DLRM, CF, 多模态 fusion, multi-task heads, RQ-VAE, HSTU, RankMixer) + 1 '## 跨工作的脉络梳理' H2 + 1 '## Drawer 入口' (inside blockquote) = 10 total '## ' matches
-6. content 含 4 段 '**核心想法**' / '**架构 flow**' / '**为什么这样设计**' style bold callouts (source_03 风格 markers)
-7. Self-link exclusion: content 不含 'cd://<this_doc_id>' (self-reference). 验证: query the newly inserted id, grep content for that id in drawer section — must be 0 hits.
-8. content_hash auto-computed; updated_at = today
-
-NO DEPS — 可立即拣. Sibling tasks (T-B/C/D/E retrofits) depend on this task's auto-assigned id (they will SELECT id FROM company_documents WHERE title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)' at task start).
-
-OUTPUT: 1 idempotent seed script `scripts/seed_meta_mlsd_recsys_models.py` (per established T-P0-837/838/839 pattern); 1 PROGRESS entry 5-段; commit `[T-P0-{this_id}] [Meta-MLSD F] Seed RecSys core models 8-work prep note with drawer index header`.
-
 #### T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section
 - **Priority**: P0
 - **Complexity**: S
@@ -698,6 +646,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 740 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents. INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level d
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
 - [x] **2026-05-11** -- T-P0-841: [Meta-MLSD E] Promote new Main Hub to is_golden=1 + audit URI consistency. Promote the new T-P0-840 main hub doc 到 is_golden=1 (Meta company 默认第一个页面 convention), demote 旧 golden doc 82 到 is_golde
