@@ -66,32 +66,6 @@ AC:
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
-#### T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Section 1) 已经讲了 hybrid serving 双路径 (active user 离线 batch + fresh content 在线 incremental, blend at retrieval). 如果已经讲了 → no-edit close; 如果没讲 → 补一句到 framing 段.
-
-STEP 1 (audit, no edit):
-- Grep scripts/seed_meta_reels_golden_sd.py 和 sd 41 DB content (overview / architecture columns)
-- 关键词: 'hybrid', '离线 batch + 在线', '在线 incremental', 'precompute + cache', 'fresh content path', 'active user 走', 'two-path retrieval'
-- 也看一下 8 段台词 verbatim 是否在 Section 1 (Framing 0-5min) 提到 freshness vs latency trade-off
-
-STEP 2 (conditional edit):
-IF 已经讲了 → 在 PROGRESS 写一句 'Audit confirms hybrid-serving framing present at <location>', 任务 mark done, 0 edit
-IF 没讲 → 找到 Section 1 framing 段, 加 1-2 sentences:
-  '我会做 hybrid serving: active user 走离线 batch 预计算 + cache (亿级 QPS 低延迟), 同时跑一条 online incremental retrieval 让 fresh content 有机会进入候选池. 两条路径在 retrieval 阶段 blend. 这一步同时解决 cold-start (新视频/新 creator) 和 freshness (avoid stale cache) 两个问题, 是 Reels 这个 surface 的 unique 架构杠杆.'
-
-POST-EDIT (only if STEP 2 made edits): re-run scripts/retrofit_meta_mlsd_sd41_drawer_header.py
-
-ACCEPTANCE CRITERIA:
-- [AC1] Audit 报告: hybrid-serving 是否已存在; 如存在, 给出位置 (overview 第 N 段 / architecture 第 N 段 / 8 段台词第几段)
-- [AC2] 如做了 edit, sd 41 overview 或 architecture 长度 +200-400 字节, grep 'hybrid serving' / '离线 batch + 在线' 命中
-- [AC3] 如做了 edit, Drawer 入口 顶部 header 仍存在 (retrofit re-run)
-- [AC4] 8 段台词 verbatim 不被破坏 (除非 STEP 2 显式补充第 1 段)
-
-DEPENDENCY: none (independent). 注: 如果 STEP 1 audit 发现已经有, 这是个 close-out-as-no-op 的 task — 仍要走完 protocol 把结果归档
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -517,6 +491,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
 - [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 

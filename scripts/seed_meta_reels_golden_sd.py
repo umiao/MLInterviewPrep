@@ -176,6 +176,10 @@ DATAFLOW = """\
 
 > "Second, Reels consumption is session-based and continuous. Unlike a structured feed where a user picks one item, Reels users consume tens of videos sequentially. This creates within-session dynamics — diversity collapse, fatigue, interest drift — that we have to model explicitly. The implication is that we need **within-session features computed at request time**, not just batch user profiles, and our ranking model needs to be **session-aware not just user-aware**."
 
+**Serving-side flag (brief, before close)** — Specialty 1 的 upload-time precompute 在 production 上对应一条 hybrid-serving 决策，提前 declare 一下避免 serving 段被问到时仓促展开：
+
+> "On the serving side I'd actually run **hybrid serving** — active users get candidates from a **batch-precomputed pool refreshed during idle windows**, cached for low-latency at billion-QPS, while a parallel **online incremental retrieval path** surfaces fresh content / new creator uploads that have no engagement history yet. The two paths **blend at retrieval**. This simultaneously addresses **cold-start** (new video / new creator) and **freshness** (avoiding stale cache), without paying serving-time multimodal-encoding cost — it's the unique architecture lever for Reels versus a static feed."
+
 **Active deprioritize + yes/no close**：
 
 > "I'm choosing not to deep-dive on cold-start, content moderation, or multi-resolution storage for now, but I'll flag them as risks later. Does this framing make sense, or is there a different angle you'd like me to anchor on?"
