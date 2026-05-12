@@ -9,6 +9,249 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level deep-dive drawer for Meta MLSD prep — referenced from main hub (doc 96) and all sibling drawers.
+
+SOURCE: docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md (full file, ~14 KB, 8 H2 sections + 跨工作脉络梳理 H2)
+
+DB TARGET: data/mle_prep.db, table=company_documents
+COLUMNS:
+- company_id = 31 (Meta)
+- title = '[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)'
+- doc_kind = 'prep_note'
+- source_type = 'manual'
+- is_golden = 0
+- content = markdown body (see structure below; ~16-18 KB after Drawer 入口 prepend)
+
+CONTENT STRUCTURE:
+1. **TOP: Drawer 入口 section** (blockquote + 3-column table, per spec in docs/prep/meta_mlsd_2026-05-12/README.md). Entries (5 total, NO self-reference, NO emoji):
+   - **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排
+   - **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family
+   - **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块
+   - **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework
+   - **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta
+   (注意 self-link 排除：本 doc 不列自身的 cd://N)
+   Wrap entire section in blockquote `> `; H2 = '## Drawer 入口（点击展开详读）' (inside blockquote, so `> ## ...`). After table, close blockquote and add markdown horizontal rule `---` to separate from body.
+2. **Body**: 直接照搬 source_03_recsys_models.md 第 1 行以后所有内容 (从 '# 推荐系统核心模型复习笔记' 开始). 8 个 H2 section + 跨工作脉络梳理 H2. 用户措辞 verbatim, **不要 paraphrase**, **不要 reformatting math** ($ / $$ 保留), **不要修改 takeaway 文字**.
+
+DRAWER URI CONVENTIONS (per memory `reference_dblc_drawer_links.md`):
+- cd://N → CompanyDocDrawer (company_documents.id)
+- sd://<slug> → SystemDesignDrawer (system_designs.slug, NOT id)
+
+STYLE:
+- NO emoji (user reluctance signal — '如果你实在想用 emoji 可以事后把对应脚本清理了')
+- Markdown-native visual prominence: blockquote + bold link labels + table + horizontal rule
+- 中文叙述 (照搬 source_03 verbatim)
+- 英文 ML 术语 first-occurrence `**English** (acronym, 中文)` — source_03 已经按这个 style 写好, 不要改
+
+VALIDATION (sanity check after INSERT):
+1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%推荐系统核心模型%' returns exactly 1 row
+2. length(content) BETWEEN 14000 AND 20000 (source 14KB + drawer index ~1KB + structure overhead)
+3. content 第一段是 Drawer 入口 blockquote (grep '^> ## Drawer 入口' at line 1 or first non-empty line)
+4. content 含 5 个 unique drawer URI 在 Drawer 入口 table (sd://meta-reels-golden + cd://94 + cd://95 + cd://96 + sd://interview-recommendation-system)
+5. content 含 8 个 '## ' body H2 headers (DCN v1/v2, DLRM, CF, 多模态 fusion, multi-task heads, RQ-VAE, HSTU, RankMixer) + 1 '## 跨工作的脉络梳理' H2 + 1 '## Drawer 入口' (inside blockquote) = 10 total '## ' matches
+6. content 含 4 段 '**核心想法**' / '**架构 flow**' / '**为什么这样设计**' style bold callouts (source_03 风格 markers)
+7. Self-link exclusion: content 不含 'cd://<this_doc_id>' (self-reference). 验证: query the newly inserted id, grep content for that id in drawer section — must be 0 hits.
+8. content_hash auto-computed; updated_at = today
+
+NO DEPS — 可立即拣. Sibling tasks (T-B/C/D/E retrofits) depend on this task's auto-assigned id (they will SELECT id FROM company_documents WHERE title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)' at task start).
+
+OUTPUT: 1 idempotent seed script `scripts/seed_meta_mlsd_recsys_models.py` (per established T-P0-837/838/839 pattern); 1 PROGRESS entry 5-段; commit `[T-P0-{this_id}] [Meta-MLSD F] Seed RecSys core models 8-work prep note with drawer index header`.
+
+#### T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-842
+- **Description**: Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a prominent Drawer 入口 顶部 section. Body content stays unchanged (no destructive edits).
+
+DEP RESOLUTION at task start:
+- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)'  → T-A's doc id (used in cd://<T-A-id>)
+- 若 query 返回 0 行 → 报错并 fail loud, 不要 UPDATE doc 94
+
+DB TARGET: data/mle_prep.db
+UPDATE company_documents SET content = <new_drawer_index + horizontal_rule + existing_content>, updated_at=CURRENT_TIMESTAMP WHERE id=94 AND company_id=31
+
+NEW PREPENDED SECTION (place BEFORE the existing first H1/H2):
+
+```
+> ## Drawer 入口（点击展开详读）
+>
+> | 入口 | 内容 | 何时打开 |
+> | --- | --- | --- |
+> | **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
+> | **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
+> | **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework |
+> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
+> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
+
+---
+
+```
+
+(Note: Drawer 入口 does NOT include `cd://94` — self-link excluded per spec. 5 entries total.)
+
+DEDUPE STEP: Scan existing doc 94 content for any pre-existing drawer-list-style sections (look for patterns like `[xxx](sd://...)` or `[xxx](cd://...)` clustered in a section). If found, leave them in body prose as inline references but ensure no separate "drawer index" duplicate. 当前 doc 94 内仅 Q13 Reels 卡片含 1 处 `sd://meta-reels-golden` inline reference + 几处 cross-reference — those are inline narrative references, NOT a drawer index section, KEEP them as-is (dedupe rule applies only to dedicated drawer-index sections).
+
+STYLE:
+- NO emoji
+- Blockquote wrap with `> ` prefix on every line of the drawer section + table
+- `**[bold-label](URI)**` link format, NOT naked URIs
+- Horizontal rule `---` after blockquote, before existing first body section
+- Self-link exclusion (no cd://94 in Drawer 入口 of doc 94)
+
+VALIDATION (sanity check after UPDATE):
+1. SELECT length(content) FROM company_documents WHERE id=94 — new length ~14400-15000 (existing 13974 + ~700-900 byte drawer header)
+2. content STARTS WITH '> ## Drawer 入口（点击展开详读）' (after optional leading whitespace) — assert first non-empty line is this
+3. content 含 5 unique drawer URI: sd://meta-reels-golden + cd://95 + cd://96 + cd://<T-A-id> + sd://interview-recommendation-system (in Drawer 入口 table); cd://94 must NOT appear in Drawer 入口 (self-link exclusion)
+4. content 含 markdown horizontal rule '---' after the blockquote table (separator between Drawer 入口 and body)
+5. content 仍含原 13-row family taxonomy 表 + Q1-Q12 cards (body preserved, NOT destructively edited)
+6. ruff check / pytest 1265 passed (no regression)
+7. updated_at = today
+
+OUTPUT: 1 idempotent retrofit script `scripts/retrofit_meta_mlsd_94_drawer_header.py` (idempotent via sentinel comment in prepended block); 1 PROGRESS entry 5-段; commit `[T-P0-{this_id}] [Meta-MLSD G] Retrofit doc 94 prepend Drawer 入口 顶部 section`.
+
+IDEMPOTENCY: insert sentinel HTML comment `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->` as first line; on re-run, if sentinel found, skip and report UNCHANGED.
+
+#### T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-842
+- **Description**: Retrofit existing company_documents.id=95 ('[Meta-MLSD] Cross-cutting 积木库 (drawer)') by prepending a prominent Drawer 入口 顶部 section. Body content stays unchanged.
+
+DEP RESOLUTION at task start:
+- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)'  → T-A's doc id
+
+DB TARGET: data/mle_prep.db
+UPDATE company_documents SET content = <new_drawer_index + hr + existing>, updated_at=CURRENT_TIMESTAMP WHERE id=95 AND company_id=31
+
+NEW PREPENDED SECTION (5 entries, NO cd://95 self-link):
+
+```
+> ## Drawer 入口（点击展开详读）
+>
+> | 入口 | 内容 | 何时打开 |
+> | --- | --- | --- |
+> | **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
+> | **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
+> | **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework |
+> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
+> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
+
+---
+
+```
+
+DEDUPE: doc 95 当前 content 有可能含若干 inline reference (sd://meta-reels-golden 出现 1-3 处 in 'Section 2 每积木 expanded note' or 'Section 3 Decision Tree'); 这些是 inline narrative, NOT 独立 drawer index, KEEP as-is.
+
+STYLE / VALIDATION / IDEMPOTENCY: 同 T-P0-843 模式, 调整为 doc 95:
+1. length(content) 5500-6500 (existing 5058 + ~700 byte header)
+2. content 起始 '> ## Drawer 入口（点击展开详读）'
+3. 5 drawer URI in Drawer 入口 table: sd://meta-reels-golden + cd://94 + cd://96 + cd://<T-A> + sd://interview-recommendation-system; cd://95 NOT in Drawer 入口
+4. horizontal rule '---' after blockquote
+5. body 仍含 9 积木 markdown 表 + Section 2 expanded notes
+6. ruff/pytest pass
+7. Sentinel: `<!-- META_MLSD_DRAWER_HEADER_95_20260512 -->`
+8. updated_at = today
+
+OUTPUT: `scripts/retrofit_meta_mlsd_95_drawer_header.py` (idempotent); PROGRESS 5-段; commit `[T-P0-{this_id}] [Meta-MLSD H] Retrofit doc 95 prepend Drawer 入口 顶部 section`.
+
+#### T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-842
+- **Description**: Retrofit existing company_documents.id=96 ('[Meta-MLSD] 45min Playbook + 4 Strong Moments', is_golden=1 default first page) by:
+1. **Prepending** a prominent Drawer 入口 顶部 section
+2. **Dedupe**: REMOVE the existing old 'Section 8 Drawer — 深内容入口' (which was a mid-doc drawer list at section 8 from T-P0-840 initial seed) since its 3 entries are now in the new top section
+
+DEP RESOLUTION at task start:
+- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)' → T-A's doc id
+
+DB TARGET: data/mle_prep.db
+UPDATE company_documents SET content = <new_drawer_index_top + hr + body_with_old_section8_removed>, updated_at=CURRENT_TIMESTAMP WHERE id=96 AND company_id=31
+
+NEW PREPENDED SECTION (5 entries, NO cd://96 self-link):
+
+```
+> ## Drawer 入口（点击展开详读）
+>
+> | 入口 | 内容 | 何时打开 |
+> | --- | --- | --- |
+> | **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
+> | **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
+> | **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
+> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
+> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
+
+---
+
+```
+
+DEDUPE INSTRUCTIONS for doc 96 specifically:
+- 找到现有的 'Section 8 Drawer — 深内容入口' (a markdown H2 + bullet list with 3 drawer URI: sd://meta-reels-golden / cd://94 / cd://95). EXACT pattern from T-P0-840 seed: '## 8. Drawer — 深内容入口' followed by bullet list of `[label →](URI)` entries.
+- **REMOVE the entire Section 8** (header + bullet list). 重新编号: 原 Section 9 (30 秒判题流程) 改为 Section 8.
+- Section 2 中有 1 处 inline reference `[Reels Home Feed (45min walkthrough) →](sd://meta-reels-golden)` — 此为 narrative inline reference, KEEP (dedupe only applies to drawer-index style sections, not inline prose).
+
+STYLE / VALIDATION / IDEMPOTENCY:
+1. content STARTS WITH '> ## Drawer 入口（点击展开详读）'
+2. 5 drawer URI in Drawer 入口 (sd://meta-reels-golden + cd://94 + cd://95 + cd://<T-A> + sd://interview-recommendation-system); cd://96 NOT in Drawer 入口
+3. 原 '## 8. Drawer — 深内容入口' header 和其下的 bullet list **完全 removed** (grep '## 8. Drawer' returns 0 hits after edit)
+4. 原 '## 9. 30 秒判题流程' renamed to '## 8. 30 秒判题流程' (renumber)
+5. body 仍含 sections 1-7 + new section 8 (was 9); H2 count after edit: 1 (Drawer 入口 inside blockquote) + 8 (Sections 1-8) = 9 total '## '
+6. length(content) range: 现 ~7331; after prepend ~+700 byte + remove ~150 byte section 8 = 7800-8200
+7. ruff/pytest pass
+8. Sentinel: `<!-- META_MLSD_DRAWER_HEADER_96_20260512 -->`
+9. updated_at = today
+
+OUTPUT: `scripts/retrofit_meta_mlsd_96_drawer_header.py` (idempotent via sentinel + body-state check); PROGRESS 5-段; commit `[T-P0-{this_id}] [Meta-MLSD I] Retrofit doc 96 main hub: prepend Drawer 入口 + remove old Section 8 + renumber`.
+
+#### T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-842
+- **Description**: Retrofit system_designs.id=41 (slug='meta-reels-golden', title='Meta MLSD Golden Example: Reels Home Feed Recommendation (45min walkthrough)') by prepending a Drawer 入口 顶部 section to the **`overview` column** (since overview is the first thing rendered in SystemDesignDrawer). Other columns (architecture / dataflow / formulas / etc.) stay unchanged.
+
+DEP RESOLUTION at task start:
+- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)' → T-A's doc id
+
+DB TARGET: data/mle_prep.db
+UPDATE system_designs SET overview = <new_drawer_index + hr + existing_overview>, updated_at=CURRENT_TIMESTAMP WHERE id=41 AND slug='meta-reels-golden'
+
+NEW PREPENDED OVERVIEW SECTION (5 entries, NO sd://meta-reels-golden self-link):
+
+```
+> ## Drawer 入口（点击展开详读）
+>
+> | 入口 | 内容 | 何时打开 |
+> | --- | --- | --- |
+> | **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
+> | **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
+> | **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework |
+> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
+> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
+
+---
+
+```
+
+(NOTE: Drawer 入口 does NOT include `sd://meta-reels-golden` — self-link excluded. 5 entries total.)
+
+DEDUPE: SD's overview 当前 (post T-P0-837) 含 ~2851 字 of '整体节奏哲学' content with possible 1-2 inline references to other docs. KEEP all inline narrative references; dedupe rule only applies to drawer-index sections.
+
+STYLE / VALIDATION / IDEMPOTENCY:
+1. overview STARTS WITH '> ## Drawer 入口（点击展开详读）'
+2. overview 含 5 drawer URI (cd://94 + cd://95 + cd://96 + cd://<T-A> + sd://interview-recommendation-system); sd://meta-reels-golden NOT in Drawer 入口
+3. overview 含 horizontal rule '---' between blockquote and original content
+4. Other 8 columns (architecture / dataflow / formulas / production_constraints / tradeoffs / defense / verbal_outline / cheat_sheet) **完全 unchanged** (byte-identical pre vs post)
+5. content_hash auto-recomputed; overview length 2851 → ~3550-3700 (+ ~700-850 byte header)
+6. ruff/pytest pass
+7. Sentinel `<!-- META_MLSD_DRAWER_HEADER_SD41_20260512 -->` in overview as first line
+8. updated_at = today
+
+OUTPUT: `scripts/retrofit_meta_mlsd_sd41_drawer_header.py` (idempotent via sentinel + column-isolation check); PROGRESS 5-段; commit `[T-P0-{this_id}] [Meta-MLSD J] Retrofit Reels SD (id=41) overview prepend Drawer 入口`.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
