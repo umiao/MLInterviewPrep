@@ -5,10 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
 #### T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section
 - **Priority**: P0
 - **Complexity**: S
@@ -53,6 +49,10 @@ STYLE / VALIDATION / IDEMPOTENCY:
 8. updated_at = today
 
 OUTPUT: `scripts/retrofit_meta_mlsd_sd41_drawer_header.py` (idempotent via sentinel + column-isolation check); PROGRESS 5-段; commit `[T-P0-{this_id}] [Meta-MLSD J] Retrofit Reels SD (id=41) overview prepend Drawer 入口`.
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
 
 ### P1 -- Should Have (agentic intelligence)
 
