@@ -85,6 +85,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q1. Top 3 Comments Extraction
 
+**Generic 对比**: 通用 cross-item engagement ranking 套路是 retrieval -> ranking -> 优化 click. 但这题候选池只有几十到几千 comment, retrieval 没必要; 且 position-0 是下游 conversation 种子, 优化目标是 conversation quality 而非 click → 见下方 Unique Twist.
+
 **Unique Twist**: 这是 **intra-item ranking**, 不是 cross-item. 候选池只有几十到几千, position 0 comment 是下游 conversation 种子 — 比 user engagement 更深远.
 
 **Puzzle Pieces**:
@@ -106,6 +108,8 @@ CONTENT = f"""{SENTINEL}
 **Strong Moment**: "The comment at position 0 isn't just a ranked result—it becomes the seed of the conversation that the next thousand viewers see. So we're optimizing downstream conversation quality, not just the engagement of the selected comments."
 
 ### Q2. Video-to-Video Search (no text)
+
+**Generic 对比**: 有 text query 时套 query-to-item retrieval (BM25 + dense embedding). 但这题没有 text query, 相似性自身需要被定义 (视觉/音频/intent 三 axis 不重合) → multi-facet retrieval (见下方 Unique Twist).
 
 **Unique Twist**: 没 text query, "相似" 本身需被定义. 视觉 / 音频 / 用途相似是三 axis, 不重合.
 
@@ -129,6 +133,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q3. Friend Recommendation (Meta 产品名 **PYMK** = People You May Know)
 
+**Generic 对比**: 套 two-tower user embedding similarity (user-to-user cosine). 但图结构是 retrieval 本身不是 feature, 且 reciprocity (双向接受) 而非 send-request 才是 positive label → 见下方 Unique Twist.
+
 **Unique Twist**: 图结构是 retrieval 本身, 不是 feature. **Reciprocity** (双向接受) 才是真 positive; dismissal 是异常强负信号.
 
 **Puzzle Pieces**:
@@ -150,6 +156,8 @@ CONTENT = f"""{SENTINEL}
 **Strong Moment**: "The strongest signal in this domain is actually the negative—a user dismissing a PYMK suggestion is a far more reliable label than them sending a friend request, because the request can be one-sided while dismissal is unambiguous."
 
 ### Q4. Ads Recommendation
+
+**Generic 对比**: 套 NDCG / pairwise ranking 优化 ordinal order. 但 auction 的 bid × pCTR 数学要求 calibrated probability — pairwise 一上就破坏 auction 经济学 → 见下方 Unique Twist.
 
 **Unique Twist**: 输出必须是 **calibrated probability**, 不是 ordinal score — auction 的 bid x pCTR 要求 calibration. 多 stakeholder, conversion 有延迟.
 
@@ -174,6 +182,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q5. Event Recommendation
 
+**Generic 对比**: 套 user-item collaborative filtering (历史 RSVP -> 矩阵分解). 但 per-user RSVP 频率太低 (1 人 ~3 events/year), CF 信号严重稀疏 → content-based retrieval + social signal 主导 (见下方 Unique Twist).
+
 **Unique Twist**: 双 cold-start (event 一直新+死, user RSVP 极低), geo+time 是硬约束不是 feature, conversion 高成本.
 
 **Puzzle Pieces**:
@@ -197,6 +207,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q6. Personalized Location Recommendation
 
+**Generic 对比**: 套静态 user preference profile (历史偏好 -> ranking). 但 9am 和 9pm 同一用户 intent 完全不同 → context 不是普通 feature, 是主导 intent disambiguator (见下方 Unique Twist).
+
 **Unique Twist**: POI 长期稳定, user intent 在 request time 才浮现. 同店 9am 是答案 9pm 不是. Context 是主导 intent disambiguator, 不是普通 feature.
 
 **Puzzle Pieces**:
@@ -218,6 +230,8 @@ CONTENT = f"""{SENTINEL}
 **Strong Moment**: "The user at 9am and the same user at 9pm have completely different intents—context isn't one feature among many, it's the primary disambiguator. Without it, we're just recommending the user's average preference, which is no one's actual preference at any moment."
 
 ### Q7. Weapon Ad Classifier
+
+**Generic 对比**: 套静态 supervised binary classifier (train -> deploy -> done). 但 attack 模式每周演化, 静态 dataset 3 个月失效 → active learning loop 才是真系统 (见下方 Unique Twist).
 
 **Unique Twist**: **Adversarial** (主动 evade) + 极端 class imbalance (~0.1% pos) + multimodal + cost asymmetric (FN >> FP).
 
@@ -242,6 +256,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q8. Yelp Restaurant Recommendation
 
+**Generic 对比**: 套 rating-based CF (4-star 推 4-star 用户). 但 aspect-level matching (quiet / vegan / romantic) 信号上限高一个量级 → review text 是 dominant signal (见下方 Unique Twist).
+
 **Unique Twist**: Review text 是 **dominant signal**. Aspect-level matching (quiet / vegan / romantic) 超过 rating matching 上限.
 
 **Puzzle Pieces**:
@@ -263,6 +279,8 @@ CONTENT = f"""{SENTINEL}
 **Strong Moment**: "Rating-based CF has a hard ceiling because two 4-star restaurants can be completely different experiences. The lift comes from aspect-level matching—extracting 'is this place quiet, group-friendly, vegan-OK' from reviews and matching to the user's expressed preferences in their own review history."
 
 ### Q9. FB News Feed
+
+**Generic 对比**: 套单 ranking head on raw engagement (predict click / like). 但 Meta 显式从 engagement 转向 MSI (Meaningful Social Interactions), 内容类型异构, 不同 source 不同 retrieval logic → 见下方 Unique Twist.
 
 **Unique Twist**: 内容类型异构 (status / photo / video / link / milestone), 社交图权重显著, Meta 显式从 engagement 转向 **MSI** (Meaningful Social Interactions).
 
@@ -286,6 +304,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q10. IG Story Recommendation
 
+**Generic 对比**: 套 item-level ranking (per-story score -> sort). 但 ranking unit 是 author-tray 不是 story, recency 是 hard filter 不是 feature → 见下方 Unique Twist.
+
 **Unique Twist**: 24h 硬过期 + ranking unit is **author-tray, not story** — 按作者顺序刷, 改变整个 architecture.
 
 **Puzzle Pieces**:
@@ -308,6 +328,8 @@ CONTENT = f"""{SENTINEL}
 
 ### Q11. Spotify Music Recommendation
 
+**Generic 对比**: 套通用 watch-time-like engagement signal + dedup-after-consumption. 但 relisten 是正向 (跟视频相反), session 内 mood 不能跳变 → 见下方 Unique Twist.
+
 **Unique Twist**: 音频 embedding + session 连续性 (mood 不能跳) + **relisten 是正向** (跟视频相反).
 
 **Puzzle Pieces**:
@@ -329,6 +351,8 @@ CONTENT = f"""{SENTINEL}
 **Strong Moment**: "Music has one feature that distinguishes it from almost every other recommendation domain: relisten is positive, not redundant. A user playing the same song 50 times is a five-star signal, not a saturation signal. This inverts the deduplication logic you'd use for video or articles."
 
 ### Q12. Predict If User Attends FB Event
+
+**Generic 对比**: 直接套 binary classifier (predict attend yes/no -> ship). 但 prediction-as-feature 任务必须先问 "谁消费这个 prediction" — 答案决定 architecture (ranking / notification gating / capacity planning 各不相同) → 见下方 Unique Twist.
 
 **Unique Twist**: 这是 **prediction-as-feature** — 先问 "谁消费 prediction", 否则 design 走偏. 上次答烂大概率在此.
 
@@ -398,10 +422,11 @@ def validate_content(content: str) -> None:
     # Length bounds: 9000-14000 chars original; 14200 (2026-05-12) for PYMK
     # acronym; 15700 (T-P0-848) for Q13 Reels stub -> full card promotion
     # (Unique Twist + Puzzle Pieces + Anti-patterns + Strong Moment + dual
-    # pointer to cd://96 + sd://meta-reels-golden).
+    # pointer to cd://96 + sd://meta-reels-golden); 18200 (T-P2-852) for
+    # Q1-Q12 'Generic 对比' segment prepended before each Unique Twist.
     n = len(content)
-    if not (9000 <= n <= 15700):
-        raise RuntimeError(f"content length {n} not in [9000, 15700]")
+    if not (9000 <= n <= 18200):
+        raise RuntimeError(f"content length {n} not in [9000, 18200]")
 
     # Section markers
     for marker in (

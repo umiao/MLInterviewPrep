@@ -96,42 +96,6 @@ AC:
 - **Depends on**: T-P1-821, T-P1-834
 - **Description**: Final 4-item acceptance checklist (per Discord plan v3 §9): (a) all P0/P1 companies' prep_notes/notes byte counts < threshold anchored by A0 EDA; (b) meta-prep child nodes mean byte count > 800; (c) audit_uri_consistency.py reports 0 broken kg:// db:// cd:// sd://; (d) red-dot logic manual smoke on sample companies passes. Compute byte-savings stats (before vs after) + commit count + KG growth (node + link delta). PROGRESS close-out entry summarizes the 42-task batch. AC: all 4 checklist items pass; close-out entry written.
 
-#### T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套')
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: T-P0-848
-- **Description**: Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend a 'Generic 对比' 段 before the existing 'Unique Twist' line in that card.
-
-FORMAT (1-2 sentences per card):
-'**Generic 对比**: 通用 [domain] [framework] 做法是 [X]. 但这题 [pivot reason] → 见下方 Unique Twist.'
-
-WORKED EXAMPLES (do not blind-copy — derive per-题):
-- Q1 Top comments: 'Generic 对比: 通用 cross-item engagement ranking. 但这题候选池只有几十到几千 comment, retrieval 没必要, 且 position-0 是下游 conversation 种子 — 优化目标是 conversation quality 而非 click.'
-- Q2 Video-to-video search: 'Generic 对比: 有 text query 时套 query-to-item retrieval (BM25 + dense). 但这题没有 text query, 相似性自身需要被定义 (视觉/音频/intent 三 axis 不重合) → multi-facet retrieval.'
-- Q3 Friend rec: 'Generic 对比: 套 two-tower user embedding similarity. 但图结构是 retrieval 本身不是 feature, 且 reciprocity (双向接受) 而非 send-request 才是 positive label.'
-- Q4 Ads: 'Generic 对比: 套 NDCG/pairwise ranking. 但 auction 的 bid × pCTR 数学要求 calibrated probability, pairwise 一上就破坏 auction 经济学.'
-- Q5 Events: 'Generic 对比: 套 user-item collaborative filtering. 但 per-user RSVP 频率太低 (1 人 3 events/year), CF 信号严重稀疏 → content-based + social signal 主导.'
-- Q6 Location: 'Generic 对比: 套静态 user preference profile. 但 9am 和 9pm 同一用户 intent 完全不同 → context 不是 feature, 是主导 intent disambiguator.'
-- Q7 Weapon classifier: 'Generic 对比: 套静态 supervised binary classifier. 但 attack 模式每周演化, 静态 dataset 3 个月失效 → active learning loop 才是真系统.'
-- Q8 Yelp: 'Generic 对比: 套 rating-based CF. 但 aspect-level matching (quiet / vegan / romantic) 信号上限高一个量级 → review text 是 dominant signal.'
-- Q9 FB News Feed: 'Generic 对比: 套单 ranking head on raw engagement. 但 Meta 显式从 engagement 转向 MSI, 内容类型异构, 不同 source 不同 retrieval logic.'
-- Q10 IG Story: 'Generic 对比: 套 item-level ranking. 但 ranking unit 是 author-tray 不是 story, recency 是 hard filter 不是 feature.'
-- Q11 Spotify: 'Generic 对比: 套通用 watch-time-like signal. 但 relisten 是正向 (跟视频相反), session 内 mood 不能跳变.'
-- Q12 Predict attendance: 'Generic 对比: 直接套 binary classifier. 但 prediction-as-feature 任务必须先问 "谁消费这个 prediction" — 答案决定 architecture (ranking / notification / capacity planning 各不相同).'
-
-VALIDATOR BUMP: seed_meta_mlsd_family_taxonomy.py [9000, 15700] (post-T-B), 上界 +2500 → [9000, 18200]
-
-POST-SEED: re-run scripts/retrofit_meta_mlsd_94_drawer_header.py
-
-ACCEPTANCE CRITERIA:
-- [AC1] seed 重新跑通, doc 94 长度增加 ~2-3KB
-- [AC2] grep DB content for '**Generic 对比**:' marker — 出现 12 次 (Q1-Q12, NOT Q13)
-- [AC3] Q1-Q12 每张 card 的 'Unique Twist' 字段未被破坏 (verbatim preserved)
-- [AC4] Q13 card (T-P0-848 已落地) 未被破坏
-- [AC5] Drawer 入口 顶部 header 仍存在 (retrofit re-run)
-
-DEPENDENCY RATIONALE: T-P0-848 编辑同一文件 (seed_meta_mlsd_family_taxonomy.py) 且改 Q13 整张 card, T-F 改 Q1-Q12 prefix — 串行避免合并冲突
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -491,6 +455,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套'). Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
