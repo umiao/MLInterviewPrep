@@ -66,33 +66,6 @@ AC:
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
-#### T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
-
-CONTENT:
-- 积木: Selection bias / feedback loop primitives (IPS 重新加权 + epsilon-greedy/Thompson sampling 强制曝光 + counterfactual replay 在 A/B 前 filter)
-- 何时套用: 任何讨论 popularity death-spiral / 新 item 永远拿不到 label / 'logged data 是有偏的' / exposure bias 闭环
-- 一句 justification: '推什么用户就看什么 → logged data 严重有偏 → 三件套破开闭环: IPS 重新加权 logged data + epsilon-greedy/Thompson 强制给新 item 曝光 + counterfactual replay 在跑 A/B 前过滤明显 broken candidate. 用户视角是 fairness, 平台视角是 data acquisition policy.'
-
-WHY THIS DESERVES A NEW ROW (not just expand existing):
-- 现有 9 积木里, IPS 已经在 (但和 active exploration 分开列), counterfactual replay 已经在 (但和 IPS 分开列). 第 10 积木的价值是把它们 tie 成 module + framing 为 '破开 feedback loop' 的统一 module — 现场遇到 'how do you handle bias' 一次性套出三件套
-- 跟 T-P0-847 doc 96 Twist 7 (feedback loop / selection bias) 互相引用: doc 96 提 framework, doc 95 提 module 实操
-
-VALIDATOR BUMP: scripts/seed_meta_mlsd_cross_cutting.py 当前 length 校验 ~5800 字节, +300 → 上界 +500 字节左右
-
-POST-SEED: re-run scripts/retrofit_meta_mlsd_95_drawer_header.py
-
-ACCEPTANCE CRITERIA:
-- [AC1] seed 重新跑通, doc 95 表格行数 9 → 10
-- [AC2] grep DB content for: 'Selection bias', 'feedback loop', 'IPS 重新加权', 'epsilon-greedy', 'counterfactual replay', '破开闭环' / 'data acquisition policy' — 全部 hit
-- [AC3] Drawer 入口 顶部 table 仍存在 (retrofit 已 re-run)
-- [AC4] doc 95 长度增量 ~300-400 字节
-
-DEPENDENCY: none (independent)
-
 #### T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent
 - **Priority**: P1
 - **Complexity**: S
@@ -544,6 +517,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
 - [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
 - [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str

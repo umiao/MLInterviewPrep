@@ -4,8 +4,10 @@ Per T-P0-839 ([Meta-MLSD C]). Target: company_documents row for company_id=31
 (Meta) titled '[Meta-MLSD] Cross-cutting 积木库 (drawer)'.
 
 This is the cd:// drawer page reached from the Meta MLSD main hub (T-P0-832/840).
-Content is the 9 跨题通用 ML 积木 — apply any one immediately when facing a new
-recommendation / ranking / classification problem during the interview.
+Content is the 10 跨题通用 ML 积木 — apply any one immediately when facing a new
+recommendation / ranking / classification problem during the interview. The 10th
+积木 (T-P1-850) ties IPS / counterfactual replay / active exploration as a unified
+'破开 feedback loop' module — pairs with cd://96 Twist 7 framing.
 
 SOURCE:
   docs/prep/meta_mlsd_2026-05-11/source_02_family_taxonomy.md
@@ -27,7 +29,7 @@ Second run = 0 writes when content is byte-identical.
 Style:
   - Chinese narration + English ML terms (first-occurrence pattern)
   - 主表: 4-col markdown table (# | 积木 | 何时套用 | Justification)
-  - Section 2: 9 H4 sub-headers, each 60-100 字 expanded note
+  - Section 2: 10 H4 sub-headers, each 60-100 字 expanded note
   - Section 3: Decision Tree 60-80 字 if-else mapping
 """
 from __future__ import annotations
@@ -54,11 +56,11 @@ CONTENT = f"""{SENTINEL}
 
 # Meta MLSD - Cross-cutting 积木库 (drawer)
 
-> 9 个跨题通用的 ML 积木 — 题目变了, 积木不变. 记熟一次, 在 Meta MLSD 任意 rec/ranking/classification 题中可即时调用. 配套阅读: 13 题分型卡片 [cd://{FAMILY_TAXONOMY_DOC_ID}](cd://{FAMILY_TAXONOMY_DOC_ID}); 完整端到端示范 [sd://meta-reels-golden](sd://meta-reels-golden).
+> 10 个跨题通用的 ML 积木 — 题目变了, 积木不变. 记熟一次, 在 Meta MLSD 任意 rec/ranking/classification 题中可即时调用. 配套阅读: 13 题分型卡片 [cd://{FAMILY_TAXONOMY_DOC_ID}](cd://{FAMILY_TAXONOMY_DOC_ID}); 完整端到端示范 [sd://meta-reels-golden](sd://meta-reels-golden).
 
 ---
 
-## 1. 积木总表 (9 piece quick-reference)
+## 1. 积木总表 (10 piece quick-reference)
 
 | # | 积木 | 何时套用 | Justification |
 | - | --- | --- | --- |
@@ -71,10 +73,11 @@ CONTENT = f"""{SENTINEL}
 | 7 | Long-term holdout (~5% users, 30+ days) | 任何讨论 evaluation 完整性 | 短 A/B 抓不到 retention / filter bubble / fatigue |
 | 8 | Calibration check across surfaces | 多 surface 混排或概率被下游消费 | 跨 head 的 score 不可比时 ranking 失真 |
 | 9 | Slice metrics by confounder | 任何 evaluation 段 | aggregate 数字会掩盖 sub-group failure (duration / new vs return user) |
+| 10 | Selection bias / feedback loop 三件套 (module) | 讨论 popularity death-spiral / 新 item 拿不到 label / "logged data 有偏" / exposure bias 闭环 | 推什么用户就看什么 → logged data 有偏 → IPS 重新加权 + epsilon-greedy/Thompson 强制曝光 + counterfactual replay 在 A/B 前过滤 broken candidate; 用户视角 fairness, 平台视角 data acquisition policy |
 
 ---
 
-## 2. 9 积木 expanded notes
+## 2. 10 积木 expanded notes
 
 #### 积木 1. Two-tower retrieval + deep ranking
 
@@ -112,6 +115,10 @@ CONTENT = f"""{SENTINEL}
 
 **何时套用**: 任何 evaluation 段. **要点**: aggregate AUC / NDCG 数字会掩盖 sub-group failure — duration bucket (short / mid / long video), new vs return user, country, device. **典型陷阱**: overall metric 涨 0.3%, 但 new user 跌 2% — total roll-out 会损失增长. 任何 readout 都报 slice.
 
+#### 积木 10. Selection bias / feedback loop 三件套 (module)
+
+**何时套用**: 讨论 popularity death-spiral (头部越曝越火, 长尾永不翻身) / 新 item 永远拿不到 label / "logged data 是有偏的" / exposure bias 闭环 时. **要点**: 推什么用户就看什么 → logged data 严重有偏 → 三件套破开闭环: (a) **IPS 重新加权** logged data (用 propensity 倒数 reweight 训练目标, 修正 log-policy 偏差); (b) **epsilon-greedy / Thompson sampling** 强制给新 item 曝光预算 (active acquisition, 非纯 exploit); (c) **counterfactual replay** 在跑 A/B 前过滤明显 broken candidate, 不烧 user traffic. 把积木 4 (IPS / replay) + 积木 5 (active exploration) tie 成统一 module — 现场遇到 "how do you handle bias" 一次性套出三件. **Reframe**: 用户视角是 fairness (多样性 / 新 creator 公平), 平台视角是 **data acquisition policy** — 训练数据怎么收集决定模型上限. 跟 [cd://96](cd://96) Twist 7 (feedback loop / selection bias) 配套使用: doc 96 提 framework, 此处提 module 实操.
+
 ---
 
 ## 3. 30 秒题型 → 积木 decision tree
@@ -136,44 +143,50 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # AC #2: length 3000-5500 chars per task spec.
+    # AC #2: length 3000-6500 chars per task spec (upper bound bumped for 10th piece, T-P1-850).
     n = len(content)
-    if not (3000 <= n <= 5500):
-        raise RuntimeError(f"content length {n} not in [3000, 5500]")
+    if not (3000 <= n <= 6500):
+        raise RuntimeError(f"content length {n} not in [3000, 6500]")
 
     # Section markers
     for marker in (
         "# Meta MLSD - Cross-cutting 积木库",
         "## 1. 积木总表",
-        "## 2. 9 积木 expanded notes",
+        "## 2. 10 积木 expanded notes",
         "## 3. 30 秒题型",
     ):
         if marker not in content:
             raise RuntimeError(f"section marker missing: {marker!r}")
 
-    # AC #4: 5 keyword spotcheck.
+    # AC #4: keyword spotcheck (incl. T-P1-850 feedback-loop module keywords).
     for kw in (
         "Two-tower retrieval",
         "IPS",
         "LLM-as-teacher",
         "Long-term holdout",
         "Slice metrics",
+        "Selection bias",
+        "feedback loop",
+        "IPS 重新加权",
+        "epsilon-greedy",
+        "counterfactual replay",
+        "data acquisition policy",
     ):
         if kw not in content:
             raise RuntimeError(f"keyword spotcheck missing: {kw!r}")
 
-    # AC #3: main markdown table = header + sep + 9 data rows >= 11 lines starting with '|'.
+    # AC #3: main markdown table = header + sep + 10 data rows >= 12 lines starting with '|'.
     table_lines = [
         ln for ln in content.splitlines()
         if ln.lstrip().startswith("|")
     ]
-    if len(table_lines) < 11:
+    if len(table_lines) < 12:
         raise RuntimeError(
             f"main table too short: {len(table_lines)} lines starting with '|'; "
-            f"need >=11 (header + sep + 9 data rows)"
+            f"need >=12 (header + sep + 10 data rows)"
         )
-    # Explicit: 9 numbered rows '| 1 |' .. '| 9 |' in Section 1.
-    for i in range(1, 10):
+    # Explicit: 10 numbered rows '| 1 |' .. '| 10 |' in Section 1.
+    for i in range(1, 11):
         if f"| {i} |" not in content:
             raise RuntimeError(f"main table row '| {i} |' missing")
 
@@ -188,15 +201,15 @@ def validate_content(content: str) -> None:
             f"cd://{FAMILY_TAXONOMY_DOC_ID} (family taxonomy backlink) missing"
         )
 
-    # 9 '#### 积木' headers — one per piece.
+    # 10 '#### 积木' headers — one per piece.
     piece_headers = sum(
         1
-        for i in range(1, 10)
+        for i in range(1, 11)
         if f"#### 积木 {i}." in content
     )
-    if piece_headers != 9:
+    if piece_headers != 10:
         raise RuntimeError(
-            f"expected 9 '#### 积木 N.' headers, got {piece_headers}"
+            f"expected 10 '#### 积木 N.' headers, got {piece_headers}"
         )
 
 

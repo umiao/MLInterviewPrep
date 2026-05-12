@@ -110,11 +110,11 @@ def validate_content(content: str, existing_body: str) -> None:
             f"got {first_visible!r}"
         )
 
-    # AC #1: length(content) in [5500, 6500] per task spec.
+    # AC #1: length(content) in [5500, 7200] (upper bumped for T-P1-850 10th 积木).
     n_chars = len(content)
-    if not (5500 <= n_chars <= 6500):
+    if not (5500 <= n_chars <= 7200):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [5500, 6500]"
+            f"content char-length {n_chars} not in [5500, 7200]"
         )
 
     # AC #3: 5 unique drawer URIs each appear exactly once IN PREPENDED BLOCK;
