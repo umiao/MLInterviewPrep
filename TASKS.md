@@ -9,60 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-842
-- **Description**: Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a prominent Drawer 入口 顶部 section. Body content stays unchanged (no destructive edits).
-
-DEP RESOLUTION at task start:
-- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)'  → T-A's doc id (used in cd://<T-A-id>)
-- 若 query 返回 0 行 → 报错并 fail loud, 不要 UPDATE doc 94
-
-DB TARGET: data/mle_prep.db
-UPDATE company_documents SET content = <new_drawer_index + horizontal_rule + existing_content>, updated_at=CURRENT_TIMESTAMP WHERE id=94 AND company_id=31
-
-NEW PREPENDED SECTION (place BEFORE the existing first H1/H2):
-
-```
-> ## Drawer 入口（点击展开详读）
->
-> | 入口 | 内容 | 何时打开 |
-> | --- | --- | --- |
-> | **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
-> | **[Cross-cutting 9 ML 积木](cd://95)** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
-> | **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework |
-> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
-> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
-
----
-
-```
-
-(Note: Drawer 入口 does NOT include `cd://94` — self-link excluded per spec. 5 entries total.)
-
-DEDUPE STEP: Scan existing doc 94 content for any pre-existing drawer-list-style sections (look for patterns like `[xxx](sd://...)` or `[xxx](cd://...)` clustered in a section). If found, leave them in body prose as inline references but ensure no separate "drawer index" duplicate. 当前 doc 94 内仅 Q13 Reels 卡片含 1 处 `sd://meta-reels-golden` inline reference + 几处 cross-reference — those are inline narrative references, NOT a drawer index section, KEEP them as-is (dedupe rule applies only to dedicated drawer-index sections).
-
-STYLE:
-- NO emoji
-- Blockquote wrap with `> ` prefix on every line of the drawer section + table
-- `**[bold-label](URI)**` link format, NOT naked URIs
-- Horizontal rule `---` after blockquote, before existing first body section
-- Self-link exclusion (no cd://94 in Drawer 入口 of doc 94)
-
-VALIDATION (sanity check after UPDATE):
-1. SELECT length(content) FROM company_documents WHERE id=94 — new length ~14400-15000 (existing 13974 + ~700-900 byte drawer header)
-2. content STARTS WITH '> ## Drawer 入口（点击展开详读）' (after optional leading whitespace) — assert first non-empty line is this
-3. content 含 5 unique drawer URI: sd://meta-reels-golden + cd://95 + cd://96 + cd://<T-A-id> + sd://interview-recommendation-system (in Drawer 入口 table); cd://94 must NOT appear in Drawer 入口 (self-link exclusion)
-4. content 含 markdown horizontal rule '---' after the blockquote table (separator between Drawer 入口 and body)
-5. content 仍含原 13-row family taxonomy 表 + Q1-Q12 cards (body preserved, NOT destructively edited)
-6. ruff check / pytest 1265 passed (no regression)
-7. updated_at = today
-
-OUTPUT: 1 idempotent retrofit script `scripts/retrofit_meta_mlsd_94_drawer_header.py` (idempotent via sentinel comment in prepended block); 1 PROGRESS entry 5-段; commit `[T-P0-{this_id}] [Meta-MLSD G] Retrofit doc 94 prepend Drawer 入口 顶部 section`.
-
-IDEMPOTENCY: insert sentinel HTML comment `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->` as first line; on re-run, if sentinel found, skip and report UNCHANGED.
-
 #### T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section
 - **Priority**: P0
 - **Complexity**: S
@@ -646,6 +592,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 740 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a p
 - [x] **2026-05-12** -- T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents. INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level d
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
