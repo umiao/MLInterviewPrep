@@ -9,6 +9,86 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing strong-moment list. Call it Section 2 'Twist 挖掘方法论' (subsequent section indices shift +1).
+
+CONTENT:
+1. 顶层 4 轴 (checklist for ANY new题): 业务结构 (marketplace/内容形态/入口语义) × 数据特性 (模态/标签/偏差) × 用户行为 (session/fatigue/双边) × 系统约束 (scale/latency/freshness)
+2. 4-段 per-twist derivation template: Generic 对比 → 核心特点 → Design implications → AI 补充
+3. Reels/Homefeed 7-twist worked example (用 Reels 作示例, 忽略短/长视频差):
+   (1) Homefeed = no explicit query intent → user 表征本身就是 query → retrieval 必须 user-conditioned 2-tower + hybrid serving (active user 离线 batch cache + fresh content 在线 incremental, blend at retrieval)
+   (2) Multimodal UGC → visual+audio+text encoder + 多模态融合; UGC 级联到 label/guardrail/cold-start
+   (3) Personalized (user-conditioned) ranking → 2-tower 解决 scale + deep crossing 解决 personalization depth
+   (4) Watch-time as primary signal → weighted logistic / multi-task heads; Reels 版微调: completion ratio > 绝对秒数
+   (5) Two-sided marketplace / creator equity → creator-level diversity + 长尾保底曝光 + creator retention
+   (6) Session-level fatigue / slate optimization → page-aware re-ranking, MMR, DPP; session-level metrics
+   (7) Feedback loop / selection bias → IPS + epsilon-greedy/Thompson + counterfactual replay (这点也是 T-D 第 10 积木的本体, 互相引用)
+4. AI 补充 explicit corrections:
+   (a) Personalized ≠ pointwise: 学习目标轴 (pointwise/pairwise/listwise) 与 打分函数输入轴 (user-independent/personalized) **正交**. DLRM 就是 personalized + pointwise. 现场表述应是 'user-independent ranking 不适用' 而不是 'pointwise 不适用'. (这条 T-C 在 doc 97 §2 也会有 sidebar, 互相 cross-reference)
+   (b) UGC 级联: UGC 不只影响 feature, 还级联到 label (不能 raw click) / guardrail (retrieval 阶段 hard filter) / cold-start (content embedding 必要性反向强化)
+
+PLACEMENT NOTES:
+- 这一 section 是 strong-moment #1 'unique twist' 的 deep-dive, 应该放在 strong-moment 段之前 (作为产出 #1 的方法论铺垫)
+- doc 96 当前 ~6KB; 这一 section ~3KB → 终态 ~9-10KB, 仍在 main-hub 范围
+
+VALIDATOR BUMP: scripts/seed_meta_mlsd_main_hub.py 的 length 校验范围需要相应放宽 (检查当前上下界, 上界 +3500 字节左右)
+
+POST-SEED: 必须 re-run scripts/retrofit_meta_mlsd_96_drawer_header.py (per memory feedback_meta_mlsd_reseed_drawer_overwrite.md)
+
+ACCEPTANCE CRITERIA:
+- [AC1] seed re-run 成功, doc 96 长度从 ~6KB 涨到 8-11KB
+- [AC2] grep DB content for: '业务结构', '数据特性', '用户行为', '系统约束', 'Generic 对比', 'AI 补充', 'no explicit query intent', 'hybrid serving', 'personalized + pointwise', 'UGC 级联' — 全部 hit
+- [AC3] Drawer 入口 顶部 table 仍存在 (retrofit 已 re-run)
+- [AC4] scripts/audit_uri_consistency.py 通过
+
+#### T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-847
+- **Description**: Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 twist: multimodal short-form video + session-based continuous consumption + within-session dynamics').
+
+REPLACE WITH full card following Q1-Q12 structure (Unique Twist 段 → Puzzle Pieces 表 → Anti-patterns 列表 → Strong Moment 引文):
+
+1. Unique Twist (2-3 sentences synthesizing 7 twists into paragraph form):
+   'Reels homefeed 是无显式 query intent 的 user-conditioned ranking, 内容是多模态 UGC, 主信号是 watch-completion-ratio 而非秒数, slate-level 上有 session fatigue, 平台层有 creator marketplace 长尾保护, 整个 logged data 受 feedback loop 污染.'
+
+2. Puzzle Pieces (6-row table picked from 7 twists' design-implications):
+   - Hybrid serving (active 离线 batch + fresh 在线 incremental, blend at retrieval): freshness vs latency 双重 trade-off
+   - Multi-modal encoders (visual / audio / text) + 融合: UGC metadata 不可信
+   - 2-tower (user side ≠ optional): no explicit query, user 本身就是 query
+   - Multi-task heads (click + completion + watch-time, completion-ratio weighted): 短视频 watch-time 用绝对秒数会偏向长视频
+   - Slate-level reranking (MMR / DPP) + session metrics: 单点最优 ≠ session 最优
+   - IPS + exploration policy + counterfactual replay (= 第 10 积木): logged data 严重有偏
+
+3. Anti-patterns (4-5 entries):
+   - 用绝对 watch-time 当 label (短视频被打低)
+   - 单 tower content-only retrieval (忽略 user query nature)
+   - 套 search results page 的 query-intent 思路
+   - 忽略 creator 长尾保护 (marketplace supply 死亡螺旋)
+   - 每个 item 独立 score (忽略 session fatigue)
+
+4. Strong Moment (一句 verbatim, 现场就这么说):
+   'Reels homefeed 不是 search results — 用户没有显式 query, user 表征本身就是 query. 这把 retrieval 强制推向 user-conditioned 2-tower, serving 上 active user 走离线 batch cache 但还要并行跑 online incremental 把 fresh content 拉进来. 这是 cold-start 和 freshness 两个问题同时被同一架构解掉.'
+
+5. 尾部 dual-pointer:
+   '→ 完整方法论 derivation: cd://96 (Twist 挖掘方法论 section) | 实战 45min 8段台词 verbatim: sd://meta-reels-golden'
+
+VALIDATOR BUMP: seed_meta_mlsd_family_taxonomy.py 当前 [9000, 14200], 上界 +1500 → [9000, 15700]
+
+POST-SEED: 必须 re-run scripts/retrofit_meta_mlsd_94_drawer_header.py
+
+ACCEPTANCE CRITERIA:
+- [AC1] seed re-run 成功, doc 94 长度增加 ~1KB
+- [AC2] grep DB content for: 'Reels homefeed', 'completion-ratio', 'Hybrid serving', 'creator 长尾', 'session fatigue', 'cd://96', 'sd://meta-reels-golden' — 全部 hit
+- [AC3] Q13 card 长度 (1 stub line → ~1KB full card)
+- [AC4] Drawer 入口 顶部 table 仍存在 (retrofit 已 re-run)
+- [AC5] Self-link exclusion: cd://94 NOT in Q13 body
+
+DEPENDENCY RATIONALE: 引用 cd://96 的 'Twist 挖掘方法论 section', 该 section 在 T-P0-847 落地
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -66,6 +146,81 @@ AC:
 - **Depends on**: T-P0-811, T-P0-812, T-P0-813, T-P0-814, T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
+#### T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (after '局限' 段, before '---' separator).
+
+CONTENT:
+'**轴的澄清** (一个常见误用): 学习目标轴 (pointwise / pairwise / listwise) 与 打分函数输入轴 (user-independent / personalized) **正交**, 不是同一件事. DLRM 本身就是 personalized + pointwise: score = f(user_feat, item_feat, context), 逐 item 打分但是 user-conditioned. 现场如果说"这题不适用 pointwise"是错的, 正确表述应该是"user-independent ranking (PageRank / global quality score / CTR-rank) 不适用". 真正决定 architecture 的是 user side 是否参与打分, 不是 pointwise/pairwise/listwise 的选择.'
+
+PLACEMENT RATIONALE: §2 是 DLRM 节, DLRM 的 'dot product → top MLP → sigmoid' flow 正是 personalized + pointwise 的教科书实例, 在这里澄清最自然. (备选: §5 multi-task 节, 但 §2 锚定更紧)
+
+POST-EDIT: re-run scripts/seed_meta_mlsd_recsys_models.py (validator bound 已是 [14000, 24000], 当前 ~14KB 还在范围; 但需要验证一次)
+
+ACCEPTANCE CRITERIA:
+- [AC1] source_03 文件 §2 末尾出现 '轴的澄清' / '正交' / 'personalized + pointwise' / 'DLRM 本身就是' markers
+- [AC2] seed 重新跑通过, doc 97 DB 内容 grep 同样 markers 命中
+- [AC3] doc 97 长度增量 ~500 字节, validator 不需要再 bump
+- [AC4] 自链接排除仍保持 (cd://97 不在自身 Drawer 入口)
+- [AC5] cross-reference 思路: T-P0-847 (doc 96) AI 补充段也提到这条, 两处都点出但不重复 verbatim
+
+DEPENDENCY: none (independent)
+
+#### T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
+
+CONTENT:
+- 积木: Selection bias / feedback loop primitives (IPS 重新加权 + epsilon-greedy/Thompson sampling 强制曝光 + counterfactual replay 在 A/B 前 filter)
+- 何时套用: 任何讨论 popularity death-spiral / 新 item 永远拿不到 label / 'logged data 是有偏的' / exposure bias 闭环
+- 一句 justification: '推什么用户就看什么 → logged data 严重有偏 → 三件套破开闭环: IPS 重新加权 logged data + epsilon-greedy/Thompson 强制给新 item 曝光 + counterfactual replay 在跑 A/B 前过滤明显 broken candidate. 用户视角是 fairness, 平台视角是 data acquisition policy.'
+
+WHY THIS DESERVES A NEW ROW (not just expand existing):
+- 现有 9 积木里, IPS 已经在 (但和 active exploration 分开列), counterfactual replay 已经在 (但和 IPS 分开列). 第 10 积木的价值是把它们 tie 成 module + framing 为 '破开 feedback loop' 的统一 module — 现场遇到 'how do you handle bias' 一次性套出三件套
+- 跟 T-P0-847 doc 96 Twist 7 (feedback loop / selection bias) 互相引用: doc 96 提 framework, doc 95 提 module 实操
+
+VALIDATOR BUMP: scripts/seed_meta_mlsd_cross_cutting.py 当前 length 校验 ~5800 字节, +300 → 上界 +500 字节左右
+
+POST-SEED: re-run scripts/retrofit_meta_mlsd_95_drawer_header.py
+
+ACCEPTANCE CRITERIA:
+- [AC1] seed 重新跑通, doc 95 表格行数 9 → 10
+- [AC2] grep DB content for: 'Selection bias', 'feedback loop', 'IPS 重新加权', 'epsilon-greedy', 'counterfactual replay', '破开闭环' / 'data acquisition policy' — 全部 hit
+- [AC3] Drawer 入口 顶部 table 仍存在 (retrofit 已 re-run)
+- [AC4] doc 95 长度增量 ~300-400 字节
+
+DEPENDENCY: none (independent)
+
+#### T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Section 1) 已经讲了 hybrid serving 双路径 (active user 离线 batch + fresh content 在线 incremental, blend at retrieval). 如果已经讲了 → no-edit close; 如果没讲 → 补一句到 framing 段.
+
+STEP 1 (audit, no edit):
+- Grep scripts/seed_meta_reels_golden_sd.py 和 sd 41 DB content (overview / architecture columns)
+- 关键词: 'hybrid', '离线 batch + 在线', '在线 incremental', 'precompute + cache', 'fresh content path', 'active user 走', 'two-path retrieval'
+- 也看一下 8 段台词 verbatim 是否在 Section 1 (Framing 0-5min) 提到 freshness vs latency trade-off
+
+STEP 2 (conditional edit):
+IF 已经讲了 → 在 PROGRESS 写一句 'Audit confirms hybrid-serving framing present at <location>', 任务 mark done, 0 edit
+IF 没讲 → 找到 Section 1 framing 段, 加 1-2 sentences:
+  '我会做 hybrid serving: active user 走离线 batch 预计算 + cache (亿级 QPS 低延迟), 同时跑一条 online incremental retrieval 让 fresh content 有机会进入候选池. 两条路径在 retrieval 阶段 blend. 这一步同时解决 cold-start (新视频/新 creator) 和 freshness (avoid stale cache) 两个问题, 是 Reels 这个 surface 的 unique 架构杠杆.'
+
+POST-EDIT (only if STEP 2 made edits): re-run scripts/retrofit_meta_mlsd_sd41_drawer_header.py
+
+ACCEPTANCE CRITERIA:
+- [AC1] Audit 报告: hybrid-serving 是否已存在; 如存在, 给出位置 (overview 第 N 段 / architecture 第 N 段 / 8 段台词第几段)
+- [AC2] 如做了 edit, sd 41 overview 或 architecture 长度 +200-400 字节, grep 'hybrid serving' / '离线 batch + 在线' 命中
+- [AC3] 如做了 edit, Drawer 入口 顶部 header 仍存在 (retrofit re-run)
+- [AC4] 8 段台词 verbatim 不被破坏 (除非 STEP 2 显式补充第 1 段)
+
+DEPENDENCY: none (independent). 注: 如果 STEP 1 audit 发现已经有, 这是个 close-out-as-no-op 的 task — 仍要走完 protocol 把结果归档
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -95,6 +250,42 @@ AC:
 - **Complexity**: S
 - **Depends on**: T-P1-821, T-P2-835, T-P1-834
 - **Description**: Final 4-item acceptance checklist (per Discord plan v3 §9): (a) all P0/P1 companies' prep_notes/notes byte counts < threshold anchored by A0 EDA; (b) meta-prep child nodes mean byte count > 800; (c) audit_uri_consistency.py reports 0 broken kg:// db:// cd:// sd://; (d) red-dot logic manual smoke on sample companies passes. Compute byte-savings stats (before vs after) + commit count + KG growth (node + link delta). PROGRESS close-out entry summarizes the 42-task batch. AC: all 4 checklist items pass; close-out entry written.
+
+#### T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套')
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: T-P0-848
+- **Description**: Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend a 'Generic 对比' 段 before the existing 'Unique Twist' line in that card.
+
+FORMAT (1-2 sentences per card):
+'**Generic 对比**: 通用 [domain] [framework] 做法是 [X]. 但这题 [pivot reason] → 见下方 Unique Twist.'
+
+WORKED EXAMPLES (do not blind-copy — derive per-题):
+- Q1 Top comments: 'Generic 对比: 通用 cross-item engagement ranking. 但这题候选池只有几十到几千 comment, retrieval 没必要, 且 position-0 是下游 conversation 种子 — 优化目标是 conversation quality 而非 click.'
+- Q2 Video-to-video search: 'Generic 对比: 有 text query 时套 query-to-item retrieval (BM25 + dense). 但这题没有 text query, 相似性自身需要被定义 (视觉/音频/intent 三 axis 不重合) → multi-facet retrieval.'
+- Q3 Friend rec: 'Generic 对比: 套 two-tower user embedding similarity. 但图结构是 retrieval 本身不是 feature, 且 reciprocity (双向接受) 而非 send-request 才是 positive label.'
+- Q4 Ads: 'Generic 对比: 套 NDCG/pairwise ranking. 但 auction 的 bid × pCTR 数学要求 calibrated probability, pairwise 一上就破坏 auction 经济学.'
+- Q5 Events: 'Generic 对比: 套 user-item collaborative filtering. 但 per-user RSVP 频率太低 (1 人 3 events/year), CF 信号严重稀疏 → content-based + social signal 主导.'
+- Q6 Location: 'Generic 对比: 套静态 user preference profile. 但 9am 和 9pm 同一用户 intent 完全不同 → context 不是 feature, 是主导 intent disambiguator.'
+- Q7 Weapon classifier: 'Generic 对比: 套静态 supervised binary classifier. 但 attack 模式每周演化, 静态 dataset 3 个月失效 → active learning loop 才是真系统.'
+- Q8 Yelp: 'Generic 对比: 套 rating-based CF. 但 aspect-level matching (quiet / vegan / romantic) 信号上限高一个量级 → review text 是 dominant signal.'
+- Q9 FB News Feed: 'Generic 对比: 套单 ranking head on raw engagement. 但 Meta 显式从 engagement 转向 MSI, 内容类型异构, 不同 source 不同 retrieval logic.'
+- Q10 IG Story: 'Generic 对比: 套 item-level ranking. 但 ranking unit 是 author-tray 不是 story, recency 是 hard filter 不是 feature.'
+- Q11 Spotify: 'Generic 对比: 套通用 watch-time-like signal. 但 relisten 是正向 (跟视频相反), session 内 mood 不能跳变.'
+- Q12 Predict attendance: 'Generic 对比: 直接套 binary classifier. 但 prediction-as-feature 任务必须先问 "谁消费这个 prediction" — 答案决定 architecture (ranking / notification / capacity planning 各不相同).'
+
+VALIDATOR BUMP: seed_meta_mlsd_family_taxonomy.py [9000, 15700] (post-T-B), 上界 +2500 → [9000, 18200]
+
+POST-SEED: re-run scripts/retrofit_meta_mlsd_94_drawer_header.py
+
+ACCEPTANCE CRITERIA:
+- [AC1] seed 重新跑通, doc 94 长度增加 ~2-3KB
+- [AC2] grep DB content for '**Generic 对比**:' marker — 出现 12 次 (Q1-Q12, NOT Q13)
+- [AC3] Q1-Q12 每张 card 的 'Unique Twist' 字段未被破坏 (verbatim preserved)
+- [AC4] Q13 card (T-P0-848 已落地) 未被破坏
+- [AC5] Drawer 入口 顶部 header 仍存在 (retrofit re-run)
+
+DEPENDENCY RATIONALE: T-P0-848 编辑同一文件 (seed_meta_mlsd_family_taxonomy.py) 且改 Q13 整张 card, T-F 改 Q1-Q12 prefix — 串行避免合并冲突
 
 ### P3 -- Stretch Goals
 
