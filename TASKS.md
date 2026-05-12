@@ -9,62 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: INSERT a company_documents row holding Meta MLSD 的 13 题 family taxonomy 总表 + 每题 Twist → Puzzle pieces → Anti-patterns → Strong moment hook 卡片. Drawer-reachable from main hub (T-P0-832) via cd://<this row id>.
-
-SOURCE:
-- docs/prep/meta_mlsd_2026-05-11/source_02_family_taxonomy.md
-  - Lines 1-3: 第一节 family taxonomy 13 行表格 (题目 / family / unique twist 一句话)
-  - Lines 8-160: 第三节 Q1-Q12 详细卡片 (Q13 Reels 在 source_01)
-- docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md
-  - Lines 396-428: 题目列表 raw enumeration (Yelp饭馆 / FB Newsfeed / IG Story / Spotify / event / location / weapon 等), 用作 Q1-Q12 卡片的 cross-reference verification
-
-DB TARGET: data/mle_prep.db, table=company_documents
-COLUMNS TO FILL:
-- company_id = 31 (Meta)
-- title = '[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)'
-- doc_kind = 'prep_note'
-- source_type = 'manual'
-- is_golden = 0 (not the default first page)
-- content = markdown body with the structure below
-- content_hash auto-computed
-- created_at / updated_at auto
-
-CONTENT STRUCTURE (~10-12 KB):
-1. **Section 1: Family Taxonomy 总表** — 一张 13 行 markdown 表格, 列: #, 题目, Family, 核心 unique twist 一句话. 直接照搬 source_02 lines 1-3 内容, 修正 markdown 渲染（原文是 inline 拼接的, 改为标准 `|` 分隔表格）.
-2. **Section 2: Per-Question Cards Q1-Q13** — 每题一节, 用四级结构:
-   - **Q{N}. {题目名}**
-     - **Unique Twist**: 1-2 句话, 解释这题 vs 其他题最大区别
-     - **Puzzle Pieces**: markdown 表格 (Piece | Why), 列出 6-7 个构件
-     - **Anti-patterns**: 3-item bullet list, 用户常踩的坑
-     - **Strong Moment Hook**: 1 段英文金句台词 verbatim, 用于面试中投放
-   - Q1 Top 3 Comments / Q2 Video-to-Video Search / Q3 Friend Recommendation / Q4 Ads / Q5 Event / Q6 Location / Q7 Weapon Ad / Q8 Yelp Restaurant / Q9 FB News Feed / Q10 IG Story / Q11 Spotify Music / Q12 Predict Event Attendance — 这 12 题照搬 source_02 lines 11-157
-   - **Q13 Reels** — **只放 1 段 1-2 句话 'see full 45-min walkthrough'**, 直接 link 到 sd://meta-reels-golden (NOT db://, NOT 路径形式). 标记此处为整本笔记的 canonical golden example.
-3. **Section 3: 如何使用这本 drawer** — 1 段简短指南 (40-60 字), 说明 30 秒判断题型 → 找到对应卡片 → 套 puzzle pieces + 投 strong moment hook.
-
-STYLE:
-- 中文叙述 + 英文 ML 术语 (first-occurrence `**English** (acronym, 中文)`)
-- 金句台词 (strong moment hook) **保留英文原文 verbatim** (面试就这么说), 不要翻译, 不要 paraphrase
-- Puzzle pieces 表格保持紧凑, 不要展开成长句
-- Anti-patterns 用 ❌ 前缀
-- 匹配 source_02 voice — 直接, 不啰嗦, sentence fragment OK
-
-VALIDATION (sanity check after INSERT):
-1. SELECT id, title, doc_kind, is_golden, length(content) FROM company_documents WHERE company_id=31 AND title LIKE '[Meta-MLSD]%Family Taxonomy%' returns exactly 1 row
-2. length(content) BETWEEN 9000 AND 14000 (估计区间)
-3. content 含 'sd://meta-reels-golden' substring (Q13 Reels 卡片链接)
-4. content 含 12 个独立的 '### Q' (Q1..Q12) headers (Q13 是 reference-only, header 可以是简短形式)
-5. content 含 'Strong Moment' 至少 12 次 (每卡 1 次)
-6. doc_kind='prep_note' AND is_golden=0
-7. content 含 13 行 taxonomy 表格 (grep '^\| \d' 或 markdown table row pattern, count >= 13 行 + 1 header + 1 separator = >= 15 行包括表格框架)
-
-NO DEPS — 可立刻拣. T-P0-832 main hub 完成本任务后需要查询 SELECT id FROM company_documents WHERE title LIKE '[Meta-MLSD]%Family Taxonomy%' 拿到 id 写 cd://N 链接.
-
-OUTPUT to PROGRESS.md after completion: 1 entry under '## 2026-05-XX [T-P0-XXX / Meta-MLSD B]' 含 what/deliverables/sanity check/status/request 5 段.
-
 #### T-P0-839: [Meta-MLSD C] Cross-cutting 积木库 → company_documents
 - **Priority**: P0
 - **Complexity**: M
@@ -724,6 +668,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
+- [x] **2026-05-11** -- T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents. INSERT a company_documents row holding Meta MLSD 的 13 题 family taxonomy 总表 + 每题 Twist → Puzzle pieces → Anti-patterns → 
 - [x] **2026-05-11** -- T-P0-837: [Meta-MLSD A] Reels Golden Example → system_designs (slug=meta-reels-golden). INSERT a system_designs row that becomes Meta MLSD 的 canonical golden example, slug-addressable via sd://meta-reels-gold
 - [x] **2026-05-11** -- T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see aud
 - [x] **2026-05-11** -- T-P0-813: [KG-INT B4a-uber] Uber dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Uber. Read all 6 note-surfaces for company_id=see aud
