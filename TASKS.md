@@ -9,49 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-842
-- **Description**: Retrofit existing company_documents.id=95 ('[Meta-MLSD] Cross-cutting 积木库 (drawer)') by prepending a prominent Drawer 入口 顶部 section. Body content stays unchanged.
-
-DEP RESOLUTION at task start:
-- SELECT id FROM company_documents WHERE company_id=31 AND title='[Meta-MLSD] 推荐系统核心模型复习笔记 (8 工作 + 脉络)'  → T-A's doc id
-
-DB TARGET: data/mle_prep.db
-UPDATE company_documents SET content = <new_drawer_index + hr + existing>, updated_at=CURRENT_TIMESTAMP WHERE id=95 AND company_id=31
-
-NEW PREPENDED SECTION (5 entries, NO cd://95 self-link):
-
-```
-> ## Drawer 入口（点击展开详读）
->
-> | 入口 | 内容 | 何时打开 |
-> | --- | --- | --- |
-> | **[Reels Golden Example (45min 全文)](sd://meta-reels-golden)** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
-> | **[13 题 Family Taxonomy](cd://94)** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
-> | **[45min Playbook + 4 Strong Moments](cd://96)** | 节奏 + 元结构 + meta-rules | 整体 framework |
-> | **[RecSys 核心模型 8 工作](cd://{T-A-id})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
-> | **[通用 RecSys SD Cookbook](sd://interview-recommendation-system)** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
-
----
-
-```
-
-DEDUPE: doc 95 当前 content 有可能含若干 inline reference (sd://meta-reels-golden 出现 1-3 处 in 'Section 2 每积木 expanded note' or 'Section 3 Decision Tree'); 这些是 inline narrative, NOT 独立 drawer index, KEEP as-is.
-
-STYLE / VALIDATION / IDEMPOTENCY: 同 T-P0-843 模式, 调整为 doc 95:
-1. length(content) 5500-6500 (existing 5058 + ~700 byte header)
-2. content 起始 '> ## Drawer 入口（点击展开详读）'
-3. 5 drawer URI in Drawer 入口 table: sd://meta-reels-golden + cd://94 + cd://96 + cd://<T-A> + sd://interview-recommendation-system; cd://95 NOT in Drawer 入口
-4. horizontal rule '---' after blockquote
-5. body 仍含 9 积木 markdown 表 + Section 2 expanded notes
-6. ruff/pytest pass
-7. Sentinel: `<!-- META_MLSD_DRAWER_HEADER_95_20260512 -->`
-8. updated_at = today
-
-OUTPUT: `scripts/retrofit_meta_mlsd_95_drawer_header.py` (idempotent); PROGRESS 5-段; commit `[T-P0-{this_id}] [Meta-MLSD H] Retrofit doc 95 prepend Drawer 入口 顶部 section`.
-
 #### T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list
 - **Priority**: P0
 - **Complexity**: M
@@ -592,6 +549,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 740 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-12** -- T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=95 ('[Meta-MLSD] Cross-cutting 积木库 (drawer)') by prepending a prominent Drawer 入口
 - [x] **2026-05-12** -- T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a p
 - [x] **2026-05-12** -- T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents. INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level d
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
