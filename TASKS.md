@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P1-803, T-P1-804, T-P1-805, T-P1-806, T-P1-807
-- **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-meta_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -463,6 +457,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
+- [x] **2026-05-11** -- T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see aud
 - [x] **2026-05-11** -- T-P0-813: [KG-INT B4a-uber] Uber dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Uber. Read all 6 note-surfaces for company_id=see aud
 - [x] **2026-05-11** -- T-P0-812: [KG-INT B4a-pinterest-prep] Pinterest-prep dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-prep. Read all 6 note-surfaces for company_
 - [x] **2026-05-11** -- T-P0-811: [KG-INT B4a-pinterest-concepts] Pinterest-CONCEPTS dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-CONCEPTS. Read all 6 note-surfaces for comp
