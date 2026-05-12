@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 740 completed tasks archived as of latest archival.
+> 756 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1099,3 +1099,19 @@ LR golden (scripts/seed_linear_regress
 - [x] **2026-05-10** -- T-P1-800: [KG-INT B2b] Add 'meta-prep' pillar + 5 sub-node stubs. Idempotent seed scripts/seed_meta_prep_pillar.py: insert depth-0 node path='meta-prep' (title 'Cross-Company Interview M
 - [x] **2026-05-10** -- T-P1-801: [KG-INT B2c] Internalization protocol doc + promotion_criteria + archive/ scaffold. Write docs/workflow/company_internalization_protocol.md (7-step protocol + §2 Migration matrix template with 4-tuple cau
 - [x] **2026-05-10** -- T-P1-802: [KG-INT B2d] audit_uri_consistency.py: extend with kg:// scheme support. scripts/audit_uri_consistency.py currently covers db:// cd:// sd:// (see file's docstring lines 1-30). Add kg://N regex 
+- [x] **2026-05-11** -- T-P0-811: [KG-INT B4a-pinterest-concepts] Pinterest-CONCEPTS dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-CONCEPTS. Read all 6 note-surfaces for comp
+- [x] **2026-05-11** -- T-P0-812: [KG-INT B4a-pinterest-prep] Pinterest-prep dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Pinterest-prep. Read all 6 note-surfaces for company_
+- [x] **2026-05-11** -- T-P0-813: [KG-INT B4a-uber] Uber dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Uber. Read all 6 note-surfaces for company_id=see aud
+- [x] **2026-05-11** -- T-P0-814: [KG-INT B4a-meta] Meta dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Meta. Read all 6 note-surfaces for company_id=see aud
+- [x] **2026-05-11** -- T-P0-837: [Meta-MLSD A] Reels Golden Example → system_designs (slug=meta-reels-golden). INSERT a system_designs row that becomes Meta MLSD 的 canonical golden example, slug-addressable via sd://meta-reels-gold
+- [x] **2026-05-11** -- T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents. INSERT a company_documents row holding Meta MLSD 的 13 题 family taxonomy 总表 + 每题 Twist → Puzzle pieces → Anti-patterns → 
+- [x] **2026-05-11** -- T-P0-839: [Meta-MLSD C] Cross-cutting 积木库 → company_documents. INSERT a company_documents row holding the 9 跨题通用 ML 积木 (cross-cutting reusable pieces), 让用户面试中遇到任何 recommendation/ranki
+- [x] **2026-05-11** -- T-P0-840: [Meta-MLSD D] Main Hub Page → company_documents (45min Playbook + 4 Strong Moments). INSERT the **main hub page** for Meta MLSD prep — 高密度 ~6 KB summary, 重内容全部 drawer 链接到 T-P0-837/838/839. 这页将在 T-P0-833 pr
+- [x] **2026-05-11** -- T-P0-841: [Meta-MLSD E] Promote new Main Hub to is_golden=1 + audit URI consistency. Promote the new T-P0-840 main hub doc 到 is_golden=1 (Meta company 默认第一个页面 convention), demote 旧 golden doc 82 到 is_golde
+- [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
+- [x] **2026-05-10** -- T-P1-803: [KG-INT B3-1] Shared substrate: behavioral patterns -> meta-prep/behavioral-clusters. Scan all 11 P0+P1 companies' surfaces (prep_notes, notes, company_documents). Extract behavioral patterns appearing in >
+- [x] **2026-05-10** -- T-P1-804: [KG-INT B3-2] Shared substrate: SD vocab -> meta-prep/system-design-must-knows. Same protocol as B3-1 but for system-design vocabulary: ANN/HNSW/IVF/PQ, LTR/NDCG, MMoE/PLE, calibration metrics, etc. E
+- [x] **2026-05-10** -- T-P1-805: [KG-INT B3-3] Shared substrate: AI-native code-pad -> meta-prep/code-pad-best-practices. Extract AI-native coding playbook (Meta-style 3-step prompt drill, AI tool usage best practices) from companies whose in
+- [x] **2026-05-10** -- T-P1-806: [KG-INT B3-4] Shared substrate: LC keywords -> meta-prep/lc-keyword-checklists. Cross-company LC keyword frequency: which problem types/tags appear in >=3 P0+P1 prep docs. Build per-tag checklist + fr
+- [x] **2026-05-10** -- T-P1-807: [KG-INT B3-5] Shared substrate: onsite loop templates -> meta-prep/onsite-loop-templates. Extract general onsite loop structures (4-round VO, hiring committee, team match) appearing in >=3 P0+P1 docs. AC: onsit
+- [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi

@@ -52,6 +52,7 @@ IS_GOLDEN = 0
 
 FAMILY_DOC_ID = 94  # T-P0-838
 JIMU_DOC_ID = 95    # T-P0-839
+RECSYS_MODELS_DOC_ID = 97  # T-A: RecSys 核心模型 8 工作 (T-P0-842)
 SD_SLUG = "meta-reels-golden"  # T-P0-837
 
 CONTENT = f"""{SENTINEL}
@@ -78,7 +79,75 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 2. 4 Strong Moments — 预分配到固定位置
+## 2. Twist 挖掘方法论
+
+> 任何新题, 30 秒过 4 轴定位 + 4 段模板推导 twist; 不要靠题感. Reels 7 条 twist 是这套方法的 worked example, 投放在 Strong Moment #1.
+
+### 2.1 顶层 4 轴 (拿到题先过一遍)
+
+| 维度轴 | 检查点 | Reels 示例 |
+| --- | --- | --- |
+| **业务结构** | marketplace 模式 / 内容形态 / 入口语义 (search vs feed vs notification) | Home feed 入口 = 无 explicit query intent + 双边 creator marketplace |
+| **数据特性** | 模态 (text/visual/audio) / label noise / 偏差 surface (position / duration / selection) | 多模态 UGC + watch-time noisy + feedback loop selection bias |
+| **用户行为** | session 长度 / fatigue / 双边对称性 (creator vs consumer) | Session-level fatigue + slate 内 redundancy; creator equity |
+| **系统约束** | scale (candidate pool / QPS) / latency / freshness | 10^8 candidate + 200ms budget + content freshness 小时级 |
+
+**用法**: 30 秒过一遍 4 轴, 每轴标记 1-2 个非通用属性, 转化为 design implication.
+
+### 2.2 Per-twist 4 段推导模板
+
+每条 twist 用 4 段 verbatim 推导, 不要省略任何一段:
+
+1. **Generic 对比** — 通用做法是什么 (e.g. 通用 ranking 用 binary click 做 label)
+2. **核心特点** — 这题区别于通用的 1 句话特点 (e.g. "watch-time 比 click 更 informative")
+3. **Design implications** — 上述特点强制的 3 个 design 决策 (label / model / serving 各一)
+4. **AI 补充** — 容易被新手混淆 / 漏掉 / 误用 的细节 (面试官 senior signal calibration 点)
+
+### 2.3 Reels Homefeed 7-twist worked example
+
+> 用 Reels 作示例, 忽略短/长视频差; 此处列 Generic 对比 + 核心特点 + Design implications, AI 补充见 2.4.
+
+1. **Homefeed = no explicit query intent**
+   - Generic 对比: search 有 query token 做强信号; feed 没有
+   - 核心特点: user 表征本身就是 query
+   - Design implications: retrieval 必须 user-conditioned 2-tower + **hybrid serving** (active user 离线 batch cache + fresh content 在线 incremental, blend at retrieval)
+2. **Multimodal UGC** (visual + audio + text caption)
+   - Generic 对比: tabular feature CTR 模型用 hand-crafted embedding 即可
+   - 核心特点: 内容形态高维异构 + cold-start 频繁
+   - Design implications: visual + audio + text encoder + 多模态融合 (cross-attention / concat); UGC 级联到 label / guardrail / cold-start
+3. **Personalized (user-conditioned) ranking**
+   - Generic 对比: 经典 LambdaRank 等是 user-independent listwise
+   - 核心特点: 用户偏好高度个性化, listwise interaction 必须 conditioned on user
+   - Design implications: 2-tower 解决 scale + DLRM / DCN deep crossing 解决 personalization depth
+4. **Watch-time as primary signal**
+   - Generic 对比: 通用 ranking 用 binary click 二分类
+   - 核心特点: Reels 完成度比绝对秒数更可比 (15s 短视频 vs 60s 视频不可同尺度)
+   - Design implications: weighted logistic / multi-task heads (click / watch / like / share); Reels 版微调: completion ratio > 绝对秒数
+5. **Two-sided marketplace / creator equity**
+   - Generic 对比: 单边 ranking 只优化 consumer utility
+   - 核心特点: creator 也是利益方 (创作者激励 / 长尾保护)
+   - Design implications: creator-level diversity + 长尾保底曝光 + creator retention metric
+6. **Session-level fatigue / slate optimization**
+   - Generic 对比: pointwise scoring 独立打分每个 item
+   - 核心特点: session 内对相似内容产生 fatigue; slate 内顺序与组合都影响 utility
+   - Design implications: page-aware re-ranking, MMR (Maximal Marginal Relevance), DPP; session-level metric (session length / dwell)
+7. **Feedback loop / selection bias**
+   - Generic 对比: 假设 training distribution = serving distribution
+   - 核心特点: 模型输出影响下一轮 training label, exposure 偏差累积 (T-D 第 10 积木的本体, 互相引用)
+   - Design implications: **IPS (Inverse Propensity Score)** + epsilon-greedy / Thompson sampling + counterfactual replay
+
+### 2.4 AI 补充: 2 个最容易讲错的细节
+
+**(a) Personalized ≠ pointwise** (cd://{RECSYS_MODELS_DOC_ID} §2 DLRM 也有对应 sidebar, 互相 cross-reference): 学习目标轴 (pointwise / pairwise / listwise) 与 打分函数输入轴 (user-independent / personalized) **正交**. DLRM 就是 personalized + pointwise. 现场表述应是 "user-independent ranking 不适用" 而不是 "pointwise 不适用".
+
+**(b) UGC 级联**: UGC 不只影响 feature, 还级联到 label / guardrail / cold-start:
+- **Label**: UGC 上不能 raw click 当 label (creator spam / clickbait 高), 需要 watch-time + 人工标注 sub-graph
+- **Guardrail**: retrieval 阶段 hard filter (NSFW / 违规) — 不能放到 ranking 才 filter, candidate set 会污染
+- **Cold-start**: content embedding 是必要 (反向加强 — collaborative filtering 单独不够, item-side embedding 才能 cold-start)
+
+---
+
+## 3. 4 Strong Moments — 预分配到固定位置
 
 > 不要临场决定. 每个 moment 包含 mechanism (为什么 strong) + timing-window + hook phrase (英文 verbatim).
 
@@ -98,7 +167,7 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 3. ML-Native Vocabulary — YES / NO 对照
+## 4. ML-Native Vocabulary — YES / NO 对照
 
 | ❌ NO (SDE-SD 词, 会被 calibrate "didn't show ML depth") | ✅ YES (ML-native, 显 senior) |
 | --- | --- |
@@ -110,7 +179,7 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 4. Framing / Body / Strong / Zoom-out 元结构
+## 5. Framing / Body / Strong / Zoom-out 元结构
 
 **Framing (60-90s)**: 2-twist thesis (each 45-60s), 每 twist 含 what / why-this-problem-specific / ML implication / cost; 末尾 active deprioritize "I'm choosing not to deep-dive on X, Y" + yes/no 收尾. **Body (each section)**: sub-section announcement ("N parts: A, B, C") → list bullets → 立刻 pick 1 expand 60s → surface 1 non-obvious risk → transition "unless you want to deepen X". **Strong (4 个预分配)**: state reframe → 3 concrete actions with who/what/cost/量化 → failure modes + mitigation → trade-off ("X is stronger but costs Y"). **Zoom-out (3 min before end)**: 3-sentence summary → top 3 risks with mechanism + alarm signal → invite deepening.
 
@@ -118,7 +187,7 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 5. 偏好节奏 Meta-rules (8 条)
+## 6. 偏好节奏 Meta-rules (8 条)
 
 1. 前 90s 不要问 clarification 问题 — 直接 propose framing 并用 yes/no 收尾.
 2. 每个开放问题给 60-90s 回答 — 不要 30s, 不要 2 min.
@@ -131,13 +200,13 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 6. 减少澄清的广度 NOT 深度
+## 7. 减少澄清的广度 NOT 深度
 
 减少 clarification 的"广度"是对的, 但**不要**减少"深度". 区别: ❌ 不再 triage email / push / in-app / portal 这种 surface 维度 ❌ 不展开 FR / NFR / QPS / availability ✅ **要**快速锁一句话假设 (*"I'll assume we're optimizing for in-app notification ranking with a daily candidate pool of ~1000 per user, latency budget ~200ms"*) 说完就往下走, 不等面试官反复确认; ✅ 每个 ML 决策点 surface trade-off, 但**自己**给推荐答案, 不把选择权抛回去. 上一面 "on track" 但加面 = 方向对, 深度和决断力不够 — 这次"快速 frame、自信决策、深入 ML 内核".
 
 ---
 
-## 7. E4 标准 vs E5 加分上限
+## 8. E4 标准 vs E5 加分上限
 
 | 维度 | E4 必须做到 (4 条) | E5 加分项 (3 条) |
 | --- | --- | --- |
@@ -150,7 +219,7 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 8. Drawer — 深内容入口
+## 9. Drawer — 深内容入口
 
 - **完整 45-min 端到端台词 (Reels Home Feed)**: 8 段 verbatim 台词 + 4 strong moment 精确投放位置 + 关键 verbal pattern → [sd://{SD_SLUG}](sd://{SD_SLUG})
 - **Family Taxonomy + 13 题型卡片 (Q1-Q13)**: 每题 Twist / Puzzle pieces / Anti-patterns / Hook phrase → [cd://{FAMILY_DOC_ID}](cd://{FAMILY_DOC_ID})
@@ -158,7 +227,7 @@ CONTENT = f"""{SENTINEL}
 
 ---
 
-## 9. 30 秒判题流程
+## 10. 30 秒判题流程
 
 看到题 → 30s 内判断 family (rec / ranking / classification / search / event / graph) → 跳到 [cd://{FAMILY_DOC_ID}](cd://{FAMILY_DOC_ID}) 找对应卡片读其 Twist + Puzzle pieces + Hook phrase → 从 [cd://{JIMU_DOC_ID}](cd://{JIMU_DOC_ID}) 取适配积木 (rec/ranking 类默认套 1+3+4+5+7; classification 类套 6+7+9; cold-start heavy 类套 2+5; graph 类不套 two-tower) → 投放 hook phrase → 按 Section 1 timing skeleton 走 45 分钟 → 35-40 min 必投放 Strong Moment #4 zoom-out + top 3 risks.
 """
@@ -174,11 +243,12 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # AC #2: SQLite length(content) BETWEEN 5500 AND 7500 — char count,
-    # not byte count (SQLite's length() on TEXT returns chars).
+    # T-P0-847 absorbed Section 2 'Twist 挖掘方法论' (4 轴 + 4-段 template
+    # + Reels 7-twist worked example + AI 补充). Range bumped per task spec
+    # ("上界 +3500 字节左右"); char-count, not byte-count.
     n = len(content)
-    if not (5500 <= n <= 7500):
-        raise RuntimeError(f"content char-length {n} not in [5500, 7500]")
+    if not (8500 <= n <= 12000):
+        raise RuntimeError(f"content char-length {n} not in [8500, 12000]")
 
     # AC #3: 3 drawer URIs (sd://meta-reels-golden + cd://94 + cd://95).
     for uri in (
@@ -189,10 +259,10 @@ def validate_content(content: str) -> None:
         if uri not in content:
             raise RuntimeError(f"drawer URI missing: {uri!r}")
 
-    # AC #4: exactly 9 H2 sections (lines starting with '## ').
+    # T-P0-847: 10 H2 sections (Section 2 'Twist 挖掘方法论' inserted).
     h2_count = sum(1 for ln in content.splitlines() if ln.startswith("## "))
-    if h2_count != 9:
-        raise RuntimeError(f"expected 9 '## ' H2 sections, got {h2_count}")
+    if h2_count != 10:
+        raise RuntimeError(f"expected 10 '## ' H2 sections, got {h2_count}")
 
     # AC #5: 4 'Strong Moment #' anchors (#1-#4).
     for i in range(1, 5):

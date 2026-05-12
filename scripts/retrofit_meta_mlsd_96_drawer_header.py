@@ -62,10 +62,12 @@ RECSYS_MODELS_DOC_ID = 97      # T-A: RecSys 核心模型 8 工作 (per T-P0-842
 SD_REELS_GOLDEN = "meta-reels-golden"
 SD_GENERIC_RECSYS = "interview-recommendation-system"
 
-# Old Section 8 dedupe markers (from T-P0-840 initial seed).
-SECTION_8_HEADER_OLD = "## 8. Drawer — 深内容入口"
-SECTION_9_HEADER_OLD = "## 9. 30 秒判题流程"
-SECTION_8_HEADER_NEW = "## 8. 30 秒判题流程"
+# Body dedupe markers. Section indices bumped +1 after T-P0-847 inserted
+# 'Section 2 Twist 挖掘方法论' into the seed; Drawer is now Section 9 and
+# the trailing 30 秒判题 flow is Section 10 (collapsed back to 9 here).
+SECTION_DRAWER_OLD = "## 9. Drawer — 深内容入口"
+SECTION_TRIAGE_OLD = "## 10. 30 秒判题流程"
+SECTION_TRIAGE_NEW = "## 9. 30 秒判题流程"
 
 DRAWER_INDEX = f"""> ## Drawer 入口（点击展开详读）
 >
@@ -90,30 +92,30 @@ def sha256_bytes(text: str) -> str:
 
 
 def transform_body(body: str) -> str:
-    """Drop old Section 8 drawer + renumber Section 9 → Section 8 (idempotent)."""
+    """Drop body Drawer section + renumber trailing triage section (idempotent)."""
     # Idempotent: if already transformed, no-op.
-    if SECTION_8_HEADER_OLD not in body:
-        if SECTION_8_HEADER_NEW in body:
+    if SECTION_DRAWER_OLD not in body:
+        if SECTION_TRIAGE_NEW in body:
             return body
         raise RuntimeError(
-            "body lacks both old Section 8 header "
-            f"{SECTION_8_HEADER_OLD!r} and post-transform header "
-            f"{SECTION_8_HEADER_NEW!r}; refusing to guess"
+            "body lacks both drawer header "
+            f"{SECTION_DRAWER_OLD!r} and post-transform header "
+            f"{SECTION_TRIAGE_NEW!r}; refusing to guess"
         )
 
-    start = body.find(SECTION_8_HEADER_OLD)
-    next_sec = body.find(SECTION_9_HEADER_OLD, start)
+    start = body.find(SECTION_DRAWER_OLD)
+    next_sec = body.find(SECTION_TRIAGE_OLD, start)
     if next_sec == -1:
         raise RuntimeError(
-            f"Section 9 marker {SECTION_9_HEADER_OLD!r} not found after "
-            f"Section 8 at offset {start}"
+            f"triage marker {SECTION_TRIAGE_OLD!r} not found after "
+            f"drawer section at offset {start}"
         )
 
-    # Remove block from `## 8. Drawer ...` through (exclusive) `## 9. ...`.
-    # The original `---\n\n` separator that preceded Section 8 is preserved
-    # (it now separates Section 7 from the renumbered Section 8).
+    # Remove block from `## 9. Drawer ...` through (exclusive) `## 10. ...`.
+    # The original `---\n\n` separator that preceded the drawer section is
+    # preserved (it now separates Section 8 from the renumbered Section 9).
     trimmed = body[:start] + body[next_sec:]
-    return trimmed.replace(SECTION_9_HEADER_OLD, SECTION_8_HEADER_NEW, 1)
+    return trimmed.replace(SECTION_TRIAGE_OLD, SECTION_TRIAGE_NEW, 1)
 
 
 def build_content(existing_body: str) -> str:
@@ -166,48 +168,49 @@ def validate_content(content: str, transformed_body: str) -> None:
             f"self-link violation: {self_uri!r} found in prepended block"
         )
 
-    # AC #3: old Section 8 header fully removed.
-    if SECTION_8_HEADER_OLD in content:
+    # AC #3: body Drawer section fully removed.
+    if SECTION_DRAWER_OLD in content:
         raise RuntimeError(
-            f"dedupe failed: {SECTION_8_HEADER_OLD!r} still present in content"
+            f"dedupe failed: {SECTION_DRAWER_OLD!r} still present in content"
         )
 
-    # AC #4: Section 9 renumbered to Section 8.
-    if SECTION_9_HEADER_OLD in content:
+    # AC #4: triage section renumbered (## 10. → ## 9.).
+    if SECTION_TRIAGE_OLD in content:
         raise RuntimeError(
-            f"renumber failed: {SECTION_9_HEADER_OLD!r} still present"
+            f"renumber failed: {SECTION_TRIAGE_OLD!r} still present"
         )
-    if SECTION_8_HEADER_NEW not in content:
+    if SECTION_TRIAGE_NEW not in content:
         raise RuntimeError(
-            f"renumber failed: {SECTION_8_HEADER_NEW!r} not found in content"
+            f"renumber failed: {SECTION_TRIAGE_NEW!r} not found in content"
         )
 
-    # AC #5: H2 count = 1 (Drawer 入口 inside blockquote, `> ## `) + 8
-    # (Sections 1..8). Both `## ` and `> ## ` are counted via lines starting
+    # AC #5: H2 count = 1 (Drawer 入口 inside blockquote, `> ## `) + 9
+    # (Sections 1..9 after T-P0-847 inserted 'Twist 挖掘方法论' as new
+    # Section 2). Both `## ` and `> ## ` are counted via lines starting
     # with `## ` after stripping leading `> `.
     h2_lines = [
         ln for ln in lines
         if ln.lstrip("> ").startswith("## ")
     ]
-    if len(h2_lines) != 9:
+    if len(h2_lines) != 10:
         raise RuntimeError(
-            f"expected 9 H2 headings (1 Drawer 入口 + 8 sections); "
+            f"expected 10 H2 headings (1 Drawer 入口 + 9 sections); "
             f"got {len(h2_lines)}: {h2_lines}"
         )
-    # Verify sections 1..8 numeric headers all present (in body, not blockquote).
+    # Verify sections 1..9 numeric headers all present (in body, not blockquote).
     body_h2 = [ln for ln in lines if ln.startswith("## ")]
-    for n in range(1, 9):
+    for n in range(1, 10):
         if not any(ln.startswith(f"## {n}.") for ln in body_h2):
             raise RuntimeError(
                 f"missing body section header `## {n}.` in renumbered content"
             )
 
-    # AC #6: length range ~7000-8500 chars (spec ~7800-8200 bytes; allow
-    # margin since len() counts chars not bytes).
+    # AC #6: length range bumped after T-P0-847 absorbed Section 2 methodology
+    # (+~3.7k chars seed-side; prepended Drawer block adds ~0.7k chars net).
     n_chars = len(content)
-    if not (7000 <= n_chars <= 8500):
+    if not (10500 <= n_chars <= 12500):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [7000, 8500]"
+            f"content char-length {n_chars} not in [10500, 12500]"
         )
 
     # AC: body preserved verbatim — content must end with transformed_body
@@ -217,16 +220,18 @@ def validate_content(content: str, transformed_body: str) -> None:
             "transformed body not preserved verbatim at end of content"
         )
 
-    # AC: required body landmarks still present.
+    # AC: required body landmarks still present (section indices bumped +1
+    # after T-P0-847 inserted 'Twist 挖掘方法论' as new Section 2).
     required_body_fragments = [
         "<!-- META_MLSD_MAIN_HUB_20260511 -->",
         "# Meta MLSD 45-min Playbook",
         "## 1. 节奏 Timing Skeleton (45min)",
-        "## 2. 4 Strong Moments",
+        "## 2. Twist 挖掘方法论",
+        "## 3. 4 Strong Moments",
         "Strong Moment #1",
         "Strong Moment #4",
-        "## 7. E4 标准 vs E5 加分上限",
-        # Inline narrative reference in Section 2 must survive.
+        "## 8. E4 标准 vs E5 加分上限",
+        # Inline narrative reference in Section 3 must survive.
         "[Reels Home Feed (45min walkthrough, 8 段台词 verbatim) →]"
         f"(sd://{SD_REELS_GOLDEN})",
     ]
