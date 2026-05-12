@@ -9,41 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
-
-**内容来源**: docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md (本 task 同时新建该 source 文件，verbatim 用户 2026-05-12 Discord msg 1503871554759557274 的 Part 4 Golden Answer 完整脚本)。
-
-**9 列 prose 分布**:
-- overview: 整体节奏哲学 (Opening 60s + 时间分配 + 3 unique twists 框架)
-- architecture: Section 5.1 Architecture verbatim (Funnel 2-stage + L2 ranker 主塔/Shallow bias tower/Multi-head; MMR not DPP rationale) + **末尾自含 1-2 段简版 Bias Tower** (核心 3 句: 双塔加性 / 主深偏浅 / mask-at-inference; anchor 句: '深入见 framework_nodes path=meta-prep/system-design-must-knows/popularity-bias-debiasing')
-- dataflow: Section 1 Framing + Section 2 Metrics + Section 3 Labels + Section 4 Features 整段 verbatim (4-min/3-min/4-min/3-min 节奏)
-- formulas: Label 阶梯 (L1-L4) + Negative sampling ratio 1:3-5:1-2:0.5-1 + Train/eval split 双轴 + Multi-task conflict 三选项对比
-- production_constraints: Section 5.3 Serving verbatim (Latency budget 60/10/80/30/20 = 200ms + Tiered refresh 5 档 streaming/hourly/daily/at-creation/quarterly + Cache) + **末尾自含 1-2 段简版 Shadow Logging + Train-Serve Skew** (4 来源浓缩 + shadow logging 2 件套核心句; anchor 句: '深入见 fr-node 266')
-- tradeoffs: Section 5.2 Training 中的 multi-task conflict 三选项 + Reranker MMR vs DPP + Negative sampling explore vs exploit + Bias tower vs feature
-- defense: Section 5.4 Monitoring + A/B 段 verbatim (4 monitoring signals + A/B 设计 list-level metric + Abuse model 独立 not share weights rationale + Loop closure)
-- verbal_outline: Closing 30s verbatim + Part 5 Mock 节奏 Checklist (开场 60s 4 checks / 段末 4 件事 / Drift 自查 / List-level 题目 4 特殊提醒) + 缝合句模板
-- cheat_sheet: 4 个 Strong Moment 预分配表 (类比 sd41 cheat_sheet 节奏) + **末尾新增 Design Doc 强调话术 4 句金句** (verbatim 来自用户 Bias Tower 参考资料第 8 节)
-
-**Idempotent seed pattern** (sentinel UPSERT by slug='meta-top3-comments-golden'): mirror scripts/seed_meta_reels_golden_sd.py 结构。
-
-**Acceptance Criteria**:
-1. New script: scripts/seed_meta_top3_comments_golden_sd.py (idempotent, sentinel UPSERT by slug, dry-run flag)
-2. New source: docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md (verbatim 用户 Discord msg 内容 + Bias Tower 简版段融合点标注)
-3. 9 列 prose 每列 > 200 chars, 总 content > 8000 bytes (镜像 sd41 size scale 17856 → 至少 8000)
-4. display_order=131 (reserved 130-149 ML SD 范围)
-5. Architecture 段含 anchor 句指向 fr-node path=meta-prep/system-design-must-knows/popularity-bias-debiasing
-6. Production_constraints 段含相同 anchor 句
-7. Cheat_sheet 末尾含 4 句 Design Doc 强调话术 (verbatim from user 参考资料第 8 节)
-8. Re-run seed script → 无变化 (idempotent)
-9. python scripts/audit_uri_consistency.py 通过 (新 sd 链接可解析)
-10. EXPECTED_FILES exported at commit: scripts/seed_meta_top3_comments_golden_sd.py, docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md
-
-**Commit msg**: [T-P0-XXX] [Meta-MLSD] sd://meta-top3-comments-golden (45min Top-3 Comments walkthrough)
-
 #### T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线)
 - **Priority**: P0
 - **Complexity**: M
@@ -685,6 +650,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough). **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
 - [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
 - [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str
 - [x] **2026-05-12** -- T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section. Retrofit system_designs.id=41 (slug='meta-reels-golden', title='Meta MLSD Golden Example: Reels Home Feed Recommendation
