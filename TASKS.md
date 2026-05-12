@@ -9,6 +9,232 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
+
+**内容来源**: docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md (本 task 同时新建该 source 文件，verbatim 用户 2026-05-12 Discord msg 1503871554759557274 的 Part 4 Golden Answer 完整脚本)。
+
+**9 列 prose 分布**:
+- overview: 整体节奏哲学 (Opening 60s + 时间分配 + 3 unique twists 框架)
+- architecture: Section 5.1 Architecture verbatim (Funnel 2-stage + L2 ranker 主塔/Shallow bias tower/Multi-head; MMR not DPP rationale) + **末尾自含 1-2 段简版 Bias Tower** (核心 3 句: 双塔加性 / 主深偏浅 / mask-at-inference; anchor 句: '深入见 framework_nodes path=meta-prep/system-design-must-knows/popularity-bias-debiasing')
+- dataflow: Section 1 Framing + Section 2 Metrics + Section 3 Labels + Section 4 Features 整段 verbatim (4-min/3-min/4-min/3-min 节奏)
+- formulas: Label 阶梯 (L1-L4) + Negative sampling ratio 1:3-5:1-2:0.5-1 + Train/eval split 双轴 + Multi-task conflict 三选项对比
+- production_constraints: Section 5.3 Serving verbatim (Latency budget 60/10/80/30/20 = 200ms + Tiered refresh 5 档 streaming/hourly/daily/at-creation/quarterly + Cache) + **末尾自含 1-2 段简版 Shadow Logging + Train-Serve Skew** (4 来源浓缩 + shadow logging 2 件套核心句; anchor 句: '深入见 fr-node 266')
+- tradeoffs: Section 5.2 Training 中的 multi-task conflict 三选项 + Reranker MMR vs DPP + Negative sampling explore vs exploit + Bias tower vs feature
+- defense: Section 5.4 Monitoring + A/B 段 verbatim (4 monitoring signals + A/B 设计 list-level metric + Abuse model 独立 not share weights rationale + Loop closure)
+- verbal_outline: Closing 30s verbatim + Part 5 Mock 节奏 Checklist (开场 60s 4 checks / 段末 4 件事 / Drift 自查 / List-level 题目 4 特殊提醒) + 缝合句模板
+- cheat_sheet: 4 个 Strong Moment 预分配表 (类比 sd41 cheat_sheet 节奏) + **末尾新增 Design Doc 强调话术 4 句金句** (verbatim 来自用户 Bias Tower 参考资料第 8 节)
+
+**Idempotent seed pattern** (sentinel UPSERT by slug='meta-top3-comments-golden'): mirror scripts/seed_meta_reels_golden_sd.py 结构。
+
+**Acceptance Criteria**:
+1. New script: scripts/seed_meta_top3_comments_golden_sd.py (idempotent, sentinel UPSERT by slug, dry-run flag)
+2. New source: docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md (verbatim 用户 Discord msg 内容 + Bias Tower 简版段融合点标注)
+3. 9 列 prose 每列 > 200 chars, 总 content > 8000 bytes (镜像 sd41 size scale 17856 → 至少 8000)
+4. display_order=131 (reserved 130-149 ML SD 范围)
+5. Architecture 段含 anchor 句指向 fr-node path=meta-prep/system-design-must-knows/popularity-bias-debiasing
+6. Production_constraints 段含相同 anchor 句
+7. Cheat_sheet 末尾含 4 句 Design Doc 强调话术 (verbatim from user 参考资料第 8 节)
+8. Re-run seed script → 无变化 (idempotent)
+9. python scripts/audit_uri_consistency.py 通过 (新 sd 链接可解析)
+10. EXPECTED_FILES exported at commit: scripts/seed_meta_top3_comments_golden_sd.py, docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] sd://meta-top3-comments-golden (45min Top-3 Comments walkthrough)
+
+#### T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
+
+把用户 2026-05-12 Discord msg 1503874418529669201 给的 Bias Tower / Train-Serve Skew / Shadow Feature Logging 8 节内容 verbatim 灌进 framework_nodes id=266 (path='meta-prep/system-design-must-knows/popularity-bias-debiasing', title='Popularity Bias / Position Bias / Selection Bias') 的 description 列。
+
+**8 节内容**:
+1. Shallow Bias Tower (YouTube 2019): 架构 (双塔加性 logit = main_tower + bias_tower) + 为什么浅 (容量瓶颈 + 防 position 抢梯度) + 核心归纳偏置 (加性可分 + 主塔输出独立于 position)
+2. Mask-at-Inference: 训练喂真实 position / 推理屏蔽; 2 种等价实现 (bias term 置 0 / position 设固定参考值); 配套 feature dropout 训练技巧
+3. Bias Tower vs 拼进主塔 6 轴对比表 (分解结构/推理 mask/梯度竞争/可识别性等) + 理论等价前提
+4. isAds 判断标准: 反事实 (organic 的相关性) → bias 处理; 事实预测 P(click|当前身份) → context feature
+5. Train/Serve Skew 4 大来源 (代码路径不一致 / Time travel / 数据源默认值漂移 / bias 特征训练 vs serving mask 分布不匹配) + 后果
+6. Shadow Feature Logging 4 工程要点 (无偏采样 / Kafka 异步队列不阻塞 serving / Flink stream label joiner / 持续监控 logged vs serving 分布告警) + 保证 (训练/服务 100% 一致 + Point-in-time + bias 特征忠实记录)
+7. 三层闭环逻辑链 + 口诀: 架构纠偏 (bias tower) + 推理纠偏 (mask) + 数据纠偏 (shadow log), 三层缺一不可
+8. Design Doc 4 句强调话术 (加性 shallow bias tower / Mask-at-inference 反事实信号 / Shadow logging 防 skew / 业务指标为真实评估目标)
+
+**Idempotent seed pattern**: sentinel UPSERT by framework_nodes.path='meta-prep/system-design-must-knows/popularity-bias-debiasing'。脚本可重跑无副作用。
+
+**Acceptance Criteria**:
+1. New script: scripts/seed_bias_tower_debiasing_node.py (idempotent, dry-run flag)
+2. New source: docs/prep/meta_mlsd_2026-05-12_top3/source_05_bias_tower_train_serve_skew.md (verbatim 用户 Discord msg 内容)
+3. framework_nodes.description 增长 > 5KB, 包含 8 节完整内容 + section headers
+4. fr-node 已存在 (id=266)，仅 UPDATE description (不要 INSERT 新 node)
+5. Re-run → 无变化 (idempotent)
+6. EXPECTED_FILES: scripts/seed_bias_tower_debiasing_node.py, docs/prep/meta_mlsd_2026-05-12_top3/source_05_bias_tower_train_serve_skew.md
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] Bias Tower deep-dive → fr-node 266 description (supporting reference)
+
+#### T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-853
+- **Description**: Retrofit company_documents id=94 ('Family Taxonomy + 13 Question Cards') 的 Drawer 入口表 + Q1 'Top 3 Comments Extraction' card cross-link。
+
+**改动 1 - Drawer 入口表 (顶部 blockquote H2 表)**:
+新增一行: `| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 45-min full pacing + Bias Tower + Shadow Logging | 想看 Top-3 Comments 完整 walkthrough |`
+
+位置: 放在 sd://meta-reels-golden 行下方 (golden 类放一起)。
+
+**改动 2 - Q1 'Top 3 Comments Extraction' card 末尾**:
+在 Strong Moment 段后追加一行斜体: `*→ 完整 45min 脚本见 sd://meta-top3-comments-golden*`
+
+Q1 card 本身**保持 30 秒判题密度** (不要展开成长篇), 仅加 1 行 anchor。
+
+**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_94_drawer_header.py 模板逻辑 (sentinel-based, 检测目标行已存在则 skip)。新建 / 改写为 scripts/retrofit_meta_mlsd_94_top3_xref.py 也可，但优先 in-place 扩展现有脚本以避免脚本爆炸。
+
+**Acceptance Criteria**:
+1. Drawer 入口表多 1 行指向 sd://meta-top3-comments-golden
+2. Q1 card 末尾多 1 行 cross-link
+3. cd94 总 content 长度增长 < 500 bytes (仅 2 行 markdown)
+4. self-URI cd://94 不在 Drawer 入口表
+5. Re-run script → 无变化 (idempotent)
+6. python scripts/audit_uri_consistency.py 通过
+7. EXPECTED_FILES: scripts/retrofit_meta_mlsd_94_drawer_header.py (或新文件 scripts/retrofit_meta_mlsd_94_top3_xref.py)
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] cd94 retrofit: drawer + Q1 cross-link → sd://top3
+
+#### T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-853
+- **Description**: Retrofit company_documents id=95 ('Cross-cutting 积木库') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
+
+**改动**: Drawer 入口表 (顶部 blockquote H2 表) 新增一行:
+`| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 完整 45min walkthrough: framing/metric/label/feature/arch/training/serving/monitoring | 想看 Top-3 Comments 配套积木实战 |`
+
+位置: 放在 sd://meta-reels-golden 行下方 (golden 类放一起)。
+
+**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_95_drawer_header.py 模板逻辑。
+
+**Acceptance Criteria**:
+1. Drawer 入口表多 1 行指向 sd://meta-top3-comments-golden
+2. self-URI cd://95 不在表内
+3. Re-run → 无变化
+4. python scripts/audit_uri_consistency.py 通过
+5. EXPECTED_FILES: scripts/retrofit_meta_mlsd_95_drawer_header.py
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] cd95 retrofit: drawer add sd://top3
+
+#### T-P0-857: [Meta-MLSD] Retrofit cd96 Drawer 入口 → sd://meta-top3-comments-golden
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-853
+- **Description**: Retrofit company_documents id=96 ('45min Playbook + 4 Strong Moments') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
+
+**改动**: Drawer 入口表 (顶部 blockquote H2 表) 新增一行:
+`| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 第 2 例 45min walkthrough (类比 Reels Golden) | 对照学 framing/metric/label 三段式 + Strong Moment 编排 |`
+
+位置: 放在 sd://meta-reels-golden 行下方。
+
+**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_96_drawer_header.py 模板逻辑。
+
+**Acceptance Criteria**:
+1. Drawer 入口表多 1 行指向 sd://meta-top3-comments-golden
+2. self-URI cd://96 不在表内
+3. Section 8 (原 drawer 列表) 不被影响
+4. Re-run → 无变化
+5. python scripts/audit_uri_consistency.py 通过
+6. EXPECTED_FILES: scripts/retrofit_meta_mlsd_96_drawer_header.py
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] cd96 retrofit: drawer add sd://top3
+
+#### T-P0-858: [Meta-MLSD] Retrofit cd97 Drawer 入口 → sd://meta-top3-comments-golden
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-853
+- **Description**: Retrofit company_documents id=97 ('推荐系统核心模型复习笔记 8 工作 + 脉络'，2026-05-12 batch 刚加入) 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
+
+**改动**: Drawer 入口表 (顶部 blockquote H2 表) 新增一行:
+`| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 把 8 工作 (DCN/DLRM/MMOE/multi-task 等) 嵌入完整 45min 编排 | 想看模型层 → 走完整脚本 |`
+
+位置: 放在 sd://meta-reels-golden 行下方。
+
+**注意**: cd97 是 2026-05-12 batch (T-P0-841 family) 刚加的 RecSys 笔记。该 doc 已有 Drawer 入口 section (T-P0-842 retrofit 完成)。本 task **新建** scripts/retrofit_meta_mlsd_97_drawer_header.py (复用 94/95/96 retrofit 脚本模板; 现有 cd97 的 drawer header 来自 seed script 直接写入而非 retrofit, 但 retrofit 逻辑应同样安全 idempotent)。
+
+**Acceptance Criteria**:
+1. Drawer 入口表多 1 行指向 sd://meta-top3-comments-golden
+2. self-URI cd://97 不在表内
+3. doc 本体 (RecSys 8 工作 + 脉络梳理) 不被影响
+4. Re-run → 无变化 (idempotent)
+5. python scripts/audit_uri_consistency.py 通过
+6. EXPECTED_FILES: scripts/retrofit_meta_mlsd_97_drawer_header.py (新建)
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] cd97 retrofit: drawer add sd://top3
+
+#### T-P0-859: [Meta-MLSD] Retrofit sd41 (Reels Golden) overview Drawer → sd://meta-top3-comments-golden
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-853
+- **Description**: Retrofit system_designs id=41 (slug='meta-reels-golden', 'Reels Home Feed Recommendation 45min Golden') 的 overview 列开头 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
+
+**改动**: overview 列 (Drawer 入口 section, 已由 T-P0-846 prepend 完成) 表新增一行:
+`| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 第 2 例 Meta MLSD golden walkthrough (intra-item ranking + set selection family) | 对比学 Reels (cross-item engagement) vs Top-3 Comments (intra-item set selection) 的 framing/twist 差异 |`
+
+位置: 在 sd41 自己的 Drawer 入口表 (除 sd41 自身 self-link 外的) 现有行下方追加。**self-URI sd://meta-reels-golden 不能在表内**。
+
+**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_sd41_drawer_header.py。
+
+**Acceptance Criteria**:
+1. overview 列 Drawer 入口表多 1 行
+2. self-URI sd://meta-reels-golden 不在表内 (already invariant)
+3. overview 其余 prose (节奏哲学 + 4 strong moment 表 + ML-native vocab 表 + E4 边界) 不被影响
+4. 其他 8 列 (architecture/dataflow/...) 完全不动
+5. Re-run → 无变化
+6. python scripts/audit_uri_consistency.py 通过
+7. EXPECTED_FILES: scripts/retrofit_meta_mlsd_sd41_drawer_header.py
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] sd41 overview retrofit: drawer add sd://top3
+
+#### T-P0-860: [Meta-MLSD] 前端 SystemDesignList 加 'ML System Design' 第 4 个 tab + prod 校验
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-853, T-P0-855, T-P0-856, T-P0-857, T-P0-858, T-P0-859
+- **Description**: 在 src/frontend/src/pages/SystemDesignList.tsx 加第 4 个 tab 'ML System Design'，把 sd41 (Reels Golden, do=130) 和 sd 新建的 meta-top3-comments-golden (do=131) 隔离到独立 tab。
+
+**具体改动**:
+
+1. `type Tab = 'interview' | 'ebay' | 'pinterest';` → `type Tab = 'interview' | 'ml-mlsd' | 'ebay' | 'pinterest';`
+2. **Interview Prep filter 收紧**: 现有 `display_order >= 100 && display_order < 199` → `display_order >= 100 && display_order < 130` (cuts off 130+, exclude ML SD range)
+3. **新 useMemo `mlMlsdModules`**: filter `display_order >= 130 && display_order < 199`, 不分类 (扁平卡片列表)
+4. **新 `mlMlsdCount`**: count of do in [130, 199)
+5. **新 tab button** 'ML System Design' 放在 'Interview Prep' 和 'eBay Projects' 之间
+6. **新 tab panel** `{activeTab === 'ml-mlsd' && (...)}`，复用 Pinterest tab 的扁平卡片 grid 模式 (single category, 不要 8 类目分组)
+7. **TOPIC_META 加 2 条**:
+   - 'meta-reels-golden': { description: 'Meta MLSD canonical Reels golden 45min walkthrough: pacing + 4 strong moments + multimodal lifecycle + DLRM + multi-task heads + IPS-vs-exploration + watch-ratio retention metric', difficulty: 'Hard', tags: ['Meta', 'MLSD', 'Reels', 'Multimodal', 'DLRM'], category: 'ML System Design' }
+   - 'meta-top3-comments-golden': { description: 'Meta MLSD Top-3 Comments selection golden 45min walkthrough: intra-item ranking + set selection + 3 unique twists (comment≠item / time-bias / community health) + MMOE + shallow bias tower + shadow logging + list-level A/B', difficulty: 'Hard', tags: ['Meta', 'MLSD', 'Top-K', 'Selection Bias', 'List-level'], category: 'ML System Design' }
+8. **CATEGORY_ORDER 不需要改** (新 tab 用扁平模式)
+
+**Prod 校验**:
+- inner agent commit 代码后 run `npm run build` (在 src/frontend/) → 成功
+- 起 prod backend (FastAPI + serve built static)在 background, log 到 logs/manual_prod_T-P0-XXX.log
+- 退出前 echo URL + log path 给用户 (典型 http://localhost:8000)
+- **用户**: 浏览器打开 4 tab 验证：(1) Interview Prep 不再显示 sd41/Top-3; (2) ML System Design 显示 2 卡 (Reels + Top-3); (3) eBay Projects 不变; (4) Pinterest 不变。点击 ML System Design 任一卡片 → 进入 SD detail page 渲染 9 列 prose 正常。
+
+**Acceptance Criteria**:
+1. SystemDesignList.tsx 4 tab 切换正常 (TS strict, no lint error)
+2. `npm run build` 成功 exit 0
+3. `npm run test` (vitest, 如有) 通过
+4. 浏览器手动验证: Interview Prep 数 (do 100-129) - 1 (减去 sd41) = 之前 - 1; ML System Design 数 = 2 (sd41 + top3); eBay 不变; Pinterest 不变
+5. 点击 'Meta MLSD: Top-3 Comments...' 卡 → URL = /system-design/meta-top3-comments-golden, 9 列 prose 全部渲染
+6. 点击 'Meta MLSD: Reels...' 卡 → URL = /system-design/meta-reels-golden, prose 渲染正常
+7. URL ?tab=ml-mlsd 直链能 land 在 ML SD tab
+8. 退出前 prod server **仍在 background 运行** 等用户校验，log path 写入 commit msg / PROGRESS.md
+9. EXPECTED_FILES: src/frontend/src/pages/SystemDesignList.tsx
+
+**Dep 满足后才会被 picker 选中**: T-P0-853 (sd 新建) + T-P0-855..859 (5 surface retrofit) 全部 completed 后此 task 才 pickable，保证 sd 数据 + drawer 都 ready 后再做前端。
+
+**Commit msg**: [T-P0-XXX] [Meta-MLSD] frontend: add ML System Design 4th tab (do 130-198) + prod build
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
