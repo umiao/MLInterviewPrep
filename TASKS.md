@@ -9,66 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-841: [Meta-MLSD E] Promote new Main Hub to is_golden=1 + audit URI consistency
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-840
-- **Description**: Promote the new T-P0-840 main hub doc 到 is_golden=1 (Meta company 默认第一个页面 convention), demote 旧 golden doc 82 到 is_golden=0 (保留, 不删 — 旧的 AI-Native Onsite Prep round 仍可能用到). 收尾跑 URI consistency audit.
-
-DEPS: T-P0-840 (main hub doc created).
-
-DB OPERATIONS (data/mle_prep.db):
-
-```sql
--- Step 1: Find new main hub id
-SELECT id FROM company_documents 
-WHERE company_id=31 AND title='[Meta-MLSD] 45min Playbook + 4 Strong Moments';
--- Expected: exactly 1 row, id ≠ 82
-
--- Step 2: Demote existing golden (doc 82)
-UPDATE company_documents 
-SET is_golden=0, golden_at=NULL, updated_at=CURRENT_TIMESTAMP
-WHERE id=82 AND company_id=31;
-
--- Step 3: Promote new main hub
-UPDATE company_documents 
-SET is_golden=1, golden_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP
-WHERE id=<new_main_hub_id> AND company_id=31;
-
--- Step 4: Verify only 1 row is golden for company_id=31
-SELECT COUNT(*) FROM company_documents WHERE company_id=31 AND is_golden=1;
--- Expected: exactly 1
-```
-
-VALIDATION (mandatory checks):
-1. After UPDATE: SELECT id, is_golden, golden_at FROM company_documents WHERE company_id=31 AND is_golden=1 returns exactly 1 row, id = new main hub id (NOT 82).
-2. Doc 82 still exists with is_golden=0 (NOT deleted).
-3. Run `python scripts/audit_uri_consistency.py` (per memory `reference_dblc_drawer_links.md`); if exits 0 → pass. If exits non-zero → report flagged URIs and STOP (do not mark task complete).
-4. Run smoke check: SELECT id, title, is_golden FROM company_documents WHERE company_id=31 ORDER BY is_golden DESC, id ASC. First row should be new main hub (id confirmed in step 1).
-5. Verify all 3 drawer URIs in new main hub still resolve:
-   - SELECT slug FROM system_designs WHERE slug='meta-reels-golden' → 1 row
-   - SELECT id FROM company_documents WHERE id=<cd referenced family doc id> AND company_id=31 → 1 row
-   - SELECT id FROM company_documents WHERE id=<cd referenced jimu doc id> AND company_id=31 → 1 row
-
-OPTIONAL DASHBOARD SMOKE: If MLI dashboard is running locally (curl localhost:5174 or :8765 — check src/ or scripts/run_dashboard.* for port), curl /companies/31 and verify new main hub shows as default first page. If dashboard not running, skip but note in PROGRESS.
-
-DELIVERABLES:
-- 2 UPDATE statements executed (demote 82, promote new hub)
-- 1 audit script run with PASS
-- PROGRESS.md entry, 5 段
-- Discord ping (optional, user can pull when interactive): summarize 5-task batch landed + new Meta default first page slug/title
-
-ROLLBACK PLAN (if anything fails):
-```sql
-UPDATE company_documents SET is_golden=1, golden_at='2026-05-01 07:13:16' WHERE id=82;
-UPDATE company_documents SET is_golden=0, golden_at=NULL WHERE id=<new_main_hub_id>;
-```
-Old golden_at value from prior session: doc 82 had golden_at NULL initially but updated_at=2026-05-01 07:13:16 — set golden_at to that as best-effort restore.
-
-NO further deps — this is the last task of the 5-task batch.
-
-OUTPUT to PROGRESS.md after completion: 1 entry (5 段) + 1 summary mini-section noting all 5 tasks (T-P0-837 .. T-P0-841) closed and Meta default first page now points to new main hub.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -517,6 +457,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
 - [x] **2026-05-11** -- T-P1-777: Pinterest LC notes voice + density refactor: pilot on LC 465 + LC 1723. Discord ad-hoc msg 1501625424210563193 (2026-05-06): user flagged LC 465 + LC 1723 bitmask/状压 explanations as 啰嗦 + varia
+- [x] **2026-05-11** -- T-P0-841: [Meta-MLSD E] Promote new Main Hub to is_golden=1 + audit URI consistency. Promote the new T-P0-840 main hub doc 到 is_golden=1 (Meta company 默认第一个页面 convention), demote 旧 golden doc 82 到 is_golde
 - [x] **2026-05-11** -- T-P0-840: [Meta-MLSD D] Main Hub Page → company_documents (45min Playbook + 4 Strong Moments). INSERT the **main hub page** for Meta MLSD prep — 高密度 ~6 KB summary, 重内容全部 drawer 链接到 T-P0-837/838/839. 这页将在 T-P0-833 pr
 - [x] **2026-05-11** -- T-P0-839: [Meta-MLSD C] Cross-cutting 积木库 → company_documents. INSERT a company_documents row holding the 9 跨题通用 ML 积木 (cross-cutting reusable pieces), 让用户面试中遇到任何 recommendation/ranki
 - [x] **2026-05-11** -- T-P0-838: [Meta-MLSD B] Family Taxonomy + 13 Question Cards → company_documents. INSERT a company_documents row holding Meta MLSD 的 13 题 family taxonomy 总表 + 每题 Twist → Puzzle pieces → Anti-patterns → 
