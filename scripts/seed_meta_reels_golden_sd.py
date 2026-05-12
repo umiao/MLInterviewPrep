@@ -126,7 +126,7 @@ ARCHITECTURE = """\
 
 ## 2. Retrieval — Multi-Channel Two-Tower
 
-- **(a) Personalized two-tower (60%)**：user tower (long-term profile + recent session history)、content tower (multimodal embedding + content metadata)；ANN (HNSW / ScaNN) over content index；contrastive training，negatives = in-batch + hard negatives mined from early-skip events
+- **(a) Personalized two-tower (60%)**：user tower (long-term profile + recent session history)、content tower (multimodal embedding + content metadata)；ANN (Approximate Nearest Neighbor 索引，**HNSW** = Hierarchical Navigable Small World / **ScaNN** = Scalable Closest Neighbor Search) over content index；contrastive training，negatives = in-batch + hard negatives mined from early-skip events
 - **(b) Trending / recency channel (20%)**：surface fresh content with limited engagement history；按 upload time bucket + 早期 engagement velocity 召回
 - **(c) Diversity channel (20%)**：pull from under-represented content clusters relative to the user's recent N sessions；这是 bias mitigation 的 retrieval-layer 投影
 

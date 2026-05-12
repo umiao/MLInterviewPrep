@@ -78,7 +78,7 @@ CONTENT = f"""{SENTINEL}
 
 #### 积木 1. Two-tower retrieval + deep ranking
 
-**何时套用**: rec / feed / search 默认两阶段架构. **要点**: retrieval 塔学 user / item embedding, ANN (HNSW / IVF) 召回 top-K (~1000); ranking 用 deeper cross / interaction network 在 latency 富余下排序. **Reels 应用** (见 [sd://meta-reels-golden](sd://meta-reels-golden)): two-tower 召回 + DLRM-style ranker 是 default skeleton, 不要在 retrieval 用全 cross feature.
+**何时套用**: rec / feed / search 默认两阶段架构. **要点**: retrieval 塔学 user / item embedding, ANN (Approximate Nearest Neighbor 索引,如 **HNSW** = Hierarchical Navigable Small World / **IVF** = Inverted File) 召回 top-K (~1000); ranking 用 deeper cross / interaction network 在 latency 富余下排序. **Reels 应用** (见 [sd://meta-reels-golden](sd://meta-reels-golden)): two-tower 召回 + DLRM-style ranker 是 default skeleton, 不要在 retrieval 用全 cross feature.
 
 #### 积木 2. Multimodal embedding precomputed at upload
 

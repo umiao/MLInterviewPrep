@@ -105,14 +105,15 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # AC #2: byte length in [14000, 20000]. The spec says "length(content)"
-    # but cites "source 14KB + drawer index ~1KB" which only makes sense as
-    # UTF-8 bytes (source is 10485 chars / 16804 bytes — chars would be
-    # ~11KB, well below 14000). Validate bytes.
+    # AC #2: byte length sanity bound. The original T-P0-842 spec was [14000,
+    # 20000] (source 14KB + drawer index 1KB). 2026-05-12 supplement raised
+    # source by ~2KB inline (Hadamard / FM-vs-DLRM / CF-vs-2tower / fusion-
+    # terminology / RQ-VAE residual / HSTU-vs-OneRec / RankMixer FFN+T-fixed),
+    # so we raised the upper bound to 24000 to fit.
     n_bytes = len(content.encode("utf-8"))
-    if not (14000 <= n_bytes <= 20000):
+    if not (14000 <= n_bytes <= 24000):
         raise RuntimeError(
-            f"content byte-length {n_bytes} not in [14000, 20000]"
+            f"content byte-length {n_bytes} not in [14000, 24000]"
         )
 
     # AC #3: Drawer 入口 section appears before any body H1 — i.e., the

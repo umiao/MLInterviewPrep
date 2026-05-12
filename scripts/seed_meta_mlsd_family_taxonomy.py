@@ -127,7 +127,7 @@ CONTENT = f"""{SENTINEL}
 
 **Strong Moment**: "'Similar' is undefined here—it could mean visually similar, audio-similar, or intent-similar, and these pull in different directions. I'd treat this as multi-facet retrieval and let user interaction learn which axis matters in their session."
 
-### Q3. Friend Recommendation
+### Q3. Friend Recommendation (Meta 产品名 **PYMK** = People You May Know)
 
 **Unique Twist**: 图结构是 retrieval 本身, 不是 feature. **Reciprocity** (双向接受) 才是真 positive; dismissal 是异常强负信号.
 
@@ -375,10 +375,11 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # Length bounds: 9000-14000 chars per task spec.
+    # Length bounds: 9000-14000 chars per original task spec; bumped to 14200
+    # (2026-05-12) to accommodate PYMK acronym expansion in Q3 header.
     n = len(content)
-    if not (9000 <= n <= 14000):
-        raise RuntimeError(f"content length {n} not in [9000, 14000]")
+    if not (9000 <= n <= 14200):
+        raise RuntimeError(f"content length {n} not in [9000, 14200]")
 
     # Section markers
     for marker in (
