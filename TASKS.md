@@ -5,12 +5,6 @@
 
 ## In Progress
 
-#### T-P0-868: [META-MLSD-SD42-RESEED] Reseed Top-3 Comments Golden from rewritten draft
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-865
-- **Description**: INPUT = T-865 schema + Discord attachment 'Comments Ranking (rewritten)' draft. Replace sd42 content. Map to canonical sd-golden sections (per T-865 schema): overview (framing + 3 twists) / architecture (multi-stage funnel) / dataflow (4-section walkthrough: framing 90s / metrics 60s / labels 90s / features 60s) / formulas (label schema + propensity weighting) / production_constraints / tradeoffs / defense (Strong Moments verbatim). NO drawer header. Section-level 3-rule pass. Verify against T-865 schema validator.
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -485,6 +479,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-13** -- T-P0-868: [META-MLSD-SD42-RESEED] Reseed Top-3 Comments Golden from rewritten draft. INPUT = T-865 schema + Discord attachment 'Comments Ranking (rewritten)' draft. Replace sd42 content. Map to canonical s
 - [x] **2026-05-13** -- T-P0-867: [META-MLSD-SD41-PRUNE] Strip Reels Golden drawer + philosophy duplicates. INPUT = T-865 schema. (a) DELETE top drawer header table. (b) overview '整体节奏哲学' prose -> 2-paragraph solution anchor (wh
 - [x] **2026-05-13** -- T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton. INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE 
 - [x] **2026-05-13** -- T-P0-865: [META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary. OUTPUT FORM = MACHINE-CHECKABLE SCHEMA (not prose audit). Deliverables: (1) schemas/meta_mlsd_canonical.yaml -- canonica

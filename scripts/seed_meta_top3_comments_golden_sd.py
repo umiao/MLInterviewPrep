@@ -2,21 +2,41 @@
 
 INSERTs (or idempotently updates) the canonical Meta MLSD Top-3 Comments
 golden example as ``system_designs(slug='meta-top3-comments-golden')``,
-drawer-reachable via ``sd://meta-top3-comments-golden``. Sourced verbatim from
+drawer-reachable via ``sd://meta-top3-comments-golden``. Sourced from
 ``docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md``
 (user-authored Discord msg 1503871555216605214 Part 4 Golden Answer + Part 5
 Mock Checklist + msg 1503874418802163744 Bias Tower / Shadow Logging reference).
 
-Mirrors the structural shape of `scripts/seed_meta_reels_golden_sd.py` (sd41):
-9 prose columns all non-NULL, each > 200 chars, total content > 8000 bytes,
-sentinel-based UPSERT by slug, dry-run flag.
+T-P0-868 reseed (2026-05-13): per schemas/meta_mlsd_canonical.yaml, the
+methodology homepage moved to cd96 and sd-golden is now solution-only.
+Replaced overview 整体节奏哲学 prose (R-FORBID-rhythm-philosophy) with a
+2-paragraph solution anchor + Top-3-Comments-specific 4-Strong-Moment slot
+map; stripped any 'why this is strong' meta-prose from defense
+(R-FORBID-why-this-is-strong); consolidated verbal_outline + cheat_sheet
+to Top-3-Comments-specific anchors only (R-XPAGE-{cheatsheet,verbal}-no-
+cd96-dup); added Decision summary blocks to architecture / dataflow /
+production_constraints / tradeoffs / defense for section-level 3-rule
+pass. NO drawer header (R-DRAWER-no-sd-drawer).
+
+Target row shape (9 prose columns, all > 200 chars, schema char ranges
+per sd_golden.fields):
+  - overview                : 2-paragraph solution anchor (what / 3 twists / 4-slot map)
+  - architecture            : 2-stage point-wise ranking + MMR set-selection reranker + bias tower
+  - dataflow                : 4-section verbatim walk (framing / metrics / labels / features)
+  - formulas                : label schema (L1-L4) + negative sampling + multi-task conflict + score combine
+  - production_constraints  : Section 5.3 serving + tiered refresh + skew defense
+  - tradeoffs               : 8 tradeoffs ("I pick A because X, costs Y, switches to B if Z")
+  - defense                 : 4 Strong Moment verbatim + monitoring + A/B + loop closure; NO 'why this is strong' meta-prose
+  - verbal_outline          : Top-3-specific entry phrases + drift lines (methodology lives in cd://96)
+  - cheat_sheet             : Top-3-only quantification anchors + firm-claim register + 4 Design Doc 强调话术 (cd://96 owns timing skeleton + 8 meta-rules)
 
 Architecture and production_constraints both embed a short Bias Tower /
 Shadow-Logging digest with an anchor sentence pointing to fr-node
 ``meta-prep/system-design-must-knows/popularity-bias-debiasing`` (id=266)
 for the 深版 walkthrough (T-P0-854 owns that 深版).
 
-Cheat_sheet ends with the user's 4 Design Doc 强调话术 sentences verbatim.
+Idempotent: re-running upserts in place by `slug`. Sentinel-based UPSERT
+keyed on `slug='meta-top3-comments-golden'`.
 
 Usage::
 
@@ -50,70 +70,50 @@ ANCHOR_FR_NODE = "meta-prep/system-design-must-knows/popularity-bias-debiasing"
 OVERVIEW = """\
 # Top-3 Comments under a Post -- 45min Golden Walkthrough
 
-## 整体节奏哲学 (Opening 60s + 时间分配 + 3 unique twists 框架)
+This golden walks one verbatim 45-minute interview for **Top-3 Comments under a Post**: a viewer-primary set-selection problem where retrieval is trivially bounded by the post's own comment pool, so the design lives entirely in **ranking + list-level reranking**. The unique angle is that **three intrinsic twists** -- comment-is-not-an-item, early-comment time-bias, and community-health-as-guardrail -- drive almost every downstream decision, and the answer is to put all three on the table inside the first 60 seconds, then revisit each as a Strong Moment later. Methodology (timing skeleton, ML-native vocabulary YES/NO, 8 偏好节奏 meta-rules, E4/E5 boundary) lives in `cd://96`; this row owns only the solution.
 
-**Opening 60s 锁三件事** (declarative, 不问 clarifying):
+## Twist 1 -- Comment is not a generic item
 
-> "Scope: 设计一个系统，从一个 post 下的所有 comments 中选出 3 条 surface 给 viewer，
-> optimize for viewer's joint experience (engagement + community health)。Retrieval 被
-> 单个 post 的 comment pool 天然 bound，所以这是个 **ranking + set-selection 问题，不是
-> multi-stage retrieval**。"
+Comments are ultra-short text whose authorship is a user-graph node, so the dominant signal is social, not text. **I pick** text + social fused representation (caption / hashtag-style mini-BERT for the body, commenter sub-entity embedding for identity, viewer x commenter follow / past-engagement as cross features), feeding the L2 ranker's main tower. Costs: an extra commenter-side embedding pipeline maintained alongside the post-side index. **Switches to** pure text two-tower retrieval only if the post pool exceeds ~10k comments per post -- not the in-feed regime. This is where the "ranker beats two-tower because ranker can see viewer x commenter interaction terms" claim pays off.
 
-**3 unique twists vs generic ranking** (每个带 design implication，是后续每一段的 hook):
+## Twist 2 -- Early-comment time-bias
 
-| # | Twist                              | Design implication                                              |
-|---|------------------------------------|-----------------------------------------------------------------|
-| 1 | **Comment != item**                | 超短文本 + 作者是 user graph 节点 + social signal 是主信号；text + social fused representation，commenter 当 sub-entity |
-| 2 | **Time-bias**                      | 早发的 comment 抢曝光；engagement velocity (rate not count) 当 feature，bandit explore 补晚评论 |
-| 3 | **Adversarial + community health** | 进 **guardrail**，不进主优化目标；独立 abuse model + toxicity hard filter pre-ranker |
+Comments posted in the first minutes of a post's life accumulate disproportionate impressions, so raw engagement counts confound time-of-arrival with quality. **I pick** **engagement velocity (rate, not count)** as the time-debiased label and feature, plus a **5% per-session bandit exploration budget** to surface late-arriving comments. Costs: streaming engagement-rate compute (1-5 min cadence) and a UX cost of late-comment exposure. **Switches to** simple count-based ranking only if velocity infra is unavailable in week 1, but the time-bias mitigation is the twist this Strong Moment hosts.
 
-**Time plan (declarative, 不让面试官分配)**:
+## Twist 3 -- Community-health is a guardrail, not a head
 
-- **15 min 前段**: framing / metric / label / feature
-- **25 min 后段**: model + serving + monitoring
-- 收尾 yes/no: 等点头就推进
+Toxicity / abuse / harassment are disqualifying, not "less engagement". **I pick** an **independent abuse model + toxicity hard filter pre-ranker** (NOT shared weights with the engagement ranker), with tiered action (hard filter for confident, hard demote for uncertain). Costs: a second model trained on weekly retrain cadence to fight adversarial drift. **Switches to** soft loss term only if abuse model precision collapses below 0.8 -- but treating compliance as a loss term is a category error.
 
-## 与 sd41 (Reels Golden) 的关键差异
+## 4 Strong Moment slots (pre-allocated, do NOT improvise)
 
-| Dim                | sd41 Reels                            | sd131 Top-3 Comments (本题)                         |
-|--------------------|---------------------------------------|-----------------------------------------------------|
-| Retrieval          | 2-stage funnel, multi-channel 60/20/20| **Trivial bounded by post's comment pool, 不展开**  |
-| Output             | Ordered feed (linear consumption)     | **Top-3 set selection (list-level)**                |
-| ML formulation     | Point-wise ranking + multi-task heads | Point-wise ranking + **MMR reranker with hard quota** |
-| Negative label 难点 | Early-skip implicit signal            | **Selection bias on unexposed comments** (IPS + bandit) |
-| Metric             | Session-level engagement              | **List-level diversity + any-engagement rate**      |
-| Community health   | Hard filter (compliance)              | **独立 abuse model + tiered action (filter / demote)** |
+| # | Time   | Theme                                  | Top-3-Comments-specific twist anchor                                            |
+|---|--------|----------------------------------------|---------------------------------------------------------------------------------|
+| 1 | 0-1    | 3 unique twists framing                | "set-selection not pure ranking" + 3 twists + 15/25 time plan                   |
+| 2 | 8-12   | Selection-bias 三阶 negative label     | IPS-weighted exposed-not-engaged + 5% bandit unexposed + hard-neg mining        |
+| 3 | 15-21  | Bias Tower + MMR vs DPP                | shallow additive bias tower + mask-at-inference + MMR with hard quota across 3 axes |
+| 4 | 31-35  | 4 monitoring signals (leading vs lagging) | prediction distribution shift earlier than engagement metric; list-level A/B   |
 
-**Why this matters**: top-K / carousel / multi-slot 题目 (top-3 comments / top-K
-search results / multi-slot ads) 与 ordered feed 题目 (Reels / Newsfeed) 在 **metric
-+ architecture (ranker vs reranker)** 段必须显式区分。开场就说 "this is a set-selection
-problem, not pure ranking" 是 E5 边界 signal。
-
-## E4 not E5 -- 边界提醒
-
-不要 invent novel methods (e.g. learned DPP kernel for n=3 list)，不要 over-scope
-("2 years out we'd train a custom comment-LLM..."). 要的是 **confident execution of
-standard playbook + 1-2 deeper insights** (本题 deeper insights = Section 1 time-bias
-reframe + Section 3 selection-bias 三阶 negative label)。每个决策点说出 "我选 A 因为 X，
-代价是 Y，如果 Z 变化我会切到 B" -- 见 tradeoffs col 8 个 trade-off matrix。
+The dataflow / defense / tradeoffs columns are this row's solution body; verbal_outline + cheat_sheet hold only Top-3-Comments-specific anchors. Anything else (rhythm rules, vocab YES/NO, E4/E5 line) belongs in `cd://96`.
 """
 
 
 ARCHITECTURE = """\
-# Architecture: 2-stage Pointwise Ranking + MMR Set-Selection Reranker
+# Architecture: 2-stage Pointwise Ranking + MMR Set-Selection Reranker + Shallow Bias Tower
 
-## Section 5.1 Architecture verbatim (本题核心 6 min)
+## Decision summary (the architectural twist)
 
-Funnel (top-down, 每层 budget 明确):
+**I pick** a 2-stage point-wise ranking funnel (cheap pre-rank -> deep rank) followed by an **MMR list-level reranker with hard quota across 3 axes (commenter / sentiment / topic)** -- the **unique angle** vs a generic ranker is the shallow additive **bias tower with mask-at-inference** that structurally decouples relevance from position / popularity / freshness bias. **This is where** the Bias-Tower-and-MMR-vs-DPP twist of Strong Moment #3 lives. Latency budget p99 < 200 ms over ~1000 candidates per request.
+
+## Funnel (top-down, each layer budget explicit)
 
 ```
 Pre-filter (toxicity hard filter + dedup, in-storage)  -> 1000 candidates
 L1 pre-rank (GBDT, cheap features, weighted target)    -> top 100-200
 L2 deep rank (MMOE + shallow bias tower)               -> point-wise scores
-Reranker (MMR with hard quota)                         -> top 3
+Reranker (MMR with hard quota across 3 axes)           -> top 3
 ```
 
-**L2 ranker 详细架构 (这是核心 -- 必须 expand 90s)**:
+## L2 ranker detail (the core -- expand ~90s)
 
 ```
 +--------------------------------------------+
@@ -125,154 +125,135 @@ Reranker (MMR with hard quota)                         -> top 3
 | Shallow bias tower                         |
 |  Input: position / popularity / recency    |
 |  Output: additive at training              |
-|           MASKED at inference  <- 关键     |
+|           MASKED at inference  <- key      |
 +--------------------------------------------+
 ```
 
-**Multi-task 起点**: shared bottom + 多 head + 合成 label，**升级到 MMOE 只有在 negative
-transfer 出现时** -- 不要一上来就 MMOE。Loss weight 由 biz context 锁 (comment 相对 like
-的 lift 价值 + risk budget)，**不是 uncertainty weighting** -- 因为 weight 本质是产品
-决策，不是统计估计。
+**Multi-task start point**: shared bottom + multi heads + composite label; **upgrade to MMOE only if negative transfer appears** -- do not default to MMOE on day 1. Loss weights are **locked by business context** (comment lift value + risk budget), **NOT uncertainty weighting** -- because the weight is a product decision, not a statistical estimate.
 
-**Reranker 选择 MMR 不 DPP** (本题最重要的 architectural trade-off):
+## Reranker: MMR not DPP (the most important architectural trade-off)
 
-- **Why MMR**: n=3, list 太短，DPP 的 set-level optimization 没空间体现 -- 3 个 item
-  的 determinant 几乎被任意一对 cosine 主导
-- **Method**: MMR across 3 axes (commenter / sentiment / topic) + **hard quota**
-  (no 2 same commenter, <=1 OP self-reply)
-- **Future upgrade signal**: DPP with learned kernel **when list 扩到 top-10+** --
-  这是 senior 写 trade-off 的方式: 不说 "MMR is better"，说 "MMR for this regime, DPP
-  if regime changes"
+- **Why MMR**: for n=3 the list is too short for DPP's set-level optimization -- the 3-item determinant is dominated by any single pairwise cosine, costing DPP its theoretical edge
+- **Method**: MMR across 3 axes (commenter / sentiment / topic) + **hard quota** (no 2 same commenter, <=1 OP self-reply)
+- **Future upgrade signal**: switches to DPP with learned kernel **when list expands to top-10+**; this is the senior way to write the trade-off -- not "MMR is better", but "MMR for this regime, DPP if regime changes"
 
-==> 下段缝合: **3 head 对应 Section 2 的 3 proxy；shallow tower 实现 Section 3 承诺的 debias**。
+==> Section-stitch: the 3 heads map back to Section 2's 3 proxies; the shallow tower delivers what Section 3 promised on debias.
 
-## Bias Tower 简版 (本段末尾自含 -- 深版见 fr-node)
+## Bias Tower digest (this section self-contained -- deep version in fr-node)
 
-**3 句核心 (verbatim from 用户参考资料第 一/二/三 节)**:
+**3-sentence core (verbatim from user reference §1-§3)**:
 
-1. **加性结构 + 容量瓶颈**: `logit = main_tower(content, user, ctx) + bias_tower(bias_features)`，
-   主塔深 (MMoE)，偏差塔浅 (1-2 层 / 线性)。偏差塔输入**只放 bias 类特征** (position /
-   device / slot type / isAds)。浅的 inductive bias = **吃不下 content 信号**，只能
-   吸收加性偏置 -> 主塔被逼学真实相关性。
-2. **Mask-at-inference**: 训练时 bias tower 喂真实 position；推理时 **bias term 整个
-   置 0** (或 position 设固定参考值)。配套训练技巧: position feature dropout 让模型对
-   缺失鲁棒。
-3. **Bias tower vs 直接当 feature**: bias tower **加性可分**，推理 mask 良定义；拼进
-   主塔 -> content x position 纠缠，推理时分布外、表示被污染、position 抢梯度。理论
-   等价的前提 (position 随机分布 + dropout + 正则 + 大容量) = 手工搭 bias tower。
+1. **Additive structure + capacity bottleneck**: `logit = main_tower(content, user, ctx) + bias_tower(bias_features)`, main tower deep (MMoE), bias tower shallow (1-2 layers / linear). Bias tower input is **bias features only** (position / device / slot type / isAds). The shallow inductive bias **cannot absorb content signal**, leaving it room only for additive bias -> the main tower is forced to learn real relevance.
+2. **Mask-at-inference**: at training time the bias tower sees real position; at inference the **bias term is zeroed entirely** (or position set to a fixed reference value). Companion training trick: position-feature dropout to make the model robust to missingness.
+3. **Bias tower vs feature-input**: the bias tower is **additively separable**, so inference masking is well-defined; mixing position into the main tower causes content x position entanglement, distributional drift at inference, and position stealing gradient share. Theoretical equivalence (random position + dropout + regularization + large capacity) is exactly the hand-built bias-tower decomposition.
 
-**深入见 fr-node `""" + ANCHOR_FR_NODE + """`** -- 涵盖 isAds counterfactual
-vs context-feature 判断标准、shadow logging 与 bias tower 的耦合、口诀 (架构纠偏 +
-推理纠偏 + 数据纠偏，三层缺一不可) 等深版内容 (T-P0-854 owns)。
+**Deep version in fr-node `""" + ANCHOR_FR_NODE + """`** -- covers isAds counterfactual vs context-feature distinction, shadow logging x bias tower coupling, and the 3-line mantra (architecture / inference / data debias, three layers all required); T-P0-854 owns that 深版.
 
-## Architectural choices 对应回 framing 的 3 twists
+## Architectural choices -> 3 twists (callback)
 
 | Twist                       | Architectural choice                                                       |
 |-----------------------------|----------------------------------------------------------------------------|
 | Comment != item             | Comment text embedding @ creation + commenter sub-entity features in main tower |
 | Time-bias                   | Engagement velocity feature (rate, not count) + shallow bias tower mask    |
-| Adversarial / community     | Toxicity hard filter pre-ranker + **independent abuse model** (no share weights) |
+| Adversarial / community     | Toxicity hard filter pre-ranker + **independent abuse model** (no shared weights) |
 """
 
 
 DATAFLOW = """\
 # Dataflow: Section 1-4 Verbatim (前段 14 min framing + metric + label + feature)
 
-## Section 1: Framing (4 min)
+## Decision summary (the rhythm twist)
 
-"L1 (user): **Viewer 是主用户** -- 他们消费 comments 决定是否参与。Commenter 和 OP 是
-secondary stakeholder，进 joint experience guardrail。
+**I pick** a chronological 4-section walk over a component-by-component walk because **the core decision here is** time-allocation: 4 Strong Moments at fixed slots (0-1 framing / 8-12 label / 15-21 architecture / 31-35 monitoring), **this is where** E4 vs E5 wrap diverges. Latency: p99 < 200 ms at billion-QPS for hot post sessions, single-digit ms p99 for the streaming engagement-velocity feature.
 
-L2 (scale): **100M DAU, ~10% commenting rate, viral post peak 100x average, p99 < 200ms**。
+## Section 1: Framing (90s)  <- Strong Moment #1
+
+"L1 (user): **Viewer is the primary user** -- they consume comments and decide whether to engage. Commenter and OP are secondary stakeholders, folded into the joint-experience guardrail.
+
+L2 (scale): **100M DAU, ~10% commenting rate, viral post peak 100x average, p99 < 200ms**.
 
 L3 (twists with implications):
 
-- **Comment != item** -> 需要 text + social fused representation，commenter 当 sub-entity
-- **Time-bias** -> engagement velocity (rate not count) 当 feature，bandit explore 补晚评论
-- **Community health** -> 独立 abuse model + toxicity hard filter pre-ranker
+- **Comment != item** -> need text + social fused representation, commenter as sub-entity
+- **Time-bias** -> engagement velocity (rate, not count) as feature, bandit explore late comments
+- **Community health** -> independent abuse model + toxicity hard filter pre-ranker
 
-L4 (ML formulation): **2-stage point-wise ranking** (cheap pre-rank -> deep rank) +
-**list-level reranking** (MMR for diversity)。Retrieval trivial 不展开。
+L4 (ML formulation): **2-stage point-wise ranking** (cheap pre-rank -> deep rank) + **list-level reranking** (MMR for diversity). Retrieval is trivially bounded -- not expanded."
 
-==> 下段缝合: 这 3 个 twist 每个都会 hook 到下一段的具体 metric 或 guardrail。"
+==> Section-stitch: each of these 3 twists hooks into a specific downstream metric or guardrail.
 
-## Section 2: Metrics (3 min)
+## Section 2: Metrics (60s)
 
-"**L1 North-star**: **weekly commenter return rate** -- 一个数，不并列。捕捉
-「看到好的 top-3 -> 愿意参与 -> 长期回流」。
+"**L1 North-star**: **weekly commenter return rate** -- one number, not a parallel list. Captures 'see good top-3 -> willing to engage -> long-term return'.
 
-**L2 Proxies (3, 每个一句 alignment)**:
+**L2 Proxies (3, each with one-line alignment)**:
 
-- Comment-area dwell time -> top-3 有趣 -> 用户读得久 -> return ↑
-- Reply rate triggered by top-3 -> top-3 引发对话 -> commenter return ↑
-- Self-comment rate after top-3 -> top-3 激发参与 -> 新 commenter return ↑
+- Comment-area dwell time -> top-3 interesting -> user reads longer -> return up
+- Reply rate triggered by top-3 -> top-3 sparks conversation -> commenter return up
+- Self-comment rate after top-3 -> top-3 activates participation -> new-commenter return up
 
-**List-level metric (top-3 是 set selection)**:
+**List-level metric (top-3 is set selection)**:
 
-- Top-3 **diversity score** (sentiment / commenter / topic 3 轴)
+- Top-3 **diversity score** (sentiment / commenter / topic, 3 axes)
 - Set-level user satisfaction (post-view next-action distribution)
 
-**L3 Guardrails (指标 + 阈值 + enforce 机制)**:
+**L3 Guardrails (metric + threshold + enforcement mechanism)**:
 
 - Toxicity rate < 0.5% -> hard filter pre-ranker
 - Report rate per 1k impressions < X -> A/B halt criterion
 - p99 latency < 200ms -> serving constraint
 - Early-post exposure share -> fairness re-weight in loss
-- Group exposure gini -> fairness audit
+- Group-exposure gini -> fairness audit
 
-**L4 Causal chain**: reply rate ↑ -> 用户感受到 comment area 有对话价值 -> 用户回流参与
--> weekly commenter return ↑
+**L4 Causal chain**: reply rate up -> users perceive conversation value in the comment area -> users return to engage -> weekly commenter return up."
 
-==> 下段缝合: north-star 和 3 个 proxy 直接定义了 label 结构 -- 下面 label 段会逐一落地。"
+==> Section-stitch: north-star and 3 proxies directly define the label schema -- the next section will land each one.
 
-## Section 3: Labels (4 min) -- 本题核心难点 selection bias
+## Section 3: Labels (90s)  <- Strong Moment #2 (selection bias)
 
-"**Positive label 阶梯**:
+"**Positive label ladder**:
 
 - L1 baseline (the dumbest version): binary engagement (like / reply within window)
 - L2: weighted multi-signal (reply > like > view-completion)
-- **L3 (我选这层)**: engagement-to-impression ratio in rolling [T, T+1h] window
-  - Trade-off: 比 raw count 复杂，但 **partial-debias 了 position bias**
-- L4 (留 follow-up): multi-task labels with weighted heads
+- **L3 (I pick this level)**: engagement-to-impression ratio in rolling [T, T+1h] window
+  - Trade-off: more complex than raw count, but **partial-debias of position bias**
+- L4 (follow-up): multi-task labels with weighted heads
 
-**Negative label (本题核心难点 -- selection bias)**:
+**Negative label (the core difficulty of this question -- selection bias)**:
 
-- **Explicit**: dislike / report (strong signal, 直接用)
-- **Exposed-not-engaged**: 标准 negative
+- **Explicit**: dislike / report (strong signal, used directly)
+- **Exposed-not-engaged**: standard negative
 - **Unexposed**: treat as **unknown** + IPS-weighted + bandit-exploration backfill
-  - Why not 'unexposed = negative': 引入巨量 false negative (好 comment 只是没曝光过)
-  - Trade-off: 工程复杂，但理论正确
+  - Why not 'unexposed = negative': introduces massive false negatives (a good comment that simply wasn't surfaced)
+  - Trade-off: engineering complexity, but theoretically correct
 
-**Imbalance ladder (stop at L2, 留 L3/L4 给 follow-up)**:
+**Imbalance ladder (stop at L2, leave L3/L4 for follow-up)**:
 
 - L1: stratified sampling
 - L2: class-weighted loss
 
-**Bias handling**: popularity / position / freshness -> **shallow bias tower，serving
-时 mask 输出** (YouTube 2019 做法，比 mask input feature 更稳，因为 model 不能从其他
-feature 重建 bias)。
+**Bias handling**: popularity / position / freshness -> **shallow bias tower, masked at serving** (YouTube 2019 design, more stable than masking input features because the model cannot reconstruct bias from other features).
 
-**Leakage guard**: feature snapshot @ T, label observation @ [T, T+ΔT], **no overlap**。
+**Leakage guard**: feature snapshot @ T, label observation @ [T, T+ΔT], **no overlap**."
 
-==> 下段缝合: multi-task label (engagement / quality / safety) 定义了下面 architecture
-需要的 head 数量。"
+==> Section-stitch: multi-task labels (engagement / quality / safety) define the number of heads the architecture in the next section will need.
 
-## Section 4: Features (3 min) -- 4 象限模型
+## Section 4: Features (60s) -- 4-quadrant model
 
-"**4 象限模型，每象限 3 个 + 1 个 comment 独有**:
+"**4-quadrant model, 3 per quadrant + 1 comment-specific**:
 
 **User (viewer)**:
 
-- Demographic + topic preference embedding
-- Viewer 历史 comment engagement rate
-- Viewer sentiment preference (likes positive / debate / sarcasm)
+- Demographic + topic-preference embedding
+- Viewer history comment-engagement rate
+- Viewer sentiment preference (positive / debate / sarcasm)
 
-**Item (comment + commenter sub-entity)** -- 这象限含本题独有项:
+**Item (comment + commenter sub-entity)** -- contains the comment-specific items:
 
 - Comment text embedding (computed once at creation)
-- **Early engagement velocity** (rate-based, time-debiased) <- 对应 Section 1 time-bias twist
-- **Commenter identity** (verified / OP / followed-by-viewer) <- 对应 comment != item twist
-- Toxicity / sentiment score (bonus, 喂 quality head)
+- **Early engagement velocity** (rate-based, time-debiased) <- corresponds to Section 1 time-bias twist
+- **Commenter identity** (verified / OP / followed-by-viewer) <- corresponds to comment-is-not-item twist
+- Toxicity / sentiment score (bonus, feeds quality head)
 
 **Context**:
 
@@ -280,92 +261,73 @@ feature 重建 bias)。
 - Time of day + day of week
 - Device + session intent
 
-**Interaction (viewer x this specific comment)** -- ranking 比 single-tower retrieval
-强大的根源:
+**Interaction (viewer x this specific comment)** -- the root of why ranking beats single-tower retrieval:
 
 - Viewer x commenter follow relationship
 - Semantic similarity (viewer's comment history vs this comment)
 - Viewer's historical engagement with this commenter
 
-**Critical distinction**: Interaction features 是 per-(user, item) pair, serving 时
-**每条 candidate 算一次**。这是 ranking 比 single-tower retrieval 强大的根源 --
-two-tower 永远算不出 user x item interaction，只能 dot product。
+**Critical distinction**: Interaction features are per-(user, item) pair, **recomputed per candidate at serving**. This is the root of why ranking beats two-tower retrieval -- two-tower can never compute user x item interaction, only a dot product."
 
-==> 下段缝合: comment embedding 喂 L2 ranker 主路；interaction features 在 DCN 风格
-cross layer 里和 user embedding 交叉。"
+==> Section-stitch: comment embedding feeds the L2 ranker main path; interaction features cross with user embedding in the DCN-style cross layer.
 """
 
 
 FORMULAS = """\
 # Label Ladder + Negative Sampling Ratio + Train/Eval Split 双轴 + Multi-task Conflict
 
-## Positive label 阶梯 (L1 -> L4, 我选 L3)
+## Positive label ladder (L1 -> L4, I pick L3)
 
 | Level | Label                                                              | Trade-off / Why                                  |
 |-------|--------------------------------------------------------------------|--------------------------------------------------|
 | L1 (dumbest) | binary engagement (like / reply within window)              | sparse + position-biased                         |
-| L2     | weighted multi-signal (reply > like > view-completion)             | 工程不难，但仍有 position bias                   |
+| L2     | weighted multi-signal (reply > like > view-completion)             | engineering easy, but position bias remains      |
 | **L3 (pick)** | **engagement-to-impression ratio in rolling [T, T+1h] window** | partial-debias position bias, time-aware         |
-| L4 (follow-up) | multi-task labels with weighted heads                          | 留 senior follow-up，主题是 head weighting design |
+| L4 (follow-up) | multi-task labels with weighted heads                          | senior follow-up; topic is head-weighting design |
 
-**Pick justification**: L3 比 L2 多一步 **rolling-window normalize by impression count**，
-这一步直接除掉了 position 高的 comment 自带的 impression 优势 -- 是 partial debias
-**前置到 label 层**，比单纯靠 model-level bias tower 多一道防线。
+**Pick justification**: L3 adds one step over L2 -- **rolling-window normalize by impression count**. That step directly divides out the impression advantage a high-position comment gets, **front-loading partial debias to the label layer**, one defensive layer ahead of the model-level bias tower.
 
-## Negative sampling batch composition (具体比例)
+## Negative sampling batch composition
 
 ```
 1   positive (exposed + engaged)
 : 3-5 exposed-not-engaged (IPS-weighted)
 : 1-2 unexposed (from bandit exploration data)
-: 0.5-1 hard negative (mined from 上一轮 model 高分但未 engage)
+: 0.5-1 hard negative (mined from previous model -- high score but no engage)
 ```
 
-**Three 关键 design decisions**:
+**Three key design decisions**:
 
-1. **IPS-weighted exposed-not-engaged**: propensity = P(item exposed | user, context)
-   from a separate logging-policy model；low-propensity item 的 not-engaged sample
-   weight 较高 (counterfactual correction)
-2. **Bandit exploration backfill for unexposed**: 5% per-session impression budget
-   for controlled exploration -> 这些 imps 进 train set 提供 unbiased label on
-   under-exposed long tail
-3. **Hard negative mining from previous model**: 高 prediction 但 not engaged 的
-   item -> 教 model 区分 confidence-high mistakes
+1. **IPS-weighted exposed-not-engaged**: propensity = P(item exposed | user, context) from a separate logging-policy model; low-propensity items get higher not-engaged sample weight (counterfactual correction).
+2. **Bandit exploration backfill for unexposed**: 5% per-session impression budget for controlled exploration -> these impressions enter the training set providing unbiased label on the under-exposed long tail.
+3. **Hard negative mining from previous model**: items with high prediction but no engagement -> teach the model to discriminate confidence-high mistakes.
 
-**Why not 'unexposed = negative'** (initial intuition 错的): 引入巨量 false negative
--- 一个好 comment 可能只是 retrieval 没碰到，强行打 0 label 教 model "好东西也不好"，
-是 selection bias 的最差 manifestation。
+**Why not 'unexposed = negative'**: introduces massive false negatives -- a good comment that simply wasn't retrieved gets a 0 label, teaching the model 'good things are bad' -- the worst manifestation of selection bias.
 
-## Train/eval split (双轴)
+## Train/eval split (two axes)
 
-**主轴 -- time-based**:
+**Primary axis -- time-based**:
 
 - Train: `[T - 30 days, T - 1 day]`
 - Eval: `[T - 1 day, T]`
-- **Why time-based not random**: comment ranking 是 **freshness-sensitive task**，
-  random split leak future popularity trend (a viral comment 在 train period 已经
-  spike，eval split 里它的 future popularity 已被 train 看到 -> AUC 虚高)
+- **Why time-based not random**: comment ranking is **freshness-sensitive** -- random split leaks future popularity trend (a viral comment already spikes inside the train period, so its future popularity is known to the train set -> AUC is inflated).
 
-**次轴 -- user-level holdout**:
+**Secondary axis -- user-level holdout**:
 
-- 每个时间窗 **5% user holdout**, 测 user generalization
-- 这一轴 catches "model memorize specific users instead of learning preferences"
+- 5% user holdout per time window, tests user generalization
+- This axis catches "model memorizes specific users instead of learning preferences"
 
-**Feature snapshot**: 对齐 train/eval 时间，**daily snapshot strategy** -- 每天定时把
-所有 feature value 落盘，train 用对应 day 的 snapshot，**point-in-time correct，no
-future leakage**。
+**Feature snapshot**: aligned to train/eval time, **daily snapshot strategy** -- every day all feature values are dumped, train consumes the snapshot for that day, **point-in-time correct, no future leakage**.
 
-## Multi-task conflict (engagement vs toxicity) -- 三选项对比
+## Multi-task conflict (engagement vs toxicity) -- 3-option compare
 
 | Option                                       | Mechanism                                                                  | Why pick / not pick                                              |
 |----------------------------------------------|----------------------------------------------------------------------------|------------------------------------------------------------------|
-| **Pick: Hard constraint via pre-filter + soft penalty in engagement head** | Toxicity > threshold -> pre-filter 移除；剩余 candidates 主 head 用 BCE + 弱 toxicity penalty term | Audit 容易、failure mode 清晰、E4 边界标准答案 |
-| Gradient surgery (PCGrad / GradVac)          | Project conflicting gradients orthogonal to each other                     | **复杂度不值得** -- top-3 ranking 不是 GradNorm-class 高竞争 multi-task |
-| Reward shaping into single label             | `score = engagement - lambda * toxicity` 合成 label                        | **保 eval diagnostic 能力** -- 单一 label train 后无法分离归因，monitor head 也丢了 |
+| **Pick: Hard constraint via pre-filter + soft penalty in engagement head** | Toxicity > threshold -> pre-filter removes; remaining candidates: main head BCE + weak toxicity penalty term | Easy audit, clear failure mode, E4 boundary answer |
+| Gradient surgery (PCGrad / GradVac)          | Project conflicting gradients orthogonal to each other                     | **Complexity not worth it** -- top-3 ranking is not GradNorm-class high-competitive multi-task |
+| Reward shaping into single label             | `score = engagement - lambda * toxicity` composite label                   | **Loses eval diagnostic power** -- a single trained label cannot decompose attribution; the monitor head is also gone |
 
-**Pick justification**: pre-filter (hard constraint) 处理 disqualifying violation +
-soft penalty (engagement head) 处理 borderline case + monitor head (不参与 loss) 提供
-diagnostic -- 三层职责清晰且 audit-able。E4 face level 不需要 PCGrad。
+**Pick justification**: pre-filter (hard constraint) handles disqualifying violation + soft penalty (engagement head) handles borderline cases + monitor head (does not participate in loss) provides diagnostic -- three layers of clear responsibility, audit-able. E4 face level does not need PCGrad.
 
 ## Score combination (post-train tunable)
 
@@ -373,18 +335,20 @@ diagnostic -- 三层职责清晰且 audit-able。E4 face level 不需要 PCGrad�
 final_score = w_1 * p_engagement + w_2 * p_diversity_contrib + (- w_3 * p_toxicity)
 ```
 
-权重 `w_k` **post-train tunable** -- 无需 retrain 即可 ship engagement-vs-quality
-trade-off A/B。`p_toxicity` 项参考 Reels golden 同样用 `(1 - p)` 形式 (高 score = unlikely toxic)
-也可以 -- 数学等价。
+Weights `w_k` **post-train tunable** -- engagement-vs-quality trade-off A/Bs can ship without retrain. Using `(1 - p_toxicity)` form (high score = unlikely toxic) is mathematically equivalent and matches the Reels golden convention.
 """
 
 
 PRODUCTION_CONSTRAINTS = """\
-# Production Constraints (Section 5.3 Serving Verbatim + Shadow-Logging 简版)
+# Production Constraints (Section 5.3 Serving + Shadow-Logging digest)
 
-## Section 5.3 Serving (6 min, verbatim)
+## Decision summary (the production twist)
 
-**Latency budget (p99 < 200ms, 五层 breakdown)**:
+**I pick** parallel feature prefetch in the candidate-retrieve stage + streaming engagement-velocity feature (1-5 min cadence) + shadow-feature logging + online-offline feature parity test + cache with 5-min TTL and high-engagement invalidation -- **this is where** time-bias mitigation and skew defense meet the wire. p99 < 200 ms over ~1000 candidates, viral peak 100x average, streaming feature single-digit ms p99.
+
+## Section 5.3 Serving (~6 min, verbatim)
+
+**Latency budget (p99 < 200ms, 5-layer breakdown)**:
 
 | Stage                                            | Budget   |
 |--------------------------------------------------|----------|
@@ -395,14 +359,12 @@ PRODUCTION_CONSTRAINTS = """\
 | Aggregation + serialize                          | **20 ms** |
 | **Total**                                        | **200 ms** |
 
-**关键设计**:
+**Key design**:
 
-- **Feature prefetch 在 candidate retrieve 阶段就并行发 RPC** -- 到 ranker 时
-  feature 已在内存。这是 60ms 这层就跑 prefetch 的原因，不等 pre-filter 完。
-- Reranker 只要 30ms 因为 n=3 时 MMR 几乎免费，主要开销是 sentiment / commenter group
-  的额外 feature fetch。
+- **Feature prefetch issues RPCs in parallel during candidate retrieve** -- by ranker time the features are already in memory. That is why the 60ms stage runs prefetch instead of waiting for pre-filter to finish.
+- Reranker spends only 30ms because MMR is essentially free at n=3; the overhead is the extra sentiment / commenter-group feature fetch.
 
-## Tiered refresh strategy (5 档, 不是一刀切)
+## Tiered refresh strategy (5 cadences, not one-size-fits-all)
 
 | Cadence              | What                                                                       |
 |----------------------|----------------------------------------------------------------------------|
@@ -410,454 +372,295 @@ PRODUCTION_CONSTRAINTS = """\
 | Hourly batch         | aggregated like rate, cumulative stats                                     |
 | Daily batch          | user profile, commenter reputation, topic preference                       |
 | At creation          | comment text embedding (compute once, never recompute)                     |
-| Daily / Quarterly    | ranker model retrain (daily) / embedding model contrastive retrain (quarterly) |
+| Daily / Quarterly    | ranker retrain (daily) / embedding model contrastive retrain (quarterly)   |
 
-**关键**: **engagement velocity 必须 streaming** -- 否则 Section 1 承诺的 time-bias
-mitigation 跑不起来。这是 Section 1 framing 的产品承诺 -> serving 段的 streaming
-infra cost 之间的 **explicit accountability chain**。
+**Key**: **engagement velocity must be streaming** -- otherwise the time-bias mitigation promised in Section 1 cannot run. This is the **explicit accountability chain** from Section 1 framing's product promise to the serving section's streaming infra cost.
 
-## Serving-skew prevention (工业标准 2 件套) + Cache
+## Serving-skew prevention (2-piece industrial standard) + Cache
 
 **2-piece skew defense**:
 
-1. **Shadow feature logging**: serving 时把实际喂给 model 的 feature 值落盘，offline
-   训练用这份 log，**不再重算** -> 唯一彻底防 skew 的方法
-2. **Online-offline feature parity test**: 同一个 (user, item) 在 online 和 offline
-   pipeline 各算一遍，diff > 阈值告警 -- 这是 shadow logging 的 audit gate
+1. **Shadow feature logging**: at serving time, dump the actual feature values fed to the model; offline training consumes that log, **never recomputes** -> the only way to fully prevent skew.
+2. **Online-offline feature parity test**: compute the same (user, item) pair through online and offline pipelines, alert when diff > threshold -- the audit gate that polices shadow logging.
 
-**Cache**: hot post results 在 session 开始 cache，**5-min TTL + 新高互动 comment
-触发 invalidation**。viral post 100x peak 情况下 cache 是 latency 命脉。
+**Cache**: hot-post results cached at session start, **5-min TTL + invalidation triggered by newly-high-engagement comments**. Under 100x viral peak, cache is the latency lifeline.
 
-## Shadow Logging + Train-Serve Skew 简版 (本段末尾自含 -- 深版见 fr-node)
+## Shadow Logging + Train-Serve Skew digest (self-contained -- deep version in fr-node)
 
-**4 来源浓缩 (verbatim from 用户参考资料第五节)**:
+**4 sources distilled (verbatim from user reference §5)**:
 
-1. 训练/服务代码路径不一致 (Python vs C++)
-2. Time travel: 训练特征泄漏未来
-3. 数据源 / 默认值 / null 处理漂移
-4. **Bias 特征训练用真实值、serving 用 mask，分布不匹配** -- 与 architecture 段 bias
-   tower 直接耦合
+1. Train / serve code-path mismatch (Python vs C++)
+2. Time travel: training feature leaks future
+3. Data-source / default-value / null-handling drift
+4. **Bias feature uses real value at train, mask at serve -- distribution mismatch** -- directly coupled to the architecture section's bias tower
 
-**Shadow logging 2 件套核心句 (verbatim from 用户参考资料第六节)**:
+**Shadow logging 2-piece core (verbatim from user reference §6)**:
 
-- 保证训练/服务特征 **100% 一致** (同一份代码算的)
-- **Point-in-time 正确，无未来泄漏**；bias 特征 (position / device) 忠实记录，bias
-  tower 训练分布对齐 -- 否则 architecture 段的 mask-at-inference 直接被 skew 破坏
+- Guarantees train / serve features are **100% identical** (same code computes both)
+- **Point-in-time correct, no future leakage**; bias features (position / device) are recorded faithfully so the bias-tower training distribution aligns -- otherwise the architecture section's mask-at-inference is broken by skew at the data layer.
 
-**深入见 fr-node `""" + ANCHOR_FR_NODE + """`** -- 涵盖 shadow logging 工程要点
-(异步队列 Kafka/Pub-Sub 不阻塞 serving / 流式 label joiner Flink/Beam 按 request_id
-关联行为 / 持续监控 logged 特征分布 vs serving 实时分布告警) 等深版内容 (T-P0-854 owns)。
+**Deep version in fr-node `""" + ANCHOR_FR_NODE + """`** -- covers shadow logging engineering details (async queue Kafka/Pub-Sub, non-blocking serving / streaming label joiner Flink/Beam, request_id correlation of behavior / continuous monitoring of logged feature distribution vs serving real-time distribution, alerts); T-P0-854 owns that 深版.
 
-## Production scar 句式 (E4 senior signal -- 1-2 个就够)
+## Production scar (E4 senior signal -- one or two sentences total)
 
-- "**In my past work**, 我们发现 shadow logging 加上线时如果不做异步队列直接 inline 写盘，
-  serving p99 会跳 30%。fix 是 fire-and-forget pub-sub。"
-- "**One thing we learned the hard way**: bias tower 推理 mask 那一步 forgot to dropout
-  position feature in training -> 部署后 model 对 position=missing 完全炸，因为分布外。"
-
-## 不要主动展开的 infra 词汇
-
-QPS / SLA / availability / replication / sharding / fan-out / cache TTL / network
-bandwidth -- 这些是 infra round 词汇，**ML SD round 主动 surface 就被 down-leveled**。
-本题已经显式给了 latency budget (200ms) 和 viral peak (100x)，这是足够的产品语境，
-**不要再去 fishing 更多 NFR**。被问到再用。
+- "**In my past work**, we found that when shadow logging was first launched without an async queue, inline writes pushed serving p99 up by 30%. The fix was fire-and-forget pub-sub."
+- "**One thing we learned the hard way**: the bias tower mask-at-inference step had forgotten to apply position-feature dropout in training. After deployment the model collapsed on position=missing, because the test-time distribution was out-of-distribution."
 """
 
 
 TRADEOFFS = """\
-# Tradeoffs (8 个决策点, 每个 "I pick A because X, costs Y, switches to B if Z")
+# Tradeoffs (8 decision points -- each "I pick A because X, costs Y, switches to B if Z")
+
+## Decision summary (the tradeoff twist)
+
+8 tradeoffs follow, each in the form **"I pick A because X, costs Y, switches to B if Z"**. **This is where** the architectural twists meet concrete numbers: ~1000 candidate batch, p99 < 200ms, 5% bandit exploration, daily ranker retrain, weekly abuse-model retrain, MMR at n=3 vs DPP at n=10+.
 
 ## 1. Multi-task conflict: hard pre-filter + soft penalty  vs  PCGrad / reward shaping
 
-**Pick**: hard constraint via pre-filter + soft penalty in engagement head。
+**I pick** hard constraint via pre-filter + soft penalty in the engagement head.
 
 | Option                                            | Pros                                    | Cons                                                |
 |---------------------------------------------------|-----------------------------------------|-----------------------------------------------------|
-| **Pre-filter + soft penalty (pick)**              | Audit 容易；failure mode 清晰；E4 标准答案 | Pre-filter threshold 是 product decision，不是 statistical |
-| PCGrad / GradVac                                  | 自动 conflict 处理                      | 复杂度不值得；top-3 ranking 不是 high-competitive multi-task |
-| Reward shaping into single label                  | 实现简单                                | 保 eval diagnostic 能力为 0，monitor head 也丢了    |
+| **Pre-filter + soft penalty (pick)**              | Easy audit, clear failure mode, E4 standard answer | Pre-filter threshold is a product decision, not statistical |
+| PCGrad / GradVac                                  | Automatic conflict handling             | Complexity not worth it; top-3 ranking is not high-competitive multi-task |
+| Reward shaping into single label                  | Easy implementation                     | Loses eval diagnostic power, monitor head gone     |
 
-**Why pick**: "Top-3 ranking 不是 GradNorm-class 高竞争 multi-task，gradient surgery
-是 over-engineering。Pre-filter + soft penalty 三层职责清晰且 audit-able。"
+**Why pick**: "Top-3 ranking is not GradNorm-class high-competitive multi-task; gradient surgery is over-engineering. Pre-filter + soft penalty give three layers of clear responsibility, audit-able." Switches to PCGrad **if** routing 4+ heads with measurable negative transfer appears.
 
 ## 2. Reranker: MMR  vs  DPP
 
-**Pick (本题最重要的 architectural trade-off)**: MMR with hard quota across 3 axes。
+**I pick (the most important architectural trade-off of the question)** MMR with hard quota across 3 axes.
 
 | Dim                | MMR (pick)                                            | DPP                                            |
 |--------------------|-------------------------------------------------------|------------------------------------------------|
-| List size fit      | **n=3 perfect** -- 短 list MMR 足够                   | n>=10 才能 show kernel power                  |
-| Implementation     | greedy, deterministic                                 | determinant compute，learned kernel optional   |
-| Tunability         | lambda 参数 + 3 axes (commenter / sentiment / topic)  | learned kernel 难审计                          |
-| Future upgrade     | -> DPP **when list 扩到 top-10+**                     | -                                              |
+| List size fit      | **n=3 perfect** -- short list, MMR is enough          | n>=10 to show kernel power                     |
+| Implementation     | Greedy, deterministic                                 | Determinant compute, learned kernel optional   |
+| Tunability         | lambda parameter + 3 axes (commenter / sentiment / topic) | Learned kernel hard to audit                  |
+| Future upgrade     | -> DPP **when list expands to top-10+**               | -                                              |
 
-**Why pick**: "For n=3, MMR with hard quota (no 2 same commenter, <=1 OP self-reply)
-gives me deterministic diversity guarantee with auditable knobs. DPP for n=3 is
-solving for n=20 with n=3 evidence."
+**Why pick**: "For n=3, MMR with hard quota (no 2 same commenter, <=1 OP self-reply) gives me a deterministic diversity guarantee with auditable knobs. DPP at n=3 is solving for n=20 with n=3 evidence." Switches to DPP **if** the surface grows to top-10+ pinned comments.
 
 ## 3. Negative sampling: 'unexposed = negative'  vs  IPS + bandit backfill
 
-**Pick (本题核心难点 selection bias 的 ML 解法)**: IPS-weighted exposed-not-engaged +
-unexposed treated as unknown + 5% bandit exploration backfill。
+**I pick (the question's core difficulty -- selection bias ML solution)** IPS-weighted exposed-not-engaged + unexposed-as-unknown + 5% bandit exploration backfill.
 
 | Approach                          | Why                                                              |
 |-----------------------------------|------------------------------------------------------------------|
-| **IPS + bandit (pick)**           | 理论正确；catches under-exposed long tail; 5% bandit explicit budget |
-| Unexposed = negative              | **引入巨量 false negative**；selection bias 最差 manifestation     |
-| Pure random exploration           | UX degradation 太大                                              |
-| **Switching trigger**             | "If 5% bandit budget gives 0 net new positives after 4 weeks -> 拓到 8%; if commenter complaints rise -> 降到 3% with quality eligibility filter" |
+| **IPS + bandit (pick)**           | Theoretically correct; catches under-exposed long tail; 5% bandit is an explicit budget |
+| Unexposed = negative              | **Massive false negatives** -- the worst manifestation of selection bias |
+| Pure random exploration           | UX degradation too large                                         |
+
+**Switching trigger**: "If the 5% bandit budget gives 0 net-new positives after 4 weeks -> raise to 8%; if commenter-complaint rate rises -> lower to 3% with a quality-eligibility filter."
 
 ## 4. Label level: L3 engagement-to-impression ratio  vs  L1 binary  vs  L4 multi-task
 
-**Pick**: L3 (rolling-window ratio in [T, T+1h])。
+**I pick** L3 (rolling-window ratio in [T, T+1h]).
 
-**Why pick**: "L3 比 L2 多一步 normalize by impression count -- 这一步直接除掉 position
-高的 comment 自带的 impression 优势，是 partial debias **前置到 label 层**，比单纯靠
-model-level bias tower 多一道防线。L4 multi-task 留给 senior follow-up。"
+**Why pick**: "L3 adds one step over L2 -- normalize by impression count. That step divides out the impression advantage a high-position comment gets, front-loading partial debias to the label layer one defensive layer ahead of the model-level bias tower. L4 multi-task is left for senior follow-up." Switches to L4 **if** head-weighting design becomes the senior follow-up direction.
 
 ## 5. Bias handling: shallow bias tower + mask  vs  feature input  vs  IPS only
 
-**Pick**: shallow bias tower with mask-at-inference (YouTube 2019)。
+**I pick** shallow bias tower with mask-at-inference (YouTube 2019).
 
-| Dim              | Bias Tower (pick)              | 拼进主塔 feature             | IPS only                       |
+| Dim              | Bias Tower (pick)              | Feature-into-main-tower      | IPS only                       |
 |------------------|--------------------------------|------------------------------|--------------------------------|
-| 分解结构         | 加性可分                       | content x position 纠缠      | training-time correction only  |
-| 推理 mask        | 良定义                         | 分布外、表示被污染           | N/A (no mask)                  |
-| 梯度竞争         | 主塔学相关性                   | position 抢信号              | N/A                            |
-| **Why pick**: "**Bias tower + mask 是 architectural mechanism；IPS 是 statistical correction。两者不冲突 -- 但 bias tower 是 first-line 防线，IPS 是 second-line。**" |
+| Decomposition    | Additively separable           | Content x position entangled | Training-time correction only  |
+| Inference mask   | Well-defined                   | OOD, representation polluted | N/A (no mask)                  |
+| Gradient share   | Main tower learns relevance    | Position steals gradient     | N/A                            |
+
+**Why pick**: "**Bias tower + mask is an architectural mechanism; IPS is a statistical correction. They are not in conflict -- but the bias tower is first-line defense, IPS is second-line.**" Switches to feature-input **if and only if** position becomes truly random (e.g., experimental shuffling) -- then theoretical equivalence holds.
 
 ## 6. Train/eval split: time-based + user holdout  vs  random
 
-**Pick**: time-based 主轴 + user-level holdout 次轴。
+**I pick** time-based primary + user-level holdout secondary.
 
-**Why pick**: "Comment ranking 是 freshness-sensitive task -- random split leak
-future popularity trend，AUC 虚高。Time-based 主轴是 must，user holdout 次轴 catches
-'model memorize specific users instead of learning preferences'。"
+**Why pick**: "Comment ranking is freshness-sensitive -- random split leaks future popularity trend, AUC is inflated. Time-based primary is mandatory; user holdout secondary catches 'model memorizes specific users instead of learning preferences'." Switches to random **only if** the use case stops being temporal (not our regime).
 
 ## 7. Abuse model: independent  vs  shared weights with ranker
 
-**Pick**: 独立 abuse model (NSFW + relevance + high-risk)，**不和 ranker share weights**。
+**I pick** independent abuse model (NSFW + relevance + high-risk), **NOT shared weights** with the ranker.
 
 | Dim              | Independent (pick)                                    | Shared weights                          |
 |------------------|-------------------------------------------------------|------------------------------------------|
-| Risk             | Ranker 无法 学 abuse pattern 形成 collusion           | Ranker 可能 internalize abuse signal as engagement proxy |
+| Risk             | Ranker cannot learn abuse pattern; no collusion       | Ranker may internalize abuse signal as engagement proxy |
 | Update cadence   | Abuse model **weekly retrain** (adversarial drift)    | Coupled to ranker retrain cycle (daily) |
-| Audit            | 独立 precision/recall daily 监控                      | 混在 multi-task metric 里               |
-| **Why pick**: "Adversarial drift 速度 != ranker drift 速度，独立 model + 独立 retrain schedule 是必须。" |
+| Audit            | Independent precision/recall, daily monitor           | Mixed inside multi-task metric          |
+
+**Why pick**: "Adversarial drift speed != ranker drift speed; independent model + independent retrain schedule is mandatory." Switches to shared weights **only if** abuse becomes a labeling artifact rather than adversarial -- which is not the regime here.
 
 ## 8. Loss weighting strategy: biz-context locked  vs  uncertainty weighting
 
-**Pick**: biz context locked (comment lift 价值 + risk budget)，**not uncertainty weighting**。
+**I pick** biz-context locked (comment lift value + risk budget), **NOT uncertainty weighting**.
 
-**Why pick**: "**Loss weight 本质是产品决策，不是统计估计**。uncertainty weighting 是
-solving statistical mismatch；biz-context lock 是 reflecting product priority。E5 边界
-signal = 知道何时 ML 决策应该 defer to product。"
-
-## 不要 cookbook 的话 (avoid)
-
-- "Let me clarify the requirements" / "What's the QPS?" (前 60s 不澄清)
-- "I'm going to follow a standard recommendation pipeline..." (cookbook)
-- "Which surface -- mobile or web?" (broad surface clarify)
-- "Should we use MMOE or just multi-head?" (在 architecture 段直接 announce，不要问)
-
-## 应该这样开题 (do)
-
-- "Scope: 设计一个系统，从一个 post 下的所有 comments 中选出 3 条 surface 给 viewer，
-  optimize for viewer's joint experience..."
-- "3 个 unique twists vs generic ranking: comment != item, time-bias, community-health-as-guardrail..."
-- "Time plan: 15 min framing/metric/label/feature，25 min model+serving+monitoring..."
+**Why pick**: "**Loss weights are a product decision, not a statistical estimate.** Uncertainty weighting solves statistical mismatch; biz-context locking reflects product priority. The E5 boundary signal is knowing when an ML decision should defer to product." Switches to uncertainty weighting **only if** product priority is truly ambiguous and the head distribution is statistically dominant.
 """
 
 
 DEFENSE = """\
-# Section 5.4 Monitoring + A/B Verbatim (4 monitoring signals + list-level A/B + abuse model + loop closure)
+# Strong Moments -- 4 verbatim English lines (say them as-is)
 
-## Model health monitoring (4 个 signal, ordered by leading-vs-lagging)
+The 4 lines below are canonical Strong Moment shape, **internalized verbatim** -- do not explain / paraphrase / shrink. Drop them precisely at the 0-1 / 8-12 / 15-21 / 31-35 minute slots. Strong-Moment methodology (reframe-claim-3-actions-tradeoff template, 元结构, 8 meta-rules) lives in `cd://96` §3 / §5 / §6; this column carries only the speak-aloud English plus the monitoring / A/B / loop-closure wrap.
 
-| # | Signal                              | Mechanism                                                                          | Leading vs Lagging  |
-|---|-------------------------------------|------------------------------------------------------------------------------------|---------------------|
-| 1 | **Online-offline metric gap**       | eval AUC vs online CTR divergence > X% -> alert (label leak / distribution shift 早期信号) | leading             |
-| 2 | **Prediction distribution shift**   | KL divergence of model output day-over-day -> 比 metric 退化更早的 leading indicator | leading (earliest)  |
-| 3 | **Feature drift**                   | PSI on top features, hourly                                                       | leading             |
-| 4 | **Engagement metric**               | 24h moving avg vs baseline                                                        | lagging             |
+## Decision summary (which Strong Moment to fire when)
 
-**Why 4 信号 not 1**: 单一 engagement metric 是 lagging indicator -- 等它跌的时候用户
-已经流失。Prediction distribution shift (signal #2) 是 **比 metric 退化更早的 leading
-indicator** -- 这是 E4 senior signal，普通候选只说 "monitor AUC"。
+**I pick** the 4 Strong Moment slots at the 4 sections where Top-3 Comments diverges most: framing (3 twists), label (selection bias), architecture (bias tower + MMR-vs-DPP), monitoring (4 leading-vs-lagging signals). Each block has Cue + verbatim. The **unique angle** is each Strong Moment ends with a trade-off, **this is where** E5 separates from a brain dump. Latency context: p99 < 200 ms, 100x viral peak.
 
-## A/B 设计 for top-3 list-level (本题特殊)
+---
 
-**Randomization**: user-level (同 user sessions 必须 consistent -- 否则 weekly return
-metric 测不准)。
+## Strong Moment #1 -- 3 Unique Twists Framing (0-1 min, opening)
 
-**Metrics 三层**:
+**Cue**: declarative open "Scope: ... viewer-primary set-selection, retrieval bounded ... let me put 3 twists on the table".
 
-- **Primary list-level**: **any-engagement rate in top-3** (不是单条 NDCG/MRR) -- 本题
-  特殊点: top-K / carousel / multi-slot 题目必须用 list-level metric
-- **Secondary**: dwell time / reply rate / self-comment rate
-- **Guardrails**: report rate / toxicity exposure / group fairness
+> "**Three unique twists vs generic ranking, each with a design implication**.
+>
+> **First, comment is not a generic item** -- ultra-short text, authorship is a user-graph node, social signal is dominant. Implication: text + social fused representation, commenter as a sub-entity in the main tower.
+>
+> **Second, early-comment time-bias** -- comments posted in the first minutes accumulate disproportionate impressions, so raw counts confound arrival time with quality. Implication: engagement velocity, a rate-not-count feature, plus a bandit exploration budget for late comments.
+>
+> **Third, community health as guardrail, not as a head** -- toxicity is disqualifying, not 'less engagement'. Implication: independent abuse model + toxicity hard filter pre-ranker. Treating compliance as a soft loss term is a category error.
+>
+> Time plan: 15 minutes framing / metric / label / feature, 25 minutes model / serving / monitoring. Does that anchor make sense, or is there a different angle you'd like me to start from?"
 
-**Ramp 策略**: 1% -> 5% -> 20% -> 50%, **automatic halt 当任一 guardrail 越界** --
-不是 manual review，是 automated circuit breaker。
+---
 
-**North-star (weekly return) measurement**: **4-week long-horizon holdout group**,
-A/B ramp 决策接受 proxy-based -- 这是 trade-off: 等不起 4 周再 launch，但保留 holdout
-做 retrospective long-term validation。
+## Strong Moment #2 -- Selection Bias 3-Stage Negative Label (8-12 min, label section)
 
-## Abuse / gaming detection (独立模型 + tiered action)
+**Cue**: after announcing 'Negative label is the core difficulty of this question', "**Let me walk through the three-stage negative label**". This is where the selection-bias twist pays off versus a generic CTR ranker.
 
-**Independence rationale**: 独立模型 (NSFW + relevance + high-risk)，**不和 ranker
-share weights** -- 避免 ranker 学 abuse pattern 形成 collusion。如果 abuse pattern
-是 engagement proxy (e.g. shock content), shared model 会把它当 positive signal 投放。
+> "**Negative label is the core difficulty here, because of selection bias on the comments we never showed**.
+>
+> **Explicit negatives** -- dislike, report -- are strong signals; we use them directly.
+>
+> **Exposed-not-engaged** are standard negatives, but I IPS-weight them by propensity from a separate logging-policy model so that low-propensity items get higher sample weight at training -- a counterfactual correction.
+>
+> **Unexposed** is where naive systems break: if you label every unexposed comment as negative, you teach the model that good things are bad whenever retrieval missed them. So I treat unexposed as **unknown** and backfill with a **5% per-session bandit exploration budget**, which gives unbiased label on the under-exposed long tail.
+>
+> **Hard negative mining from the previous model** -- high-prediction-but-no-engagement items -- teaches the model to discriminate confidence-high mistakes.
+>
+> Why this matters more than IPS alone: IPS corrects bias in the data you have; the bandit changes the data you collect. **It is a stronger lever, but it requires cross-functional cost** -- product and growth pay part of the bill that ML would otherwise pay in accuracy loss."
 
-**Tiered action** (分级响应避免 false-positive 一棒子打死):
+---
 
-| Confidence | Action                                              |
-|------------|-----------------------------------------------------|
-| Confident  | **Hard filter** (移出 candidate set, 进 pre-ranker 输入)  |
-| Uncertain  | **Hard demote** (保留在 pool 但不进 top-K)         |
+## Strong Moment #3 -- Bias Tower + MMR vs DPP (15-21 min, architecture section)
 
-**Adversarial drift defense**: abuse model **precision/recall daily 监控**, **weekly
-retrain**。Adversarial drift 速度 != ranker drift 速度 -- abusers actively probe
-defense weekly，weekly retrain cadence 是必须。
+**Cue**: after introducing the L2 ranker structure, "**Let me unpack two decisions inside this -- the bias tower, and MMR vs DPP**". This is the most important architectural trade-off in the question.
 
-## Loop closure (闭环 -- E5 边界 signal)
+> "**The first architectural decision is the bias tower**. I add a **shallow additive bias tower** -- linear or 1-2 layers -- whose input is **bias features only**: position, popularity, recency, device, slot type. Output is added to the main-tower logit at training. At inference, the **bias term is zeroed entirely**. Companion trick: position-feature dropout in training to make the model robust to missingness.
+>
+> Why a separate tower rather than putting position into the main tower: the shallow inductive bias **cannot absorb content signal**, so it leaves room only for additive bias and the main tower is forced to learn real relevance. Mixing position into the main tower entangles content with position, contaminates the inference distribution, and makes position steal gradient share from real features. The bias tower is **additively separable**, so masking is well-defined.
+>
+> **The second architectural decision is reranking with MMR, not DPP**. For n=3 the list is too short for DPP's set-level optimization -- the 3-item determinant is dominated by any pairwise cosine, costing DPP its theoretical edge. **I pick MMR across 3 axes -- commenter, sentiment, topic -- plus a hard quota** (no two same-commenter items, at most one OP self-reply). **Switches to DPP with a learned kernel when the list expands to top-10+** -- not 'MMR is better', but 'MMR for this regime, DPP if regime changes'."
 
-Monitoring outputs feed back into 2 places:
+**Bonus closer (objective combination, said immediately after the architecture claim)**:
 
-1. **Training data quality feedback** -- 4 monitoring signals 的 alert 触发 sample
-   re-labeling / hard negative mining input
-2. **Abuse model retraining schedule** -- adversarial drift signal 决定 retrain
-   cadence (weekly default -> daily emergency mode if precision drops > 5pp)
+> "On objectives, I combine three: engagement (multi-head), set-level diversity, and compliance / safety. Combination strategy: multi-task heads for engagement and diversity, but **compliance applied as a hard filter pre-ranker, not a loss term** -- compliance violations are not 'less engagement', they are disqualifying. **Treating them as a soft loss term is a category error** recommendation teams often make."
 
-==> Loop closure 是 ML system 与 product 系统的 **continuous feedback** -- 不是
-"deploy and forget"，是 "monitoring outputs ARE input to next iteration"。
+---
 
-## 不要这样收尾 (avoid)
+## Strong Moment #4 -- 4 Monitoring Signals + List-level A/B (31-35 min, monitoring section)
 
-- "I think that's all I have." (passive close)
-- "I'm done." (no invite)
-- "Want to discuss serving in more depth?" (低优先级 fallback -- serving 已 wrap)
+**Cue**: actively opening, "**Let me zoom out from the model and talk about monitoring, A/B, and the abuse loop -- because these decide whether the design ships safely**". This is the E5 boundary signal -- the wrap-up Strong Moment.
 
-## 应该这样收尾 (do)
-
-- 30-sec closing recap (见 verbal_outline col, verbatim 1 段)
-- "Are there parts of the design you'd like me to deepen?"
+> "**Model health monitoring needs four signals, ordered by leading vs lagging**.
+>
+> **Signal 1, online-offline metric gap**: eval AUC vs online CTR divergence > X% -- an early signal of label leak or distribution shift.
+>
+> **Signal 2, prediction distribution shift**: KL divergence of model output day-over-day. This is **earlier than metric degradation**, so it is the leading-est indicator. Most candidates only say 'monitor AUC'; this is the senior signal.
+>
+> **Signal 3, feature drift**: PSI on top features, hourly.
+>
+> **Signal 4, engagement metric**: 24h moving average vs baseline. Lagging -- by the time it drops users have churned.
+>
+> **A/B for top-3 list-level**: user-level randomization so weekly-return metrics are consistent per user. **Primary metric is any-engagement rate in the top 3, not single-item NDCG / MRR**, because this is a set-selection problem, not pure ranking. Ramp 1% -> 5% -> 20% -> 50%, with **automatic halt when any guardrail breaches** -- circuit breaker, not manual review. **North-star** (weekly return) measured by a **4-week long-horizon holdout group**; A/B ramp decisions accept proxy-based -- we cannot wait 4 weeks per launch, but we retain the holdout for retrospective validation.
+>
+> **Abuse detection is an independent model** -- NSFW + relevance + high-risk -- **not shared weights with the ranker**. Adversarial drift speed != ranker drift speed; abuse model **weekly retrain**, daily precision/recall monitor. Tiered action: **hard filter** at confident, **hard demote** at uncertain -- avoids a one-size-fits-all false-positive sweep.
+>
+> Loop closure: monitoring outputs feed back into two places -- **training data quality** (alerts trigger sample re-labeling and hard-neg mining) and **abuse-model retraining schedule** (drift signal escalates weekly -> daily emergency). **Monitoring outputs are the input to the next iteration**, not deploy-and-forget.
+>
+> Are there parts of the design you'd like me to deepen?"
 """
 
 
 VERBAL_OUTLINE = """\
-# Closing 30s Verbatim + Part 5 Mock 节奏 Checklist + 缝合句模板
+# Top-3-Comments-specific verbal anchors (methodology lives in cd://96)
 
-## Closing 30s recap (verbatim, 可朗读)
+The general verbal scaffolding (declarative openers, sub-structure announce, drift recovery, ML-native YES/NO vocab table, hand-off / collaborative-mode 句式, quantification 句式, production-scar 句式) lives in `cd://96` §5 (Framing/Body/Strong/Zoom 元结构) and §6 (8 偏好节奏 meta-rules). The lines below are the only ones unique to **Top-3 Comments under a Post** -- quote them verbatim, do NOT duplicate cd96.
 
-"30-sec recap: **viewer-primary top-3 set selection, retrieval bounded (trivial),
-2-stage ranking + MMR rerank with hard quota, multi-task MMOE with shallow bias
-tower (masked at serve), time + user 双轴 split, tiered feature refresh with shadow
-logging for skew defense, list-level A/B with long-horizon north-star holdout,
-independent abuse model with tiered action.**"
+## 4 Strong Moment entry phrases (memorize verbatim -- these are the cue lines)
 
-**关键词密度自查**: 1 句话里出现 set selection / MMR / MMOE / shallow bias tower /
-masked at serve / 双轴 split / shadow logging / list-level A/B / long-horizon
-holdout / independent abuse model -- 10 个 ML-native 术语，**这才是 recap 的样子**，
-不是 "we built a recommendation system that ranks comments"。
+1. "**Three unique twists vs generic ranking, each with a design implication**..."  (3-twist framing, 0-1 min -- Twist 1/2/3)
+2. "**Negative label is the core difficulty here, because of selection bias on the comments we never showed**..."  (label, 8-12 min -- selection-bias twist)
+3. "**The first architectural decision is the bias tower** ... **The second architectural decision is reranking with MMR, not DPP**..."  (architecture, 15-21 min -- bias-tower + MMR-vs-DPP twist)
+4. "**Model health monitoring needs four signals, ordered by leading vs lagging**..."  (monitoring + A/B + abuse, 31-35 min -- E5 wrap-up twist)
 
-## Part 5: 通用 Mock 节奏 Checklist (每次开题前过一遍)
+## Top-3-Comments-specific drift-recovery lines (NOT in cd96 -- these name Top-3 by surface)
 
-### 5.1 开场 60s checklist
+- Drift to generic ranking -> "**Let me return to the ML core** -- for Top-3 Comments the more important question is the set-selection list-level constraint, not generic point-wise ranking."
+- Asked about retrieval depth -> "**Retrieval is trivially bounded by the post's own comment pool** for this surface -- I'll spend the budget on ranker + reranker instead."
+- Asked about cold-start too early -> "**Let me park cold-start until the bandit-exploration section** -- the 5% per-session budget is where that answer lives. Flag it as a known risk for now."
+- Asked about QPS at framing -> "**100M DAU and 100x viral peak** -- I will come back to the serving constraint at Section 5.3; the ML decisions here do not change with QPS, only the cache TTL and prefetch concurrency do."
 
-- 一句话 scope statement (input / output / objective / constraint)
-- 2-3 个 unique twists，每个带 design implication
-- Time plan (15 min 前段 + 25 min 后段)
+## Top-3-Comments-only hand-off prompt (the deepen-which-side question)
 
-### 5.2 每段进入时 checklist
+> "Want me to **deepen the label-selection-bias 3-stage design, the bias tower x MMR architectural pair, or the 4 monitoring signals + list-level A/B**?"
 
-- 先说 L1 (the dumbest version)，60 秒内
-- 再爬阶梯，每层带 trade-off
-- 段末做 4 件事: L1 锚定 / 阶梯展示 / trade-off 表态 / 下段缝合
-
-### 5.3 段末 checkpoint 句式
-
-```
-To summarize this section:
- - The simplest version is ___
- - Going one level deeper would be ___ (trade-off: ___)
- - I'm choosing to stop at level ___ because ___
- - This connects to Section ___ where I'll use ___
-```
-
-### 5.4 Drift 自查 (每段结束扫一遍)
-
-- 没有在当前段讲下一段的内容
-- 没有 reverse-drift 回前面段补丁
-- 没有用错位术语 (每个技术词原 paper 解决的是当前问题吗?)
-- 没有 dodge 具体问题 (被问 X 答 Y)
-
-### 5.5 List-level 题目 4 特殊提醒 (top-K / carousel / multi-slot)
-
-- 开场显式说 "**this is a set-selection problem, not pure ranking**"
-- Metric 段包含 **list-level 指标** (diversity / coverage / set satisfaction)
-- Architecture 段**显式区分 ranker / reranker**
-- A/B 段用 **list-level metric (any-engagement)** 而非 NDCG/MRR
-
-## 缝合句模板 (每段段末必须落地)
-
-```
-[当前段结论 1 句]
-==> 下段缝合: [当前段的 X 直接定义/触发/约束下段的 Y]
-```
-
-**8 个缝合句示例 (from source verbatim)**:
-
-1. Framing -> Metrics: "这 3 个 twist 每个都会 hook 到下一段的具体 metric 或 guardrail"
-2. Metrics -> Labels: "north-star 和 3 个 proxy 直接定义了 label 结构"
-3. Labels -> Architecture: "multi-task label 定义了下面 architecture 需要的 head 数量"
-4. Features -> Architecture: "comment embedding 喂 L2 ranker 主路；interaction features
-   在 DCN 风格 cross layer 里和 user embedding 交叉"
-5. Architecture -> Training: "3 head 对应 Section 2 的 3 proxy；shallow tower 实现
-   Section 3 承诺的 debias"
-6. Training -> Serving: "feature snapshot 策略定义 serving 必须 fetch 什么、多新"
-7. Serving -> Monitoring: "shadow logging 也是下面 monitoring 段 online-offline metric
-   gap 的 ground truth 来源"
-8. Monitoring -> Loop closure: "monitoring outputs ARE input to next iteration"
-
-## ML-native YES / NO 对照表 (本题特有)
-
-### YES (主动用) -- 本题特有 ML-native 词汇
-
-| Category   | Terms (本题高频)                                                                  |
-|------------|------------------------------------------------------------------------------------|
-| Formulation| set selection / list-level / ranker vs reranker / MMR vs DPP                       |
-| Bias       | selection bias / IPS / shallow bias tower / mask-at-inference / shadow logging     |
-| Label      | engagement-to-impression ratio / multi-signal weighted / exposed-not-engaged       |
-| Sampling   | IPS-weighted / bandit exploration / hard negative mining                           |
-| Monitoring | online-offline metric gap / prediction distribution shift / PSI / leading vs lagging |
-| Production | tiered refresh / 5-档 cadence / circuit breaker on guardrail breach                |
-
-### NO (被动用) -- avoid 主动 surface
-
-| Category    | Terms (避免 主动)                                                          |
-|-------------|----------------------------------------------------------------------------|
-| Infra       | QPS / SLA / availability / replication / sharding / fan-out / cache TTL    |
-| Storage     | bandwidth / disk / IOPS / index size                                       |
-| Surface     | mobile vs web vs API consumer / 多设备适配                                 |
-
-**Why this matters**: list-level 题目主动 surface infra 词汇 = 立刻 down-leveled。
-本题 latency budget (p99<200ms) 和 viral peak (100x) 已显式给出，**不要 fishing 更多 NFR**。
+The 3-way choice maps to Top-3-Comments-specific levers: labels = IPS + 5% bandit + hard-neg mining; architecture = shallow additive bias tower + MMR with hard quota across 3 axes; monitoring = 4 leading-vs-lagging signals + circuit-breaker A/B + independent abuse model. Avoid offering a 4th choice -- three is the canonical Top-3 Comments carve-up.
 """
 
 
 CHEAT_SHEET = """\
-# 速查表 (Cheat Sheet) — 30s flash review before walking into Top-3 Comments MLSD
+# 30-sec pre-walk-in checklist -- Top-3-Comments-only
 
-## 元结构一图概览
+Methodology (timing skeleton, 元结构, 8 meta-rules, E4/E5 boundary, drift-recovery vocab) lives in `cd://96` §1 / §5 / §6 / §8. The anchors below are Top-3-Comments-specific only -- quote verbatim, do NOT overlap cd96.
 
-```
-Opening 60s (锁三件事)
-+- Scope: set-selection top-3, retrieval trivial
-+- 3 unique twists with implications:
-|   - Comment != item -> text+social fused, commenter sub-entity
-|   - Time-bias -> velocity feature + bandit explore
-|   - Community health -> guardrail not main objective
-+- Time plan: 15 min framing/metric/label/feature + 25 min model+serving+monitoring
+## Strong Moment slot map (memorize position, anchor, twist)
 
-Body 段 (Section 1-5.4)
-+- L1 (dumbest) -> L2 -> L3 (pick) -> L4 (follow-up)
-+- 段末 4 件事: L1 锚定 / 阶梯展示 / trade-off 表态 / 下段缝合
-+- 每段每个非显然决策 surface trade-off
+| Time   | Slot    | Top-3-Comments-specific anchor (the twist this slot hosts)                         |
+|--------|---------|------------------------------------------------------------------------------------|
+| 0-1    | **#1**  | 3 unique twists -- comment != item / time-bias / community-health-as-guardrail     |
+| 8-12   | **#2**  | Selection bias 3-stage negative label -- IPS + 5% bandit + hard-neg mining         |
+| 15-21  | **#3**  | Bias Tower + MMR vs DPP -- additive separable + mask-at-inference + 3-axis quota   |
+| 31-35  | **#4**  | 4 monitoring signals -- prediction distribution shift earlier than engagement       |
 
-Closing 30s (10 ML-native 术语密度 recap)
-+- viewer-primary set selection
-+- 2-stage + MMR rerank
-+- multi-task MMOE + shallow bias tower (masked)
-+- 时间 + user 双轴 split
-+- tiered refresh + shadow logging
-+- list-level A/B + long-horizon holdout
-+- independent abuse model + tiered action
-```
+## Top-3-Comments-only quantification anchors (drop verbatim into the appropriate moment)
 
-## 时间锚点 (memorize)
+- **15 / 25 min split**: 前段 framing/metric/label/feature, 后段 model/serving/monitoring -- the Top-3 time plan declared in the first 60s.
+- **5% per session**: bandit exploration impression budget -- the selection-bias twist of Strong Moment #2.
+- **3-axis MMR**: commenter / sentiment / topic + hard quota (no 2 same commenter, <=1 OP self-reply) -- the architecture twist of Strong Moment #3.
+- **n=3 vs n=10+**: MMR is the regime answer for n=3; DPP switches in at n=10+ -- the unique angle.
+- **5-min TTL cache + high-engagement invalidation**: the 100x viral-peak production lever.
+- **200 ms p99** over **~1000 candidates** with **60/10/80/30/20 ms** stage budget; engagement velocity at **1-5 min streaming** cadence -- the scale anchors for the serving and feature sections.
+- **4-week long-horizon holdout** for north-star (weekly commenter return); A/B ramp accepts proxy-based decisions.
 
-| Time   | Stage                                  | Strong Moment                       |
-|--------|----------------------------------------|-------------------------------------|
-| 0-1    | Opening 60s (declarative scope)        | **#1** 3 unique twists framing      |
-| 1-5    | Section 1 Framing (L1-L4)              | -                                   |
-| 5-8    | Section 2 Metrics (NS + proxies + guardrails) | -                            |
-| 8-12   | Section 3 Labels (positive ladder + negative selection bias) | **#2** Selection bias 三阶 negative label |
-| 12-15  | Section 4 Features (4 象限)            | -                                   |
-| 15-21  | Section 5.1 Architecture (funnel + L2 detail) | **#3** Bias Tower + MMR vs DPP |
-| 21-25  | Section 5.2 Training (loss / sampling / split / conflict) | -               |
-| 25-31  | Section 5.3 Serving (latency budget + tiered refresh + shadow logging) | - |
-| 31-35  | Section 5.4 Monitoring + A/B           | **#4** 4 monitoring signals + list-level A/B |
-| 35-45  | Closing 30s + Q&A                      | -                                   |
+## Top-3-Comments-only firm-claim register (each line is said at most once during the 45 min)
 
-## 4 Strong Moment 预分配表 (类比 sd41 cheat_sheet)
+- "**This is a set-selection problem, not pure ranking.**"  (Twist framing callback)
+- "**It is a stronger lever than IPS, but it requires cross-functional cost** -- product and growth pay part of the bill."  (Selection-bias twist callback)
+- "**For n=3, MMR with hard quota gives me a deterministic diversity guarantee with auditable knobs; DPP at n=3 is solving for n=20 with n=3 evidence.**"  (Architecture twist callback)
+- "**Treating compliance as a soft loss term is a category error.**"  (bonus, said once after #3)
+- "**Prediction distribution shift is earlier than metric degradation -- the leading-est indicator.**"  (Monitoring twist callback)
 
-| # | Time   | Theme                                  | Hook (entry phrase)                                         |
-|---|--------|----------------------------------------|--------------------------------------------------------------|
-| 1 | 0-1    | 3 unique twists framing                | "3 个 unique twists vs generic ranking: comment != item, time-bias..." |
-| 2 | 8-12   | Selection bias 三阶 negative label     | "Negative label 是本题核心难点 -- selection bias. 三阶处理..." |
-| 3 | 15-21  | Bias Tower + MMR vs DPP                | "Reranker 选择 MMR 不 DPP, n=3 时 DPP 没空间..."             |
-| 4 | 31-35  | 4 monitoring signals (leading vs lagging) | "Prediction distribution shift 是比 metric 退化更早的 leading indicator..." |
+## Reuse range (one-line note, full mapping in cd://96)
 
-## 偏好节奏 meta-rules (8 条铁律 -- 与 sd41 共享)
-
-1. **前 60 秒不要问澄清问题** -- 直接 propose scope + 3 twists + time plan
-2. **每个开放问题给 60-90 秒回答** -- 不要 30 秒，不要 2 分钟
-3. **列完 N 个 bullets 立刻 pick 1 expand** -- 机械规则，不要例外
-4. **每个 strong moment 包含 trade-off** -- "X is stronger but costs Y"
-5. **每 8-10 分钟主动 zoom-out 或邀请方向选择** -- 避免线性 brain dump
-6. **当面试官表情困惑时立刻 park 当前 topic** -- "let me park that, more important is..."
-7. **List-level 题目段末必须 list-level metric** -- 不能只说 NDCG/MRR
-8. **Wrap 时一定有 top-N risks** -- 这是 E5 边界 signal，也是 E4 strong 必备
-
-## E4 not E5 -- 边界提醒
-
-- DO: confident execution of standard playbook + 1-2 deeper insights
-- DO: pick a reasonable model and justify with clear trade-offs (本题 8 个 trade-off matrix)
-- DO: identify the top 2-3 risks (selection bias / adversarial drift / list-level diversity collapse)
-- DO: show production sense (tiered refresh + shadow logging + circuit breaker)
-- DO: drive the conversation forward without getting stuck
-
-- DON'T: invent novel methods (learned DPP kernel for n=3)
-- DON'T: over-scope ("2 years out we'd train custom comment-LLM...")
-- DON'T: cookbook language ("I'm going to follow standard recommendation pipeline...")
-- DON'T: triage email/push/in-app/portal surface 维度 (本题已显式 in-app comments)
-
-## 复用范围 (适用于其他 list-level / set-selection 题型)
-
-本 golden example 的结构 **80% 直接复用** 于:
-
-- **Top-K Search Results ranking** -- query encoder 加进 main tower，list-level metric
-  改成 SERP-level satisfaction
-- **Multi-slot Ads ranking** -- multi-task heads 加 bid / pCVR + auction logic，
-  reranker 用 list-level bid optimization 不是 MMR
-- **Carousel recommendation** (E-commerce / video carousel) -- diversity axis 改成
-  product category / vertical，hard quota 改成 per-category cap
-- **Feed top-N pinned comments** -- 与本题几乎完全一致，只是 n 从 3 改成 5-10
-
-ML 底层框架 (point-wise ranking + list-level reranker + multi-task + bias mitigation
-+ time/user 双轴 split + 4 monitoring signals + abuse model independent + tiered
-refresh + shadow logging) **不变**，每题独立 twist 投放 Strong Moment #1。
+This row's 2-stage point-wise + MMR list-level + bias tower + 4-quadrant features + 4 monitoring signals + independent abuse model + tiered refresh + shadow logging shape is the canonical **list-level / set-selection** carve-up. For Reels / Notification / Friend-rec / Ads mappings see the cd://96 hub and the sibling sd-golden rows (`sd://meta-reels-golden`, `sd://meta-weapon-ads-golden` planned, `sd://meta-friend-rec-golden` planned).
 
 ---
 
-## Design Doc 强调话术 (verbatim 用户参考资料第八节, 4 句金句)
+## Design Doc 强调话术 (verbatim user reference §8, 4 closing sentences)
 
-**面试 / Design Doc 写作 / Code Review 场合 verbatim 用这 4 句**:
+**For interview / Design Doc / Code Review settings, say these 4 lines verbatim**:
 
 1. **「采用加性 shallow bias tower，结构性强制 relevance / bias 分解」**
 2. **「Mask-at-inference 提供干净的反事实排序信号」**
 3. **「Shadow feature logging 保证 bias 特征训练/服务分布一致，避免 debias 机制被 skew 破坏」**
 4. **「离线 AUC 可能持平甚至微跌，业务指标 (多样性 / 留存 / 新内容曝光) 为真实评估目标」**
 
-**Why these 4 sentences are the killer ending**:
+Why these 4 sentences are the killer ending:
 
-- 第 1 句 = architectural commitment (加性结构 + 容量瓶颈的 inductive bias)
-- 第 2 句 = inference correctness (counterfactual semantics 不是工程 hack)
-- 第 3 句 = data-layer accountability (skew defense 不是 nice-to-have 是 prerequisite)
-- 第 4 句 = **business-metric alignment** -- "AUC 持平甚至微跌仍 ship" 是 E5 边界 signal,
-  说明你知道 ML metric 与 product metric 的对应关系，不被 offline number 绑架。
+- Sentence 1 = architectural commitment (additive structure + capacity bottleneck as inductive bias)
+- Sentence 2 = inference correctness (counterfactual semantics, not an engineering hack)
+- Sentence 3 = data-layer accountability (skew defense is a prerequisite, not nice-to-have)
+- Sentence 4 = **business-metric alignment** -- "ship with offline AUC flat or slightly down" is the E5 boundary signal: you know the relationship between ML metric and product metric and refuse to be bound by offline numbers.
 """
 
 
@@ -928,7 +731,9 @@ def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
 
 
 def validate(cur: sqlite3.Cursor) -> list[str]:
-    """Run validation checks against the task acceptance criteria."""
+    """Run AC1-AC7 + T-P0-868 schema checks (R-DRAWER, R-FORBID-*, 3-rule)."""
+    import re
+
     errs: list[str] = []
 
     cur.execute(
@@ -960,9 +765,9 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
     }
     for k, v in prose_cols.items():
         if v is None:
-            errs.append(f"AC2/3 FAIL: column {k} is NULL")
+            errs.append(f"AC2 FAIL: column {k} is NULL")
         elif len(v) <= 200:
-            errs.append(f"AC2/3 FAIL: column {k} length={len(v)} <= 200")
+            errs.append(f"AC2 FAIL: column {k} length={len(v)} <= 200")
 
     total_bytes = sum(len((v or "").encode("utf-8")) for v in prose_cols.values())
     if total_bytes <= 8000:
@@ -972,9 +777,9 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
         errs.append(f"AC4 FAIL: display_order={disp_order}, expected {DISPLAY_ORDER}")
 
     if ANCHOR_FR_NODE not in (architecture or ""):
-        errs.append(f"AC5 FAIL: anchor fr-node path not in architecture col")
+        errs.append("AC5 FAIL: anchor fr-node path not in architecture col")
     if ANCHOR_FR_NODE not in (prod_cons or ""):
-        errs.append(f"AC6 FAIL: anchor fr-node path not in production_constraints col")
+        errs.append("AC6 FAIL: anchor fr-node path not in production_constraints col")
 
     design_doc_phrases = [
         "采用加性 shallow bias tower",
@@ -1003,6 +808,84 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
         errs.append(
             f"display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
         )
+
+    # ----- T-P0-868 schema checks (schemas/meta_mlsd_canonical.yaml) -----
+    # R-DRAWER-no-sd-drawer: no drawer table at top of any sd-golden body.
+    drawer_top_re = re.compile(r"^\|.*sd://.*\|", re.MULTILINE)
+    for k, v in prose_cols.items():
+        if v and drawer_top_re.search(v[:2000] or ""):
+            errs.append(
+                f"R-DRAWER-no-sd-drawer FAIL: {k} top has '| ... sd:// ... |' table"
+            )
+
+    # R-FORBID-rhythm-philosophy: 整体节奏哲学 must not appear in overview.
+    if overview and "整体节奏哲学" in overview:
+        errs.append(
+            "R-FORBID-rhythm-philosophy FAIL: overview still contains 整体节奏哲学"
+        )
+
+    # R-FORBID-why-this-is-strong: 'why this is strong' must not appear in defense.
+    if defense and re.search(r"(?i)why this is strong", defense):
+        errs.append(
+            "R-FORBID-why-this-is-strong FAIL: defense still contains 'Why this is strong'"
+        )
+
+    # R-FORBID-drawer-header-literal: '| Doc | ... sd://' must not appear anywhere.
+    drawer_header_re = re.compile(r"^\|\s*Doc\s*\|.*sd://", re.MULTILINE)
+    for k, v in prose_cols.items():
+        if v and drawer_header_re.search(v):
+            errs.append(
+                f"R-FORBID-drawer-header-literal FAIL: {k} contains '| Doc | ... sd://' header"
+            )
+
+    # 3-rule (section-level, at_least_one_bullet pass) for apply_3rule=true cols.
+    rule_patterns = {
+        "R-3RULE-decision": [
+            r"\b(I pick|we pick|I choose|we choose|default to|pick A)\b",
+            r"(?i)\bdecision\b.*\bover\b",
+        ],
+        "R-3RULE-tradeoff": [
+            r"(?i)\b(costs?|at the cost of|switches? to|in exchange for)\b",
+            r"\bvs\b",
+        ],
+        "R-3RULE-scale-sla": [
+            r"\b\d+\s*(ms|µs|us|qps|QPS|dim|k|K|M|B|fps|min|sec|s)\b",
+            r"\bp(50|95|99|999)\b",
+            r"\bHNSW\b|\bIVF\b|\bScaNN\b|\bMMR\b|\bDPP\b",
+        ],
+        "R-3RULE-twist-callback": [
+            r"(?i)\b(twist|unique angle|the core decision here is|this is where)\b",
+            r"(?i)\bcallback (to|of)\b",
+        ],
+    }
+    apply_3rule_cols = (
+        "overview", "architecture", "dataflow",
+        "production_constraints", "tradeoffs", "defense",
+    )
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        for rule_id, patterns in rule_patterns.items():
+            hit = any(re.search(p, body) for p in patterns)
+            if not hit:
+                errs.append(
+                    f"{rule_id} FAIL: section {col} has no matching bullet "
+                    f"(at_least_one_bullet pass)"
+                )
+
+    # sd_golden.overview target_chars [1500, 4500]; defense [2500, 8500];
+    # architecture [2000, 6000]; dataflow [2500, 9000].
+    field_char_ranges = {
+        "overview":     (1500, 4500),
+        "architecture": (2000, 6000),
+        "dataflow":     (2500, 9000),
+        "defense":      (2500, 8500),
+    }
+    for col, (lo, hi) in field_char_ranges.items():
+        n = len(prose_cols.get(col) or "")
+        if not (lo <= n <= hi):
+            errs.append(
+                f"SCHEMA-charrange FAIL: {col} chars={n} not in [{lo}, {hi}]"
+            )
 
     print(f"[OK] row id={rid} slug={slug}")
     print(f"     title={title[:60]}...")
