@@ -9,35 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-853
-- **Description**: Retrofit company_documents id=94 ('Family Taxonomy + 13 Question Cards') 的 Drawer 入口表 + Q1 'Top 3 Comments Extraction' card cross-link。
-
-**改动 1 - Drawer 入口表 (顶部 blockquote H2 表)**:
-新增一行: `| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 45-min full pacing + Bias Tower + Shadow Logging | 想看 Top-3 Comments 完整 walkthrough |`
-
-位置: 放在 sd://meta-reels-golden 行下方 (golden 类放一起)。
-
-**改动 2 - Q1 'Top 3 Comments Extraction' card 末尾**:
-在 Strong Moment 段后追加一行斜体: `*→ 完整 45min 脚本见 sd://meta-top3-comments-golden*`
-
-Q1 card 本身**保持 30 秒判题密度** (不要展开成长篇), 仅加 1 行 anchor。
-
-**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_94_drawer_header.py 模板逻辑 (sentinel-based, 检测目标行已存在则 skip)。新建 / 改写为 scripts/retrofit_meta_mlsd_94_top3_xref.py 也可，但优先 in-place 扩展现有脚本以避免脚本爆炸。
-
-**Acceptance Criteria**:
-1. Drawer 入口表多 1 行指向 sd://meta-top3-comments-golden
-2. Q1 card 末尾多 1 行 cross-link
-3. cd94 总 content 长度增长 < 500 bytes (仅 2 行 markdown)
-4. self-URI cd://94 不在 Drawer 入口表
-5. Re-run script → 无变化 (idempotent)
-6. python scripts/audit_uri_consistency.py 通过
-7. EXPECTED_FILES: scripts/retrofit_meta_mlsd_94_drawer_header.py (或新文件 scripts/retrofit_meta_mlsd_94_top3_xref.py)
-
-**Commit msg**: [T-P0-XXX] [Meta-MLSD] cd94 retrofit: drawer + Q1 cross-link → sd://top3
-
 #### T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden
 - **Priority**: P0
 - **Complexity**: S
@@ -620,6 +591,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden. Retrofit company_documents id=94 ('Family Taxonomy + 13 Question Cards') 的 Drawer 入口表 + Q1 'Top 3 Comments Extraction' c
 - [x] **2026-05-12** -- T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线). **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
 - [x] **2026-05-12** -- T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough). **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
 - [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
