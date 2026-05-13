@@ -9,36 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
-
-把用户 2026-05-12 Discord msg 1503874418529669201 给的 Bias Tower / Train-Serve Skew / Shadow Feature Logging 8 节内容 verbatim 灌进 framework_nodes id=266 (path='meta-prep/system-design-must-knows/popularity-bias-debiasing', title='Popularity Bias / Position Bias / Selection Bias') 的 description 列。
-
-**8 节内容**:
-1. Shallow Bias Tower (YouTube 2019): 架构 (双塔加性 logit = main_tower + bias_tower) + 为什么浅 (容量瓶颈 + 防 position 抢梯度) + 核心归纳偏置 (加性可分 + 主塔输出独立于 position)
-2. Mask-at-Inference: 训练喂真实 position / 推理屏蔽; 2 种等价实现 (bias term 置 0 / position 设固定参考值); 配套 feature dropout 训练技巧
-3. Bias Tower vs 拼进主塔 6 轴对比表 (分解结构/推理 mask/梯度竞争/可识别性等) + 理论等价前提
-4. isAds 判断标准: 反事实 (organic 的相关性) → bias 处理; 事实预测 P(click|当前身份) → context feature
-5. Train/Serve Skew 4 大来源 (代码路径不一致 / Time travel / 数据源默认值漂移 / bias 特征训练 vs serving mask 分布不匹配) + 后果
-6. Shadow Feature Logging 4 工程要点 (无偏采样 / Kafka 异步队列不阻塞 serving / Flink stream label joiner / 持续监控 logged vs serving 分布告警) + 保证 (训练/服务 100% 一致 + Point-in-time + bias 特征忠实记录)
-7. 三层闭环逻辑链 + 口诀: 架构纠偏 (bias tower) + 推理纠偏 (mask) + 数据纠偏 (shadow log), 三层缺一不可
-8. Design Doc 4 句强调话术 (加性 shallow bias tower / Mask-at-inference 反事实信号 / Shadow logging 防 skew / 业务指标为真实评估目标)
-
-**Idempotent seed pattern**: sentinel UPSERT by framework_nodes.path='meta-prep/system-design-must-knows/popularity-bias-debiasing'。脚本可重跑无副作用。
-
-**Acceptance Criteria**:
-1. New script: scripts/seed_bias_tower_debiasing_node.py (idempotent, dry-run flag)
-2. New source: docs/prep/meta_mlsd_2026-05-12_top3/source_05_bias_tower_train_serve_skew.md (verbatim 用户 Discord msg 内容)
-3. framework_nodes.description 增长 > 5KB, 包含 8 节完整内容 + section headers
-4. fr-node 已存在 (id=266)，仅 UPDATE description (不要 INSERT 新 node)
-5. Re-run → 无变化 (idempotent)
-6. EXPECTED_FILES: scripts/seed_bias_tower_debiasing_node.py, docs/prep/meta_mlsd_2026-05-12_top3/source_05_bias_tower_train_serve_skew.md
-
-**Commit msg**: [T-P0-XXX] [Meta-MLSD] Bias Tower deep-dive → fr-node 266 description (supporting reference)
-
 #### T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden
 - **Priority**: P0
 - **Complexity**: S
@@ -650,6 +620,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线). **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
 - [x] **2026-05-12** -- T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough). **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
 - [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
 - [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str
