@@ -274,6 +274,41 @@ three_rule:
         - '(?i)\bcallback (to|of)\b'
 
 # ============================================================================
+# R-NARRATIVE-prose-form (T-P0-869+ retrofitted to T-P0-873 for sd41/sd42)
+# ============================================================================
+# sd-golden bodies are oral-recital interview narrative scripts in first-person
+# English ("I pick", "I'd reframe"), NOT bullet-heavy markdown notes. Applies to
+# sections marked apply_3rule:true. Measurable proxies are enforced by each
+# seed script's validate() and by scripts/audit_meta_mlsd_3rule.py (T-P0-872).
+# ----------------------------------------------------------------------------
+narrative_prose_form:
+  rule_id: R-NARRATIVE-prose-form
+  applies_to: sd_golden
+  applies_at: section
+  applies_when: apply_3rule == true
+  added_at: "2026-05-13"
+  added_by_task: T-P0-869
+  retrofit_tasks: [T-P0-873]   # sd41 + sd42 conversion from bullet-style
+  semantic_rules:
+    - Each section opens with a declarative one-sentence claim.
+    - Each section runs bold-anchored substantive prose.
+    - Each section closes with a trade-off / handoff sentence.
+    - First-person interview voice ('I pick', 'I'd reframe', 'this is where').
+    - No instructor-commentary or note-voice leftovers.
+  measurable_proxy:
+    bold_density_per_section_min: 3      # >=3 **bold** spans per apply_3rule section
+    bullet_run_max_consecutive: 4        # >4 unbroken bullet lines = violation
+    table_row_max: 3                     # markdown tables with >3 body rows = violation
+  detect_regex:
+    bold: '\*\*[^*\n]+\*\*'
+    bullet_line: '^\s*[-*]\s+'
+    table_line: '^\|'
+  rationale: |
+    Bullet-heavy markdown reads like lecture notes, not interview speech. The
+    measurable proxies (>=3 bold / <=4 consecutive bullets / <=3-row tables)
+    are coarse but cheap to enforce and correlate well with oral-recital form.
+
+# ============================================================================
 # FORBIDDEN PATTERNS (regex-level)
 # ============================================================================
 # These strings/phrases should not appear anywhere in cd96 or sd-golden

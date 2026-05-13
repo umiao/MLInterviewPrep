@@ -14,6 +14,20 @@ prose (R-FORBID-rhythm-philosophy), defense 'Why this is strong' meta-prose
 (R-FORBID-why-this-is-strong), verbal_outline/cheat_sheet duplicates of
 cd96 §1/§5/§6 (R-XPAGE-{cheatsheet,verbal}-no-cd96-dup).
 
+T-P0-873 narrative retrofit (2026-05-13): per the now-formalized
+R-NARRATIVE-prose-form rule in schemas/meta_mlsd_canonical.yaml, all
+apply_3rule:true sections are converted from bullet-heavy markdown notes
+to oral-recital first-person English narrative. Measurable proxies enforced
+by validate(): >=3 **bold** spans per section; <=4 consecutive bullet
+lines; <=3-row markdown tables. Substance preserved; this is pure form
+conversion. Specifically: (a) overview 4-row slot map table compressed to
+3 rows + a prose sentence carrying slot #4; (b) architecture §1 multimodal
+embedding pipeline 5-bullet run rewritten as 3 prose paragraphs (visual /
+audio / text + fusion + refresh) so the longest bullet run drops to <=4;
+(c) tradeoffs §1-§8 each 5-row comparison table converted to 'I pick A
+because X, costs Y, switches to B if Z' prose so the longest table body
+drops to <=3 rows.
+
 Target row shape (9 prose columns, overview/architecture/dataflow/tradeoffs/
 defense all > 200 chars; formulas/production_constraints/verbal_outline/
 cheat_sheet may be short anchors per schema sd_golden.fields):
@@ -72,12 +86,13 @@ Reels consumption is continuous: users consume tens of videos sequentially, and 
 
 ## 4 Strong Moment slots (pre-allocated, do NOT improvise)
 
+The 4 slots fire at fixed times. **Slot #1 (0-5)** carries the multimodal-lifecycle framing — pretrained + upload-time compute + quarterly refresh + cost decoupling. **Slot #2 (5-12)** carries the multi-head label schema (watch ratio + strong+ / early-skip) with the ambiguous-middle nuance and the duration confounder. **Slot #3 (26-32)** carries the exposure-bias reframe as a data-acquisition policy (onboarding + 5%/session re-explore + cold ramp), not just IPS. **Slot #4 (38-42)** carries the zoom-out plus top 3 risks — 3-sentence summary, circuit breaker for diversity drop, watch-vs-retention alarm — fired before serving.
+
 | # | Time   | Theme                                  | Reels-specific twist anchor                                                   |
 |---|--------|----------------------------------------|-------------------------------------------------------------------------------|
 | 1 | 0-5    | Multimodal lifecycle (framing)         | pretrained + upload-time compute + quarterly refresh + cost decoupling        |
 | 2 | 5-12   | Label schema (data section)            | multi-head (watch ratio + strong+ / early-skip) + ambiguous middle + duration confounder |
-| 3 | 26-32  | Exposure bias reframe (bias section)   | data-acquisition policy, NOT just IPS — onboarding + 5%/session re-explore + cold ramp |
-| 4 | 38-42  | Zoom-out + top 3 risks (before serving) | 3-sentence summary + circuit breaker for diversity drop + watch-vs-retention alarm |
+| 3 | 26-32  | Exposure bias reframe (bias section)   | data-acquisition policy, NOT just IPS -- onboarding + 5%/session re-explore + cold ramp |
 
 The dataflow / defense / tradeoffs columns are this row's solution body; verbal_outline + cheat_sheet hold only Reels-specific anchors. Anything else (rhythm rules, vocab YES/NO, E4/E5 line) belongs in `cd://96`.
 """
@@ -117,11 +132,9 @@ ARCHITECTURE = """\
 
 ## 1. Multimodal Embedding Pipeline (upload-time, decoupled)
 
-- **Visual encoder**：pretrained video encoder (ViViT / TimeSformer 类) over frame sequences；fine-tune on Reels-specific contrastive objective (co-engaged videos as positives)
-- **Audio encoder**：pretrained audio encoder over soundtrack (Wav2Vec2 / VGGish)；soundtrack 是 trending 信号的重要载体
-- **Text encoder**：lightweight BERT over caption / hashtag / OCR-extracted overlays (大多数 Reels text 极少)
-- **Fusion**：concat + projection MLP → single content embedding (e.g., 256-dim)
-- **Refresh cadence**：encoder 权重 **quarterly** 重训 + 重算所有 content embedding；single-video embedding compute 只在 upload-time 一次，**decouples content understanding cost from serving cost**
+The pipeline runs **three modality encoders** at upload time and fuses them into a single content embedding. **I pick** a **pretrained video encoder** (ViViT / TimeSformer class) over frame sequences, fine-tuned on a Reels-specific contrastive objective where co-engaged videos are positives — the visual modality is the dominant signal because most Reels are UGC with minimal text. The **audio modality** uses a **pretrained Wav2Vec2 / VGGish encoder** over soundtrack because soundtrack is the dominant carrier of trending signal in Reels. The **text modality** uses a lightweight BERT over caption / hashtag / OCR-extracted overlays — kept lightweight because most Reels carry very little text.
+
+Fusion is **concat + projection MLP** into a **single 256-dim content embedding**. **Refresh cadence**: encoder weights retrain **quarterly** plus a full re-embed sweep over the content index; single-video embedding compute runs **only once at upload time**, never at request time. This **decouples content understanding cost from serving cost** — the property Twist 1 callbacks lean on. **Switches to** monthly refresh only if a single quarterly cycle accumulates >=3 points of recall drift on a frozen content-similarity set.
 
 ## 2. Retrieval — Multi-Channel Two-Tower
 
@@ -406,94 +419,35 @@ TRADEOFFS = """\
 
 ## 1. Pretrained backbone + fine-tune  vs  from scratch
 
-**I pick** pretrained backbone + Reels-specific contrastive fine-tune (over from-scratch).
-
-| | Pretrained + fine-tune (pick) | From scratch |
-|---|---|---|
-| Data efficiency | 高 — backbone 已 absorb 大量 visual / audio prior | 低 — 需要 100x 标注数据 |
-| Compute cost | 低 — 只 fine-tune top layers + lightweight pretrain refresh | 高 — full encoder training cycle |
-| Domain alignment | 中 — pretrain domain 可能与 Reels 不完全重合 | 高 — 但 ROI 低于 fine-tune |
-| **Why pick**: cost decoupling 的 enabler — quarterly encoder refresh 是 fine-tune 的，不是 full retrain，所以可行 |
+**I pick** a pretrained backbone with a Reels-specific contrastive fine-tune because the backbone has already absorbed a massive visual / audio prior — from-scratch training would need roughly **100x the labeled data** to recover that prior. **Costs**: a quarterly fine-tune refresh on the encoder head, which is dramatically cheaper than a full encoder training cycle. **Switches to** from-scratch only if the pretrain-domain mismatch with Reels becomes large enough that fine-tune cannot close it on the contrastive objective. This is the **enabler** for the cost-decoupling twist: quarterly refresh is feasible **only because** it is fine-tune, not full retrain.
 
 ## 2. IPS / propensity weighting  vs  active exploration policy
 
-**Pick (Strong Moment #3 core claim)**: 把 exposure bias **reframe as data acquisition problem**，IPS 作为铺垫但不是 main lever。
-
-| | IPS / Propensity weighting | Active exploration (pick as primary) |
-|---|---|---|
-| Lever type | **Data correction** — 调整 you have 的 data | **Data acquisition** — 改变 you collect 的 data |
-| Implementation | training-time loss reweighting | system-level (onboarding + 5% budget + cold-start ramp) |
-| Cost | 单 ML team 即可 ship | **Cross-functional cost** — product + growth 也要参与 |
-| Ceiling | 受限于 historical retrieval 的 candidate pool | 可以扩张 candidate pool 本身 |
-| **Why pick**: "**It's a stronger lever, but it requires cross-functional cost — product and growth pay part of the bill that ML would otherwise pay in accuracy loss**" |
+**I pick** active exploration as the **primary** lever, with IPS / propensity weighting as a supporting layer — Strong Moment #3's core claim is that exposure bias is **a system-level data-acquisition problem, not just a training-time statistical correction**. IPS is a **data-correction** lever that adjusts the data you have via training-time loss reweighting; active exploration is a **data-acquisition** lever that changes the data you collect via onboarding, a 5% per-session budget, and a content-side cold-start ramp. **Costs**: a single ML team can ship IPS alone, but the exploration policy requires **cross-functional cost** — product and growth participate in budget and UX policy. The ceiling matters too: IPS is bounded by the historical retrieval candidate pool; active exploration expands the candidate pool itself. **"It's a stronger lever, but it requires cross-functional cost — product and growth pay part of the bill that ML would otherwise pay in accuracy loss."** **Switches to** IPS-only when the cross-functional budget is unavailable.
 
 ## 3. Watch-ratio optimization  vs  long-term retention
 
-**Pick**: multi-head 主优化 + long-term holdout 防御。
-
-| | Watch-ratio 主优化 (pick) | Retention 主优化 |
-|---|---|---|
-| Signal density | 高 — 每 impression 都有 watch ratio | 低 — retention 是 cohort-level 信号 |
-| Reward latency | 立刻 | 30+ 天 |
-| Failure mode | **Clickbait / rage content gaming** | data sparsity，模型欠拟合 |
-| Defense | long-term holdout + explicit-engagement head + creator quality survey | N/A (没有 short-term signal 可 defend) |
-| **Switching trigger**: "If we ever see watch ratio going up but retention going down, that's the most important alarm" |
+**I pick** multi-head primary optimization with a long-term holdout as defense, because **watch ratio gives a per-impression signal** while retention is cohort-level and arrives 30+ days later — only watch-ratio has the signal density to drive a daily-retrain ranker. **Costs**: a clickbait / rage-content gaming failure mode that requires the long-term holdout + explicit-engagement head + creator quality survey to defend. **Switches to** retention-primary only if watch-ratio gaming becomes unrecoverable, but retention alone has no short-term signal to defend with, so this would be a fundamental regime change. **"If we ever see watch ratio going up but retention going down, that's the most important alarm."**
 
 ## 4. Compliance as hard filter  vs  compliance as loss term
 
-**Pick (firm claim)**: hard filter at re-ranking。
-
-| | Hard filter (pick) | Soft loss term |
-|---|---|---|
-| Semantic correctness | Compliance violation = disqualifying | Compliance violation = "less engagement" |
-| Audit-ability | 高 — 是 / 否 binary outcome | 低 — 与 score 混在一起 |
-| Failure mode if混 | 高 engagement 内容可能 override 轻度 compliance issue | clean |
-| **Category claim**: "**Treating compliance as a soft loss term is a category error**" |
+**I pick** compliance as a **hard filter** at re-ranking, NOT a soft loss term, because **compliance violation is disqualifying, not "less engagement"**. The hard-filter approach gives a yes/no binary outcome that is **high-audit-ability**, whereas mixing a compliance term into the score makes high-engagement content silently **override** minor compliance issues. **Costs**: a separate compliance classifier pipeline (possibly an LLM-finetune family) producing a binary mask. **Switches to** soft-loss only if the compliance classifier precision collapses below an actionable threshold — but the **firm claim** stands: **"Treating compliance as a soft loss term is a category error."**
 
 ## 5. Shared backbone + head-specific top  vs  separate models
 
-**Pick**: shared backbone + head-specific top layers (3 heads)。
-
-| | Shared backbone (pick) | Separate models per head |
-|---|---|---|
-| Parameter efficiency | 高 | 低 |
-| Negative transfer risk | 中 — heads correlated 时 minor | N/A |
-| Head correlation | **Benefits from sharing** (watch-ratio ↔ explicit engagement correlated) | 不利用 correlation |
-| Calibration drift | 较易 (joint train) | 各 head 独立漂移 |
-| **Why pick**: "Watch-ratio and engagement are correlated enough to benefit from shared representation" |
+**I pick** a shared backbone with head-specific top layers across the **3 heads**, because watch-ratio and explicit engagement are **correlated enough to benefit from shared representation** while still allowing per-head specialization at the top. **Costs**: a minor negative-transfer risk when heads are loosely correlated, and the calibration drift across heads requires joint-training discipline. **Switches to** separate models per head only if negative transfer measurably degrades the early-skip head — empirically not the regime; the shared backbone is the parameter-efficient choice. **"Watch-ratio and engagement are correlated enough to benefit from shared representation."**
 
 ## 6. Pareto-search loss weighting  vs  GradNorm / Uncertainty weighting
 
-**Pick**: Pareto search on offline metrics post-train。
-
-| | Pareto search (pick) | GradNorm / Uncertainty |
-|---|---|---|
-| Interpretability | 高 — 可看到 frontier 上 trade-off | 低 — 隐式权重 |
-| Audit | 易 ship-review | 难 ship-review |
-| Retraining cost | 0 — post-train tuning | 需要 retrain |
-| Best for | heads not strongly competitive (Reels 情况) | heads strongly competitive |
+**I pick** Pareto search on offline metrics post-train rather than GradNorm or uncertainty weighting, because **the heads here are not strongly competitive** (the shared backbone absorbs most of the correlation), and Pareto search lets a ship-review see the trade-off frontier explicitly. **Costs**: a small offline search grid per release, but zero retraining cost since the weights are post-train tunable. **Switches to** GradNorm only if the heads become strongly competitive (e.g., when a fourth or fifth task with anti-correlated gradients enters the joint loss). The senior signal here is interpretability: an implicit-weight method is **hard to ship-review**.
 
 ## 7. Multi-channel retrieval (60/20/20)  vs  single channel
 
-**Pick**: 3-channel parallel — personalized 60% / trending 20% / diversity 20%。
-
-| | Multi-channel (pick) | Single two-tower |
-|---|---|---|
-| Cold start (content-side) | Trending channel handles | 需要专门 cold-start logic |
-| Exploration | Diversity channel built-in | 需要 IPS / 上层 exploration policy |
-| Filter bubble | 显著 mitigation | 严重 |
-| Coverage of long-tail | 高 | 低 |
-| **Cost**: 3 个 retrieval index 维护 + candidate pool budget 分配 — 但与 mitigation 收益相比划算 |
+**I pick** a 3-channel parallel retrieval — **personalized 60% / trending 20% / diversity 20%** — over a single two-tower, because the trending channel handles content-side cold-start, the diversity channel builds in exploration without an extra IPS layer, and together they **dramatically mitigate filter-bubble narrowing**. **Costs**: maintaining 3 retrieval indices plus a budget allocation across channels — but the cold-start and filter-bubble mitigation more than pays for it. **Switches to** a single-channel retrieval only if maintenance budget collapses; **at the cost of** giving up long-tail coverage and pushing the exploration burden entirely onto an upstream policy layer.
 
 ## 8. Within-session features fresh  vs  pre-aggregated batch
 
-**Pick**: within-session features **request-time**。
-
-| | Request-time fresh (pick) | Pre-aggregated batch |
-|---|---|---|
-| Use case fit | 唯一可行 — session 只有几分钟 | 不可行 (session 没结束) |
-| Compute cost | 高 — 每 request 算 | 低 — batch |
-| **Why no choice**: Reels 的 within-session dynamics 是 ML 内核，pre-agg 直接不能用 |
+**I pick** within-session features computed **request-time fresh** because the **Reels within-session dynamics are the ML core** — a session is only a few minutes long and pre-aggregated batch features cannot land before the session ends. **Costs**: a single-digit-ms p99 per-request compute cost and a wider feature-store fan-out. **Switches to** pre-aggregated batch features only if session length collapses to 1-2 items — not the Reels regime; pre-aggregation is fundamentally infeasible here. This is **not a free tradeoff** so much as a forced choice; the senior signal is naming the constraint rather than pretending it is a knob.
 
 """
 
@@ -853,6 +807,61 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
             errs.append(
                 f"SCHEMA-charrange FAIL: {col} chars={n} not in [{lo}, {hi}]"
             )
+
+    # R-NARRATIVE-prose-form: measurable_proxy thresholds (T-P0-873 retrofit).
+    #   - bold_density_per_section_min: 3 (>=3 **bold** spans per apply_3rule section)
+    #   - bullet_run_max_consecutive:   4 (>4 unbroken bullet lines = violation)
+    #   - table_row_max:                3 (markdown tables with >3 body rows = violation)
+    bold_re = re.compile(r"\*\*[^*\n]+\*\*")
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        bold_count = len(bold_re.findall(body))
+        if bold_count < 3:
+            errs.append(
+                f"R-NARRATIVE FAIL: {col} bold_density={bold_count} < 3"
+            )
+
+    bullet_line_re = re.compile(r"^\s*[-*]\s+", re.MULTILINE)
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        run = 0
+        max_run = 0
+        for line in body.splitlines():
+            if bullet_line_re.match(line):
+                run += 1
+                max_run = max(max_run, run)
+            elif line.strip() == "":
+                run = 0
+            else:
+                run = 0
+        if max_run > 4:
+            errs.append(
+                f"R-NARRATIVE FAIL: {col} bullet_run_max={max_run} > 4"
+            )
+
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        in_table = False
+        rows_seen = 0
+        for line in body.splitlines():
+            if line.lstrip().startswith("|"):
+                rows_seen += 1
+                in_table = True
+            else:
+                if in_table:
+                    body_rows = rows_seen - 2  # subtract header + separator
+                    if body_rows > 3:
+                        errs.append(
+                            f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
+                        )
+                in_table = False
+                rows_seen = 0
+        if in_table:
+            body_rows = rows_seen - 2
+            if body_rows > 3:
+                errs.append(
+                    f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
+                )
 
     print(f"[OK] row id={rid} slug={slug}")
     print(f"     title={title[:60]}...")

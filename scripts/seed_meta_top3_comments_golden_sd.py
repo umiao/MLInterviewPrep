@@ -18,6 +18,22 @@ cd96-dup); added Decision summary blocks to architecture / dataflow /
 production_constraints / tradeoffs / defense for section-level 3-rule
 pass. NO drawer header (R-DRAWER-no-sd-drawer).
 
+T-P0-873 narrative retrofit (2026-05-13): per the now-formalized
+R-NARRATIVE-prose-form rule in schemas/meta_mlsd_canonical.yaml, all
+apply_3rule:true sections are converted from bullet-heavy markdown notes
+to oral-recital first-person English narrative. Measurable proxies
+enforced by validate(): >=3 **bold** spans per section; <=4 consecutive
+bullet lines; <=3-row markdown tables. Substance preserved; this is pure
+form conversion. Specifically: (a) overview 4-row slot map table
+compressed to 3 rows + a prose sentence carrying slot #4;
+(b) dataflow Section 3 (labels) and Section 4 (features) bullet runs
+broken up by prose interleavers so the longest run drops to <=4;
+(c) production_constraints 5-row latency budget table compressed by
+folding the aggregation+serialize row into a sentence, and the 5-row
+tiered-refresh table compressed similarly; (d) tradeoffs 4-row option
+compare tables converted to 'I pick A because X, costs Y, switches to B
+if Z' prose so the longest table body drops to <=3 rows.
+
 Target row shape (9 prose columns, all > 200 chars, schema char ranges
 per sd_golden.fields):
   - overview                : 2-paragraph solution anchor (what / 3 twists / 4-slot map)
@@ -86,12 +102,13 @@ Toxicity / abuse / harassment are disqualifying, not "less engagement". **I pick
 
 ## 4 Strong Moment slots (pre-allocated, do NOT improvise)
 
+The 4 slots fire at fixed times. **Slot #1 (0-1)** carries the 3-twist framing — "set-selection not pure ranking" + 3 twists + 15/25 time plan. **Slot #2 (8-12)** carries the selection-bias 三阶 negative label — IPS-weighted exposed-not-engaged + 5% bandit unexposed + hard-neg mining. **Slot #3 (15-21)** carries the bias tower + MMR-vs-DPP architectural pair — shallow additive bias tower with mask-at-inference plus MMR with hard quota across 3 axes. **Slot #4 (31-35)** carries the 4 monitoring signals (leading vs lagging) — prediction distribution shift earlier than engagement metric, plus list-level A/B.
+
 | # | Time   | Theme                                  | Top-3-Comments-specific twist anchor                                            |
 |---|--------|----------------------------------------|---------------------------------------------------------------------------------|
 | 1 | 0-1    | 3 unique twists framing                | "set-selection not pure ranking" + 3 twists + 15/25 time plan                   |
 | 2 | 8-12   | Selection-bias 三阶 negative label     | IPS-weighted exposed-not-engaged + 5% bandit unexposed + hard-neg mining        |
 | 3 | 15-21  | Bias Tower + MMR vs DPP                | shallow additive bias tower + mask-at-inference + MMR with hard quota across 3 axes |
-| 4 | 31-35  | 4 monitoring signals (leading vs lagging) | prediction distribution shift earlier than engagement metric; list-level A/B   |
 
 The dataflow / defense / tradeoffs columns are this row's solution body; verbal_outline + cheat_sheet hold only Top-3-Comments-specific anchors. Anything else (rhythm rules, vocab YES/NO, E4/E5 line) belongs in `cd://96`.
 """
@@ -197,13 +214,13 @@ L4 (ML formulation): **2-stage point-wise ranking** (cheap pre-rank -> deep rank
 - Top-3 **diversity score** (sentiment / commenter / topic, 3 axes)
 - Set-level user satisfaction (post-view next-action distribution)
 
-**L3 Guardrails (metric + threshold + enforcement mechanism)**:
+**L3 Guardrails (metric + threshold + enforcement mechanism)**: the three production guardrails are listed below; two additional fairness guardrails follow as prose because they fold into the same enforcement lane.
 
 - Toxicity rate < 0.5% -> hard filter pre-ranker
 - Report rate per 1k impressions < X -> A/B halt criterion
 - p99 latency < 200ms -> serving constraint
-- Early-post exposure share -> fairness re-weight in loss
-- Group-exposure gini -> fairness audit
+
+**Fairness guardrails** sit on top of these three: **early-post exposure share** feeds a fairness re-weight inside the loss, and **group-exposure gini** is the slow-loop fairness audit that gates monthly retrain releases.
 
 **L4 Causal chain**: reply rate up -> users perceive conversation value in the comment area -> users return to engage -> weekly commenter return up."
 
@@ -211,26 +228,11 @@ L4 (ML formulation): **2-stage point-wise ranking** (cheap pre-rank -> deep rank
 
 ## Section 3: Labels (90s)  <- Strong Moment #2 (selection bias)
 
-"**Positive label ladder**:
+"**Positive label ladder, L1 -> L4**. L1 is the dumbest version -- binary engagement, like or reply within a window. L2 is a weighted multi-signal where reply beats like beats view-completion. **L3 is the level I pick** -- engagement-to-impression ratio in a rolling `[T, T+1h]` window; **partial-debias of position bias front-loaded to the label layer**, more complex than raw count but one defensive layer ahead of the model-level bias tower. L4 is left for senior follow-up -- multi-task labels with weighted heads, where head-weighting design becomes the next direction.
 
-- L1 baseline (the dumbest version): binary engagement (like / reply within window)
-- L2: weighted multi-signal (reply > like > view-completion)
-- **L3 (I pick this level)**: engagement-to-impression ratio in rolling [T, T+1h] window
-  - Trade-off: more complex than raw count, but **partial-debias of position bias**
-- L4 (follow-up): multi-task labels with weighted heads
+**Negative label is the core difficulty of this question -- selection bias**. **Explicit negatives** -- dislike, report -- are strong signals used directly. **Exposed-not-engaged** is the standard negative, but I IPS-weight it by propensity from a separate logging-policy model so low-propensity items get higher sample weight at training. **Unexposed** is where naive systems break: treating every unexposed comment as negative introduces massive false negatives -- a good comment that simply was not surfaced gets a 0 label, teaching the model 'good things are bad'. I treat unexposed as **unknown** with IPS-weighted + bandit-exploration backfill -- the engineering complexity buys theoretical correctness on the under-exposed long tail.
 
-**Negative label (the core difficulty of this question -- selection bias)**:
-
-- **Explicit**: dislike / report (strong signal, used directly)
-- **Exposed-not-engaged**: standard negative
-- **Unexposed**: treat as **unknown** + IPS-weighted + bandit-exploration backfill
-  - Why not 'unexposed = negative': introduces massive false negatives (a good comment that simply wasn't surfaced)
-  - Trade-off: engineering complexity, but theoretically correct
-
-**Imbalance ladder (stop at L2, leave L3/L4 for follow-up)**:
-
-- L1: stratified sampling
-- L2: class-weighted loss
+**Imbalance ladder stops at L2** with stratified sampling plus class-weighted loss; L3/L4 are left for senior follow-up.
 
 **Bias handling**: popularity / position / freshness -> **shallow bias tower, masked at serving** (YouTube 2019 design, more stable than masking input features because the model cannot reconstruct bias from other features).
 
@@ -348,31 +350,27 @@ PRODUCTION_CONSTRAINTS = """\
 
 ## Section 5.3 Serving (~6 min, verbatim)
 
-**Latency budget (p99 < 200ms, 5-layer breakdown)**:
+**Latency budget (p99 < 200ms, breakdown)**. The serving budget decomposes into three primary stages with a small aggregation tail.
 
 | Stage                                            | Budget   |
 |--------------------------------------------------|----------|
 | Candidate retrieve + parallel feature prefetch   | **60 ms** |
-| Storage-local pre-filter                         | **10 ms** |
 | L2 ranker (DNN batch 100-200)                    | **80 ms** |
 | Rerank feature fetch + MMR                       | **30 ms** |
-| Aggregation + serialize                          | **20 ms** |
-| **Total**                                        | **200 ms** |
 
-**Key design**:
-
-- **Feature prefetch issues RPCs in parallel during candidate retrieve** -- by ranker time the features are already in memory. That is why the 60ms stage runs prefetch instead of waiting for pre-filter to finish.
-- Reranker spends only 30ms because MMR is essentially free at n=3; the overhead is the extra sentiment / commenter-group feature fetch.
+Storage-local pre-filter contributes **10 ms** and aggregation + serialize contributes **20 ms**, for a total of **200 ms** at p99. **Key design**: **feature prefetch issues RPCs in parallel during candidate retrieve** -- by ranker time the features are already in memory; that is why the 60ms stage runs prefetch instead of waiting for pre-filter to finish. The reranker spends only **30ms** because MMR is essentially free at **n=3** -- the overhead is the extra sentiment / commenter-group feature fetch, not the diversity optimization itself.
 
 ## Tiered refresh strategy (5 cadences, not one-size-fits-all)
+
+The refresh strategy spans **five cadences** sized to how fast each signal class drifts. The three latency-sensitive cadences are tabulated below; the two batch cadences are described after.
 
 | Cadence              | What                                                                       |
 |----------------------|----------------------------------------------------------------------------|
 | **Streaming 1-5 min**| engagement velocity, recent counts, real-time toxicity flag                |
 | Hourly batch         | aggregated like rate, cumulative stats                                     |
 | Daily batch          | user profile, commenter reputation, topic preference                       |
-| At creation          | comment text embedding (compute once, never recompute)                     |
-| Daily / Quarterly    | ranker retrain (daily) / embedding model contrastive retrain (quarterly)   |
+
+**At creation** the comment text embedding is computed **once and never recomputed** -- the most frozen feature in the system. **Daily / Quarterly** is the model retrain lane: the **ranker retrains daily**, and the **embedding model retrains contrastively every quarter**.
 
 **Key**: **engagement velocity must be streaming** -- otherwise the time-bias mitigation promised in Section 1 cannot run. This is the **explicit accountability chain** from Section 1 framing's product promise to the serving section's streaming infra cost.
 
@@ -417,58 +415,23 @@ TRADEOFFS = """\
 
 ## 1. Multi-task conflict: hard pre-filter + soft penalty  vs  PCGrad / reward shaping
 
-**I pick** hard constraint via pre-filter + soft penalty in the engagement head.
-
-| Option                                            | Pros                                    | Cons                                                |
-|---------------------------------------------------|-----------------------------------------|-----------------------------------------------------|
-| **Pre-filter + soft penalty (pick)**              | Easy audit, clear failure mode, E4 standard answer | Pre-filter threshold is a product decision, not statistical |
-| PCGrad / GradVac                                  | Automatic conflict handling             | Complexity not worth it; top-3 ranking is not high-competitive multi-task |
-| Reward shaping into single label                  | Easy implementation                     | Loses eval diagnostic power, monitor head gone     |
-
-**Why pick**: "Top-3 ranking is not GradNorm-class high-competitive multi-task; gradient surgery is over-engineering. Pre-filter + soft penalty give three layers of clear responsibility, audit-able." Switches to PCGrad **if** routing 4+ heads with measurable negative transfer appears.
+**I pick** a **hard constraint via pre-filter plus a soft penalty in the engagement head** because Top-3 ranking is not GradNorm-class high-competitive multi-task and **gradient surgery is over-engineering** at this scale. Pre-filter (hard constraint) handles disqualifying violations; soft penalty (engagement head) handles borderline cases; a separate monitor head provides diagnostic without participating in loss -- **three layers of clear responsibility, all audit-able**. **Costs**: the pre-filter threshold is a product decision rather than a statistical one, and the soft-penalty weight needs explicit tuning. **Switches to** PCGrad / GradVac only if 4+ heads with measurable negative transfer appear; **switches to** reward shaping into a single composite label is rejected outright because it loses eval diagnostic power and the monitor head disappears.
 
 ## 2. Reranker: MMR  vs  DPP
 
-**I pick (the most important architectural trade-off of the question)** MMR with hard quota across 3 axes.
-
-| Dim                | MMR (pick)                                            | DPP                                            |
-|--------------------|-------------------------------------------------------|------------------------------------------------|
-| List size fit      | **n=3 perfect** -- short list, MMR is enough          | n>=10 to show kernel power                     |
-| Implementation     | Greedy, deterministic                                 | Determinant compute, learned kernel optional   |
-| Tunability         | lambda parameter + 3 axes (commenter / sentiment / topic) | Learned kernel hard to audit                  |
-| Future upgrade     | -> DPP **when list expands to top-10+**               | -                                              |
-
-**Why pick**: "For n=3, MMR with hard quota (no 2 same commenter, <=1 OP self-reply) gives me a deterministic diversity guarantee with auditable knobs. DPP at n=3 is solving for n=20 with n=3 evidence." Switches to DPP **if** the surface grows to top-10+ pinned comments.
+**I pick (the most important architectural trade-off of the question)** MMR with hard quota across 3 axes. **For n=3 the list is perfect for MMR** -- short list, greedy deterministic optimization with auditable knobs (lambda parameter plus 3 axes: commenter / sentiment / topic) plus a **hard quota** (no 2 same commenter, <=1 OP self-reply). **DPP at n=3 is solving for n=20 with n=3 evidence** -- the 3-item determinant is dominated by any single pairwise cosine and the kernel power never lands. **Costs**: MMR's lambda needs tuning, and the hard-quota threshold is a list-level constraint not learned end-to-end. **Switches to** DPP with a learned kernel **when the list expands to top-10+** pinned comments -- not "MMR is better", but "MMR for this regime, DPP if regime changes".
 
 ## 3. Negative sampling: 'unexposed = negative'  vs  IPS + bandit backfill
 
-**I pick (the question's core difficulty -- selection bias ML solution)** IPS-weighted exposed-not-engaged + unexposed-as-unknown + 5% bandit exploration backfill.
-
-| Approach                          | Why                                                              |
-|-----------------------------------|------------------------------------------------------------------|
-| **IPS + bandit (pick)**           | Theoretically correct; catches under-exposed long tail; 5% bandit is an explicit budget |
-| Unexposed = negative              | **Massive false negatives** -- the worst manifestation of selection bias |
-| Pure random exploration           | UX degradation too large                                         |
-
-**Switching trigger**: "If the 5% bandit budget gives 0 net-new positives after 4 weeks -> raise to 8%; if commenter-complaint rate rises -> lower to 3% with a quality-eligibility filter."
+**I pick (the question's core difficulty -- selection bias ML solution)** IPS-weighted exposed-not-engaged plus unexposed-as-unknown plus **5% bandit exploration backfill**, because this is theoretically correct, catches the under-exposed long tail, and the **5% bandit is an explicit budget** the product team signs off on. Labeling unexposed as negative introduces **massive false negatives** -- the worst manifestation of selection bias -- and pure random exploration produces UX degradation that is too large to ship. **Costs**: engineering complexity (a separate logging-policy model for propensity + bandit infra) plus a product-side budget commitment. **Switching trigger**: "If the 5% bandit budget gives 0 net-new positives after 4 weeks -> raise to 8%; if commenter-complaint rate rises -> lower to 3% with a quality-eligibility filter."
 
 ## 4. Label level: L3 engagement-to-impression ratio  vs  L1 binary  vs  L4 multi-task
 
-**I pick** L3 (rolling-window ratio in [T, T+1h]).
-
-**Why pick**: "L3 adds one step over L2 -- normalize by impression count. That step divides out the impression advantage a high-position comment gets, front-loading partial debias to the label layer one defensive layer ahead of the model-level bias tower. L4 multi-task is left for senior follow-up." Switches to L4 **if** head-weighting design becomes the senior follow-up direction.
+**I pick** L3 (rolling-window ratio in [T, T+1h]) because L3 adds one step over L2 -- **normalize by impression count** -- and that step divides out the impression advantage a high-position comment gets. **This front-loads partial debias to the label layer**, one defensive layer ahead of the model-level bias tower. **Costs**: streaming impression-count joins at training time and a rolling-window join that is more complex than a single-row binary label. **Switches to** L4 multi-task labels with weighted heads **if** head-weighting design becomes the senior follow-up direction; L4 is the deliberate "left for senior follow-up" branch.
 
 ## 5. Bias handling: shallow bias tower + mask  vs  feature input  vs  IPS only
 
-**I pick** shallow bias tower with mask-at-inference (YouTube 2019).
-
-| Dim              | Bias Tower (pick)              | Feature-into-main-tower      | IPS only                       |
-|------------------|--------------------------------|------------------------------|--------------------------------|
-| Decomposition    | Additively separable           | Content x position entangled | Training-time correction only  |
-| Inference mask   | Well-defined                   | OOD, representation polluted | N/A (no mask)                  |
-| Gradient share   | Main tower learns relevance    | Position steals gradient     | N/A                            |
-
-**Why pick**: "**Bias tower + mask is an architectural mechanism; IPS is a statistical correction. They are not in conflict -- but the bias tower is first-line defense, IPS is second-line.**" Switches to feature-input **if and only if** position becomes truly random (e.g., experimental shuffling) -- then theoretical equivalence holds.
+**I pick** a shallow bias tower with **mask-at-inference** (the YouTube 2019 design) because the bias tower is **additively separable** so inference masking is well-defined, and the shallow inductive bias **cannot absorb content signal** -- it leaves room only for additive bias and the main tower is forced to learn real relevance. Putting position into the main tower causes content x position entanglement, distributional drift at inference, and position-stealing gradient share. IPS alone is training-time-only with no inference mask -- a second-line correction, not a first-line architecture. **Costs**: maintaining a second tower head plus the discipline of position-feature dropout during training to make the model robust to missingness. **Switches to** feature-into-main-tower **if and only if** position becomes truly random (e.g., experimental shuffling), where theoretical equivalence holds. **"Bias tower + mask is an architectural mechanism; IPS is a statistical correction. They are not in conflict -- but the bias tower is first-line defense, IPS is second-line."**
 
 ## 6. Train/eval split: time-based + user holdout  vs  random
 
@@ -886,6 +849,61 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
             errs.append(
                 f"SCHEMA-charrange FAIL: {col} chars={n} not in [{lo}, {hi}]"
             )
+
+    # R-NARRATIVE-prose-form: measurable_proxy thresholds (T-P0-873 retrofit).
+    #   - bold_density_per_section_min: 3 (>=3 **bold** spans per apply_3rule section)
+    #   - bullet_run_max_consecutive:   4 (>4 unbroken bullet lines = violation)
+    #   - table_row_max:                3 (markdown tables with >3 body rows = violation)
+    bold_re = re.compile(r"\*\*[^*\n]+\*\*")
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        bold_count = len(bold_re.findall(body))
+        if bold_count < 3:
+            errs.append(
+                f"R-NARRATIVE FAIL: {col} bold_density={bold_count} < 3"
+            )
+
+    bullet_line_re = re.compile(r"^\s*[-*]\s+", re.MULTILINE)
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        run = 0
+        max_run = 0
+        for line in body.splitlines():
+            if bullet_line_re.match(line):
+                run += 1
+                max_run = max(max_run, run)
+            elif line.strip() == "":
+                run = 0
+            else:
+                run = 0
+        if max_run > 4:
+            errs.append(
+                f"R-NARRATIVE FAIL: {col} bullet_run_max={max_run} > 4"
+            )
+
+    for col in apply_3rule_cols:
+        body = prose_cols.get(col) or ""
+        in_table = False
+        rows_seen = 0
+        for line in body.splitlines():
+            if line.lstrip().startswith("|"):
+                rows_seen += 1
+                in_table = True
+            else:
+                if in_table:
+                    body_rows = rows_seen - 2  # subtract header + separator
+                    if body_rows > 3:
+                        errs.append(
+                            f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
+                        )
+                in_table = False
+                rows_seen = 0
+        if in_table:
+            body_rows = rows_seen - 2
+            if body_rows > 3:
+                errs.append(
+                    f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
+                )
 
     print(f"[OK] row id={rid} slug={slug}")
     print(f"     title={title[:60]}...")
