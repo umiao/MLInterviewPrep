@@ -1,22 +1,26 @@
 """Idempotent reschedule: Meta AI-Enabled ML System Design follow-up.
 
-Per user Discord 2026-05-13 (msg 1504175057919017090): the Meta follow-up
-ML System Design round originally scheduled for Thursday 2026-05-14
-10:00-10:45 AM PDT is rescheduled to Friday 2026-05-15 11:00-11:45 AM PDT.
+Reschedule history (all Discord-driven, all on 2026-05-13):
+  - Originally seeded as 2026-05-14 10:00 AM PDT, title "Meta Follow-up Round
+    - ML System Design" by scripts/_add_meta_mlsd_followup_2026-05-14.py
+    (event id=66)
+  - Moved to 2026-05-15 11:00 AM PDT, title realigned to include "AI-Enabled"
+    per Discord msg 1504175057919017090
+  - Moved to 2026-05-15 12:00 PM PDT per Discord msg 1504182639463235645
+    (current canonical slot)
 
-The original event was seeded by scripts/_add_meta_mlsd_followup_2026-05-14.py
-as event id=66 with title "Meta Follow-up Round - ML System Design". This
-script:
-  - finds that row (canonical key: company_id + old scheduled_at + title)
-  - updates scheduled_at to 2026-05-15 11:00:00
-  - aligns title with the parent round (id=45) wording: "AI-Enabled ML
-    System Design"
-  - rewrites the description to reflect the new slot
+The current canonical slot is the NEW_* constants below. PRIOR_SLOTS lists
+every historically-seeded slot in newest-first order so this script is
+robust to:
+  - Re-runs (no-op via SYNC at the canonical slot)
+  - Fresh-DB rebuild after the original 2026-05-14 seed (UPDATEs in place)
+  - Re-runs after partial application from any intermediate state
 
-Idempotent: after the first run the row matches the new key, so subsequent
-runs SYNC fields without inserting.
+The script never inserts; it only UPDATEs an existing row (or SYNCs the
+already-canonical row). The interview_events.id is preserved (=66) so any
+downstream references remain stable.
 
-  - Friday 2026-05-15, 11:00-11:45 AM PDT (GMT-07:00)
+  - Friday 2026-05-15, 12:00-12:45 PM PDT (GMT-07:00)
   - AI-Enabled ML System Design follow-up
   - Duration: 45 min
   - Interviewer: TBD
@@ -40,28 +44,33 @@ DURATION_MINUTES = 45
 STATUS = "upcoming"
 LOCATION = "Zoom"
 
-OLD_SCHEDULED_AT = "2026-05-14 10:00:00"
-OLD_TITLE = "Meta Follow-up Round - ML System Design"
-
-NEW_SCHEDULED_AT = "2026-05-15 11:00:00"
+NEW_SCHEDULED_AT = "2026-05-15 12:00:00"
 NEW_TITLE = "Meta Follow-up Round - AI-Enabled ML System Design"
 NEW_DESCRIPTION = (
     "Meta follow-up interview (additional round after 2026-05-01 final).\n"
-    "Friday 2026-05-15, 11:00-11:45 AM PDT (GMT-07:00).\n"
+    "Friday 2026-05-15, 12:00-12:45 PM PDT (GMT-07:00).\n"
     "AI-Enabled ML System Design (follow-up to the 2026-05-01 round with "
     "Nailong Z., event id=45).\n"
     "Interviewer: TBD.\n"
     "Platform: Zoom.\n"
-    "Note: rescheduled from 2026-05-14 10:00 AM PDT per user request "
-    "(Discord 2026-05-13)."
+    "Note: rescheduled from 2026-05-14 10:00 AM PDT to 2026-05-15 11:00 AM PDT, "
+    "then to 2026-05-15 12:00 PM PDT, per user requests (Discord 2026-05-13)."
 )
+
+# Historical slots in newest-first order. The script walks this list looking
+# for a row to migrate to (NEW_SCHEDULED_AT, NEW_TITLE). Each entry is the
+# (scheduled_at, title) the row had AT that point in its reschedule history.
+PRIOR_SLOTS = [
+    ("2026-05-15 11:00:00", "Meta Follow-up Round - AI-Enabled ML System Design"),
+    ("2026-05-14 10:00:00", "Meta Follow-up Round - ML System Design"),
+]
 
 
 def main() -> None:
     conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
 
-    # Already-rescheduled case: row at new key. SYNC fields, no insert.
+    # Already-canonical case: SYNC fields, no row movement.
     cur.execute(
         "SELECT id FROM interview_events "
         "WHERE company_id = ? AND scheduled_at = ? AND title = ?",
@@ -89,42 +98,47 @@ def main() -> None:
         print(f"[SYNC]   id={existing_new[0]}: already at {NEW_SCHEDULED_AT}, fields refreshed")
         return
 
-    # First-run case: locate original row by old key, update in place.
-    cur.execute(
-        "SELECT id FROM interview_events "
-        "WHERE company_id = ? AND scheduled_at = ? AND title = ?",
-        (COMPANY_ID, OLD_SCHEDULED_AT, OLD_TITLE),
-    )
-    existing_old = cur.fetchone()
-    if existing_old is None:
-        conn.close()
-        raise SystemExit(
-            f"[FAIL] Could not find Meta event at {OLD_SCHEDULED_AT!r} "
-            f"with title {OLD_TITLE!r}. Inspect interview_events manually."
+    # Walk historical slots newest-first, UPDATE the first match in place.
+    for prior_scheduled_at, prior_title in PRIOR_SLOTS:
+        cur.execute(
+            "SELECT id FROM interview_events "
+            "WHERE company_id = ? AND scheduled_at = ? AND title = ?",
+            (COMPANY_ID, prior_scheduled_at, prior_title),
         )
+        existing = cur.fetchone()
+        if existing is None:
+            continue
 
-    cur.execute(
-        "UPDATE interview_events SET "
-        "company_name = ?, event_type = ?, title = ?, description = ?, "
-        "scheduled_at = ?, duration_minutes = ?, location = ?, status = ? "
-        "WHERE id = ?",
-        (
-            COMPANY_NAME,
-            EVENT_TYPE,
-            NEW_TITLE,
-            NEW_DESCRIPTION,
-            NEW_SCHEDULED_AT,
-            DURATION_MINUTES,
-            LOCATION,
-            STATUS,
-            existing_old[0],
-        ),
-    )
-    conn.commit()
+        cur.execute(
+            "UPDATE interview_events SET "
+            "company_name = ?, event_type = ?, title = ?, description = ?, "
+            "scheduled_at = ?, duration_minutes = ?, location = ?, status = ? "
+            "WHERE id = ?",
+            (
+                COMPANY_NAME,
+                EVENT_TYPE,
+                NEW_TITLE,
+                NEW_DESCRIPTION,
+                NEW_SCHEDULED_AT,
+                DURATION_MINUTES,
+                LOCATION,
+                STATUS,
+                existing[0],
+            ),
+        )
+        conn.commit()
+        conn.close()
+        print(
+            f"[UPDATE] id={existing[0]}: {prior_title!r} @ {prior_scheduled_at} "
+            f"-> {NEW_TITLE!r} @ {NEW_SCHEDULED_AT}"
+        )
+        return
+
     conn.close()
-    print(
-        f"[UPDATE] id={existing_old[0]}: {OLD_TITLE!r} @ {OLD_SCHEDULED_AT} "
-        f"-> {NEW_TITLE!r} @ {NEW_SCHEDULED_AT}"
+    raise SystemExit(
+        "[FAIL] Could not find a Meta MLSD row at any known historical slot "
+        f"(canonical={NEW_SCHEDULED_AT}, prior={PRIOR_SLOTS}). "
+        "Inspect interview_events manually."
     )
 
 
