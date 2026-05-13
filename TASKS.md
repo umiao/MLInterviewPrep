@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-865
-- **Description**: INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE Section 1 timing skeleton: each row uses T-865 4-tag schema (rhythm/twist/scale/trade) -- 4 lines per time row, not just label like 'Framing opening'. (c) KEEP Section 3 (4 Strong Moments), Section 4 (ML-native YES-NO), Sections 5-8 (methodology) -- cd96 is homepage, philosophy belongs here. (d) Re-run retrofit_meta_mlsd_96_drawer_header.py. (e) In-session self-check: verify cd96 passes schema validator (T-865 deliverable). Verify: prod build + cd96 renders at localhost:5173/companies/31/prep?tab=docs&doc=96.
-
 #### T-P0-867: [META-MLSD-SD41-PRUNE] Strip Reels Golden drawer + philosophy duplicates
 - **Priority**: P0
 - **Complexity**: M
@@ -497,6 +491,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-13** -- T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton. INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE 
 - [x] **2026-05-13** -- T-P0-865: [META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary. OUTPUT FORM = MACHINE-CHECKABLE SCHEMA (not prose audit). Deliverables: (1) schemas/meta_mlsd_canonical.yaml -- canonica
 - [x] **2026-05-13** -- T-P0-864: Add Adobe Phone Screen 2026-05-14 14:00 PDT (30 min). Discord 2026-05-13 msg 1504185501085864127 — new event, Adobe phone screen Thursday 2026-05-14 2:00 PM PDT 30min. Adobe 
 - [x] **2026-05-13** -- T-P0-863: Reschedule Meta AI-Enabled MLSD follow-up 2026-05-15 11:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504182639463235645 — Meta moved the slot again, same day +1h. Refactored _reschedule_meta_mlsd_2

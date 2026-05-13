@@ -205,12 +205,15 @@ def validate_content(content: str, transformed_body: str) -> None:
                 f"missing body section header `## {n}.` in renumbered content"
             )
 
-    # AC #6: length range bumped after T-P0-847 absorbed Section 2 methodology
-    # (+~3.7k chars seed-side; prepended Drawer block adds ~0.7k chars net).
+    # AC #6: length range. T-P0-866 bumped upper bound from 12500 to 14000:
+    # Section 1 timing table grew from 4-col to 6-col (R-TIMING-row-4tag,
+    # +~900 chars), §2.2 abstract template deleted (-~480 chars). Net seed-side
+    # delta +~420 chars; with prepended Drawer block (~1700 chars) the final
+    # content ~12-13k chars.
     n_chars = len(content)
-    if not (10500 <= n_chars <= 12500):
+    if not (10500 <= n_chars <= 14000):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [10500, 12500]"
+            f"content char-length {n_chars} not in [10500, 14000]"
         )
 
     # AC: body preserved verbatim — content must end with transformed_body

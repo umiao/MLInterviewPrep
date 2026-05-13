@@ -65,17 +65,19 @@ CONTENT = f"""{SENTINEL}
 
 ## 1. 节奏 Timing Skeleton (45min)
 
-| 时间段 | 阶段 | Strong moment | 一句话应做的事 |
-| --- | --- | --- | --- |
-| 0-3 min | Framing 开场 | — | 60s declarative propose + 30s yes/no 收尾, 不问 clarification |
-| 3-5 min | Framing 收 + twist | ⭐ #1 unique twist | "the core decision here is X, not Y" 锁问题 ML 内核 |
-| 5-12 min | Data & labels | — | 3 part walk: source / label schema / bias surface |
-| 12-15 min | Label nuance | ⭐ #2 sophisticated label | multi-head + duration confounder + ambiguous middle |
-| 15-25 min | Model | — | retrieval + ranking; 主动问面试官 deepen 哪边 |
-| 25-28 min | Production scar | ⭐ #3 quantified intuition | "two-tower 128-dim ~10k candidate single-digit ms" 类 |
-| 28-35 min | Evaluation | — | offline (sliced) + counterfactual replay + online + long-term holdout |
-| 35-40 min | Zoom-out | ⭐ #4 top 3 risks | "let me zoom out for a sec — we've covered X..." |
-| 40-45 min | Serving + Q&A | — | 轻描淡写, deprioritize signal; "won't go deeper unless you'd like" |
+> **每行 4 tag**: rhythm (节奏轴 vocab) + twist (sd:// callback) + scale (数字 anchor) + trade (一句话 trade-off / 节奏规则). `-` 表示该 tag 在此 row 不适用 (rhythm + trade 必须非空, twist + scale 可空).
+
+| 时间段 (time_band) | rhythm | Strong moment | Twist (sd://) | Scale anchor | Trade-off / 节奏规则 |
+| --- | --- | --- | --- | --- | --- |
+| 0-3 min | Framing | - | - | - | 60s declarative propose + 30s yes/no 收尾; 前 90s no-clarification — costs surface 广度, gains 节奏 |
+| 3-5 min | Framing | #1 | unique ML-native twist · sd://{SD_SLUG} | - | I pick 1 ML-native twist over generic SDE framing; costs broader scope, gains "this candidate understands the problem class" signal |
+| 5-12 min | Data | - | - | label schema 3-part (source / schema / bias) | I pick source-then-label-then-bias walk over flat enumeration; costs verbatim preamble, gains rhythm |
+| 12-15 min | Data | #2 | multi-head label + duration confounder + ambiguous-middle · sd://{SD_SLUG} | multi-task heads (click / watch / like / share) | I pick multi-task heads over single binary; costs label-store complexity, switches to single label if data <10M events/day |
+| 15-25 min | Model | - | - | retrieval ~10k candidate + ranking 200ms budget; two-tower 128-dim | I pick retrieval-then-ranking funnel + deepen ONE branch (主动问面试官); costs the other branch's depth, gains face-time on senior signal axis |
+| 25-28 min | Bias | #3 | quantified production scar · sd://{SD_SLUG} | two-tower 128-dim, ~10k candidate, single-digit ms p99; ~200 features ceiling | I pick focused ~200-feature set over kitchen-sink; costs marginal recall, gains training-distribution stability (eBay scar) |
+| 28-35 min | Evaluation | - | - | offline sliced + counterfactual replay + online A/B + long-term holdout | I pick counterfactual replay + long-term holdout over A/B-only; costs setup time, gains exposure-bias defense |
+| 35-40 min | Zoomout | #4 | top 3 risks + invite deepening · sd://{SD_SLUG} | - | I pick zoom-out-and-rank-3-risks over linear brain-dump; costs 3-min budget, gains E5 system-thinking + communication signal |
+| 40-45 min | Serving | - | - | cache / index / latency budget surfaced only on probe | I pick deprioritize-serving over deep-dive; costs perceived serving knowledge, gains "know what matters" senior signal |
 
 ---
 
@@ -94,14 +96,7 @@ CONTENT = f"""{SENTINEL}
 
 **用法**: 30 秒过一遍 4 轴, 每轴标记 1-2 个非通用属性, 转化为 design implication.
 
-### 2.2 Per-twist 4 段推导模板
-
-每条 twist 用 4 段 verbatim 推导, 不要省略任何一段:
-
-1. **Generic 对比** — 通用做法是什么 (e.g. 通用 ranking 用 binary click 做 label)
-2. **核心特点** — 这题区别于通用的 1 句话特点 (e.g. "watch-time 比 click 更 informative")
-3. **Design implications** — 上述特点强制的 3 个 design 决策 (label / model / serving 各一)
-4. **AI 补充** — 容易被新手混淆 / 漏掉 / 误用 的细节 (面试官 senior signal calibration 点)
+> §2.2 (abstract 4-段 template) 已下沉到 sd-golden worked examples (T-P0-866): 抽象模板换成 4 个 concrete 45-min walkthrough (Reels Golden / Top-3 Comments Golden / Weapon Ads Golden / Friend Rec Golden, links in 顶部 Drawer 入口). cd96 是 homepage 只放方法论 + 4 strong moment 投放位置; 推导细节读 drawer 里的 sd-golden.
 
 ### 2.3 Reels Homefeed 7-twist worked example
 
@@ -243,12 +238,13 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # T-P0-847 absorbed Section 2 'Twist 挖掘方法论' (4 轴 + 4-段 template
-    # + Reels 7-twist worked example + AI 补充). Range bumped per task spec
-    # ("上界 +3500 字节左右"); char-count, not byte-count.
+    # T-P0-866: Section 1 timing table grew from 4-col to 6-col (R-TIMING-row-4tag);
+    # Section 2.2 abstract template deleted (R-FORBID-per-twist-4-section-template).
+    # Net: +~900 chars (bigger table) - ~480 chars (deleted §2.2 body) = +~420.
+    # Upper bound bumped from 12000 to 13000 to accommodate.
     n = len(content)
-    if not (8500 <= n <= 12000):
-        raise RuntimeError(f"content char-length {n} not in [8500, 12000]")
+    if not (8500 <= n <= 13000):
+        raise RuntimeError(f"content char-length {n} not in [8500, 13000]")
 
     # AC #3: 3 drawer URIs (sd://meta-reels-golden + cd://94 + cd://95).
     for uri in (
@@ -301,6 +297,53 @@ def validate_content(content: str) -> None:
         raise RuntimeError(
             f"timing skeleton table too short: {len(table_lines)} '|'-lines; "
             f"need >=11 (header + sep + 9 data rows)"
+        )
+
+    # T-P0-866: Section 1 timing table MUST be 6 columns per R-TIMING-row-4tag
+    # (time_band | rhythm | strong_moment_slot | tag_twist | tag_scale | tag_trade).
+    # Locate the Section 1 table by scanning from "## 1." heading to next "## ".
+    lines = content.splitlines()
+    sec1_start = next(
+        (i for i, ln in enumerate(lines) if ln.startswith("## 1.")), None
+    )
+    if sec1_start is None:
+        raise RuntimeError("Section 1 heading '## 1.' not found")
+    sec1_end = next(
+        (
+            i
+            for i, ln in enumerate(lines[sec1_start + 1:], sec1_start + 1)
+            if ln.startswith("## ")
+        ),
+        len(lines),
+    )
+    sec1_table_rows = [
+        ln for ln in lines[sec1_start:sec1_end]
+        if ln.lstrip().startswith("|") and "---" not in ln
+    ]
+    if len(sec1_table_rows) < 10:  # 1 header + 9 data rows
+        raise RuntimeError(
+            f"Section 1 timing table has {len(sec1_table_rows)} non-sep rows; "
+            f"need >=10 (1 header + 9 data rows)"
+        )
+    # Each row must have exactly 6 cells (5 internal "|" + 2 outer = 7 pipe chars).
+    for row in sec1_table_rows:
+        pipe_count = row.count("|")
+        if pipe_count != 7:
+            raise RuntimeError(
+                f"Section 1 row has {pipe_count} '|' chars (need 7 for 6 cols): "
+                f"{row[:120]!r}"
+            )
+
+    # T-P0-866: forbidden_pattern R-FORBID-per-twist-4-section-template must
+    # NOT match. Scope = cd96_playbook.
+    import re
+    forbidden = re.compile(
+        r"Per-twist 4-section template|Per-twist 4\s*段推导模板",
+        re.IGNORECASE,
+    )
+    if forbidden.search(content):
+        raise RuntimeError(
+            "R-FORBID-per-twist-4-section-template matched; §2.2 should be deleted"
         )
 
 

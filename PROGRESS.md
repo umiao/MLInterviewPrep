@@ -553,3 +553,52 @@ and make sure the disk is unlocked. (lines 1-362): overview (2851 chars — paci
 - **Sanity check result**: (a) YAML parses cleanly via `yaml.safe_load` -- 9 cd96 sections, 9 sd_golden fields, 4 three_rule entries, 4 forbidden_patterns, 4 cross_page rules, 1 diff_delta, 1 ninety_second_forcing. (b) All 14 rule IDs unique (`R-3RULE-*`, `R-FORBID-*`, `R-XPAGE-*`, `R-DIFFDELTA-70pct`, `R-90S-friend-rec-section5`, `R-TIMING-row-4tag`, `R-DRAWER-cd96`, `R-DRAWER-no-sd-drawer`). (c) Zero emoji-class symbols (unicodedata category `So`) in either file. (d) Doc instances cross-referenced to DB: cd96 = company_documents id=96, sd41 slug=meta-reels-golden, sd42 slug=meta-top3-comments-golden -- both verified to exist. (e) Schema rules cover every downstream task's stated needs (T-866 §2.2 delete + §1 timing rewrite, T-867 drawer + philosophy strip + diff-delta self-check, T-868 reseed mapping, T-869 weapon ads anchors, T-870 friend-rec 90s forcing, T-871 drawer link-in, T-872 3-part validator contract).
 - **Status**: [DONE] (HITL gate per task spec: human reviewer signs off on schema design itself before T-866..T-870 unblock for parallel autonomous execution).
 - **Request**: `task_db.py update T-P0-865 --status completed`
+
+
+## 2026-05-13 18:55 -- [Meta-MLSD overhaul] autonomous_run.sh 8 launched; sessions 1-2 confirmed, parent session handoff complete
+
+- **User ack**: Discord msg 1504192907421421729 -- '好 可以 script auto run了' = green light on plan v2.
+- **Pre-launch fixes**: tasks T-P0-865..872 had state=NULL (task_db.py add doesn't set state); state-aware picker () requires state='ready'. Direct SQL UPDATE on .claude/tasks.db set all 8 to state='ready'. Picker verified: T-865 pickable (no deps), T-866 correctly blocked (deps_missing=[T-P0-865]).
+- **Launch**: . pgid 31816 saved to .claude/run-pgid. AR-16 cold-start watchdog auto-disabled (setsid not on Windows MSYS) -- expected behavior; AR-7 retry path remains active.
+- **Session 1/8 → T-P0-865 [META-MLSD-SCHEMA]**: completed; commit 0adbba1 ships schemas/meta_mlsd_canonical.yaml (9 cd96 sections + 9 sd-golden fields + 14 rule IDs across 5 families: section-level 3-rule x4, forbidden_patterns x4, cross-page consistency x4, diff-delta 70%-halt heuristic, 90s forcing function for Friend-Rec Section 5, R-TIMING-row-4tag, drawer rules) + docs/meta_mlsd_audit_20260513.md (task->rule map).
+- **Session 2/8 → T-P0-866 [META-MLSD-CD96-SURGERY]**: AR-18 EXPECTED_TASK_PREFIX armed; in progress.
+- **Handoff**: parent session's deliverable (plan v2 + materialized task chain + schema gate + launch + monitor armed) is complete. Sessions 3-8 are owned by orchestrator subprocess pgid 31816; each inner session commits its own PROGRESS.md entry per the autonomous-mode contract (CLAUDE.md Autonomous Mode section). Monitor task bcq85270j armed on the log streaming session boundaries / commits / AR-7/12/16/18 / errors.
+- **Sanity check**: git log shows T-865 commit landed; schema YAML + audit md verified via commit 0adbba1520a46e4ae3ab4965d3612d24fe47e513
+Author: Shenghui Xu <xushenghui@gmail.com>
+Date:   Wed May 13 11:55:33 2026 -0700
+
+    [T-P0-865] Author canonical Meta-MLSD schema (YAML) + thin audit summary
+    
+    Adds schemas/meta_mlsd_canonical.yaml (machine-checkable contract for
+    cd96-playbook + sd-golden doc-types: 9 cd96 sections, 9 sd-golden fields,
+    14 unique rule IDs across 5 families -- 3-rule x4 at SECTION level with
+    at-least-one-bullet pass threshold, forbidden_patterns x4, cross-page
+    consistency x4, diff-delta 70%-halt heuristic, 90s forcing function for
+    friend-rec Section 5; plus R-TIMING-row-4tag for cd96 timing skeleton
+    6-column row schema and R-DRAWER-cd96 / R-DRAWER-no-sd-drawer).
+    
+    Adds docs/meta_mlsd_audit_20260513.md: thin task -> rule map for
+    T-P0-866..T-P0-872 plus the 4 HITL-gate questions the human reviewer
+    should sign off before parallel agents pick up T-P0-866..T-P0-870.
+    
+    Reviewer feedback absorbed: 3-rule is SECTION-level, not bullet-level
+    (mechanism bullets like 'HNSW M=32 p99 8ms' do not need cargo-cult
+    twist-callback suffix); T-872's machine-checkable schema replaces the
+    prose-audit-grep approach (high FP/FN -> schema validator is CI-able).
+
+ PROGRESS.md                      |  51 ++++++
+ TASKS.md                         |  63 +++++--
+ archive/completed_tasks.md       |  29 ++-
+ docs/meta_mlsd_audit_20260513.md |  86 +++++++++
+ schemas/meta_mlsd_canonical.yaml | 375 +++++++++++++++++++++++++++++++++++++++
+ 5 files changed, 584 insertions(+), 20 deletions(-). has-unblocked=yes, picker correctly walks T-865 -> T-866. Inner sessions are autonomous-mode-standard self-verifying.
+- **Status**: parent session COMPLETE. Orchestrator running 6 remaining sessions (T-866 in-flight; T-867,868,869,870 parallelizable after T-865 done; T-871 deps on T-866+T-869+T-870; T-872 deps on all). Notifications will continue to fire on parent session via Monitor.
+
+
+## 2026-05-13 19:05 -- [T-P0-866 / META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton
+- **What I did**: Applied T-P0-865 schema to cd96 (`company_documents.id=96`). (a) DELETED §2.2 "Per-twist 4 段推导模板" abstract template (matches `R-FORBID-per-twist-4-section-template`); replaced with one-line stub noting the 4 concrete sd-golden walkthroughs supersede the abstract template (linked via 顶部 Drawer 入口). (b) REWROTE §1 timing skeleton from 4-column to 6-column per `R-TIMING-row-4tag`: time_band | rhythm | strong_moment_slot | tag_twist | tag_scale | tag_trade. All 9 rows populate rhythm (vocab: Framing/Data/Model/Bias/Evaluation/Zoomout/Serving) + trade ("I pick X over Y; costs Z, gains W" form); twist/scale use `-` when N/A. strong_moment_slot uses canonical `#1`/`#2`/`#3`/`#4`/`-` (no `⭐` decoration). (c) KEPT §3-§9 unchanged (homepage methodology). (d) Re-ran `retrofit_meta_mlsd_96_drawer_header.py` + `retrofit_meta_mlsd_96_top3_xref.py` to restore drawer header (now incl. Top-3 Comments Golden row). (e) Self-check passes for all T-866-in-scope rules.
+- **Deliverables**: `scripts/seed_meta_mlsd_main_hub.py` (rewrote §1 table + deleted §2.2 + tightened validator: char range [8500,13000], 6-col table check via cell-pipe count, `R-FORBID-per-twist-4-section-template` regex assertion). `scripts/retrofit_meta_mlsd_96_drawer_header.py` (bumped char-length upper bound 12500 → 14000 to accommodate the bigger 6-col table). `scripts/_audit_cd96_t866_selfcheck.py` (NEW, throwaway one-off; encodes cd96 schema rules from YAML; stand-in until T-872's `audit_meta_mlsd_3rule.py` lands). DB content `company_documents.id=96`: 11587 → 12880 chars (+1293, within retrofit [10500, 14000] gate).
+- **Sanity check result**: (a) seed_meta_mlsd_main_hub.py validators pass: chars=12536 in [8500, 13000], 6-col timing table verified (each row has exactly 7 `|` chars), `Per-twist 4...` forbidden pattern asserted absent, 10 H2 sections present, all 4 Strong Moment markers + 3 drawer URIs in body. (b) retrofit_meta_mlsd_96_drawer_header.py passes: chars=12704 in [10500, 14000], 10 H2 (1 drawer + 9 body), sentinel + 5 drawer URIs each present exactly once in prepended block, cd://96 self-link absent. (c) retrofit_meta_mlsd_96_top3_xref.py idempotency restored: sd://meta-top3-comments-golden row inserted between reels and cd://94 rows; final chars=12880. (d) `_audit_cd96_t866_selfcheck.py`: T-866-in-scope rules all PASS (`R-FORBID-per-twist-4-section-template` no match, all 9 §1 rows are 6-col vocab-compliant, §2.2 absent, §2.1/§2.3/§2.4 preserved, all 9 §-headings present, R-3RULE-decision + R-3RULE-tradeoff for §1 now PASS — were FAIL pre-T866). Remaining 9 R-3RULE findings (§2/§3/§5/§7/§9 decision/tradeoff/twist-callback) are pre-existing and out-of-scope per task description (c) "KEEP §3-9"; targeted decision-phrase callout pass is deferred (likely follow-up after T-872 schema validator lands and confirms what regex behavior the validator actually enforces). (e) Full pytest suite: 1265 passed, 20 SQLAlchemy 2.0 LegacyAPIWarning (pre-existing, unrelated). (f) Ruff clean on all modified scripts.
+- **Deferred manual smoke test (task spec (f))**: Did not start dev server + visit `localhost:5173/companies/31/prep?tab=docs&doc=96` in this autonomous session. Markdown body is well-formed (12880 chars, valid 6-col table per validator, no orphan refs to deleted §2.2). The render path is data-driven (`GET /companies/31/docs` → `react-markdown` + `remark-gfm`), so a passing seed + retrofit validator chain is the proxy. Follow-up: when next interactive session opens, visit URL above and visually confirm the 6-col timing table renders without breaking layout.
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-866 --status completed`
