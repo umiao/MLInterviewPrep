@@ -202,6 +202,20 @@ const TOPIC_META: Record<string, TopicMeta> = {
     tags: ["Two-Tower", "DLRM", "MMoE", "Multi-task"],
     category: "Recommendation & ML",
   },
+  "meta-reels-golden": {
+    description:
+      "Meta MLSD canonical Reels golden 45min walkthrough: pacing + 4 strong moments + multimodal lifecycle + DLRM + multi-task heads + IPS-vs-exploration + watch-ratio retention metric",
+    difficulty: "Hard",
+    tags: ["Meta", "MLSD", "Reels", "Multimodal", "DLRM"],
+    category: "ML System Design",
+  },
+  "meta-top3-comments-golden": {
+    description:
+      "Meta MLSD Top-3 Comments selection golden 45min walkthrough: intra-item ranking + set selection + 3 unique twists (comment≠item / time-bias / community health) + MMOE + shallow bias tower + shadow logging + list-level A/B",
+    difficulty: "Hard",
+    tags: ["Meta", "MLSD", "Top-K", "Selection Bias", "List-level"],
+    category: "ML System Design",
+  },
   "pinterest-system-design-concepts": {
     description:
       "Pinterest 核心概念与术语 deep-dive 索引: 多任务排序架构 (MMoE/PLE/DLRM/DCN-v2)、检索与 ANN (HNSW/IVF/Faiss)、LTR 方法、评估指标、纠偏与 LLM 微调、基础设施与业务 KPI、Pinterest 专属系统 (PinSAGE/SearchSAGE/Catalog)。",
@@ -266,7 +280,7 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   Hard: "bg-red-100 text-red-700",
 };
 
-type Tab = "interview" | "ebay" | "pinterest";
+type Tab = "interview" | "ml-mlsd" | "ebay" | "pinterest";
 
 export default function SystemDesignList() {
   const navigate = useNavigate();
@@ -292,14 +306,14 @@ export default function SystemDesignList() {
     [modules],
   );
 
-  // Interview topics: display_order in [100, 199), grouped by category.
+  // Interview topics: display_order in [100, 130), grouped by category.
+  // Range bumped from [100, 199) to [100, 130) in T-P0-860 to carve out
+  // [130, 199) for the ML System Design tab (Meta MLSD golden walkthroughs).
   // Pinterest 199-206 (concept index doc at 199; SD docs at 200..206) is a
-  // separate tab to avoid interleaving with general interview prep
-  // (T-2026-05-01: user request; T-P1-740: bumped lower bound to 199 for
-  // the Pinterest concept-doc index).
+  // separate tab to avoid interleaving with general interview prep.
   const interviewTopics = useMemo(() => {
     const topics = modules.filter(
-      (m) => m.display_order >= 100 && m.display_order < 199,
+      (m) => m.display_order >= 100 && m.display_order < 130,
     );
     const grouped: Record<string, SystemDesignSummary[]> = {};
     for (const cat of CATEGORY_ORDER) {
@@ -337,8 +351,23 @@ export default function SystemDesignList() {
     return grouped;
   }, [modules]);
 
+  // ML System Design modules: display_order in [130, 199) -- Meta MLSD golden
+  // walkthroughs (Reels at 130, Top-3 Comments at 131, room for future
+  // additions up to 198). Flat card list, no category subdivision.
+  const mlMlsdModules = useMemo(
+    () =>
+      [...modules]
+        .filter((m) => m.display_order >= 130 && m.display_order < 199)
+        .sort((a, b) => a.display_order - b.display_order),
+    [modules],
+  );
+
   const interviewCount = useMemo(
-    () => modules.filter((m) => m.display_order >= 100 && m.display_order < 199).length,
+    () => modules.filter((m) => m.display_order >= 100 && m.display_order < 130).length,
+    [modules],
+  );
+  const mlMlsdCount = useMemo(
+    () => modules.filter((m) => m.display_order >= 130 && m.display_order < 199).length,
     [modules],
   );
   const pinterestCount = useMemo(
@@ -368,6 +397,16 @@ export default function SystemDesignList() {
           Interview Prep
         </button>
         <button
+          onClick={() => switchTab("ml-mlsd")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "ml-mlsd"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
+        >
+          ML System Design
+        </button>
+        <button
           onClick={() => switchTab("ebay")}
           className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
             activeTab === "ebay"
@@ -394,8 +433,8 @@ export default function SystemDesignList() {
         <div>
           <p className="text-sm text-gray-600 mb-6">
             {interviewCount} system design interview questions, grouped by
-            category (Pinterest in its own tab). Click any topic for the full
-            study guide.
+            category (ML System Design and Pinterest in their own tabs).
+            Click any topic for the full study guide.
           </p>
 
           {isLoading && (
@@ -465,6 +504,80 @@ export default function SystemDesignList() {
                 </div>
               );
             })}
+        </div>
+      )}
+
+      {/* ML System Design tab -- Meta MLSD golden walkthroughs (do 130..198).
+          Flat card grid (no category subdivision); two cards initially:
+          Reels Golden (130) and Top-3 Comments Golden (131). */}
+      {activeTab === "ml-mlsd" && (
+        <div>
+          <p className="text-sm text-gray-600 mb-6">
+            {mlMlsdCount} Meta MLSD golden walkthroughs (45min full-set
+            simulations). Reels = cross-item engagement framing; Top-3 Comments
+            = intra-item ranking + set selection family.
+          </p>
+
+          {isLoading && (
+            <div className="text-gray-500 py-12 text-center">Loading...</div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-4">
+              {error instanceof Error
+                ? error.message
+                : "Failed to load topics"}
+            </div>
+          )}
+
+          {!isLoading && !error && mlMlsdModules.length === 0 && (
+            <div className="text-gray-400 py-12 text-center">
+              No ML System Design modules yet.
+            </div>
+          )}
+
+          {!isLoading && !error && mlMlsdModules.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {mlMlsdModules.map((topic) => {
+                const meta = TOPIC_META[topic.slug];
+                const difficulty = meta?.difficulty ?? "Medium";
+                const tags = meta?.tags ?? [];
+                const description =
+                  meta?.description ?? topic.subtitle ?? "";
+                return (
+                  <div
+                    key={topic.slug}
+                    className="bg-white rounded-lg border border-gray-200 px-4 py-3 cursor-pointer hover:border-blue-400 hover:shadow-md transition-all"
+                    onClick={() =>
+                      navigate(`/system-design/${topic.slug}`)
+                    }
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-base font-semibold text-gray-800">
+                        {topic.title}
+                      </h3>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded shrink-0 ml-2 ${DIFFICULTY_COLORS[difficulty]}`}
+                      >
+                        {difficulty}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{description}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

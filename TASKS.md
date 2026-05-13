@@ -9,46 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-860: [Meta-MLSD] 前端 SystemDesignList 加 'ML System Design' 第 4 个 tab + prod 校验
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-853, T-P0-855, T-P0-856, T-P0-857, T-P0-858, T-P0-859
-- **Description**: 在 src/frontend/src/pages/SystemDesignList.tsx 加第 4 个 tab 'ML System Design'，把 sd41 (Reels Golden, do=130) 和 sd 新建的 meta-top3-comments-golden (do=131) 隔离到独立 tab。
-
-**具体改动**:
-
-1. `type Tab = 'interview' | 'ebay' | 'pinterest';` → `type Tab = 'interview' | 'ml-mlsd' | 'ebay' | 'pinterest';`
-2. **Interview Prep filter 收紧**: 现有 `display_order >= 100 && display_order < 199` → `display_order >= 100 && display_order < 130` (cuts off 130+, exclude ML SD range)
-3. **新 useMemo `mlMlsdModules`**: filter `display_order >= 130 && display_order < 199`, 不分类 (扁平卡片列表)
-4. **新 `mlMlsdCount`**: count of do in [130, 199)
-5. **新 tab button** 'ML System Design' 放在 'Interview Prep' 和 'eBay Projects' 之间
-6. **新 tab panel** `{activeTab === 'ml-mlsd' && (...)}`，复用 Pinterest tab 的扁平卡片 grid 模式 (single category, 不要 8 类目分组)
-7. **TOPIC_META 加 2 条**:
-   - 'meta-reels-golden': { description: 'Meta MLSD canonical Reels golden 45min walkthrough: pacing + 4 strong moments + multimodal lifecycle + DLRM + multi-task heads + IPS-vs-exploration + watch-ratio retention metric', difficulty: 'Hard', tags: ['Meta', 'MLSD', 'Reels', 'Multimodal', 'DLRM'], category: 'ML System Design' }
-   - 'meta-top3-comments-golden': { description: 'Meta MLSD Top-3 Comments selection golden 45min walkthrough: intra-item ranking + set selection + 3 unique twists (comment≠item / time-bias / community health) + MMOE + shallow bias tower + shadow logging + list-level A/B', difficulty: 'Hard', tags: ['Meta', 'MLSD', 'Top-K', 'Selection Bias', 'List-level'], category: 'ML System Design' }
-8. **CATEGORY_ORDER 不需要改** (新 tab 用扁平模式)
-
-**Prod 校验**:
-- inner agent commit 代码后 run `npm run build` (在 src/frontend/) → 成功
-- 起 prod backend (FastAPI + serve built static)在 background, log 到 logs/manual_prod_T-P0-XXX.log
-- 退出前 echo URL + log path 给用户 (典型 http://localhost:8000)
-- **用户**: 浏览器打开 4 tab 验证：(1) Interview Prep 不再显示 sd41/Top-3; (2) ML System Design 显示 2 卡 (Reels + Top-3); (3) eBay Projects 不变; (4) Pinterest 不变。点击 ML System Design 任一卡片 → 进入 SD detail page 渲染 9 列 prose 正常。
-
-**Acceptance Criteria**:
-1. SystemDesignList.tsx 4 tab 切换正常 (TS strict, no lint error)
-2. `npm run build` 成功 exit 0
-3. `npm run test` (vitest, 如有) 通过
-4. 浏览器手动验证: Interview Prep 数 (do 100-129) - 1 (减去 sd41) = 之前 - 1; ML System Design 数 = 2 (sd41 + top3); eBay 不变; Pinterest 不变
-5. 点击 'Meta MLSD: Top-3 Comments...' 卡 → URL = /system-design/meta-top3-comments-golden, 9 列 prose 全部渲染
-6. 点击 'Meta MLSD: Reels...' 卡 → URL = /system-design/meta-reels-golden, prose 渲染正常
-7. URL ?tab=ml-mlsd 直链能 land 在 ML SD tab
-8. 退出前 prod server **仍在 background 运行** 等用户校验，log path 写入 commit msg / PROGRESS.md
-9. EXPECTED_FILES: src/frontend/src/pages/SystemDesignList.tsx
-
-**Dep 满足后才会被 picker 选中**: T-P0-853 (sd 新建) + T-P0-855..859 (5 surface retrofit) 全部 completed 后此 task 才 pickable，保证 sd 数据 + drawer 都 ready 后再做前端。
-
-**Commit msg**: [T-P0-XXX] [Meta-MLSD] frontend: add ML System Design 4th tab (do 130-198) + prod build
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -499,6 +459,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P0-860: [Meta-MLSD] 前端 SystemDesignList 加 'ML System Design' 第 4 个 tab + prod 校验. 在 src/frontend/src/pages/SystemDesignList.tsx 加第 4 个 tab 'ML System Design'，把 sd41 (Reels Golden, do=130) 和 sd 新建的 meta-
 - [x] **2026-05-12** -- T-P0-859: [Meta-MLSD] Retrofit sd41 (Reels Golden) overview Drawer → sd://meta-top3-comments-golden. Retrofit system_designs id=41 (slug='meta-reels-golden', 'Reels Home Feed Recommendation 45min Golden') 的 overview 列开头 D
 - [x] **2026-05-12** -- T-P0-858: [Meta-MLSD] Retrofit cd97 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=97 ('推荐系统核心模型复习笔记 8 工作 + 脉络'，2026-05-12 batch 刚加入) 的 Drawer 入口表新增 1 行指向 sd://meta-top3-com
 - [x] **2026-05-12** -- T-P0-857: [Meta-MLSD] Retrofit cd96 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=96 ('45min Playbook + 4 Strong Moments') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-gold
