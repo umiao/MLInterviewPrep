@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-867, T-P0-868, T-P0-869, T-P0-870, T-P0-871, T-P0-873
-- **Description**: INPUT = schemas/meta_mlsd_canonical.yaml. Three-part lint: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule.py runs schema validator against cd96 + sd41/42 + 2 new sds. Reports section-level 3-rule failures + forbidden-pattern hits + R-NARRATIVE-prose-form measurable_proxy violations (bold density <3, bullet runs >4, table rows >3). (b) CROSS-PAGE CONSISTENCY: same script checks the 4 sd-golden docs use identical section naming + depth conventions; cd96 references sd:// links resolve. (c) DIFF-DELTA REPORT: post-hoc summary of line-count reduction from T-867 sd41 prune + T-868 sd42 reseed; flag any >70% reduction for human re-review. Apply remediation commits where (a)/(b) fail. Verify: script exit 0 on all 5 docs (after T-873 narrative retrofit lands).
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -462,6 +456,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-13** -- T-P0-873: [META-MLSD-NARRATIVE-RETROFIT] Convert sd41+sd42 to oral-recital prose form. RETROFIT task added 2026-05-13 mid-chain. T-867 (sd41 prune) and T-868 (sd42 reseed) landed BEFORE R-NARRATIVE-prose-for
+- [x] **2026-05-13** -- T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta. INPUT = schemas/meta_mlsd_canonical.yaml. Three-part lint: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule
 - [x] **2026-05-13** -- T-P0-871: [META-MLSD-CD96-LINK-IN] Add weapon+friend goldens to cd96 drawer + Section 1. (a) cd96 drawer header table: add 2 rows sd://meta-weapon-ads-golden + sd://meta-friend-rec-golden alongside Reels + Top
 - [x] **2026-05-13** -- T-P0-870: [META-MLSD-SD-NEW-FRIEND] Create meta-friend-rec-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Friend Recommendation System Design'. INSERT new system_d
 - [x] **2026-05-13** -- T-P0-869: [META-MLSD-SD-NEW-WEAPON] Create meta-weapon-ads-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Weapon Ads Classifier (rewritten)' draft. INSERT new syst

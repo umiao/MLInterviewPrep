@@ -109,6 +109,8 @@ CONTENT = f"""{SENTINEL}
 
 **用法**: 30 秒过一遍 4 轴, 每轴标记 1-2 个非通用属性, 转化为 design implication.
 
+**决策原则**: I default to this 4-axis mechanical pass over 题感, because 题感 is sample-of-1; the pass costs 30s of overhead in exchange for reproducibility across novel problems.
+
 > §2.2 (abstract 4-段 template) 已下沉到 sd-golden worked examples (T-P0-866): 抽象模板换成 4 个 concrete 45-min walkthrough (Reels Golden / Top-3 Comments Golden / Weapon Ads Golden / Friend Rec Golden, links in 顶部 Drawer 入口). cd96 是 homepage 只放方法论 + 4 strong moment 投放位置; 推导细节读 drawer 里的 sd-golden.
 
 ### 2.3 Reels Homefeed 7-twist worked example
@@ -159,6 +161,8 @@ CONTENT = f"""{SENTINEL}
 
 > 不要临场决定. 每个 moment 包含 mechanism (为什么 strong) + timing-window + hook phrase (英文 verbatim).
 
+**决策原则**: I pick pre-allocating the 4 moments to fixed timing slots over deciding mid-interview, because cognitive load vs decision speed is the binding constraint at minute 25 — this is where treating Strong Moments as scheduling (not improvisation) pays off; costs flexibility, in exchange for reliability of delivery.
+
 ### Strong Moment #1 — Unique twist 洞察 (Framing, 3-5 min)
 **Mechanism**: 在 framing 末尾 surface 该题区别于通用 ranking 的 1 个 ML-native twist (e.g. Reels 是 session-based not item-pick; Notification 是 send-or-not gating not rank). 面试官 calibrate level 时立即识别为 "this candidate understands the problem class". **何时投放**: framing yes/no 收尾前 60s. **Hook phrase**: *"There are two intrinsic specialties of this problem that will drive most of my design decisions, and I want to put them on the table upfront."*
 
@@ -193,6 +197,8 @@ CONTENT = f"""{SENTINEL}
 
 **机械规则**: 列完 N 个 bullets **立刻** pick 1 expand 到 60s — 不要列完直接停在 bullet 层.
 
+**决策原则**: I default to the mechanical "list → pick 1 → risk → transition" rhythm over free-form deepening, in exchange for sounding slightly templated; gains rhythm reliability under interviewer time pressure.
+
 ---
 
 ## 6. 偏好节奏 Meta-rules (8 条)
@@ -211,6 +217,8 @@ CONTENT = f"""{SENTINEL}
 ## 7. 减少澄清的广度 NOT 深度
 
 减少 clarification 的"广度"是对的, 但**不要**减少"深度". 区别: ❌ 不再 triage email / push / in-app / portal 这种 surface 维度 ❌ 不展开 FR / NFR / QPS / availability ✅ **要**快速锁一句话假设 (*"I'll assume we're optimizing for in-app notification ranking with a daily candidate pool of ~1000 per user, latency budget ~200ms"*) 说完就往下走, 不等面试官反复确认; ✅ 每个 ML 决策点 surface trade-off, 但**自己**给推荐答案, 不把选择权抛回去. 上一面 "on track" 但加面 = 方向对, 深度和决断力不够 — 这次"快速 frame、自信决策、深入 ML 内核".
+
+**决策原则**: The twist here is treating clarification as a depth-vs-breadth allocation, not as a tax. I default to surfacing a one-sentence assumption and moving on, in exchange for perceived completeness; switches to deeper clarification only if the interviewer explicitly pushes back.
 
 ---
 
@@ -238,6 +246,8 @@ CONTENT = f"""{SENTINEL}
 ## 10. 30 秒判题流程
 
 看到题 → 30s 内判断 family (rec / ranking / classification / search / event / graph) → 跳到 [cd://{FAMILY_DOC_ID}](cd://{FAMILY_DOC_ID}) 找对应卡片读其 Twist + Puzzle pieces + Hook phrase → 从 [cd://{JIMU_DOC_ID}](cd://{JIMU_DOC_ID}) 取适配积木 (rec/ranking 类默认套 1+3+4+5+7; classification 类套 6+7+9; cold-start heavy 类套 2+5; graph 类不套 two-tower) → 投放 hook phrase → 按 Section 1 timing skeleton 走 45 分钟 → 35-40 min 必投放 Strong Moment #4 zoom-out + top 3 risks.
+
+**决策原则**: I default to this 30s family lookup over generic SDE framing, in exchange for early-binding risk if the read misfires — costs ~2 min to reframe on a wrong family read, gains ~10 min of rhythm on a correct read.
 """
 
 
@@ -251,14 +261,13 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # T-P0-871: Section 1 strong-moment rows (4 of them) now cite 4 worked
-    # examples each (Reels + Top-3 + Weapon + Friend) instead of just Reels;
-    # adds ~500 chars. Upper bound bumped from 13000 to 14000.
-    # Prior bump (T-P0-866): 12000 -> 13000 for 4-col -> 6-col timing table
-    # (+~900) minus §2.2 deletion (-~480) = +~420 net.
+    # T-P0-872: 5 "决策原则" 3-rule remediation lines added to §2/§3/§5/§7/§9
+    # (~800 chars). Upper bound bumped 14000 -> 15000.
+    # Prior bumps: T-P0-871 13000 -> 14000 (Section 1 4-worked-examples
+    # citation); T-P0-866 12000 -> 13000 (4-col -> 6-col timing table).
     n = len(content)
-    if not (8500 <= n <= 14000):
-        raise RuntimeError(f"content char-length {n} not in [8500, 14000]")
+    if not (8500 <= n <= 15000):
+        raise RuntimeError(f"content char-length {n} not in [8500, 15000]")
 
     # AC #3 (T-P0-871 widened): 4 sd-golden URIs + 2 cd:// drawer backlinks
     # must all appear at least once (Section 1 timing skeleton cites the
