@@ -9,18 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-869: [META-MLSD-SD-NEW-WEAPON] Create meta-weapon-ads-golden sd row
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-865
-- **Description**: INPUT = T-865 schema + Discord attachment 'Weapon Ads Classifier (rewritten)' draft. INSERT new system_designs row slug='meta-weapon-ads-golden'. Family = T&S classification (NOT RecSys). Twist set = bidirectional liability asymmetry + multi-modal/multi-layer adversarial + platform admission posture upstream constraint + legal-adjacent boundary as true ML hard problem. Phase 1/2/3 -> overview/dataflow/defense+tradeoffs. Key content anchors: cascade calibration shared scale, OCR+CLIP+seller-graph trio, three eval-set discipline (frozen/rolling/adversarial), disagreement-aware label, hard-neg shortcut counterfactual audit. NO drawer header. Section-level 3-rule pass via T-865 schema validator.
-
-#### T-P0-870: [META-MLSD-SD-NEW-FRIEND] Create meta-friend-rec-golden sd row
-- **Priority**: P0
-- **Complexity**: L
-- **Depends on**: T-P0-865
-- **Description**: INPUT = T-865 schema + Discord attachment 'Friend Recommendation System Design' draft. INSERT new system_designs row slug='meta-friend-rec-golden'. Twist = bilateral matching P(send) x P(accept) threaded across framing/label/feature/model/serving/monitoring. Map sections per T-865 schema. WARNING: attachment Section 5 (15-20min model section) is tabular encyclopedia (LR/XGBoost/DNN/MMoE/Transformer ladder + 5 retrieval channels table + serving table). MUST compress to narrative-rhythm. FORCING FUNCTION: 'if only 90 seconds, which 3 sentences?' -- apply this question to Section 5 after rewrite. Keep MMoE multi-head bilateral + cluster-randomized A/B + NRT bilateral signal as the L4+ moments; ladder/channels reducible to 1 paragraph each. NO drawer header. Section-level 3-rule pass via schema validator.
-
 #### T-P0-871: [META-MLSD-CD96-LINK-IN] Add weapon+friend goldens to cd96 drawer + Section 1
 - **Priority**: P0
 - **Complexity**: S
@@ -30,8 +18,14 @@
 #### T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-867, T-P0-868, T-P0-869, T-P0-870, T-P0-871
-- **Description**: INPUT = T-865 schema. Three-part lint, not single grep pass: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule.py runs T-865 schema validator against cd96 + sd41/42 + 2 new sds. Reports section-level 3-rule failures (decision+tradeoff / scale-SLA / twist-callback) and forbidden-pattern hits. (b) CROSS-PAGE CONSISTENCY: same script checks the 4 sd-golden docs use identical section naming + depth conventions (e.g. all call it 'Strong Moments' not mixing with 'Defense Highlights'); cd96 references sd:// links resolve. (c) DIFF-DELTA REPORT: post-hoc summary of line-count reduction from T-867's sd41 prune + T-868's sd42 reseed; flag any >70% reduction for human re-review. Apply remediation commits where (a)/(b) fail. Verify: script exit 0 on all 5 docs.
+- **Depends on**: T-P0-867, T-P0-868, T-P0-869, T-P0-870, T-P0-871, T-P0-873
+- **Description**: INPUT = schemas/meta_mlsd_canonical.yaml. Three-part lint: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule.py runs schema validator against cd96 + sd41/42 + 2 new sds. Reports section-level 3-rule failures + forbidden-pattern hits + R-NARRATIVE-prose-form measurable_proxy violations (bold density <3, bullet runs >4, table rows >3). (b) CROSS-PAGE CONSISTENCY: same script checks the 4 sd-golden docs use identical section naming + depth conventions; cd96 references sd:// links resolve. (c) DIFF-DELTA REPORT: post-hoc summary of line-count reduction from T-867 sd41 prune + T-868 sd42 reseed; flag any >70% reduction for human re-review. Apply remediation commits where (a)/(b) fail. Verify: script exit 0 on all 5 docs (after T-873 narrative retrofit lands).
+
+#### T-P0-873: [META-MLSD-NARRATIVE-RETROFIT] Convert sd41+sd42 to oral-recital prose form
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-867, T-P0-868
+- **Description**: RETROFIT task added 2026-05-13 mid-chain. T-867 (sd41 prune) and T-868 (sd42 reseed) landed BEFORE R-NARRATIVE-prose-form rule was added to schema; their content is bullet-style. This task converts both to oral-recital prose: ** English first-person ('I') interview voice. ** Apply R-NARRATIVE-prose-form rules from schemas/meta_mlsd_canonical.yaml: >=3 **bold** spans per section, <=4 consecutive bullets, <=3-row tables. Bold-mark all key decisions, scale/SLA anchors, tradeoff statements, twist callbacks (multimodal lifecycle for sd41, comment-twist trio for sd42), technical scheme names. Content substance is preserved -- this is pure form conversion. Validate against scripts/audit_meta_mlsd_3rule.py narrative-form check (T-872 will also enforce). For each of 18 sections (9 per sd), confirm: opening declarative claim + bold-anchored paragraphs + closing tradeoff/handoff. ABSORB: also strip any remaining instructor-commentary or note-voice leftovers.
 
 ### P1 -- Should Have (agentic intelligence)
 
@@ -479,6 +473,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-13** -- T-P0-870: [META-MLSD-SD-NEW-FRIEND] Create meta-friend-rec-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Friend Recommendation System Design'. INSERT new system_d
+- [x] **2026-05-13** -- T-P0-869: [META-MLSD-SD-NEW-WEAPON] Create meta-weapon-ads-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Weapon Ads Classifier (rewritten)' draft. INSERT new syst
 - [x] **2026-05-13** -- T-P0-868: [META-MLSD-SD42-RESEED] Reseed Top-3 Comments Golden from rewritten draft. INPUT = T-865 schema + Discord attachment 'Comments Ranking (rewritten)' draft. Replace sd42 content. Map to canonical s
 - [x] **2026-05-13** -- T-P0-867: [META-MLSD-SD41-PRUNE] Strip Reels Golden drawer + philosophy duplicates. INPUT = T-865 schema. (a) DELETE top drawer header table. (b) overview '整体节奏哲学' prose -> 2-paragraph solution anchor (wh
 - [x] **2026-05-13** -- T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton. INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE 
