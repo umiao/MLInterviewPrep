@@ -455,6 +455,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-13** -- T-P0-862: Reschedule Lyra Jacqueline session 2026-05-14 14:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504181155916943452 — move Lyra/Jacqueline therapy on 2026-05-14 from 2:00 PM PDT to 12:00 PM PDT
 - [x] **2026-05-13** -- T-P0-861: Reschedule Meta AI-Enabled MLSD follow-up from 2026-05-14 10:00 to 2026-05-15 11:00 PDT. Discord 2026-05-13 msg 1504175057919017090 — move event id=66 to Friday 2026-05-15 11:00-11:45 AM PDT via idempotent res
 - [x] **2026-05-12** -- T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套'). Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se

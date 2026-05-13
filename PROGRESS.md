@@ -481,3 +481,10 @@ and make sure the disk is unlocked. (lines 1-362): overview (2851 chars — paci
 - **Sanity check result**: First run reported `[UPDATE] id=66: ... @ 2026-05-14 10:00:00 -> ... @ 2026-05-15 11:00:00`. Re-run for idempotency reported `[SYNC] id=66: already at 2026-05-15 11:00:00, fields refreshed` (no duplicate row). Final-state SQL: `WHERE scheduled_at LIKE '2026-05-14%'` returns 1 row (Lyra id=65 @ 14:00 only, Meta gone); `WHERE scheduled_at LIKE '2026-05-15%'` returns 1 row (Meta id=66 @ 11:00, AI-Enabled title, 45 min, Zoom, upcoming). No conflicts on new slot.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P0-861` (already completed via `task_db.py complete T-P0-861`).
+
+## 2026-05-13 17:48 -- [T-P0-862] Reschedule Lyra Jacqueline 2026-05-14 14:00 -> 12:00 PDT
+- **What I did**: Discord request (msg 1504181155916943452) -- moved the Lyra/Jacqueline therapy session on 2026-05-14 from 2:00 PM PDT to 12:00 PM PDT (second same-day reschedule of this slot; earlier today it had been 10:00 -> 14:00 to make room for a Meta MLSD follow-up, but that follow-up has since moved off 5/14 entirely per T-P0-861). Extended the existing `scripts/_add_lyra_jacqueline_2026-05-14.py` SUPERSEDED_SLOTS cleanup list (added the 14:00 row) and updated SESSIONS to the new 12:00 canonical slot + description. No new seed script -- matched existing DELETE-and-reinsert pattern.
+- **Deliverables**: MODIFIED `scripts/_add_lyra_jacqueline_2026-05-14.py` (header reschedule history rewritten, SUPERSEDED_SLOTS extended from 1 to 2 rows, SESSIONS scheduled_at flipped 14:00 -> 12:00, description rewritten). `interview_events` state: DELETE id=65 (14:00) + INSERT id=67 (12:00); single Lyra row on 2026-05-14 post-op.
+- **Sanity check result**: First run reported `[DELETE] id=65 @ 14:00 (superseded)` + `[INSERT] id=67 @ 12:00 (inserted=1, synced=0, deleted=1)`. Re-run for idempotency: `[SYNC] id=67 @ 12:00 (inserted=0, synced=1, deleted=0)`. Final-state SQL: exactly 1 row on 2026-05-14 (Lyra id=67 @ 12:00, 60 min, 'upcoming'); no stale 10:00 or 14:00 rows for company_id=25.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P0-862` (already completed).

@@ -1,11 +1,15 @@
 """Idempotent seed: Lyra therapy session with Jacqueline Hurt-Coppola.
 
-Per user Discord 2026-05-10 (msg 1502929534046044240) the session was originally
-scheduled Thursday 2026-05-14 10:00 AM PDT. Per user Discord 2026-05-13 (msg
-1503987671909929112) it was rescheduled to Thursday 2026-05-14 2:00 PM PDT to
-free the 10:00-10:45 AM slot for a Meta ML Sys Design follow-up interview.
+Reschedule history (Discord-driven, all on 2026-05-14):
+  - Originally scheduled 10:00 AM PDT (Discord 2026-05-10 msg 1502929534046044240)
+  - Moved to 2:00 PM PDT to free the 10:00 slot for a Meta MLSD follow-up
+    (Discord 2026-05-13 msg 1503987671909929112)
+  - Moved to 12:00 PM PDT, the canonical current slot
+    (Discord 2026-05-13 msg 1504181155916943452). The 2026-05-13 Meta MLSD
+    follow-up has since been rescheduled off 2026-05-14 entirely
+    (see scripts/_reschedule_meta_mlsd_2026-05-15.py).
 
-  - Thursday 2026-05-14, 2:00 PM PDT (rescheduled from 10:00 AM PDT)
+  - Thursday 2026-05-14, 12:00 PM PDT (current canonical slot)
   - Therapy, 60 min
   - Provider: Jacqueline Hurt-Coppola
 
@@ -13,7 +17,7 @@ Company: Lyra (id=25). Timezone: naive Pacific (PDT), per project convention.
 Mirrors prior Jacqueline session pattern (id=17/37/38/60 etc., last seeded by
 scripts/_add_lyra_jacqueline_2026-05-08.py).
 
-Migration: deletes the prior 2026-05-14 10:00 row for this company+title so
+Migration: deletes the prior 10:00 and 14:00 rows for this company+title so
 re-runs are idempotent and the rescheduled slot is the single source of truth.
 
 Run: python scripts/_add_lyra_jacqueline_2026-05-14.py
@@ -36,18 +40,21 @@ STATUS = "upcoming"
 # row on this date.
 SUPERSEDED_SLOTS = [
     ("2026-05-14 10:00:00", "Lyra session with Jacqueline"),
+    ("2026-05-14 14:00:00", "Lyra session with Jacqueline"),
 ]
 
 SESSIONS = [
     {
         "title": "Lyra session with Jacqueline",
-        "scheduled_at": "2026-05-14 14:00:00",
+        "scheduled_at": "2026-05-14 12:00:00",
         "description": (
             "Jacqueline Hurt-Coppola session. "
-            "Thursday 2026-05-14 2:00 PM PDT, 60 min. "
+            "Thursday 2026-05-14 12:00 PM PDT, 60 min. "
             "Therapy session (Lyra). "
-            "Rescheduled from 10:00 AM PDT on 2026-05-13 to free the "
-            "10:00-10:45 AM slot for a Meta ML Sys Design follow-up interview."
+            "Rescheduled 2026-05-13: first 10:00 AM -> 2:00 PM (to free the "
+            "10:00 slot for a Meta MLSD follow-up), then 2:00 PM -> 12:00 PM "
+            "per user request. The Meta MLSD follow-up has since moved off "
+            "2026-05-14 (now Friday 2026-05-15 11:00 AM PDT)."
         ),
     },
 ]
