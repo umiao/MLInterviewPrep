@@ -9,6 +9,48 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-865
+- **Description**: INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE Section 1 timing skeleton: each row uses T-865 4-tag schema (rhythm/twist/scale/trade) -- 4 lines per time row, not just label like 'Framing opening'. (c) KEEP Section 3 (4 Strong Moments), Section 4 (ML-native YES-NO), Sections 5-8 (methodology) -- cd96 is homepage, philosophy belongs here. (d) Re-run retrofit_meta_mlsd_96_drawer_header.py. (e) In-session self-check: verify cd96 passes schema validator (T-865 deliverable). Verify: prod build + cd96 renders at localhost:5173/companies/31/prep?tab=docs&doc=96.
+
+#### T-P0-867: [META-MLSD-SD41-PRUNE] Strip Reels Golden drawer + philosophy duplicates
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-865
+- **Description**: INPUT = T-865 schema. (a) DELETE top drawer header table. (b) overview '整体节奏哲学' prose -> 2-paragraph solution anchor (what / 2 specialties / what we walk through). (c) defense: keep 4 Strong Moment verbatim 台词 ONLY, strip 'Why this is strong' methodology meta-prose. (d) verbal_outline + cheat_sheet: consolidate or delete (duplicate cd96 Sections 5/6/1). (e) Every section (not bullet) passes schema 3-rule: decision+tradeoff present / scale-SLA present / twist-callback present. (f) DIFF-DELTA SELF-CHECK: log line-count before/after; if reduction >70% (target ~40%), STOP and request human review -- likely over-deleted. Target: ~42KB -> ~25KB by stripping methodology, not solution. Verify: sd41 renders via sd:// link + passes T-865 schema validator.
+
+#### T-P0-868: [META-MLSD-SD42-RESEED] Reseed Top-3 Comments Golden from rewritten draft
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-865
+- **Description**: INPUT = T-865 schema + Discord attachment 'Comments Ranking (rewritten)' draft. Replace sd42 content. Map to canonical sd-golden sections (per T-865 schema): overview (framing + 3 twists) / architecture (multi-stage funnel) / dataflow (4-section walkthrough: framing 90s / metrics 60s / labels 90s / features 60s) / formulas (label schema + propensity weighting) / production_constraints / tradeoffs / defense (Strong Moments verbatim). NO drawer header. Section-level 3-rule pass. Verify against T-865 schema validator.
+
+#### T-P0-869: [META-MLSD-SD-NEW-WEAPON] Create meta-weapon-ads-golden sd row
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-865
+- **Description**: INPUT = T-865 schema + Discord attachment 'Weapon Ads Classifier (rewritten)' draft. INSERT new system_designs row slug='meta-weapon-ads-golden'. Family = T&S classification (NOT RecSys). Twist set = bidirectional liability asymmetry + multi-modal/multi-layer adversarial + platform admission posture upstream constraint + legal-adjacent boundary as true ML hard problem. Phase 1/2/3 -> overview/dataflow/defense+tradeoffs. Key content anchors: cascade calibration shared scale, OCR+CLIP+seller-graph trio, three eval-set discipline (frozen/rolling/adversarial), disagreement-aware label, hard-neg shortcut counterfactual audit. NO drawer header. Section-level 3-rule pass via T-865 schema validator.
+
+#### T-P0-870: [META-MLSD-SD-NEW-FRIEND] Create meta-friend-rec-golden sd row
+- **Priority**: P0
+- **Complexity**: L
+- **Depends on**: T-P0-865
+- **Description**: INPUT = T-865 schema + Discord attachment 'Friend Recommendation System Design' draft. INSERT new system_designs row slug='meta-friend-rec-golden'. Twist = bilateral matching P(send) x P(accept) threaded across framing/label/feature/model/serving/monitoring. Map sections per T-865 schema. WARNING: attachment Section 5 (15-20min model section) is tabular encyclopedia (LR/XGBoost/DNN/MMoE/Transformer ladder + 5 retrieval channels table + serving table). MUST compress to narrative-rhythm. FORCING FUNCTION: 'if only 90 seconds, which 3 sentences?' -- apply this question to Section 5 after rewrite. Keep MMoE multi-head bilateral + cluster-randomized A/B + NRT bilateral signal as the L4+ moments; ladder/channels reducible to 1 paragraph each. NO drawer header. Section-level 3-rule pass via schema validator.
+
+#### T-P0-871: [META-MLSD-CD96-LINK-IN] Add weapon+friend goldens to cd96 drawer + Section 1
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-869, T-P0-870, T-P0-866
+- **Description**: (a) cd96 drawer header table: add 2 rows sd://meta-weapon-ads-golden + sd://meta-friend-rec-golden alongside Reels + Top-3. (b) Section 1 timing skeleton: where relevant, cite 4 worked examples instead of 1. (c) Update scripts/retrofit_meta_mlsd_96_drawer_header.py canonical drawer block. Verify: cd96 renders with 4 sd:// links + passes T-865 schema validator. Deps NOTE: T-866 added (both write cd96; race risk if parallel).
+
+#### T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-867, T-P0-868, T-P0-869, T-P0-870, T-P0-871
+- **Description**: INPUT = T-865 schema. Three-part lint, not single grep pass: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule.py runs T-865 schema validator against cd96 + sd41/42 + 2 new sds. Reports section-level 3-rule failures (decision+tradeoff / scale-SLA / twist-callback) and forbidden-pattern hits. (b) CROSS-PAGE CONSISTENCY: same script checks the 4 sd-golden docs use identical section naming + depth conventions (e.g. all call it 'Strong Moments' not mixing with 'Defense Highlights'); cd96 references sd:// links resolve. (c) DIFF-DELTA REPORT: post-hoc summary of line-count reduction from T-867's sd41 prune + T-868's sd42 reseed; flag any >70% reduction for human re-review. Apply remediation commits where (a)/(b) fail. Verify: script exit 0 on all 5 docs.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -453,28 +495,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 756 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-13** -- T-P0-865: [META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary. OUTPUT FORM = MACHINE-CHECKABLE SCHEMA (not prose audit). Deliverables: (1) schemas/meta_mlsd_canonical.yaml -- canonica
 - [x] **2026-05-13** -- T-P0-864: Add Adobe Phone Screen 2026-05-14 14:00 PDT (30 min). Discord 2026-05-13 msg 1504185501085864127 — new event, Adobe phone screen Thursday 2026-05-14 2:00 PM PDT 30min. Adobe 
 - [x] **2026-05-13** -- T-P0-863: Reschedule Meta AI-Enabled MLSD follow-up 2026-05-15 11:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504182639463235645 — Meta moved the slot again, same day +1h. Refactored _reschedule_meta_mlsd_2
 - [x] **2026-05-13** -- T-P0-862: Reschedule Lyra Jacqueline session 2026-05-14 14:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504181155916943452 — move Lyra/Jacqueline therapy on 2026-05-14 from 2:00 PM PDT to 12:00 PM PDT
 - [x] **2026-05-13** -- T-P0-861: Reschedule Meta AI-Enabled MLSD follow-up from 2026-05-14 10:00 to 2026-05-15 11:00 PDT. Discord 2026-05-13 msg 1504175057919017090 — move event id=66 to Friday 2026-05-15 11:00-11:45 AM PDT via idempotent res
 - [x] **2026-05-12** -- T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套'). Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend
-- [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
-- [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
-- [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
-- [x] **2026-05-12** -- T-P0-860: [Meta-MLSD] 前端 SystemDesignList 加 'ML System Design' 第 4 个 tab + prod 校验. 在 src/frontend/src/pages/SystemDesignList.tsx 加第 4 个 tab 'ML System Design'，把 sd41 (Reels Golden, do=130) 和 sd 新建的 meta-
-- [x] **2026-05-12** -- T-P0-859: [Meta-MLSD] Retrofit sd41 (Reels Golden) overview Drawer → sd://meta-top3-comments-golden. Retrofit system_designs id=41 (slug='meta-reels-golden', 'Reels Home Feed Recommendation 45min Golden') 的 overview 列开头 D
-- [x] **2026-05-12** -- T-P0-858: [Meta-MLSD] Retrofit cd97 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=97 ('推荐系统核心模型复习笔记 8 工作 + 脉络'，2026-05-12 batch 刚加入) 的 Drawer 入口表新增 1 行指向 sd://meta-top3-com
-- [x] **2026-05-12** -- T-P0-857: [Meta-MLSD] Retrofit cd96 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=96 ('45min Playbook + 4 Strong Moments') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-gold
-- [x] **2026-05-12** -- T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=95 ('Cross-cutting 积木库') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
-- [x] **2026-05-12** -- T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden. Retrofit company_documents id=94 ('Family Taxonomy + 13 Question Cards') 的 Drawer 入口表 + Q1 'Top 3 Comments Extraction' c
-- [x] **2026-05-12** -- T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线). **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
-- [x] **2026-05-12** -- T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough). **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
-- [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
-- [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str
-- [x] **2026-05-12** -- T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section. Retrofit system_designs.id=41 (slug='meta-reels-golden', title='Meta MLSD Golden Example: Reels Home Feed Recommendation
-- [x] **2026-05-12** -- T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list. Retrofit existing company_documents.id=96 ('[Meta-MLSD] 45min Playbook + 4 Strong Moments', is_golden=1 default first pa
-- [x] **2026-05-12** -- T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=95 ('[Meta-MLSD] Cross-cutting 积木库 (drawer)') by prepending a prominent Drawer 入口
-- [x] **2026-05-12** -- T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a p
-- [x] **2026-05-12** -- T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents. INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level d

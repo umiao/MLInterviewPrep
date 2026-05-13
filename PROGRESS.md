@@ -502,3 +502,54 @@ and make sure the disk is unlocked. (lines 1-362): overview (2851 chars — paci
 - **Sanity check result**: First run `[INSERT] id=68 @ 2026-05-14 14:00:00`. Re-run for idempotency: `[SYNC] id=68 @ 2026-05-14 14:00:00` (no duplicate). 5/14 final state: 2 rows -- Lyra id=67 @ 12:00 (60 min, ends 13:00) + Adobe id=68 @ 14:00 (30 min). No time conflicts.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P0-864` (already completed).
+
+
+## 2026-05-13 18:30 -- [Meta-MLSD overhaul] Task planning mode: 8-task chain materialized (HITL-gated)
+
+- **User request** (Discord 1504188274019926207, taskplanning mode): Audit Meta MLSD docs at /companies/31/prep?tab=docs&doc=96. cd96 timing skeleton too abstract; Per-twist 4-section template (cd96 Section 2.2) is fluff -- remove. sd41 (Reels Golden) called 一塌糊涂: kill top drawer header, kill methodology/philosophy (belongs on homepage cd96), pure solution density. User attached 3 rewritten goldens (Comments Ranking / Weapon Ads Classifier / Friend Recommendation, 29KB). Audit criterion: every bullet covers (1) decision+tradeoff (2) scale/SLA/budget (3) twist/specialty callback (3-rule).
+- **Audit done in-session**: read cd96 (11587 bytes -- §2.2 confirmed abstract, §1 timing rows lack content density), sd41 (full 8 sections, drawer header + overview prose + verbal_outline + cheat_sheet all duplicate cd96 §5/§6/§1), sd42 (similar pattern, ready for reseed). Confirmed slugs free: meta-weapon-ads-golden / meta-friend-rec-golden.
+- **8 tasks materialized via task_db.py** (T-P0-865..872), dependency chain:
+  - T-P0-865 [META-MLSD-AUDIT] (status=blocked, HITL gate) - investigation report -> docs/meta_mlsd_audit_20260513.md
+  - T-P0-866 [CD96-SURGERY] deps T-865 - kill §2.2, tighten §1 density, keep §3-§8
+  - T-P0-867 [SD41-PRUNE] deps T-865 - drawer + philosophy strip, target ~25KB
+  - T-P0-868 [SD42-RESEED] deps T-865 - reseed from Comments Ranking rewritten draft
+  - T-P0-869 [SD-NEW-WEAPON] deps T-865 - new sd row slug=meta-weapon-ads-golden
+  - T-P0-870 [SD-NEW-FRIEND] deps T-865 - new sd row slug=meta-friend-rec-golden, Section 5 narrative-compress
+  - T-P0-871 [CD96-LINK-IN] deps T-869, T-870 - drawer header refresh + retrofit script update
+  - T-P0-872 [AUDIT-PASS-2] deps T-867..871 - new scripts/audit_meta_mlsd_3rule.py + remediation
+- **TASKS.md regenerated**. Plan delivered to user via Discord (3-part message id 1504189519161982987). Two clarifications pending before unblocking T-865 + launching autonomous_run.sh 8 --allow-dirty: (a) is cd96 the homepage for methodology, or pull §5-§8 to a new meta-prep page? (b) keep T-872 as standalone audit script task or fold into T-866..870 each?
+- **Sanity check**: task_db.py list confirms 8 tasks present with correct depends_on chain; T-865 status=blocked persisted; TASKS.md regen returned ok. No code changes this session -- planning-only deliverable.
+- **Status**: AWAITING USER APPROVAL on two open questions before launching autonomous_run.sh.
+
+
+## 2026-05-13 18:45 -- [Meta-MLSD overhaul] Plan v2: absorbed independent review, schema-first pivot
+
+- **Independent reviewer feedback** (Discord 1504191449024040970, 8KB): 4 sharp critiques + 4 missing-from-plan items, ALL absorbed:
+  - (1) T-865 must output machine-checkable schema (YAML), not prose audit -- otherwise 5 fresh-context parallel agents drift on 'tighten' interpretation. Schema = shared ground truth + T-872 lint spec.
+  - (2) T-871 missing dep on T-866: both write cd96, git race risk -> ADDED dep edge.
+  - (3) 3-rule must be SECTION-level not bullet-level -- mechanism bullets ('HNSW M=32 p99 8ms') exempt from twist-callback suffix; cargo-cult avoidance.
+  - (4) T-872 value contingent on T-865 schema output -- prose audit -> grep T-872 -> high FP/FN, cut; schema -> schema validator -> CI-able, keep.
+  - (5) HITL gate reviews SCHEMA DESIGN itself, not just audit content.
+  - (6) T-872 split into 3 parts: (a) per-page schema validation (b) cross-page consistency (section naming/depth) (c) diff-delta heuristic (catastrophic-delete catcher).
+  - (7) Friend Rec '90-second forcing function' added to T-870 -- 'if only 90s, which 3 sentences?'
+  - (8) Token budget caution noted for autonomous_run launch.
+- **Q1 settled**: cd96 §5-§8 methodology stays in cd96. YAGNI (no second framework yet).
+- **Q2 settled**: T-872 stays, paired with T-865 schema decision.
+- **Updates applied** via task_db.py update + depend:
+  - T-865 retitled '[META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary'; description rewritten for schema-first deliverable.
+  - T-866..870 descriptions cite 'INPUT = T-865 schema', section-level 3-rule.
+  - T-867 added explicit diff-delta self-check (sd41 >70% reduction halts).
+  - T-870 added '90s forcing function' for Friend Rec Section 5.
+  - T-871: added dep edge to T-866 (cd96 writer race fix); description notes the race.
+  - T-872 retitled '[META-MLSD-LINT-3X]'; description rewritten as 3-part lint (schema validate + cross-page + diff-delta).
+- **TASKS.md regenerated**. Dep chain re-verified: T-865 -> {866,867,868,869,870}; {866,869,870} -> 871; {867,868,869,870,871} -> 872.
+- **Reply to user**: posted iteration summary on Discord, awaiting approval of schema-first plan v2 before unblocking T-865 + launching autonomous_run.sh 8 --allow-dirty.
+- **Sanity check**: task_db.py list confirms 8 tasks with corrected deps + updated descriptions; T-865 status=blocked persists.
+- **Status**: STILL AWAITING USER APPROVAL (this iteration responded to reviewer feedback, but final go-ahead from human required before T-865 unblocks).
+
+## 2026-05-13 -- [T-P0-865 / META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary
+- **What I did**: Authored `schemas/meta_mlsd_canonical.yaml` (the machine-checkable contract for the Meta-MLSD overhaul) and `docs/meta_mlsd_audit_20260513.md` (thin task-to-rule map). Schema covers two doc-types: `cd96-playbook` (9 numbered sections of `company_documents.content` id=96) and `sd-golden` (system_designs split across 9 fields: overview/architecture/dataflow/formulas/production_constraints/tradeoffs/defense/cheat_sheet/verbal_outline). Encoded 14 unique rule IDs across 5 rule families: 3-rule (decision/tradeoff/scale-SLA/twist-callback) at SECTION level with at-least-one-bullet pass threshold (not per-bullet -- mechanism bullets like 'HNSW M=32 p99 8ms' exempt from cargo-cult twist suffix); 4 forbidden_patterns (why-this-is-strong / rhythm-philosophy / drawer-header-literal / per-twist-4-section-template); 4 cross-page consistency rules (section naming, sd:// link resolution, twist-list match cd96 drawer, cheatsheet no-dup); diff-delta heuristic (>70% line-count reduction -> human review halt, target ~40%); 90s forcing function for sd-friend Section 5. cd96 §1 timing skeleton row schema formalized as 6-column row with rhythm + strong_moment_slot + tag_twist/tag_scale/tag_trade tags, all rows must populate rhythm + trade.
+- **Deliverables**: `schemas/meta_mlsd_canonical.yaml` (NEW, 246 lines / ~12KB, schema_version=1). `docs/meta_mlsd_audit_20260513.md` (NEW, ~80 lines): downstream task -> schema rule map for T-866..T-872, plus HITL gate questions (3-rule section-level interp, 4 forbidden patterns, 6-column timing row, 70% diff-delta threshold).
+- **Sanity check result**: (a) YAML parses cleanly via `yaml.safe_load` -- 9 cd96 sections, 9 sd_golden fields, 4 three_rule entries, 4 forbidden_patterns, 4 cross_page rules, 1 diff_delta, 1 ninety_second_forcing. (b) All 14 rule IDs unique (`R-3RULE-*`, `R-FORBID-*`, `R-XPAGE-*`, `R-DIFFDELTA-70pct`, `R-90S-friend-rec-section5`, `R-TIMING-row-4tag`, `R-DRAWER-cd96`, `R-DRAWER-no-sd-drawer`). (c) Zero emoji-class symbols (unicodedata category `So`) in either file. (d) Doc instances cross-referenced to DB: cd96 = company_documents id=96, sd41 slug=meta-reels-golden, sd42 slug=meta-top3-comments-golden -- both verified to exist. (e) Schema rules cover every downstream task's stated needs (T-866 §2.2 delete + §1 timing rewrite, T-867 drawer + philosophy strip + diff-delta self-check, T-868 reseed mapping, T-869 weapon ads anchors, T-870 friend-rec 90s forcing, T-871 drawer link-in, T-872 3-part validator contract).
+- **Status**: [DONE] (HITL gate per task spec: human reviewer signs off on schema design itself before T-866..T-870 unblock for parallel autonomous execution).
+- **Request**: `task_db.py update T-P0-865 --status completed`

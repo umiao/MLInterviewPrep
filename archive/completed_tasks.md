@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 756 completed tasks archived as of latest archival.
+> 774 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1115,3 +1115,30 @@ LR golden (scripts/seed_linear_regress
 - [x] **2026-05-10** -- T-P1-806: [KG-INT B3-4] Shared substrate: LC keywords -> meta-prep/lc-keyword-checklists. Cross-company LC keyword frequency: which problem types/tags appear in >=3 P0+P1 prep docs. Build per-tag checklist + fr
 - [x] **2026-05-10** -- T-P1-807: [KG-INT B3-5] Shared substrate: onsite loop templates -> meta-prep/onsite-loop-templates. Extract general onsite loop structures (4-round VO, hiring committee, team match) appearing in >=3 P0+P1 docs. AC: onsit
 - [x] **2026-05-11** -- T-P2-835: [KG-INT B6-P2-batch] 18 applied-status companies: KG-extraction only (no archive). For 18 applied-status companies (Apple, Nvidia, Reddit, Salesforce, Microsoft, Instacart, Robinhood, Roblox, Amazon, Coi
+- [x] **2026-05-12** -- T-P0-842: [Meta-MLSD F] RecSys 核心模型 8 工作 + 脉络 → company_documents. INSERT a new company_documents row holding user's verbatim 推荐系统核心模型复习笔记 (8 工作 + 跨工作脉络梳理). This becomes the model-level d
+- [x] **2026-05-12** -- T-P0-843: [Meta-MLSD G] Retrofit doc 94 (Family Cards) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=94 ('[Meta-MLSD] Family Taxonomy + 13 Question Cards (drawer)') by prepending a p
+- [x] **2026-05-12** -- T-P0-844: [Meta-MLSD H] Retrofit doc 95 (Cross-cutting 积木库) — prepend Drawer 入口 顶部 section. Retrofit existing company_documents.id=95 ('[Meta-MLSD] Cross-cutting 积木库 (drawer)') by prepending a prominent Drawer 入口
+- [x] **2026-05-12** -- T-P0-845: [Meta-MLSD I] Retrofit doc 96 (Main Hub) — prepend Drawer 入口 + dedupe Section 8 old drawer list. Retrofit existing company_documents.id=96 ('[Meta-MLSD] 45min Playbook + 4 Strong Moments', is_golden=1 default first pa
+- [x] **2026-05-12** -- T-P0-846: [Meta-MLSD J] Retrofit Reels SD (id=41) overview — prepend Drawer 入口 顶部 section. Retrofit system_designs.id=41 (slug='meta-reels-golden', title='Meta MLSD Golden Example: Reels Home Feed Recommendation
+- [x] **2026-05-12** -- T-P0-847: [Meta-MLSD] doc 96 retrofit: add 'Twist 挖掘方法论' section (4 axes + 4-段 template + Reels 7-twist worked example). Edit scripts/seed_meta_mlsd_main_hub.py to add a new section between Section 1 (节奏 Timing Skeleton) and the existing str
+- [x] **2026-05-12** -- T-P0-848: [Meta-MLSD] doc 94 Q13 Reels card: replace stub with 7-twist summary + dual reference (sd://meta-reels-golden + cd://96). Edit scripts/seed_meta_mlsd_family_taxonomy.py: locate Q13 Reels card (currently 1-line stub: '已在 golden example 详述. 核心 
+- [x] **2026-05-12** -- T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough). **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
+
+**内
+- [x] **2026-05-12** -- T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线). **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
+
+把用户 2026-05-12 Discord msg 1503874418529669201 给的 Bias Tower / Train-Serve Skew / S
+- [x] **2026-05-12** -- T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden. Retrofit company_documents id=94 ('Family Taxonomy + 13 Question Cards') 的 Drawer 入口表 + Q1 'Top 3 Comments Extraction' c
+- [x] **2026-05-12** -- T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=95 ('Cross-cutting 积木库') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
+
+**改动**: Dra
+- [x] **2026-05-12** -- T-P0-857: [Meta-MLSD] Retrofit cd96 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=96 ('45min Playbook + 4 Strong Moments') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-gold
+- [x] **2026-05-12** -- T-P0-858: [Meta-MLSD] Retrofit cd97 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=97 ('推荐系统核心模型复习笔记 8 工作 + 脉络'，2026-05-12 batch 刚加入) 的 Drawer 入口表新增 1 行指向 sd://meta-top3-com
+- [x] **2026-05-12** -- T-P0-859: [Meta-MLSD] Retrofit sd41 (Reels Golden) overview Drawer → sd://meta-top3-comments-golden. Retrofit system_designs id=41 (slug='meta-reels-golden', 'Reels Home Feed Recommendation 45min Golden') 的 overview 列开头 D
+- [x] **2026-05-12** -- T-P0-860: [Meta-MLSD] 前端 SystemDesignList 加 'ML System Design' 第 4 个 tab + prod 校验. 在 src/frontend/src/pages/SystemDesignList.tsx 加第 4 个 tab 'ML System Design'，把 sd41 (Reels Golden, do=130) 和 sd 新建的 meta-
+- [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
+
+CONTENT:
+- 积木: Selection bi
+- [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se

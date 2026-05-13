@@ -1,0 +1,375 @@
+# Meta-MLSD Canonical Schema
+# ----------------------------------------------------------------------------
+# Source of truth for the Meta-MLSD content overhaul (T-P0-865 .. T-P0-872).
+# Consumed by:
+#   - T-P0-866 (cd96 surgery)
+#   - T-P0-867 (sd41 prune)
+#   - T-P0-868 (sd42 reseed)
+#   - T-P0-869 (meta-weapon-ads-golden)
+#   - T-P0-870 (meta-friend-rec-golden)
+#   - T-P0-871 (cd96 link-in)
+#   - T-P0-872 (scripts/audit_meta_mlsd_3rule.py validator)
+#
+# Design rationale:
+#   5 fresh-context parallel agents will drift on prose "tighten" unless they
+#   share a machine-checkable contract. The 3-rule is encoded at SECTION
+#   granularity (not per-bullet) because mechanism bullets like
+#   "HNSW M=32 p99 8ms" do not need a twist-callback suffix; the twist-callback
+#   is a section-level rhythm property, not a per-line decoration.
+# ----------------------------------------------------------------------------
+
+schema_version: 1
+generated_at: "2026-05-13"
+generated_by_task: T-P0-865
+
+# ----------------------------------------------------------------------------
+# What this schema covers
+# ----------------------------------------------------------------------------
+applies_to:
+  - doc_type: cd96-playbook
+    storage: company_documents.content
+    instances:
+      - {ref: "cd96", company_id: 31, doc_id: 96, title: "[Meta-MLSD] 45min Playbook + 4 Strong Moments"}
+  - doc_type: sd-golden
+    storage: system_designs.{field}
+    instances:
+      - {ref: "sd41", slug: "meta-reels-golden",         scope: "RecSys"}
+      - {ref: "sd42", slug: "meta-top3-comments-golden", scope: "RecSys / list-level"}
+      - {ref: "sd-weapon", slug: "meta-weapon-ads-golden", scope: "T&S classification", task: "T-P0-869", planned: true}
+      - {ref: "sd-friend", slug: "meta-friend-rec-golden", scope: "Bilateral matching", task: "T-P0-870", planned: true}
+
+# ============================================================================
+# DOC-TYPE: cd96-playbook
+# ============================================================================
+# Single Markdown blob in company_documents.content. The "homepage" of the
+# Meta MLSD hub: methodology + 4 Strong Moments + ML-native vocab + meta-rules.
+# Per-twist worked examples live in sd-golden rows (linked via sd:// in drawer).
+# ----------------------------------------------------------------------------
+cd96_playbook:
+  description: |
+    Methodology homepage. Owns: timing rhythm, Strong Moments slots, vocab
+    YES/NO, meta-rules. Does NOT own: per-twist worked walkthroughs (those
+    live in sd-golden). Sections 5-8 are intentionally kept abstract here.
+
+  drawer_header:
+    rule_id: R-DRAWER-cd96
+    required: true
+    must_link_sd_goldens:
+      - meta-reels-golden
+      - meta-top3-comments-golden
+      - meta-weapon-ads-golden        # added by T-P0-871
+      - meta-friend-rec-golden        # added by T-P0-871
+    must_use_sd_protocol_link: true   # "sd://<slug>" syntax, not raw markdown URL
+
+  sections:
+    - id: "§1"
+      heading_regex: '^## 1\.\s*节奏.*Timing Skeleton'
+      required: true
+      payload_kind: timing_skeleton_table
+      row_schema:
+        rule_id: R-TIMING-row-4tag
+        # Each row of the 45-min timing table MUST carry these 4 tags.
+        # Empty (`-`) is allowed for `twist` and `scale` when the phase is
+        # transit-rhythm only, but `rhythm` and `trade` are non-empty for ALL rows.
+        columns:
+          - {name: time_band,    required: true,  example: "0-3 min"}
+          - {name: rhythm,       required: true,  vocab: [Framing, Data, Model, Bias, Evaluation, Zoomout, Serving, QA]}
+          - {name: strong_moment_slot, required: true, vocab: ["#1", "#2", "#3", "#4", "-"]}
+          - {name: tag_twist,    required: true,  empty_ok: true, semantic: "which sd:// twist this rhythm row hosts, or '-'"}
+          - {name: tag_scale,    required: true,  empty_ok: true, semantic: "concrete numeric anchor if applicable (latency / dim / traffic)"}
+          - {name: tag_trade,    required: true,  empty_ok: false, semantic: "one-line tradeoff or rhythm-rule statement"}
+      delete_subsection:
+        - id: "§2.2"
+          heading_regex: 'Per-twist 4\s*段推导模板'   # "Per-twist 4-段推导模板"
+          rationale: "abstract template duplicates per-twist worked examples in sd-golden"
+          enforced_by_task: T-P0-866
+
+    - id: "§2"
+      heading_regex: '^## 2\.\s*Twist'
+      required: true
+      payload_kind: prose_with_subsections
+      keep_subsections: ["§2.1", "§2.3", "§2.4"]
+      delete_subsections: ["§2.2"]
+      apply_3rule: true
+
+    - id: "§3"
+      heading_regex: '^## 3\.\s*4 Strong Moments'
+      required: true
+      payload_kind: strong_moment_slots
+      slot_count: 4
+      slot_heading_regex: '^### Strong Moment #([1-4])'
+      apply_3rule: true
+
+    - id: "§4"
+      heading_regex: '^## 4\.\s*ML-Native Vocabulary'
+      required: true
+      payload_kind: yes_no_table
+      apply_3rule: false
+
+    - id: "§5"
+      heading_regex: '^## 5\.\s*Framing.*Body.*Strong.*Zoom'
+      required: true
+      payload_kind: prose_meta_structure
+      apply_3rule: true
+
+    - id: "§6"
+      heading_regex: '^## 6\.\s*偏好节奏.*Meta-rules'
+      required: true
+      payload_kind: numbered_meta_rules
+      min_bullets: 8
+      max_bullets: 8
+      apply_3rule: false   # meta-rules ARE the rules; no twist-callback needed
+      rationale: "8 meta-rules are themselves the rhythm spec; exempt from twist-callback"
+
+    - id: "§7"
+      heading_regex: '^## 7\.\s*减少澄清'
+      required: true
+      payload_kind: prose
+      apply_3rule: true
+
+    - id: "§8"
+      heading_regex: '^## 8\.\s*E4.*E5'
+      required: true
+      payload_kind: boundary_table
+      apply_3rule: false
+
+    - id: "§9"
+      heading_regex: '^## 9\.\s*30\s*秒'   # "30 秒判题流程"
+      required: true
+      payload_kind: numbered_steps
+      min_bullets: 5
+      max_bullets: 15
+      apply_3rule: true
+
+# ============================================================================
+# DOC-TYPE: sd-golden
+# ============================================================================
+# system_designs row split across multiple Markdown fields. Each instance
+# walks a SINGLE 45-min interview verbatim. NO drawer header table inside
+# the sd-golden body (the drawer table belongs to cd96 only).
+# ----------------------------------------------------------------------------
+sd_golden:
+  description: |
+    Per-twist 45-min walkthrough. Owns: framing-language verbatim, label
+    schema, architecture, dataflow rhythm, tradeoffs, Strong Moment verbatim.
+    Does NOT own: meta-rules, vocab YES/NO, 8-rules-of-rhythm (those live
+    in cd96). cheat_sheet + verbal_outline are OPTIONAL; if used, they must
+    not duplicate cd96 §1/§5/§6.
+
+  forbidden_top_block:
+    rule_id: R-DRAWER-no-sd-drawer
+    pattern_regex: '^\|.*sd://.*\|'      # no drawer table at top of sd-golden body
+    rationale: "drawer table belongs to cd96; including it in sd-golden duplicates state"
+    enforced_by_tasks: [T-P0-867, T-P0-868, T-P0-869, T-P0-870]
+
+  fields:
+    - id: overview
+      required: true
+      apply_3rule: true
+      target_chars: {min: 1500, max: 4500}
+      must_contain_semantic:
+        - {tag: framing_anchor,  description: "what this design solves in one sentence"}
+        - {tag: twist_list,      description: "the 2-4 unique twists this golden showcases"}
+      forbidden_subsection_regex:
+        - {id: R-FORBID-rhythm-philosophy, pattern: '^##\s*整体节奏哲学', rationale: "duplicates cd96 §6"}
+      cross_page_check:
+        rule_id: R-XPAGE-twist-list-matches-cd96-drawer
+        description: "twist_list in overview must match the twists declared in cd96 drawer for this sd:// slug"
+
+    - id: architecture
+      required: true
+      apply_3rule: true
+      target_chars: {min: 2000, max: 6000}
+      must_contain_semantic:
+        - {tag: stage_funnel,  description: "explicit stage funnel (retrieval / ranking / rerank / serving) OR equivalent decomposition"}
+
+    - id: dataflow
+      required: true
+      apply_3rule: true
+      target_chars: {min: 2500, max: 9000}
+      must_contain_semantic:
+        - {tag: time_anchored_walkthrough, description: "minute-by-minute or section-by-section verbatim walk"}
+
+    - id: formulas
+      required: false                    # sd41 may skip; sd42 must include label schema
+      apply_3rule: false
+      rationale: "formulas are anchors, not narrative; 3-rule does not apply"
+
+    - id: production_constraints
+      required: false
+      apply_3rule: true
+
+    - id: tradeoffs
+      required: true
+      apply_3rule: true                  # this is the highest-density 3-rule section
+      min_bullets: 6
+      max_bullets: 10
+      bullet_pattern_regex: '^[0-9]+\.\s.+\bvs\b.+'
+      bullet_semantic_template: '"I pick A because X, costs Y, switches to B if Z"'
+
+    - id: defense
+      required: true
+      apply_3rule: true
+      target_chars: {min: 2500, max: 8500}
+      must_contain_semantic:
+        - {tag: strong_moment_verbatim, description: "the 4 Strong Moment lines in interview-ready English"}
+      forbidden_subsection_regex:
+        - {id: R-FORBID-why-this-is-strong, pattern: '(?i)why this is strong', rationale: "meta-commentary about the Strong Moment is methodology, lives in cd96"}
+
+    - id: cheat_sheet
+      required: false
+      apply_3rule: false
+      rationale: "30-sec flash card; intentionally telegraphic, exempt from 3-rule"
+      duplication_guard:
+        rule_id: R-XPAGE-cheatsheet-no-cd96-dup
+        description: "if present, must NOT verbatim duplicate cd96 §1 / §5 / §6"
+
+    - id: verbal_outline
+      required: false
+      apply_3rule: false
+      duplication_guard:
+        rule_id: R-XPAGE-verbal-no-cd96-dup
+        description: "if present, must NOT verbatim duplicate cd96 §5 meta-structure prose"
+
+# ============================================================================
+# 3-RULE (SECTION-LEVEL)
+# ============================================================================
+# A section "passes" rule R-3RULE-X if AT LEAST ONE bullet/line in the section
+# satisfies the rule's regex/semantic. Per-bullet enforcement would force
+# cargo-cult suffixes onto mechanism bullets (e.g. "HNSW M=32 p99 8ms") that
+# do not need a twist callback. The twist callback is a section-level rhythm
+# property -- it must appear somewhere, but not on every line.
+# ----------------------------------------------------------------------------
+three_rule:
+  applies_at: section
+  pass_threshold: at_least_one_bullet
+  rules:
+    R-3RULE-decision:
+      label: decision_present
+      description: "section contains an explicit ranked decision -- 'I pick X', 'choose A over B', 'default to Y'"
+      detect_regex:
+        - '\b(I pick|we pick|I choose|we choose|default to|pick A)\b'
+        - '(?i)\bdecision\b.*\bover\b'
+
+    R-3RULE-tradeoff:
+      label: tradeoff_present
+      description: "section contains explicit costs/switches -- 'costs Y', 'switches to B if Z', '... at the cost of ...'"
+      detect_regex:
+        - '(?i)\b(costs?|at the cost of|switches? to|in exchange for)\b'
+        - '\bvs\b'
+
+    R-3RULE-scale-sla:
+      label: scale_sla_present
+      description: "section anchors at least one concrete number: latency, dimension, QPS, candidate-count, dataset size."
+      detect_regex:
+        - '\b\d+\s*(ms|µs|us|qps|QPS|dim|k|K|M|B|fps|min|sec|s)\b'
+        - '\bp(50|95|99|999)\b'
+        - '\bHNSW\b|\bIVF\b'   # algorithmic anchors implying scale design
+
+    R-3RULE-twist-callback:
+      label: twist_callback_present
+      description: "section names the unique twist it is hosting -- e.g. 'the bilateral matching twist', 'this is where the ambiguous-middle label pays off'"
+      detect_regex:
+        - '(?i)\b(twist|unique angle|the core decision here is|this is where)\b'
+        - '(?i)\bcallback (to|of)\b'
+
+# ============================================================================
+# FORBIDDEN PATTERNS (regex-level)
+# ============================================================================
+# These strings/phrases should not appear anywhere in cd96 or sd-golden
+# bodies. They are footprints of the pre-overhaul state.
+# ----------------------------------------------------------------------------
+forbidden_patterns:
+  - id: R-FORBID-why-this-is-strong
+    pattern: '(?i)why this is strong'
+    scope: [sd_golden.defense]
+    rationale: "meta-commentary belongs in cd96, not sd-golden verbatim"
+
+  - id: R-FORBID-rhythm-philosophy
+    pattern: '整体节奏哲学'    # "整体节奏哲学"
+    scope: [sd_golden.overview]
+    rationale: "duplicates cd96 §6"
+
+  - id: R-FORBID-drawer-header-literal
+    pattern: '^\|\s*Doc\s*\|.*sd://'
+    scope: [sd_golden.overview, sd_golden.architecture, sd_golden.dataflow,
+            sd_golden.tradeoffs, sd_golden.defense, sd_golden.cheat_sheet,
+            sd_golden.verbal_outline]
+    rationale: "drawer header is a cd96-only artifact"
+
+  - id: R-FORBID-per-twist-4-section-template
+    pattern: '(?i)Per-twist 4-section template|Per-twist 4\s*段推导模板'
+    scope: [cd96_playbook]
+    rationale: "abstract template -> replaced by concrete sd-golden examples"
+
+# ============================================================================
+# CROSS-PAGE CONSISTENCY (T-872 part B)
+# ============================================================================
+cross_page_consistency:
+  R-XPAGE-section-naming:
+    description: "the 4 sd-golden instances must use IDENTICAL canonical naming for the Strong Moments section header"
+    canonical_header_regex: '^#\s*Strong Moments|^# .*Strong Moments.*verbatim'
+    must_not_mix_synonyms: ["Defense Highlights", "Key Moments", "Verbatim Lines"]
+
+  R-XPAGE-sd-link-resolves:
+    description: "every sd:// link inside cd96 must resolve to a system_designs.slug that exists"
+    check: lookup_in_db
+    db_table: system_designs
+    db_column: slug
+
+  R-XPAGE-twist-list-matches-cd96-drawer:
+    description: "the twist_list declared in each sd-golden overview must match the twists declared for that slug in cd96 drawer header"
+
+  R-XPAGE-cheatsheet-no-cd96-dup:
+    description: "if sd-golden.cheat_sheet exists, it must not verbatim include >5 consecutive bullets from cd96 §1/§5/§6"
+    max_consecutive_overlap_bullets: 5
+
+# ============================================================================
+# DIFF-DELTA HEURISTIC (T-872 part C)
+# ============================================================================
+diff_delta:
+  R-DIFFDELTA-70pct:
+    description: "if a prune task (T-867 sd41, T-868 sd42) reduces line count by >70%, halt and request human review -- likely over-deleted"
+    threshold_pct: 70
+    target_pct: 40
+    action_on_breach: human_review_required
+
+# ============================================================================
+# 90-SECOND FORCING FUNCTION (T-870 friend rec Section 5)
+# ============================================================================
+ninety_second_forcing:
+  R-90S-friend-rec-section5:
+    description: |
+      Friend Rec sd-golden Section 5 (model architecture, 15-20min slot in the
+      walkthrough) must compress its tabular encyclopedia (LR/XGBoost/DNN/MMoE/
+      Transformer ladder + 5 retrieval channels table + serving table) to a
+      narrative rhythm. Apply the question 'if only 90 seconds, which 3
+      sentences?' after rewrite -- the 3 sentences must keep MMoE multi-head
+      bilateral, cluster-randomized A/B, and NRT bilateral signal.
+    applies_to: {ref: sd-friend, field: dataflow_or_architecture}
+    keep_anchors:
+      - "MMoE multi-head bilateral"
+      - "cluster-randomized A/B"
+      - "NRT bilateral signal"
+    compress_to_one_paragraph_each:
+      - "model ladder (LR -> XGBoost -> DNN -> MMoE -> Transformer)"
+      - "5 retrieval channels table"
+
+# ============================================================================
+# VALIDATOR CONTRACT (T-872 part A)
+# ============================================================================
+# scripts/audit_meta_mlsd_3rule.py consumes this YAML and reports:
+#   - section-level 3-rule failures (per rule, per section)
+#   - forbidden_patterns hits (per pattern, per location)
+#   - cross-page inconsistencies
+#   - timing skeleton row-schema violations
+# Exit 0 = clean across all 5 docs. Exit 1 = at least one finding.
+# ----------------------------------------------------------------------------
+validator:
+  entrypoint: scripts/audit_meta_mlsd_3rule.py
+  exit_codes:
+    0: "all 5 docs clean"
+    1: "schema findings (per-page or cross-page)"
+    2: "diff-delta breach (>70% reduction logged but unconfirmed)"
+  report_format: json
+  report_path: logs/meta_mlsd_audit_{date}.json
