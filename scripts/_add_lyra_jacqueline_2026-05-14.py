@@ -1,13 +1,20 @@
 """Idempotent seed: Lyra therapy session with Jacqueline Hurt-Coppola.
 
-Per user Discord 2026-05-10 (msg 1502929534046044240):
-  - Thursday 2026-05-14, 10:00 AM PDT
+Per user Discord 2026-05-10 (msg 1502929534046044240) the session was originally
+scheduled Thursday 2026-05-14 10:00 AM PDT. Per user Discord 2026-05-13 (msg
+1503987671909929112) it was rescheduled to Thursday 2026-05-14 2:00 PM PDT to
+free the 10:00-10:45 AM slot for a Meta ML Sys Design follow-up interview.
+
+  - Thursday 2026-05-14, 2:00 PM PDT (rescheduled from 10:00 AM PDT)
   - Therapy, 60 min
   - Provider: Jacqueline Hurt-Coppola
 
 Company: Lyra (id=25). Timezone: naive Pacific (PDT), per project convention.
 Mirrors prior Jacqueline session pattern (id=17/37/38/60 etc., last seeded by
 scripts/_add_lyra_jacqueline_2026-05-08.py).
+
+Migration: deletes the prior 2026-05-14 10:00 row for this company+title so
+re-runs are idempotent and the rescheduled slot is the single source of truth.
 
 Run: python scripts/_add_lyra_jacqueline_2026-05-14.py
 """
@@ -24,14 +31,23 @@ EVENT_TYPE = "other"
 DURATION_MINUTES = 60
 STATUS = "upcoming"
 
+# Slots that were superseded by the rescheduled SESSIONS below. Cleaned up at
+# the start of every run so the rescheduled slot is the only Lyra/Jacqueline
+# row on this date.
+SUPERSEDED_SLOTS = [
+    ("2026-05-14 10:00:00", "Lyra session with Jacqueline"),
+]
+
 SESSIONS = [
     {
         "title": "Lyra session with Jacqueline",
-        "scheduled_at": "2026-05-14 10:00:00",
+        "scheduled_at": "2026-05-14 14:00:00",
         "description": (
-            "Jacqueline Hurt-Coppola scheduled a new session. "
-            "Thursday 2026-05-14 10:00 AM PDT, 60 min. "
-            "Therapy session (Lyra)."
+            "Jacqueline Hurt-Coppola session. "
+            "Thursday 2026-05-14 2:00 PM PDT, 60 min. "
+            "Therapy session (Lyra). "
+            "Rescheduled from 10:00 AM PDT on 2026-05-13 to free the "
+            "10:00-10:45 AM slot for a Meta ML Sys Design follow-up interview."
         ),
     },
 ]
@@ -40,6 +56,18 @@ SESSIONS = [
 def main() -> None:
     conn = sqlite3.connect(str(DB_PATH))
     cur = conn.cursor()
+
+    deleted = 0
+    for old_scheduled_at, old_title in SUPERSEDED_SLOTS:
+        cur.execute(
+            "SELECT id FROM interview_events "
+            "WHERE company_id = ? AND scheduled_at = ? AND title = ?",
+            (COMPANY_ID, old_scheduled_at, old_title),
+        )
+        for (row_id,) in cur.fetchall():
+            cur.execute("DELETE FROM interview_events WHERE id = ?", (row_id,))
+            print(f"[DELETE] id={row_id}: {old_title} @ {old_scheduled_at} (superseded)")
+            deleted += 1
 
     inserted = 0
     synced = 0
@@ -93,7 +121,7 @@ def main() -> None:
     conn.commit()
     conn.close()
 
-    print(f"\nDone. inserted={inserted}, synced={synced}")
+    print(f"\nDone. inserted={inserted}, synced={synced}, deleted={deleted}")
 
 
 if __name__ == "__main__":
