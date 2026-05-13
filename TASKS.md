@@ -9,30 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-859: [Meta-MLSD] Retrofit sd41 (Reels Golden) overview Drawer → sd://meta-top3-comments-golden
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-853
-- **Description**: Retrofit system_designs id=41 (slug='meta-reels-golden', 'Reels Home Feed Recommendation 45min Golden') 的 overview 列开头 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
-
-**改动**: overview 列 (Drawer 入口 section, 已由 T-P0-846 prepend 完成) 表新增一行:
-`| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 第 2 例 Meta MLSD golden walkthrough (intra-item ranking + set selection family) | 对比学 Reels (cross-item engagement) vs Top-3 Comments (intra-item set selection) 的 framing/twist 差异 |`
-
-位置: 在 sd41 自己的 Drawer 入口表 (除 sd41 自身 self-link 外的) 现有行下方追加。**self-URI sd://meta-reels-golden 不能在表内**。
-
-**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_sd41_drawer_header.py。
-
-**Acceptance Criteria**:
-1. overview 列 Drawer 入口表多 1 行
-2. self-URI sd://meta-reels-golden 不在表内 (already invariant)
-3. overview 其余 prose (节奏哲学 + 4 strong moment 表 + ML-native vocab 表 + E4 边界) 不被影响
-4. 其他 8 列 (architecture/dataflow/...) 完全不动
-5. Re-run → 无变化
-6. python scripts/audit_uri_consistency.py 通过
-7. EXPECTED_FILES: scripts/retrofit_meta_mlsd_sd41_drawer_header.py
-
-**Commit msg**: [T-P0-XXX] [Meta-MLSD] sd41 overview retrofit: drawer add sd://top3
-
 #### T-P0-860: [Meta-MLSD] 前端 SystemDesignList 加 'ML System Design' 第 4 个 tab + prod 校验
 - **Priority**: P0
 - **Complexity**: M
@@ -523,6 +499,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P0-859: [Meta-MLSD] Retrofit sd41 (Reels Golden) overview Drawer → sd://meta-top3-comments-golden. Retrofit system_designs id=41 (slug='meta-reels-golden', 'Reels Home Feed Recommendation 45min Golden') 的 overview 列开头 D
 - [x] **2026-05-12** -- T-P0-858: [Meta-MLSD] Retrofit cd97 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=97 ('推荐系统核心模型复习笔记 8 工作 + 脉络'，2026-05-12 batch 刚加入) 的 Drawer 入口表新增 1 行指向 sd://meta-top3-com
 - [x] **2026-05-12** -- T-P0-857: [Meta-MLSD] Retrofit cd96 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=96 ('45min Playbook + 4 Strong Moments') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-gold
 - [x] **2026-05-12** -- T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=95 ('Cross-cutting 积木库') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。

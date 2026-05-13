@@ -1,25 +1,32 @@
-"""Retrofit Meta MLSD SD id=41 (Reels Golden) overview with Drawer 入口 header (T-P0-846).
+"""Retrofit Meta MLSD SD id=41 (Reels Golden) overview Drawer header.
 
-Per T-P0-846 ([Meta-MLSD J]). Target: system_designs.id=41,
+Originally written for T-P0-846 ([Meta-MLSD J]) to prepend the Drawer 入口
+header. Extended in T-P0-859 to add a 6th drawer entry pointing at the
+sibling Top-3 Comments golden (sd://meta-top3-comments-golden), placed at
+the bottom of the existing 5-row table.
+
+Target: system_designs.id=41,
 slug='meta-reels-golden',
 title='Meta MLSD Golden Example: Reels Home Feed Recommendation (45min walkthrough)'.
 
-Prepends a Drawer 入口 顶部 section (5 entries, NO self-link
+Prepends a Drawer 入口 顶部 section (6 entries, NO self-link
 sd://meta-reels-golden) + horizontal rule to the `overview` column ONLY.
 The other 8 content columns (architecture / dataflow / formulas /
 production_constraints / tradeoffs / defense / verbal_outline / cheat_sheet)
 remain byte-identical pre vs post.
 
-DRAWER URI INVENTORY (5 entries, NO self-link sd://meta-reels-golden):
+DRAWER URI INVENTORY (6 entries, NO self-link sd://meta-reels-golden):
   - cd://94                                  (Family Taxonomy + 13 Question Cards)
   - cd://95                                  (Cross-cutting 积木库)
   - cd://96                                  (45min Playbook + 4 Strong Moments)
   - cd://97                                  (T-A: RecSys 核心模型 8 工作)
   - sd://interview-recommendation-system     (general RecSys SD cookbook)
+  - sd://meta-top3-comments-golden           (T-P0-859: sibling MLSD golden, intra-item ranking)
 
 DEPS resolved at runtime (fail loud if any drift):
   - cd://94, cd://95, cd://96, cd://97 must exist with expected title fragments
   - sd://interview-recommendation-system slug resolves
+  - sd://meta-top3-comments-golden slug resolves
 
 Idempotency: sentinel <!-- META_MLSD_DRAWER_HEADER_SD41_20260512 --> placed
 as the first line of overview. On re-run, if sentinel present + overview
@@ -58,12 +65,13 @@ EXPECTED_TITLE = (
     "(45min walkthrough)"
 )
 
-# Sibling drawer references (5 entries, NO self-link sd://meta-reels-golden).
+# Sibling drawer references (6 entries, NO self-link sd://meta-reels-golden).
 FAMILY_TAXONOMY_DOC_ID = 94    # 13 题 Family Taxonomy
 CROSS_CUTTING_DOC_ID = 95      # Cross-cutting 积木库
 MAIN_HUB_DOC_ID = 96           # 45min Playbook + 4 Strong Moments
 RECSYS_MODELS_DOC_ID = 97      # T-A: RecSys 核心模型 8 工作 (per T-P0-842)
 SD_GENERIC_RECSYS = "interview-recommendation-system"
+SD_TOP3_GOLDEN = "meta-top3-comments-golden"  # T-P0-859: sibling MLSD golden
 
 DRAWER_INDEX = (
     f"> ## Drawer 入口（点击展开详读）\n"
@@ -80,6 +88,9 @@ DRAWER_INDEX = (
     f"| DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |\n"
     f"> | **[通用 RecSys SD Cookbook](sd://{SD_GENERIC_RECSYS})** "
     f"| Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |\n"
+    f"> | **[Top-3 Comments Golden Example (45min)](sd://{SD_TOP3_GOLDEN})** "
+    f"| 第 2 例 Meta MLSD golden walkthrough (intra-item ranking + set selection family) "
+    f"| 对比学 Reels (cross-item engagement) vs Top-3 Comments (intra-item set selection) 的 framing/twist 差异 |\n"
     f"\n"
     f"---\n"
     f"\n"
@@ -107,12 +118,32 @@ def sha256_bytes(text: str | None) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+PREPENDED_END_MARKER = "\n---\n\n"
+
+
+def strip_prepended_block(existing_overview: str) -> str:
+    """Return body with any existing sentinel-led prepended block stripped.
+
+    Uses the trailing `\\n---\\n\\n` marker (the horizontal rule that closes
+    the Drawer 入口 blockquote and separates it from the prose body) as the
+    boundary, so this works even if the prepended block's row count has
+    drifted from the current DRAWER_INDEX (e.g., row count expanded from 5
+    to 6 in T-P0-859).
+    """
+    if not existing_overview.startswith(SENTINEL):
+        return existing_overview
+    end_idx = existing_overview.find(PREPENDED_END_MARKER, len(SENTINEL))
+    if end_idx < 0:
+        raise RuntimeError(
+            "sentinel present but trailing '---' marker missing; "
+            "cannot safely strip prepended block"
+        )
+    return existing_overview[end_idx + len(PREPENDED_END_MARKER):]
+
+
 def build_overview(existing_overview: str) -> str:
     """Prepend sentinel + drawer index to overview (idempotent)."""
-    if existing_overview.startswith(SENTINEL):
-        body = existing_overview[len(PREPENDED_BLOCK):]
-    else:
-        body = existing_overview
+    body = strip_prepended_block(existing_overview)
     return f"{PREPENDED_BLOCK}{body}"
 
 
@@ -138,13 +169,14 @@ def validate_overview(content: str, body: str) -> None:
             f"got {first_visible!r}"
         )
 
-    # AC #2: 5 unique drawer URIs each appear exactly once in PREPENDED BLOCK.
+    # AC #2: 6 unique drawer URIs each appear exactly once in PREPENDED BLOCK.
     drawer_uris = [
         f"cd://{FAMILY_TAXONOMY_DOC_ID}",
         f"cd://{CROSS_CUTTING_DOC_ID}",
         f"cd://{MAIN_HUB_DOC_ID}",
         f"cd://{RECSYS_MODELS_DOC_ID}",
         f"sd://{SD_GENERIC_RECSYS}",
+        f"sd://{SD_TOP3_GOLDEN}",
     ]
     for uri in drawer_uris:
         c = PREPENDED_BLOCK.count(uri)
@@ -173,11 +205,12 @@ def validate_overview(content: str, body: str) -> None:
             "original overview body not preserved verbatim at end of content"
         )
 
-    # AC #5: length in spec range ~3550-3700 (allow margin).
+    # AC #5: length in spec range. Original 5-row block ~3476 chars; the
+    # T-P0-859 6th row adds ~270 chars → expected range ~3700-3800.
     n_chars = len(content)
-    if not (3400 <= n_chars <= 3900):
+    if not (3400 <= n_chars <= 4100):
         raise RuntimeError(
-            f"overview char-length {n_chars} not in [3400, 3900]"
+            f"overview char-length {n_chars} not in [3400, 4100]"
         )
 
     # AC: required body landmarks still present.
@@ -271,11 +304,19 @@ def main() -> int:
             return 1
         print(f"[OK] sd://{SD_GENERIC_RECSYS} verified: id={sd_check[0]}")
 
+        sd_top3 = conn.execute(
+            "SELECT id, slug FROM system_designs WHERE slug = ?",
+            (SD_TOP3_GOLDEN,),
+        ).fetchone()
+        if sd_top3 is None:
+            print(f"[ERROR] sd://{SD_TOP3_GOLDEN} missing")
+            return 1
+        print(f"[OK] sd://{SD_TOP3_GOLDEN} verified: id={sd_top3[0]}")
+
         # Strip prepended block (if sentinel present) before validation.
-        if existing_overview.startswith(SENTINEL):
-            body_raw = existing_overview[len(PREPENDED_BLOCK):]
-        else:
-            body_raw = existing_overview
+        # Uses the trailing horizontal-rule marker, not len(PREPENDED_BLOCK),
+        # so the block length is allowed to drift between revisions.
+        body_raw = strip_prepended_block(existing_overview)
 
         new_overview = build_overview(existing_overview)
         validate_overview(new_overview, body_raw)
