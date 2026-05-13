@@ -495,3 +495,10 @@ and make sure the disk is unlocked. (lines 1-362): overview (2851 chars — paci
 - **Sanity check result**: First run reported `[UPDATE] id=66: ... @ 2026-05-15 11:00:00 -> ... @ 2026-05-15 12:00:00`. Re-run for idempotency: `[SYNC] id=66: already at 2026-05-15 12:00:00, fields refreshed`. Final-state SQL: id=66 at `2026-05-15 12:00:00`, title `Meta Follow-up Round - AI-Enabled ML System Design`, 45 min, Zoom, upcoming; `COUNT(*) WHERE company_id=31 AND event_type='system_design' AND scheduled_at LIKE '2026-05-1%'` = 1 (no duplicate row). 5/14 has only the Lyra session id=67 @ 12:00; 5/15 has only Meta id=66 @ 12:00.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P0-863` (already completed).
+
+## 2026-05-13 18:17 -- [T-P0-864] Add Adobe Phone Screen 2026-05-14 14:00 PDT (30 min)
+- **What I did**: Discord request (msg 1504185501085864127) -- new event: Adobe phone screen on Thursday 2026-05-14 at 2:00 PM PDT, 30 min, interviewer + platform TBD. Adobe already exists in `companies` table (id=23), so this seed only inserts into `interview_events` (no company-row touch). Followed the existing `_add_<company>_<context>_<date>.py` pattern; canonical key `(company_id, scheduled_at, title)`.
+- **Deliverables**: CREATED `scripts/_add_adobe_phone_screen_2026-05-14.py` (94 lines, idempotent). INSERTED `interview_events.id=68` (Adobe, phone_screen, "Adobe Phone Screen", 2026-05-14 14:00:00, 30 min, location NULL, status upcoming).
+- **Sanity check result**: First run `[INSERT] id=68 @ 2026-05-14 14:00:00`. Re-run for idempotency: `[SYNC] id=68 @ 2026-05-14 14:00:00` (no duplicate). 5/14 final state: 2 rows -- Lyra id=67 @ 12:00 (60 min, ends 13:00) + Adobe id=68 @ 14:00 (30 min). No time conflicts.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P0-864` (already completed).
