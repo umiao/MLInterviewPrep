@@ -54,6 +54,19 @@ FAMILY_DOC_ID = 94  # T-P0-838
 JIMU_DOC_ID = 95    # T-P0-839
 RECSYS_MODELS_DOC_ID = 97  # T-A: RecSys 核心模型 8 工作 (T-P0-842)
 SD_SLUG = "meta-reels-golden"  # T-P0-837
+# Three additional sd-goldens linked from cd96 (T-P0-868/869/870; cited
+# in Section 1 timing skeleton twist column by T-P0-871):
+SD_TOP3_SLUG = "meta-top3-comments-golden"   # T-P0-868
+SD_WEAPON_SLUG = "meta-weapon-ads-golden"    # T-P0-869
+SD_FRIEND_SLUG = "meta-friend-rec-golden"    # T-P0-870
+
+# Worked-example citation string used in Section 1 strong-moment rows
+# (cite 4 sd-golden walkthroughs instead of just sd://meta-reels-golden,
+# per T-P0-871). Reels first (richest exemplar), then Top-3 / Weapon / Friend.
+WORKED_EXAMPLES_CITATION = (
+    f"sd://{SD_SLUG} · sd://{SD_TOP3_SLUG} · "
+    f"sd://{SD_WEAPON_SLUG} · sd://{SD_FRIEND_SLUG}"
+)
 
 CONTENT = f"""{SENTINEL}
 
@@ -70,13 +83,13 @@ CONTENT = f"""{SENTINEL}
 | 时间段 (time_band) | rhythm | Strong moment | Twist (sd://) | Scale anchor | Trade-off / 节奏规则 |
 | --- | --- | --- | --- | --- | --- |
 | 0-3 min | Framing | - | - | - | 60s declarative propose + 30s yes/no 收尾; 前 90s no-clarification — costs surface 广度, gains 节奏 |
-| 3-5 min | Framing | #1 | unique ML-native twist · sd://{SD_SLUG} | - | I pick 1 ML-native twist over generic SDE framing; costs broader scope, gains "this candidate understands the problem class" signal |
+| 3-5 min | Framing | #1 | unique ML-native twist · 4 worked examples ({WORKED_EXAMPLES_CITATION}) | - | I pick 1 ML-native twist over generic SDE framing; costs broader scope, gains "this candidate understands the problem class" signal |
 | 5-12 min | Data | - | - | label schema 3-part (source / schema / bias) | I pick source-then-label-then-bias walk over flat enumeration; costs verbatim preamble, gains rhythm |
-| 12-15 min | Data | #2 | multi-head label + duration confounder + ambiguous-middle · sd://{SD_SLUG} | multi-task heads (click / watch / like / share) | I pick multi-task heads over single binary; costs label-store complexity, switches to single label if data <10M events/day |
+| 12-15 min | Data | #2 | multi-head label + duration confounder + ambiguous-middle · 4 worked examples ({WORKED_EXAMPLES_CITATION}) | multi-task heads (click / watch / like / share) | I pick multi-task heads over single binary; costs label-store complexity, switches to single label if data <10M events/day |
 | 15-25 min | Model | - | - | retrieval ~10k candidate + ranking 200ms budget; two-tower 128-dim | I pick retrieval-then-ranking funnel + deepen ONE branch (主动问面试官); costs the other branch's depth, gains face-time on senior signal axis |
-| 25-28 min | Bias | #3 | quantified production scar · sd://{SD_SLUG} | two-tower 128-dim, ~10k candidate, single-digit ms p99; ~200 features ceiling | I pick focused ~200-feature set over kitchen-sink; costs marginal recall, gains training-distribution stability (eBay scar) |
+| 25-28 min | Bias | #3 | quantified production scar · 4 worked examples ({WORKED_EXAMPLES_CITATION}) | two-tower 128-dim, ~10k candidate, single-digit ms p99; ~200 features ceiling | I pick focused ~200-feature set over kitchen-sink; costs marginal recall, gains training-distribution stability (eBay scar) |
 | 28-35 min | Evaluation | - | - | offline sliced + counterfactual replay + online A/B + long-term holdout | I pick counterfactual replay + long-term holdout over A/B-only; costs setup time, gains exposure-bias defense |
-| 35-40 min | Zoomout | #4 | top 3 risks + invite deepening · sd://{SD_SLUG} | - | I pick zoom-out-and-rank-3-risks over linear brain-dump; costs 3-min budget, gains E5 system-thinking + communication signal |
+| 35-40 min | Zoomout | #4 | top 3 risks + invite deepening · 4 worked examples ({WORKED_EXAMPLES_CITATION}) | - | I pick zoom-out-and-rank-3-risks over linear brain-dump; costs 3-min budget, gains E5 system-thinking + communication signal |
 | 40-45 min | Serving | - | - | cache / index / latency budget surfaced only on probe | I pick deprioritize-serving over deep-dive; costs perceived serving knowledge, gains "know what matters" senior signal |
 
 ---
@@ -238,17 +251,23 @@ def validate_content(content: str) -> None:
     if SENTINEL not in content:
         raise RuntimeError("sentinel missing")
 
-    # T-P0-866: Section 1 timing table grew from 4-col to 6-col (R-TIMING-row-4tag);
-    # Section 2.2 abstract template deleted (R-FORBID-per-twist-4-section-template).
-    # Net: +~900 chars (bigger table) - ~480 chars (deleted §2.2 body) = +~420.
-    # Upper bound bumped from 12000 to 13000 to accommodate.
+    # T-P0-871: Section 1 strong-moment rows (4 of them) now cite 4 worked
+    # examples each (Reels + Top-3 + Weapon + Friend) instead of just Reels;
+    # adds ~500 chars. Upper bound bumped from 13000 to 14000.
+    # Prior bump (T-P0-866): 12000 -> 13000 for 4-col -> 6-col timing table
+    # (+~900) minus §2.2 deletion (-~480) = +~420 net.
     n = len(content)
-    if not (8500 <= n <= 13000):
-        raise RuntimeError(f"content char-length {n} not in [8500, 13000]")
+    if not (8500 <= n <= 14000):
+        raise RuntimeError(f"content char-length {n} not in [8500, 14000]")
 
-    # AC #3: 3 drawer URIs (sd://meta-reels-golden + cd://94 + cd://95).
+    # AC #3 (T-P0-871 widened): 4 sd-golden URIs + 2 cd:// drawer backlinks
+    # must all appear at least once (Section 1 timing skeleton cites the
+    # 4 sd-goldens as worked-example callbacks; cd-siblings show up in §9 / §10).
     for uri in (
         f"sd://{SD_SLUG}",
+        f"sd://{SD_TOP3_SLUG}",
+        f"sd://{SD_WEAPON_SLUG}",
+        f"sd://{SD_FRIEND_SLUG}",
         f"cd://{FAMILY_DOC_ID}",
         f"cd://{JIMU_DOC_ID}",
     ):

@@ -190,9 +190,14 @@ def main() -> int:
     # sd-golden, NOT cd96; R-FORBID-drawer-header-literal scoped to sd-golden).
     # Only R-FORBID-per-twist-4-section-template applies here.
 
-    # Drawer must contain the 2 currently-seeded sd:// slugs (the 4-slug
-    # requirement is enforced by T-P0-871, not T-P0-866).
-    for slug in ("meta-reels-golden", "meta-top3-comments-golden"):
+    # Drawer must contain all 4 sd-golden slugs (T-P0-871 widened from 2 to 4
+    # per schemas/meta_mlsd_canonical.yaml cd96_playbook.drawer_header.must_link_sd_goldens).
+    for slug in (
+        "meta-reels-golden",
+        "meta-top3-comments-golden",
+        "meta-weapon-ads-golden",
+        "meta-friend-rec-golden",
+    ):
         if f"sd://{slug}" not in content:
             findings.append(f"[drawer] sd://{slug} missing from cd96")
 

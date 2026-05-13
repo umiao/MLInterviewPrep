@@ -1,12 +1,14 @@
-"""Retrofit Meta MLSD doc 96 (Main Hub) with Drawer 入口 header + dedupe (T-P0-845).
+"""Retrofit Meta MLSD doc 96 (Main Hub) with Drawer 入口 header + dedupe (T-P0-845, T-P0-871).
 
-Per T-P0-845 ([Meta-MLSD I]). Target: company_documents.id=96, company_id=31,
-title '[Meta-MLSD] 45min Playbook + 4 Strong Moments' (is_golden=1, default
-first-page Meta MLSD entry).
+Per T-P0-845 ([Meta-MLSD I]) + T-P0-871 ([META-MLSD-CD96-LINK-IN]). Target:
+company_documents.id=96, company_id=31, title '[Meta-MLSD] 45min Playbook + 4
+Strong Moments' (is_golden=1, default first-page Meta MLSD entry).
 
 Two-part edit:
-1. Prepend a prominent Drawer 入口 顶部 section (5 entries, NO self-link
-   cd://96) + horizontal rule before the body.
+1. Prepend a prominent Drawer 入口 顶部 section (8 entries, NO self-link
+   cd://96) + horizontal rule before the body. The 4 sd-golden worked
+   examples (Reels / Top-3 / Weapon Ads / Friend Rec) are grouped at the top
+   of the table; cd-sibling docs + generic cookbook follow.
 2. Dedupe: REMOVE the existing mid-doc 'Section 8 Drawer — 深内容入口' (from
    T-P0-840 initial seed; its 3 entries are now superseded by the new top
    section). Renumber the original 'Section 9. 30 秒判题流程' → 'Section 8.'.
@@ -15,8 +17,11 @@ Section 2's inline reference `[Reels Home Feed (45min walkthrough) →](sd://
 meta-reels-golden)` is narrative prose, KEPT verbatim (dedupe only applies
 to the drawer-index style section).
 
-DRAWER URI INVENTORY (5 entries, NO self-link cd://96):
+DRAWER URI INVENTORY (8 entries, NO self-link cd://96):
   - sd://meta-reels-golden                  (T-P0-837)
+  - sd://meta-top3-comments-golden          (T-P0-868, added to canonical via T-P0-871)
+  - sd://meta-weapon-ads-golden             (T-P0-869, added via T-P0-871)
+  - sd://meta-friend-rec-golden             (T-P0-870, added via T-P0-871)
   - cd://94                                  (Family Taxonomy + 13 Question Cards)
   - cd://95                                  (Cross-cutting 积木库)
   - cd://97                                  (T-A: RecSys 核心模型 8 工作)
@@ -55,11 +60,14 @@ COMPANY_ID = 31  # Meta
 DOC_ID = 96
 EXPECTED_TITLE = "[Meta-MLSD] 45min Playbook + 4 Strong Moments"
 
-# Sibling drawer references (5 entries, NO self-link cd://96).
+# Sibling drawer references (8 entries, NO self-link cd://96).
 FAMILY_TAXONOMY_DOC_ID = 94    # 13 题 Family Taxonomy
 CROSS_CUTTING_DOC_ID = 95      # Cross-cutting 积木库
 RECSYS_MODELS_DOC_ID = 97      # T-A: RecSys 核心模型 8 工作 (per T-P0-842)
-SD_REELS_GOLDEN = "meta-reels-golden"
+SD_REELS_GOLDEN = "meta-reels-golden"               # T-P0-837
+SD_TOP3_GOLDEN = "meta-top3-comments-golden"        # T-P0-868 (folded into canonical by T-P0-871)
+SD_WEAPON_GOLDEN = "meta-weapon-ads-golden"         # T-P0-869 (added by T-P0-871)
+SD_FRIEND_GOLDEN = "meta-friend-rec-golden"         # T-P0-870 (added by T-P0-871)
 SD_GENERIC_RECSYS = "interview-recommendation-system"
 
 # Body dedupe markers. Section indices bumped +1 after T-P0-847 inserted
@@ -74,6 +82,9 @@ DRAWER_INDEX = f"""> ## Drawer 入口（点击展开详读）
 > | 入口 | 内容 | 何时打开 |
 > | --- | --- | --- |
 > | **[Reels Golden Example (45min 全文)](sd://{SD_REELS_GOLDEN})** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
+> | **[Top-3 Comments Golden Example (45min)](sd://{SD_TOP3_GOLDEN})** | 第 2 例 45min walkthrough (类比 Reels Golden) | 对照学 framing/metric/label 三段式 + Strong Moment 编排 |
+> | **[Weapon Ads Classifier Golden (45min)](sd://{SD_WEAPON_GOLDEN})** | 第 3 例 (T&S classification, 非 RecSys) | 想看 cascade calibration / 三段 eval / 多模态 T&S |
+> | **[Friend Recommendation Golden (45min)](sd://{SD_FRIEND_GOLDEN})** | 第 4 例 (bilateral matching P(send)×P(accept)) | 想看 MMoE 双头 / cluster-randomized A/B / NRT 双边信号 |
 > | **[13 题 Family Taxonomy](cd://{FAMILY_TAXONOMY_DOC_ID})** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
 > | **[Cross-cutting 9 ML 积木](cd://{CROSS_CUTTING_DOC_ID})** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
 > | **[RecSys 核心模型 8 工作](cd://{RECSYS_MODELS_DOC_ID})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
@@ -145,10 +156,15 @@ def validate_content(content: str, transformed_body: str) -> None:
             f"got {first_visible!r}"
         )
 
-    # AC #2: 5 unique drawer URIs each appear exactly once IN PREPENDED BLOCK;
-    # and cd://96 (self) must NOT appear in PREPENDED BLOCK at all.
+    # AC #2 (T-P0-871 widened from 5 to 8): 8 unique drawer URIs each appear
+    # exactly once IN PREPENDED BLOCK; cd://96 (self) must NOT appear.
+    # The 4 sd-goldens are required by schemas/meta_mlsd_canonical.yaml
+    # cd96_playbook.drawer_header.must_link_sd_goldens.
     drawer_uris = [
         f"sd://{SD_REELS_GOLDEN}",
+        f"sd://{SD_TOP3_GOLDEN}",
+        f"sd://{SD_WEAPON_GOLDEN}",
+        f"sd://{SD_FRIEND_GOLDEN}",
         f"cd://{FAMILY_TAXONOMY_DOC_ID}",
         f"cd://{CROSS_CUTTING_DOC_ID}",
         f"cd://{RECSYS_MODELS_DOC_ID}",
@@ -205,15 +221,14 @@ def validate_content(content: str, transformed_body: str) -> None:
                 f"missing body section header `## {n}.` in renumbered content"
             )
 
-    # AC #6: length range. T-P0-866 bumped upper bound from 12500 to 14000:
-    # Section 1 timing table grew from 4-col to 6-col (R-TIMING-row-4tag,
-    # +~900 chars), §2.2 abstract template deleted (-~480 chars). Net seed-side
-    # delta +~420 chars; with prepended Drawer block (~1700 chars) the final
-    # content ~12-13k chars.
+    # AC #6: length range. T-P0-871 bumped upper bound from 14000 to 16000:
+    # drawer block grew from 5 to 8 entries (+~700 chars in prepended block)
+    # AND Section 1 timing skeleton twist cells now cite 4 worked examples
+    # instead of 1 (+~500 chars across 4 strong-moment rows).
     n_chars = len(content)
-    if not (10500 <= n_chars <= 14000):
+    if not (10500 <= n_chars <= 16000):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [10500, 14000]"
+            f"content char-length {n_chars} not in [10500, 16000]"
         )
 
     # AC: body preserved verbatim — content must end with transformed_body
@@ -315,7 +330,13 @@ def main() -> int:
                 return 1
             print(f"[OK] cd://{cd_id} verified: {r[1]!r}")
 
-        for slug in (SD_REELS_GOLDEN, SD_GENERIC_RECSYS):
+        for slug in (
+            SD_REELS_GOLDEN,
+            SD_TOP3_GOLDEN,
+            SD_WEAPON_GOLDEN,
+            SD_FRIEND_GOLDEN,
+            SD_GENERIC_RECSYS,
+        ):
             sd = conn.execute(
                 "SELECT id, slug FROM system_designs WHERE slug = ?",
                 (slug,),
