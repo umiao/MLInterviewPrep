@@ -9,28 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-853
-- **Description**: Retrofit company_documents id=95 ('Cross-cutting 积木库') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
-
-**改动**: Drawer 入口表 (顶部 blockquote H2 表) 新增一行:
-`| **[Top-3 Comments Golden Example (45min)](sd://meta-top3-comments-golden)** | 完整 45min walkthrough: framing/metric/label/feature/arch/training/serving/monitoring | 想看 Top-3 Comments 配套积木实战 |`
-
-位置: 放在 sd://meta-reels-golden 行下方 (golden 类放一起)。
-
-**Idempotent**: 复用现有 scripts/retrofit_meta_mlsd_95_drawer_header.py 模板逻辑。
-
-**Acceptance Criteria**:
-1. Drawer 入口表多 1 行指向 sd://meta-top3-comments-golden
-2. self-URI cd://95 不在表内
-3. Re-run → 无变化
-4. python scripts/audit_uri_consistency.py 通过
-5. EXPECTED_FILES: scripts/retrofit_meta_mlsd_95_drawer_header.py
-
-**Commit msg**: [T-P0-XXX] [Meta-MLSD] cd95 retrofit: drawer add sd://top3
-
 #### T-P0-857: [Meta-MLSD] Retrofit cd96 Drawer 入口 → sd://meta-top3-comments-golden
 - **Priority**: P0
 - **Complexity**: S
@@ -591,6 +569,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
 - [x] **2026-05-12** -- T-P1-850: [Meta-MLSD] doc 95 cross-cutting: add 10th 积木 'Selection-bias / feedback-loop primitives' (IPS + exploration + counterfactual replay tied as module). Edit scripts/seed_meta_mlsd_cross_cutting.py: add 10th row to 积木 table after current row 9.
 - [x] **2026-05-12** -- T-P1-849: [Meta-MLSD] doc 97 RecSys models: add 'personalized ≠ pointwise' orthogonality sidebar in §2 DLRM. Edit docs/prep/meta_mlsd_2026-05-12/source_03_recsys_models.md: add 2-3 sentence sidebar at end of §2 DLRM section (afte
+- [x] **2026-05-12** -- T-P0-856: [Meta-MLSD] Retrofit cd95 Drawer 入口 → sd://meta-top3-comments-golden. Retrofit company_documents id=95 ('Cross-cutting 积木库') 的 Drawer 入口表新增 1 行指向 sd://meta-top3-comments-golden。
 - [x] **2026-05-12** -- T-P0-855: [Meta-MLSD] Retrofit cd94 Drawer 入口 + Q1 Card cross-link → sd://meta-top3-comments-golden. Retrofit company_documents id=94 ('Family Taxonomy + 13 Question Cards') 的 Drawer 入口表 + Q1 'Top 3 Comments Extraction' c
 - [x] **2026-05-12** -- T-P0-854: [Meta-MLSD] Bias Tower 深版 → framework_nodes id=266 description (支线). **支线**, 不阻塞主线 (T-P0-853 不依赖此 task)。
 - [x] **2026-05-12** -- T-P0-853: [Meta-MLSD] sd://meta-top3-comments-golden (45min walkthrough). **主交付**: 新 system_designs 行 slug=meta-top3-comments-golden display_order=131 镜像 sd41 (Reels Golden) 的 9 列 prose 结构。
