@@ -2,47 +2,39 @@
 
 INSERTs (or idempotently updates) the canonical Meta MLSD golden example as
 ``system_designs(slug='meta-reels-golden')``, drawer-reachable via
-``sd://meta-reels-golden``. Sourced verbatim from
-``docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md`` (lines 1-362)
-which is the user's own pacing/timing/strong-moment playbook for Reels Home
-Feed Recommendation.
+``sd://meta-reels-golden``.
 
-T-P0-867 prune (2026-05-13): per schemas/meta_mlsd_canonical.yaml the
-methodology homepage moved to cd96; this sd-golden is now solution-only.
-Stripped: top drawer header (R-DRAWER-no-sd-drawer), overview 整体节奏哲学
-prose (R-FORBID-rhythm-philosophy), defense 'Why this is strong' meta-prose
-(R-FORBID-why-this-is-strong), verbal_outline/cheat_sheet duplicates of
-cd96 §1/§5/§6 (R-XPAGE-{cheatsheet,verbal}-no-cd96-dup).
+T-P1-875 archetype migration (2026-05-13): document_archetype migrated from
+``structured_reference`` (10-field shape, ~45KB across overview/architecture/
+dataflow/formulas/production_constraints/tradeoffs/defense/verbal_outline/
+cheat_sheet) to ``oral_narrative``. Per the new archetype's contract in
+``schemas/meta_mlsd_canonical.yaml`` (``document_archetypes.values.oral_narrative``):
 
-T-P0-873 narrative retrofit (2026-05-13): per the now-formalized
-R-NARRATIVE-prose-form rule in schemas/meta_mlsd_canonical.yaml, all
-apply_3rule:true sections are converted from bullet-heavy markdown notes
-to oral-recital first-person English narrative. Measurable proxies enforced
-by validate(): >=3 **bold** spans per section; <=4 consecutive bullet
-lines; <=3-row markdown tables. Substance preserved; this is pure form
-conversion. Specifically: (a) overview 4-row slot map table compressed to
-3 rows + a prose sentence carrying slot #4; (b) architecture §1 multimodal
-embedding pipeline 5-bullet run rewritten as 3 prose paragraphs (visual /
-audio / text + fusion + refresh) so the longest bullet run drops to <=4;
-(c) tradeoffs §1-§8 each 5-row comparison table converted to 'I pick A
-because X, costs Y, switches to B if Z' prose so the longest table body
-drops to <=3 rows.
+  - ``dataflow`` carries a single continuous 第一人称 45-min 口播稿 (8 sections).
+  - ``overview`` / ``formulas`` / ``cheat_sheet`` are slim anchors.
+  - ``architecture`` / ``production_constraints`` / ``tradeoffs`` / ``defense``
+    / ``verbal_outline`` are NULL by design -- their content lives inlined
+    in the dataflow narrative (立场 + trade-off + Strong Moment + verbatim).
 
-Target row shape (9 prose columns, overview/architecture/dataflow/tradeoffs/
-defense all > 200 chars; formulas/production_constraints/verbal_outline/
-cheat_sheet may be short anchors per schema sd_golden.fields):
-  - overview                : 2-paragraph solution anchor (what / 2 specialties / 4-slot map)
-  - architecture            : 2-stage retrieval+ranking + multi-channel + DLRM + multimodal
-  - dataflow                : 8-segment 0-5 / 5-12 / 12-18 / 18-26 / 26-32 / 32-38 / 38-42 / 42-45 minute-by-minute narrative
-  - formulas                : label schema (watch ratio, strong+, early-skip, ambiguous middle), loss weighting (Pareto)
-  - production_constraints  : multimodal precompute, quarterly refresh, async candidate, feature freshness策略
-  - tradeoffs               : pretrained-vs-scratch, IPS-vs-exploration, watch-ratio-vs-retention, compliance-as-filter
-  - defense                 : 4 strong moment 完整英文台词 verbatim (Moments #1-#4); NO 'why this is strong' meta-prose
-  - verbal_outline          : Reels-specific entry phrases + drift line (methodology lives in cd://96)
-  - cheat_sheet             : Reels-only quantification anchors + firm-claim register (cd://96 owns timing skeleton + 8 meta-rules)
+Rationale: structured_reference shape spread the same Reels insights
+(multimodal twist / ambiguous middle label / IPS-as-acquisition / hard-filter
+compliance) across overview -> architecture -> dataflow -> defense fields,
+each restating the others. Per user (Discord 2026-05-13 22:39 + the third-party
+review in msg 1504368694875394158) the new shape consolidates everything
+into one continuous oral-recital script, satisfying 4 criteria (causal chain
+complete / first-person speakable / trade-off has立场 / has defense + twist)
+via 因果链 + 立场+trade-off + twist 在 body 兑现 三原则.
 
-Idempotent: re-running upserts in place by `slug`. Sentinel-based UPSERT
-keyed on `slug='meta-reels-golden'`.
+The 4 criteria were mechanically verified against the new dataflow before
+this migration -- see PROGRESS.md 2026-05-13 22:55 + Discord msg
+1504369692121239665 (verification report).
+
+Idempotent: re-running upserts in place by ``slug``. Sentinel-based UPSERT
+keyed on ``slug='meta-reels-golden'``. Architecture-shape fields (5 NULLed)
+remain NULL on re-run; if a structured_reference seed is later re-run against
+the same row, it would re-populate them -- but the canonical archetype
+declaration in ``meta_mlsd_canonical.yaml`` means the audit would flag that
+as a regression.
 
 Usage::
 
@@ -63,541 +55,264 @@ DEFAULT_DB = REPO_ROOT / "data" / "mle_prep.db"
 SLUG = "meta-reels-golden"
 TITLE = "Meta MLSD Golden Example: Reels Home Feed Recommendation (45min walkthrough)"
 SUBTITLE = (
-    "Meta MLSD Golden Example — canonical pacing + 4 strong moments + production-aware 英文台词. "
-    "适用于 Reels / Feed / Notification / Friend-rec / Ads 等 Meta MLSD 题型 (80% 结构复用). "
-    "Reference back via cd://<Meta hub doc id> 由 T-P0-832 hub 反向链接."
+    "Meta MLSD Golden Example — 第一人称完整 45min 口播稿 "
+    "(因果链 + 立场+trade-off + twist 在 body 兑现 三原则). "
+    "适用于 Reels / Feed / Notification / Friend-rec / Ads 等 Meta MLSD 题型 "
+    "(80% 结构复用). 方法论 (Strong Moment 调度, ML-native vocab, 8 meta-rules, "
+    "E4/E5) 在 cd://96。"
 )
 DISPLAY_ORDER = 130
 SOURCE_PATH = "docs/prep/meta_mlsd_2026-05-11/source_01_pacing_golden.md"
 
+# T-P1-875: this seed produces an oral_narrative archetype document. See
+# schemas/meta_mlsd_canonical.yaml > document_archetypes.values.oral_narrative.
+DOCUMENT_ARCHETYPE = "oral_narrative"
+
 
 OVERVIEW = """\
-# Reels Home Feed Recommendation — 45min Golden Walkthrough
+# Reels Home Feed — 45min Golden 口播稿
 
-This golden walks one verbatim 45-minute interview for **Reels home feed recommendation**: short-form video, session-based consumption, hundreds-of-millions DAU, billion-QPS serving. The unique angle is that **two intrinsic specialties** drive nearly every downstream decision in the design — and the answer is to put both on the table inside the first 90 seconds, then revisit each as a Strong Moment later. Methodology (timing skeleton, ML-native vocabulary YES/NO, 8 偏好节奏 meta-rules, E4/E5 boundary) lives in `cd://96`; this row owns only the solution.
+按"因果链 + 立场+trade-off + twist 在 body 兑现" 三原则写成的完整第一人称口播稿。完整 8 段台词在 `dataflow` tab; multi-head label schema 公式在 `formulas`; 数字 anchor + firm-claim register 在 `cheat_sheet`。方法论 (timing skeleton, Strong Moment 调度, ML-native vocab YES/NO, 8 meta-rules, E4/E5 boundary) 在 `cd://96` 主 hub, 此 row 只承载 Reels 这一题的 solution。
 
-## Twist 1 — Multimodal lifecycle
+两条 driving twist 在 framing 段就 declarative surface, 后续每个 component 兑现:
 
-Most Reels are UGC with minimal text; trends are visual or audio-driven; content understanding cannot rely on metadata. **I pick** pretrained backbones (video + audio + lightweight text), **fine-tuned on a Reels-specific contrastive objective**, fused into a single 256-dim content embedding **computed once at upload time**, with encoder weights refreshed **quarterly**. Costs: extra GPU on the upload path (amortized over years of serving) and a full-index re-embed sweep per quarter (~100M items × 256-dim ≈ 25GB churn). **Switches to** request-time encoding only if encoder accuracy drifts faster than a quarter — which would invert the cost-decoupling. This is where the "decouple content understanding cost from serving cost" claim pays off.
+1. **Multimodal lifecycle** — UGC 短视频, 文本稀疏, 内容理解不能靠 metadata; pretrained video/audio/text encoder fused → 256-dim, upload-time 算一次, 季度 refresh。把 content understanding cost 从 serving path 剥离。
+2. **Session dynamics** — Reels 是连续消费, within-session fatigue / drift / diversity collapse 是 retention 主杀手; 需 request-time session-context features + session-aware ranker。
 
-## Twist 2 — Session dynamics
-
-Reels consumption is continuous: users consume tens of videos sequentially, and **within-session diversity collapse, fatigue, and interest drift dominate retention loss**. **I pick** request-time session-context features (last-K topic exposure, swipe rate so far in session, average watch ratio so far) feeding a session-aware ranker (transformer or GRU over the last K items). Costs: single-digit-ms p99 per-request feature compute and a wider feature-store fan-out. **Switches to** pre-aggregated batch features only if session length collapses to 1–2 items — not the Reels regime; this is the twist that separates Reels from a generic Feed ranker.
-
-## 4 Strong Moment slots (pre-allocated, do NOT improvise)
-
-The 4 slots fire at fixed times. **Slot #1 (0-5)** carries the multimodal-lifecycle framing — pretrained + upload-time compute + quarterly refresh + cost decoupling. **Slot #2 (5-12)** carries the multi-head label schema (watch ratio + strong+ / early-skip) with the ambiguous-middle nuance and the duration confounder. **Slot #3 (26-32)** carries the exposure-bias reframe as a data-acquisition policy (onboarding + 5%/session re-explore + cold ramp), not just IPS. **Slot #4 (38-42)** carries the zoom-out plus top 3 risks — 3-sentence summary, circuit breaker for diversity drop, watch-vs-retention alarm — fired before serving.
-
-| # | Time   | Theme                                  | Reels-specific twist anchor                                                   |
-|---|--------|----------------------------------------|-------------------------------------------------------------------------------|
-| 1 | 0-5    | Multimodal lifecycle (framing)         | pretrained + upload-time compute + quarterly refresh + cost decoupling        |
-| 2 | 5-12   | Label schema (data section)            | multi-head (watch ratio + strong+ / early-skip) + ambiguous middle + duration confounder |
-| 3 | 26-32  | Exposure bias reframe (bias section)   | data-acquisition policy, NOT just IPS -- onboarding + 5%/session re-explore + cold ramp |
-
-The dataflow / defense / tradeoffs columns are this row's solution body; verbal_outline + cheat_sheet hold only Reels-specific anchors. Anything else (rhythm rules, vocab YES/NO, E4/E5 line) belongs in `cd://96`.
-"""
-
-
-ARCHITECTURE = """\
-# Architecture: Two-Stage Retrieval + Ranking + Multimodal Embedding Lifecycle
-
-## Decision summary (the architectural twist)
-
-**I pick** a two-stage retrieval + ranking funnel with a **decoupled upload-time multimodal embedding pipeline** — the **unique angle** vs a generic feed ranker is that content understanding cost runs at upload, not request. **This is where** the cost-decoupling twist of Strong Moment #1 lives. HNSW / ScaNN ANN at single-digit ms p99.
-
-## 顶层结构 (canonical 2-stage funnel)
-
-```
-[Multimodal Content Embedding Pipeline]  -- upload-time, quarterly encoder refresh
-        │
-        ▼ (precomputed content embedding, cached in index)
-[Retrieval — multi-channel, 60/20/20]
-        ├── (a) Personalized two-tower (60%)   — main personalization channel
-        ├── (b) Trending / recency (20%)        — fresh content with limited history
-        └── (c) Diversity (20%)                 — under-represented content clusters
-              │
-              ▼ (~1000 candidates per request)
-[Ranking — DLRM-style multi-task]
-        ├── sparse-feature embeddings + dense-feature MLP
-        ├── deep cross network for feature interactions
-        ├── (optional) transformer / GRU over last-K session items
-        └── multi-task heads → weighted combine (post-train tunable)
-              │
-              ▼ (~50-100 items, tunable score)
-[Re-ranking / Hard Filters]
-        ├── compliance / safety hard filter (NOT soft loss term — category error)
-        ├── creator-side pacing / diversity dedup
-        └── final ordered list returned
-```
-
-## 1. Multimodal Embedding Pipeline (upload-time, decoupled)
-
-The pipeline runs **three modality encoders** at upload time and fuses them into a single content embedding. **I pick** a **pretrained video encoder** (ViViT / TimeSformer class) over frame sequences, fine-tuned on a Reels-specific contrastive objective where co-engaged videos are positives — the visual modality is the dominant signal because most Reels are UGC with minimal text. The **audio modality** uses a **pretrained Wav2Vec2 / VGGish encoder** over soundtrack because soundtrack is the dominant carrier of trending signal in Reels. The **text modality** uses a lightweight BERT over caption / hashtag / OCR-extracted overlays — kept lightweight because most Reels carry very little text.
-
-Fusion is **concat + projection MLP** into a **single 256-dim content embedding**. **Refresh cadence**: encoder weights retrain **quarterly** plus a full re-embed sweep over the content index; single-video embedding compute runs **only once at upload time**, never at request time. This **decouples content understanding cost from serving cost** — the property Twist 1 callbacks lean on. **Switches to** monthly refresh only if a single quarterly cycle accumulates >=3 points of recall drift on a frozen content-similarity set.
-
-## 2. Retrieval — Multi-Channel Two-Tower
-
-- **(a) Personalized two-tower (60%)**：user tower (long-term profile + recent session history)、content tower (multimodal embedding + content metadata)；ANN (Approximate Nearest Neighbor 索引，**HNSW** = Hierarchical Navigable Small World / **ScaNN** = Scalable Closest Neighbor Search) over content index；contrastive training，negatives = in-batch + hard negatives mined from early-skip events
-- **(b) Trending / recency channel (20%)**：surface fresh content with limited engagement history；按 upload time bucket + 早期 engagement velocity 召回
-- **(c) Diversity channel (20%)**：pull from under-represented content clusters relative to the user's recent N sessions；这是 bias mitigation 的 retrieval-layer 投影
-
-## 3. Ranking — DLRM-style multi-task
-
-- **Sparse + dense + cross**：sparse feature embeddings → MLP，dense features → MLP，**deep cross network** for explicit feature interactions
-- **Multi-task heads**：watch-ratio head / explicit-engagement head / early-skip head；**shared backbone** + head-specific top layers (watch-ratio 与 engagement correlated 足够 benefit from sharing)
-- **Session-aware module (optional)**：transformer 或 GRU layer over last K items in current session → 输出 session-context embedding 喂回 ranking model（这是 Reels 区别于 Feed 的关键 — 主要 lever 是 within-session fatigue 和 drift）
-- **Score combine**：final score = Σ w_k · p_k(head)，**weights post-train tunable**（无需 retrain 即可调 engagement-vs-quality trade-off）
-
-## 4. Re-ranking — Hard Filters + Business Logic
-
-- **Compliance / safety**：作为 **hard filter** at re-ranking（NOT soft loss term）— compliance violation 不是 "less engagement"，是 disqualifying；treating it as soft loss 是 **category error**
-- **Creator-side pacing**：避免 single creator 在 session 内 over-exposed
-- **Diversity dedup**：MMR / DPP-style 在 final list level
-
-## 5. Serving (deliberately light, only if asked)
-
-- **ANN-based retrieval** over content index → ~1000 candidates
-- **Multimodal embeddings precomputed at upload**，serving-time content cost minimal
-- **User-side features fresh at request**，content-side features cached（content state 变化慢于 user state）
-- **Async candidate pre-compute** for active users during predictable idle windows，refresh ranking at request time
-
-"""
+整体方案: 多路 retrieval (60/20/20) → DLRM multi-task ranking → whole-page rerank, multimodal embedding 在 upload 时算好缓存。"""
 
 
 DATAFLOW = """\
-# Dataflow: 45min 八段时间表 (minute-by-minute narrative)
+# 完整 45min 口播稿 (第一人称, 8 段连续)
 
-## Decision summary (the rhythm twist)
-
-**I pick** chronological minute-band walk over component-by-component, because **the core decision here is** time-allocation: 4 Strong Moments in fixed slots (0-5 / 5-12 / 26-32 / 38-42), **this is where** E4 vs E5 wrap diverges.
-
-## 0-5 min · Framing  ← Strong Moment #1
-
-**开场 declarative (60-90s)**：
-
-> "I'll frame this as a recommendation system for Reels in the home feed, with retrieval plus ranking as the core structure. There are **two intrinsic specialties** of this problem that will drive most of my design decisions, and I want to put them on the table upfront."
-
-**Specialty 1 — Multimodal lifecycle (Strong Moment #1 投放此处)**：
-
-> "First, Reels are short-form videos, which means content understanding cannot rely on metadata or text alone. Most Reels are UGC with minimal text, and trends are visual or audio-driven. So I'd compute multimodal embeddings — a pretrained video encoder for visual frames, an audio encoder for soundtracks, and a text encoder for any captions — fused into a single content embedding **computed once at upload time**. I'd start with pretrained backbones and fine-tune on a Reels-specific contrastive objective, where co-engaged videos are positives. The embedding gets refreshed only when we improve the encoder, **roughly quarterly**. This **decouples content understanding cost from serving cost**."
-
-**Specialty 2 — Session dynamics**：
-
-> "Second, Reels consumption is session-based and continuous. Unlike a structured feed where a user picks one item, Reels users consume tens of videos sequentially. This creates within-session dynamics — diversity collapse, fatigue, interest drift — that we have to model explicitly. The implication is that we need **within-session features computed at request time**, not just batch user profiles, and our ranking model needs to be **session-aware not just user-aware**."
-
-**Serving-side flag (brief, before close)** — Specialty 1 的 upload-time precompute 在 production 上对应一条 hybrid-serving 决策，提前 declare 一下避免 serving 段被问到时仓促展开：
-
-> "On the serving side I'd actually run **hybrid serving** — active users get candidates from a **batch-precomputed pool refreshed during idle windows**, cached for low-latency at billion-QPS, while a parallel **online incremental retrieval path** surfaces fresh content / new creator uploads that have no engagement history yet. The two paths **blend at retrieval**. This simultaneously addresses **cold-start** (new video / new creator) and **freshness** (avoiding stale cache), without paying serving-time multimodal-encoding cost — it's the unique architecture lever for Reels versus a static feed."
-
-**Active deprioritize + yes/no close**：
-
-> "I'm choosing not to deep-dive on cold-start, content moderation, or multi-resolution storage for now, but I'll flag them as risks later. Does this framing make sense, or is there a different angle you'd like me to anchor on?"
+> Section 标题只是导航用, 真讲的时候是连续说下来的。每段串因果链, 每立场挂 trade-off, framing 立的两个 twist (multimodal lifecycle / session dynamics) 在 body 里兑现。
 
 ---
 
-## 5-12 min · Data & Labels  ← Strong Moment #2
+## 开场 · Framing
 
-**Announce structure (3 parts)**：
+"好, 这道题我把它 formulate 成一个 Reels home feed 的推荐问题——给定一个用户和他当前的浏览 context, 从我们的视频库里返回一个有序的 feed 列表。
 
-> "Let me walk through this in three parts: data sources, label schema, and biases. I'll **start with labels** since they're the most non-trivial for Reels."
+我先做几个假设, 确认一下边界。第一, user 这一侧, 我假设这是已登录用户为主的场景, 因为推荐高度依赖历史行为, 未登录的匿名流量我会走一套退化的、基于 trending 和 context 的逻辑, 但不是这道题的主线。第二, 规模上, 我假设是亿级 DAU、百万级 QPS、内容库大概一亿量级, 端到端 latency SLO 我按 p99 200 毫秒来设计。
 
-**Data sources (30s, fast list)**：impression logs / engagement logs (watch time, likes, comments, shares, follows, swipe events) / content metadata (uploader, duration, embeddings, hashtags) / user-side data (long-term profile, recent session history, demographics).
+然后是 input、output 和 objective。这里我想先纠正一个我自己容易说顺嘴的地方——视频库是 corpus, 它不是 model 的 input。一次 request 真正的 model input, 是 user feature、context feature, 加上候选 item 的 feature 这三组东西。
 
-**Label schema (Strong Moment #2 投放此处)** — see `formulas` column for full schema.
+objective 上, 我认为这个问题 user-end metric 是要明确高于 biz metric 的。我希望优化的是中长期的用户价值——比如 7 日 retention、session 时长、人均观看时长这些。而 revenue、还有内容生态健康度, 我把它们放在 guardrail 这一侧。这里我要明确一点: guardrail 里最重要的其实不是 revenue, 是 integrity——NSFW、违规内容的 violation rate, 这是 UGC 平台的大头; 再加上 creator-side 的健康度和 diversity。我特意不把 NDCG、MRR 放进 guardrail, 因为那是我自己系统的 offline ranking metric, 不是一个独立的约束。
 
-**Bias preview (transition)**：
+output 这一侧, 我们没有一个直接的 ground truth label, 所以要找 proxy。我会同时建模两类信号: 一类是 contextualized 的完播率, 一类是观看时长 ratio。两个一起用是有意为之的——单看完播率会系统性偏向短视频, 单看时长会偏向长视频, 两个一起、再把 duration 本身作为 feature 和 evaluation slice, 就能把这个 confounder 平衡掉。负向信号比如 early-skip 我也会用, 但具体怎么设计我想留到 label section 展开。
 
-> "I'll come back to biases in a moment when we discuss exploration — but at the data layer, the **dominant risk is that all our labels are conditioned on what we chose to show**. Let me hold that thought and move to features unless you want to deepen labels first."
+最后说 twist——这道题和一个传统 recSys 不一样的地方, 我认为有三点。第一, Reels 是 multimodal 的 UGC, 文本信号稀疏, 所以内容理解不能靠 metadata, 得做 content understanding。第二, 也是我认为最 signature 的一点, Reels 的消费是 session-based、连续的——用户一次刷几十个, session 内的 fatigue、兴趣漂移、diversity 塌陷, 是 retention 的主要杀手, 这个必须显式建模。第三, 推荐天然有 exposure bias, 我们的 label 全是 conditioned on 我们推了什么, 需要 debias。
 
----
+整体方案就是一个标准的两阶段漏斗: 多路 retrieval、multi-task ranking、whole-page rerank, content embedding 在 upload 时算好缓存。
 
-## 12-18 min · Features  (节奏要快, 不是 strong moment 区)
-
-**4 buckets (10s announce → expand 1)**：
-
-1. **User features**: long-term profile embedding (learned from past engagement), demographic, recent topic exposure (last N sessions)
-2. **Content features**: the multimodal embedding, uploader features, duration, recency, historical engagement statistics
-3. **Context features**: time of day, device, network type, **session position** (how many Reels in this session so far)
-4. **Cross features**: user-content historical interaction (has user followed uploader? engaged with similar content recently?)
-
-**Expand session-context features (40s)**：
-
-> "The non-trivial design choice here is **session-context features** — 'topic exposure in the last 5 items in this session', 'average watch ratio so far this session', 'swipe rate this session'. These have to be **computed at request time**, not pre-aggregated. They're the main lever for handling within-session fatigue and drift."
-
-**Trade-off statement**：fresh user features (request-time) vs precomputed content features (cached)。
+这是我的 framing。接下来 data 和 label、retrieval、ranking、serving 这几块, 你想我先深入哪一块? 还是按顺序走?"
 
 ---
 
-## 18-26 min · Model Architecture  (邀请面试官选 deepening)
+## Data & Label
 
-**Two-stage announcement (1 min)**：retrieval + ranking。
+"好, 那我从 data 和 label 开始, 因为我觉得这块对 Reels 来说是最 non-trivial 的。
 
-**Retrieval (90s)**：two-tower (user tower + content tower) + ANN，contrastive training，negatives = in-batch + hard negatives from early-skip。
+label 设计的核心张力, 我认为是 signal density 和 bias 之间的权衡——越显式的信号越准但越稀疏, 越 implicit 的越多但越脏。所以我分层来看。
 
-**Multi-channel detail (60s)** — **量化比例 60/20/20**：
+最显式的是用户主动反馈: 正向是 like、share、collect、follow, 负向是 report、dislike。这类 signal 高精度, 但非常 sparse, 类别极度不平衡。
 
-> "I'd actually run **multiple retrieval channels in parallel**: (1) the main two-tower personalized channel, (2) a trending/recency channel that surfaces fresh content with limited history, (3) a diversity channel that pulls from under-represented content clusters relative to the user's recent history. Each channel contributes a fraction of the candidate pool — maybe 60/20/20."
+往下一层是 watch-based 的信号, 这其实是 Reels 的主 label, 而且它不是二元的, 是个回归信号——normalized watch ratio, 定义成观看时长除以视频时长, capped 在 1。一定要 normalize, raw 时长会系统性 over-weight 长视频。
 
-**Ranking (90s)**：DLRM-style sparse/dense towers + deep cross network + multi-task heads → weighted combine (post-train tunable)。
+负样本这一侧, 我的主线是 in-session 的 early-skip——用户在前 2 到 3 秒、或者完播率低于 20% 就划走。这是 Reels 特有的、天然的 hard negative, 它免费、量大, 而且因为是我们 surface 过的, 它至少是相对无偏的。这一点我想强调, 因为它比从外部挖 hard negative 要干净得多。
 
-**Invite deepening (key collaborative-mode signal)**：
+这里有一个 nuance 我想专门提一下——ambiguous middle。一个用户看了 50% 然后划走, 他既不是 hard negative 也不是 strong positive, 是真的 ambiguous。我的处理是: 在 watch-ratio 这个 head 上把它当弱正样本, 但在 early-skip 这个 head 上直接把它排除掉。强行给 ambiguous 数据打一个二元 label, 只会往训练里加噪声。
 
-> "Want me to deepen retrieval, ranking architecture, or the multi-task head design?"
+再往下, 从我们根本没 surface 过的内容里, 可以采样少量 easy negative。但我要点明一点——这些 easy negative 本身是 biased 的, 把没推过当成用户不喜欢, 这恰恰就是 exposure bias 的源头。所以用它的时候必须配合 sampling 上的修正, 或者用 exploration 收集的数据来兜底。更激进一点, 还可以用全局采样、甚至 LLM-as-judge 去挖一些 false negative, 但那个成本高、会引入 judge 自己的 bias, 我会把它定位成一个可选项, 不是主线。
 
-**If they pick ranking** — deepen with (a) sharing strategy (shared backbone + head-specific top layers), (b) Pareto-style loss weighting NOT gradient-based balancing, (c) sequence modeling (transformer / GRU over last K items)。
-
----
-
-## 26-32 min · Bias & Objectives  ← Strong Moment #3
-
-**Setup (30s)**：
-
-> "I want to spend time here because I think **bias handling is where most recommendation systems underinvest**."
-
-**Standard correction (30s)** — IPS / propensity weighting at training time — **作为铺垫**。
-
-**Strong Moment #3 核心 (90s)** — reframe exposure bias as data acquisition problem，三层 intervention (onboarding labeled exploration / periodic re-explore 5% budget / content-side cold-start ramp)，failure modes，"this is a stronger lever than IPS"。see `defense` column for verbatim 台词。
-
-**Objectives (60s)**：3 components combined — user engagement (multi-head) / ecosystem value (creator retention, diversity) / **compliance as hard filter NOT soft loss term** (category error)。
+最后, duration 是几乎所有 engagement label 的 confounder, 5 秒的 loop 天然比 60 秒的好完播。所以 duration 对我来说既是 feature input, 又是 evaluation 时必须切的 slice。"
 
 ---
 
-## 32-38 min · Evaluation
+## Features
 
-**3 layers (offline / online / long-term)**：
+"feature 这块框架比较套路, 我按 user、content、context、cross 四类来分, 但 Reels 的关键是要把 session 动态这一类从 cross 里单独拎出来。
 
-- **Offline (60s)**: per-head metrics first — NDCG and weighted watch ratio for engagement head, AUC for explicit engagement and early-skip。然后 aggregate ranking metrics — session-level diversity, coverage of long-tail content。**Critically**: all metrics sliced by **video duration buckets** (confounder) AND by user segment (new vs established)。
-- **Counterfactual replay (30s)**: before A/B，logged data with IPS-weighted replay estimates online performance，catches obviously broken candidates。
-- **Online A/B (40s)**: **session-level metrics not item-level** — session length, return rate, day-N retention。
-- **Long-term holdout (40s)**: 30+ day holdout for filter bubble narrowing, creator ecosystem effects, fatigue accumulation。
+user feature, 我的主力其实是用户的行为序列建模出的 embedding。demographic——性别、职业这些——我反而会很谨慎, 它预测力弱、而且合规敏感, 我把它降级成 cold-start 时的兜底信号, 不是主力。另外像用户来了多久、有没有我们内部的 level 和 merit 体系, 这类我也归在 user 这一侧, 没有争议。我整体是从一个 triage 的视角来组织 user feature, 不是一味堆 IID 数据。
 
-**Final flag (senior signal)**：
+content feature, 常规的是 engagement 统计量——曝光、CTR、完播率、各种 count。但这里有个问题: 这些统计量对冷启动 item 是全空的。所以 content 这一侧必须包含 upload 时就算好的 multimodal embedding, 否则新视频没有任何内容表征。
 
-> "One thing I want to flag: the **alignment problem between offline and online**. Offline NDCG improvements don't always translate to online retention. I'd track this correlation explicitly and recalibrate offline metrics when they drift from online outcomes."
+context feature 比较直接: time of day、device、network、用户是怎么进到这个视频的。
 
----
+cross feature, 我想拆成两类讲。一类是 lifetime 的行为 cross——用户和 creator、用户和 topic 的 affinity, 这种我靠 DCN 这样的结构去显式建模 feature interaction。另一类, 也是我想专门强调的, 是 in-session state——这个 session 内已经看了几个、到目前为止的平均完播率、swipe rate、最近 K 个 item 的 topic 分布。这一类必须 request-time 现算, 它是处理 session 内 fatigue 和 drift 的唯一抓手。我前面把 session-based 消费立成了核心 twist, 这组 feature 就是它在 feature 层的落地。
 
-## 38-42 min · Zoom-out + Top Risks  ← Strong Moment #4
-
-**3-sentence summary** + **top 3 risks** (each with mechanism + alarm signal) + **invite deepening** — see `defense` column for verbatim 台词。
+关于 debias, 我打算集中放在 feature 和 model 这一侧来处理。具体做法是把 position、device 这类 bias feature 放进一个独立的 shallow bias tower, 训练的时候正常用, serving 的时候把这个 tower 的输入置 0。这个比 training-time 的 IPS reweighting 更稳、更好 ship。但我要补一个边界——这个 bias tower 修的是已经 surface 过的数据内部的 selection bias, 它修不了根本没被 surface 那一类内容, 所以它是必要但不充分的, 完整的答案还得靠 exploration 配合。"
 
 ---
 
-## 42-45 min · Serving (light) + Q&A
+## Model
 
-**Deliberately short (2 min max)**：
+"model 我分 retrieval 和 ranking 两段。
 
-> "On serving, two-stage matches our two-stage model: ANN-based retrieval over the content index returns ~1000 candidates, ranking scores them with the deep model. Multimodal embeddings are precomputed at upload, so serving-time content cost is minimal. User-side features computed at request, content-side features cached. We can precompute a candidate pool for active users during predictable idle windows and refresh at request time with fresh ranking. **I won't go deeper unless you'd like** — happy to discuss monitoring or rollback if useful."
+retrieval 之前, 我想先花一点时间对比一下 retrieval 范式和 generative 范式, 因为 Reels 其实挺适合 generative 的。retrieval-based 的优势是对 hot item 的判断更精细, ID memorization 够、精度高, 而且 candidate pool 大、有 fallback 余地。generative 范式的优势我想说准确——它的强项是不需要维护 ANN 索引、检索逻辑参数化进了模型, 以及 autoregressive 解码天然建模 item 之间的序列依赖, 还有 scaling law。这里我要纠正一个常见的说法: generative 对冷启动其实不是优势, 反而是它的弱点——它生成的是 semantic ID, 一个全新的、零交互的 item, 它的 SID 可能还没进 codebook, 模型不会去生成它。所以冷启动这两个范式都不天然解决, 这个我留到后面单独讲。
 
-**Purpose of brevity**: 主动 deprioritize = 告诉面试官你 aware of serving 但不在 ML SD round 上花预算。Graceful exit signal。
+虽然 Reels 很适合 generative, 但我 v1 会推荐 retrieval-based, 理由是已有系统兼容性、latency 和 compute budget。代价是 generative 的序列建模优势我暂时拿不到, 所以我会把 generative 明确定位成 next-iteration 的演进方向, 而不是 v1。
+
+具体的 retrieval, 我会做多路召回: 一路是 ANN two-tower 的个性化召回, 这是主力; 一路是基于 history viewed tag 和 query 的 indexing-based 召回; 再加 diversity 相关的召回路。two-tower 的训练用 contrastive, 负样本是 in-batch negative 加上从 early-skip 里挖的 hard negative。in-batch negative 免费、coverage 广, 但它会偏向 popular item, 所以我会用 log-Q correction 来修这个 popularity bias。
+
+ranking 我做两阶段, 而且我想强调 L1 和 L2 不是两个无关的模型, 它们是同一个建模思路上的成本梯度。L1 的职责是 storage-local、便宜、把几千个候选快速砍到几百个, 只要别误杀 L2 本来会高分的 item 就行。我的背景是做大规模 search 的, 自然的分层逻辑是 L1 侧重简单的一两阶 crossing、L2 做精细的 interactive 建模。具体到 Reels, L1 我会用一个 distilled 的小双塔加 MLP——它本质上听起来就像一个输入受限的 DLRM, 和 L2 共享 feature、用蒸馏对齐打分分布。我特意不用 GBDT, 不是因为 GBDT 过时, 是因为 Reels 的主力信号是高维的 ID embedding 和 multimodal embedding, GBDT 吃不动这类输入。L1 我默认压到 2 阶 cross。
+
+L2 就放开了, 用 DLRM 加 DCN, cross 阶数堆到三四阶, 输出 100 到 200 个结果。具体需要多少阶 crossing, 我会给一个有先验的起点再用 ablation 验证——而且 ablation 要看的是 L1 加 L2 串起来的端到端 recall, 不是 L1 单层的精度。
+
+最后是 reranking, 在 whole-page 这一层。这里我想把两类机制分清楚: 合规、NSFW 这类是 hard filter, 二元 disqualify, 直接 mask 掉, 它不是 rerank objective 里的一个软目标——把 compliance 当 soft loss term 是个 category error。diversity 这类才是 soft 的, 用 MMR 或 DPP, 是个 trade-off 不是 cutoff。如果 hard filter 砍得太多导致候选不够, 我会做 backfill, 但 backfill 有质量梯度——优先从 L2 的次高分补, 其次 trending, 最后才是 category popular。一次 push 我觉得 10 到 25 个 feed 就够了。"
+
+---
+
+## 冷启动 (承接 model)
+
+"前面提到冷启动两个范式都不天然解决, 我在这里收一下。
+
+item 冷启动, 我的主线是 content-based——multimodal embedding 在 upload 时就有, 新视频靠它进 retrieval; engagement 统计量缺失时, fallback 到 category 或 creator 的 average, 而不是 site average, site average 太糊。
+
+在这个之上, 我会留一个结构性的补充: retrieval 里专门有一路 fresh-content channel, 再给每个 session 一个小比例、大概 5% 的 exploration 预算, 但要 gated by 质量过滤, 防止低质内容套利这个预算。
+
+user 冷启动, 可以在 onboarding 时让新用户过一个 diverse 的内容集, 用早期 engagement 当相对无偏的 preference 信号, 但我会让这个流程保持轻量。bandit 我知道是个选项——可以用 contextual bandit 来平衡 explore 和 exploit——但我会点到为止, 不展开。"
+
+---
+
+## Evaluation
+
+"evaluation 我分三层。
+
+offline, 我先看 per-head 的 metric——watch-ratio 这个回归 head 看 weighted NDCG, engagement 和 early-skip 这两个二元 head 看 AUC。关键是所有 metric 都要按 duration bucket 和用户 segment 切片, 因为 duration 是 confounder、新老用户的分布也不一样。
+
+online A/B, 我想强调一个 Reels 特有的陷阱——实验单位必须是 user 或 session 级, 不能是 item 或 impression 级。因为 session 内 item 之间是互相影响的, impression 级随机化会污染。看的指标也要是 session-level 的: session 时长、return rate、day-N retention。
+
+第三层是 long-term holdout, 30 天以上, 抓那些短期 A/B 看不到的东西——filter bubble 收窄、creator 生态效应、fatigue 累积。
+
+我还想 flag 一个点: offline 和 online 的对齐问题。offline NDCG 涨不一定 online retention 涨, 这个 correlation 我会显式追踪, 漂了就重新校准 offline metric。"
+
+---
+
+## Serving / Logging
+
+"serving 和 logging, 我知道这不是 ML SD 考察的最大重点, 所以我给你几个我最在意的点, 不展开。
+
+我最关心的是 train-serving skew。首选的根治方案是 serving-time 的 feature snapshot——serving 当下把喂给模型的 feature 值原样落盘, 训练直接用这份。如果因为 budget 原因做不到, 退一步是只做 query-request logging、feature 离线重建, 但那样必须配 offline replay 来校验重建的偏差。新 feature 上线前, 走 shadow logging, 先 log 不打分, 观察 feature drift。
+
+serving 本身, 我沿用 framing 里提的 push-pull——active user 走 batch precompute 的 cache 拿低延迟, 其余 fallback 到 pull, 同时一条 online 增量路径负责没有任何 engagement 历史的新内容。
+
+部署形态上, retrieval 和 L1 是 distributed、sharded 的, index 按 item 分片, 本地出 top candidate 再 scatter-gather 聚合; L2 是集中式的, 因为候选规模到这里已经塌缩了两三个数量级。这也正好呼应前面说的 L1 便宜、storage-local。"
+
+---
+
+## Wrap
+
+"我 zoom out 总结一下, 然后说三个我最担心的 risk。
+
+整体是一个两阶段的 retrieval 加 ranking 系统, 带 multimodal 内容理解、multi-task ranking head、session-aware feature, exposure bias 靠 bias tower 加 exploration policy 来缓解, evaluation 覆盖 offline、online、long-term 三层。
+
+三个 risk。第一, exposure bias 复利的速度可能快过我们 mitigation 的速度, 5% 的 exploration 预算不一定够——我会监控 served diversity, 跌破阈值要有 circuit breaker。第二, multi-task 的 loss 权重会随数据分布漂移, 所以我的 retrain pipeline 要重新调 head 权重, 不是固定组合下重训。第三, 也是最重要的——watch time 涨但 retention 跌, 这是 clickbait 和 rage content 在 gaming 我们的 proxy, 这个最重要的 alarm 靠 long-term holdout 来抓。
+
+这些就是我的设计, 有哪一块你想让我再深入吗?"
 """
 
 
 FORMULAS = """\
-# Label Schema (Strong Moment #2 核心) + Loss Weighting
+# Label Schema 公式 (口播稿 Data&Label 段对应的形式化)
 
-## Multi-head label schema (Reels 区别于 standard ranking 的关键)
+> 口播稿原文在 `dataflow` tab; 此处只放 watch-ratio / strong-positive / early-skip 三头的精确定义 + duration confounder + 权重组合方式, 面试官追问公式时打开。
 
-> "Label 1: **normalized watch ratio**, defined as `watch_time / video_duration`, capped at 1.0. Critical to normalize — raw watch time would systematically over-weight long content. A 3-second video watched fully should count as much as a 60-second video watched fully."
+## Multi-head label 定义
 
-> "Label 2: **strong positive (binary)** — explicit engagement: like, comment, share, follow, save. Sparse but high-precision."
+| Label | 定义 | Head type | 用途 |
+|-------|------|-----------|------|
+| `watch_ratio` | `min(watch_time / video_duration, 1.0)` | regression / bucketed classification | Reels 主 label; 一定 normalize, raw 时长 over-weight 长视频 |
+| `strong_positive` | `1 if (like ∨ comment ∨ share ∨ follow ∨ save) else 0` | binary | 显式正反馈; sparse high-precision, 类别 imbalance 严重 |
+| `early_skip` | `1 if (swipe_at < 2.5s ∨ watch_ratio < 0.2) else 0` | binary | implicit hard-negative; Reels 特有的天然 hard negative |
 
-> "Label 3: **strong negative (binary)** — early swipe-away, defined as user swiping within the **first 2-3 seconds or before 20% completion**. This is the implicit hard-negative signal that's unique to Reels and crucial for breaking exposure bias in negative sampling."
+## Ambiguous middle 处理 (关键 nuance)
 
-### 关键 nuance: ambiguous middle
+定义 `ambiguous_middle = (0.2 ≤ watch_ratio ≤ 0.5)`:
+- `watch_ratio` head: 当弱正样本 (label 直接用 watch_ratio 值, 没特殊处理)
+- `early_skip` head: 直接从训练集中排除 (不打 0/1 二元 label)
 
-> "A user who watches 50% then swipes is genuinely ambiguous — not a hard negative, not a strong positive. I'd treat it as **weakly positive on the watch-ratio head and exclude it entirely from the early-skip head**. Forcing a binary label on ambiguous data adds noise."
+> 强行二元化 ambiguous middle 只往训练里加噪声。
 
-### 公式定义
+## Duration confounder
 
-| Label | 定义 | Head type | Notes |
-|-------|------|-----------|-------|
-| `watch_ratio` | `min(watch_time / video_duration, 1.0)` | regression (or bucketed classification) | 主要 engagement 信号；duration confounder must be sliced |
-| `strong_positive` | `1 if {like ∨ comment ∨ share ∨ follow ∨ save} else 0` | binary classification | sparse high-precision，类别 imbalance 严重 |
-| `early_skip` | `1 if (swipe_at < 2.5s ∨ watch_ratio < 0.2) else 0` | binary classification | implicit hard-negative；exclude ambiguous middle (0.2 ≤ watch_ratio ≤ 0.5) |
+duration 既是 **feature input**, 又是 **evaluation slice**。所有 offline metric 必须按 duration bucket 报: `[0-5s, 5-15s, 15-30s, 30-60s, 60s+]`。
 
-### Duration confounder
-
-> "**Video duration is a confounder for almost every engagement label**. A 5-second loop is much easier to complete than a 60-second clip. So duration becomes both a **feature input** AND an **evaluation slice** — we should be looking at metrics conditioned on duration buckets, not just aggregate."
-
-Duration buckets 建议: `[0-5s, 5-15s, 15-30s, 30-60s, 60s+]`，offline metrics 必须分 bucket report。
-
-## Loss weighting (Strong Moment ranking-deep 投放)
-
-**Combination strategy**:
+## 权重组合 (post-train tunable)
 
 ```
-final_score = w_1 · p̂_watch_ratio + w_2 · p̂_strong_positive + w_3 · p̂_early_skip_inverse
+final_score = w_1 · p̂_watch_ratio + w_2 · p̂_strong_positive + w_3 · (1 - p̂_early_skip)
 ```
 
-其中:
-- 权重 `w_k` **post-train tunable** — 可调 engagement-vs-quality trade-off 而无需 retrain
-- `p̂_early_skip_inverse = 1 - p̂_early_skip`，所以高 score = unlikely early skip
+权重 `w_k` post-train tunable — 调 engagement-vs-quality trade-off 不需要 retrain。tuning 用 Pareto search on offline metrics (不用 GradNorm — head 不强 competitive, Pareto search 可 audit 易 ship review)。
 
-### Tuning approach (senior signal)
+## Sharing strategy
 
-> "I'd start with **equal weighting** and tune via **Pareto-style search on offline metrics**, NOT gradient-based loss balancing — it's more interpretable and the heads aren't competitive enough to require sophisticated balancing."
-
-**Why not GradNorm / uncertainty weighting**: 解释性差，head 之间不强 competitive (shared backbone 已经 absorb 大部分 correlation)，Pareto search on offline metrics 更可 audit、更易 ship review。
-
-### Sharing strategy
-
-> "Shared backbone, head-specific top layers. Watch-ratio and engagement are **correlated enough to benefit from shared representation**."
+shared backbone (sparse-emb + dense-MLP + DCN) → 3 个 head-specific top-MLP:
 
 ```
-[shared backbone (sparse-emb + dense-MLP + DCN)]
+[shared backbone]
         │
         ├─── [head 1: watch_ratio top-MLP]    (regression)
         ├─── [head 2: strong_positive top-MLP] (binary)
         └─── [head 3: early_skip top-MLP]      (binary)
 ```
 
-"""
-
-
-PRODUCTION_CONSTRAINTS = """\
-# Production Constraints (ML-side, not infra-side)
-
-## Decision summary (the production twist)
-
-**I pick** upload-time multimodal compute + request-time session features + hard-filter compliance + 5% exploration budget + 30+ day long-term holdout — **this is where** cost-decoupling meets bias-as-acquisition on the production wire (~100M items, HNSW / ScaNN at single-digit ms p99, ranker ~50 ms per ~1000-candidate batch).
-
-## 1. Multimodal embedding 生命周期
-
-- **Compute timing**: encoder forward pass **only at upload time** (一次性 cost per video) — 不是 request-time
-- **Refresh cadence**: encoder 权重 **quarterly** 重训，全库 content embedding **quarterly batch refresh**
-- **Cost decoupling**: 把 content understanding 的 GPU cost 从 serving path 中剥离，serving 看到的只是 lookup-by-id 拿 precomputed vector
-
-> "This decouples content understanding cost from serving cost."
-
-## 2. Feature freshness 策略 (asymmetric)
-
-| Side | Freshness | Reason |
-|------|-----------|--------|
-| User-side features | **fresh at request time** | user state 变化快 (session-context features 是 main lever for fatigue / drift) |
-| Content-side features | **cached / precomputed** | content state 变化慢，per-request recompute 浪费 |
-
-> "Fresh user features versus stale precomputed features. For Reels I'd compute user-side features fresh at request, but content-side features can be precomputed and cached."
-
-## 3. Candidate precompute (async, idle-window)
-
-- **Active users**: precompute candidate pool during predictable idle windows (e.g., overnight 用户低活跃期)
-- **Refresh at request time**: 拿 precomputed pool + fresh user-side features 重 rank
-- **New / sporadic users**: fall through to full retrieval pipeline at request time
-
-## 4. Exploration budget as production constraint
-
-5% per-session impression budget for controlled exploration (Strong Moment #3 的 production 投影):
-- **Capped per session** — 避免 UX degradation
-- **Quality eligibility filter** — 避免 low-quality content 套利 exploration budget
-- **Wider candidate pool than production retrieval** — 否则 exploration data 还是 biased (production retrieval 已经过滤掉 long-tail)
-
-## 5. Compliance / safety as hard filter (NOT soft loss)
-
-- **位置**: re-ranking 层 hard filter，不是 loss term
-- **为什么**: compliance 不是 "less engagement"，是 **disqualifying**
-- **Cost**: 单独 compliance classifier pipeline (可能是独立的 LLM-finetune 系列 model)，结果作 binary mask
-
-> "Treating compliance as a soft loss term is a category error that recommendation teams often make."
-
-## 6. Long-term holdout (30+ days)
-
-- 一小撮用户 hold out 不接收新模型 launches，**at least 30 days**
-- **目的**: 捕捉短 A/B 看不到的 long-term degradation — filter bubble narrowing, creator ecosystem effects, fatigue accumulation
-- **Cost**: 这撮用户上不了新 feature，需要 product 同意 trade business loss for 风险 detection
-
-"""
-
-
-TRADEOFFS = """\
-# Tradeoffs (每个决策点必须 surface, "I pick A because X, costs Y, switches to B if Z")
-
-## Decision summary (the tradeoff twist)
-
-8 tradeoffs follow, each in the form **"I pick A because X, costs Y, switches to B if Z"**. **This is where** the architectural twists meet concrete numbers: HNSW / ScaNN ANN at single-digit ms p99, multi-channel 60/20/20, 5% per-session exploration, 30+ day holdout, ~50 ms p99 ranker.
-
-## 1. Pretrained backbone + fine-tune  vs  from scratch
-
-**I pick** a pretrained backbone with a Reels-specific contrastive fine-tune because the backbone has already absorbed a massive visual / audio prior — from-scratch training would need roughly **100x the labeled data** to recover that prior. **Costs**: a quarterly fine-tune refresh on the encoder head, which is dramatically cheaper than a full encoder training cycle. **Switches to** from-scratch only if the pretrain-domain mismatch with Reels becomes large enough that fine-tune cannot close it on the contrastive objective. This is the **enabler** for the cost-decoupling twist: quarterly refresh is feasible **only because** it is fine-tune, not full retrain.
-
-## 2. IPS / propensity weighting  vs  active exploration policy
-
-**I pick** active exploration as the **primary** lever, with IPS / propensity weighting as a supporting layer — Strong Moment #3's core claim is that exposure bias is **a system-level data-acquisition problem, not just a training-time statistical correction**. IPS is a **data-correction** lever that adjusts the data you have via training-time loss reweighting; active exploration is a **data-acquisition** lever that changes the data you collect via onboarding, a 5% per-session budget, and a content-side cold-start ramp. **Costs**: a single ML team can ship IPS alone, but the exploration policy requires **cross-functional cost** — product and growth participate in budget and UX policy. The ceiling matters too: IPS is bounded by the historical retrieval candidate pool; active exploration expands the candidate pool itself. **"It's a stronger lever, but it requires cross-functional cost — product and growth pay part of the bill that ML would otherwise pay in accuracy loss."** **Switches to** IPS-only when the cross-functional budget is unavailable.
-
-## 3. Watch-ratio optimization  vs  long-term retention
-
-**I pick** multi-head primary optimization with a long-term holdout as defense, because **watch ratio gives a per-impression signal** while retention is cohort-level and arrives 30+ days later — only watch-ratio has the signal density to drive a daily-retrain ranker. **Costs**: a clickbait / rage-content gaming failure mode that requires the long-term holdout + explicit-engagement head + creator quality survey to defend. **Switches to** retention-primary only if watch-ratio gaming becomes unrecoverable, but retention alone has no short-term signal to defend with, so this would be a fundamental regime change. **"If we ever see watch ratio going up but retention going down, that's the most important alarm."**
-
-## 4. Compliance as hard filter  vs  compliance as loss term
-
-**I pick** compliance as a **hard filter** at re-ranking, NOT a soft loss term, because **compliance violation is disqualifying, not "less engagement"**. The hard-filter approach gives a yes/no binary outcome that is **high-audit-ability**, whereas mixing a compliance term into the score makes high-engagement content silently **override** minor compliance issues. **Costs**: a separate compliance classifier pipeline (possibly an LLM-finetune family) producing a binary mask. **Switches to** soft-loss only if the compliance classifier precision collapses below an actionable threshold — but the **firm claim** stands: **"Treating compliance as a soft loss term is a category error."**
-
-## 5. Shared backbone + head-specific top  vs  separate models
-
-**I pick** a shared backbone with head-specific top layers across the **3 heads**, because watch-ratio and explicit engagement are **correlated enough to benefit from shared representation** while still allowing per-head specialization at the top. **Costs**: a minor negative-transfer risk when heads are loosely correlated, and the calibration drift across heads requires joint-training discipline. **Switches to** separate models per head only if negative transfer measurably degrades the early-skip head — empirically not the regime; the shared backbone is the parameter-efficient choice. **"Watch-ratio and engagement are correlated enough to benefit from shared representation."**
-
-## 6. Pareto-search loss weighting  vs  GradNorm / Uncertainty weighting
-
-**I pick** Pareto search on offline metrics post-train rather than GradNorm or uncertainty weighting, because **the heads here are not strongly competitive** (the shared backbone absorbs most of the correlation), and Pareto search lets a ship-review see the trade-off frontier explicitly. **Costs**: a small offline search grid per release, but zero retraining cost since the weights are post-train tunable. **Switches to** GradNorm only if the heads become strongly competitive (e.g., when a fourth or fifth task with anti-correlated gradients enters the joint loss). The senior signal here is interpretability: an implicit-weight method is **hard to ship-review**.
-
-## 7. Multi-channel retrieval (60/20/20)  vs  single channel
-
-**I pick** a 3-channel parallel retrieval — **personalized 60% / trending 20% / diversity 20%** — over a single two-tower, because the trending channel handles content-side cold-start, the diversity channel builds in exploration without an extra IPS layer, and together they **dramatically mitigate filter-bubble narrowing**. **Costs**: maintaining 3 retrieval indices plus a budget allocation across channels — but the cold-start and filter-bubble mitigation more than pays for it. **Switches to** a single-channel retrieval only if maintenance budget collapses; **at the cost of** giving up long-tail coverage and pushing the exploration burden entirely onto an upstream policy layer.
-
-## 8. Within-session features fresh  vs  pre-aggregated batch
-
-**I pick** within-session features computed **request-time fresh** because the **Reels within-session dynamics are the ML core** — a session is only a few minutes long and pre-aggregated batch features cannot land before the session ends. **Costs**: a single-digit-ms p99 per-request compute cost and a wider feature-store fan-out. **Switches to** pre-aggregated batch features only if session length collapses to 1-2 items — not the Reels regime; pre-aggregation is fundamentally infeasible here. This is **not a free tradeoff** so much as a forced choice; the senior signal is naming the constraint rather than pretending it is a knob.
-
-"""
-
-
-DEFENSE = """\
-# Strong Moments — 4 个完整英文台词 verbatim (面试就这么说)
-
-下面 4 段台词是 canonical 形态，**逐字 internalize** — 不要解释 / 改写 / 缩水。在 0-5 / 5-12 / 26-32 / 38-42 分钟段精准投放。Strong-Moment methodology (reframe-claim-3-actions-tradeoff 模板, 元结构, 8 meta-rules) 在 `cd://96` §3/§5/§6；这里只放可以直接说出口的英文。
-
-## Decision summary (which Strong Moment to fire when)
-
-**I pick** the 4 Strong Moment slots at the 4 sections where Reels diverges most: framing (multimodal), data (label schema), bias (data-acquisition reframe), wrap (top 3 risks). Each block has Cue + verbatim. The **unique angle** is each Strong Moment ends with a trade-off, **this is where** E5 separates from a brain dump.
-
----
-
-## Strong Moment #1 — Multimodal Lifecycle (0-5 min, framing)
-
-**Cue**: 紧接 declarative open "I'll frame this as ... with two intrinsic specialties..."。这是 Twist 1 的 verbatim 投放点。
-
-> "**First, Reels are short-form videos**, which means content understanding cannot rely on metadata or text alone. Most Reels are UGC with minimal text, and trends are visual or audio-driven. So I'd compute multimodal embeddings — a pretrained video encoder for visual frames, an audio encoder for soundtracks, and a text encoder for any captions — fused into a single content embedding **computed once at upload time**. I'd start with pretrained backbones and fine-tune on a Reels-specific contrastive objective, where co-engaged videos are positives. The embedding gets refreshed only when we improve the encoder, **roughly quarterly**. This **decouples content understanding cost from serving cost**."
-
----
-
-## Strong Moment #2 — Label Schema with Ambiguous Middle (5-12 min, data section)
-
-**Cue**: 紧接 announce "I'll start with labels since they're the most non-trivial for Reels"。This is where the Reels-specific label twist pays off versus a generic CTR ranker.
-
-> "**Label 1: normalized watch ratio**, defined as `watch_time / video_duration`, capped at 1.0. Critical to normalize — raw watch time would systematically over-weight long content. A 3-second video watched fully should count as much as a 60-second video watched fully.
->
-> Label 2: **strong positive (binary)** — explicit engagement like, comment, share, follow, save. Sparse but high-precision.
->
-> Label 3: **strong negative (binary)** — early swipe-away, defined as user swiping within the first 2-3 seconds or before 20% completion. This is the implicit hard-negative signal that's unique to Reels and crucial for breaking exposure bias in negative sampling.
->
-> **Important nuance: the ambiguous middle**. A user who watches 50% then swipes is genuinely ambiguous — not a hard negative, not a strong positive. I'd treat it as **weakly positive on the watch-ratio head and exclude it entirely from the early-skip head**. Forcing a binary label on ambiguous data adds noise.
->
-> One thing I want to flag: **video duration is a confounder** for almost every engagement label. A 5-second loop is much easier to complete than a 60-second clip. So duration becomes both a feature input and an evaluation slice — we should be looking at metrics conditioned on duration buckets, not just aggregate."
-
----
-
-## Strong Moment #3 — Exposure Bias Reframe (26-32 min, bias section)
-
-**Cue**: 紧接你提 IPS 作为铺垫后，"**But I want to push the framing further**..."。This is the unique angle for Reels-class problems: bias is acquired, not just corrected.
-
-> "**But I want to push the framing further** — I'd reframe exposure bias as a **system-level data acquisition problem, not just a training-time statistical correction**. Three places we can intervene:
->
-> **First, onboarding as labeled exploration**. New users go through cold-start anyway. Rather than treating cold-start as a constraint to overcome, treat it as an opportunity to collect high-quality preference labels under controlled exposure — surface a curated diverse set covering distinct content clusters, and use early engagement as relatively unbiased preference signals.
->
-> **Second, periodic re-exploration for existing users**. Allocate a small fraction — say **5%** — of impressions per session to controlled exploration: content from under-represented clusters relative to the user's recent history. Dual purpose: bias mitigation and interest-drift detection.
->
-> **Third, content-side cold-start ramp**. New uploads have no engagement history. Guarantee fresh content an impression budget in its first hours, gated by quality filters to avoid spam capture.
->
-> **Failure modes to watch**: (1) exploration budget being gamed by low-quality content — mitigate with quality eligibility filters; (2) UX degradation from over-aggressive exploration — cap per-session budget and A/B test; (3) exploration data still being biased if retrieval already filtered out long-tail — need to ensure exploration draws from a wider candidate pool than production retrieval.
->
-> **Why this matters more than IPS alone**: IPS corrects bias in the data you have. This approach changes the data you collect. **It's a stronger lever, but it requires cross-functional cost** — product and growth pay part of the bill that ML would otherwise pay in accuracy loss."
-
-**Bonus closer (objective combination, said immediately after the bias claim)**:
-
-> "On objectives, I'd combine three: user engagement (multi-head), ecosystem value (creator retention, content diversity at the platform level), and compliance/safety. Combination strategy: multi-task heads for engagement and ecosystem, but **compliance applied as a hard filter at re-ranking, not as a loss term**. Compliance violations aren't 'less engagement' — they're disqualifying. **Treating them as a soft loss term is a category error** that recommendation teams often make."
-
----
-
-## Strong Moment #4 — Zoom-out + Top 3 Risks (38-42 min, before serving)
-
-**Cue**: 主动开启，"**Let me zoom out for a moment** and summarize the design, then flag the top risks I see"。This is the E5 boundary signal — the only Strong Moment whose twist is meta-rhythm (own the wrap-up).
-
-> "**Let me zoom out for a moment** and summarize the design, then flag the top risks I see.
->
-> We have a **two-stage retrieval-plus-ranking system with multimodal content understanding, multi-task ranking heads, session-aware features, exposure bias mitigation via active exploration policy, and evaluation across offline, online, and long-term layers**.
->
-> The top three risks:
->
-> **Risk 1: Exposure bias compounding faster than mitigation can correct**. Our mitigations are partial — 5% exploration budget may not be enough if the feedback loop is strong. I'd want to **monitor content diversity served over time and have a circuit breaker if diversity drops below threshold**.
->
-> **Risk 2: Multi-task loss imbalance over time**. Heads may drift in relative importance as the data distribution shifts. I'd **build retraining pipelines that re-tune head weights, not just retrain weights at fixed loss combinations**.
->
-> **Risk 3: Long-term engagement versus short-term watch time**. Watch-ratio optimization can be gamed by clickbait or rage content. The pairing with explicit engagement signals partially addresses it, but **the real defense is the long-term holdout and quality-survey signals** I mentioned in evaluation. **If we ever see watch ratio going up but retention going down, that's the most important alarm**.
->
-> Are there parts of the design you'd like me to deepen?"
-"""
-
-
-VERBAL_OUTLINE = """\
-# Reels-specific verbal anchors (methodology lives in cd://96)
-
-The general verbal scaffolding (declarative openers, sub-structure announce, drift recovery, ML-native YES/NO vocab table, hand-off / collaborative-mode 句式, quantification 句式, production-scar 句式) lives in `cd://96` §5 (Framing/Body/Strong/Zoom 元结构) and §6 (8 偏好节奏 meta-rules). The lines below are the only ones unique to **Reels home feed** — quote them verbatim, do NOT duplicate cd96.
-
-## 4 Strong Moment entry phrases (memorize verbatim — these are the cue lines)
-
-1. "**First, Reels are short-form videos**..."  (multimodal lifecycle, 0-5 min — Twist 1)
-2. "**Label 1: normalized watch ratio**..."  (label schema, 5-12 min — Reels ambiguous-middle twist)
-3. "**But I want to push the framing further**..."  (exposure bias reframe, 26-32 min — data-acquisition twist)
-4. "**Let me zoom out for a moment** and summarize the design..."  (top 3 risks, 38-42 min — E5 wrap-up twist)
-
-## Reels-specific drift-recovery lines (NOT in cd96 — these mention Reels by name)
-
-- 飘到 generic ranking → "**Let me return to the ML core** — for Reels, the more important question is how within-session dynamics affect the rank, not what generic feature buckets exist."
-- 被问 surface 维度 → "**I'd anchor on Reels home feed in-app** for this discussion; the cross-surface mix is a different problem."
-- 被问 cold-start 太早 → "**Let me park cold-start until the bias section** — it's where the exploration-budget answer lives. For now I'll flag it as a known risk."
-- 被问 QPS → "**Billion-QPS in serving** — I'll come back to the serving constraint at the end; the ML decisions I'd make here don't change with QPS, only the candidate-precompute cadence does."
-
-## Reels-only hand-off prompt (the deepen-which-side question)
-
-> "Want me to **deepen retrieval, ranking architecture, or the multi-task head design**?"
-
-The 3-way choice maps to Reels-specific levers: retrieval = multi-channel 60/20/20 + ANN (HNSW/ScaNN, ~100M items); ranking = DLRM + DCN + session-aware transformer/GRU over last K items; heads = watch-ratio + strong-positive + early-skip with shared backbone and Pareto post-train weighting. Avoid offering a 4th choice — three is the canonical Reels carve-up.
-"""
+watch-ratio 与 strong-positive correlated 足够 benefit from 共享表征; early-skip 用同一 backbone 是因为 backbone capacity 足够 absorb 三头的分布差异。"""
 
 
 CHEAT_SHEET = """\
 # 30-sec pre-walk-in checklist — Reels-only
 
-Methodology (timing skeleton, 元结构, 8 meta-rules, E4/E5 boundary, drift recovery vocab) lives in `cd://96` §1 / §5 / §6 / §8. The anchors below are Reels-specific only — quote verbatim, do NOT overlap cd96.
+> 方法论 (timing skeleton, 元结构, 8 meta-rules, E4/E5 boundary, drift recovery vocab) 在 `cd://96` §1 / §5 / §6 / §8。此处只放 Reels 特有的 anchor 数 + firm-claim register, 进面前 30 秒过一遍。
 
-## Strong Moment slot map (memorize position, anchor, twist)
+## 数字 anchor (说出来时声音里就有数)
 
-| Time   | Slot    | Reels-specific anchor (the twist this slot hosts)                                  |
-|--------|---------|------------------------------------------------------------------------------------|
-| 0-5    | **#1**  | multimodal lifecycle — pretrained + upload-time + quarterly + cost decoupling      |
-| 5-12   | **#2**  | label schema — 3 heads + ambiguous middle + duration confounder                    |
-| 26-32  | **#3**  | exposure bias as data acquisition — 5% session budget + onboarding + cold ramp     |
-| 38-42  | **#4**  | top 3 risks — diversity circuit breaker / head-weight retune / watch-vs-retention alarm |
+- **60/20/20**: 多路 retrieval 切分 (personalized / trending / diversity)
+- **5% per session**: exploration impression 预算
+- **256-dim**: multimodal content embedding 维度; 季度 refresh
+- **20% 完播 或 <2.5s**: early-skip 定义 (Reels 特有 hard-negative)
+- **30+ days**: long-term holdout 抓 filter bubble / creator 生态 / fatigue
+- **~100M items, HNSW / ScaNN, 单数字 ms p99**: retrieval/serving 规模 anchor
+- **p99 200ms**: 端到端 latency SLO
+- **10-25 items per push**: 一次 feed 返回长度
 
-## Reels-only quantification anchors (drop verbatim into the appropriate moment)
+## Firm-claim register (整场至多说 1 次)
 
-- **60/20/20**: multi-channel retrieval split (personalized / trending / diversity) — the unique angle that decouples bias mitigation from a single tower.
-- **5% per session**: exploration impression budget — the data-acquisition twist of Strong Moment #3.
-- **256-dim**: multimodal content embedding dimension; refresh **quarterly** — the cost-decoupling twist of Strong Moment #1.
-- **20% completion or < 2-3s**: early-skip definition — the Reels-specific hard-negative twist.
-- **30+ days**: long-term holdout for filter-bubble narrowing — switches the eval lens from short-term watch to retention.
-- **~100M items** with **HNSW** / **ScaNN** ANN over content index; **single-digit ms p99** session-context feature compute — the scale anchors for the retrieval and serving sections.
+- "**视频库是 corpus, 不是 model input**——一次 request 的 input 是 (user, context, candidate item) 三组 feature。" (开场 framing 立场)
+- "**单看完播率偏短视频, 单看时长偏长视频; 一起用 + duration 当 slice 平衡 confounder。**" (Data 段 watch-ratio 立场)
+- "**ambiguous middle 在 watch-ratio head 当弱正、在 early-skip head 直接排除——强行二元化是加噪声。**" (Data 段 label nuance)
+- "**bias tower 修的是 surface 过的数据内部的 selection bias, 修不了根本没 surface 的——必要但不充分, 完整答案还得靠 exploration。**" (Features 段 debias 边界)
+- "**generative 对冷启动不是优势, 反而是弱点——新 item 的 SID 可能还没进 codebook。**" (Model 段范式对比纠错)
+- "**L1 不用 GBDT 不是因为 GBDT 过时, 是因为 Reels 主力是高维 ID + multimodal embedding, GBDT 吃不动。**" (Model 段 L1 立场)
+- "**compliance 是 hard filter 不是 soft loss term——把 compliance 当 soft loss 是 category error。**" (Model 段 rerank 立场)
+- "**A/B 必须 user/session 级, 不能 item/impression 级——session 内 item 互相影响, impression 级随机化会污染。**" (Eval 段 Reels 陷阱)
+- "**train-serving skew 首选 serving-time feature snapshot 根治, 退到 offline 重建必须配 replay 校验。**" (Serving 段)
+- "**watch time 涨但 retention 跌——这是最重要的 alarm, 靠 long-term holdout 抓。**" (Wrap 段 risk #3)
 
-## Reels-only firm-claim register (each line is said at most once during the 45 min)
+## 复用范围
 
-- "**We decouple content understanding cost from serving cost** — encoder runs at upload, not request."  (Twist 1 callback)
-- "**The ambiguous middle is genuinely ambiguous** — weakly positive on watch-ratio, excluded from early-skip."  (Twist 2 callback)
-- "**It's a stronger lever than IPS, but it requires cross-functional cost** — product and growth pay part of the bill."  (Twist 3 callback)
-- "**Treating compliance as a soft loss term is a category error.**"  (bonus, said once after #3)
-- "**If we ever see watch ratio going up but retention going down, that's the most important alarm.**"  (Twist 4 callback)
+此 row 的 2-stage + multi-task + 60/20/20 + 3-层 eval 是 Reels carve-up。Feed / Notification / Friend-rec / Ads / Top-3 Comments 的 mapping 见 cd://96 hub + sibling sd-golden (`sd://meta-top3-comments-golden`, `sd://meta-weapon-ads-golden`, `sd://meta-friend-rec-golden`)。"""
 
-## 复用范围 (one-line note, full mapping in cd://96)
 
-This row's 2-stage + multi-task + 60/20/20 + 3-layer eval shape is the canonical Reels carve-up. For Feed / Notification / Friend-rec / Ads / Top-3 Comments mappings see the cd://96 hub and the sibling sd-golden rows (`sd://meta-top3-comments-golden`, `sd://meta-weapon-ads-golden` planned, `sd://meta-friend-rec-golden` planned).
-"""
+# T-P1-875: oral_narrative archetype NULLs these 5 fields. Their content lives
+# inlined in DATAFLOW (the 8-section 口播稿). Validation in
+# scripts/audit_meta_mlsd_3rule.py respects the archetype declared on the
+# instance in schemas/meta_mlsd_canonical.yaml.
+ARCHITECTURE: str | None = None
+PRODUCTION_CONSTRAINTS: str | None = None
+TRADEOFFS: str | None = None
+DEFENSE: str | None = None
+VERBAL_OUTLINE: str | None = None
 
 
 def _now() -> str:
+    """ISO-8601 UTC timestamp with seconds precision."""
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def _content_hash(payload: dict[str, str | None]) -> str:
+    """Stable hash over the canonical content fields (NULL contributes empty string)."""
     keys = (
         "title", "subtitle", "overview", "architecture", "dataflow",
         "formulas", "production_constraints", "tradeoffs", "defense",
@@ -614,6 +329,7 @@ def _content_hash(payload: dict[str, str | None]) -> str:
 
 
 def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
+    """Insert or update the row, writing NULL for archetype-nullable fields."""
     now = _now()
     payload: dict[str, str | int | None] = {
         "slug": SLUG,
@@ -660,65 +376,71 @@ def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
 
 
 def validate(cur: sqlite3.Cursor) -> list[str]:
-    """Run AC1-AC7 + T-P0-867 schema checks (R-DRAWER, R-FORBID-*, 3-rule)."""
-    import re
+    """Archetype-aware seed-side validation.
 
+    For oral_narrative: verify the 4 contracted fields populated, the 5 NULL
+    fields actually NULL, content_hash present, and the row carries the
+    expected slug/title/display_order. Deep semantic checks (R-3RULE-* /
+    R-NARRATIVE-* / R-CHAR-range / R-DRAWER-no-sd-drawer) live in
+    scripts/audit_meta_mlsd_3rule.py and are the canonical post-seed gate.
+    """
     errs: list[str] = []
 
     cur.execute(
-        "SELECT id, slug, title, subtitle, display_order, overview, architecture, "
-        "dataflow, formulas, production_constraints, tradeoffs, defense, "
-        "verbal_outline, cheat_sheet, content_hash, updated_at "
-        "FROM system_designs WHERE slug = ?",
+        "SELECT id, slug, title, subtitle, display_order, overview, "
+        "architecture, dataflow, formulas, production_constraints, "
+        "tradeoffs, defense, verbal_outline, cheat_sheet, content_hash, "
+        "updated_at FROM system_designs WHERE slug = ?",
         (SLUG,),
     )
     rows = cur.fetchall()
     if len(rows) != 1:
-        errs.append(f"AC1 FAIL: expected exactly 1 row for slug={SLUG}, got {len(rows)}")
+        errs.append(
+            f"AC1 FAIL: expected exactly 1 row for slug={SLUG}, got {len(rows)}"
+        )
         return errs
 
-    row = rows[0]
-    (rid, slug, title, subtitle, disp_order, overview, architecture, dataflow,
-     formulas, prod_cons, tradeoffs, defense, verbal, cheat, chash, upd_at) = row
+    (
+        rid, slug, title, subtitle, disp_order, overview, architecture,
+        dataflow, formulas, prod_cons, tradeoffs, defense, verbal, cheat,
+        chash, upd_at,
+    ) = rows[0]
 
-    prose_cols = {
-        "overview": overview,
+    # Populated-fields contract for oral_narrative.
+    populated = {
+        "overview": (overview, 200),
+        "dataflow": (dataflow, 4000),
+        "formulas": (formulas, 200),
+        "cheat_sheet": (cheat, 200),
+    }
+    for col, (body, floor) in populated.items():
+        if body is None or len(body) < floor:
+            errs.append(
+                f"AC2 FAIL: column {col} length={len(body or '')} < {floor} "
+                f"(oral_narrative populated-floor)"
+            )
+
+    # NULL-fields contract for oral_narrative.
+    nulled = {
         "architecture": architecture,
-        "dataflow": dataflow,
-        "formulas": formulas,
         "production_constraints": prod_cons,
         "tradeoffs": tradeoffs,
         "defense": defense,
         "verbal_outline": verbal,
-        "cheat_sheet": cheat,
     }
-    for k, v in prose_cols.items():
-        if v is None:
-            errs.append(f"AC2 FAIL: column {k} is NULL")
-        elif len(v) <= 200:
-            errs.append(f"AC2 FAIL: column {k} length={len(v)} <= 200")
-
-    total_bytes = sum(len((v or "").encode("utf-8")) for v in prose_cols.values())
-    if total_bytes <= 8000:
-        errs.append(f"AC3 FAIL: total prose bytes={total_bytes} <= 8000")
-
-    expected_phrases = [
-        "First, Reels are short-form",
-        "Label 1: normalized watch ratio",
-        "But I want to push the framing further",
-        "Let me zoom out for a moment",
-    ]
-    for phrase in expected_phrases:
-        if phrase not in (defense or ""):
-            errs.append(f"AC4 FAIL: phrase {phrase!r} not in defense column")
+    for col, val in nulled.items():
+        if val is not None and val != "":
+            errs.append(
+                f"AC3 FAIL: column {col} expected NULL (oral_narrative) but "
+                f"got length={len(val)}"
+            )
 
     if "Meta MLSD Golden Example" not in (subtitle or ""):
-        errs.append("AC5 FAIL: subtitle missing 'Meta MLSD Golden Example' substring")
-
+        errs.append("AC4 FAIL: subtitle missing 'Meta MLSD Golden Example'")
     if not chash:
-        errs.append("AC6 FAIL: content_hash is empty")
+        errs.append("AC5 FAIL: content_hash empty")
     if not upd_at:
-        errs.append("AC6 FAIL: updated_at is empty")
+        errs.append("AC5 FAIL: updated_at empty")
 
     cur.execute(
         "SELECT COUNT(*) FROM system_designs WHERE display_order = ?",
@@ -727,151 +449,29 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
     cnt = cur.fetchone()[0]
     if cnt != 1:
         errs.append(
-            f"AC7 FAIL: display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
+            f"AC6 FAIL: display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
         )
-
-    # ----- T-P0-867 schema checks (schemas/meta_mlsd_canonical.yaml) -----
-    # R-DRAWER-no-sd-drawer: no drawer table at top of any sd-golden body.
-    drawer_top_re = re.compile(r"^\|.*sd://.*\|", re.MULTILINE)
-    for k, v in prose_cols.items():
-        if v and drawer_top_re.search(v[:2000] or ""):
-            errs.append(
-                f"R-DRAWER-no-sd-drawer FAIL: {k} top has '| ... sd:// ... |' table"
-            )
-
-    # R-FORBID-rhythm-philosophy: 整体节奏哲学 must not appear in overview.
-    if overview and "整体节奏哲学" in overview:
-        errs.append(
-            "R-FORBID-rhythm-philosophy FAIL: overview still contains 整体节奏哲学"
-        )
-
-    # R-FORBID-why-this-is-strong: 'why this is strong' must not appear in defense.
-    if defense and re.search(r"(?i)why this is strong", defense):
-        errs.append(
-            "R-FORBID-why-this-is-strong FAIL: defense still contains 'Why this is strong'"
-        )
-
-    # R-FORBID-drawer-header-literal: '| Doc | ... sd://' must not appear anywhere.
-    drawer_header_re = re.compile(r"^\|\s*Doc\s*\|.*sd://", re.MULTILINE)
-    for k, v in prose_cols.items():
-        if v and drawer_header_re.search(v):
-            errs.append(
-                f"R-FORBID-drawer-header-literal FAIL: {k} contains '| Doc | ... sd://' header"
-            )
-
-    # 3-rule (section-level, at_least_one_bullet pass) for apply_3rule=true cols.
-    rule_patterns = {
-        "R-3RULE-decision": [
-            r"\b(I pick|we pick|I choose|we choose|default to|pick A)\b",
-            r"(?i)\bdecision\b.*\bover\b",
-        ],
-        "R-3RULE-tradeoff": [
-            r"(?i)\b(costs?|at the cost of|switches? to|in exchange for)\b",
-            r"\bvs\b",
-        ],
-        "R-3RULE-scale-sla": [
-            r"\b\d+\s*(ms|µs|us|qps|QPS|dim|k|K|M|B|fps|min|sec|s)\b",
-            r"\bp(50|95|99|999)\b",
-            r"\bHNSW\b|\bIVF\b|\bScaNN\b",
-        ],
-        "R-3RULE-twist-callback": [
-            r"(?i)\b(twist|unique angle|the core decision here is|this is where)\b",
-            r"(?i)\bcallback (to|of)\b",
-        ],
-    }
-    apply_3rule_cols = (
-        "overview", "architecture", "dataflow",
-        "production_constraints", "tradeoffs", "defense",
-    )
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        for rule_id, patterns in rule_patterns.items():
-            hit = any(re.search(p, body) for p in patterns)
-            if not hit:
-                errs.append(
-                    f"{rule_id} FAIL: section {col} has no matching bullet "
-                    f"(at_least_one_bullet pass)"
-                )
-
-    # sd_golden.overview target_chars [1500, 4500]; defense [2500, 8500];
-    # architecture [2000, 6000]; dataflow [2500, 9000].
-    field_char_ranges = {
-        "overview":     (1500, 4500),
-        "architecture": (2000, 6000),
-        "dataflow":     (2500, 9000),
-        "defense":      (2500, 8500),
-    }
-    for col, (lo, hi) in field_char_ranges.items():
-        n = len(prose_cols.get(col) or "")
-        if not (lo <= n <= hi):
-            errs.append(
-                f"SCHEMA-charrange FAIL: {col} chars={n} not in [{lo}, {hi}]"
-            )
-
-    # R-NARRATIVE-prose-form: measurable_proxy thresholds (T-P0-873 retrofit).
-    #   - bold_density_per_section_min: 3 (>=3 **bold** spans per apply_3rule section)
-    #   - bullet_run_max_consecutive:   4 (>4 unbroken bullet lines = violation)
-    #   - table_row_max:                3 (markdown tables with >3 body rows = violation)
-    bold_re = re.compile(r"\*\*[^*\n]+\*\*")
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        bold_count = len(bold_re.findall(body))
-        if bold_count < 3:
-            errs.append(
-                f"R-NARRATIVE FAIL: {col} bold_density={bold_count} < 3"
-            )
-
-    bullet_line_re = re.compile(r"^\s*[-*]\s+", re.MULTILINE)
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        run = 0
-        max_run = 0
-        for line in body.splitlines():
-            if bullet_line_re.match(line):
-                run += 1
-                max_run = max(max_run, run)
-            elif line.strip() == "":
-                run = 0
-            else:
-                run = 0
-        if max_run > 4:
-            errs.append(
-                f"R-NARRATIVE FAIL: {col} bullet_run_max={max_run} > 4"
-            )
-
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        in_table = False
-        rows_seen = 0
-        for line in body.splitlines():
-            if line.lstrip().startswith("|"):
-                rows_seen += 1
-                in_table = True
-            else:
-                if in_table:
-                    body_rows = rows_seen - 2  # subtract header + separator
-                    if body_rows > 3:
-                        errs.append(
-                            f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
-                        )
-                in_table = False
-                rows_seen = 0
-        if in_table:
-            body_rows = rows_seen - 2
-            if body_rows > 3:
-                errs.append(
-                    f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
-                )
 
     print(f"[OK] row id={rid} slug={slug}")
     print(f"     title={title[:60]}...")
-    print(f"     display_order={disp_order}, total prose bytes={total_bytes}")
-    for k, v in prose_cols.items():
-        print(f"     {k}: {len(v or '')} chars")
+    print(f"     archetype={DOCUMENT_ARCHETYPE}")
+    print(f"     display_order={disp_order}")
+    print(
+        f"     populated: overview={len(overview or '')} dataflow={len(dataflow or '')} "
+        f"formulas={len(formulas or '')} cheat_sheet={len(cheat or '')}"
+    )
+    print(
+        f"     nulled: architecture={'NULL' if architecture is None else len(architecture)} "
+        f"production_constraints={'NULL' if prod_cons is None else len(prod_cons)} "
+        f"tradeoffs={'NULL' if tradeoffs is None else len(tradeoffs)} "
+        f"defense={'NULL' if defense is None else len(defense)} "
+        f"verbal_outline={'NULL' if verbal is None else len(verbal)}"
+    )
     return errs
 
 
 def main() -> int:
+    """CLI entrypoint."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=str(DEFAULT_DB))
     ap.add_argument("--dry-run", action="store_true")
@@ -904,7 +504,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print("\n[DONE] all 7 ACs pass")
+    print("\n[DONE] oral_narrative archetype seed: all ACs pass")
     return 0
 
 

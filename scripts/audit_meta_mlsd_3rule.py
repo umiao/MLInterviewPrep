@@ -119,6 +119,38 @@ def load_schema() -> dict[str, Any]:
         return yaml.safe_load(f)
 
 
+def get_sd_golden_instance(schema: dict[str, Any], slug: str) -> dict[str, Any]:
+    """Return the applies_to.instances entry for an sd-golden slug (or {})."""
+    for group in schema.get("applies_to", []) or []:
+        if group.get("doc_type") != "sd-golden":
+            continue
+        for inst in group.get("instances", []) or []:
+            if inst.get("slug") == slug:
+                return inst
+    return {}
+
+
+def get_archetype_for_slug(schema: dict[str, Any], slug: str) -> str:
+    """Return the document_archetype declared on an sd-golden instance.
+
+    Falls back to document_archetypes.default_archetype (default
+    'structured_reference') when the instance has no explicit declaration.
+    """
+    inst = get_sd_golden_instance(schema, slug)
+    if inst.get("document_archetype"):
+        return inst["document_archetype"]
+    return (schema.get("document_archetypes") or {}).get(
+        "default_archetype", "structured_reference"
+    )
+
+
+def get_oral_narrative_contract(schema: dict[str, Any]) -> dict[str, Any]:
+    """Return the oral_narrative archetype's `contract` dict (or {} if undefined)."""
+    archetypes = schema.get("document_archetypes") or {}
+    values = archetypes.get("values") or {}
+    return (values.get("oral_narrative") or {}).get("contract") or {}
+
+
 def fetch_cd96(conn: sqlite3.Connection) -> str:
     """Return cd96 markdown content."""
     row = conn.execute(
@@ -407,13 +439,16 @@ def _audit_cd96_timing_table(sec1_body: str, cfg: dict[str, Any]) -> list[str]:
 # sd-golden specific checks
 # ---------------------------------------------------------------------------
 def audit_sd_golden(conn: sqlite3.Connection, slug: str, schema: dict[str, Any]) -> dict[str, Any]:
-    """Run the sd-golden per-page audit for one slug."""
+    """Run the sd-golden per-page audit for one slug.
+
+    Branches on document_archetype: structured_reference uses sd_golden.fields
+    spec; oral_narrative uses document_archetypes.values.oral_narrative.contract.
+    """
     cols = fetch_sd_golden(conn, slug)
     findings: list[str] = []
-    sg_cfg = schema["sd_golden"]
-    three_rule = schema["three_rule"]
+    archetype = get_archetype_for_slug(schema, slug)
 
-    # R-DRAWER-no-sd-drawer: no `| ... sd:// ... |` table at top of any field.
+    # R-DRAWER-no-sd-drawer applies to both archetypes (no drawer table at top).
     drawer_top_re = re.compile(r"^\|.*sd://.*\|", re.MULTILINE)
     for k, v in cols.items():
         if v and drawer_top_re.search(v[:2000]):
@@ -422,8 +457,39 @@ def audit_sd_golden(conn: sqlite3.Connection, slug: str, schema: dict[str, Any])
                 f"table within first 2000 chars"
             )
 
-    # Per-field rules from sg_cfg["fields"].
+    if archetype == "oral_narrative":
+        findings.extend(_audit_sd_golden_oral_narrative(slug, cols, schema))
+    else:
+        findings.extend(_audit_sd_golden_structured_reference(slug, cols, schema))
+
+    # Forbidden patterns scoped to sd_golden.<field> -- archetype-agnostic.
+    for col, body in cols.items():
+        if not body:
+            continue
+        findings.extend(
+            f"[{slug}.{col}] {h}"
+            for h in check_forbidden_patterns(body, f"sd_golden.{col}", schema)
+        )
+
+    return {
+        "doc": slug,
+        "archetype": archetype,
+        "chars": sum(len(v or "") for v in cols.values()),
+        "lines": sum((v or "").count("\n") + 1 if v else 0 for v in cols.values()),
+        "per_field_chars": {k: len(v or "") for k, v in cols.items()},
+        "findings": findings,
+    }
+
+
+def _audit_sd_golden_structured_reference(
+    slug: str, cols: dict[str, str], schema: dict[str, Any]
+) -> list[str]:
+    """Per-field audit for structured_reference archetype (original sd_golden.fields)."""
+    findings: list[str] = []
+    sg_cfg = schema["sd_golden"]
+    three_rule = schema["three_rule"]
     fields_spec = {f["id"]: f for f in sg_cfg.get("fields", [])}
+
     for col, body in cols.items():
         spec = fields_spec.get(col)
         if not spec:
@@ -448,21 +514,10 @@ def audit_sd_golden(conn: sqlite3.Connection, slug: str, schema: dict[str, Any])
                 findings.append(
                     f"[{failing}] {slug}.{col} (at_least_one_bullet pass)"
                 )
-            # R-NARRATIVE measurable proxies.
             for v in check_narrative_prose(body, schema):
                 findings.append(f"[{slug}.{col}] {v}")
 
-        # Forbidden patterns scoped to sd_golden.<field>.
-        findings.extend(
-            f"[{slug}.{col}] {h}"
-            for h in check_forbidden_patterns(body, f"sd_golden.{col}", schema)
-        )
-
-    # tradeoffs section: bullet count + 'vs' pattern (schema-declared shape).
-    # Accept either flat numbered list (`1. ... vs ...`) or H2-numbered prose
-    # (`## 1. ... vs ...`) -- T-873 retrofit converted sd41/sd42 tradeoffs to
-    # H2-prefixed prose paragraphs while sd-weapon / sd-friend kept the flat
-    # form. Both forms preserve the "N items with vs" semantics.
+    # tradeoffs count check (numbered '... vs ...' items).
     tradeoffs_spec = fields_spec.get("tradeoffs", {})
     body = cols.get("tradeoffs", "")
     if tradeoffs_spec and body:
@@ -477,14 +532,64 @@ def audit_sd_golden(conn: sqlite3.Connection, slug: str, schema: dict[str, Any])
                 f"[{min_b}, {max_b}] (accepts both '1. ... vs ...' and "
                 f"'## 1. ... vs ...' forms)"
             )
+    return findings
 
-    return {
-        "doc": slug,
-        "chars": sum(len(v or "") for v in cols.values()),
-        "lines": sum((v or "").count("\n") + 1 if v else 0 for v in cols.values()),
-        "per_field_chars": {k: len(v or "") for k, v in cols.items()},
-        "findings": findings,
-    }
+
+def _audit_sd_golden_oral_narrative(
+    slug: str, cols: dict[str, str], schema: dict[str, Any]
+) -> list[str]:
+    """Per-field audit for oral_narrative archetype.
+
+    Contract (from document_archetypes.values.oral_narrative.contract):
+      required_fields[].id (with .min_chars, .apply_3rule, .apply_narrative_prose_form)
+      optional_fields[].id (same modifier flags)
+      nullable_fields[]  -- legal NULL
+    """
+    findings: list[str] = []
+    contract = get_oral_narrative_contract(schema)
+    three_rule = schema["three_rule"]
+
+    required = contract.get("required_fields") or []
+    optional = contract.get("optional_fields") or []
+    nullable = set(contract.get("nullable_fields") or [])
+
+    field_modifiers: dict[str, dict[str, Any]] = {}
+    for spec in required:
+        field_modifiers[spec["id"]] = {"required": True, **spec}
+    for spec in optional:
+        field_modifiers[spec["id"]] = {"required": False, **spec}
+
+    for col, body in cols.items():
+        n = len(body or "")
+        if col in nullable:
+            # Explicit NULL-allowed; nothing to check.
+            continue
+        mods = field_modifiers.get(col)
+        if mods is None:
+            # Unknown column in oral_narrative contract: skip (not regulated here).
+            continue
+
+        # min_chars check (required field length floor).
+        min_chars = int(mods.get("min_chars", 0) or 0)
+        if mods["required"] and n < min_chars:
+            findings.append(
+                f"[oral_narrative.required] {slug}.{col} chars={n} < min={min_chars}"
+            )
+
+        # 3-rule (substantive: causal / tradeoff / scale / twist) -- governed by
+        # the contract's per-field apply_3rule flag.
+        if body and mods.get("apply_3rule"):
+            for failing in check_3rule_section(body, three_rule):
+                findings.append(
+                    f"[{failing}] {slug}.{col} (at_least_one_bullet pass)"
+                )
+
+        # R-NARRATIVE prose-form bold density / bullet runs / table rows.
+        if body and mods.get("apply_narrative_prose_form"):
+            for v in check_narrative_prose(body, schema):
+                findings.append(f"[{slug}.{col}] {v}")
+
+    return findings
 
 
 # ---------------------------------------------------------------------------
@@ -495,8 +600,14 @@ def audit_cross_page(conn: sqlite3.Connection, schema: dict[str, Any]) -> dict[s
     findings: list[str] = []
 
     # R-XPAGE-section-naming: every sd-golden defense column must use the
-    # canonical Strong-Moments header (or a # header containing "Strong Moments").
+    # canonical Strong-Moments header. Oral_narrative archetype has no
+    # defense field by design -- the cross_page_overrides in the archetype
+    # contract declares this rule `action: skip`.
     for slug in SD_GOLDEN_SLUGS:
+        archetype = get_archetype_for_slug(schema, slug)
+        if archetype == "oral_narrative":
+            # Strong Moments are inlined in dataflow; no separate defense header.
+            continue
         cols = fetch_sd_golden(conn, slug)
         defense = cols.get("defense", "")
         if not STRONG_MOMENTS_HEADER_RE.search(defense):
@@ -538,9 +649,21 @@ def audit_diff_delta(conn: sqlite3.Connection, schema: dict[str, Any]) -> dict[s
         cols = fetch_sd_golden(conn, slug)
         chars_now = sum(len(v or "") for v in cols.values())
         lines_now = sum((v or "").count("\n") + 1 if v else 0 for v in cols.values())
-        baseline = BASELINE_CHARS.get(slug)
+
+        # Archetype-aware baseline source:
+        #   structured_reference -> BASELINE_CHARS (pre-prune snapshot)
+        #   oral_narrative -> instance.baseline_chars_post_migration
+        # (the migration commit itself is exempted; future deletions still gated)
+        archetype = get_archetype_for_slug(schema, slug)
+        if archetype == "oral_narrative":
+            inst = get_sd_golden_instance(schema, slug)
+            baseline = inst.get("baseline_chars_post_migration")
+        else:
+            baseline = BASELINE_CHARS.get(slug)
+
         item: dict[str, Any] = {
             "slug": slug,
+            "archetype": archetype,
             "chars_now": chars_now,
             "lines_now": lines_now,
             "baseline_chars": baseline,

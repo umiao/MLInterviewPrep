@@ -81,7 +81,7 @@ DRAWER_INDEX = f"""> ## Drawer 入口（点击展开详读）
 >
 > | 入口 | 内容 | 何时打开 |
 > | --- | --- | --- |
-> | **[Reels Golden Example (45min 全文)](sd://{SD_REELS_GOLDEN})** | 八段台词 + 4 Strong Moments verbatim | 想看 DLRM/multi-task/multimodal 实战编排 |
+> | **[Reels Golden Example (45min 口播稿)](sd://{SD_REELS_GOLDEN})** | 8 段第一人称口播稿 (因果链 + 立场+trade-off + twist 在 body 兑现) | 想看 Reels 这题 end-to-end 怎么说 |
 > | **[Top-3 Comments Golden Example (45min)](sd://{SD_TOP3_GOLDEN})** | 第 2 例 45min walkthrough (类比 Reels Golden) | 对照学 framing/metric/label 三段式 + Strong Moment 编排 |
 > | **[Weapon Ads Classifier Golden (45min)](sd://{SD_WEAPON_GOLDEN})** | 第 3 例 (T&S classification, 非 RecSys) | 想看 cascade calibration / 三段 eval / 多模态 T&S |
 > | **[Friend Recommendation Golden (45min)](sd://{SD_FRIEND_GOLDEN})** | 第 4 例 (bilateral matching P(send)×P(accept)) | 想看 MMoE 双头 / cluster-randomized A/B / NRT 双边信号 |
@@ -221,14 +221,16 @@ def validate_content(content: str, transformed_body: str) -> None:
                 f"missing body section header `## {n}.` in renumbered content"
             )
 
-    # AC #6: length range. T-P0-871 bumped upper bound from 14000 to 16000:
-    # drawer block grew from 5 to 8 entries (+~700 chars in prepended block)
-    # AND Section 1 timing skeleton twist cells now cite 4 worked examples
-    # instead of 1 (+~500 chars across 4 strong-moment rows).
+    # AC #6: length range. T-P0-874 bumped upper bound from 16000 to 20000:
+    # body §1.1 "4 Golden Examples 主次映射" added +~2.5KB (cd97-voice 4-card
+    # expansion) + §3 Strong Moments polish (---separators + **主适配** lines)
+    # +~800 chars. Body alone is now ~17.5KB; +1.1KB drawer block → ~18.6KB
+    # total. Prior bumps: T-P0-871 14000 -> 16000 (5→8 drawer entries +
+    # 4-worked-examples citation in §1 twist cells); base 14000 (T-P0-845).
     n_chars = len(content)
-    if not (10500 <= n_chars <= 16000):
+    if not (10500 <= n_chars <= 20000):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [10500, 16000]"
+            f"content char-length {n_chars} not in [10500, 20000]"
         )
 
     # AC: body preserved verbatim — content must end with transformed_body

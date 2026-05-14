@@ -455,6 +455,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-13** -- T-P1-875: [Meta-MLSD-narrative] sd41 narrative-mode 简化 + 触发 schema 演进决策. 用户报 sd://meta-reels-golden 写得乱七八糟, 跟 framing/方法论冲突, 让我用他写的口播稿大幅简化. 已 live: sd41 10 字段→4 字段 (45KB→14KB), cd96 drawer 行描述更
+- [x] **2026-05-13** -- T-P0-874: [META-MLSD-CD96-LINK-FIX] cd96 §1 dedupe sd-golden cluster + new §1.1 主次映射 + §3 typography polish; match cd97 排版水准. User feedback (2026-05-13 23:22 Discord): cd96 has 3 issues — (1) §1 timing table inlines 4 sd:// URIs as raw strings (n
 - [x] **2026-05-13** -- T-P0-873: [META-MLSD-NARRATIVE-RETROFIT] Convert sd41+sd42 to oral-recital prose form. RETROFIT task added 2026-05-13 mid-chain. T-867 (sd41 prune) and T-868 (sd42 reseed) landed BEFORE R-NARRATIVE-prose-for
 - [x] **2026-05-13** -- T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta. INPUT = schemas/meta_mlsd_canonical.yaml. Three-part lint: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule
 - [x] **2026-05-13** -- T-P0-871: [META-MLSD-CD96-LINK-IN] Add weapon+friend goldens to cd96 drawer + Section 1. (a) cd96 drawer header table: add 2 rows sd://meta-weapon-ads-golden + sd://meta-friend-rec-golden alongside Reels + Top

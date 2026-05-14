@@ -33,7 +33,19 @@ applies_to:
   - doc_type: sd-golden
     storage: system_designs.{field}
     instances:
-      - {ref: "sd41", slug: "meta-reels-golden",         scope: "RecSys"}
+      # sd41 migrated to oral_narrative archetype 2026-05-13 (T-P1-875).
+      # Old structured_reference shape (10 fields, ~45KB) replaced by single
+      # continuous 第一人称 口播稿 in dataflow + slim overview/formulas/cheat_sheet.
+      # See document_archetypes.oral_narrative for the contract this instance is
+      # validated against (relaxed from sd_golden.fields defaults).
+      - ref: "sd41"
+        slug: "meta-reels-golden"
+        scope: "RecSys"
+        document_archetype: oral_narrative
+        archetype_migrated_at: "2026-05-13"
+        archetype_migrated_from: structured_reference
+        archetype_migrated_by_task: T-P1-875
+        baseline_chars_post_migration: 13417   # diff-delta baseline reset (was 45274)
       - {ref: "sd42", slug: "meta-top3-comments-golden", scope: "RecSys / list-level"}
       - {ref: "sd-weapon", slug: "meta-weapon-ads-golden", scope: "T&S classification", task: "T-P0-869", planned: true}
       - {ref: "sd-friend", slug: "meta-friend-rec-golden", scope: "Bilateral matching", task: "T-P0-870", planned: true}
@@ -239,6 +251,92 @@ sd_golden:
         description: "if present, must NOT verbatim duplicate cd96 §5 meta-structure prose"
 
 # ============================================================================
+# DOCUMENT ARCHETYPES (T-P1-875)
+# ============================================================================
+# sd-golden content can adopt one of two archetypes. Default is
+# structured_reference (the original 10-field shape -- sd_golden.fields above
+# is its contract). oral_narrative is a relaxed contract where the full
+# 45-min talk lives in a single continuous dataflow column, with立场s and
+# trade-offs inlined rather than extracted into separate tradeoffs/defense
+# fields.
+#
+# Decision rationale: review (Discord msg 1504368694875394158 / PROGRESS
+# 2026-05-13 22:55) noted the original schema conflates "presentation shape"
+# (10 fields, bold density, char ranges) with "semantic quality" (causal
+# chain, explicit立场+trade-off, twist callback). The 4 criteria can be
+# satisfied by either archetype; archetype choice is the author's style call,
+# not a quality gate. Author verifies the 4 criteria via mechanical audit
+# before migration; this YAML records the resulting archetype declaration.
+#
+# Scope:
+#   - oral_narrative ships ONLY on sd41 (Reels) as the validation case.
+#     3 sister sd-goldens (sd42 top3 / sd-weapon / sd-friend) stay
+#     structured_reference. Per review, do not retrofit all 4 in one pass.
+#
+# Deferred (NOT in this archetype, will design separately if needed):
+#   - semantic_detector (NLP-grade tradeoff/failure-mode auto-detection)
+#   - tight max_chars (n=1 instance, not enough data to fit)
+#   - explicit_tradeoff_line_count_min (review:"first see if defaults bite")
+# ----------------------------------------------------------------------------
+document_archetypes:
+  added_at: "2026-05-13"
+  added_by_task: T-P1-875
+  applies_to: sd_golden
+  default_archetype: structured_reference
+
+  values:
+    structured_reference:
+      description: |
+        Original 10-field shape. All required fields in `sd_golden.fields`
+        must be populated; R-NARRATIVE-prose-form applies; R-DIFFDELTA-70pct
+        applies against BASELINE_CHARS.
+      contract_ref: sd_golden       # the sd_golden block above is the contract
+
+    oral_narrative:
+      description: |
+        Single continuous 第一人称 口播稿 in `dataflow`. tradeoffs / Strong
+        Moments / verbatim quotes are inlined in the narrative, not extracted
+        to separate fields. NULL is legal on architecture / production_constraints /
+        tradeoffs / defense / verbal_outline.
+      contract:
+        required_fields:
+          - id: dataflow
+            min_chars: 4000            # n=1 floor; max intentionally not fitted
+            apply_3rule: true          # causal / tradeoff / scale / twist still required at section level
+            apply_narrative_prose_form: false
+            rationale_no_narrative_prose_form: |
+              R-NARRATIVE bold_density >= 3 is a Markdown-form proxy; Chinese
+              口播稿 doesn't decorate every paragraph with **bold**.
+              R-3RULE-* on this section already enforces the substantive
+              tradeoff / decision / scale / twist properties.
+          - id: overview
+            min_chars: 200
+            apply_3rule: false         # short framing anchor, not a fully-loaded narrative section
+            apply_narrative_prose_form: false
+        optional_fields:
+          - {id: formulas, apply_3rule: false, apply_narrative_prose_form: false}
+          - {id: cheat_sheet, apply_3rule: false, apply_narrative_prose_form: false}
+        nullable_fields:
+          # These are required:true in sd_golden.fields but NULL is legal for
+          # oral_narrative because their content lives inline in dataflow.
+          - architecture
+          - production_constraints
+          - tradeoffs
+          - defense
+          - verbal_outline
+        cross_page_overrides:
+          R-XPAGE-section-naming:
+            action: skip
+            rationale: "oral_narrative has no `defense` field, so the Strong-Moments header check doesn't apply."
+        diff_delta:
+          baseline_source: instance.baseline_chars_post_migration
+          rationale: |
+            Archetype migration is by design a substantive change. BASELINE_CHARS
+            (45274 for sd41) was the structured_reference size; for ongoing diff-delta
+            gating, the post-migration size (recorded on the instance) becomes the
+            new baseline. Future deletions are still gated against this baseline.
+
+# ============================================================================
 # 3-RULE (SECTION-LEVEL)
 # ============================================================================
 # A section "passes" rule R-3RULE-X if AT LEAST ONE bullet/line in the section
@@ -253,17 +351,30 @@ three_rule:
   rules:
     R-3RULE-decision:
       label: decision_present
-      description: "section contains an explicit ranked decision -- 'I pick X', 'choose A over B', 'default to Y'"
+      description: |
+        section contains an explicit ranked decision -- English: 'I pick X',
+        'choose A over B', 'default to Y'; Chinese: '我选/我会/我推荐/我打算/
+        我特意/首选/默认走/我用'.
       detect_regex:
         - '\b(I pick|we pick|I choose|we choose|default to|pick A)\b'
         - '(?i)\bdecision\b.*\bover\b'
+        # Chinese alternates (T-P1-875): oral_narrative archetype in 中文 口播稿
+        # expresses the same立场 pattern with these particles.
+        - '我(选|会推荐|推荐|打算|特意|默认|定位|首选|的处理是|挑|用一个)'
+        - '首选|主线|主力|默认走'
 
     R-3RULE-tradeoff:
       label: tradeoff_present
-      description: "section contains explicit costs/switches -- 'costs Y', 'switches to B if Z', '... at the cost of ...'"
+      description: |
+        section contains explicit costs/switches -- English: 'costs Y',
+        'switches to B if Z', '... at the cost of ...'; Chinese: '代价是/
+        换/不过/更稳/吃不动/不是因为...是因为'.
       detect_regex:
         - '(?i)\b(costs?|at the cost of|switches? to|in exchange for)\b'
         - '\bvs\b'
+        # Chinese alternates (T-P1-875).
+        - '代价(是|, |。)|代价是|换来|权衡|tradeoff|trade-off'
+        - '更稳|更好 ship|吃不动|不展开|点到为止|不是.*是因为|更干净|更可 audit'
 
     R-3RULE-scale-sla:
       label: scale_sla_present
