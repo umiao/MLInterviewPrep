@@ -492,3 +492,15 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-spotify-music-golden';"` returns `12994|meta-spotify-music-golden` (within 8000-13000 spec). 5 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 4 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P2-889`
+
+
+## 2026-05-15 06:08 -- [T-P0-890] [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit
+
+- **What I did**: Wired all 13 sd://meta-*-golden URIs into Meta MLSD doc 94 (id=94) in two places: (1) added a 5th `sd-golden` column to Section 1 Family Taxonomy 总表 (13 rows: Q1 Top-3, Q2 V2V, Q3 Friend, Q4 Ads, Q5 Event, Q6 Location, Q7 Weapon, Q8 Yelp, Q9 FB Feed, Q10 IG Story, Q11 Spotify, Q12 Event Attendance, Q13 Reels), and (2) appended → [sd-golden](sd://meta-XXX-golden) suffix to each ### QN. heading in Section 2. Then re-ran retrofit_meta_mlsd_94_drawer_header.py to re-establish the drawer header at the top (the wire-up does NOT touch the drawer block, but the retrofit script is the canonical post-write sanity check). Pre-task fixup: backfilled state='done' on T-P0-883/T-P0-884 (status=completed but state=NULL); without this the picker reported T-P0-890 as blocked by deps_missing=[T-P0-883, T-P0-884] even though both deps were completed 2026-05-14.
+- **Deliverables**:
+  - `scripts/wire_meta_mlsd_94_uris.py` (new, ~210 LoC, sentinel-based idempotent; sentinel `<!-- META_MLSD_94_URI_WIREUP_20260514 -->` inserted directly after FAMILY_TAXONOMY sentinel)
+  - `scripts/retrofit_meta_mlsd_94_drawer_header.py` (validator upper bound bumped 19000 -> 21000 to accommodate +~1100 chars from wire-up; rationale comment updated)
+  - `data/mle_prep.db` company_documents.id=94: chars 18073 -> 19196 (+1123), drawer sentinel intact at top, all 13 slugs now appear >=2x (table cell + heading).
+- **Sanity check result**: `pytest tests/ -x -q` -> 1265 passed in 46s. Re-running both wire-up + retrofit reports `[UNCHANGED] 0 writes` (idempotency proven). `sqlite3 SELECT substr(content,1,80) FROM company_documents WHERE id=94` -> still starts with `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->`. Slug count: 12 of 13 at count=2, Q1=3 (extra mention from earlier top3_xref retrofit), Q13=9 (golden card has 7 pre-existing mentions + table cell + heading).
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P0-890`

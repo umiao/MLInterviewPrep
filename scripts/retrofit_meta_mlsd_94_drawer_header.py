@@ -114,11 +114,13 @@ def validate_content(content: str, existing_body: str) -> None:
     # [14400, 15200]; upper bound bumped to 16500 in T-P0-848 to accommodate
     # Q13 stub -> full card promotion (+~1000 chars to seed body); 19000
     # in T-P2-852 for Q1-Q12 'Generic 对比' segments (+~2100 chars to seed
-    # body, mirrors seed validator bump from 15700 -> 18200).
+    # body, mirrors seed validator bump from 15700 -> 18200); 21000 in
+    # T-P0-890 for the 13-row sd:// URI wire-up (Section 1 table 5th column
+    # + Q1-Q13 heading suffixes, +~1100 chars).
     n_chars = len(content)
-    if not (14400 <= n_chars <= 19000):
+    if not (14400 <= n_chars <= 21000):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [14400, 19000]"
+            f"content char-length {n_chars} not in [14400, 21000]"
         )
 
     # AC #3: 5 unique drawer URIs each appear at least once IN PREPENDED BLOCK;

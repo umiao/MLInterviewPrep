@@ -9,43 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-890: [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-883, T-P0-884, T-P0-885, T-P1-886, T-P1-887, T-P1-888, T-P2-889
-- **Description**: Meta MLSD top-9 batch FINAL wire-up task -- depends on all 7 autorun tasks landing first.
-
-GOAL: cd94 (id=94) Family Taxonomy row currently has `—` in the URI column for 12 of 13 problems (only Q13 Reels has sd://meta-reels-golden). After this batch, ALL 13 should have URIs.
-
-WORK:
-1. Update Section 1 "Family Taxonomy 总表" in `company_documents.content` WHERE id=94: replace `—` in URI column (or add an explicit URI column) so each Q row links to its sd:// URI:
-   - Q1 Top-3 Comments → sd://meta-top3-comments-golden
-   - Q2 V2V Search → sd://meta-v2v-search-golden
-   - Q3 Friend Rec → sd://meta-friend-rec-golden
-   - Q4 Ads → sd://meta-ads-golden
-   - Q5 Event Rec → sd://meta-event-rec-golden
-   - Q6 Location → sd://meta-location-rec-golden
-   - Q7 Weapon Ads → sd://meta-weapon-ads-golden
-   - Q8 Yelp → sd://meta-yelp-restaurant-golden
-   - Q9 FB News Feed → sd://meta-fb-newsfeed-golden
-   - Q10 IG Story → sd://meta-ig-story-golden
-   - Q11 Spotify → sd://meta-spotify-music-golden
-   - Q12 Event Attendance → sd://meta-event-attendance-golden
-   - Q13 Reels → sd://meta-reels-golden (already in place)
-
-   Implementation: prefer adding the link inline to each Q row's heading (e.g., `### Q1. Top 3 Comments Extraction → [sd-golden](sd://meta-top3-comments-golden)`) AND in the Section 1 table.
-
-2. **Re-run drawer header retrofit** -- per `feedback_meta_mlsd_reseed_drawer_overwrite.md` memory, ANY content rewrite of cd94 wipes the drawer header. Run:
-   `python scripts/retrofit_meta_mlsd_94_drawer_header.py` (or whichever exists for cd94)
-   If the script doesn't exist, look at how it was done last time (search `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->` in PROGRESS.md history).
-
-3. Verify cd94 still has drawer header at top + all 13 URI cells populated:
-   `sqlite3 data/mle_prep.db "SELECT substr(content,1,500) FROM company_documents WHERE id=94;"` -- should still show META_MLSD_DRAWER_HEADER_94 marker.
-
-4. EXPECTED_FILES=data/mle_prep.db (+ scripts/<retrofit_script>.py if newly created)
-
-Commit: [<TASK_ID>] [Meta-MLSD] cd94 wire-up: link 9 new sd:// URIs + re-run drawer header retrofit
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -532,6 +495,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 - [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+- [x] **2026-05-14** -- T-P0-890: [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit. Meta MLSD top-9 batch FINAL wire-up task -- depends on all 7 autorun tasks landing first.
 - [x] **2026-05-14** -- T-P0-885: [Meta-MLSD] Add meta-ads-golden 口播稿 row (Q4 Ads, auction-mediated calibrated probability). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-884: [Meta-MLSD] Add meta-event-attendance-golden 口播稿 row (Q12 Predict Event Attendance). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-883: [Meta-MLSD] Add meta-ig-story-golden 口播稿 row (Q10 IG Story, author-tray reframe). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
