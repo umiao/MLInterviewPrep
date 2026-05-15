@@ -472,3 +472,13 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-event-rec-golden';"` returns `12990|meta-event-rec-golden` (within 8000-13000 spec). 6 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 3 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P1-887`
+
+## 2026-05-14 22:28 -- [T-P1-888] [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec)
+
+- **What I did**: Drafted overview (§1+§2) + verbal_outline (§3-§5) for Q6 Personalized Location Recommendation per locked template (anchors id=45/46). Inherited template from `scripts/mlsd_top9_spec.md`. Dominant twist: context (time/weather/calendar/party) is the PRIMARY intent disambiguator -- same user at 9am vs 9pm has different intents, static profile gives the average no one wants at any moment. Interacting twists: (#2) intent classification as intermediate task (food/coffee/activity/nightlife/errand) BEFORE ranking, framed as senior-signal product can A/B independently from ranker; (#3) walk-vs-drive candidate-set switch (3mi vs 30mi) keyed off context-inferred mode -- switches candidate-gen layer, not soft distance feature, because "30mi + high-affinity" ↔ "2mi + mid-affinity" substitutions are physically incoherent for a walker; (#4) MMR diversity re-rank across predicted intent classes + POI categories as policy-layer split. Eval slices by time-of-day + mode + intent-class to expose intent-class collapse that aggregate top-line masks. Multiple trim passes (17162 → 13738 → 13017 → 12976) to land within mechanical envelope.
+- **Deliverables**:
+  - `scripts/insert_meta_location_rec_golden.py` (new, ~140 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=52, slug=`meta-location-rec-golden`, overview=4110 / verbal=8866 / total=12976 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-location-rec-golden';"` returns `12976|meta-location-rec-golden` (within 8000-13000 spec). 6 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 4 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-888`

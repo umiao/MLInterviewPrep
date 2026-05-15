@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 774 completed tasks archived as of latest archival.
+> 790 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1142,3 +1142,19 @@ LR golden (scripts/seed_linear_regress
 CONTENT:
 - 积木: Selection bi
 - [x] **2026-05-12** -- T-P1-851: [Meta-MLSD] sd 41 Reels Golden: audit framing for hybrid-serving language; supplement if absent. Investigate whether sd 41 'Meta MLSD Golden Example: Reels Home Feed Recommendation' 当前 framing strong-moment (0-5min Se
+- [x] **2026-05-13** -- T-P0-861: Reschedule Meta AI-Enabled MLSD follow-up from 2026-05-14 10:00 to 2026-05-15 11:00 PDT. Discord 2026-05-13 msg 1504175057919017090 — move event id=66 to Friday 2026-05-15 11:00-11:45 AM PDT via idempotent res
+- [x] **2026-05-13** -- T-P0-862: Reschedule Lyra Jacqueline session 2026-05-14 14:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504181155916943452 — move Lyra/Jacqueline therapy on 2026-05-14 from 2:00 PM PDT to 12:00 PM PDT
+- [x] **2026-05-13** -- T-P0-863: Reschedule Meta AI-Enabled MLSD follow-up 2026-05-15 11:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504182639463235645 — Meta moved the slot again, same day +1h. Refactored _reschedule_meta_mlsd_2
+- [x] **2026-05-13** -- T-P0-864: Add Adobe Phone Screen 2026-05-14 14:00 PDT (30 min). Discord 2026-05-13 msg 1504185501085864127 — new event, Adobe phone screen Thursday 2026-05-14 2:00 PM PDT 30min. Adobe 
+- [x] **2026-05-13** -- T-P0-865: [META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary. OUTPUT FORM = MACHINE-CHECKABLE SCHEMA (not prose audit). Deliverables: (1) schemas/meta_mlsd_canonical.yaml -- canonica
+- [x] **2026-05-13** -- T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton. INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE 
+- [x] **2026-05-13** -- T-P0-867: [META-MLSD-SD41-PRUNE] Strip Reels Golden drawer + philosophy duplicates. INPUT = T-865 schema. (a) DELETE top drawer header table. (b) overview '整体节奏哲学' prose -> 2-paragraph solution anchor (wh
+- [x] **2026-05-13** -- T-P0-868: [META-MLSD-SD42-RESEED] Reseed Top-3 Comments Golden from rewritten draft. INPUT = T-865 schema + Discord attachment 'Comments Ranking (rewritten)' draft. Replace sd42 content. Map to canonical s
+- [x] **2026-05-13** -- T-P0-869: [META-MLSD-SD-NEW-WEAPON] Create meta-weapon-ads-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Weapon Ads Classifier (rewritten)' draft. INSERT new syst
+- [x] **2026-05-13** -- T-P0-870: [META-MLSD-SD-NEW-FRIEND] Create meta-friend-rec-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Friend Recommendation System Design'. INSERT new system_d
+- [x] **2026-05-13** -- T-P0-871: [META-MLSD-CD96-LINK-IN] Add weapon+friend goldens to cd96 drawer + Section 1. (a) cd96 drawer header table: add 2 rows sd://meta-weapon-ads-golden + sd://meta-friend-rec-golden alongside Reels + Top
+- [x] **2026-05-13** -- T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta. INPUT = schemas/meta_mlsd_canonical.yaml. Three-part lint: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule
+- [x] **2026-05-13** -- T-P0-873: [META-MLSD-NARRATIVE-RETROFIT] Convert sd41+sd42 to oral-recital prose form. RETROFIT task added 2026-05-13 mid-chain. T-867 (sd41 prune) and T-868 (sd42 reseed) landed BEFORE R-NARRATIVE-prose-for
+- [x] **2026-05-13** -- T-P0-874: [META-MLSD-CD96-LINK-FIX] cd96 §1 dedupe sd-golden cluster + new §1.1 主次映射 + §3 typography polish; match cd97 排版水准. User feedback (2026-05-13 23:22 Discord): cd96 has 3 issues — (1) §1 timing table inlines 4 sd:// URIs as raw strings (n
+- [x] **2026-05-13** -- T-P1-875: [Meta-MLSD-narrative] sd41 narrative-mode 简化 + 触发 schema 演进决策. 用户报 sd://meta-reels-golden 写得乱七八糟, 跟 framing/方法论冲突, 让我用他写的口播稿大幅简化. 已 live: sd41 10 字段→4 字段 (45KB→14KB), cd96 drawer 行描述更
+- [x] **2026-05-12** -- T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套'). Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend

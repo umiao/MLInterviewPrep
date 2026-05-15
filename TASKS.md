@@ -115,38 +115,6 @@ AC:
 - **Depends on**: None
 - **Description**: Top-3 + Weapon Ads + Friend Rec dataflows replaced with 8-段 第一人称 口播稿 (2026-05-14 sessions). All 3 now de-facto oral_narrative shape but schema still treats them as structured_reference. audit_meta_mlsd_3rule.py rerun would breach R-CHAR-range / R-DIFFDELTA-70pct / R-NARRATIVE-prose-form on all 3 (same class as sd41 pre-T-P1-875). Minimal-A path (mirror T-P1-875): (1) rewrite scripts/seed_meta_top3_*.py, scripts/seed_meta_weapon_*.py, scripts/seed_meta_friend_*.py to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense/verbal_outline=None). (2) Update schemas/meta_mlsd_canonical.yaml: 3 instance entries get document_archetype: oral_narrative + baseline_chars_post_migration: 10504/11607/10576. (3) Validator already has the archetype branch from T-P1-875; should auto-handle. (4) Verify with seed --dry-run then live, then re-run audit_meta_mlsd_3rule.py expecting 0 findings on sd41-44. Backups for revert: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db + pre_weapon_20260514_112637 + pre_friend_20260514_114845. PROGRESS.md entries 2026-05-14 18:30 + 18:50 reference this work.
 
-#### T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-
-READ FIRST: scripts/mlsd_top9_spec.md (locked template + positive rubric + reference anchors + validation contract + out-of-scope list).
-
-ANCHORS for style/length calibration:
-- meta-fb-newsfeed-golden (id=45) -- BEST-case Meta-native anchor
-- meta-yelp-restaurant-golden (id=46) -- WORST-case non-Meta anchor
-Inherit the EXACT template these use. ~10k chars total (overview + verbal_outline only; rest NULL).
-
-VALIDATION (mechanical only -- per user directive 2026-05-14, NO quality regex):
-sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='<SLUG>';"
-Expect total 8000-13000, slug exact. Quality is human spot-check via rubric in spec doc.
-
-COMMIT: EXPECTED_FILES=data/mle_prep.db (plus any one-shot insert script under scripts/). Format: [<TASK_ID>] [Meta-MLSD] Add <SLUG> 口播稿 row (twist-threaded solving + SM slot map)
-
-OUT-OF-SCOPE: do NOT populate architecture/dataflow/formulas/etc.; do NOT write verbatim 60-word SM hook phrases; do NOT update cd94 (wire-up task does that).
-
-THIS PROBLEM: Q6 Personalized Location Recommendation
-TARGET SLUG: meta-location-rec-golden
-CD94 SOURCE: `### Q6. Personalized Location Recommendation` block from id=94.
-
-TWIST SEEDS:
-
-1. **DOMINANT -- Context (time / weather / calendar / party-size) is the primary intent disambiguator, NOT one feature among many** -- Same user at 9am vs 9pm has completely different intents. Static user preference profile gives an average that is no one's actual preference. Context is the primary disambiguator, not just a context feature.
-2. **Intent classification as intermediate task (food / coffee / activity / nightlife)** -- Surface intent classification BEFORE ranking; condition the ranker on the predicted intent class. NEW vs cd94 card -- card lists as puzzle piece but doesn't frame as senior-signal SM. Interacts with #1 (context is the input to intent classification).
-3. **Walk-vs-drive candidate-set switch (3-mile vs 30-mile)** -- The candidate set radius itself depends on inferred transportation mode. Walking → 3-mile candidate set; driving → 30-mile. This switches the candidate gen layer, not just a ranking feature. NEW vs cd94 card. Interacts with #1 (context includes location + time + weather which together infer mode).
-4. **Diversity in re-ranking (don't return 5 cafes when user wanted variety)** -- Final slate diversity constraint -- MMR-style re-ranking across intent classes / POI categories.
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -590,26 +558,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-885: [Meta-MLSD] Add meta-ads-golden 口播稿 row (Q4 Ads, auction-mediated calibrated probability). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-884: [Meta-MLSD] Add meta-event-attendance-golden 口播稿 row (Q12 Predict Event Attendance). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-883: [Meta-MLSD] Add meta-ig-story-golden 口播稿 row (Q10 IG Story, author-tray reframe). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-13** -- T-P1-875: [Meta-MLSD-narrative] sd41 narrative-mode 简化 + 触发 schema 演进决策. 用户报 sd://meta-reels-golden 写得乱七八糟, 跟 framing/方法论冲突, 让我用他写的口播稿大幅简化. 已 live: sd41 10 字段→4 字段 (45KB→14KB), cd96 drawer 行描述更
-- [x] **2026-05-13** -- T-P0-874: [META-MLSD-CD96-LINK-FIX] cd96 §1 dedupe sd-golden cluster + new §1.1 主次映射 + §3 typography polish; match cd97 排版水准. User feedback (2026-05-13 23:22 Discord): cd96 has 3 issues — (1) §1 timing table inlines 4 sd:// URIs as raw strings (n
-- [x] **2026-05-13** -- T-P0-873: [META-MLSD-NARRATIVE-RETROFIT] Convert sd41+sd42 to oral-recital prose form. RETROFIT task added 2026-05-13 mid-chain. T-867 (sd41 prune) and T-868 (sd42 reseed) landed BEFORE R-NARRATIVE-prose-for
-- [x] **2026-05-13** -- T-P0-872: [META-MLSD-LINT-3X] Schema validator + cross-page consistency + diff-delta. INPUT = schemas/meta_mlsd_canonical.yaml. Three-part lint: (a) PER-PAGE SCHEMA VALIDATION: scripts/audit_meta_mlsd_3rule
-- [x] **2026-05-13** -- T-P0-871: [META-MLSD-CD96-LINK-IN] Add weapon+friend goldens to cd96 drawer + Section 1. (a) cd96 drawer header table: add 2 rows sd://meta-weapon-ads-golden + sd://meta-friend-rec-golden alongside Reels + Top
-- [x] **2026-05-13** -- T-P0-870: [META-MLSD-SD-NEW-FRIEND] Create meta-friend-rec-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Friend Recommendation System Design'. INSERT new system_d
-- [x] **2026-05-13** -- T-P0-869: [META-MLSD-SD-NEW-WEAPON] Create meta-weapon-ads-golden sd row. INPUT = schemas/meta_mlsd_canonical.yaml + Discord attachment 'Weapon Ads Classifier (rewritten)' draft. INSERT new syst
-- [x] **2026-05-13** -- T-P0-868: [META-MLSD-SD42-RESEED] Reseed Top-3 Comments Golden from rewritten draft. INPUT = T-865 schema + Discord attachment 'Comments Ranking (rewritten)' draft. Replace sd42 content. Map to canonical s
-- [x] **2026-05-13** -- T-P0-867: [META-MLSD-SD41-PRUNE] Strip Reels Golden drawer + philosophy duplicates. INPUT = T-865 schema. (a) DELETE top drawer header table. (b) overview '整体节奏哲学' prose -> 2-paragraph solution anchor (wh
-- [x] **2026-05-13** -- T-P0-866: [META-MLSD-CD96-SURGERY] Prune cd96 abstract methodology + tighten timing skeleton. INPUT = T-865 schema. Apply schema to cd96. (a) DELETE Section 2.2 abstract 'Per-twist 4-section template'. (b) REWRITE 
-- [x] **2026-05-13** -- T-P0-865: [META-MLSD-SCHEMA] Author canonical schema (YAML) + thin audit summary. OUTPUT FORM = MACHINE-CHECKABLE SCHEMA (not prose audit). Deliverables: (1) schemas/meta_mlsd_canonical.yaml -- canonica
-- [x] **2026-05-13** -- T-P0-864: Add Adobe Phone Screen 2026-05-14 14:00 PDT (30 min). Discord 2026-05-13 msg 1504185501085864127 — new event, Adobe phone screen Thursday 2026-05-14 2:00 PM PDT 30min. Adobe 
-- [x] **2026-05-13** -- T-P0-863: Reschedule Meta AI-Enabled MLSD follow-up 2026-05-15 11:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504182639463235645 — Meta moved the slot again, same day +1h. Refactored _reschedule_meta_mlsd_2
-- [x] **2026-05-13** -- T-P0-862: Reschedule Lyra Jacqueline session 2026-05-14 14:00 -> 12:00 PDT. Discord 2026-05-13 msg 1504181155916943452 — move Lyra/Jacqueline therapy on 2026-05-14 from 2:00 PM PDT to 12:00 PM PDT
-- [x] **2026-05-13** -- T-P0-861: Reschedule Meta AI-Enabled MLSD follow-up from 2026-05-14 10:00 to 2026-05-15 11:00 PDT. Discord 2026-05-13 msg 1504175057919017090 — move event id=66 to Friday 2026-05-15 11:00-11:45 AM PDT via idempotent res
-- [x] **2026-05-12** -- T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套'). Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend
