@@ -431,3 +431,34 @@ Date:   Wed May 13 11:55:33 2026 -0700
   - Bilingual regex spot-check: `我选/我会/代价是/吃不动/更稳/不展开` all hit by updated R-3RULE-decision/-tradeoff patterns; sister docs (sd42 top3 / sd-weapon / sd-friend) still pass on existing English regex (no regression)
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P1-875 --status completed`. Cd96 §9/§10 pre-existing drift is a separate task (it's a T-P0-871 leftover where the retrofit collapsed §9 Drawer into the top sentinel block but the schema heading_regex was never updated; track as follow-up if user wants schema-cd96 alignment).
+
+## 2026-05-15 04:30 -- [Meta-MLSD top-9 batch] Recovery: backfill 3 commits + relaunch autorun for remaining 5
+
+- **What I did**: Previous autorun (16:22-17:16 wall, max 8 sessions) stopped after 2 consecutive session failures (Session 1: AR-7 hung-2x on T-P0-883; Session 2: API 529 Overloaded on T-P0-885). BUT inner agents actually completed work on T-P0-883/884/885 -- DB has rows id=47/48/49 + tasks marked completed -- they just timed out before committing the seed scripts to git, so wrapper saw no HEAD movement and counted as fail. Recovery:
+  1. Verified 3 rows pass mechanical rubric: ig-story=12993 chars, event-attendance=12994, ads=12978 (within 8k-13k spec); each has 6 `(driven by Twist N · interacts with M)` prefixes in §3.
+  2. 2 of 3 insert scripts existed as untracked (`insert_meta_event_attendance_golden.py`, `insert_meta_ads_golden.py`). Created the missing Q10 seed (`insert_meta_ig_story_golden.py`) from DB content dump -- inlined as UPSERT for forward-compat with the other 2 SKIP-on-exist pattern.
+  3. Committed 4 commits: `[chore]` for shared infrastructure (`mlsd_top9_spec.md`, anchor inserter, task orchestrator); `[T-P0-883]`/`[T-P0-884]`/`[T-P0-885]` for each Q's seed.
+  4. Marked T-P0-885 completed via `task_db.py complete` (T-P0-883/884 were already flipped by the autorun agent before timeout).
+  5. Discovered remaining 5 tasks had `state=NULL` and were invisible to `task_db.py pick` (state-aware post-B3 foldin). Promoted T-P1-886/887/888/T-P2-889/T-P0-890 to `state='ready'` via direct SQL on `tasks.db`.
+  6. Killed mistakenly-launched intermediate autorun (T-P1-886 had been bumped to in_progress before kill); reset to active.
+  7. Relaunched `bash scripts/autonomous_run.sh 5 --allow-dirty` (bg job `bz1z6wi7g`).
+- **Deliverables**:
+  - 4 commits: `6cc69eb` [chore] infrastructure, `367a9e6` [T-P0-883] Q10 IG Story seed, `7107064` [T-P0-884] Q12 Event Attendance seed, `256d04d` [T-P0-885] Q4 Ads seed.
+  - `scripts/insert_meta_ig_story_golden.py` (new, 147 LoC, UPSERT idempotent, inlined ~13k char content).
+  - `scripts/insert_meta_event_attendance_golden.py` (preserved, 151 LoC, SKIP-on-exist).
+  - `scripts/insert_meta_ads_golden.py` (preserved, 150 LoC, SKIP-on-exist).
+  - tasks.db state promotion for 5 pending: state=NULL→'ready'.
+- **Sanity check result**: `git log` shows 4 new commits on main; `task_db.py pick` returns `T-P1-886` (correctly picking the highest-priority state='ready' task w/o blocked deps -- T-P0-890 dep-blocked); autorun resume log shows Session 1/5 started; inner agent uses state-aware `pick` so it'll pick T-P1-886 even though EXPECTED_TASK_PREFIX peek returns T-P1-876 (legacy non-state-aware path -- mismatch is soft-credited by AR-18 `head_legit_unexpected`).
+- **Status**: [PARTIAL] -- 3/9 sd rows committed + audited; 5 remaining tasks in autorun (T-P1-886 V2V / T-P1-887 Event Rec / T-P1-888 Location / T-P2-889 Spotify / T-P0-890 cd94 wire-up). Expected runtime ~3-4h. Discord pings on launch + completion.
+- **Lesson** (worth surfacing): autorun's AR-18 peek logic uses legacy `status='active'` filter (not state-aware), so EXPECTED_TASK_PREFIX can disagree with what the inner agent (using `pick`) actually selects. As long as both find the same task by deps + priority, AR-18 soft-credits. But if NEW tasks are added without state='ready', they're invisible to `pick` -- the `task_db.py add` CLI doesn't set state. Need either: (a) post-add SQL bump to state='ready', or (b) `task_db.py add --state ready` flag. (b) is the cleaner long-term fix; tracked as candidate followup for INFRA-HITL B3 fold-in extension.
+- **Request**: leave T-P1-886..890 active; do NOT mark done until autorun completes.
+
+## 2026-05-15 04:50 -- [T-P1-886] [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 V2V Search)
+
+- **What I did**: Drafted overview (§1+§2) + verbal_outline (§3-§5) for Q2 Video-to-Video Search per locked template (anchors id=45/46). Inherited template from `scripts/mlsd_top9_spec.md`; sourced twist seeds from cd94 Q2 block + task description. Dominant twist: "similar" is undefined without a text query (visual/audio/intent axes pull in different directions), so multi-facet retrieval with session-time learned facet weights (Thompson sampling on per-facet Beta posterior over in-session CTR), L2-normalize each modality BEFORE fusion to prevent silent audio dominance, single-stage content-only retrieval (query IS the video, no two-tower) with corpus-level cold-start friendly. Twist interactions: 1↔3 (per-session facet weights operationalize multi-facet), 2↔1 (L2-normalize keeps facets composable under merge), 3↔4 (Thompson exploration covers session cold-start; content-only embedding covers corpus cold-start). Required 5 iterative trim passes (16947 → 14585 → 13883 → 13605 → 13446 → 13385 → 12976) to land within 8k-13k mechanical envelope.
+- **Deliverables**:
+  - `scripts/insert_meta_v2v_search_golden.py` (new, ~180 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=50, slug=`meta-v2v-search-golden`, overview=4601 / verbal=8375 / total=12976 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-v2v-search-golden';"` returns `12976|meta-v2v-search-golden` (within 8000-13000 spec). All 5 §3 sections open with `**(driven by Twist N · interacts with M)**`. §4 has 4 SM bullets. §5 has 4 drift lines + 1 3-way handoff. §2 has 4 twists with #1 marked DOMINANT and twists #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-886`

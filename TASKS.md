@@ -9,6 +9,43 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-890: [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-883, T-P0-884, T-P0-885, T-P1-886, T-P1-887, T-P1-888, T-P2-889
+- **Description**: Meta MLSD top-9 batch FINAL wire-up task -- depends on all 7 autorun tasks landing first.
+
+GOAL: cd94 (id=94) Family Taxonomy row currently has `—` in the URI column for 12 of 13 problems (only Q13 Reels has sd://meta-reels-golden). After this batch, ALL 13 should have URIs.
+
+WORK:
+1. Update Section 1 "Family Taxonomy 总表" in `company_documents.content` WHERE id=94: replace `—` in URI column (or add an explicit URI column) so each Q row links to its sd:// URI:
+   - Q1 Top-3 Comments → sd://meta-top3-comments-golden
+   - Q2 V2V Search → sd://meta-v2v-search-golden
+   - Q3 Friend Rec → sd://meta-friend-rec-golden
+   - Q4 Ads → sd://meta-ads-golden
+   - Q5 Event Rec → sd://meta-event-rec-golden
+   - Q6 Location → sd://meta-location-rec-golden
+   - Q7 Weapon Ads → sd://meta-weapon-ads-golden
+   - Q8 Yelp → sd://meta-yelp-restaurant-golden
+   - Q9 FB News Feed → sd://meta-fb-newsfeed-golden
+   - Q10 IG Story → sd://meta-ig-story-golden
+   - Q11 Spotify → sd://meta-spotify-music-golden
+   - Q12 Event Attendance → sd://meta-event-attendance-golden
+   - Q13 Reels → sd://meta-reels-golden (already in place)
+
+   Implementation: prefer adding the link inline to each Q row's heading (e.g., `### Q1. Top 3 Comments Extraction → [sd-golden](sd://meta-top3-comments-golden)`) AND in the Section 1 table.
+
+2. **Re-run drawer header retrofit** -- per `feedback_meta_mlsd_reseed_drawer_overwrite.md` memory, ANY content rewrite of cd94 wipes the drawer header. Run:
+   `python scripts/retrofit_meta_mlsd_94_drawer_header.py` (or whichever exists for cd94)
+   If the script doesn't exist, look at how it was done last time (search `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->` in PROGRESS.md history).
+
+3. Verify cd94 still has drawer header at top + all 13 URI cells populated:
+   `sqlite3 data/mle_prep.db "SELECT substr(content,1,500) FROM company_documents WHERE id=94;"` -- should still show META_MLSD_DRAWER_HEADER_94 marker.
+
+4. EXPECTED_FILES=data/mle_prep.db (+ scripts/<retrofit_script>.py if newly created)
+
+Commit: [<TASK_ID>] [Meta-MLSD] cd94 wire-up: link 9 new sd:// URIs + re-run drawer header retrofit
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -66,6 +103,82 @@ AC:
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
+#### T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ruff reports a fatal syntax error at scripts/translate_p6_nodes.py:1972. The outer r-string literal opened at L1968 contains an inner Python docstring -- `"""倒数排名融合"""` -- inside an embedded ``` markdown block, and the inner triple-quotes terminate the outer string prematurely. This corrupts the rest of the file (the `## Interview Tips` markdown content after line 1981 becomes top-level Python). Fix options: (a) escape the inner triple-quotes, (b) replace outer `r"""..."""` with `r'...'` or `textwrap.dedent` of a raw multi-line list, or (c) split the markdown blob to a sibling .md file and read it at runtime. Blocker for whole-tree `ruff check scripts/` runs. Surfaces only because of the cross-project-sync audit; src/+tests/ are clean.
+
+#### T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: Top-3 + Weapon Ads + Friend Rec dataflows replaced with 8-段 第一人称 口播稿 (2026-05-14 sessions). All 3 now de-facto oral_narrative shape but schema still treats them as structured_reference. audit_meta_mlsd_3rule.py rerun would breach R-CHAR-range / R-DIFFDELTA-70pct / R-NARRATIVE-prose-form on all 3 (same class as sd41 pre-T-P1-875). Minimal-A path (mirror T-P1-875): (1) rewrite scripts/seed_meta_top3_*.py, scripts/seed_meta_weapon_*.py, scripts/seed_meta_friend_*.py to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense/verbal_outline=None). (2) Update schemas/meta_mlsd_canonical.yaml: 3 instance entries get document_archetype: oral_narrative + baseline_chars_post_migration: 10504/11607/10576. (3) Validator already has the archetype branch from T-P1-875; should auto-handle. (4) Verify with seed --dry-run then live, then re-run audit_meta_mlsd_3rule.py expecting 0 findings on sd41-44. Backups for revert: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db + pre_weapon_20260514_112637 + pre_friend_20260514_114845. PROGRESS.md entries 2026-05-14 18:30 + 18:50 reference this work.
+
+#### T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template + positive rubric + reference anchors + validation contract + out-of-scope list).
+
+ANCHORS for style/length calibration:
+- meta-fb-newsfeed-golden (id=45) -- BEST-case Meta-native anchor
+- meta-yelp-restaurant-golden (id=46) -- WORST-case non-Meta anchor
+Inherit the EXACT template these use. ~10k chars total (overview + verbal_outline only; rest NULL).
+
+VALIDATION (mechanical only -- per user directive 2026-05-14, NO quality regex):
+sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='<SLUG>';"
+Expect total 8000-13000, slug exact. Quality is human spot-check via rubric in spec doc.
+
+COMMIT: EXPECTED_FILES=data/mle_prep.db (plus any one-shot insert script under scripts/). Format: [<TASK_ID>] [Meta-MLSD] Add <SLUG> 口播稿 row (twist-threaded solving + SM slot map)
+
+OUT-OF-SCOPE: do NOT populate architecture/dataflow/formulas/etc.; do NOT write verbatim 60-word SM hook phrases; do NOT update cd94 (wire-up task does that).
+
+THIS PROBLEM: Q5 Event Recommendation (FB Events)
+TARGET SLUG: meta-event-rec-golden
+CD94 SOURCE: `### Q5. Event Recommendation` block from id=94.
+
+TWIST SEEDS:
+
+1. **DOMINANT -- Dual cold-start (events new/expire constantly + per-user RSVP frequency ~3/yr too sparse for CF)** -- Per-user CF is unworkable: a typical user RSVPs to ~3 events per year. Content-based retrieval over event metadata + LLM-extracted event aspect graph dominates as the primary lever. Reframe: this is NOT a CF problem.
+2. **Geo + time + capacity are HARD filters, not soft features** -- Geo distance, time-availability for the user, and event capacity (sold-out) are hard filters at candidate gen. Folding into the scoring function is the generic-ranker mistake. Interacts with #1 (after hard filters, content-based aspect matching dominates the remaining candidates).
+3. **Friend-going as strongest personalization + selection-bias correction** -- Friends-going-to-event is the strongest personalization signal but is itself selection-biased (friends only attend events that already passed some filter). Need IPS-style correction OR cohort-based prior. NEW vs cd94 card (card lists "friend-going as strong feature" but doesn't surface the selection-bias trap).
+4. **Capacity calibration sold-out re-ranking** -- Once an event is near-capacity, the model should de-emphasize it for new users even if the prediction is high -- you don't want to deliver a recommendation to a user who can't RSVP. Post-prediction layer, not in the model. NEW vs cd94 card. Interacts with #2 (capacity is a hard filter at the binary edge, but calibration handles the soft near-capacity boundary).
+
+#### T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template + positive rubric + reference anchors + validation contract + out-of-scope list).
+
+ANCHORS for style/length calibration:
+- meta-fb-newsfeed-golden (id=45) -- BEST-case Meta-native anchor
+- meta-yelp-restaurant-golden (id=46) -- WORST-case non-Meta anchor
+Inherit the EXACT template these use. ~10k chars total (overview + verbal_outline only; rest NULL).
+
+VALIDATION (mechanical only -- per user directive 2026-05-14, NO quality regex):
+sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='<SLUG>';"
+Expect total 8000-13000, slug exact. Quality is human spot-check via rubric in spec doc.
+
+COMMIT: EXPECTED_FILES=data/mle_prep.db (plus any one-shot insert script under scripts/). Format: [<TASK_ID>] [Meta-MLSD] Add <SLUG> 口播稿 row (twist-threaded solving + SM slot map)
+
+OUT-OF-SCOPE: do NOT populate architecture/dataflow/formulas/etc.; do NOT write verbatim 60-word SM hook phrases; do NOT update cd94 (wire-up task does that).
+
+THIS PROBLEM: Q6 Personalized Location Recommendation
+TARGET SLUG: meta-location-rec-golden
+CD94 SOURCE: `### Q6. Personalized Location Recommendation` block from id=94.
+
+TWIST SEEDS:
+
+1. **DOMINANT -- Context (time / weather / calendar / party-size) is the primary intent disambiguator, NOT one feature among many** -- Same user at 9am vs 9pm has completely different intents. Static user preference profile gives an average that is no one's actual preference. Context is the primary disambiguator, not just a context feature.
+2. **Intent classification as intermediate task (food / coffee / activity / nightlife)** -- Surface intent classification BEFORE ranking; condition the ranker on the predicted intent class. NEW vs cd94 card -- card lists as puzzle piece but doesn't frame as senior-signal SM. Interacts with #1 (context is the input to intent classification).
+3. **Walk-vs-drive candidate-set switch (3-mile vs 30-mile)** -- The candidate set radius itself depends on inferred transportation mode. Walking → 3-mile candidate set; driving → 30-mile. This switches the candidate gen layer, not just a ranking feature. NEW vs cd94 card. Interacts with #1 (context includes location + time + weather which together infer mode).
+4. **Diversity in re-ranking (don't return 5 cafes when user wanted variety)** -- Final slate diversity constraint -- MMR-style re-ranking across intent classes / POI categories.
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -95,6 +208,62 @@ AC:
 - **Complexity**: S
 - **Depends on**: T-P1-821, T-P1-834
 - **Description**: Final 4-item acceptance checklist (per Discord plan v3 §9): (a) all P0/P1 companies' prep_notes/notes byte counts < threshold anchored by A0 EDA; (b) meta-prep child nodes mean byte count > 800; (c) audit_uri_consistency.py reports 0 broken kg:// db:// cd:// sd://; (d) red-dot logic manual smoke on sample companies passes. Compute byte-savings stats (before vs after) + commit count + KG growth (node + link delta). PROGRESS close-out entry summarizes the 42-task batch. AC: all 4 checklist items pass; close-out entry written.
+
+#### T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix)
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (60 auto-fixable). Distribution: many UP017 (use datetime.UTC alias), F541 (f-string without placeholders), N806/N803 (lowercase var names like `X`, `N`, `LogisticRegression`), B905 (zip() without strict=), SIM103/SIM108 (return-condition / ternary), UP035 (collections.abc imports), E741 (ambiguous var `l`), E402 (import not at top of file), I001 (import block unsorted), W605 (invalid escape sequence). Concentrated in one-shot utility scripts: `_add_pinterest_*`, `_smoke_*`, `_rewrite_*`, `_verify_*`, `_update_*`, `audit_*`. Suggested approach: run `ruff check --fix scripts/` (auto-fixes ~60), then human-review remaining N806/B905/E741 (semantic risk: renaming vars in old utility scripts may break a referenced run-result). src/+tests/ remain clean (audited 2026-05-14).
+
+#### T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` header, but pyproject.toml `[project].dependencies` only carries runtime deps. Per the workspace dependency source-of-truth rule (CLAUDE.md), pyproject.toml is canonical; these 4 should appear there too -- ideally as `[project.optional-dependencies] dev = [...]` so `pip install -e .[dev]` matches `pip install -r requirements.txt`. Sibling of helixos T-P2-217-style drift; also flagged for helixos/homestead in the 2026-05-11 scheduled sync (not yet filed there because activity gate skipped them). Audit pass: 2026-05-14.
+
+#### T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/except ValueError/pass guarding `_sys.path.remove(str(project_root / "scripts"))` in the `finally` block should be `with contextlib.suppress(ValueError): _sys.path.remove(...)`. Single-spot mechanical fix, runs only via whole-tree audit. Verify the same pattern is not repeated in the propagated copies under root/helixos/homestead/blog_proj before closing.
+
+#### T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work (sd41 Reels golden, cd96, sd-friend, sd-weapon, sd42 Top-3 Comments, Meta-MLSD schema) the skill is directly applicable to MLI. Action: read `claude-code-project-template/.claude/skills/study-review/SKILL.md` to confirm scope fit, then copy the directory (SKILL.md + any helper files) to `MLInterviewPrep/.claude/skills/study-review/`. Do NOT auto-apply -- this is a sync proposal; human reviewer should validate that the template skill matches MLI conventions before merging.
+
+#### T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive)
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template + positive rubric + reference anchors + validation contract + out-of-scope list).
+
+ANCHORS for style/length calibration:
+- meta-fb-newsfeed-golden (id=45) -- BEST-case Meta-native anchor
+- meta-yelp-restaurant-golden (id=46) -- WORST-case non-Meta anchor
+Inherit the EXACT template these use. ~10k chars total (overview + verbal_outline only; rest NULL).
+
+VALIDATION (mechanical only -- per user directive 2026-05-14, NO quality regex):
+sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='<SLUG>';"
+Expect total 8000-13000, slug exact. Quality is human spot-check via rubric in spec doc.
+
+COMMIT: EXPECTED_FILES=data/mle_prep.db (plus any one-shot insert script under scripts/). Format: [<TASK_ID>] [Meta-MLSD] Add <SLUG> 口播稿 row (twist-threaded solving + SM slot map)
+
+OUT-OF-SCOPE: do NOT populate architecture/dataflow/formulas/etc.; do NOT write verbatim 60-word SM hook phrases; do NOT update cd94 (wire-up task does that).
+
+THIS PROBLEM: Q11 Spotify Music Recommendation (NOTE: non-Meta product, Tier-3 template fill per user 2026-05-14 directive)
+TARGET SLUG: meta-spotify-music-golden
+CD94 SOURCE: `### Q11. Spotify Music Recommendation` block from id=94.
+
+TWIST SEEDS:
+
+1. **DOMINANT -- Relisten is positive, not redundant (inverts dedup logic)** -- One feature distinguishes music rec from almost every other recommendation domain: relisten is a 5-star signal, not saturation. A user playing the same song 50 times is loving it, not fatiguing. This inverts the deduplication logic standard in video / article rec. Architectural implication: NO post-ranking dedup; instead, relisten frequency is a positive feature.
+2. **Audio embedding from spectrogram is the cold-start lever** -- Metadata (artist / genre / era) is too coarse to handle the long-tail. Spectrogram-based audio embedding handles new-artist cold-start: index a new track at upload time with no playcount data. Interacts with #1 (relisten as positive only works when content embedding is strong enough to surface relistenable tracks).
+3. **Session mood coherence as autoregressive constraint (NOT pointwise scoring)** -- Within a session, mood should NOT jump (rock → classical → rock is bad). Sequential model conditioned on session prefix, not pointwise next-song scoring. NEW vs cd94 card. Interacts with #1 (relisten positive within mood coherence -- repeating same track stays in mood; repeating across moods can violate it).
+4. **Skip-rate as primary label, not play-count** -- Play-count is gameable (auto-play counts). Skip-rate (skip within first 30 seconds) is a strong negative signal. Primary label is `play-to-completion`, NOT play-count. NEW vs cd94 card.
 
 ### P3 -- Stretch Goals
 
@@ -455,6 +624,10 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+- [x] **2026-05-14** -- T-P0-885: [Meta-MLSD] Add meta-ads-golden 口播稿 row (Q4 Ads, auction-mediated calibrated probability). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+- [x] **2026-05-14** -- T-P0-884: [Meta-MLSD] Add meta-event-attendance-golden 口播稿 row (Q12 Predict Event Attendance). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+- [x] **2026-05-14** -- T-P0-883: [Meta-MLSD] Add meta-ig-story-golden 口播稿 row (Q10 IG Story, author-tray reframe). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-13** -- T-P1-875: [Meta-MLSD-narrative] sd41 narrative-mode 简化 + 触发 schema 演进决策. 用户报 sd://meta-reels-golden 写得乱七八糟, 跟 framing/方法论冲突, 让我用他写的口播稿大幅简化. 已 live: sd41 10 字段→4 字段 (45KB→14KB), cd96 drawer 行描述更
 - [x] **2026-05-13** -- T-P0-874: [META-MLSD-CD96-LINK-FIX] cd96 §1 dedupe sd-golden cluster + new §1.1 主次映射 + §3 typography polish; match cd97 排版水准. User feedback (2026-05-13 23:22 Discord): cd96 has 3 issues — (1) §1 timing table inlines 4 sd:// URIs as raw strings (n
 - [x] **2026-05-13** -- T-P0-873: [META-MLSD-NARRATIVE-RETROFIT] Convert sd41+sd42 to oral-recital prose form. RETROFIT task added 2026-05-13 mid-chain. T-867 (sd41 prune) and T-868 (sd42 reseed) landed BEFORE R-NARRATIVE-prose-for
