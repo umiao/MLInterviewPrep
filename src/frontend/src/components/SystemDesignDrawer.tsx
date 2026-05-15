@@ -14,6 +14,7 @@ export type SystemDesignDrawerStatus =
   | "error";
 
 const SECTION_ORDER: SystemDesignSection[] = [
+  "verbal_outline",
   "overview",
   "architecture",
   "dataflow",
@@ -21,7 +22,6 @@ const SECTION_ORDER: SystemDesignSection[] = [
   "production_constraints",
   "tradeoffs",
   "defense",
-  "verbal_outline",
   "cheat_sheet",
 ];
 

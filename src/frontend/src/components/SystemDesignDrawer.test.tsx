@@ -66,6 +66,40 @@ describe("SystemDesignDrawerBody", () => {
     for (const label of Object.values(SECTION_LABELS)) {
       expect(html).toContain(label);
     }
+    // verbal_outline is promoted to the TOP (T-P0-891): its label appears
+    // before every other section label, including overview.
+    const verbalIdx = html.indexOf(SECTION_LABELS.verbal_outline);
+    for (const key of [
+      "overview",
+      "architecture",
+      "dataflow",
+      "formulas",
+      "production_constraints",
+      "tradeoffs",
+      "defense",
+      "cheat_sheet",
+    ] as const) {
+      expect(verbalIdx).toBeLessThan(html.indexOf(SECTION_LABELS[key]));
+    }
+    // The other 8 sections retain their relative order: the rendered label
+    // positions for the full promoted order are strictly increasing.
+    const promotedOrder = [
+      "verbal_outline",
+      "overview",
+      "architecture",
+      "dataflow",
+      "formulas",
+      "production_constraints",
+      "tradeoffs",
+      "defense",
+      "cheat_sheet",
+    ] as const;
+    const positions = promotedOrder.map((key) =>
+      html.indexOf(SECTION_LABELS[key]),
+    );
+    for (let i = 1; i < positions.length; i++) {
+      expect(positions[i - 1]).toBeLessThan(positions[i]);
+    }
     // Section order: overview label appears before cheat_sheet label.
     expect(html.indexOf(SECTION_LABELS.overview)).toBeLessThan(
       html.indexOf(SECTION_LABELS.cheat_sheet),

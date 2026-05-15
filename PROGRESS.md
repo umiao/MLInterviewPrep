@@ -504,3 +504,42 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: `pytest tests/ -x -q` -> 1265 passed in 46s. Re-running both wire-up + retrofit reports `[UNCHANGED] 0 writes` (idempotency proven). `sqlite3 SELECT substr(content,1,80) FROM company_documents WHERE id=94` -> still starts with `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->`. Slug count: 12 of 13 at count=2, Q1=3 (extra mention from earlier top3_xref retrofit), Q13=9 (golden card has 7 pre-existing mentions + table cell + heading).
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P0-890`
+
+## 2026-05-15 06:00 -- [Meta-MLSD top-9 batch] Autorun resume2 complete: 5/5 + wire-up
+
+- **What I did**: Resumed autorun (`bash scripts/autonomous_run.sh 5 --allow-dirty`, bg job `bz1z6wi7g`) after the morning's 4-commit recovery. All 5 sessions completed cleanly: T-P1-886 (V2V Search) + T-P1-887 (Event Rec, AR-12 extension) + T-P1-888 (Location Rec, AR-12 extension) + T-P2-889 (Spotify Music, AR-7 retry-once-success) + T-P0-890 (cd94 wire-up). Each session inserted one new `system_designs` row (12.9k chars ± 30) and committed an idempotent seed script.
+- **Deliverables**:
+  - 5 new commits: `91b9c9c` T-P1-886, `12c4ca8` T-P1-887, `126b217` T-P1-888, `7a2b2e4` T-P2-889, `2604f68` T-P0-890.
+  - 4 new `system_designs` rows: id=50 meta-v2v-search-golden (12976), id=51 meta-event-rec-golden (12990), id=52 meta-location-rec-golden (12976), id=53 meta-spotify-music-golden (12994).
+  - cd94 wire-up: `scripts/wire_meta_mlsd_94_uris.py` (sentinel idempotent, adds 5th `sd-golden` column to Section 1 table + appends `→ [sd-golden](sd://meta-XXX-golden)` to each Q1-Q13 heading); `retrofit_meta_mlsd_94_drawer_header.py` validator bound bumped 19k→21k (cd94 grew +1123 chars).
+- **Sanity check result**: 13/13 sd rows now in DB (ids 41-53); 1265 pytest pass; ruff clean; cd94 has every slug appearing ≥2× (table cell + heading link); each new row passes mechanical rubric (length in 8k-13k band, 6+ `(driven by Twist N · interacts with M)` prefixes in §3).
+- **Status**: [DONE] -- full 13-question Meta MLSD family now has golden walkthroughs (4 pre-existing + 2 manual anchors + 7 autorun). cd94 family table fully wired. End-to-end batch closed.
+- **Operational notes worth preserving**:
+  - **Wrap-up agent self-discovered the B3-foldin tail**: it backfilled `state='done'` on T-P0-883/884 (status=completed but state=NULL blocked the state-aware picker for picking the wire-up). It also flagged 3 unrelated tasks (T-P1-876, T-P1-881, T-P1-582) with the same state=NULL gap as a followup. The right long-term fix is `task_db.py add --state ready` flag (T-P1-320 fold-in candidate).
+  - **AR-12 extension fired 3 times** (T-P1-887, T-P1-888, T-P2-889) -- each agent did one full session of work before AR-12 timer; the +300s extension caught all commits. AR-12 is doing its job; the 900s primary window is too tight for ~13k-char content drafting.
+  - **AR-7 retry fired once** (T-P2-889 first attempt timed out with no progress, second attempt succeeded). API was stable this run -- no 529s.
+- **Request**: keep all 8 task_db rows as `done/completed`; no action needed.
+
+## 2026-05-15 06:30 -- [Meta-MLSD] cd96 drawer 13-题 expansion + state-NULL bulk fix
+
+- **What I did**: Two follow-ups to the top-9 batch close-out per user directive: (1) widen cd96 Drawer 入口 from 8 entries (4 sd-goldens + 4 cd/cookbook) to 17 (13 sd-goldens covering cd94 Q1-Q13 + 4 cd/cookbook) -- one-click access from cd96 to ANY of the 13 family walkthroughs; (2) bulk-promote 7 `state=NULL` active tasks to `state='ready'` (3 explicitly flagged by autorun wrap-up agent + 4 more found via audit).
+- **Deliverables**:
+  - `scripts/retrofit_meta_mlsd_96_drawer_header.py`: DRAWER_INDEX rebuilt as two-table layout (`13 题 Family Goldens` Q1-Q13 + `配套 cd / cookbook 入口`); slug constants SD_Q1..SD_Q13; validator widened 8→17 URIs; char-length upper bound 20000→23000; back-compat aliases preserved.
+  - `schemas/meta_mlsd_canonical.yaml`: `cd96_playbook.drawer_header.must_link_sd_goldens` widened 4→13 in cd94 Q-order.
+  - **Subtle bug fix** in same script: body-strip used `len(PREPENDED_BLOCK)` which broke when PREPENDED_BLOCK grew across runs (drawer 8→17 widening); replaced with body-sentinel-anchored locator (`META_MLSD_MAIN_HUB_20260511`). Without this fix, the first retrofit attempt silently truncated body Section 1.
+  - `.claude/tasks.db`: 7 tasks promoted `state=NULL → state='ready'` (T-P1-582, T-P1-876, T-P1-881, T-P2-877, T-P2-878, T-P2-879, T-P2-880).
+  - Commit `81cdca9`.
+- **Sanity check result**: cd96 grew 18290→20195 chars (+1905, expected for 9 new drawer rows); retrofit re-run reports `[UNCHANGED]` (idempotency); pytest `tests/test_retrofit_doc_drawer_links.py` 15/15 pass; audit `audit_meta_mlsd_3rule.py` cross-page findings = 0 (all 13 sd:// URIs resolve); state-NULL count now 0; picker returns T-P1-876 as next pickable.
+- **Status**: [DONE]
+- **Lesson worth flagging**: the `len(PREPENDED_BLOCK)` body-strip pattern is brittle by design -- it works ONLY if PREPENDED_BLOCK never grows across runs. Body-sentinel-anchored locators are the safer pattern for retrofit scripts that may evolve. Worth keeping in mind for future cd-level retrofits. (Not adding to LESSONS.md as a separate entry since the fix is in-place + commented.)
+- **Request**: T-P1-876 / T-P1-881 / T-P1-582 / T-P2-877..880 now pickable -- next autorun would pick T-P1-876 first. User has not yet asked to launch; await instruction.
+
+## 2026-05-15 02:42 -- [T-P0-891] Promote verbal_outline section to top of SystemDesignDrawer
+
+- **What I did**: Reordered `SECTION_ORDER` in `SystemDesignDrawer.tsx` so `verbal_outline` renders first (was position 8 of 9). Users open sd-goldens primarily for the verbal outline; this unifies the reading experience across all 53 `system_designs` rows without any DB/seed change (pure frontend render-order change).
+- **Deliverables**:
+  - `src/frontend/src/components/SystemDesignDrawer.tsx`: `SECTION_ORDER[0]` now `"verbal_outline"`; remaining 8 keep relative order [overview, architecture, dataflow, formulas, production_constraints, tradeoffs, defense, cheat_sheet].
+  - `src/frontend/src/components/SystemDesignDrawer.test.tsx`: extended the "9 sections in order" case to pin verbal_outline before every other label AND assert the full promoted order is strictly increasing in the rendered HTML (regression guard against accidental reorder).
+- **Sanity check result**: `vitest run` full suite 238/238 pass (20 files); SystemDesignDrawer.test.tsx 12/12; `npm run build` exit 0 (pre-existing >500kB chunk warning only, non-fatal). No backend/seed touched -- Invariant 3 N/A (no DB content row changed).
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P0-891 --status completed`

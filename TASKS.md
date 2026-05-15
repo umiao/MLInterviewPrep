@@ -9,6 +9,484 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
+template for sd42-sd53 in this batch.
+
+Background: sd41 currently has verbal_outline=0 (empty); its content lives
+in `dataflow` field (8.6KB). sd41 is the canonical Reels Home Feed 45-min
+walkthrough referenced by cd96 main-example A. Extract the speaking script
+from `dataflow`, rewrite in Chinese-narration + English-terms style,
+populate system_designs.verbal_outline.
+
+Constraints (memory feedback_mlsd_golden_template_constraints.md):
+- 3-5 floating twists, exactly 1 DOMINANT (clearly strongest)
+- best + worst anchor calibration
+- Chinese narration prose + English ML terms
+- First occurrence of English term: format
+  `**English** (acronym, Chinese)`
+  e.g. `**Inverse Propensity Score** (IPS, 反向倾向分数)`
+- 1-problem-1-URI no-bundle; linked goldens use sd://<slug>
+- Target length 3000-5000 chars
+
+Scope: only touch verbal_outline. Other empty fields
+(architecture/formulas/production_constraints/tradeoffs/defense) stay
+empty.
+
+Files:
+- scripts/seed_meta_reels_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD41_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-reels-golden'
+- If scripts/retrofit_meta_mlsd_sd41_drawer_header.py exists,
+  re-run AFTER seed (sd41 reseed wipes drawer header per
+  feedback_meta_mlsd_reseed_drawer_overwrite.md)
+
+AC:
+- Seed runs idempotently (twice = same DB state)
+- system_designs.verbal_outline length >= 2500
+- Mechanical check: exactly 1 DOMINANT marker; 3-5 floating-twist sections
+- pytest passes
+- API smoke: GET /system-designs/meta-reels-golden returns
+  verbal_outline non-empty
+
+git add explicit.
+Commit: [T-X] sd41 reels-golden verbal_outline (CN-narration + EN-terms golden)
+
+#### T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd42 (meta-top3-comments-golden).
+Current verbal_outline length: 2635 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_top3_comments_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD42_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-top3-comments-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-top3-comments-golden
+
+git add explicit.
+Commit: [T-X] sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd43 (meta-weapon-ads-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd43 (meta-weapon-ads-golden).
+Current verbal_outline length: 3447 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_weapon_ads_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD43_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-weapon-ads-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-weapon-ads-golden
+
+git add explicit.
+Commit: [T-X] sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd44 (meta-friend-rec-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd44 (meta-friend-rec-golden).
+Current verbal_outline length: 4264 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_friend_rec_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD44_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-friend-rec-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-friend-rec-golden
+
+git add explicit.
+Commit: [T-X] sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd45 (meta-fb-newsfeed-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd45 (meta-fb-newsfeed-golden).
+Current verbal_outline length: 7071 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_fb_newsfeed_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD45_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-fb-newsfeed-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-fb-newsfeed-golden
+
+git add explicit.
+Commit: [T-X] sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-897: sd46 meta-yelp-restaurant-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd46 (meta-yelp-restaurant-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd46 (meta-yelp-restaurant-golden).
+Current verbal_outline length: 7363 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_yelp_restaurant_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD46_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-yelp-restaurant-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-yelp-restaurant-golden
+
+git add explicit.
+Commit: [T-X] sd46 meta-yelp-restaurant-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-898: sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd47 (meta-ig-story-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd47 (meta-ig-story-golden).
+Current verbal_outline length: 8785 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_ig_story_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD47_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-ig-story-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-ig-story-golden
+
+git add explicit.
+Commit: [T-X] sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-899: sd48 meta-event-attendance-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd48 (meta-event-attendance-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd48 (meta-event-attendance-golden).
+Current verbal_outline length: 8711 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_event_attendance_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD48_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-event-attendance-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-event-attendance-golden
+
+git add explicit.
+Commit: [T-X] sd48 meta-event-attendance-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-900: sd49 meta-ads-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd49 (meta-ads-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd49 (meta-ads-golden).
+Current verbal_outline length: 8439 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_ads_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD49_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-ads-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-ads-golden
+
+git add explicit.
+Commit: [T-X] sd49 meta-ads-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-901: sd50 meta-v2v-search-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd50 (meta-v2v-search-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd50 (meta-v2v-search-golden).
+Current verbal_outline length: 8375 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_v2v_search_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD50_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-v2v-search-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-v2v-search-golden
+
+git add explicit.
+Commit: [T-X] sd50 meta-v2v-search-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-902: sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd51 (meta-event-rec-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd51 (meta-event-rec-golden).
+Current verbal_outline length: 8587 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_event_rec_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD51_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-event-rec-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-event-rec-golden
+
+git add explicit.
+Commit: [T-X] sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-903: sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd52 (meta-location-rec-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd52 (meta-location-rec-golden).
+Current verbal_outline length: 8866 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_location_rec_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD52_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-location-rec-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-location-rec-golden
+
+git add explicit.
+Commit: [T-X] sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden)
+
+#### T-P0-904: sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-892
+- **Description**: Rewrite sd53 (meta-spotify-music-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+
+Background: Harmonize verbal_outline to Chinese-narration + English-terms
+across 13 Meta sd-goldens. This task handles sd53 (meta-spotify-music-golden).
+Current verbal_outline length: 9252 chars.
+
+Constraints:
+- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
+  as the template; mirror its structure exactly
+- 3-5 floating twists, 1 DOMINANT, best+worst anchor
+- Chinese narration prose + English ML terms; first occurrence
+  `**English** (acronym, Chinese)`
+- 1-problem-1-URI no-bundle
+- Target length 3000-5000 chars
+- ONLY touch verbal_outline; other fields stay as-is
+
+Files:
+- scripts/seed_meta_meta_spotify_music_golden_verbal_outline.py (NEW idempotent seed)
+  - Sentinel marker `<!-- SD53_VERBAL_V1_20260515 -->`
+  - UPSERT system_designs.verbal_outline WHERE slug='meta-spotify-music-golden'
+
+AC:
+- Idempotent seed (twice = same DB state)
+- verbal_outline length >= 2500
+- Mechanical check: 1 DOMINANT, 3-5 floating twists
+- pytest passes; API smoke GET /system-designs/meta-spotify-music-golden
+
+git add explicit.
+Commit: [T-X] sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden)
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -491,6 +969,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-15** -- T-P0-891: Promote verbal_outline section to top of SystemDesignDrawer rendering. Promote verbal_outline section to top of SystemDesignDrawer rendering.
 - [x] **2026-05-14** -- T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
