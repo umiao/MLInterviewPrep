@@ -115,38 +115,6 @@ AC:
 - **Depends on**: None
 - **Description**: Top-3 + Weapon Ads + Friend Rec dataflows replaced with 8-段 第一人称 口播稿 (2026-05-14 sessions). All 3 now de-facto oral_narrative shape but schema still treats them as structured_reference. audit_meta_mlsd_3rule.py rerun would breach R-CHAR-range / R-DIFFDELTA-70pct / R-NARRATIVE-prose-form on all 3 (same class as sd41 pre-T-P1-875). Minimal-A path (mirror T-P1-875): (1) rewrite scripts/seed_meta_top3_*.py, scripts/seed_meta_weapon_*.py, scripts/seed_meta_friend_*.py to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense/verbal_outline=None). (2) Update schemas/meta_mlsd_canonical.yaml: 3 instance entries get document_archetype: oral_narrative + baseline_chars_post_migration: 10504/11607/10576. (3) Validator already has the archetype branch from T-P1-875; should auto-handle. (4) Verify with seed --dry-run then live, then re-run audit_meta_mlsd_3rule.py expecting 0 findings on sd41-44. Backups for revert: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db + pre_weapon_20260514_112637 + pre_friend_20260514_114845. PROGRESS.md entries 2026-05-14 18:30 + 18:50 reference this work.
 
-#### T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-
-READ FIRST: scripts/mlsd_top9_spec.md (locked template + positive rubric + reference anchors + validation contract + out-of-scope list).
-
-ANCHORS for style/length calibration:
-- meta-fb-newsfeed-golden (id=45) -- BEST-case Meta-native anchor
-- meta-yelp-restaurant-golden (id=46) -- WORST-case non-Meta anchor
-Inherit the EXACT template these use. ~10k chars total (overview + verbal_outline only; rest NULL).
-
-VALIDATION (mechanical only -- per user directive 2026-05-14, NO quality regex):
-sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='<SLUG>';"
-Expect total 8000-13000, slug exact. Quality is human spot-check via rubric in spec doc.
-
-COMMIT: EXPECTED_FILES=data/mle_prep.db (plus any one-shot insert script under scripts/). Format: [<TASK_ID>] [Meta-MLSD] Add <SLUG> 口播稿 row (twist-threaded solving + SM slot map)
-
-OUT-OF-SCOPE: do NOT populate architecture/dataflow/formulas/etc.; do NOT write verbatim 60-word SM hook phrases; do NOT update cd94 (wire-up task does that).
-
-THIS PROBLEM: Q5 Event Recommendation (FB Events)
-TARGET SLUG: meta-event-rec-golden
-CD94 SOURCE: `### Q5. Event Recommendation` block from id=94.
-
-TWIST SEEDS:
-
-1. **DOMINANT -- Dual cold-start (events new/expire constantly + per-user RSVP frequency ~3/yr too sparse for CF)** -- Per-user CF is unworkable: a typical user RSVPs to ~3 events per year. Content-based retrieval over event metadata + LLM-extracted event aspect graph dominates as the primary lever. Reframe: this is NOT a CF problem.
-2. **Geo + time + capacity are HARD filters, not soft features** -- Geo distance, time-availability for the user, and event capacity (sold-out) are hard filters at candidate gen. Folding into the scoring function is the generic-ranker mistake. Interacts with #1 (after hard filters, content-based aspect matching dominates the remaining candidates).
-3. **Friend-going as strongest personalization + selection-bias correction** -- Friends-going-to-event is the strongest personalization signal but is itself selection-biased (friends only attend events that already passed some filter). Need IPS-style correction OR cohort-based prior. NEW vs cd94 card (card lists "friend-going as strong feature" but doesn't surface the selection-bias trap).
-4. **Capacity calibration sold-out re-ranking** -- Once an event is near-capacity, the model should de-emphasize it for new users even if the prediction is high -- you don't want to deliver a recommendation to a user who can't RSVP. Post-prediction layer, not in the model. NEW vs cd94 card. Interacts with #2 (capacity is a hard filter at the binary edge, but calibration handles the soft near-capacity boundary).
-
 #### T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant)
 - **Priority**: P1
 - **Complexity**: M
@@ -624,6 +592,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 774 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-885: [Meta-MLSD] Add meta-ads-golden 口播稿 row (Q4 Ads, auction-mediated calibrated probability). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P0-884: [Meta-MLSD] Add meta-event-attendance-golden 口播稿 row (Q12 Predict Event Attendance). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.

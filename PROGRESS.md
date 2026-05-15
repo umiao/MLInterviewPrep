@@ -462,3 +462,13 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-v2v-search-golden';"` returns `12976|meta-v2v-search-golden` (within 8000-13000 spec). All 5 §3 sections open with `**(driven by Twist N · interacts with M)**`. §4 has 4 SM bullets. §5 has 4 drift lines + 1 3-way handoff. §2 has 4 twists with #1 marked DOMINANT and twists #1/#2/#3/#4 each carrying interaction clauses.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P1-886`
+
+## 2026-05-15 05:05 -- [T-P1-887] [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec)
+
+- **What I did**: Drafted overview (§1+§2) + verbal_outline (§3-§5) for Q5 FB Event Recommendation per locked template (anchors id=45/46). Inherited template from `scripts/mlsd_top9_spec.md`; insert script + content was pre-drafted in worktree. Dominant twist: dual cold-start (per-user RSVP ~3/yr + ~30% event-pool churn weekly) reframes the problem as content-based ANN over event-metadata embeddings + LLM aspect-tag graph -- NOT user-item CF. Interacting twists: (#2) geo+time+capacity as HARD filters at candidate gen (not soft scoring), substitution rate "30mi+high-affinity" ↔ "2mi+mid-affinity" is physically incoherent; (#3) friend-going is strongest single feature AND selection-biased, IPS-weighted by 1/p(friend exposed) breaks the feedback loop; (#4) capacity soft-downrank as post-prediction multiplicative layer (decouples policy from retraining). Eval uses social-cluster A/B (per-user leaks via friend-going). One trim pass needed (13011 → 12990) to land within mechanical envelope; trimmed " firing soft-downrank" from §3 risk #3 (the soft-downrank context is already established 2 paragraphs earlier).
+- **Deliverables**:
+  - `scripts/insert_meta_event_rec_golden.py` (new, ~150 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=51, slug=`meta-event-rec-golden`, overview=4403 / verbal=8587 / total=12990 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-event-rec-golden';"` returns `12990|meta-event-rec-golden` (within 8000-13000 spec). 6 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 3 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-887`
