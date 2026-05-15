@@ -482,3 +482,13 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-location-rec-golden';"` returns `12976|meta-location-rec-golden` (within 8000-13000 spec). 6 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 4 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P1-888`
+
+## 2026-05-15 05:35 -- [T-P2-889] [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify Music Rec)
+
+- **What I did**: Verified pre-drafted insert script + content for Q11 Spotify Music Recommendation per locked template (anchors id=45/46). Tier-3 (non-Meta) fill per 2026-05-14 user directive: structural twists transfer but Meta signal hierarchies do not. Dominant twist: relisten is POSITIVE, not redundant -- same song 50 times = 5-star signal, not saturation, inverts dedup logic standard in video/article rec, so NO post-ranking dedup and relisten-frequency-30d is a positive feature. Interacting twists: (#2) audio embedding from log-mel-spectrogram CNN as cold-start lever for ~60k new tracks/day (metadata too coarse), indexed at upload time with zero playcount; (#3) session mood coherence as autoregressive constraint -- transformer over session prefix (~20 tracks), NOT pointwise scoring, because rock→classical→rock slips through pointwise when each matches user-static profile; (#4) skip-rate <30s as primary negative label, PTC as primary positive, NOT play-count (gameable by auto-play queue loops). Eval slices by mood + cold-track-quota + relisten-bucket + user-tenure; IPS counterfactual replay corrects auto-play-queue selection bias; cluster-randomized A/B by user (no friend-network leakage like Event Rec). This session ran the idempotent insert (SKIP confirmed at id=53) and mechanical validation.
+- **Deliverables**:
+  - `scripts/insert_meta_spotify_music_golden.py` (new, ~150 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=53, slug=`meta-spotify-music-golden`, overview=3742 / verbal=9252 / total=12994 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-spotify-music-golden';"` returns `12994|meta-spotify-music-golden` (within 8000-13000 spec). 5 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 4 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P2-889`

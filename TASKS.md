@@ -169,38 +169,6 @@ AC:
 - **Depends on**: None
 - **Description**: claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work (sd41 Reels golden, cd96, sd-friend, sd-weapon, sd42 Top-3 Comments, Meta-MLSD schema) the skill is directly applicable to MLI. Action: read `claude-code-project-template/.claude/skills/study-review/SKILL.md` to confirm scope fit, then copy the directory (SKILL.md + any helper files) to `MLInterviewPrep/.claude/skills/study-review/`. Do NOT auto-apply -- this is a sync proposal; human reviewer should validate that the template skill matches MLI conventions before merging.
 
-#### T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-
-READ FIRST: scripts/mlsd_top9_spec.md (locked template + positive rubric + reference anchors + validation contract + out-of-scope list).
-
-ANCHORS for style/length calibration:
-- meta-fb-newsfeed-golden (id=45) -- BEST-case Meta-native anchor
-- meta-yelp-restaurant-golden (id=46) -- WORST-case non-Meta anchor
-Inherit the EXACT template these use. ~10k chars total (overview + verbal_outline only; rest NULL).
-
-VALIDATION (mechanical only -- per user directive 2026-05-14, NO quality regex):
-sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='<SLUG>';"
-Expect total 8000-13000, slug exact. Quality is human spot-check via rubric in spec doc.
-
-COMMIT: EXPECTED_FILES=data/mle_prep.db (plus any one-shot insert script under scripts/). Format: [<TASK_ID>] [Meta-MLSD] Add <SLUG> 口播稿 row (twist-threaded solving + SM slot map)
-
-OUT-OF-SCOPE: do NOT populate architecture/dataflow/formulas/etc.; do NOT write verbatim 60-word SM hook phrases; do NOT update cd94 (wire-up task does that).
-
-THIS PROBLEM: Q11 Spotify Music Recommendation (NOTE: non-Meta product, Tier-3 template fill per user 2026-05-14 directive)
-TARGET SLUG: meta-spotify-music-golden
-CD94 SOURCE: `### Q11. Spotify Music Recommendation` block from id=94.
-
-TWIST SEEDS:
-
-1. **DOMINANT -- Relisten is positive, not redundant (inverts dedup logic)** -- One feature distinguishes music rec from almost every other recommendation domain: relisten is a 5-star signal, not saturation. A user playing the same song 50 times is loving it, not fatiguing. This inverts the deduplication logic standard in video / article rec. Architectural implication: NO post-ranking dedup; instead, relisten frequency is a positive feature.
-2. **Audio embedding from spectrogram is the cold-start lever** -- Metadata (artist / genre / era) is too coarse to handle the long-tail. Spectrogram-based audio embedding handles new-artist cold-start: index a new track at upload time with no playcount data. Interacts with #1 (relisten as positive only works when content embedding is strong enough to surface relistenable tracks).
-3. **Session mood coherence as autoregressive constraint (NOT pointwise scoring)** -- Within a session, mood should NOT jump (rock → classical → rock is bad). Sequential model conditioned on session prefix, not pointwise next-song scoring. NEW vs cd94 card. Interacts with #1 (relisten positive within mood coherence -- repeating same track stays in mood; repeating across moods can violate it).
-4. **Skip-rate as primary label, not play-count** -- Play-count is gameable (auto-play counts). Skip-rate (skip within first 30 seconds) is a strong negative signal. Primary label is `play-to-completion`, NOT play-count. NEW vs cd94 card.
-
 ### P3 -- Stretch Goals
 
 ## Blocked
@@ -560,6 +528,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-14** -- T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
