@@ -60,15 +60,35 @@ COMPANY_ID = 31  # Meta
 DOC_ID = 96
 EXPECTED_TITLE = "[Meta-MLSD] 45min Playbook + 4 Strong Moments"
 
-# Sibling drawer references (8 entries, NO self-link cd://96).
+# Sibling drawer references (17 entries: 13 sd-goldens covering cd94 Q1-Q13 +
+# 4 cd/cookbook complementary entries). NO self-link cd://96.
+# Per user directive 2026-05-15 -- full 13-题 family in drawer for one-click
+# access to any walkthrough.
 FAMILY_TAXONOMY_DOC_ID = 94    # 13 题 Family Taxonomy
 CROSS_CUTTING_DOC_ID = 95      # Cross-cutting 积木库
 RECSYS_MODELS_DOC_ID = 97      # T-A: RecSys 核心模型 8 工作 (per T-P0-842)
-SD_REELS_GOLDEN = "meta-reels-golden"               # T-P0-837
-SD_TOP3_GOLDEN = "meta-top3-comments-golden"        # T-P0-868 (folded into canonical by T-P0-871)
-SD_WEAPON_GOLDEN = "meta-weapon-ads-golden"         # T-P0-869 (added by T-P0-871)
-SD_FRIEND_GOLDEN = "meta-friend-rec-golden"         # T-P0-870 (added by T-P0-871)
 SD_GENERIC_RECSYS = "interview-recommendation-system"
+
+# 13 sd-goldens, ordered by cd94 Family Taxonomy Q-number (Q1..Q13):
+SD_Q1_TOP3_GOLDEN = "meta-top3-comments-golden"     # T-P0-868
+SD_Q2_V2V_GOLDEN = "meta-v2v-search-golden"         # T-P1-886 (top-9 batch)
+SD_Q3_FRIEND_GOLDEN = "meta-friend-rec-golden"      # T-P0-870
+SD_Q4_ADS_GOLDEN = "meta-ads-golden"                # T-P0-885 (top-9 batch)
+SD_Q5_EVENT_REC_GOLDEN = "meta-event-rec-golden"    # T-P1-887 (top-9 batch)
+SD_Q6_LOCATION_GOLDEN = "meta-location-rec-golden"  # T-P1-888 (top-9 batch)
+SD_Q7_WEAPON_GOLDEN = "meta-weapon-ads-golden"      # T-P0-869
+SD_Q8_YELP_GOLDEN = "meta-yelp-restaurant-golden"   # N1.5 anchor (top-9 batch)
+SD_Q9_NEWSFEED_GOLDEN = "meta-fb-newsfeed-golden"   # N1 anchor (top-9 batch)
+SD_Q10_IG_STORY_GOLDEN = "meta-ig-story-golden"     # T-P0-883 (top-9 batch)
+SD_Q11_SPOTIFY_GOLDEN = "meta-spotify-music-golden" # T-P2-889 (top-9 batch)
+SD_Q12_EVENT_ATTEND_GOLDEN = "meta-event-attendance-golden"  # T-P0-884 (top-9 batch)
+SD_Q13_REELS_GOLDEN = "meta-reels-golden"           # T-P0-837
+
+# Back-compat aliases for any caller importing the old names:
+SD_REELS_GOLDEN = SD_Q13_REELS_GOLDEN
+SD_TOP3_GOLDEN = SD_Q1_TOP3_GOLDEN
+SD_WEAPON_GOLDEN = SD_Q7_WEAPON_GOLDEN
+SD_FRIEND_GOLDEN = SD_Q3_FRIEND_GOLDEN
 
 # Body dedupe markers. Section indices bumped +1 after T-P0-847 inserted
 # 'Section 2 Twist 挖掘方法论' into the seed; Drawer is now Section 9 and
@@ -79,13 +99,29 @@ SECTION_TRIAGE_NEW = "## 9. 30 秒判题流程"
 
 DRAWER_INDEX = f"""> ## Drawer 入口（点击展开详读）
 >
+> **13 题 Family Goldens** (cd94 Q1-Q13 顺序, 每行一个 sd-golden 口播稿):
+>
 > | 入口 | 内容 | 何时打开 |
 > | --- | --- | --- |
-> | **[Reels Golden Example (45min 口播稿)](sd://{SD_REELS_GOLDEN})** | 8 段第一人称口播稿 (因果链 + 立场+trade-off + twist 在 body 兑现) | 想看 Reels 这题 end-to-end 怎么说 |
-> | **[Top-3 Comments Golden Example (45min)](sd://{SD_TOP3_GOLDEN})** | 第 2 例 45min walkthrough (类比 Reels Golden) | 对照学 framing/metric/label 三段式 + Strong Moment 编排 |
-> | **[Weapon Ads Classifier Golden (45min)](sd://{SD_WEAPON_GOLDEN})** | 第 3 例 (T&S classification, 非 RecSys) | 想看 cascade calibration / 三段 eval / 多模态 T&S |
-> | **[Friend Recommendation Golden (45min)](sd://{SD_FRIEND_GOLDEN})** | 第 4 例 (bilateral matching P(send)×P(accept)) | 想看 MMoE 双头 / cluster-randomized A/B / NRT 双边信号 |
-> | **[13 题 Family Taxonomy](cd://{FAMILY_TAXONOMY_DOC_ID})** | Q1-Q12 卡片 + 题型识别 | 拿到新题，30 秒锁定 family |
+> | **[Q1 · Top-3 Comments Golden](sd://{SD_Q1_TOP3_GOLDEN})** | Intra-item ranking · 单池小候选 · position-0 决定下游 conversation | 候选池极小 + label-heavy + selection-bias 主例 |
+> | **[Q2 · Video-to-Video Search Golden](sd://{SD_Q2_V2V_GOLDEN})** | Pure retrieval (no query) · multi-facet · L2-normalize-before-fusion | "similar undefined" 多 facet + session-learned facet 权重 |
+> | **[Q3 · Friend Recommendation Golden](sd://{SD_Q3_FRIEND_GOLDEN})** | Graph-native · P(send)×P(accept) bilateral · MMoE 双头 + cluster A/B | 图结构 retrieval + reciprocity-aware label + NRT 双边信号 |
+> | **[Q4 · Ads Recommendation Golden](sd://{SD_Q4_ADS_GOLDEN})** | Auction-mediated · 必须 calibrated probability · IPS replay before A/B | bid×pCTR×pConversion×quality + delayed-feedback + 广告主博弈 |
+> | **[Q5 · Event Recommendation Golden](sd://{SD_Q5_EVENT_REC_GOLDEN})** | 双 cold-start (event new/expire + 用户 RSVP 极稀) · content-based 主导 | 不能套 user-item CF + hard filter geo/time/capacity + 友选偏差 |
+> | **[Q6 · Location Recommendation Golden](sd://{SD_Q6_LOCATION_GOLDEN})** | Context (time/weather/calendar/party) 是主导 intent disambiguator | 9am/9pm 同一用户 intent 不同 + intent 分类中间任务 + walk-vs-drive |
+> | **[Q7 · Weapon Ads Classifier Golden](sd://{SD_Q7_WEAPON_GOLDEN})** | Adversarial T&S · admission-cascade · shared-scale calibration | cascade + 三段 eval + 多模态 T&S + LLM-teacher distill |
+> | **[Q8 · Yelp Restaurant Golden](sd://{SD_Q8_YELP_GOLDEN})** | Aspect-level matching from review text (rating-CF 上限低) | LLM aspect 抽取 + 用户自评 self-referential profile + 照片新鲜度 |
+> | **[Q9 · FB News Feed Golden](sd://{SD_Q9_NEWSFEED_GOLDEN})** | Heterogeneous · **MSI** 而非 engagement · 多源 CG · integrity 乘性下调 | MSI 标签层级 + 多源混合 + close-friend bypass + integrity cascade |
+> | **[Q10 · IG Story Golden](sd://{SD_Q10_IG_STORY_GOLDEN})** | Author-tray 不是 story 是 ranking unit · 24h 硬过期 · 跳到下作者 = 负标 | author-tray reframe + tray 内 autoregressive + 闭友 prior 跨日 |
+> | **[Q11 · Spotify Music Golden](sd://{SD_Q11_SPOTIFY_GOLDEN})** | Relisten = positive (反转视频/文章 dedup 逻辑) · 音频 spectrogram emb | session mood 连续 + skip-rate 主负 + relisten-30d 是 feature 不是 dedup |
+> | **[Q12 · Predict Event Attendance Golden](sd://{SD_Q12_EVENT_ATTEND_GOLDEN})** | Prediction-as-feature · 必须先问下游 consumer (ranking/notify/capacity) | RSVP-vs-attend 标签分裂 + time-to-event 切换 model regime + calibration 取决于下游 |
+> | **[Q13 · Reels Home Feed Golden](sd://{SD_Q13_REELS_GOLDEN})** | Session-continuous ranking · 多模态 UGC · watch-completion-ratio | Reels 这题 end-to-end (DLRM / multi-task / multimodal / 反 feedback loop) |
+>
+> **配套 cd / cookbook 入口**:
+>
+> | 入口 | 内容 | 何时打开 |
+> | --- | --- | --- |
+> | **[13 题 Family Taxonomy](cd://{FAMILY_TAXONOMY_DOC_ID})** | Q1-Q13 卡片 + 题型识别 + 30 秒判 family | 拿到新题, 30 秒锁定 family |
 > | **[Cross-cutting 9 ML 积木](cd://{CROSS_CUTTING_DOC_ID})** | Two-Tower / IPS / LLM-teacher / Calibration | 套通用 ML 模块 |
 > | **[RecSys 核心模型 8 工作](cd://{RECSYS_MODELS_DOC_ID})** | DCN / DLRM / HSTU / RankMixer / RQ-VAE / CF | 模型层面 deep-dive |
 > | **[通用 RecSys SD Cookbook](sd://{SD_GENERIC_RECSYS})** | Two-Tower + DLRM + MMoE 教科书 | 想看通用 RecSys 而不止 Meta |
@@ -156,15 +192,28 @@ def validate_content(content: str, transformed_body: str) -> None:
             f"got {first_visible!r}"
         )
 
-    # AC #2 (T-P0-871 widened from 5 to 8): 8 unique drawer URIs each appear
+    # AC #2 (2026-05-15 widened from 8 to 17): 17 unique drawer URIs each appear
     # exactly once IN PREPENDED BLOCK; cd://96 (self) must NOT appear.
-    # The 4 sd-goldens are required by schemas/meta_mlsd_canonical.yaml
-    # cd96_playbook.drawer_header.must_link_sd_goldens.
+    # The 13 sd-goldens (cd94 Q1-Q13 family) are required by
+    # schemas/meta_mlsd_canonical.yaml cd96_playbook.drawer_header.must_link_sd_goldens.
+    # History: T-P0-845 base (5), T-P0-871 (5→8: +weapon+friend),
+    # 2026-05-15 (8→17: +9 top-9-batch sd-goldens for full 13-题 family coverage).
     drawer_uris = [
-        f"sd://{SD_REELS_GOLDEN}",
-        f"sd://{SD_TOP3_GOLDEN}",
-        f"sd://{SD_WEAPON_GOLDEN}",
-        f"sd://{SD_FRIEND_GOLDEN}",
+        # 13 sd-goldens (Q1-Q13 from cd94 family)
+        f"sd://{SD_Q1_TOP3_GOLDEN}",
+        f"sd://{SD_Q2_V2V_GOLDEN}",
+        f"sd://{SD_Q3_FRIEND_GOLDEN}",
+        f"sd://{SD_Q4_ADS_GOLDEN}",
+        f"sd://{SD_Q5_EVENT_REC_GOLDEN}",
+        f"sd://{SD_Q6_LOCATION_GOLDEN}",
+        f"sd://{SD_Q7_WEAPON_GOLDEN}",
+        f"sd://{SD_Q8_YELP_GOLDEN}",
+        f"sd://{SD_Q9_NEWSFEED_GOLDEN}",
+        f"sd://{SD_Q10_IG_STORY_GOLDEN}",
+        f"sd://{SD_Q11_SPOTIFY_GOLDEN}",
+        f"sd://{SD_Q12_EVENT_ATTEND_GOLDEN}",
+        f"sd://{SD_Q13_REELS_GOLDEN}",
+        # 4 cd / cookbook complementary entries
         f"cd://{FAMILY_TAXONOMY_DOC_ID}",
         f"cd://{CROSS_CUTTING_DOC_ID}",
         f"cd://{RECSYS_MODELS_DOC_ID}",
@@ -221,16 +270,14 @@ def validate_content(content: str, transformed_body: str) -> None:
                 f"missing body section header `## {n}.` in renumbered content"
             )
 
-    # AC #6: length range. T-P0-874 bumped upper bound from 16000 to 20000:
-    # body §1.1 "4 Golden Examples 主次映射" added +~2.5KB (cd97-voice 4-card
-    # expansion) + §3 Strong Moments polish (---separators + **主适配** lines)
-    # +~800 chars. Body alone is now ~17.5KB; +1.1KB drawer block → ~18.6KB
-    # total. Prior bumps: T-P0-871 14000 -> 16000 (5→8 drawer entries +
-    # 4-worked-examples citation in §1 twist cells); base 14000 (T-P0-845).
+    # AC #6: length range. 2026-05-15 bumped 20000 -> 23000:
+    # drawer block grew 8→17 rows (+9 sd-golden entries with twist + when-to-open
+    # cells, ~2.2KB total). Body unchanged. Prior bumps: T-P0-874 16000→20000,
+    # T-P0-871 14000→16000 (5→8 drawer + §1 cells), base 14000 (T-P0-845).
     n_chars = len(content)
-    if not (10500 <= n_chars <= 20000):
+    if not (10500 <= n_chars <= 23000):
         raise RuntimeError(
-            f"content char-length {n_chars} not in [10500, 20000]"
+            f"content char-length {n_chars} not in [10500, 23000]"
         )
 
     # AC: body preserved verbatim — content must end with transformed_body
@@ -307,8 +354,21 @@ def main() -> int:
         )
 
         # Strip prepended block (if sentinel present) before transforming body.
+        # 2026-05-15: switched from `len(PREPENDED_BLOCK)` to body-sentinel-anchored
+        # locator. The length-based strip silently truncated body Section 1 when
+        # PREPENDED_BLOCK grew across runs (drawer 8→17 widening). Body sentinel
+        # `META_MLSD_MAIN_HUB_20260511` is invariant; everything before it is
+        # prepended-drawer scaffolding.
+        BODY_SENTINEL = "<!-- META_MLSD_MAIN_HUB_20260511 -->"
         if existing_content.startswith(SENTINEL):
-            body_raw = existing_content[len(PREPENDED_BLOCK):]
+            body_start = existing_content.find(BODY_SENTINEL)
+            if body_start == -1:
+                print(
+                    f"[ERROR] sentinel {SENTINEL!r} present but body sentinel "
+                    f"{BODY_SENTINEL!r} not found; refusing to guess strip length"
+                )
+                return 1
+            body_raw = existing_content[body_start:]
         else:
             body_raw = existing_content
 
