@@ -47,7 +47,20 @@ applies_to:
         archetype_migrated_by_task: T-P1-875
         baseline_chars_post_migration: 13417   # diff-delta baseline reset (was 45274)
       - {ref: "sd42", slug: "meta-top3-comments-golden", scope: "RecSys / list-level"}
-      - {ref: "sd-weapon", slug: "meta-weapon-ads-golden", scope: "T&S classification", task: "T-P0-869", planned: true}
+      # sd43 migrated to oral_narrative archetype 2026-05-16 (T-P0-894),
+      # mirroring sd41. structured_reference 10-field shape (~51KB) replaced by
+      # single continuous 第一人称 口播稿 in dataflow + slim overview/formulas/
+      # cheat_sheet; architecture/production_constraints/tradeoffs/defense NULL.
+      # verbal_outline opted back IN by seed_meta_weapon_ads_golden_verbal_outline.py.
+      - ref: "sd-weapon"
+        slug: "meta-weapon-ads-golden"
+        scope: "T&S classification"
+        task: "T-P0-869"
+        document_archetype: oral_narrative
+        archetype_migrated_at: "2026-05-16"
+        archetype_migrated_from: structured_reference
+        archetype_migrated_by_task: T-P0-894
+        baseline_chars_post_migration: 11607   # diff-delta baseline reset (structured_reference dataflow size at migration)
       - {ref: "sd-friend", slug: "meta-friend-rec-golden", scope: "Bilateral matching", task: "T-P0-870", planned: true}
 
 # ============================================================================

@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-892
-- **Description**: GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-weapon-ads-golden: (A) oral_narrative archetype - rewrite scripts/seed_meta_weapon_*.py so overview/dataflow/formulas/cheat_sheet populated, architecture/production_constraints/tradeoffs/defense=None. (B) golden verbal_outline 3000-5000 chars, CN-narration + EN ML-terms, exactly 1 [DOMINANT] (signature: adversarial classification) + 3-5 [floating-twist] + 1 [best-anchor] + 1 [worst-anchor], sentinel SD43_VERBAL_V1_<date>, 8 sections (Framing/Data&Label/Features/Model/Cold-start/Eval/Serving/Wrap), 1-problem-1-URI (own slug only, no sd:// in own verbal_outline). (C) schemas/meta_mlsd_canonical.yaml: sd43 entry document_archetype:oral_narrative + baseline_chars_post_migration:11607. (D) seed idempotent (2x run = byte-identical). AC: re-run scripts/audit_meta_mlsd_3rule.py + scripts/audit_mlsd_prose_quality.py expecting 0 findings on sd41-44; revert backup data/backups/mle_prep_pre_weapon_20260514_112637.db noted.
-
 #### T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
@@ -839,6 +833,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
+- [x] **2026-05-16** -- T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-we
 - [x] **2026-05-15** -- T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden). Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-15** -- T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden). Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
 - [x] **2026-05-15** -- T-P0-891: Promote verbal_outline section to top of SystemDesignDrawer rendering. Promote verbal_outline section to top of SystemDesignDrawer rendering.
