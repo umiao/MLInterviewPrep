@@ -9,159 +9,23 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden)
+#### T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible
 - **Priority**: P0
-- **Complexity**: M
+- **Complexity**: S
 - **Depends on**: None
-- **Description**: Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
-template for sd42-sd53 in this batch.
-
-Background: sd41 currently has verbal_outline=0 (empty); its content lives
-in `dataflow` field (8.6KB). sd41 is the canonical Reels Home Feed 45-min
-walkthrough referenced by cd96 main-example A. Extract the speaking script
-from `dataflow`, rewrite in Chinese-narration + English-terms style,
-populate system_designs.verbal_outline.
-
-Constraints (memory feedback_mlsd_golden_template_constraints.md):
-- 3-5 floating twists, exactly 1 DOMINANT (clearly strongest)
-- best + worst anchor calibration
-- Chinese narration prose + English ML terms
-- First occurrence of English term: format
-  `**English** (acronym, Chinese)`
-  e.g. `**Inverse Propensity Score** (IPS, 反向倾向分数)`
-- 1-problem-1-URI no-bundle; linked goldens use sd://<slug>
-- Target length 3000-5000 chars
-
-Scope: only touch verbal_outline. Other empty fields
-(architecture/formulas/production_constraints/tradeoffs/defense) stay
-empty.
-
-Files:
-- scripts/seed_meta_reels_golden_verbal_outline.py (NEW idempotent seed)
-  - Sentinel marker `<!-- SD41_VERBAL_V1_20260515 -->`
-  - UPSERT system_designs.verbal_outline WHERE slug='meta-reels-golden'
-- If scripts/retrofit_meta_mlsd_sd41_drawer_header.py exists,
-  re-run AFTER seed (sd41 reseed wipes drawer header per
-  feedback_meta_mlsd_reseed_drawer_overwrite.md)
-
-AC:
-- Seed runs idempotently (twice = same DB state)
-- system_designs.verbal_outline length >= 2500
-- Mechanical check: exactly 1 DOMINANT marker; 3-5 floating-twist sections
-- pytest passes
-- API smoke: GET /system-designs/meta-reels-golden returns
-  verbal_outline non-empty
-
-git add explicit.
-Commit: [T-X] sd41 reels-golden verbal_outline (CN-narration + EN-terms golden)
-
-#### T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-892
-- **Description**: Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
-
-Depends on: T-P0-892 (sd41 golden template)
-
-Background: Harmonize verbal_outline to Chinese-narration + English-terms
-across 13 Meta sd-goldens. This task handles sd42 (meta-top3-comments-golden).
-Current verbal_outline length: 2635 chars.
-
-Constraints:
-- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
-  as the template; mirror its structure exactly
-- 3-5 floating twists, 1 DOMINANT, best+worst anchor
-- Chinese narration prose + English ML terms; first occurrence
-  `**English** (acronym, Chinese)`
-- 1-problem-1-URI no-bundle
-- Target length 3000-5000 chars
-- ONLY touch verbal_outline; other fields stay as-is
-
-Files:
-- scripts/seed_meta_meta_top3_comments_golden_verbal_outline.py (NEW idempotent seed)
-  - Sentinel marker `<!-- SD42_VERBAL_V1_20260515 -->`
-  - UPSERT system_designs.verbal_outline WHERE slug='meta-top3-comments-golden'
-
-AC:
-- Idempotent seed (twice = same DB state)
-- verbal_outline length >= 2500
-- Mechanical check: 1 DOMINANT, 3-5 floating twists
-- pytest passes; API smoke GET /system-designs/meta-top3-comments-golden
-
-git add explicit.
-Commit: [T-X] sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden)
+- **Description**: GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = display_order in [130,199) (SystemDesignList.tsx:360). Keep sd41-44 at 130-133 UNCHANGED. Append sd45-53 into 134-142 ordered by doc-96 Q-number ascending: 134=sd50(Q2 v2v-search) 135=sd49(Q4 ads) 136=sd51(Q5 event-rec) 137=sd52(Q6 location-rec) 138=sd46(Q8 yelp-restaurant) 139=sd45(Q9 fb-newsfeed) 140=sd47(Q10 ig-story) 141=sd53(Q11 spotify-music) 142=sd48(Q12 event-attendance). AC: GET /system-designs ml-mlsd filter returns exactly 13 rows; sd41-44 disp unchanged; no collision with Pinterest>=199 or interview<130; idempotent seed script under scripts/; Q->slug mapping verified against cd96/cd94 before write. Independent of Gap B - can land standalone for instant visibility.
 
 #### T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
 - **Depends on**: T-P0-892
-- **Description**: Rewrite sd43 (meta-weapon-ads-golden) verbal_outline; mirror sd41 golden template.
-
-Depends on: T-P0-892 (sd41 golden template)
-
-Background: Harmonize verbal_outline to Chinese-narration + English-terms
-across 13 Meta sd-goldens. This task handles sd43 (meta-weapon-ads-golden).
-Current verbal_outline length: 3447 chars.
-
-Constraints:
-- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
-  as the template; mirror its structure exactly
-- 3-5 floating twists, 1 DOMINANT, best+worst anchor
-- Chinese narration prose + English ML terms; first occurrence
-  `**English** (acronym, Chinese)`
-- 1-problem-1-URI no-bundle
-- Target length 3000-5000 chars
-- ONLY touch verbal_outline; other fields stay as-is
-
-Files:
-- scripts/seed_meta_meta_weapon_ads_golden_verbal_outline.py (NEW idempotent seed)
-  - Sentinel marker `<!-- SD43_VERBAL_V1_20260515 -->`
-  - UPSERT system_designs.verbal_outline WHERE slug='meta-weapon-ads-golden'
-
-AC:
-- Idempotent seed (twice = same DB state)
-- verbal_outline length >= 2500
-- Mechanical check: 1 DOMINANT, 3-5 floating twists
-- pytest passes; API smoke GET /system-designs/meta-weapon-ads-golden
-
-git add explicit.
-Commit: [T-X] sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden)
+- **Description**: GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-weapon-ads-golden: (A) oral_narrative archetype - rewrite scripts/seed_meta_weapon_*.py so overview/dataflow/formulas/cheat_sheet populated, architecture/production_constraints/tradeoffs/defense=None. (B) golden verbal_outline 3000-5000 chars, CN-narration + EN ML-terms, exactly 1 [DOMINANT] (signature: adversarial classification) + 3-5 [floating-twist] + 1 [best-anchor] + 1 [worst-anchor], sentinel SD43_VERBAL_V1_<date>, 8 sections (Framing/Data&Label/Features/Model/Cold-start/Eval/Serving/Wrap), 1-problem-1-URI (own slug only, no sd:// in own verbal_outline). (C) schemas/meta_mlsd_canonical.yaml: sd43 entry document_archetype:oral_narrative + baseline_chars_post_migration:11607. (D) seed idempotent (2x run = byte-identical). AC: re-run scripts/audit_meta_mlsd_3rule.py + scripts/audit_mlsd_prose_quality.py expecting 0 findings on sd41-44; revert backup data/backups/mle_prep_pre_weapon_20260514_112637.db noted.
 
 #### T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
 - **Depends on**: T-P0-892
-- **Description**: Rewrite sd44 (meta-friend-rec-golden) verbal_outline; mirror sd41 golden template.
-
-Depends on: T-P0-892 (sd41 golden template)
-
-Background: Harmonize verbal_outline to Chinese-narration + English-terms
-across 13 Meta sd-goldens. This task handles sd44 (meta-friend-rec-golden).
-Current verbal_outline length: 4264 chars.
-
-Constraints:
-- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
-  as the template; mirror its structure exactly
-- 3-5 floating twists, 1 DOMINANT, best+worst anchor
-- Chinese narration prose + English ML terms; first occurrence
-  `**English** (acronym, Chinese)`
-- 1-problem-1-URI no-bundle
-- Target length 3000-5000 chars
-- ONLY touch verbal_outline; other fields stay as-is
-
-Files:
-- scripts/seed_meta_meta_friend_rec_golden_verbal_outline.py (NEW idempotent seed)
-  - Sentinel marker `<!-- SD44_VERBAL_V1_20260515 -->`
-  - UPSERT system_designs.verbal_outline WHERE slug='meta-friend-rec-golden'
-
-AC:
-- Idempotent seed (twice = same DB state)
-- verbal_outline length >= 2500
-- Mechanical check: 1 DOMINANT, 3-5 floating twists
-- pytest passes; API smoke GET /system-designs/meta-friend-rec-golden
-
-git add explicit.
-Commit: [T-X] sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden)
+- **Description**: GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-friend-rec-golden: (A) oral_narrative - rewrite scripts/seed_meta_friend_*.py so overview/dataflow/formulas/cheat_sheet populated, architecture/production_constraints/tradeoffs/defense=None. (B) golden verbal_outline 3000-5000 chars, CN+EN, 1 [DOMINANT] (signature: graph-native) + 3-5 [floating-twist] + 1 [best-anchor] + 1 [worst-anchor], sentinel SD44_VERBAL_V1_<date>, 8 sections, 1-problem-1-URI. (C) schemas/meta_mlsd_canonical.yaml: sd44 entry document_archetype:oral_narrative + baseline_chars_post_migration:10576. (D) seed idempotent. AC: re-run audit_meta_mlsd_3rule.py + audit_mlsd_prose_quality.py expecting 0 findings on sd41-44; revert backup data/backups/mle_prep_pre_friend_20260514_114845.db noted.
 
 #### T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
@@ -487,6 +351,12 @@ AC:
 git add explicit.
 Commit: [T-X] sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden)
 
+#### T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-894, T-P0-895, T-P0-896, T-P0-897, T-P0-898, T-P0-899, T-P0-900, T-P0-901, T-P0-902, T-P0-903, T-P0-904, T-P0-906
+- **Description**: GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) land: (1) re-run retrofit_meta_mlsd_*_drawer_header.py for every re-seeded sd row (re-seeding wipes the drawer header - known regression, see LESSONS 2026-05-15). (2) verify every cd96/cd94 sd:// link resolves to a system_designs.slug. (3) run scripts/audit_meta_mlsd_3rule.py and scripts/audit_mlsd_prose_quality.py over all 13; assert each has [DOMINANT]x1 + [floating-twist]x3-5 + [best-anchor]x1 + [worst-anchor]x1 + SDxx_VERBAL_V1 sentinel + verbal_outline length 3000-5000. (4) assert ml-mlsd tab returns exactly 13 golden rows. AC: both audits exit 0; 13/13 conformant; PROGRESS.md entry.
+
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -554,7 +424,7 @@ AC:
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: Top-3 + Weapon Ads + Friend Rec dataflows replaced with 8-段 第一人称 口播稿 (2026-05-14 sessions). All 3 now de-facto oral_narrative shape but schema still treats them as structured_reference. audit_meta_mlsd_3rule.py rerun would breach R-CHAR-range / R-DIFFDELTA-70pct / R-NARRATIVE-prose-form on all 3 (same class as sd41 pre-T-P1-875). Minimal-A path (mirror T-P1-875): (1) rewrite scripts/seed_meta_top3_*.py, scripts/seed_meta_weapon_*.py, scripts/seed_meta_friend_*.py to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense/verbal_outline=None). (2) Update schemas/meta_mlsd_canonical.yaml: 3 instance entries get document_archetype: oral_narrative + baseline_chars_post_migration: 10504/11607/10576. (3) Validator already has the archetype branch from T-P1-875; should auto-handle. (4) Verify with seed --dry-run then live, then re-run audit_meta_mlsd_3rule.py expecting 0 findings on sd41-44. Backups for revert: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db + pre_weapon_20260514_112637 + pre_friend_20260514_114845. PROGRESS.md entries 2026-05-14 18:30 + 18:50 reference this work.
+- **Description**: SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rewrite). This task now covers sd42 ONLY: migrate sd42 meta-top3-comments-golden to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense=None; verbal_outline already golden=4829 chars from T-P0-893, KEEP it - the stale original-T-P1-881 'verbal_outline=None' line is superseded by the sd41 golden-template precedent). Update schemas/meta_mlsd_canonical.yaml sd42 entry document_archetype:oral_narrative baseline_chars_post_migration:10504. Re-run audit_meta_mlsd_3rule.py expecting 0 findings sd41-44. Revert backup: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db.
 
 ### P2 -- Nice to Have
 
@@ -609,6 +479,11 @@ AC:
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work (sd41 Reels golden, cd96, sd-friend, sd-weapon, sd42 Top-3 Comments, Meta-MLSD schema) the skill is directly applicable to MLI. Action: read `claude-code-project-template/.claude/skills/study-review/SKILL.md` to confirm scope fit, then copy the directory (SKILL.md + any helper files) to `MLInterviewPrep/.claude/skills/study-review/`. Do NOT auto-apply -- this is a sync proposal; human reviewer should validate that the template skill matches MLI conventions before merging.
+
+#### T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
 
 ### P3 -- Stretch Goals
 
@@ -969,6 +844,8 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-15** -- T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden). Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
+- [x] **2026-05-15** -- T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden). Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
 - [x] **2026-05-15** -- T-P0-891: Promote verbal_outline section to top of SystemDesignDrawer rendering. Promote verbal_outline section to top of SystemDesignDrawer rendering.
 - [x] **2026-05-14** -- T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 - [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.

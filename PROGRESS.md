@@ -543,3 +543,13 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: `vitest run` full suite 238/238 pass (20 files); SystemDesignDrawer.test.tsx 12/12; `npm run build` exit 0 (pre-existing >500kB chunk warning only, non-fatal). No backend/seed touched -- Invariant 3 N/A (no DB content row changed).
 - **Status**: [DONE]
 - **Request**: `task_db.py update T-P0-891 --status completed`
+
+## 2026-05-15 03:30 -- [T-P0-893] sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden)
+
+- **What I did**: Populated `system_designs.verbal_outline` for sd42 (`slug='meta-top3-comments-golden'`) via the new idempotent seed, mirroring the sd41 golden template (T-P0-892). Tightened the in-module payload from 5305 -> 4829 chars to land inside the golden contract's `[3000, 5000]` band (the self-check hard-fails outside it); cuts were redundant connectives / expendable parentheticals only -- every distinct technical claim, all 7 structural markers, every English-term first-occurrence expansion, and the `sd://` URI were preserved.
+- **Deliverables**:
+  - `scripts/seed_meta_meta_top3_comments_golden_verbal_outline.py` (NEW idempotent seed): sentinel `<!-- SD42_VERBAL_V1_20260515 -->`; UPSERT keyed on `slug`; strict no-op when unchanged; fingerprint-based scope guard (sd42 is the `structured_reference` archetype, so it asserts every non-`verbal_outline`/`updated_at` column is byte-identical across the write rather than asserting them empty like sd41's `oral_narrative` guard).
+  - `data/mle_prep.db`: row id=42 `verbal_outline` 2635 -> 4829 chars; all other columns byte-identical (scope guard confirmed).
+- **Sanity check result**: seed exit 0; re-run = `no-op` + scope guard `byte-identical` (idempotent). In-module + DB-side contract: DOMINANT=1, floating-twist=4, best-anchor=1, worst-anchor=1, sentinel on line 1, own `sd://meta-top3-comments-golden` URI present, length 4829 (>=2500, in band). `pytest -q` 1265 passed. `ruff check` clean. API smoke `GET /api/system-designs/meta-top3-comments-golden` -> 200, verbal_outline len 4829, markers correct, `dataflow` len 10504 unchanged (scope intact). Invariant 3 satisfied (git-tracked idempotent seed is the source of truth).
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P0-893` (human_review=0)
