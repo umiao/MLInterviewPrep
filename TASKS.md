@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = display_order in [130,199) (SystemDesignList.tsx:360). Keep sd41-44 at 130-133 UNCHANGED. Append sd45-53 into 134-142 ordered by doc-96 Q-number ascending: 134=sd50(Q2 v2v-search) 135=sd49(Q4 ads) 136=sd51(Q5 event-rec) 137=sd52(Q6 location-rec) 138=sd46(Q8 yelp-restaurant) 139=sd45(Q9 fb-newsfeed) 140=sd47(Q10 ig-story) 141=sd53(Q11 spotify-music) 142=sd48(Q12 event-attendance). AC: GET /system-designs ml-mlsd filter returns exactly 13 rows; sd41-44 disp unchanged; no collision with Pinterest>=199 or interview<130; idempotent seed script under scripts/; Q->slug mapping verified against cd96/cd94 before write. Independent of Gap B - can land standalone for instant visibility.
-
 #### T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
@@ -844,6 +838,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
 - [x] **2026-05-15** -- T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden). Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-15** -- T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden). Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
 - [x] **2026-05-15** -- T-P0-891: Promote verbal_outline section to top of SystemDesignDrawer rendering. Promote verbal_outline section to top of SystemDesignDrawer rendering.

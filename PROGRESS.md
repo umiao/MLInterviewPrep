@@ -553,3 +553,13 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: seed exit 0; re-run = `no-op` + scope guard `byte-identical` (idempotent). In-module + DB-side contract: DOMINANT=1, floating-twist=4, best-anchor=1, worst-anchor=1, sentinel on line 1, own `sd://meta-top3-comments-golden` URI present, length 4829 (>=2500, in band). `pytest -q` 1265 passed. `ruff check` clean. API smoke `GET /api/system-designs/meta-top3-comments-golden` -> 200, verbal_outline len 4829, markers correct, `dataflow` len 10504 unchanged (scope intact). Invariant 3 satisfied (git-tracked idempotent seed is the source of truth).
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P0-893` (human_review=0)
+
+## 2026-05-16 21:05 -- [T-P0-906] Reassign sd45-53 display_order into ml-mlsd tab window [130,199)
+
+- **What I did**: Created an idempotent reorder seed that moves the 9 stranded Meta-MLSD goldens (sd45-53, previously at display_order 207-260) into the ml-mlsd tab window so all 13 of the 13-题 family are visible. SCHEME B (user-approved 2026-05-16): sd41-44 stay quality-leading at 130-133 UNCHANGED; sd45-53 appended to 134-142 ordered by cd94/doc-96 Q-number ascending (Q2,Q4,Q5,Q6,Q8,Q9,Q10,Q11,Q12). Q->slug mapping verified against `company_documents` id=94 ([Meta-MLSD] Family Taxonomy + 13 Question Cards) before write.
+- **Deliverables**:
+  - `scripts/reorder_meta_mlsd_into_tab_window_20260516.py` (NEW idempotent seed): sets exact target display_order keyed on slug (re-run = no-op), models `scripts/reorder_pinterest_to_bottom_20260501.py`. Built-in post-write self-check hard-fails (exit 2) if window != 13 rows, sd41-44 not at 130-133, order mismatch, or any interview(<130)/Pinterest(>=199) collision.
+  - `data/mle_prep.db`: 9 rows reordered (v2v-search 230->134, ads 220->135, event-rec 240->136, location-rec 250->137, yelp-restaurant 208->138, fb-newsfeed 207->139, ig-story 209->140, spotify-music 260->141, event-attendance 210->142). sd41-44 untouched at 130-133.
+- **Sanity check result**: seed run 1 = 9 [UPDATE] + self-check OK; run 2 = 9 [NOOP] + self-check OK (idempotent). API smoke `GET /api/system-designs`: ml-mlsd window [130,199) returns exactly 13 rows in expected order; zero `meta-*` rows below 130 or >=199 (no collision). `pytest -q` 1265 passed. `ruff check` clean. Frontend filter confirmed at `SystemDesignList.tsx:360` (`display_order >= 130 && < 199`). `insert_meta_*` scripts are skip-if-exists, so this reorder seed is authoritative for these rows' display_order (Invariant 3 satisfied).
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P0-906` (human_review=0)
