@@ -8,74 +8,50 @@ matching** golden -- sibling of ``sd://meta-reels-golden`` (RecSys),
 ``sd://meta-weapon-ads-golden`` (T&S classification). Cross-link via cd://96
 §1/§3 drawers (added by T-P0-871).
 
-Per schemas/meta_mlsd_canonical.yaml (rule R-NARRATIVE-prose-form, added
-2026-05-13): sd-golden docs are now English oral-recital narrative scripts,
-NOT bullet-heavy markdown notes. Each section opens with a declarative
-one-sentence claim, runs bold-anchored substantive prose, and closes with a
-trade-off / handoff sentence. >=3 **bold** spans per apply_3rule section;
-<=4 consecutive bullets; <=3-row tables; first-person 'I' voice. Friend-rec
-is the highest-risk doc for falling back into bullet form because the source
-attachment is the most table-heavy.
+T-P0-895 archetype migration (2026-05-16): document_archetype migrated from
+``structured_reference`` (10-field shape, ~50KB across overview/architecture/
+dataflow/formulas/production_constraints/tradeoffs/defense/verbal_outline/
+cheat_sheet) to ``oral_narrative``, mirroring the sd41 golden template
+established by T-P1-875 + T-P0-892 and the sd43 mirror by T-P0-894. Per the
+archetype's contract in ``schemas/meta_mlsd_canonical.yaml``
+(``document_archetypes.values.oral_narrative``):
 
-4 unique twists (the question's senior signal vs generic recommendation):
+  - ``dataflow`` carries a single continuous 第一人称 45-min 口播稿 (8 sections:
+    开场 Framing / Data & Label / Features / Model / 冷启动 / Evaluation /
+    Serving / Wrap).
+  - ``overview`` / ``formulas`` / ``cheat_sheet`` are slim anchors.
+  - ``architecture`` / ``production_constraints`` / ``tradeoffs`` / ``defense``
+    / ``verbal_outline`` are NULL by design -- their content lives inlined in
+    the dataflow narrative (立场 + trade-off + Strong Moment + verbatim).
+    ``verbal_outline`` is populated separately and authoritatively by
+    ``scripts/seed_meta_friend_rec_golden_verbal_outline.py`` (T-P0-895 part B),
+    a verbal-only seed that opts this oral_narrative row INTO a speaking
+    skeleton for the SystemDesignDrawer (which renders verbal_outline first
+    since T-P0-891). This main seed NULLs it; run the verbal seed last.
 
-  1. Bilateral matching P(send) x P(accept) -- the optimization target is a
-     PRODUCT of two asymmetric distributions, not a single P(click). Sender
-     intent and receiver receptivity are different physical signals that
-     route through different gating heads in MMoE. Implication: MMoE
-     multi-head bilateral, where the bottom is shared and each gate routes
-     one expert subset to P(send), another to P(accept).
-  2. Network-effect counterfactual -- treatment effect leaks across friend
-     edges, so user-level randomization contaminates both arms. Implication:
-     cluster-randomized A/B at community-detection clusters, with a
-     SUTVA-violation check as part of the experimental contract.
-  3. NRT bilateral signal -- friend graphs change in seconds (acceptance,
-     rejection, recent block), and both sides' state matters at score time.
-     A daily snapshot misses 90%+ of the action. Implication: a
-     near-real-time signal lane that fuses sender-side AND receiver-side
-     events into the model at score time, not a batch feature.
-  4. Two-sided feed quality + abuse posture as upstream constraint --
-     spammers maximize P(send), abuse-victims minimize P(accept-from-
-     stranger), and the platform abuse posture must filter before ranking.
-     Implication: an abuse-aware admission gate before retrieval, plus
-     per-relationship-type calibration so growth thresholds compose with
-     safety thresholds on the same probability scale.
+Rationale: the structured_reference shape spread the same Friend-Rec insights
+(graph-native bilateral matching / network-effect counterfactual / NRT
+bilateral signal / abuse-posture upstream) across overview -> architecture ->
+dataflow -> defense, each restating the others, and tripped R-CHAR-range +
+R-NARRATIVE-bold-density on the 10.5KB dataflow. The oral_narrative shape
+consolidates everything into one continuous oral-recital script; the audit
+(scripts/audit_meta_mlsd_3rule.py) skips R-CHAR-range / R-NARRATIVE / the
+nullable fields for oral_narrative and only enforces dataflow >= 4000 chars +
+the section-level 3-rule.
 
-Key content anchors (from task description T-P0-870 + canonical YAML
-R-90S-friend-rec-section5):
+The diff-delta baseline for this oral_narrative instance is recorded on the
+``meta_mlsd_canonical.yaml`` instance as ``baseline_chars_post_migration:
+10576`` (the structured_reference dataflow size at migration time -- the new
+floor against which future deletions are gated; the migration commit itself is
+exempt).
 
-  - MMoE multi-head bilateral: shared bottom, two gating heads (one for
-    P(send), one for P(accept)) feeding two task-specific towers; combined
-    via P(send) * P(accept) at serving with per-relationship-type
-    calibration.
-  - Cluster-randomized A/B: SUTVA violation under user-level randomization;
-    cluster the social graph via Louvain / Leiden community detection and
-    randomize at cluster level. Variance recovery via leave-one-cluster-out
-    delta method.
-  - NRT bilateral signal: dual-sided streaming join (Kafka -> Flink) on
-    last-N seconds of accept/reject/block events; latency budget 60s
-    end-to-end; serves into the model at score time as a state feature.
-  - 5 retrieval channels (compressed to one narrative paragraph): mutual
-    friends, 2-hop graph, embedding-similarity (two-tower), cohort overlap,
-    inferred-real-life (org/school/contacts). Each channel feeds a candidate
-    pool; ranker fuses across channels at top-K.
-  - Model ladder LR -> XGBoost -> DNN -> MMoE -> Transformer compressed to
-    one paragraph: each step justified by a specific failure mode of the
-    prior; Transformer is the future tense (not yet the deployed default).
+A pre-migration safety backup exists at
+``data/backups/mle_prep_pre_friend_komantxe_20260514_114845.db`` (revert path
+if the oral_narrative content is rejected on review).
 
-Section 5 (the dataflow section's model+serving section, 15-20 min slot) is
-the highest-risk fall-back-to-encyclopedia surface; the R-90S forcing
-function 'if only 90 seconds, which 3 sentences?' applied here yields MMoE
-multi-head bilateral + cluster-randomized A/B + NRT bilateral signal as
-the L4+ moments.
-
-Architecture and production_constraints both embed a short anchor sentence
-pointing to fr-node ``meta-prep/system-design-must-knows/mmoe-ple-multitask``
-(id=258) for the deep-version MMoE-multi-task walkthrough; the deep version
-is owned by a separate fr-node task.
-
-Idempotent: re-running upserts in place by `slug`. Sentinel-based UPSERT keyed
-on `slug='meta-friend-rec-golden'`.
+Idempotent: re-running upserts in place by ``slug``. Sentinel-based UPSERT
+keyed on ``slug='meta-friend-rec-golden'``. Two consecutive runs leave the DB
+byte-identical (the row payload is fully deterministic).
 
 Usage::
 
@@ -99,12 +75,12 @@ TITLE = (
     "(Bilateral matching, 45min walkthrough)"
 )
 SUBTITLE = (
-    "Meta MLSD Golden Example -- canonical 4-twist bilateral-matching framing "
-    "(P(send) x P(accept) MMoE multi-head / cluster-randomized A/B / "
-    "NRT bilateral signal / abuse-posture admission) + MMoE multi-head ranker "
-    "behind a 5-channel retrieval funnel. Adjacent to sd://meta-reels-golden, "
-    "sd://meta-top3-comments-golden, and sd://meta-weapon-ads-golden; "
-    "cross-link via cd://96 §1 timing skeleton + §3 Strong Moments drawer."
+    "Meta MLSD Golden Example — 第一人称完整 45min 口播稿 "
+    "(因果链 + 立场+trade-off + twist 在 body 兑现 三原则). "
+    "Bilateral matching 题型 (graph-native, P(send) x P(accept), NOT 单 ranker); "
+    "4-twist framing (graph-native bilateral matching / network-effect "
+    "counterfactual / NRT bilateral signal / abuse-posture upstream). "
+    "方法论 (Strong Moment 调度, ML-native vocab, 8 meta-rules, E4/E5) 在 cd://96。"
 )
 DISPLAY_ORDER = 133
 SOURCE_PATH = (
@@ -114,485 +90,235 @@ SOURCE_PATH = (
 
 ANCHOR_FR_NODE = "meta-prep/system-design-must-knows/mmoe-ple-multitask"
 
+# T-P0-895: this seed produces an oral_narrative archetype document. See
+# schemas/meta_mlsd_canonical.yaml > document_archetypes.values.oral_narrative.
+DOCUMENT_ARCHETYPE = "oral_narrative"
+
 
 OVERVIEW = """\
-# Friend Recommendation -- 45min Golden Walkthrough
+# Friend Recommendation — 45min Golden 口播稿
 
-**I'd reframe this as a bilateral matching problem with P(send) x P(accept) as the optimization target, not a single P(click) ranker**, and that reframe is where the senior signal lives. The model serves a **two-sided platform decision** -- show user A a candidate B such that A is likely to send AND B is likely to accept -- because optimizing only sender-side intent floods receivers with unwanted requests and degrades the platform. The unique angle: **four intrinsic twists** -- bilateral matching as a product of two asymmetric distributions, network-effect counterfactual contamination, NRT bilateral signal as a serving-time state feature, and abuse-posture as an upstream admission constraint -- drive almost every downstream decision. Methodology (timing skeleton, vocab YES/NO, 8 rhythm meta-rules, E4/E5 boundary) lives in `cd://96`; this row owns only the solution.
+按"因果链 + 立场+trade-off + twist 在 body 兑现" 三原则写成的完整第一人称口播稿。完整 8 段台词在 `dataflow` tab; bilateral matching score / MMoE multi-head gating / cluster-randomized A/B 三个公式 anchor 在 `formulas`; 数字 anchor + firm-claim register + Design Doc 强调话术在 `cheat_sheet`。方法论 (timing skeleton, Strong Moment 调度, ML-native vocab YES/NO, 8 meta-rules, E4/E5 boundary) 在 `cd://96` 主 hub, 此 row 只承载 Friend Recommendation 这一题的 solution。
 
-## Twist 1 -- Bilateral matching P(send) x P(accept)
+这道题我一上来就 reframe: 它不是一个 single P(click) ranker, 它本质是一个长在 social graph 上的 **bilateral matching** 问题——optimization target 是 `P(send) x P(accept)`, 一个由两个非对称分布相乘出来的量, 不是单边的 click。四条 driving twist 在 framing 段就 declarative 立起来, 后续每个 component 兑现:
 
-A friend recommendation is a **two-sided handshake**, not a one-sided click. **I pick** **MMoE multi-head bilateral**, where the shared bottom feeds two gating heads -- one routes a subset of experts to a P(send) tower, the other to a P(accept) tower -- and the serving score is the product `P(send) * P(accept)` with per-relationship-type temperature scaling. **Costs**: two task heads, two label streams, and a joint calibration table. **Switches to** a single weighted-loss ranker only if the receiver-side label collapses below volume quorum. This is where the bilateral twist of Strong Moment #3 lives.
+1. **Graph-native bilateral matching** (压舱石 signature) — 整题活在一张秒级 mutate 的 friend graph 上; 这个 graph-native 性质同时解释了为什么 target 是两个非对称分布的乘积、为什么 user-level A/B 会被 edge 污染、为什么 recent state 在 score time 才有意义。落地: MMoE multi-head bilateral, shared bottom + 两个 gating head (一个 route 到 P(send) tower, 一个到 P(accept) tower), serving score 是 product, per-relationship-type calibrated。
+2. **Network-effect counterfactual** — treatment effect 沿 friend edge 泄漏, user-level 随机化两臂互相污染。落地: cluster-randomized A/B 在 Louvain / Leiden community 上做, leave-one-cluster-out 方差恢复 + SUTVA-violation 诊断进实验契约。
+3. **NRT bilateral signal** — friend graph 秒级变化, 双方 recent state 都在 score time 才有信息量, daily snapshot 漏掉 90%+ 的 recent-action surface。落地: Kafka -> Flink 双侧 streaming join, last-N 秒 accept/reject/block 在 score time join 进模型, 60s 端到端 SLA。
+4. **Abuse-posture is upstream** — spammer 把 P(send) 拉满、abuse-victim 把 P(accept-from-stranger) 压到底, abuse 过滤必须在 retrieval 之前。落地: abuse-aware admission gate 在 retrieval 前 + per-relationship-type calibration 让 growth threshold 与 safety threshold 在同一概率刻度上 compose。
 
-## Twist 2 -- Network-effect counterfactual (cluster-randomized A/B)
-
-Treatment effect leaks across friend edges -- a user in treatment sends requests to users in control, contaminating both arms. **I pick** **cluster-randomized A/B** at Louvain / Leiden communities, with variance recovered via a **leave-one-cluster-out delta method** because cluster sizes are unbalanced. **Costs**: weekly clustering refresh and ~10x larger sample sizes per cell vs user-level. **Switches to** user-level only on **post-acceptance** outcomes (where the network has already mutated) -- at the cost of treatment-effect bias on candidate-selection.
-
-## Twist 3 -- NRT bilateral signal (both sides, score-time)
-
-Friend graphs mutate in seconds and **both sides' recent state matters at score time**. A daily batch misses 90%+ of the recent-action surface -- a user who just rejected three requests is signaling "stop", and a daily snapshot never sees it. **I pick** an **NRT dual-sided streaming join** on the last-N seconds of accept/reject/block events for both A and B, joined into the model as a state feature at score time. **Costs**: a Kafka -> Flink lane with 60s end-to-end SLA plus dual-write to the feature store. **Switches to** daily batch only if streaming infra degrades -- at the cost of a measurable acceptance-rate drop on recent-action sub-populations.
-
-## Twist 4 -- Two-sided feed quality + abuse-posture upstream
-
-Spammers maximize P(send) and abuse-victims minimize P(accept-from-stranger), so the **abuse-posture filter is upstream of ranking**, not a post-hoc rerank. **I pick** an **abuse-aware admission gate** before retrieval plus **per-relationship-type calibration** so that growth thresholds compose with safety thresholds on the same probability scale. **Costs**: a 6-hour abuse-flag refresh and a per-relationship-type temperature table. **Switches to** a single global threshold only if abuse posture flattens across relationship types -- which it does not.
-
-## 4 Strong Moment slots (pre-allocated, do NOT improvise)
-
-The 4 slots fire at fixed times. **Slot #1 (0-1)** carries the 4-twist framing with the "bilateral matching, not a single ranker" reframe and the 15/25 time plan. **Slot #2 (8-12)** carries bilateral label schema and the disagreement on what counts as a positive (send-only vs send+accept vs sustained-engagement). **Slot #3 (15-21)** carries the MMoE multi-head bilateral architecture, the 5-channel retrieval funnel, and the NRT bilateral signal at score time. **Slot #4 (31-35)** carries cluster-randomized A/B with leave-one-cluster-out variance recovery, the SUTVA violation diagnostic, and the rollout circuit-breaker. The dataflow / defense / tradeoffs columns are the solution body; verbal_outline + cheat_sheet hold only Friend-Rec-specific anchors -- anything else (rhythm rules, vocab YES/NO, E4/E5) belongs in `cd://96`.
-"""
-
-
-ARCHITECTURE = """\
-# Architecture: 5-Channel Retrieval Funnel + MMoE Multi-Head Bilateral + NRT Signal Lane
-
-## Decision summary (the architectural twist)
-
-**I pick** a **5-channel retrieval funnel into an MMoE multi-head bilateral ranker** -- mutual-friend / 2-hop / two-tower embedding / cohort / inferred-real-life -- all feeding a ranker that produces calibrated `P(send)` and `P(accept)` combined as a product at serving. **This is where** the bilateral matching twist of Strong Moment #3 lives. The **unique angle** versus a generic two-tower ranker is the MMoE multi-head split, the abuse-aware admission gate before retrieval, and the NRT bilateral signal joined at score time -- not as a batch feature. Latency: **retrieval p99 < 30 ms** across all 5 channels parallel, **ranker p99 < 50 ms**, **NRT lookup p99 < 10 ms**, **end-to-end p99 < 100 ms** for the people-you-may-know unit.
-
-## Channel 0 -- abuse-aware admission gate (before retrieval)
-
-**Before** any retrieval channel runs, an **admission gate** evaluates the requesting user against an **abuse-flag feature table** (known spammer outbound, known abuse-victim inbound, recent ToS-violation) and **short-circuits** the pipeline if flagged. **I pick** placing this gate upstream of retrieval, not as a post-hoc rerank, because spammer recs must never enter the candidate pool. **Costs**: 6-hour refresh on the abuse-flag table plus a per-relationship-type threshold table. **Switches to** post-hoc rerank only if abuse-flag refresh latency stalls -- already a P1 incident.
-
-## Channel 1-5 -- the retrieval funnel (5 channels, one paragraph total)
-
-**Compressed to one narrative paragraph (R-90S forcing function)**: the **5 channels** are mutual-friends (cheap graph adjacency, ~1k candidates), 2-hop graph (Counter-based hop-aggregation, ~5k candidates), two-tower embedding similarity (HNSW ANN at **M=32, p99 < 8 ms**, ~3k candidates), cohort overlap (shared school / employer / group, ~2k candidates), and inferred-real-life (org chart, contact-book hash join, location co-presence, ~1k candidates). Each channel emits a per-channel-scored pool; the union is **deduplicated with channel-of-origin preserved as a one-hot feature** for ranker fusion. **The core decision here is** that 5 channels in parallel is **a candidate-coverage decomposition** (each surfaces a different friend-type signal) and a **single end-to-end model would conflate all 5**.
-
-## Ranker -- MMoE multi-head bilateral (the core, expand ~90s)
-
-The main ranker is **MMoE** with a **shared bottom**, **two gating heads**, and **two task-specific towers**: P(send) predicts sender intent, P(accept) predicts receiver receptivity. Each gate routes a soft mixture of experts to its task tower so the experts specialize without hard partitioning. **I pick** MMoE over a single weighted-loss ranker because the two distributions are **physically asymmetric** -- sender-side signals (browse history, mutual-friend count) differ from receiver-side signals (recent-block, accept-rate-from-strangers) -- and a single weighted loss forces a compromise that under-fits both heads. **Switches to** Progressive Layered Extraction (PLE) only if the heads start interfering (negative transfer) at scale, which has not been observed at this corpus size.
-
-The two heads are **calibrated to a shared posterior** so the product `P(send) * P(accept)` is interpretable -- not just a ranking. **Per-relationship-type temperature** scales each head separately for **stranger / colleague / school / real-life-contact** because base-rate acceptance varies by type; a global temperature over-pulls strangers and under-pulls contacts.
-
-## NRT bilateral signal lane (score-time)
-
-The **NRT signal lane** is a **Kafka -> Flink** streaming pipeline maintaining per-user **last-N seconds of accept/reject/block events** on both sender (A) and receiver (B) sides of every score-time lookup. The feature is **joined at score time**, not as a batch precompute, because the recent-action signal **decays in seconds** and is most informative inside 60s. End-to-end SLA: **60s** from event to model. **Switches to** daily-batch fallback only if streaming infra degrades -- with a soft alarm if NRT feature freshness exceeds 5 minutes.
-
-==> Section-stitch: the 5 channels map back to Twist 4's two-sided abuse posture, and the MMoE multi-head delivers what Twist 1 promised on bilateral matching as a product of two distributions.
-
-## MMoE-multi-task digest (this section self-contained -- deep version in fr-node)
-
-**3-sentence core**:
-
-1. **Shared bottom + per-task gating**: the bottom encodes a shared representation, and each gate produces a soft mixture over experts feeding its task tower; hard partitioning forces a tradeoff while MMoE's soft mixture lets heads borrow strength without negative transfer.
-2. **Two-task calibration with shared posterior**: P(send) and P(accept) are independently temperature-scaled per relationship type so the product is a calibrated bilateral probability. **This is where** the cascade-of-scores property is preserved across the MMoE split.
-3. **Negative-transfer monitor**: per-task AUC tracked separately; if one degrades while the other improves, the gate is shorting and a PLE migration is triggered.
-
-**Deep version in fr-node `""" + ANCHOR_FR_NODE + """`** -- MMoE vs PLE vs SNR, negative-transfer theorem, third-task-head checklist. A separate fr-node task owns that 深版.
-
-## Architectural choices -> 4 twists (callback)
-
-The MMoE multi-head bilateral answers Twist 1 (bilateral matching as a product of distributions). The cluster-randomized A/B contract (in production_constraints) answers Twist 2 (network-effect counterfactual). The NRT signal lane answers Twist 3 (recent-action surface). The abuse-aware admission gate plus per-relationship-type calibration answers Twist 4 (abuse posture upstream). **Each architectural decision callback to a framing twist** -- this is the property the bilateral pipeline was designed for.
-"""
+整体方案: abuse-aware admission gate → 5-channel retrieval funnel (mutual / 2-hop / two-tower embedding / cohort / inferred-real-life) → MMoE multi-head bilateral ranker, NRT bilateral signal 在 score time join, serving score = `P(send) x P(accept)` per-relationship-type calibrated。"""
 
 
 DATAFLOW = """\
-# Dataflow: 4-Section Verbatim Walkthrough (Phase 2 -- 15min framing + body)
+# 完整 45min 口播稿 (第一人称, 8 段连续)
 
-## Decision summary (the rhythm twist)
+> Section 标题只是导航用, 真讲的时候是连续说下来的。每段串因果链, 每立场挂 trade-off, framing 立的四个 twist (graph-native bilateral matching / network-effect counterfactual / NRT bilateral signal / abuse-posture upstream) 在 body 里逐一兑现。
 
-**I pick** a chronological 4-section walk over a component-by-component walk because **the core decision here is** time-allocation: 4 Strong Moments at fixed slots (0-1 framing / 8-12 label / 15-21 architecture / 31-35 monitoring), and **this is where** E4 vs E5 wrap diverges. The walk follows the canonical body order **framing -> metric+label -> feature -> model+serving**, with scale anchors named verbatim: **billions of friend-graph edges**, **a few hundred million daily active users**, **end-to-end p99 < 100 ms** on the people-you-may-know unit, **retrieval p99 < 30 ms** across 5 channels in parallel.
+---
 
-## Section 1: Framing (90s)  <- Strong Moment #1
+## 开场 · Framing
 
-"L1 (user): **The user of this ML output is a two-sided handshake**, not a one-sided viewer. Both the requesting user (sender) and the candidate (receiver) consume the output. Optimizing only sender-side intent floods receivers and degrades the platform.
+"好, 这道 Friend Recommendation 的题, 我开口第一件事是 reframe: 我不会把它做成一个'预测你会不会点这个人'的 single P(click) ranker, 我把它 formulate 成一个长在 social graph 上的 **bilateral matching** 问题——真正要优化的是 `P(send) x P(accept)`, 一个由 sender intent 和 receiver receptivity 两个物理上非对称的分布相乘出来的量。这个 reframe 本身就是这题的 senior signal, 因为只优化 sender 一侧会把 receiver 淹在垃圾请求里, 平台价值反而塌掉。
 
-L2 (scale): **A few hundred million DAU, billions of friend-graph edges, tens of millions of PYMK impressions per day**; per-user candidate-pool **~10k after retrieval, top-K = 20**. SLA: **end-to-end p99 < 100 ms** on home-feed, **NRT freshness < 60s**, **abuse-flag refresh every 6 hours**.
+我先 confirm 几个边界。规模上, 我假设几亿 DAU、几十亿条 friend-graph edge、每天几千万次 people-you-may-know 曝光; 一次 request 经 retrieval 后候选池 ~10k, top-K=20。SLA 上, 端到端 p99 < 100 ms (home-feed PYMK unit), retrieval 5 路并行 p99 < 30 ms, ranker p99 < 50 ms, NRT 双侧 lookup p99 < 10 ms, NRT freshness < 60s, abuse-flag 每 6 小时刷新。input 是 (requesting user A, candidate B, interaction-pair) 三组 feature, friend graph 是 corpus 不是 model input。
 
-L3 (twists with implications):
+然后是这题和一道普通 recommendation 不一样的地方, 我认为有四个 twist, 我现在就 declarative 立起来, body 里逐个兑现。第一, 也是整场压舱石——**这是 graph-native 的 bilateral matching**, 整题活在一张秒级 mutate 的 social graph 上, 这个 graph-native 性质同时派生出后面三个 twist。第二, **network-effect counterfactual**——treatment 沿 friend edge 泄漏, user-level A/B 两臂互污。第三, **NRT bilateral signal**——双方 recent state 只在 score time 有信息量。第四, **abuse-posture is upstream**——abuse 过滤必须在 ranking 之前, 不是事后 rerank。
 
-- **Bilateral matching P(send) x P(accept)** -> MMoE multi-head bilateral, two task heads, product at serving
-- **Network-effect counterfactual** -> cluster-randomized A/B at Louvain communities, leave-one-cluster-out variance
-- **NRT bilateral signal** -> dual-sided streaming join at score time, last-N-seconds state feature
-- **Abuse-posture upstream** -> admission gate before retrieval, per-relationship-type calibration
+整体方案我先给一句: abuse-aware admission gate 守在 retrieval 前面, 5 路 retrieval funnel 各召一种 friend-type 信号, MMoE multi-head bilateral ranker 出 calibrated `P(send)` 和 `P(accept)`, 两者相乘当 serving score, NRT 双侧信号 score time join。这是我的 framing, 你想我先深入 label, 还是 model 和 serving?"
 
-L4 (ML formulation): **5-channel retrieval funnel into an MMoE multi-head bilateral ranker**, with NRT signal joined at score time and an abuse-aware admission gate upstream of retrieval. The serving score is the product `P(send) * P(accept)` -- a true bilateral probability, not just a relative ranking."
+---
 
-==> Section-stitch: each of these 4 twists hooks into a specific downstream metric, label rule, or serving constraint -- the next 3 sections trace exactly that.
+## Data & Label
 
-## Section 2: Metrics and Labels (180s)  <- Strong Moment #2
+"我从 label 开始, 因为这题最 non-trivial 的就是'什么算一个正样本'本身就是个 senior judgment, 不是 model。
 
-"**L1 North-star is sustained-bilateral-engagement at 28 days, not raw acceptance rate**. Raw acceptance is gameable by lowering the acceptance threshold; 28-day sustained engagement (number of post-acceptance interactions -- messages, posts, reactions -- between A and B in the 28 days after acceptance) is the platform-value-aligned metric.
+**我选 bilateral positive: send AND accept AND 28 天内 >= 1 次 post-acceptance interaction**。为什么不是 send-only? send-only 会被 spammer 把 P(send) 拉满直接刷爆; accept-only 又会被勉强接受、接受完零互动的 reluctant accept 钻空子。28 天 sustained engagement (接受后双方的 message / post / reaction 数) 才是和平台价值对齐的信号。**代价是**一个 28 天的 label 成熟延迟, 我用 eligible-label fast-track 缓解——已经跨过 send AND accept 的近期 item 当 provisional positive, 但 sample-weight 下调。
 
-**L2 Proxies**, each with a one-line alignment statement:
+negative sampling 我特意做**非对称**: P(send) head 用 70/30 random/hard split, 因为 sender 边界宽、broad random negative 维持 retrieval recall; P(accept) head 用 50/50 split, 因为 receiver 决策更难、需要 impressed-but-not-clicked 的 hard negative 才学得到接收侧的边界。一个统一采样率会逼出一个两个 head 都欠拟合的折中。
 
-- **P(send) calibrated on the sender** -> sender-intent fidelity, prevents under-recommending
-- **P(accept) calibrated on the receiver** -> receiver-receptivity fidelity, prevents spam-like overrecommendation
-- **Click-to-send conversion at the impression level** -> top-of-funnel sender engagement
-- **28-day post-acceptance message rate** -> the true downstream platform-value signal
+eval 这块我有一个不能 collapse 的纪律——**三套 eval set, 各回答不同问题**: frozen golden set 取 4 周前的切片、永不更新, 回答'有没有过固定的 bilateral-engagement bar'; rolling weekly set 每周一从上周成熟 label 刷新, 回答'这周流量上表现如何'; cluster-randomized counterfactual set 持续更新, 回答'cluster A/B 的反事实估计趋势是否一致'。把三套合成一套是常见错误——一个 model 在 frozen 上好看, 在 cluster counterfactual 上可能已经 silently 崩了。这里没有 bandit exploration, 因为一个错误 friend-rec 的代价是 abuse / 平台信任, 不是一次 UX 实验。"
 
-**Label schema (the core difficulty -- this section's senior signal)**: the question of what counts as a positive is itself a senior judgment. **I pick** a **bilateral positive: send AND accept AND >=1 post-acceptance interaction in 28 days** -- this filters out one-sided fake-positives (spammer sends + reluctant accept) and zero-engagement matches (accept-then-ignore). **Costs**: a 28-day delay before label maturity, mitigated with **eligible-label fast-track** for recent items that have already crossed both send AND accept (counted as provisional positives with a sample-weight reduction).
+---
 
-**Negative sampling (asymmetric)**: random negatives **vs** hard negatives drawn from the impressed-but-not-clicked pool. **I pick** a **70/30 random/hard split** for the P(send) head and a **50/50 split** for the P(accept) head, because the P(accept) head needs the harder negatives to learn the receiver-side decision boundary; the P(send) head benefits from broader random negatives to keep the retrieval recall high. **Switches to** uniform random negatives only if the hard-negative pool collapses below volume.
+## Features
 
-**Three-eval-set discipline (analogous to T&S, but tuned to bilateral)**:
+"feature 我按 sender / receiver / interaction / context 四类拆, 但这题最重的象限是 interaction-side (sender x receiver pair) 的 relational, 这正是 graph-native twist 在 feature 层兑现的地方。
 
-- **Frozen golden set** on a 4-week-old slice -- 'does the model meet a fixed bilateral-engagement bar?' -- never updated.
-- **Rolling weekly set** -- 'how is the model doing on this week's traffic?' -- refreshed every Monday from the prior week's matured-label sample.
-- **Cluster-randomized counterfactual set** -- 'is the cluster A/B counterfactual estimate trending consistently?' -- continuously updated with live experimental clusters.
+sender (user A): friend-graph degree + 最近 friend-add velocity (sender-intent), browse history + PYMK dwell + 最近 profile-view, 最近 send-reject ratio (压低长期 spammer)。
 
-**Do NOT collapse these to one eval-set** -- each answers a different question."
+receiver (user B): friend-graph degree + accept-rate-from-strangers (receiver-receptivity), 最近 block / report 行为 (abuse-victim 信号), inbox depth (过载 receiver 不论 fit 都少接受)。
 
-==> Section-stitch: the bilateral positive defines the two heads (P(send) + P(accept)) that the architecture in Section 4 will need.
+interaction (最重象限, bilateral twist 落地): **mutual-friend count + Adamic-Adar weight** (便宜的 graph 邻接 anchor), **channel-of-origin** 当 one-hot (mutual / 2-hop / embedding / cohort / inferred-real-life), cohort overlap depth (同校 / 同雇主 / 同 group), inferred-real-life (org chart / contact-book hash join / location co-presence)。
 
-## Section 3: Features (60s) -- 4-quadrant model
+我想强调一个 critical distinction: **NRT lane 携带的是 state feature 不是聚合量**——双侧 last-N 秒的 accept/reject/block 事件, 在 score time join。这就是为什么一个 daily-batch-only 的 feature set 不够: 没有 NRT lane, 一个刚拒了三个请求的用户会在同一小时内被再推相似候选, 而那个'停'的信号 daily snapshot 永远看不到。这条 twist 我会在 model 段再兑现一次。"
 
-"**4-quadrant model, but the heaviest quadrant is interaction-side (sender x receiver pair)**:
+---
 
-**Sender (user A)**:
+## Model
 
-- Friend graph degree + recent friend-add velocity (sender-intent signal)
-- Browse history + people-you-may-know dwell time + recent profile-views
-- Recent send-reject ratio (de-prioritize chronic spammers)
+"model 我做 5-channel retrieval funnel 接一个 MMoE multi-head bilateral ranker, 不做单一大 ranker。
 
-**Receiver (user B)**:
+**我选 MMoE multi-head 不选 single weighted-loss ranker**, 因为 sender-side 信号 (browse、mutual-friend count) 和 receiver-side 信号 (recent-block、accept-rate-from-strangers) 物理上非对称, 一个 single weighted loss 会逼出一个两个 head 都欠拟合的折中。结构: shared bottom 编码 user + candidate + interaction, 两个 gating head 各产出 expert 的 soft mixture 喂两个 task tower (P(send) / P(accept))。代价是两个 task head + per-task gating + 一张 joint calibration table; 只有当两个 head 之间出现 negative transfer 才 switch 到 PLE, 这个 corpus 规模上还没观察到。
 
-- Friend graph degree + accept rate from strangers (receiver-receptivity signal)
-- Recent block / report behavior (abuse-victim signal)
-- Inbox depth (overloaded receivers under-accept regardless of fit)
+serving score 是两个 head 的 **product** `P(send) x P(accept)`, 不是 sum——product 是一个 calibrated bilateral 概率而不只是 ranking, 这个性质让 growth threshold 和 safety threshold 在 policy 层能在同一刻度上 compose。每个 head per-relationship-type temperature scale (stranger / colleague / school / real-life-contact), 因为 base-rate acceptance 随 relationship type 从 ~5% 到 ~80% 漂, 一个全局 temperature 会 over-pull stranger 又 under-pull real-life-contact。
 
-**Interaction (the heaviest quadrant -- this is where the bilateral twist lives)**:
+retrieval 5 路并行: mutual-friend (O(degree) graph 邻接), 2-hop (Counter-based hop-aggregation, 6 小时 cache), two-tower embedding (HNSW M=32 p99 < 8 ms), cohort overlap, inferred-real-life。每路出一个 per-channel-scored pool, union 去重并保留 **channel-of-origin 当 one-hot** 给 ranker fusion——5 路并行是一个 candidate-coverage decomposition (各 surface 一种 friend-type 信号), 单一 end-to-end retrieval 会把 5 种信号 conflate 进一个 loss 还丢掉 per-channel recall 的可调试性。model ladder 我一句话压缩: LR -> XGBoost -> DNN -> MMoE -> Transformer, 每步被前一步一个具体 failure 推动, MMoE 是 deployed default (offline AUC 比 Transformer 差 < 0.5% 但 p99 便宜 ~3x), Transformer 是 sequence-aware bilateral 的 next tense。"
 
-- **Mutual-friend count** + **Adamic-Adar weight** (cheap, the L3 carve-up anchor from the cd://96 hub)
-- **Channel-of-origin** as a one-hot feature (mutual / 2-hop / embedding / cohort / inferred-real-life)
-- **Cohort overlap depth** -- shared school, employer, group memberships
-- **Inferred-real-life signal** -- org chart, contact-book hash join, location co-presence
+---
 
-**Context**:
+## 冷启动 (承接 model)
 
-- Recent friend-rec impression density (avoid showing the same candidate too often)
-- Surface (home feed PYMK unit vs notifications-tab vs onboarding flow)
+"冷启动这题主要是 new-user cold-start 和 new-edge 稀疏, 不是 new-item。
 
-**Critical distinction**: the **NRT lane** carries **state features**, not aggregations -- last-N-seconds accept/reject/block events on both sides, joined at score time. This is the root of why a daily-batch-only feature set is insufficient -- without the NRT lane, a user who just rejected three requests gets re-recommended to similar candidates within the same hour."
+一个全新或低度数用户, friend-graph degree 近零、interaction 历史空, naive 做法会退到 site 均值。**我的处理是**让 graph-native 信号兜底——即使账号是新的, 它的 contact-book hash join / org chart / 共同 group 往往不是新的, inferred-real-life channel + 2-hop graph 沿这些边传播过来的 prior 是冷启动期唯一相对无偏的信号。fallback 顺序我特意写清楚: 先 graph-propagated / inferred-real-life prior, 再 cohort (同校同雇主) base rate, 最后才是全局 prior, 不直接 fallback 到全局 (太糊)。
 
-==> Section-stitch: the 5 retrieval channels feed the channel-of-origin one-hot in the ranker; the NRT signal lane joins at score time on both sides.
+onboarding 期走一个轻量 diverse 候选集 + 略升 exploration 比例, 但仍过 abuse-aware admission gate, 因为'新用户'不等于'安全'——新号恰恰是 spammer 最爱的入口。bandit 我知道是选项, 但这里 explore 的代价是 abuse 暴露, 我点到为止, 不展开。"
 
-## Section 4: Model and serving (60s) -- Strong Moment #3 land here
+---
 
-"**The ranker is MMoE multi-head bilateral**: shared bottom encoder, two gating heads (one per task), two task-specific towers (P(send) and P(accept)), with the serving score the **product** `P(send) * P(accept)` calibrated per relationship type.
+## Evaluation
 
-**Model ladder (R-90S compression -- one paragraph)**: the deployment lineage is **LR -> XGBoost -> DNN -> MMoE -> Transformer**; each step is justified by a specific failure of the prior -- LR fails on feature crosses, XGBoost fails on embedding co-training, DNN fails on bilateral asymmetry under a single weighted loss, MMoE captures the bilateral via per-task gates, and Transformer is the next-tense option for **sequence-aware bilateral signal**. **I pick** **MMoE as the deployed default**, not because Transformer is worse in offline AUC, but because at this scale MMoE's serving latency is **~3x cheaper at p99** and the offline AUC gap is **< 0.5%**.
+"evaluation 我分三层, 而且我会主动讲监控顺序, 因为这是 E5 的 boundary signal。
 
-**5 retrieval channels (R-90S compression -- one paragraph)**: candidate retrieval runs **5 channels in parallel** (mutual / 2-hop / two-tower-embedding / cohort / inferred-real-life), each emitting a per-channel-scored pool, deduplicated with **channel-of-origin preserved as a one-hot feature**. **HNSW M=32 p99 < 8 ms** on the two-tower channel; mutual-friend channel is **O(degree)** at p99 < 10 ms; 2-hop is **O(degree^2)** with a **6-hour cache** at p99 < 15 ms. Channels are independent so a single-channel outage degrades retrieval recall but does not fail the request.
+第一, **cluster-randomized A/B, 是这题的实际 change-management surface**。user-level 随机化会沿 friend edge 泄漏 treatment——我们踩过一次坑, 一个 user-level A/B 看着强正向, 在 cluster-randomization 下直接消失, leaked treatment 经被接受的请求污染了 control 臂, user-level 估计被高估了 ~40%。所以实验**必须**在 Louvain / Leiden community cluster 上随机化, 方差用 **leave-one-cluster-out** delta method 恢复 (cluster 大小不均, naive 标准误低估真实 CI 2-4x)。SUTVA-violation 诊断进实验契约: cluster 估计与 user-level 估计偏离 > 20% 就 reject user-level 结果只报 cluster。代价是每 cell ~10x sample size + 每周 clustering 刷新; 只有 post-acceptance outcome (网络已 mutate、SUTVA 不再违反) 才 switch 回 user-level。
 
-**NRT bilateral signal**: score-time join brings **last-60s accept/reject/block on both A and B** into the ranker via a **Flink hot-key lookup** with **p99 < 10 ms** budget. Without it, recent-action is missed for ~90% of impressions.
+第二, **三套 eval set 持续跑**: frozen golden 当固定 bar tracker, rolling weekly 周一刷新后读, cluster counterfactual 持续从 live 实验 cluster 更新。不要 collapse 成一个数, 每套 gate 一个不同的 production action (frozen gate calibration rotation, rolling gate ranker retrain release, cluster gate 实验 sign-off)。
 
-**Latency budget**: retrieval p99 < 30 ms (5 channels parallel), ranker p99 < 50 ms, NRT p99 < 10 ms, end-to-end p99 < 100 ms. Throughput: tens of millions of impressions per day, onboarding peaks **~5x average**."
+第三, **online prediction-distribution drift, 每小时**, 对 P(send) 和 P(accept) 两个 head 各做 day-over-day KL divergence 抓 base-rate shift, 这比三套 eval set 还早。大多数候选只会说'monitor AUC', 这条是 senior signal。offline metric 按 relationship-type 和 sender/receiver segment 切, 因为 base rate 和代价结构都随 relationship type 变; calibration 每晚用 frozen golden 上 per-(task, relationship-type) ECE 查 drift, 任一 cell 破 2% 就 halt calibration rotation——circuit breaker, 不是人工 review。"
 
-==> Section-stitch: the MMoE bilateral + NRT join + 5-channel retrieval funnel set up Section 4's production_constraints discussion on cluster-randomized A/B and the rollout circuit-breaker.
+---
+
+## Serving / Logging
+
+"serving 和 logging 我给几个最在意的点, 不展开。
+
+latency: retrieval 5 路并行 p99 < 30 ms (mutual O(degree) p99 < 10 ms / 2-hop 6h cache p99 < 15 ms / two-tower HNSW M=32 p99 < 8 ms / cohort p99 < 15 ms / inferred-real-life p99 < 20 ms), MMoE ranker 在去重后 ~10k 池上 p99 < 50 ms, NRT 双侧 hot-key lookup p99 < 10 ms, 端到端 p99 < 100 ms; onboarding 高峰 ~5x 平均。NRT bilateral signal 必须 score time join 不能 batch precompute, 因为 recent-action 秒级衰减、最有信息量是在 60s 内——没有它 ~90% 曝光的 recent-action 信号都漏掉, 这是 feature 段那个 graph-native twist 在 serving 层的最后一次兑现。
+
+最关键的运维面我认为不是 model weight, 是 **cluster-randomized A/B 契约 + rollout circuit-breaker**。新 MMoE ranker 走 shadow + 1% **cluster** canary -> 5% -> 25% -> 100% (cluster-canary 不是 user-canary, 因为 user-canary 经 network spillover 污染 control 臂), 三个 guardrail 任一破自动 halt——P(send) head AUC 跌破 baseline-0.5%、P(accept) head AUC 跌破 baseline-0.5%、cluster-randomized 28 天 sustained-engagement 趋势跌破 baseline-1%。train-serving 一致性上, calibration temperature 离线在 validation set 上算、线上原样应用, 周期性用 online-served data 重算校对, 偏差 > 5% 冻结 calibration rotation。"
+
+---
+
+## Wrap
+
+"我 zoom out 收一下, 然后说三个我最担心的 risk。
+
+整体是一个长在 social graph 上的 bilateral matching: abuse-aware admission gate → 5-channel retrieval funnel → MMoE multi-head bilateral ranker, serving score = `P(send) x P(accept)` per-relationship-type calibrated, NRT 双侧信号 score time join, 实验走 cluster-randomized A/B + SUTVA 诊断, rollout 走 cluster-canary circuit-breaker。
+
+三个 risk。第一, NRT lane 退化或 freshness 窗口设太宽, recent-action 信号在窗口内丢掉, 修法是 60s 端到端 SLA + freshness > 5min 软报警 + daily-batch 降级 fallback。第二, user-level A/B 的 network spillover 把效应高估 (我们踩过 ~40% 的坑), 修法是 cluster-randomized A/B + leave-one-cluster-out 方差 + SUTVA divergence > 20% 自动 reject user-level。第三, 也是最重要的——把 bilateral matching 当成一个 single weighted-loss task 做, 这是 category error, 会丢掉 product 的 calibrated-bilateral 性质, 修法是 MMoE multi-head + product serving score + per-relationship-type calibration, alarm 靠 negative-transfer monitor (per-task AUC 背离) 抓。
+
+这些是我的设计, 哪一块你想让我再深入?"
 """
 
 
 FORMULAS = """\
-# Bilateral Matching Score + MMoE Multi-Head Gating + Cluster-Randomized A/B (3 anchors)
+# 三个公式 anchor (口播稿对应的形式化, 面试官追问时打开)
 
-## Bilateral matching score (the optimization target)
+> 口播稿原文在 `dataflow` tab; 此处只放 bilateral matching score / MMoE multi-head gating / cluster-randomized A/B 三个 anchor 的精确定义, 面试官追问公式时打开。
 
-For a candidate pair (A, B) where A is the requesting user and B is the recommended candidate, the model produces two calibrated scores:
+## Bilateral matching score (optimization target)
 
-```
-P(send | A -> B)    = sigmoid(z_send   / T_send[reltype(A,B)])
-P(accept | A -> B)  = sigmoid(z_accept / T_accept[reltype(A,B)])
-```
-
-The serving score is the **product** of the two:
+对候选 pair `(A, B)` (A 是请求用户, B 是被推候选), 模型出两个 calibrated score:
 
 ```
-score(A, B) = P(send | A -> B) * P(accept | A -> B)
+P(send   | A -> B) = sigmoid(z_send   / T_send[reltype(A,B)])
+P(accept | A -> B) = sigmoid(z_accept / T_accept[reltype(A,B)])
+score(A, B)        = P(send | A -> B) * P(accept | A -> B)
 ```
 
-Per-relationship-type temperatures `T_send[reltype]` and `T_accept[reltype]` are calibrated separately for `stranger / colleague / school / real-life-contact`. Without per-relationship calibration, a single global temperature **over-pulls the stranger relationship type** (where base-rate acceptance is ~5%) and **under-pulls real-life-contact** (where base-rate acceptance is ~80%). The product is **a calibrated bilateral probability**, not just a ranking, which is the property that lets growth and safety thresholds compose at the policy layer.
+per-relationship-type temperature `T_send[reltype]` / `T_accept[reltype]` 对 `stranger / colleague / school / real-life-contact` 分别校准。没有 per-relationship 校准, 一个全局 temperature 会 over-pull stranger (base-rate accept ~5%) 又 under-pull real-life-contact (~80%)。product 是 calibrated bilateral 概率而非 ranking, 这是 growth / safety threshold 能在 policy 层 compose 的前提。
 
-## MMoE multi-head gating (the architectural anchor)
+## MMoE multi-head gating (architectural anchor)
 
-The MMoE bottom encodes user + candidate + interaction features into a shared representation `h` of dimension `d`. For each task `t in {send, accept}`, a softmax gate `g_t(h)` produces a mixture over `n` experts:
-
-```
-g_t(h)          = softmax(W_t * h)                # shape: (n,)
-mix_t(h)        = sum_{i=1..n} g_t(h)_i * E_i(h)  # shape: (d',)
-P(t | A, B)     = sigmoid(tower_t(mix_t(h)))      # task-specific scalar head
-```
-
-Each expert `E_i` is a small MLP shared across tasks; the per-task gating lets the two heads borrow strength from overlapping experts without forcing a hard partition. A **negative-transfer monitor** tracks per-task AUC drift; if `AUC_t1` degrades while `AUC_t2` improves, the gate is shorting `t1` and a PLE migration is triggered.
-
-## Cluster-randomized A/B with leave-one-cluster-out variance
-
-The treatment effect under SUTVA-violation is biased if randomization is at the user level. Cluster randomization at the community level recovers an unbiased estimate. For `K` clusters with assignment `Z_k in {0, 1}` and per-cluster average outcome `Y_k`:
+bottom 把 user + candidate + interaction 编成 shared 表征 `h` (维度 `d`)。对每个 task `t in {send, accept}`, softmax gate `g_t(h)` 产出 `n` 个 expert 的混合:
 
 ```
-TE_cluster      = (sum_k Z_k * Y_k) / (sum_k Z_k) - (sum_k (1 - Z_k) * Y_k) / (sum_k (1 - Z_k))
-var_LOCO        = (K / (K - 1)) * sum_k (TE_{-k} - mean_k TE_{-k})^2
+g_t(h)      = softmax(W_t * h)                # shape (n,)
+mix_t(h)    = sum_{i=1..n} g_t(h)_i * E_i(h)  # shape (d',)
+P(t | A,B)  = sigmoid(tower_t(mix_t(h)))      # task-specific scalar head
 ```
 
-`TE_{-k}` is the treatment-effect estimate with cluster `k` held out. The LOCO variance recovery **costs more clusters** (variance scales with cluster count, not user count), which forces ~10x larger sample sizes than user-level randomization but recovers the unbiased counterfactual under network spillover.
+每个 expert `E_i` 是跨 task 共享的小 MLP; per-task gating 让两个 head 借力重叠 expert 而不强行硬分割。**negative-transfer monitor** 跟踪 per-task AUC drift: 若 `AUC_t1` 退化而 `AUC_t2` 提升, gate 在短接 t1, 触发 gate-regularization 或 PLE 迁移。
 
-## Three eval-set discipline (formal definition)
+## Cluster-randomized A/B + leave-one-cluster-out 方差
 
-| Eval Set                | Refresh         | Answers                                              |
-|-------------------------|-----------------|------------------------------------------------------|
-| Frozen golden           | Never           | Does the model meet a fixed bilateral-engagement bar? |
-| Rolling weekly          | Mondays         | How is the model doing on this week's mix?          |
-| Cluster counterfactual  | Continuous      | Is the cluster A/B trending consistently?           |
+SUTVA 违反下, user-level 随机化的 treatment effect 有偏。在 community level 上 cluster 随机化恢复无偏估计。`K` 个 cluster, 分配 `Z_k in {0,1}`, per-cluster 平均结果 `Y_k`:
 
-**Each row answers a distinct question; do NOT collapse to a single eval-set** -- a model can look good on the frozen set and be silently broken on the cluster counterfactual. The senior signal is naming all three and saying when to read which.
-"""
+```
+TE_cluster = (sum_k Z_k Y_k)/(sum_k Z_k) - (sum_k (1-Z_k) Y_k)/(sum_k (1-Z_k))
+var_LOCO   = (K/(K-1)) * sum_k (TE_{-k} - mean_k TE_{-k})^2
+```
 
-
-PRODUCTION_CONSTRAINTS = """\
-# Production Constraints: Daily Retrain + Cluster-Randomized A/B + NRT Lane + Rollout Circuit-Breaker
-
-## Decision summary (the production twist)
-
-**I pick** a **daily ranker retrain** on rolling 30 days of bilateral labels, a **6-hour 2-hop cache refresh**, an **NRT bilateral signal lane** with a 60s end-to-end SLA, and a **cluster-randomized A/B contract** with leave-one-cluster-out variance recovery -- **this is where** the bilateral matching twist meets the wire. **Throughput**: tens of millions of people-you-may-know impressions per day, **onboarding-spike peaks ~5x average**, with **end-to-end p99 < 100 ms** on the home-feed PYMK unit and **NRT feature freshness < 60s**. The unique angle versus a generic recommendation deployment is the **network-effect counterfactual contract on cluster-randomized A/B**, not the model weights -- that contract is the actual change-management surface.
-
-## Latency budget and serving topology
-
-The 5-channel retrieval funnel runs **in parallel** at p99 < 30 ms (mutual-friend channel on the friend graph at p99 < 10 ms, 2-hop with a 6-hour cache at p99 < 15 ms, two-tower **HNSW M=32** at p99 < 8 ms, cohort at p99 < 15 ms, inferred-real-life at p99 < 20 ms). The MMoE ranker on the deduplicated ~10k-candidate pool runs at p99 < 50 ms. The NRT bilateral signal **joined at score time** on both A and B adds a Flink hot-key lookup at p99 < 10 ms. End-to-end p99 < 100 ms on the home-feed PYMK unit; without the NRT lane the recent-action signal is missed for ~90% of impressions.
-
-## Retrain cadences (tiered, not one-size-fits-all)
-
-| Cadence              | What                                                                              |
-|----------------------|-----------------------------------------------------------------------------------|
-| Streaming 6h         | 2-hop graph cache, abuse-flag refresh, per-relationship-type threshold table      |
-| Daily                | MMoE ranker retrain on rolling 30 days, per-task calibration temperatures         |
-| Weekly               | Two-tower embedding retrain, Louvain cluster refresh for A/B randomization        |
-
-The NRT lane is its own streaming-60s tier, called out in prose rather than as a 4th cadence row -- accept/reject/block events older than 60s decay below signal-noise on the receiver-receptivity head. **Switches to** a 5-minute fallback only if Flink hot-key lookup latency degrades, **at the cost of** a measurable acceptance-rate drop on recent-action sub-populations.
-
-## Cluster-randomized A/B in production (the actual change-management surface)
-
-Friend-rec experiments **must** use **cluster-randomized A/B** at Louvain / Leiden community-detection clusters, because user-level randomization **leaks treatment effect across friend edges** and contaminates both arms. **The variance is recovered via leave-one-cluster-out** delta-method estimation; cluster sizes are unbalanced and the naive standard error underestimates the true confidence interval by 2-4x. **A SUTVA-violation diagnostic** is part of the experimental contract: if the cluster-level estimate diverges from the user-level estimate by >20%, the user-level result is rejected as biased and only the cluster result is reported. **Costs**: ~10x larger sample sizes per cell vs user-level randomization, plus a weekly clustering refresh. **Switches to** user-level randomization only on **post-acceptance** outcomes (where the network has already mutated and SUTVA is no longer violated) -- at the cost of treatment-effect bias on the candidate-selection step itself.
-
-## Three-eval-set discipline in production
-
-The three eval-sets each gate a different decision: the **frozen golden set** gates a calibration rotation (does the new temperature preserve the regulatory bar?), the **rolling weekly set** gates a ranker retrain release (does the retrained MMoE hold up against this week's mix?), and the **cluster-randomized counterfactual set** gates the experimental sign-off (is the trend statistically real under network spillover?). **No eval-set is a passive scoreboard** -- each one has a corresponding production action it gates.
-
-## Rollout circuit-breaker (model + experiment)
-
-A new MMoE ranker rolls out via **shadow scoring + 1% cluster canary -> 5% -> 25% -> 100%**, with **automatic halt** when any of three guardrails breach: P(send) head AUC degrades below baseline - 0.5%, P(accept) head AUC degrades below baseline - 0.5%, or cluster-randomized 28-day sustained-engagement metric trends below baseline - 1%. The rollout is **cluster-canary**, not user-canary, because user-canary contaminates the control arm via network spillover. **Switches to** a longer-canary 7-day cluster soak only if the negative-transfer monitor fires on either MMoE head during the canary window.
-
-## MMoE-multi-task Production digest (self-contained -- deep version in fr-node)
-
-The 2-piece skew defense in production is:
-
-1. **Per-task calibration parity**: each MMoE head's calibrated P(t) is monitored daily via per-relationship-type ECE on the frozen golden set. If `ECE_t,r > 2%` for any (task, relationship-type) cell, the calibration rotation pipeline halts -- a circuit-breaker, not a manual review.
-2. **Negative-transfer monitor**: per-task validation AUC is tracked separately on the rolling weekly set. If one head's AUC degrades while the other's improves by >0.5%, the gate is shorting the under-performing task and a gate-regularization or PLE migration is triggered.
-
-**Deep version in fr-node `""" + ANCHOR_FR_NODE + """`** -- covers MMoE vs PLE vs SNR architectures, the negative-transfer theorem under task-imbalance, per-task gating regularization, and the operational checklist for adding a third task head (e.g., long-term engagement). A separate fr-node task owns that 深版.
-
-## Production scar (E4 senior signal -- one or two sentences total)
-
-**In my past work**, we found that an early MMoE rollout looked clean on offline AUC but degraded post-acceptance 28-day engagement; the **fix was switching from a P(send)+P(accept) sum loss to the product score with per-relationship-type calibration**, because the sum loss was masking a calibration mismatch between the two heads. **One thing we learned the hard way** is that a user-level A/B on friend-rec showed a strong positive treatment effect that **disappeared under cluster-randomization** -- the leaked treatment was contaminating the control arm through accepted requests, and the user-level estimate was biased upward by ~40%.
-"""
-
-
-TRADEOFFS = """\
-# Tradeoffs (8 decision points -- each "I pick A because X, costs Y, switches to B if Z")
-
-## Decision summary (the tradeoff twist)
-
-8 tradeoffs follow, each in the form **"I pick A because X, costs Y, switches to B if Z"**. **This is where** the architectural twists meet concrete numbers: ~10k retrieval pool, top-K = 20, end-to-end p99 < 100 ms, NRT 60s SLA, daily ranker retrain, 6-hour 2-hop cache, weekly two-tower retrain + Louvain clustering refresh, per-relationship-type calibration across 4 buckets, and a cluster-randomized A/B contract.
-
-1. **MMoE multi-head bilateral vs single weighted-loss ranker** -- I pick MMoE multi-head because the two distributions are **physically asymmetric** -- sender-side and receiver-side signals are different, and a single weighted loss forces a compromise that under-fits both heads. Costs: two task heads + per-task gating + a joint calibration table. Switches to PLE only if negative transfer emerges between the heads -- which has not been observed at this corpus size.
-
-2. **Bilateral product P(send) x P(accept) vs sum at serving** -- I pick the product because it is a **calibrated bilateral probability**, not just a ranking, and the product **preserves the cascade-of-scores property** so growth and safety thresholds compose at the policy layer. Costs: two-task temperature scaling + per-relationship-type calibration table. Switches to a sum-of-logits ranker only if one of the two heads collapses on label volume -- **at the cost of** losing bilateral-probability interpretability.
-
-3. **5-channel retrieval funnel vs single end-to-end retrieval** -- I pick 5 channels because each channel surfaces a different friend-type signal (mutual / 2-hop / embedding / cohort / inferred-real-life) and a single end-to-end retrieval would **conflate the 5 signals** into one loss, missing the channel-of-origin feature the ranker needs. Costs: 5 channels in parallel + dedup + a channel-of-origin one-hot. Switches to a single end-to-end retrieval **if** the channel-of-origin one-hot becomes redundant against ranker capacity, which **costs the ability to debug per-channel recall**.
-
-4. **NRT bilateral signal at score time vs daily-batch feature** -- I pick NRT joined at score time because recent-action signal **decays in seconds** and is most informative inside the last 60s; daily batch misses 90%+ of the recent-action surface. Costs: a Kafka -> Flink streaming lane with 60s end-to-end SLA + dual-write to the feature store. Switches to daily batch only if Flink infra degrades -- with a soft alarm if NRT feature freshness exceeds 5 minutes.
-
-5. **Cluster-randomized A/B vs user-level randomization** -- I pick cluster randomization at Louvain communities because user-level randomization **leaks treatment effect across friend edges** and biases both arms; the leak inflated a past experiment's effect by ~40%. Costs: ~10x larger sample sizes per cell + weekly clustering refresh + leave-one-cluster-out variance recovery. Switches to user-level randomization **only on post-acceptance outcomes** (where the network has already mutated and SUTVA holds), at the cost of treatment-effect bias on candidate-selection.
-
-6. **Bilateral positive (send AND accept AND 28-day engagement) vs send-only positive** -- I pick bilateral positive because send-only is **gameable by spammers** maximizing P(send) and accept-only without engagement is **gameable by reluctant accepts**; the bilateral positive captures sustained platform value. Costs: 28-day label-maturity delay + a fast-track provisional label with sample-weight reduction. Switches to send-only **if** post-acceptance interaction labels become unobservable, which **costs the platform-value alignment**.
-
-7. **Abuse-aware admission gate upstream of retrieval vs post-hoc rerank** -- I pick upstream admission because spammer recs must **never enter the candidate pool**; a post-hoc rerank lets them be retrieved, scored, and seen by the ranker, wasting capacity. Costs: a 6-hour abuse-flag refresh + per-relationship-type threshold table. Switches to post-hoc rerank only if the abuse-flag refresh latency stalls, which **would already be a P1 incident**.
-
-8. **HNSW two-tower retrieval (M=32, p99 8ms) vs IVF-PQ** -- I pick HNSW because it gives **recall@100 ~95%** at p99 < 8 ms on the two-tower embedding channel, where IVF-PQ trades off recall for memory. Costs: graph memory ~2x IVF + slower index build (offline). Switches to IVF-PQ only if memory becomes the binding constraint at scale, **in exchange for** a measurable recall drop on the embedding channel.
-
-Across all 8, the **firm-claim register** is: bilateral MMoE multi-head, P(send) x P(accept) product at serving, 5-channel retrieval funnel with channel-of-origin one-hot, NRT bilateral signal lane at score time, cluster-randomized A/B at Louvain communities, bilateral positive at 28-day engagement, abuse-aware admission gate upstream of retrieval, and HNSW M=32 two-tower retrieval.
-"""
-
-
-DEFENSE = """\
-# Strong Moments -- 4 verbatim English lines (say them as-is)
-
-The 4 lines below are canonical Strong Moment shape, **internalized verbatim**. Drop them at 0-1 / 8-12 / 15-21 / 31-35 minute slots. Strong-Moment methodology lives in `cd://96` §3 / §5 / §6; this column carries only the speak-aloud English plus the close-out trade-off.
-
-## Decision summary (which Strong Moment to fire when)
-
-**I pick** the 4 Strong Moment slots at the 4 places where Friend Rec diverges most: framing (4 twists + bilateral reframe), label (bilateral positive + asymmetric negatives), architecture (MMoE multi-head + 5 channels + NRT signal), monitoring (cluster-randomized A/B + SUTVA diagnostic + circuit-breaker). Each block follows Cue + verbatim + close-out trade-off. The **unique angle** is each Strong Moment **ends with a trade-off**, **this is where** E5 separates from a brain dump. Scale: **end-to-end p99 < 100 ms**, **NRT freshness < 60s**, **~10k candidate pool**, **top-K = 20**, **HNSW M=32**, **6-hour 2-hop cache**, **daily ranker retrain**.
-
----
-
-## Strong Moment #1 -- Bilateral-Matching Reframe + 4 Twists (0-1 min, opening)
-
-**Cue**: declarative open "**I'd reframe this as a bilateral matching problem with P(send) x P(accept) as the optimization target, not a single P(click) ranker** ... four twists."
-
-> "**I'd reframe this as a bilateral matching problem with P(send) x P(accept) as the optimization target, not a single P(click) ranker**. The model serves a two-sided handshake -- both the requesting user and the recommended candidate consume the output -- and optimizing only sender-side intent floods receivers and degrades the platform.
->
-> **Four unique twists vs generic recommendation, each with a design implication**.
->
-> **First, bilateral matching is a product of two asymmetric distributions** -- sender P(send) and receiver P(accept) are physically different signals. Implication: MMoE multi-head with the serving score as the product, per-relationship-type calibrated.
->
-> **Second, network-effect counterfactual** -- friend edges leak treatment effect; a past user-level A/B was biased upward by ~40% by spillover. Implication: cluster-randomized A/B at Louvain communities with leave-one-cluster-out variance.
->
-> **Third, NRT bilateral signal is a state feature at score time** -- recent accept/reject/block events decay in seconds; a daily snapshot misses 90%+ of the surface. Implication: Kafka -> Flink streaming lane with 60s end-to-end SLA, joined at score time on both sides.
->
-> **Fourth, abuse-posture is upstream of ranking** -- spammers maximize P(send) and abuse-victims minimize P(accept); the admission gate must filter before retrieval. Implication: abuse-aware admission gate + per-relationship-type calibration on the same scale.
->
-> Time plan: **15 / 25 min split**."
-
----
-
-## Strong Moment #2 -- Bilateral Label + Asymmetric Negatives (8-12 min)
-
-**Cue**: "**Let me walk through the bilateral label and the asymmetric negative-sampling for the two heads**".
-
-> "**The label is the core difficulty here, because what counts as a positive is itself a senior judgment** -- send-only is gameable by spammers, accept-without-engagement is gameable by reluctant accepts.
->
-> **I pick a bilateral positive: send AND accept AND >=1 post-acceptance interaction in 28 days** -- this filters one-sided fake-positives and zero-engagement matches. The 28-day maturity is the platform-value signal; the cost is label delay, mitigated with an **eligible-label fast-track** counting send+accept items as provisional positives with sample-weight reduction.
->
-> **Negative sampling is asymmetric**. P(send) sees a **70/30 random/hard split** because the sender boundary is broad and benefits from random negatives. P(accept) sees a **50/50 split** because the receiver decision is harder and needs impressed-but-not-clicked hard negatives. **A single uniform rate forces a compromise** that under-fits one head.
->
-> **Three eval-sets gate three decisions**: frozen golden gates calibration rotations, rolling weekly gates ranker retrain releases, cluster-randomized counterfactual gates experimental sign-off. **Each has a corresponding production action**.
->
-> Trade-off: bilateral positive **costs a 28-day label-maturity delay** in exchange for platform-value alignment -- the alternative is a fast but gameable signal."
-
----
-
-## Strong Moment #3 -- MMoE Multi-Head Bilateral + 5 Channels + NRT Signal (15-21 min)
-
-**Cue**: "**Let me unpack three architectural decisions -- the MMoE bilateral ranker, the 5-channel retrieval funnel, and the NRT signal at score time**".
-
-> "**The first architectural decision is the MMoE multi-head bilateral ranker**. The shared bottom encodes user + candidate + interaction features; two gating heads produce soft mixtures over experts feeding two task-specific towers -- P(send) and P(accept). The serving score is **the product** of the two, calibrated per relationship type across stranger / colleague / school / real-life-contact.
->
-> **MMoE over a single weighted-loss ranker**, because sender and receiver signals are physically asymmetric and a single weighted loss under-fits both heads. Switches to PLE only if negative transfer emerges.
->
-> **The second architectural decision is the 5-channel retrieval funnel**: mutual-friend, 2-hop with 6-hour cache, two-tower HNSW at **M=32 p99 < 8 ms**, cohort overlap, inferred-real-life. Each channel emits a per-channel-scored pool, deduplicated with **channel-of-origin preserved as a one-hot feature** for ranker fusion. A single end-to-end retrieval would conflate the 5 signals; the per-channel funnel keeps signal types distinct and lets per-channel recall be debugged independently.
->
-> **The third architectural decision is the NRT bilateral signal at score time**, not a batch precompute. A Kafka -> Flink streaming lane carries last-60s accept/reject/block events on both A and B, joined at score time as a state feature with **p99 < 10 ms** on the Flink hot-key lookup. Without it, recent-action is missed for ~90% of impressions."
-
-**Bonus closer (objective combination)**:
-
-> "Two heads: P(send) with BCE on the sender label + 70/30 random/hard negatives, P(accept) on the receiver label + 50/50 split. **The product is calibrated, not just ranked**, so growth and safety thresholds compose. **Treating bilateral matching as a single weighted-loss task is a category error**."
-
----
-
-## Strong Moment #4 -- Cluster-Randomized A/B + SUTVA Diagnostic + Circuit-Breaker Rollout (31-35 min)
-
-**Cue**: "**Let me zoom out and talk experimentation, monitoring, and rollout under network effects**". This is the E5 boundary signal.
-
-> "**Friend-rec experiments need three things, ordered by counterfactual fidelity**.
->
-> **First, cluster-randomized A/B at Louvain communities**. User-level randomization **leaks treatment effect across friend edges**; a past user-level A/B was biased upward by ~40% by spillover. Cluster A/B at Louvain / Leiden, with **leave-one-cluster-out variance** because cluster sizes are unbalanced and naive standard error underestimates by 2-4x. **Costs ~10x sample sizes** per cell, but recovers the unbiased counterfactual.
->
-> **Second, SUTVA-violation diagnostic** runs alongside every cluster experiment. If the cluster estimate diverges from the user-level estimate by >20%, the user-level result is rejected and only the cluster result is reported. **This is the senior signal earlier than effect-size degradation**.
->
-> **Third, online prediction-distribution drift on both heads**, hourly. KL divergence day-over-day on P(send) and P(accept) catches base-rate shifts before eval-sets do.
->
-> **Rollout is cluster-canary, not user-canary**, because user-canary contaminates the control arm. A new MMoE rolls out via shadow + 1% cluster canary -> 5% -> 25% -> 100%, with **automatic halt** on three guardrails: P(send) AUC drops baseline - 0.5%, P(accept) AUC drops baseline - 0.5%, or cluster 28-day sustained-engagement trends below baseline - 1%. **Circuit breaker, not manual review**.
->
-> Loop closure: monitoring feeds **the cluster-randomization plan** (weekly clustering refresh) and **the negative-transfer monitor** (gate-regularization or PLE migration on per-task AUC divergence).
->
-> Trade-off: **cluster A/B costs ~10x larger sample sizes** in exchange for an unbiased counterfactual under network spillover. Want me to deepen any part?"
-"""
-
-
-VERBAL_OUTLINE = """\
-# Friend-Rec-specific verbal anchors (methodology lives in cd://96)
-
-The general verbal scaffolding (declarative openers, sub-structure announce, drift recovery, ML-native YES/NO vocab table, hand-off / collaborative-mode phrasing, quantification phrasing, production-scar phrasing) lives in `cd://96` §5 (Framing / Body / Strong / Zoom 元结构) and §6 (8 偏好节奏 meta-rules). The lines below are the only ones unique to **Friend Recommendation** -- quote them verbatim, do NOT duplicate cd96.
-
-## 4 Strong Moment entry phrases (memorize verbatim -- these are the cue lines)
-
-1. "**I'd reframe this as a bilateral matching problem with P(send) x P(accept) as the optimization target, not a single P(click) ranker** ... four unique twists vs generic recommendation, each with a design implication." (4-twist framing, 0-1 min -- Twist 1/2/3/4)
-
-2. "**The label is the core difficulty here, because what counts as a positive is itself a senior judgment** -- send-only is gameable by spammers, accept-without-engagement is gameable by reluctant accepts." (label, 8-12 min -- bilateral positive twist)
-
-3. "**The first architectural decision is the MMoE multi-head bilateral ranker** ... **the second is the 5-channel retrieval funnel** ... **the third is the NRT bilateral signal at score time**." (architecture, 15-21 min -- MMoE bilateral + 5 channels + NRT twist)
-
-4. "**Friend-rec experiments need three things, ordered by counterfactual fidelity** ... cluster-randomized A/B, SUTVA-violation diagnostic, online prediction-distribution drift on both heads." (monitoring + rollout, 31-35 min -- E5 wrap-up twist)
-
-## Friend-Rec-specific drift-recovery lines (NOT in cd96 -- these name Friend Rec by surface)
-
-When the interviewer drifts toward generic recommendation: "**Let me return to the ML core** -- for Friend Rec the question is not the single-ranker P(click), it is the bilateral matching P(send) x P(accept) under network-effect counterfactual, because that is where the platform-value alignment actually lives."
-
-When asked about retrieval depth: "**Retrieval is 5 channels in parallel, not a single end-to-end model** -- mutual-friend, 2-hop, two-tower embedding, cohort, inferred-real-life. The channel-of-origin is preserved as a one-hot feature so the ranker can debug per-channel recall independently."
-
-When asked about cold-start too early: "**Let me park new-user cold-start until the inferred-real-life channel section** -- contact-book hash join plus org-chart plus location co-presence handle most new-user cold-start, and cold-start is most of the 'why a 5-channel funnel and not just two-tower' answer."
-
-When asked about scale at framing: "**A few hundred million daily active users, billions of friend-graph edges, tens of millions of people-you-may-know impressions per day**, with onboarding-spike peaks at about 5x average. The retrieval funnel runs 5 channels in parallel at p99 < 30 ms; the MMoE ranker at p99 < 50 ms; the NRT join at p99 < 10 ms; end-to-end p99 < 100 ms. The ML decisions here do not change with QPS, only the 2-hop cache window and NRT feature freshness do."
-
-When asked about why MMoE not Transformer: "**Transformer is the future-tense option for sequence-aware bilateral signal**, but at this scale MMoE's serving latency is ~3x cheaper at p99 and the offline AUC gap is < 0.5%. **I pick MMoE as the deployed default** and treat Transformer as the next-iteration candidate."
-
-## Friend-Rec-only hand-off prompt (the deepen-which-side question)
-
-> "Want me to **deepen the MMoE multi-head bilateral ranker with the per-relationship-type calibration, the 5-channel retrieval funnel with the channel-of-origin one-hot and HNSW M=32, or the cluster-randomized A/B contract with leave-one-cluster-out variance and the SUTVA-violation diagnostic**?"
-
-The 3-way choice maps to Friend-Rec-specific levers: ranker = MMoE multi-head + two gating heads + per-relationship-type calibration + product score at serving; retrieval = 5 channels in parallel + channel-of-origin one-hot + HNSW M=32 two-tower + 6-hour 2-hop cache; experimentation = cluster-randomized A/B at Louvain + LOCO variance recovery + SUTVA-violation diagnostic + cluster-canary rollout. Avoid offering a 4th choice -- three is the canonical Friend Rec carve-up.
-"""
+`TE_{-k}` 是留掉 cluster `k` 的 treatment-effect 估计。LOCO 方差恢复**代价是更多 cluster** (方差随 cluster 数而非 user 数缩放), 逼出比 user-level ~10x 的 sample size, 但在 network spillover 下恢复无偏反事实。SUTVA 诊断: cluster 估计与 user-level 偏离 > 20% 即 reject user-level。"""
 
 
 CHEAT_SHEET = """\
-# 30-sec pre-walk-in checklist -- Friend-Rec-only
+# 30-sec pre-walk-in checklist — Friend-Rec-only
 
-Methodology (timing skeleton, 元结构, 8 meta-rules, E4/E5 boundary, drift-recovery vocab) lives in `cd://96` §1 / §5 / §6 / §8. The anchors below are Friend-Rec-specific only -- quote verbatim, do NOT overlap cd96.
+> 方法论 (timing skeleton, 元结构, 8 meta-rules, E4/E5 boundary, drift recovery vocab) 在 `cd://96` §1 / §5 / §6 / §8。此处只放 Friend-Rec 特有的 anchor 数 + firm-claim register + Design Doc 强调话术, 进面前 30 秒过一遍。
 
-## Strong Moment slot map (memorize position, anchor, twist)
+## 数字 anchor (说出来时声音里就有数)
 
-| Time   | Slot    | Friend-Rec-specific anchor (the twist this slot hosts)                                          |
-|--------|---------|-------------------------------------------------------------------------------------------------|
-| 0-1    | **#1**  | Bilateral-matching reframe + 4 twists -- bilateral product / network-effect / NRT / abuse-posture |
-| 8-12   | **#2**  | Bilateral positive label (send AND accept AND 28-day engagement) + asymmetric negatives         |
-| 15-21  | **#3**  | MMoE multi-head bilateral + 5-channel retrieval funnel + NRT signal at score time               |
-| 31-35  | **#4**  | Cluster-randomized A/B at Louvain + SUTVA diagnostic + cluster-canary circuit-breaker rollout   |
+- **几亿 DAU / 几十亿 friend-graph edge / 每天几千万 PYMK 曝光**: scale anchor
+- **~10k 候选池 / top-K = 20**: retrieval -> rank 漏斗
+- **端到端 p99 < 100 ms**: retrieval 5 路并行 < 30 ms / ranker < 50 ms / NRT 双侧 < 10 ms
+- **NRT freshness < 60s, abuse-flag 6h 刷新, 2-hop 6h cache**: 双侧 streaming SLA + tiered cadence
+- **HNSW M=32 p99 < 8 ms**: two-tower embedding channel recall@100 ~95%
+- **daily ranker retrain / weekly two-tower + Louvain 刷新**: tiered cadence
+- **bilateral positive = send AND accept AND >= 1 post-accept interaction @ 28 天**: 正样本定义
+- **negative sampling 70/30 (P(send)) vs 50/50 (P(accept))**: 非对称采样
+- **base-rate accept ~5% (stranger) .. ~80% (real-life-contact)**: per-relationship calibration 必要性
+- **user-level A/B 高估 ~40% / SUTVA divergence > 20% reject / LOCO ~10x sample size**: network-effect counterfactual anchor
+- **rollout shadow + 1/5/25/100% cluster canary + 3 guardrail (P(send)-AUC / P(accept)-AUC / 28d-engagement)**: change-management lane
+- **ECE <= 2% per (task, relationship-type)**: calibration circuit-breaker 阈
 
-## Friend-Rec-only quantification anchors (drop verbatim into the appropriate moment)
+## Firm-claim register (整场至多说 1 次)
 
-- **15 / 25 min split**: 前段 framing / metric+label / feature / model+serving, 后段 production constraints + monitoring -- the Friend Rec time plan declared in the first 60s.
-- **~10k candidate pool after 5-channel retrieval, top-K = 20 surfaced**: the funnel-decomposition anchor.
-- **End-to-end p99 < 100 ms, retrieval p99 < 30 ms (5 channels in parallel), ranker p99 < 50 ms, NRT join p99 < 10 ms**: the 4-tier latency anchor.
-- **HNSW M=32 on the two-tower embedding channel at p99 < 8 ms**: the embedding-retrieval anchor.
-- **NRT 60s end-to-end SLA on bilateral signal lane**: the streaming-vs-batch anchor.
-- **6-hour 2-hop cache refresh + daily ranker retrain + weekly two-tower retrain + weekly Louvain clustering refresh**: the tiered retrain cadence.
-- **Cluster-randomized A/B at Louvain communities + leave-one-cluster-out variance + SUTVA-violation diagnostic + cluster-canary rollout**: the counterfactual contract.
-- **A past user-level A/B was biased upward by ~40% via friend-edge spillover**: the production-scar quantification.
-- **Bilateral positive at 28 days, asymmetric negatives 70/30 random/hard for P(send) and 50/50 for P(accept)**: the label-schema quantification.
+- "**这不是 single P(click) ranker, 是长在 social graph 上的 bilateral matching**——target 是 `P(send) x P(accept)`, 两个非对称分布的乘积。" (开场 reframe 立场)
+- "**graph-native 性质同时派生出后三个 twist**——network counterfactual / NRT signal / abuse posture 都是因为整题活在一张秒级 mutate 的 graph 上。" (Twist 1 压舱石 callback)
+- "**user-level A/B 沿 friend edge 泄漏 treatment, 我们踩过 ~40% 高估的坑——cluster-randomized 是实际 change-management surface。**" (Twist 2 callback)
+- "**NRT bilateral signal 是 score-time state feature 不是 batch 聚合——daily snapshot 漏 90%+ recent-action。**" (Twist 3 callback)
+- "**abuse-posture 在 retrieval 之前, 不是事后 rerank——spammer recs 绝不能进候选池。**" (Twist 4 callback)
+- "**product 是 calibrated bilateral 概率不是 ranking——这是 growth / safety threshold 能 compose 的前提。**" (Model 立场)
 
-## Friend-Rec-only firm-claim register (each line is said at most once during the 45 min)
+## 复用范围
 
-- "**This is a bilateral matching problem with P(send) x P(accept) as the optimization target, not a single P(click) ranker.**" (Bilateral twist callback)
-- "**The product is a calibrated bilateral probability, not just a ranking -- that is the property that lets growth and safety thresholds compose.**" (MMoE-calibration twist callback)
-- "**User-level randomization leaks treatment effect across friend edges; cluster randomization at Louvain communities is the unbiased counterfactual.**" (Network-effect twist callback)
-- "**NRT bilateral signal is a state feature at score time, not a batch precompute -- recent-action decays in seconds.**" (NRT twist callback)
-- "**Abuse-posture is an upstream admission gate before retrieval, not a post-hoc rerank.**" (Abuse-posture twist callback)
-- "**Treating bilateral matching as a single weighted-loss task is a category error -- it forces a compromise that under-fits both heads.**" (Architectural-correctness callback)
-
-## Reuse range (one-line note, full mapping in cd://96)
-
-This row's MMoE multi-head bilateral + 5-channel retrieval funnel + NRT signal lane + cluster-randomized A/B + leave-one-cluster-out variance + SUTVA-violation diagnostic + cluster-canary circuit-breaker rollout shape is the canonical **bilateral matching** carve-up. For RecSys / list-level / T&S-classification mappings see the cd://96 hub and the sibling sd-golden rows (`sd://meta-reels-golden`, `sd://meta-top3-comments-golden`, `sd://meta-weapon-ads-golden`).
+此 row 的 graph-native bilateral matching + MMoE multi-head P(send)xP(accept) + 5-channel retrieval funnel + NRT 双侧 score-time signal + cluster-randomized A/B + abuse-aware admission gate 是 **bilateral matching** 这一题的 carve-up。RecSys / list-level / T&S-classification 等其他 Meta MLSD 题型的 mapping 见 `cd://96` 主 hub (不在此 row 内 bundle sibling)。
 
 ---
 
-## Design Doc 强调话术 (verbatim closing sentences for interview / Design Doc / Code Review settings)
+## Design Doc 强调话术 (interview / Design Doc / Code Review 通用的收尾句)
 
-**Say these 4 lines verbatim**:
+**这 4 句 verbatim 说出来**:
 
-1. **「采用 MMoE multi-head bilateral ranker，shared bottom + two gating heads + two task towers，serving score 取 P(send) × P(accept) 的乘积，per-relationship-type calibrated -- 不是 single weighted-loss。」**
-2. **「5 retrieval channels 并行 -- mutual / 2-hop / two-tower-HNSW-M32 / cohort / inferred-real-life -- channel-of-origin 作为 one-hot feature 保留给 ranker；单一 end-to-end retrieval 会把 5 种信号混成一损失。」**
-3. **「NRT bilateral signal 在 score time join，60s end-to-end SLA，覆盖双侧 last-N-seconds accept/reject/block；daily batch 会漏掉 ~90% 的 recent-action 信号。」**
-4. **「Cluster-randomized A/B at Louvain communities，leave-one-cluster-out 方差恢复，SUTVA-violation diagnostic 作为实验合约的一部分；user-level randomization 因 friend-edge spillover 已有 ~40% 偏差案底。」**
+1. **「Friend-rec 是长在 social graph 上的 bilateral matching：optimization target 是 `P(send) x P(accept)`，由两个物理非对称分布相乘，不是 single P(click) ranker。」**
+2. **「MMoE multi-head：shared bottom + 两个 gating head 喂 P(send) / P(accept) 双 tower，serving score 取 product 并 per-relationship-type calibrated，growth 与 safety threshold 在同一刻度 compose。」**
+3. **「实验必须 cluster-randomized A/B（Louvain/Leiden）：user-level 沿 friend edge 泄漏 treatment，曾高估 ~40%；leave-one-cluster-out 方差 + SUTVA divergence > 20% reject user-level。」**
+4. **「NRT bilateral signal 是 score-time state feature（双侧 last-N 秒 accept/reject/block，60s SLA）；abuse-aware admission gate 在 retrieval 之前，不与 model weights 共用 release cadence。」**
 
-Why these 4 sentences are the killer ending:
+四句分别是: 问题 formulation (graph-native bilateral matching)、架构承诺 (MMoE multi-head + product + per-relationship calibration)、实验纪律承诺 (cluster-randomized A/B + SUTVA 诊断)、production-process 承诺 (NRT score-time + abuse gate 独立 lane) ——这是 E5 boundary signal: 你懂 ML metric / network-effect counterfactual / abuse posture 三者关系, 拒绝把它们 collapse 成一个 single ranker。"""
 
-Sentence 1 is the architectural commitment (MMoE multi-head as inductive structure for bilateral matching, not a hack). Sentence 2 is the retrieval-decomposition commitment (5 parallel channels + channel-of-origin one-hot as signal-type preservation). Sentence 3 is the NRT-state commitment (recent-action as score-time state feature, not batch precompute). Sentence 4 is the experimentation-process commitment (cluster-randomized A/B as the unbiased counterfactual under network spillover) -- the E5 boundary signal: you know the relationship between ML metric, network-effect counterfactual, and platform-value alignment, and refuse to collapse them into a single user-level A/B.
-"""
+
+# T-P0-895: oral_narrative archetype NULLs these 5 fields. Their content lives
+# inlined in DATAFLOW (the 8-section 口播稿). verbal_outline is populated
+# separately and authoritatively by
+# scripts/seed_meta_friend_rec_golden_verbal_outline.py (run it last).
+# Validation in scripts/audit_meta_mlsd_3rule.py respects the archetype
+# declared on the instance in schemas/meta_mlsd_canonical.yaml.
+ARCHITECTURE: str | None = None
+PRODUCTION_CONSTRAINTS: str | None = None
+TRADEOFFS: str | None = None
+DEFENSE: str | None = None
+VERBAL_OUTLINE: str | None = None
 
 
 def _now() -> str:
+    """ISO-8601 UTC timestamp with seconds precision."""
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def _content_hash(payload: dict[str, str | None]) -> str:
+    """Stable hash over the canonical content fields (NULL contributes empty string)."""
     keys = (
         "title", "subtitle", "overview", "architecture", "dataflow",
         "formulas", "production_constraints", "tradeoffs", "defense",
@@ -609,7 +335,7 @@ def _content_hash(payload: dict[str, str | None]) -> str:
 
 
 def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
-    """Idempotent UPSERT keyed on slug='meta-friend-rec-golden'."""
+    """Insert or update the row, writing NULL for archetype-nullable fields."""
     now = _now()
     payload: dict[str, str | int | None] = {
         "slug": SLUG,
@@ -656,73 +382,73 @@ def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
 
 
 def validate(cur: sqlite3.Cursor) -> list[str]:
-    """Run AC checks + meta_mlsd_canonical.yaml schema gates on the upserted row."""
-    import re
+    """Archetype-aware seed-side validation (mirrors sd41/sd43's oral_narrative gate).
 
+    For oral_narrative: verify the 4 contracted fields populated above their
+    floor, the 5 NULL fields actually NULL, content_hash present, and the row
+    carries the expected slug/title/display_order. Deep semantic checks
+    (R-3RULE-* / R-NARRATIVE-* / R-CHAR-range / R-DRAWER-no-sd-drawer /
+    diff-delta) live in scripts/audit_meta_mlsd_3rule.py and are the canonical
+    post-seed gate.
+    """
     errs: list[str] = []
 
     cur.execute(
-        "SELECT id, slug, title, subtitle, display_order, overview, architecture, "
-        "dataflow, formulas, production_constraints, tradeoffs, defense, "
-        "verbal_outline, cheat_sheet, content_hash, updated_at "
-        "FROM system_designs WHERE slug = ?",
+        "SELECT id, slug, title, subtitle, display_order, overview, "
+        "architecture, dataflow, formulas, production_constraints, "
+        "tradeoffs, defense, verbal_outline, cheat_sheet, content_hash, "
+        "updated_at FROM system_designs WHERE slug = ?",
         (SLUG,),
     )
     rows = cur.fetchall()
     if len(rows) != 1:
-        errs.append(f"AC1 FAIL: expected exactly 1 row for slug={SLUG}, got {len(rows)}")
+        errs.append(
+            f"AC1 FAIL: expected exactly 1 row for slug={SLUG}, got {len(rows)}"
+        )
         return errs
 
-    row = rows[0]
-    (rid, slug, title, subtitle, disp_order, overview, architecture, dataflow,
-     formulas, prod_cons, tradeoffs, defense, verbal, cheat, chash, upd_at) = row
+    (
+        rid, slug, title, subtitle, disp_order, overview, architecture,
+        dataflow, formulas, prod_cons, tradeoffs, defense, verbal, cheat,
+        chash, upd_at,
+    ) = rows[0]
 
-    prose_cols = {
-        "overview": overview,
+    # Populated-fields contract for oral_narrative (sd41-mirrored floors:
+    # overview/formulas/cheat_sheet >= 200, dataflow >= 4000).
+    populated = {
+        "overview": (overview, 200),
+        "dataflow": (dataflow, 4000),
+        "formulas": (formulas, 200),
+        "cheat_sheet": (cheat, 200),
+    }
+    for col, (body, floor) in populated.items():
+        if body is None or len(body) < floor:
+            errs.append(
+                f"AC2 FAIL: column {col} length={len(body or '')} < {floor} "
+                f"(oral_narrative populated-floor)"
+            )
+
+    # NULL-fields contract for oral_narrative.
+    nulled = {
         "architecture": architecture,
-        "dataflow": dataflow,
-        "formulas": formulas,
         "production_constraints": prod_cons,
         "tradeoffs": tradeoffs,
         "defense": defense,
         "verbal_outline": verbal,
-        "cheat_sheet": cheat,
     }
-    for k, v in prose_cols.items():
-        if v is None:
-            errs.append(f"AC2 FAIL: column {k} is NULL")
-        elif len(v) <= 200:
-            errs.append(f"AC2 FAIL: column {k} length={len(v)} <= 200")
-
-    total_bytes = sum(len((v or "").encode("utf-8")) for v in prose_cols.values())
-    if total_bytes <= 8000:
-        errs.append(f"AC3 FAIL: total prose bytes={total_bytes} <= 8000")
-
-    if disp_order != DISPLAY_ORDER:
-        errs.append(f"AC4 FAIL: display_order={disp_order}, expected {DISPLAY_ORDER}")
-
-    if ANCHOR_FR_NODE not in (architecture or ""):
-        errs.append("AC5 FAIL: anchor fr-node path not in architecture col")
-    if ANCHOR_FR_NODE not in (prod_cons or ""):
-        errs.append("AC6 FAIL: anchor fr-node path not in production_constraints col")
-
-    design_doc_phrases = [
-        "MMoE multi-head bilateral ranker",
-        "5 retrieval channels",
-        "NRT bilateral signal",
-        "Cluster-randomized A/B",
-    ]
-    for phrase in design_doc_phrases:
-        if phrase not in (cheat or ""):
-            errs.append(f"AC7 FAIL: design-doc phrase {phrase!r} not in cheat_sheet col")
+    for col, val in nulled.items():
+        if val is not None and val != "":
+            errs.append(
+                f"AC3 FAIL: column {col} expected NULL (oral_narrative) but "
+                f"got length={len(val)}"
+            )
 
     if "Meta MLSD Golden Example" not in (subtitle or ""):
-        errs.append("subtitle missing 'Meta MLSD Golden Example' substring")
-
+        errs.append("AC4 FAIL: subtitle missing 'Meta MLSD Golden Example'")
     if not chash:
-        errs.append("content_hash is empty")
+        errs.append("AC5 FAIL: content_hash empty")
     if not upd_at:
-        errs.append("updated_at is empty")
+        errs.append("AC5 FAIL: updated_at empty")
 
     cur.execute(
         "SELECT COUNT(*) FROM system_designs WHERE display_order = ?",
@@ -731,172 +457,32 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
     cnt = cur.fetchone()[0]
     if cnt != 1:
         errs.append(
-            f"display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
+            f"AC6 FAIL: display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
         )
-
-    # ----- meta_mlsd_canonical.yaml schema checks -----
-    # R-DRAWER-no-sd-drawer: no drawer table at top of any sd-golden body.
-    drawer_top_re = re.compile(r"^\|.*sd://.*\|", re.MULTILINE)
-    for k, v in prose_cols.items():
-        if v and drawer_top_re.search(v[:2000] or ""):
-            errs.append(
-                f"R-DRAWER-no-sd-drawer FAIL: {k} top has '| ... sd:// ... |' table"
-            )
-
-    # R-FORBID-rhythm-philosophy: 整体节奏哲学 must not appear in overview.
-    if overview and "整体节奏哲学" in overview:
-        errs.append(
-            "R-FORBID-rhythm-philosophy FAIL: overview still contains 整体节奏哲学"
-        )
-
-    # R-FORBID-why-this-is-strong: 'why this is strong' must not appear in defense.
-    if defense and re.search(r"(?i)why this is strong", defense):
-        errs.append(
-            "R-FORBID-why-this-is-strong FAIL: defense still contains 'Why this is strong'"
-        )
-
-    # R-FORBID-drawer-header-literal: '| Doc | ... sd://' must not appear anywhere.
-    drawer_header_re = re.compile(r"^\|\s*Doc\s*\|.*sd://", re.MULTILINE)
-    for k, v in prose_cols.items():
-        if v and drawer_header_re.search(v):
-            errs.append(
-                f"R-FORBID-drawer-header-literal FAIL: {k} contains '| Doc | ... sd://' header"
-            )
-
-    # R-90S-friend-rec-section5: dataflow + architecture must keep the 3 anchors.
-    keep_anchors = [
-        "MMoE multi-head bilateral",
-        "cluster-randomized A/B",
-        "NRT bilateral signal",
-    ]
-    for anchor in keep_anchors:
-        if anchor.lower() not in (dataflow or "").lower():
-            errs.append(
-                f"R-90S FAIL: dataflow missing anchor {anchor!r} "
-                "(L4+ Strong Moment forcing function)"
-            )
-        if anchor.lower() not in (architecture or "").lower():
-            errs.append(
-                f"R-90S FAIL: architecture missing anchor {anchor!r} "
-                "(L4+ Strong Moment forcing function)"
-            )
-
-    # 3-rule (section-level, at_least_one_bullet pass) for apply_3rule=true cols.
-    rule_patterns = {
-        "R-3RULE-decision": [
-            r"\b(I pick|we pick|I choose|we choose|default to|pick A)\b",
-            r"(?i)\bdecision\b.*\bover\b",
-        ],
-        "R-3RULE-tradeoff": [
-            r"(?i)\b(costs?|at the cost of|switches? to|in exchange for)\b",
-            r"\bvs\b",
-        ],
-        "R-3RULE-scale-sla": [
-            r"\b\d+\s*(ms|µs|us|qps|QPS|dim|k|K|M|B|fps|min|sec|s)\b",
-            r"\bp(50|95|99|999)\b",
-            r"\bHNSW\b|\bIVF\b|\bScaNN\b|\bMMR\b|\bDPP\b",
-        ],
-        "R-3RULE-twist-callback": [
-            r"(?i)\b(twist|unique angle|the core decision here is|this is where)\b",
-            r"(?i)\bcallback (to|of)\b",
-        ],
-    }
-    apply_3rule_cols = (
-        "overview", "architecture", "dataflow",
-        "production_constraints", "tradeoffs", "defense",
-    )
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        for rule_id, patterns in rule_patterns.items():
-            hit = any(re.search(p, body) for p in patterns)
-            if not hit:
-                errs.append(
-                    f"{rule_id} FAIL: section {col} has no matching bullet "
-                    f"(at_least_one_bullet pass)"
-                )
-
-    # sd_golden field char ranges (per schema).
-    field_char_ranges = {
-        "overview":     (1500, 4500),
-        "architecture": (2000, 6000),
-        "dataflow":     (2500, 9000),
-        "defense":      (2500, 8500),
-    }
-    for col, (lo, hi) in field_char_ranges.items():
-        n = len(prose_cols.get(col) or "")
-        if not (lo <= n <= hi):
-            errs.append(
-                f"SCHEMA-charrange FAIL: {col} chars={n} not in [{lo}, {hi}]"
-            )
-
-    # R-NARRATIVE-prose-form: measurable_proxy thresholds (per schema).
-    #   - bold_density_per_section_min: 3 (>=3 **bold** spans per apply_3rule section)
-    #   - bullet_run_max_consecutive:   4 (>4 unbroken bullet lines = violation)
-    #   - table_row_max:                3 (markdown tables with >3 body rows = violation)
-    bold_re = re.compile(r"\*\*[^*\n]+\*\*")
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        bold_count = len(bold_re.findall(body))
-        if bold_count < 3:
-            errs.append(
-                f"R-NARRATIVE FAIL: {col} bold_density={bold_count} < 3"
-            )
-
-    bullet_line_re = re.compile(r"^\s*[-*]\s+", re.MULTILINE)
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        run = 0
-        max_run = 0
-        for line in body.splitlines():
-            if bullet_line_re.match(line):
-                run += 1
-                max_run = max(max_run, run)
-            elif line.strip() == "":
-                # blank line resets the consecutive count
-                run = 0
-            else:
-                run = 0
-        if max_run > 4:
-            errs.append(
-                f"R-NARRATIVE FAIL: {col} bullet_run_max={max_run} > 4"
-            )
-
-    # Table row count: contiguous lines starting with '|'; first row is header,
-    # second is the separator (|---|---|), rest are body rows.
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        in_table = False
-        rows_seen = 0
-        for line in body.splitlines():
-            if line.lstrip().startswith("|"):
-                rows_seen += 1
-                in_table = True
-            else:
-                if in_table:
-                    body_rows = rows_seen - 2  # subtract header + separator
-                    if body_rows > 3:
-                        errs.append(
-                            f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
-                        )
-                in_table = False
-                rows_seen = 0
-        if in_table:
-            body_rows = rows_seen - 2
-            if body_rows > 3:
-                errs.append(
-                    f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
-                )
 
     print(f"[OK] row id={rid} slug={slug}")
     print(f"     title={title[:60]}...")
-    print(f"     display_order={disp_order}, total prose bytes={total_bytes}")
-    for k, v in prose_cols.items():
-        print(f"     {k}: {len(v or '')} chars")
+    print(f"     archetype={DOCUMENT_ARCHETYPE}")
+    print(f"     display_order={disp_order}")
+    print(
+        f"     populated: overview={len(overview or '')} "
+        f"dataflow={len(dataflow or '')} formulas={len(formulas or '')} "
+        f"cheat_sheet={len(cheat or '')}"
+    )
+    print(
+        f"     nulled: architecture="
+        f"{'NULL' if architecture is None else len(architecture)} "
+        f"production_constraints="
+        f"{'NULL' if prod_cons is None else len(prod_cons)} "
+        f"tradeoffs={'NULL' if tradeoffs is None else len(tradeoffs)} "
+        f"defense={'NULL' if defense is None else len(defense)} "
+        f"verbal_outline={'NULL' if verbal is None else len(verbal)}"
+    )
     return errs
 
 
 def main() -> int:
-    """CLI entrypoint: upsert + validate the meta-friend-rec-golden row."""
+    """CLI entrypoint."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=str(DEFAULT_DB))
     ap.add_argument("--dry-run", action="store_true")
@@ -929,7 +515,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print("\n[DONE] all ACs pass")
+    print("\n[DONE] oral_narrative archetype seed: all ACs pass")
     return 0
 
 

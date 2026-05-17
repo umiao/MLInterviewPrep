@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-892
-- **Description**: GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-friend-rec-golden: (A) oral_narrative - rewrite scripts/seed_meta_friend_*.py so overview/dataflow/formulas/cheat_sheet populated, architecture/production_constraints/tradeoffs/defense=None. (B) golden verbal_outline 3000-5000 chars, CN+EN, 1 [DOMINANT] (signature: graph-native) + 3-5 [floating-twist] + 1 [best-anchor] + 1 [worst-anchor], sentinel SD44_VERBAL_V1_<date>, 8 sections, 1-problem-1-URI. (C) schemas/meta_mlsd_canonical.yaml: sd44 entry document_archetype:oral_narrative + baseline_chars_post_migration:10576. (D) seed idempotent. AC: re-run audit_meta_mlsd_3rule.py + audit_mlsd_prose_quality.py expecting 0 findings on sd41-44; revert backup data/backups/mle_prep_pre_friend_20260514_114845.db noted.
-
 #### T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
@@ -413,6 +407,18 @@ AC:
 - **Complexity**: S
 - **Depends on**: None
 - **Description**: SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rewrite). This task now covers sd42 ONLY: migrate sd42 meta-top3-comments-golden to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense=None; verbal_outline already golden=4829 chars from T-P0-893, KEEP it - the stale original-T-P1-881 'verbal_outline=None' line is superseded by the sd41 golden-template precedent). Update schemas/meta_mlsd_canonical.yaml sd42 entry document_archetype:oral_narrative baseline_chars_post_migration:10504. Re-run audit_meta_mlsd_3rule.py expecting 0 findings sd41-44. Revert backup: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db.
+
+#### T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add 'ml-infra-llm'. (2) new mlInfraModules useMemo filter display_order>=300 && <400, sorted. (3) new mlInfraCount useMemo. (4) BOUND pinterest: change pinterestTopics filter (line ~337) and pinterestCount (line ~374) from '>=199' to '>=199 && <300' so the new band does NOT leak into Pinterest tab. (5) new tab <button> after Pinterest, label 'ML Infra · LLM'. (6) new {activeTab==='ml-infra-llm' && (...)} content block mirroring the ml-mlsd flat-card render. switchTab is already generic. Scenario matrix: tab selected -> only [300,400) rows shown; pinterest tab -> only [199,300); no row appears in two tabs. AC: vitest + npm run build exit 0; MANUAL SMOKE: open /system-design?tab=ml-infra-llm -> tab visible & active -> (after T-B) the Anthropic card shows -> click -> drawer renders 9 sections; open ?tab=pinterest -> still exactly the 8 pinterest rows, no ML-Infra row leaked.
+
+#### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: T-P1-908
+- **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
 
 ### P2 -- Nice to Have
 
@@ -833,6 +839,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
+- [x] **2026-05-16** -- T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-fr
 - [x] **2026-05-16** -- T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-we
 - [x] **2026-05-15** -- T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden). Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-15** -- T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden). Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden

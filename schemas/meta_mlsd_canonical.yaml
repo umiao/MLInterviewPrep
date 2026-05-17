@@ -61,7 +61,21 @@ applies_to:
         archetype_migrated_from: structured_reference
         archetype_migrated_by_task: T-P0-894
         baseline_chars_post_migration: 11607   # diff-delta baseline reset (structured_reference dataflow size at migration)
-      - {ref: "sd-friend", slug: "meta-friend-rec-golden", scope: "Bilateral matching", task: "T-P0-870", planned: true}
+      # sd44 migrated to oral_narrative archetype 2026-05-16 (T-P0-895),
+      # mirroring sd41 (and the sd43 mirror by T-P0-894). structured_reference
+      # 10-field shape (~50KB) replaced by single continuous 第一人称 口播稿 in
+      # dataflow + slim overview/formulas/cheat_sheet; architecture/
+      # production_constraints/tradeoffs/defense NULL. verbal_outline opted
+      # back IN by seed_meta_friend_rec_golden_verbal_outline.py.
+      - ref: "sd-friend"
+        slug: "meta-friend-rec-golden"
+        scope: "Bilateral matching"
+        task: "T-P0-870"
+        document_archetype: oral_narrative
+        archetype_migrated_at: "2026-05-16"
+        archetype_migrated_from: structured_reference
+        archetype_migrated_by_task: T-P0-895
+        baseline_chars_post_migration: 10576   # diff-delta baseline reset (structured_reference dataflow size at migration)
 
 # ============================================================================
 # DOC-TYPE: cd96-playbook
