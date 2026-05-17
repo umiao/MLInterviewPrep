@@ -586,3 +586,12 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: seed exit 0; re-run idempotent (INSERT->SYNC x4, status flip->no-op). Independent DB verify: 4 rows for company_id=23 @ 2026-05-21 with correct times/location/duration, companies.status=onsite, description self-contained with full rubric. `ruff check` clean. Date verified 2026-05-21 = Thursday. Committed `a40a351` (pre-commit secret scan clean). Project memory `project_adobe_final_onsite` saved + indexed.
 - **Status**: [DONE]
 - **Request**: No change (ad-hoc, no task ID). Note: PROGRESS.md now 596 lines, over the ~300 archival threshold -- archival to archive/progress_log.md is overdue (separate maintenance, not done here to stay in scope).
+
+## 2026-05-16 23:45 -- [adhoc] Add Adobe 5th final-round interview (video, Olivia Simpson, 2026-05-22)
+- **What I did**: Ad-hoc Discord follow-up -- a round missed from the first Adobe itinerary drop. Added the 5th final-loop round (Olivia Simpson, remote video via Microsoft Teams) as a separate dated seed (different day + remote modality vs the 2026-05-21 in-person panel), routed to `interview_events` per CLAUDE.md Surface Identification rules.
+- **Deliverables**:
+  - `scripts/_add_adobe_video_round_20260522.py` (NEW idempotent seed): 1 event, Fri 2026-05-22 11:00-11:45 AM PDT, Microsoft Teams, event_type=technical, status=upcoming. UPSERT keyed on (company_id, scheduled_at, title) mirroring `_add_adobe_onsite_20260521.py`. Kept as a sibling seed (not folded into the 5/21 panel seed) per the granular `_add_<company>_<date>` convention; companies.status left 'onsite' (unchanged). No interviewer->theme assignment (user confirmed Adobe rounds team-random).
+  - `data/mle_prep.db`: 1 new interview_events row (id=74). Adobe final loop now 5 rows (ids 70-74). (DB not git-tracked; seed is source of truth -- Invariant 3.)
+- **Sanity check result**: seed exit 0; re-run idempotent (INSERT->SYNC). DB verify: 5 Adobe rows >=2026-05-21 with correct times/location/duration; 2026-05-22 = Friday (matches description); companies.status=onsite. `ruff check` clean. Project memory `project_adobe_final_onsite` updated to 5 rounds + new seed id.
+- **Status**: [DONE]
+- **Request**: No change (ad-hoc, no task ID).
