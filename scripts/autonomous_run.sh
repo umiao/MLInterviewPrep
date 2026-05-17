@@ -130,6 +130,9 @@ if [ ! -f "$_WRAPPER_LIB_DIR/scripts/lib/claude_wrapper.sh" ]; then
   exit 2
 fi
 source "$_WRAPPER_LIB_DIR/scripts/lib/claude_wrapper.sh"
+# [INFRA-AUTORUN A] (T-P1-324): shared session-loop helpers (start_sha
+# capture + on_session_failed seam). MLI semantics are canonical here.
+source "$_WRAPPER_LIB_DIR/scripts/lib/autonomous_session.sh"
 
 # --- INFRA-HITL A2.2: dirty working-tree preflight ---
 # Abort if working tree has uncommitted/untracked files unless --allow-dirty
@@ -156,7 +159,8 @@ while [ $session_count -lt $MAX_SESSIONS ]; do
   echo "--- Session $session_count/$MAX_SESSIONS ---"
 
   # Capture commit SHA before session for progress detection
-  start_sha=$(git rev-parse HEAD)
+  # (extracted to scripts/lib/autonomous_session.sh -- byte-equivalent)
+  session_capture_start_sha
 
   # AR-18: peek the highest-priority unblocked task ID and export as EXPECTED_TASK_PREFIX
   # so the wrapper can verify any new commit during the window matches the inner session's
@@ -195,6 +199,12 @@ except Exception:
     unset EXPECTED_TASK_PREFIX
   fi
 
+  # [INFRA-AUTORUN B] (T-P1-326): scale CLAUDE_P_TIMEOUT by the peeked task's
+  # complexity (per-task timeout_override_sec wins). Single implementation in
+  # scripts/lib/autonomous_session.sh; falls back to BASE (900s, == pre-B) on
+  # any failure or for S-complexity. cwd == project root here (no WORK_DIR).
+  export_complexity_timeout "$_peek_id"
+
   exit_code=0
   run_claude_with_timeout -p "Autonomous mode. Read TASKS.md, pick ONE highest-priority unblocked task, \
     and complete it. After completing the task: \
@@ -229,22 +239,12 @@ except Exception:
     fi
     echo "[orchestrator] Session ended. Continuing in next session..."
   else
-    # Git stash on failed session
-    git stash push -m "auto-stash: failed session $session_count" 2>/dev/null || true
-
-    # Distinguish context exhaustion from real failure
-    current_sha=$(git rev-parse HEAD)
-    if [ "$current_sha" != "$start_sha" ]; then
-      # New commits were made -- task is progressing (context exhaustion, not failure)
-      echo "[orchestrator] Session made progress (new commits). Not counting as failure."
-      consecutive_failures=0
-    else
-      consecutive_failures=$((consecutive_failures + 1))
-      echo "[orchestrator] Session failed ($consecutive_failures/$MAX_CONSECUTIVE_FAILURES)"
-      if [ $consecutive_failures -ge $MAX_CONSECUTIVE_FAILURES ]; then
-        echo "[orchestrator] Too many consecutive failures. Stopping."
-        break
-      fi
+    # Failure handling extracted to scripts/lib/autonomous_session.sh
+    # ([INFRA-AUTORUN A] / T-P1-324). The seam body is byte-for-byte the
+    # prior MLI semantics (stash + progress-detection). Task C' (T-P1-327)
+    # replaces ONLY on_session_failed's body with session-resume retry.
+    if ! on_session_failed "$exit_code"; then
+      break
     fi
   fi
   echo ""
