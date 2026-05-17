@@ -85,6 +85,8 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+from lib import events as events_log  # noqa: E402
 
 DEFAULT_TTL = int(os.environ.get("CLAUDE_LEASE_DEFAULT_TTL", "600"))
 
@@ -325,15 +327,16 @@ def _classify_lease(
 
 
 def _append_event(root: Path, payload: dict[str, Any]) -> None:
-    """Append a JSON line to .claude/events.jsonl. Best-effort;
-    failure is logged to stderr but does not abort the sweep.
+    """Append a JSON line to .claude/events.jsonl via the shared lib.
+
+    The B7 ``scripts/lib/events.append`` provides cross-process locking
+    (fcntl/msvcrt), atomic writes under O_APPEND, and 100 MiB rotation.
+    This wrapper exists for backwards-compatibility with the B4
+    call sites; both paths emit the same on-disk format.
     """
-    target = _events_log(root)
-    target.parent.mkdir(parents=True, exist_ok=True)
     try:
-        with target.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(payload, sort_keys=True) + "\n")
-    except OSError as exc:
+        events_log.append(root, payload)
+    except (ValueError, OSError) as exc:
         sys.stderr.write(
             f"WARN: could not append to events.jsonl: {exc}\n"
         )
@@ -498,6 +501,21 @@ def cmd_claim(args: argparse.Namespace) -> int:
         fpath.parent.mkdir(parents=True, exist_ok=True)
         fpath.touch()
 
+        # B7 events log entry: ready -> leased (or leased -> leased on
+        # steal-claim). prev_state captured before the UPDATE above.
+        project_id = _project_id_from_db(con, _project_id_for_root(root))
+        _append_event(root, {
+            "ts": now,
+            "project_id": project_id,
+            "task_id": args.task_id,
+            "from_state": task["state"],
+            "to_state": "leased",
+            "actor": "sweep_stuck_leases.py:claim",
+            "pid": pid,
+            "pgid": pgid,
+            "ttl_s": ttl,
+        })
+
         result = {
             "ok": True, "task_id": args.task_id, "pid": pid, "pgid": pgid,
             "started_at": now, "ttl_seconds": ttl,
@@ -582,6 +600,7 @@ def cmd_release(args: argparse.Namespace) -> int:
                 }))
             return 0
         now = _now()
+        prior_pid = task.get("pid")
         con.execute(
             """UPDATE tasks SET state='ready', pid=NULL, pgid=NULL,
                                 started_at=NULL, last_heartbeat=NULL,
@@ -596,6 +615,20 @@ def cmd_release(args: argparse.Namespace) -> int:
                 fpath.unlink()
             except OSError:
                 pass
+
+        # B7 events log entry: leased -> ready (graceful release).
+        project_id = _project_id_from_db(con, _project_id_for_root(root))
+        _append_event(root, {
+            "ts": now,
+            "project_id": project_id,
+            "task_id": args.task_id,
+            "from_state": "leased",
+            "to_state": "ready",
+            "actor": "sweep_stuck_leases.py:release",
+            "reason": "graceful_release",
+            "pid": prior_pid,
+        })
+
         if args.json:
             print(json.dumps({"ok": True, "task_id": args.task_id}))
         else:
