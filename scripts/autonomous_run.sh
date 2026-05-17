@@ -205,6 +205,13 @@ except Exception:
   # any failure or for S-complexity. cwd == project root here (no WORK_DIR).
   export_complexity_timeout "$_peek_id"
 
+  # [INFRA-AUTORUN C'] (T-P1-327): resolve/persist the session UUID for the
+  # peeked task and export CLAUDE_SESSION_UUID. claude_wrapper.sh passes
+  # --session-id on the cold attempt and --resume + continuation prompt on
+  # AR-7/AR-12 retry. No-op under AUTONOMOUS_RESUME=0. Single implementation
+  # in scripts/lib/autonomous_session.sh (MLI walks up + sources the root lib).
+  resume_mint_session_uuid "$_peek_id"
+
   exit_code=0
   run_claude_with_timeout -p "Autonomous mode. Read TASKS.md, pick ONE highest-priority unblocked task, \
     and complete it. After completing the task: \
