@@ -9,6 +9,95 @@
 
 ### P0 -- Must Have (core functionality)
 
+#### T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: ## Summary
+A ~30-minute read-only investigation that identifies the exact code path(s) that produced both drift directions, so 910/912 are root-cause fixes not symptom treatment.
+
+## Context
+Review (independent, Discord 2026-05-19) flagged that nobody asked WHY 111/114 are fully-checked-but-not-mastered and WHY 115/171 are pct=100/0-checked. Without this, the sweep + guard treat symptoms. The answer directly determines which mutation entry points T-P1-912 must intercept (NOT just framework_nodes.description writes -- possibly status/progress_pct direct sets, import flows, or a script bug).
+
+## Acceptance Criteria
+- [ ] AC1: For nodes 111, 114, 115, 171: git log/blame the seed scripts + framework_nodes_description_history rows that last touched description/status/progress_pct; classify each drift origin (manual edit / specific script bug / import flow / pre-checklist legacy status).
+- [ ] AC2: Enumerate ALL mutation entry points that can change framework_nodes.status/progress_pct/description outside the API PUT path (grep scripts/ + migrations/ + seed_data/ for UPDATE framework_nodes / ORM .status= / .progress_pct= / .description=).
+- [ ] AC3 (decision output): a findings note (logs/review/ or docs/) stating, per drift class, the producing path and the concrete recommendation for what 912 must guard (the interception scope), and whether 115/171 is legacy-legit or stale (feeds 913).
+- [ ] AC4: read-only -- zero DB writes, zero source edits; investigation + written findings only.
+
+## Technical Approach
+- git log --follow / blame on scripts/update_node_*, scripts/seed_*; query framework_nodes_description_history for 111/114/115/171; static grep for non-PUT mutation sites.
+
+## Edge Cases
+- History may be squashed/absent for some nodes -> record "indeterminate" explicitly rather than guessing.
+- Distinguish "checklist never existed" (115/171 legit pre-checklist mastery) from "checklist added then status lost".
+
+## Complexity
+S -- time-boxed ~30min, read-only, but gates the design of 910/912.
+
+## Dependencies
+None. This is the new first task: it must precede T-P0-910 and T-P1-912 because its findings define the helper guarantees and the guard interception scope (Review point: root-cause before symptom fix).
+
+#### T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress)
+- **Priority**: P0
+- **Complexity**: M
+- **Depends on**: T-P0-914
+- **Description**: ## Summary
+Promote the proven node-44 reconcile logic into a shared, tested scripts/lib/framework_progress.py -- ONE imported function -- AND pin the consistency model (checkbox = canonical; status/progress = derived) in code + a short ADR.
+
+## Context
+Completion in KG-Framework is framework_nodes.status, set from checkbox state ONLY on the API PUT path. Direct description writes bypass it (Discord 2026-05-19 node-44 bug). Review point A (highest-value): without an explicit "checkbox is canonical, status/progress is derived" rule, this recurs the moment someone hand-sets mastered and a later reconcile overwrites it -- nobody knows who wins. That rule must be written down, not implied.
+
+## Acceptance Criteria
+- [ ] AC1: scripts/lib/framework_progress.py exposes reconcile_node_from_checkboxes(db, node_id) -> bool(changed) and reconcile_all_fully_checked(db) -> list[ids]; byte-faithful to routers/framework.py L212-227 promote-only semantics; calls the REAL _propagate_upward imported from src.backend.routers.framework (NEVER re-implemented).
+- [ ] AC2 (consistency model, Review A): module docstring + docs/adr/ADR-checkbox-canonical.md state: checkbox state is the single source of truth; status/progress_pct are derived projections; a manual status edit is NOT authoritative and WILL be reconciled; if a human needs a non-derived status that is a separate explicit mechanism (out of scope here), never a silent DB edit.
+- [ ] AC3 (TEST MATRIX -- hard precondition, Review missed-1): tests/test_framework_progress_helper.py MUST cover fully-checked / partially-checked / reverse (pct>0 but 0 checked, the 115/171 shape) / empty (no checkbox) / boundary (1/1, 0/1, NULL description) + ancestor-propagation parity vs a hand-computed weighted average. All green is a gate for T-P0-911; no sweep before this passes.
+- [ ] AC4 (idempotent): second call on a reconciled node returns False, writes nothing.
+- [ ] AC5 (both branches): fully-checked -> mastered/100; partial leaf -> in_progress only if currently not_started + pct=ratio; zero-checked -> untouched. REVERSE (pct>0,0-checked) -> helper MUST NOT silently zero it; leave it and flag (911/913 own that class) -- assert this in tests.
+- [ ] AC6 (journey): seed imports helper, calls after a description write, commits -> node renders mastered/green after refresh; re-run no-op.
+
+## Technical Approach
+- New scripts/lib/framework_progress.py (package already exists). Helper takes an existing db Session (composable; does NOT commit). Refactor scripts/reconcile_node_44_*.py to delegate (delete its inline duplicate -> single implementation).
+
+## Edge Cases
+- Checkbox signature ^\s*[-*]\s+\[[ xX]\] documented. NULL/no-checkbox -> no-op never crash. Windows: encoding=utf-8; /c/Anaconda/python.exe in docs. Root-cause (T-P0-914) findings may widen AC1 mutation surface -- reflect them.
+
+## Complexity
+M -- small surface, must be byte-faithful + fully tested + the ADR.
+
+## Dependencies
+T-P0-914 (root-cause investigation). The root-cause findings define exactly which mutation surface the helper must own and whether the reverse class is legacy-legit, so the helper design cannot be finalized before it.
+
+#### T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only)
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-910
+- **Description**: ## Summary
+Build the table-wide reconcile sweep as a dry-run-first tool (diff report, audit log, scope pinned). THIS task delivers the tool + a committed dry-run diff report ONLY -- the actual apply is the separate human-gated T-P0-915.
+
+## Context
+Review missed-2 + point-5: an automated full-table write needs sweep --dry-run -> diff -> human review -> --apply -> audit log, and 911 blast radius is orders of magnitude above the settings.json one-liner, so it needs its own HITL gate (not defaulted into unattended autorun). Review point B: scope must be pinned in-spec, verbatim.
+
+## Acceptance Criteria
+- [ ] AC1: scripts/reconcile_fully_checked_nodes_20260519.py supports --dry-run (default; computes + writes a human-readable diff report to logs/review/, ZERO DB writes) and --apply (performs writes); both call reconcile_all_fully_checked from the T-P0-910 helper (NO inline reconcile logic).
+- [ ] AC2 (scope pinned, Review B verbatim): the sweep MUST NOT mutate ambiguous drift classes -- reverse pct>0/0-checked (115/171) and partial-stale (92) are explicitly out; it touches ONLY nodes matching the deterministic fully-checked signature. Assert in code + a test.
+- [ ] AC3 (THIS task scope): deliverable = the tool + a committed dry-run diff report (logs/review/) listing exactly which nodes WOULD change (expect 111, 114 + any newly drifted). NO --apply run here.
+- [ ] AC4 (audit log): --apply (in T-P0-915) appends a structured audit record (ts, node_ids, before/after status+pct) to logs/ + a timestamped mle_prep.db .bak before writing.
+- [ ] AC5 (not hardcoded): operates by signature over the whole table, never enumerates 111/114 literally.
+- [ ] AC6 (idempotent): re-run dry-run after a hypothetical apply shows zero would-change.
+
+## Technical Approach
+- One script, --dry-run/--apply flags. Dry-run renders the diff via the same audit query validated in planning. DB is gitignored projection (Invariant 3) -> commit ONLY the script + the dry-run report.
+
+## Edge Cases
+- 114 review->mastered is intended (fully-checked is terminal; document, not a promote-only violation). If T-P0-910 tests not green -> blocked. Re-audit at task start.
+
+## Complexity
+M -- tool + dry-run/apply split + diff renderer + audit log.
+
+## Dependencies
+T-P0-910 (helper + its green test matrix). Hard: this is a thin driver over the shared helper and must not run before the helper test gate (AC3 of T-P0-910) is green.
+
 #### T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
@@ -420,6 +509,65 @@ AC:
 - **Depends on**: T-P1-908
 - **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
 
+#### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P0-910, T-P0-914
+- **Description**: ## Summary
+Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
+
+## Context
+Review D ("doctor not police") + the user synthesis: layered guard -- pre-commit = scan + autofix-suggestion (preserve DX); CI fail + runtime self-heal come in Phase B. Single mode only: drop the premature strict|safe abstraction (Review debatable-3) until a real use case appears.
+
+## Acceptance Criteria
+- [ ] AC1: .claude/hooks/description_progress_guard.py (modeled on invariant3_guard.py) AST-detects writes to the mutation surface defined by T-P0-914 root-cause (at minimum framework_nodes.description; widen to status/progress_pct direct sets if root-cause says so) in scripts/*.py.
+- [ ] AC2 (scanner semantics, both branches): file writes the surface AND calls scripts.lib.framework_progress reconcile_* (or has "# RECONCILE-EXEMPT: <reason>") -> silent OK; writes surface WITHOUT reconcile and not exempt -> WARN to stderr + a copy-paste autofix hint naming the helper, exit 0 (NEVER blocks in Phase A).
+- [ ] AC3: --test (self-tests), --scan PATH (back-test), --sweep [scripts] (read-only offender report) -- parity with invariant3_guard mode surface.
+- [ ] AC4 (journey): dev writes a non-reconciling description seed, commits -> pre-commit prints the WARN+hint, commit still succeeds; dev adds the helper call -> WARN gone.
+- [ ] AC5: wired as a pre-commit SCAN step only (scripts/pre-commit infra) -- NOT into .claude/settings.json PreToolUse (that sensitive wiring is Phase B).
+- [ ] AC6: --sweep over scripts/ produces the current offender list (triage = retrofit-vs-exempt list captured; retrofitting historical scripts is OUT OF SCOPE here).
+
+## Technical Approach
+- Copy invariant3_guard.py structure (hook_utils, AST parent-map, exempt regex). Phase A exit code is ALWAYS 0; the only output is the warning. Single mode.
+
+## Edge Cases
+- Best-effort AST + the exempt escape; document residual false-negative risk. Never crash (infra error -> exit 0).
+
+## Complexity
+M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
+
+## Dependencies
+T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
+
+#### T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-914
+- **Description**: ## Summary
+Fast git-history triage of the REVERSE drift (pct=100 + 0 checkboxes: nodes 115, 171) -- legit pre-checklist mastery vs stale. Advanced to P1 because, unlike 111/114 (visual lag, semantically conservative), this is silent data corruption if any downstream consumes pct=100 as mastered (Review missed-4).
+
+## Context
+Review: 115/171 are "more dangerous" yet were parked at P2 with the low-risk 92 class. Decouple + advance. Most cases are second-judgeable from git history (did a checklist ever exist?).
+
+## Acceptance Criteria
+- [ ] AC1: for 115 and 171 (and any other pct>0 / 0-checked node found at task start): inspect framework_nodes_description_history + git blame of the owning seed to determine legit-legacy-mastery vs stale.
+- [ ] AC2 (both branches): legit (mastered before content became a checklist) -> document as intentional, leave pct, add a code comment / data note so the guard does not later flag it; stale -> recommend correction (clear pct OR add the now-missing checkboxes) and create a follow-up reconcile task.
+- [ ] AC3: a concise decision note (logs/review/ + Discord) with a per-node verdict + recommended action; uses the T-P0-914 root-cause findings as input.
+- [ ] AC4 (journey): user reads the per-node verdict, picks per node -> follow-up correction task created only for the stale ones.
+- [ ] AC5: read-only; no DB writes in this task.
+
+## Technical Approach
+- Cross T-P0-914 output with framework_nodes_description_history; quick git blame. Small, fast, no sweep.
+
+## Edge Cases
+- Indeterminate history -> mark indeterminate + ask the user rather than guess (a wrong "legit" call perpetuates corruption).
+
+## Complexity
+S -- targeted 2-node (maybe a few more) triage, read-only.
+
+## Dependencies
+T-P0-914 (root-cause). The root-cause investigation already gathers the history needed to judge legit-vs-stale, so this consumes its findings; independent of the 911 sweep (different drift class).
+
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -481,6 +629,34 @@ AC:
 
 ### P3 -- Stretch Goals
 
+#### T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation)
+- **Priority**: P3
+- **Complexity**: S
+- **Depends on**: T-P0-915
+- **Description**: ## Summary
+Read-only decision doc for the LOW-RISK partial-checked pct-stale class (node 92 type: e.g. 7/15 checked but pct=0), kept separate from the urgent 115/171 reverse class so they are not queued together (Review missed-4).
+
+## Context
+Review explicitly: do NOT queue 92 (clearly low-risk, deterministic fix = backfill pct to checked-ratio + in_progress) with 115/171 (silent-corruption risk). This task owns ONLY the 92-class.
+
+## Acceptance Criteria
+- [ ] AC1: logs/review/ HTML lists every partial-checked leaf whose pct != checked-ratio with the deterministic recommendation (reconcile to ratio + in_progress).
+- [ ] AC2: no DB writes; the actual reconcile (if user approves) is a trivial follow-up that just calls the T-P0-910 helper partial path.
+- [ ] AC3 (both branches): user approves -> follow-up reconcile task created; user defers -> documented as known low-risk debt, no action.
+- [ ] AC4 (journey): user opens HTML, one-click sees the small deterministic set, approves -> follow-up created.
+
+## Technical Approach
+- Reuse the planning audit query (partial branch). Cross-check vs framework_nodes_description_history only if a row looks non-deterministic.
+
+## Edge Cases
+- Re-audit at task start; a node may have moved class. Do NOT conflate with mastery (92 needs pct backfill, not mastered).
+
+## Complexity
+S -- read-only audit + small HTML.
+
+## Dependencies
+T-P0-915 (apply). Run after the fully-checked sweep is applied so this report reflects the post-sweep table and only the genuinely partial-stale residue remains.
+
 ## Blocked
 
 #### T-P0-822: [KG-INT B4b-google] Google execute: hard-archive + skeleton seed + acceptance proof
@@ -524,6 +700,37 @@ AC:
 - **Complexity**: L
 - **Depends on**: T-P0-827
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-meta_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-meta_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-meta_2026-05-10.md, (3) move source seed scripts (scripts/seed_meta_*.py / scripts/content_*meta*.py / scripts/patch_meta_*.py) -> archive/seed_scripts/B4a-meta/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_meta_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+
+#### T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff
+- **Priority**: P0
+- **Complexity**: S
+- **Depends on**: T-P0-911
+- **Description**: ## Summary
+Run reconcile_fully_checked_nodes --apply ONLY after a human has reviewed and approved the T-P0-911 dry-run diff. This is the HITL hard boundary the Review demanded for the high-blast-radius full-table write.
+
+## Context
+Review point-5: settings.json one-line edit is human-gated but a full-table sweep was not -- asymmetric. This task makes the apply explicitly human_review=1: the autonomous batch STOPS here; a human reads the dry-run diff, then this runs.
+
+## Acceptance Criteria
+- [ ] AC1 (precondition): T-P0-911 dry-run diff report exists in logs/review/ and a human (reviewer name recorded via task_db complete --reviewer) has approved it.
+- [ ] AC2 (threshold gate): if the dry-run diff shows > 20 nodes would change, do NOT auto-apply -- re-confirm with the user first (unexpected blast radius = stop).
+- [ ] AC3: timestamped mle_prep.db .bak taken immediately before --apply; structured audit record written (ts, node_ids, before/after).
+- [ ] AC4 (journey): human approves diff -> --apply runs -> nodes 111/114 (+any signature matches) become mastered/100/completed -> verified count of fully-checked-but-not-mastered == 0 -> KG shows them green after refresh.
+- [ ] AC5 (both branches): diff <= 20 nodes and approved -> apply; diff > 20 OR not approved -> halt + report, no writes.
+- [ ] AC6: idempotent re-run after apply = clean [SKIP], no .bak.
+
+## Technical Approach
+- Invoke the T-P0-911 script with --apply. No new code unless the threshold gate needs a flag (--max-nodes 20).
+
+## Edge Cases
+- DB changed between dry-run and apply -> re-run dry-run, abort if diff differs materially.
+- This task carries human_review=1 and is parked (status=blocked,state=pending) so unattended autorun cannot pick it.
+
+## Complexity
+S -- a gated invocation, but the gate is the point.
+
+## Dependencies
+T-P0-911 (the dry-run tool + its committed diff report). Hard HITL boundary: cannot start until a human approves that diff.
 
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
@@ -745,6 +952,37 @@ COMPLEXITY: M
 - **Complexity**: S
 - **Depends on**: T-P1-820, T-P1-833
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-parspec_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-parspec_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-parspec_2026-05-10.md, (3) move source seed scripts (scripts/seed_parspec_*.py / scripts/content_*parspec*.py / scripts/patch_parspec_*.py) -> archive/seed_scripts/B4a-parspec/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_parspec_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+
+#### T-P1-917: [HUMAN-REVIEW] Guard Phase B: enforcer -- CI fail-on-drift (mandatory) + runtime safe-heal + settings.json wiring
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P1-912, T-P1-918
+- **Description**: ## Summary
+Phase B: promote the scanner to an ENFORCER -- a mandatory CI gate that fails on uncovered drift, plus runtime safe-mode self-heal, plus the sensitive .claude/settings.json PreToolUse wiring. Enabled only after drift taxonomy is decided.
+
+## Context
+User synthesis (overrides Review "CI optional"): until the consistency model matures, CI fail on uncovered drift is MANDATORY, not optional. Layering = pre-commit scan+suggest (Phase A, shipped) / CI fail (here, mandatory) / runtime safe-heal (here). Phase B waits for 913 (and 916) so "covered vs uncovered" is well-defined and the enforcer does not fail CI on classes still under decision.
+
+## Acceptance Criteria
+- [ ] AC1 (CI gate, mandatory): a CI step runs description_progress_guard --sweep over scripts/ AND a DB consistency check (count of fully-checked-but-not-mastered == 0) and FAILS the build (exit nonzero) on any uncovered drift. Not behind an opt-in flag.
+- [ ] AC2 (runtime safe-heal): a documented safe path (e.g. a make/CLI target) that runs the T-P0-910 reconcile on the fully-checked signature so a developer can self-heal locally before pushing.
+- [ ] AC3 (both branches): drift present + class is "covered" (fully-checked) -> CI fails with the exact self-heal command; drift present but class is "under-decision" (reverse/partial, per 913/916) -> CI does NOT fail on it (allow-listed) but logs it.
+- [ ] AC4 (sensitive wiring, HITL): deliver the .claude/settings.json PreToolUse snippet (Write+Edit+Bash, mirroring invariant3_guard) and the CI workflow file as a diff; request explicit human sign-off for the settings.json registration -- do NOT self-apply (settings.json is in the autonomous-mode sensitive-file gate; this task carries human_review=1).
+- [ ] AC5 (journey): dev pushes a non-reconciling description change -> CI fails citing the self-heal cmd -> dev runs it -> reconciled -> CI green.
+- [ ] AC6: the Phase-A scanner is upgraded in-place to also support an --enforce exit-2 mode used by CI; pre-commit stays warn-only (DX preserved).
+
+## Technical Approach
+- Add CI workflow + an --enforce mode to the Phase A hook. settings.json wiring delivered as a reviewed snippet, applied by a human.
+
+## Edge Cases
+- The allow-list for under-decision classes must be data-driven (reads 913/916 verdicts) so it auto-shrinks as classes are resolved -- document.
+- Never crash; CI failure messages must name the exact remediation command.
+
+## Complexity
+L -- enforcer mode + CI workflow + data-driven allow-list + sensitive split sign-off.
+
+## Dependencies
+T-P1-912 (Phase A scanner -- enforcer extends it) and T-P2-913 (reverse-drift verdicts define the under-decision allow-list). Last in the chain so CI does not fail on classes still pending a human decision.
 
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
