@@ -50,6 +50,9 @@ htmlcov/
 .claude/last_*_pass
 .claude/autonomous.lock
 .claude/tasks.db
+.claude/events.jsonl
+.claude/events.jsonl.*
+.meta_mlsd_log_path.txt
 
 # Word / temp files
 *.docx
