@@ -612,37 +612,6 @@ T-P0-915 (apply). Run after the fully-checked sweep is applied so this report re
 - **Depends on**: T-P0-827
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-meta_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-meta_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-meta_2026-05-10.md, (3) move source seed scripts (scripts/seed_meta_*.py / scripts/content_*meta*.py / scripts/patch_meta_*.py) -> archive/seed_scripts/B4a-meta/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_meta_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
-#### T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-911
-- **Description**: ## Summary
-Run reconcile_fully_checked_nodes --apply ONLY after a human has reviewed and approved the T-P0-911 dry-run diff. This is the HITL hard boundary the Review demanded for the high-blast-radius full-table write.
-
-## Context
-Review point-5: settings.json one-line edit is human-gated but a full-table sweep was not -- asymmetric. This task makes the apply explicitly human_review=1: the autonomous batch STOPS here; a human reads the dry-run diff, then this runs.
-
-## Acceptance Criteria
-- [ ] AC1 (precondition): T-P0-911 dry-run diff report exists in logs/review/ and a human (reviewer name recorded via task_db complete --reviewer) has approved it.
-- [ ] AC2 (threshold gate): if the dry-run diff shows > 20 nodes would change, do NOT auto-apply -- re-confirm with the user first (unexpected blast radius = stop).
-- [ ] AC3: timestamped mle_prep.db .bak taken immediately before --apply; structured audit record written (ts, node_ids, before/after).
-- [ ] AC4 (journey): human approves diff -> --apply runs -> nodes 111/114 (+any signature matches) become mastered/100/completed -> verified count of fully-checked-but-not-mastered == 0 -> KG shows them green after refresh.
-- [ ] AC5 (both branches): diff <= 20 nodes and approved -> apply; diff > 20 OR not approved -> halt + report, no writes.
-- [ ] AC6: idempotent re-run after apply = clean [SKIP], no .bak.
-
-## Technical Approach
-- Invoke the T-P0-911 script with --apply. No new code unless the threshold gate needs a flag (--max-nodes 20).
-
-## Edge Cases
-- DB changed between dry-run and apply -> re-run dry-run, abort if diff differs materially.
-- This task carries human_review=1 and is parked (status=blocked,state=pending) so unattended autorun cannot pick it.
-
-## Complexity
-S -- a gated invocation, but the gate is the point.
-
-## Dependencies
-T-P0-911 (the dry-run tool + its committed diff report). Hard HITL boundary: cannot start until a human approves that diff.
-
 #### T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions
 - **Priority**: P1
 - **Complexity**: M
@@ -987,6 +956,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-19** -- T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff. ## Summary
 - [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
 - [x] **2026-05-19** -- T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only). ## Summary
 - [x] **2026-05-19** -- T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress). ## Summary
