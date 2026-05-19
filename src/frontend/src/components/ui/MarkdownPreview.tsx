@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type { Element, ElementContent } from "hast";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -8,6 +9,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import "katex/dist/katex.min.css";
 import { slugify, type TocHeading } from "../../utils/slugify";
+import { extractHeadings, headingIdByLine } from "./markdownHeadings";
 import { calloutClass, getCalloutKindFromHast, type HastLike } from "./markdownCallout";
 
 interface MarkdownPreviewProps {
@@ -95,27 +97,45 @@ export default function MarkdownPreview({
   onSdLinkClick,
   onKgLinkClick,
 }: MarkdownPreviewProps) {
-  const headingsRef = useRef<TocHeading[]>([]);
+  // Headings are a pure function of the source -> derive, don't collect.
+  // (Was: reset + push into a ref during render -- a react-hooks render
+  // purity violation, fragile under StrictMode / the React Compiler.)
+  const headings = useMemo(() => extractHeadings(markdown), [markdown]);
+  // Same single source feeds the on-DOM anchor id (keyed by the hast
+  // node's source line) so sidebar id === anchor id by construction --
+  // incl. math / duplicate / mixed-inline headings.
+  const idByLine = useMemo(() => headingIdByLine(markdown), [markdown]);
   const prevJsonRef = useRef<string>("");
 
-  // After each render, emit collected headings if changed
+  // Emit when the derived headings change. prevJsonRef is written ONLY
+  // inside the effect (allowed -- not during render) to dedupe identical
+  // emissions when the parent passes a fresh onHeadingsExtracted lambda.
   useEffect(() => {
     if (!onHeadingsExtracted) return;
-    const json = JSON.stringify(headingsRef.current);
+    const json = JSON.stringify(headings);
     if (json !== prevJsonRef.current) {
       prevJsonRef.current = json;
-      onHeadingsExtracted(headingsRef.current);
+      onHeadingsExtracted(headings);
     }
-  });
+  }, [headings, onHeadingsExtracted]);
 
-  // Reset headings collector before each render
-  headingsRef.current = [];
-
-  /** Factory for heading components that record heading info and add IDs. */
-  function HeadingWithId({ level, children, ...props }: { level: number; children?: React.ReactNode } & React.HTMLAttributes<HTMLHeadingElement>) {
-    const text = childrenToText(children);
-    const id = slugify(text);
-    headingsRef.current.push({ level, text, id });
+  /**
+   * Heading component: sets the on-DOM anchor `id` from the SAME
+   * scanHeadings() pass that builds the sidebar (looked up by the hast
+   * node's source line), so the two can never diverge -- including for
+   * math/duplicate headings KaTeX would otherwise garble. Falls back to
+   * slugify(childrenToText(children)) only if position is unavailable
+   * (defensive; react-markdown supplies it for ATX headings).
+   */
+  function HeadingWithId({ level, node, children, ...props }: {
+    level: number;
+    node?: Element;
+    children?: React.ReactNode;
+  } & React.HTMLAttributes<HTMLHeadingElement>) {
+    const line = node?.position?.start?.line;
+    const id =
+      (line != null ? idByLine.get(line) : undefined) ??
+      slugify(childrenToText(children));
     if (level === 1) return <h1 id={id} {...props}>{children}</h1>;
     if (level === 2) return <h2 id={id} {...props}>{children}</h2>;
     return <h3 id={id} {...props}>{children}</h3>;
@@ -276,9 +296,9 @@ export default function MarkdownPreview({
               </a>
             );
           },
-          h1: ({ children, ...props }) => <HeadingWithId level={1} {...props}>{children}</HeadingWithId>,
-          h2: ({ children, ...props }) => <HeadingWithId level={2} {...props}>{children}</HeadingWithId>,
-          h3: ({ children, ...props }) => <HeadingWithId level={3} {...props}>{children}</HeadingWithId>,
+          h1: ({ node, children, ...props }) => <HeadingWithId level={1} node={node} {...props}>{children}</HeadingWithId>,
+          h2: ({ node, children, ...props }) => <HeadingWithId level={2} node={node} {...props}>{children}</HeadingWithId>,
+          h3: ({ node, children, ...props }) => <HeadingWithId level={3} node={node} {...props}>{children}</HeadingWithId>,
           input: ({ type, ...rest }) => {
             // Suppress native checkboxes from remark-gfm; handled by li override
             if (type === "checkbox") return null;
@@ -320,11 +340,17 @@ export default function MarkdownPreview({
               return <li {...props}>{children}</li>;
             }
 
-            // Read checked state from hast node's input child
-            const inputChild = (_node?.children as any[])?.find(
-              (c: any) => c.tagName === "input" && c.properties?.type === "checkbox"
+            // Read checked state from hast node's input child. Typed via
+            // @types/hast (Element/ElementContent) instead of `any` -- the
+            // `type === "element"` narrowing is strictly safer than the old
+            // untyped access and behavior-identical for real <input> nodes.
+            const inputChild = (_node?.children as ElementContent[] | undefined)?.find(
+              (c): c is Element =>
+                c.type === "element" &&
+                c.tagName === "input" &&
+                c.properties?.type === "checkbox",
             );
-            const isChecked = !!inputChild?.properties?.checked;
+            const isChecked = inputChild?.properties?.checked === true;
 
             // Line index from hast node position (1-based -> 0-based)
             const lineIdx = (_node?.position?.start?.line ?? 1) - 1;
@@ -348,7 +374,10 @@ export default function MarkdownPreview({
                 } : undefined}
               >
                 {isChecked ? <CheckIcon /> : <UncheckedIcon />}
-                <span className={isChecked ? "line-through text-gray-400" : ""}>
+                {/* Checked items keep the leading check icon only -- no
+                    strikethrough / muted text (per user UX preference,
+                    Discord 2026-05-19). Applies app-wide to all task lists. */}
+                <span>
                   {textChildren}
                 </span>
               </li>

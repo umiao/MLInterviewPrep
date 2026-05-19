@@ -95,6 +95,50 @@ def test_update_node_title_and_description(test_client, db_session):
     assert matched[0]["description"] == "Quicksort, mergesort, heapsort"
 
 
+def test_progress_only_update_derives_leaf_status(test_client, db_session):
+    """Regression (Discord 2026-05-19): checkbox toggles PUT only
+    {description, progress_pct}; the leaf's own status (and via
+    propagation its ancestors') must move off 'not_started'."""
+    parent = _seed_node(db_session, title="DS", path="ds", depth=0)
+    leaf = _seed_node(
+        db_session, title="Array", path="ds/array", depth=1,
+        parent_id=parent.id, description="notes",
+    )
+    assert leaf.status == "not_started"
+
+    # Partial progress, no explicit status -> in_progress (promote).
+    resp = test_client.put(
+        f"/api/framework/nodes/{leaf.id}",
+        json={"description": "notes", "progress_pct": 40.0},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "in_progress"
+
+    # Parent must derive in_progress via _propagate_upward.
+    tree = test_client.get("/api/framework/tree").json()
+    p = [n for n in tree if n["id"] == parent.id][0]
+    assert p["status"] == "in_progress"
+
+    # 100% -> mastered + progress pinned to 100.
+    resp = test_client.put(
+        f"/api/framework/nodes/{leaf.id}",
+        json={"description": "notes", "progress_pct": 100.0},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["status"] == "mastered"
+    assert body["progress_pct"] == 100.0
+
+    # Promote-only: dropping progress does NOT demote a mastered leaf,
+    # and progress==0 leaves status untouched (no silent clobber).
+    resp = test_client.put(
+        f"/api/framework/nodes/{leaf.id}",
+        json={"description": "notes", "progress_pct": 0.0},
+    )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "mastered"
+
+
 def test_tree_includes_description(test_client, db_session):
     """GET /framework/tree response includes the description field."""
     _seed_node(db_session, title="ML Basics", path="ml/basics", description="Core ML concepts")

@@ -201,6 +201,21 @@ def update_framework_node(
     update_data = node_update.model_dump(exclude_unset=True)
     now = datetime.utcnow()
 
+    # Derive a leaf's own status from progress when the client updates
+    # progress without an explicit status. Checkbox toggles in the notes
+    # UI send only {description, progress_pct}; without this, a leaf node
+    # -- and via _propagate_upward every ancestor -- stays 'not_started'
+    # forever even at 100% progress (the reported bug). Promote-only:
+    # never demote a manually advanced status, and progress==0 leaves
+    # status untouched. Injected into update_data so the existing status
+    # side-effect block + _propagate_upward handle it uniformly.
+    if "progress_pct" in update_data and "status" not in update_data:
+        p = update_data["progress_pct"] or 0.0
+        if p >= 100:
+            update_data["status"] = "mastered"
+        elif p > 0 and node.status == "not_started":
+            update_data["status"] = "in_progress"
+
     # Status transition side effects (timestamps only-set-never-clear)
     if "status" in update_data:
         new_status = update_data["status"]

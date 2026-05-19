@@ -63,7 +63,8 @@ function buildUrl(path: string, params?: RequestOptions["params"]): string {
 }
 
 function buildInit(options?: RequestOptions): RequestInit {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- params consumed by buildUrl
+  // params/headers destructured only to exclude them from `rest`;
+  // ignoreRestSiblings (eslint.config.js) covers this idiom now.
   const { body, params, headers, ...rest } = options ?? {};
   const init: RequestInit = { ...rest };
   if (body !== undefined) {

@@ -1,10 +1,14 @@
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
 import { useFrameworkNotes } from "../hooks/useFrameworkNotes";
 import MarkdownPreview from "../components/ui/MarkdownPreview";
 import PrevNextNav from "../components/ui/PrevNextNav";
+import ProblemDrawer from "../components/problems/ProblemDrawer";
+import CompanyDocDrawer from "../components/CompanyDocDrawer";
+import SystemDesignDrawer from "../components/SystemDesignDrawer";
+import type { DrawerTarget } from "./PrepNotesPage";
 import type { FrameworkNode, NodeStatus } from "../types/framework";
 
 const STATUS_COLORS: Record<NodeStatus, string> = {
@@ -110,6 +114,11 @@ export default function FrameworkNotesPage() {
   const nodeId = Number(rawId);
   const navigate = useNavigate();
 
+  // Drawer state for in-note resource links (lc:// db:// cd:// sd://).
+  // Reuses the exact DrawerTarget union + drawer components proven in
+  // PrepNotesPage so links open the same drawer views, not inert anchors.
+  const [drawer, setDrawer] = useState<DrawerTarget>(null);
+
   // Fetch the single node
   const { data: node, isLoading } = useQuery<FrameworkNode>({
     queryKey: ["framework", "node", nodeId],
@@ -185,6 +194,7 @@ export default function FrameworkNotesPage() {
   }
 
   return (
+    <>
     <div className="flex flex-col h-full">
       {/* Sticky header */}
       <header className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-3 shrink-0">
@@ -199,7 +209,14 @@ export default function FrameworkNotesPage() {
                 <span className="text-gray-300">/</span>
                 {i < breadcrumbs.length - 1 ? (
                   <Link
-                    to={`/framework/${crumb.id}/notes`}
+                    // Breadcrumb ancestors are always non-leaf category
+                    // nodes. Per the app's documented contract
+                    // (Framework.tsx handleBreadcrumbNavigate: "always
+                    // stays on framework page, no notes redirect"),
+                    // breadcrumbs must land on /framework/:id (the tree
+                    // view that handles category nodes), NOT /:id/notes
+                    // -- the latter dead-ended on category ancestors.
+                    to={`/framework/${crumb.id}`}
                     className="hover:text-gray-700 truncate max-w-[120px]"
                     title={crumb.title}
                   >
@@ -291,6 +308,10 @@ export default function FrameworkNotesPage() {
               <MarkdownPreview
                 markdown={notes}
                 onCheckboxClick={handleCheckboxClick}
+                onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
+                onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+                onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
+                onSdLinkClick={(slug) => setDrawer({ type: "system_design", slug })}
                 onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
               />
             ) : groupedLeaves.length > 0 ? (
@@ -348,5 +369,28 @@ export default function FrameworkNotesPage() {
         )}
       </div>
     </div>
+    {/* Resource drawers -- reused verbatim from PrepNotesPage so in-note
+        lc:// db:// cd:// sd:// links open the same drawer views. */}
+    <ProblemDrawer
+      lcId={drawer?.type === "lc" ? drawer.id : null}
+      dbId={drawer?.type === "problem" ? drawer.id : null}
+      onClose={() => setDrawer(null)}
+    />
+    <CompanyDocDrawer
+      docId={drawer?.type === "company_doc" ? drawer.id : null}
+      onClose={() => setDrawer(null)}
+      onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
+      onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+      onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
+    />
+    <SystemDesignDrawer
+      slug={drawer?.type === "system_design" ? drawer.slug : null}
+      onClose={() => setDrawer(null)}
+      onLcLinkClick={(id) => setDrawer({ type: "lc", id })}
+      onDbLinkClick={(id) => setDrawer({ type: "problem", id })}
+      onCdLinkClick={(id) => setDrawer({ type: "company_doc", id })}
+      onKgLinkClick={(id) => navigate(`/kg?node=n${id}`)}
+    />
+    </>
   );
 }
