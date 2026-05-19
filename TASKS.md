@@ -9,36 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-914
-- **Description**: ## Summary
-Promote the proven node-44 reconcile logic into a shared, tested scripts/lib/framework_progress.py -- ONE imported function -- AND pin the consistency model (checkbox = canonical; status/progress = derived) in code + a short ADR.
-
-## Context
-Completion in KG-Framework is framework_nodes.status, set from checkbox state ONLY on the API PUT path. Direct description writes bypass it (Discord 2026-05-19 node-44 bug). Review point A (highest-value): without an explicit "checkbox is canonical, status/progress is derived" rule, this recurs the moment someone hand-sets mastered and a later reconcile overwrites it -- nobody knows who wins. That rule must be written down, not implied.
-
-## Acceptance Criteria
-- [ ] AC1: scripts/lib/framework_progress.py exposes reconcile_node_from_checkboxes(db, node_id) -> bool(changed) and reconcile_all_fully_checked(db) -> list[ids]; byte-faithful to routers/framework.py L212-227 promote-only semantics; calls the REAL _propagate_upward imported from src.backend.routers.framework (NEVER re-implemented).
-- [ ] AC2 (consistency model, Review A): module docstring + docs/adr/ADR-checkbox-canonical.md state: checkbox state is the single source of truth; status/progress_pct are derived projections; a manual status edit is NOT authoritative and WILL be reconciled; if a human needs a non-derived status that is a separate explicit mechanism (out of scope here), never a silent DB edit.
-- [ ] AC3 (TEST MATRIX -- hard precondition, Review missed-1): tests/test_framework_progress_helper.py MUST cover fully-checked / partially-checked / reverse (pct>0 but 0 checked, the 115/171 shape) / empty (no checkbox) / boundary (1/1, 0/1, NULL description) + ancestor-propagation parity vs a hand-computed weighted average. All green is a gate for T-P0-911; no sweep before this passes.
-- [ ] AC4 (idempotent): second call on a reconciled node returns False, writes nothing.
-- [ ] AC5 (both branches): fully-checked -> mastered/100; partial leaf -> in_progress only if currently not_started + pct=ratio; zero-checked -> untouched. REVERSE (pct>0,0-checked) -> helper MUST NOT silently zero it; leave it and flag (911/913 own that class) -- assert this in tests.
-- [ ] AC6 (journey): seed imports helper, calls after a description write, commits -> node renders mastered/green after refresh; re-run no-op.
-
-## Technical Approach
-- New scripts/lib/framework_progress.py (package already exists). Helper takes an existing db Session (composable; does NOT commit). Refactor scripts/reconcile_node_44_*.py to delegate (delete its inline duplicate -> single implementation).
-
-## Edge Cases
-- Checkbox signature ^\s*[-*]\s+\[[ xX]\] documented. NULL/no-checkbox -> no-op never crash. Windows: encoding=utf-8; /c/Anaconda/python.exe in docs. Root-cause (T-P0-914) findings may widen AC1 mutation surface -- reflect them.
-
-## Complexity
-M -- small surface, must be byte-faithful + fully tested + the ADR.
-
-## Dependencies
-T-P0-914 (root-cause investigation). The root-cause findings define exactly which mutation surface the helper must own and whether the reverse class is legacy-legit, so the helper design cannot be finalized before it.
-
 #### T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only)
 - **Priority**: P0
 - **Complexity**: S
@@ -1048,6 +1018,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
+- [x] **2026-05-19** -- T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress). ## Summary
 - [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
 - [x] **2026-05-16** -- T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-fr
 - [x] **2026-05-16** -- T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-we

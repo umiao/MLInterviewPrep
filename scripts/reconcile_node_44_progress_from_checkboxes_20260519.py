@@ -14,12 +14,16 @@ status='not_started', progress_pct=0.0 while showing 5/5 checked. The
 KG-Framework view colours/labels by `status`, so it rendered "Not
 Started" (red) instead of "Mastered" (green = completed).
 
-Fix: do exactly what the backend PUT does for a progress_pct=100
-checkbox-driven update (routers/framework.py L212-227), then call the
-REAL _propagate_upward() so ancestors (9 Data Structures, 1 Coding &
-Algorithms) are recomputed by the production weighted-average + status
-derivation -- imported, never re-implemented (CLAUDE.md: no duplicate
-utilities; guarantees the rollup matches prod exactly).
+Fix: delegate to scripts.lib.framework_progress.reconcile_node_from_
+checkboxes() -- the single shared implementation (T-P0-910). It does
+exactly what the backend PUT does for a checkbox-driven update
+(routers/framework.py L212-227) and calls the REAL _propagate_upward()
+so ancestors (9 Data Structures, 1 Coding & Algorithms) are recomputed
+by the production weighted-average + status derivation. Node 44 is 5/5
+checked, so the helper derives mastered/100 -- identical outcome to the
+old inline block, now generalized (derived from the actual checkbox
+state, not hard-coded) and byte-faithful via one tested function. This
+script's inline duplicate was deleted (CLAUDE.md: no duplicate utilities).
 
 Scope: this script owns ONLY node 44's reconciliation. The DB-wide
 audit also flagged nodes 111 and 114 with milder drift; those are left
@@ -45,10 +49,14 @@ from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+sys.path.insert(0, str(PROJECT_ROOT / "scripts"))
+
+from lib.framework_progress import (  # noqa: E402
+    reconcile_node_from_checkboxes,
+)
 
 from src.backend.database import SessionLocal, init_db  # noqa: E402
 from src.backend.models.framework import FrameworkNode  # noqa: E402
-from src.backend.routers.framework import _propagate_upward  # noqa: E402
 
 NODE_ID = 44
 DB_PATH = PROJECT_ROOT / "data" / "mle_prep.db"
@@ -125,18 +133,12 @@ def main() -> int:
 
         backup_db()
 
-        # Replicate routers/framework.py L212-227 for a progress_pct=100
-        # checkbox-driven PUT (status derived -> 'mastered' side effects).
-        now = datetime.utcnow()
-        node.progress_pct = 100.0
-        node.status = "mastered"
-        if node.started_at is None:
-            node.started_at = now
-        if node.completed_at is None:
-            node.completed_at = now
-
-        # Reuse the production rollup so ancestors match prod exactly.
-        _propagate_upward(NODE_ID, db)
+        # Single shared implementation (T-P0-910): derives status/progress
+        # from node 44's checkbox state (5/5 -> mastered/100), applies the
+        # byte-faithful promote-only PUT semantics, and calls the REAL
+        # _propagate_upward so ancestors match prod exactly. Composable:
+        # the helper does not commit -- this script owns the transaction.
+        reconcile_node_from_checkboxes(db, NODE_ID)
         db.commit()
 
         # Verify.
