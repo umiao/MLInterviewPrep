@@ -9,36 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-910
-- **Description**: ## Summary
-Build the table-wide reconcile sweep as a dry-run-first tool (diff report, audit log, scope pinned). THIS task delivers the tool + a committed dry-run diff report ONLY -- the actual apply is the separate human-gated T-P0-915.
-
-## Context
-Review missed-2 + point-5: an automated full-table write needs sweep --dry-run -> diff -> human review -> --apply -> audit log, and 911 blast radius is orders of magnitude above the settings.json one-liner, so it needs its own HITL gate (not defaulted into unattended autorun). Review point B: scope must be pinned in-spec, verbatim.
-
-## Acceptance Criteria
-- [ ] AC1: scripts/reconcile_fully_checked_nodes_20260519.py supports --dry-run (default; computes + writes a human-readable diff report to logs/review/, ZERO DB writes) and --apply (performs writes); both call reconcile_all_fully_checked from the T-P0-910 helper (NO inline reconcile logic).
-- [ ] AC2 (scope pinned, Review B verbatim): the sweep MUST NOT mutate ambiguous drift classes -- reverse pct>0/0-checked (115/171) and partial-stale (92) are explicitly out; it touches ONLY nodes matching the deterministic fully-checked signature. Assert in code + a test.
-- [ ] AC3 (THIS task scope): deliverable = the tool + a committed dry-run diff report (logs/review/) listing exactly which nodes WOULD change (expect 111, 114 + any newly drifted). NO --apply run here.
-- [ ] AC4 (audit log): --apply (in T-P0-915) appends a structured audit record (ts, node_ids, before/after status+pct) to logs/ + a timestamped mle_prep.db .bak before writing.
-- [ ] AC5 (not hardcoded): operates by signature over the whole table, never enumerates 111/114 literally.
-- [ ] AC6 (idempotent): re-run dry-run after a hypothetical apply shows zero would-change.
-
-## Technical Approach
-- One script, --dry-run/--apply flags. Dry-run renders the diff via the same audit query validated in planning. DB is gitignored projection (Invariant 3) -> commit ONLY the script + the dry-run report.
-
-## Edge Cases
-- 114 review->mastered is intended (fully-checked is terminal; document, not a promote-only violation). If T-P0-910 tests not green -> blocked. Re-audit at task start.
-
-## Complexity
-M -- tool + dry-run/apply split + diff renderer + audit log.
-
-## Dependencies
-T-P0-910 (helper + its green test matrix). Hard: this is a thin driver over the shared helper and must not run before the helper test gate (AC3 of T-P0-910) is green.
-
 #### T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
@@ -1018,6 +988,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
+- [x] **2026-05-19** -- T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only). ## Summary
 - [x] **2026-05-19** -- T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress). ## Summary
 - [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
 - [x] **2026-05-16** -- T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-fr
