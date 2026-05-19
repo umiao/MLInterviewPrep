@@ -956,6 +956,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-19** -- T-P1-919: No-checklist drift fix: node 69 Regularization -- add confirmation checkbox + re-derive status (user-scoped: ONLY no-checklist, NOT 115/171/92). Discord user decision 2026-05-19 (msg 1506361186168606802) for the T-P0-914 no-checklist drift bucket. SCOPE: node 69 ON
 - [x] **2026-05-19** -- T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff. ## Summary
 - [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
 - [x] **2026-05-19** -- T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only). ## Summary
