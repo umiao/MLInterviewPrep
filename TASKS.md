@@ -9,35 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation)
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: ## Summary
-A ~30-minute read-only investigation that identifies the exact code path(s) that produced both drift directions, so 910/912 are root-cause fixes not symptom treatment.
-
-## Context
-Review (independent, Discord 2026-05-19) flagged that nobody asked WHY 111/114 are fully-checked-but-not-mastered and WHY 115/171 are pct=100/0-checked. Without this, the sweep + guard treat symptoms. The answer directly determines which mutation entry points T-P1-912 must intercept (NOT just framework_nodes.description writes -- possibly status/progress_pct direct sets, import flows, or a script bug).
-
-## Acceptance Criteria
-- [ ] AC1: For nodes 111, 114, 115, 171: git log/blame the seed scripts + framework_nodes_description_history rows that last touched description/status/progress_pct; classify each drift origin (manual edit / specific script bug / import flow / pre-checklist legacy status).
-- [ ] AC2: Enumerate ALL mutation entry points that can change framework_nodes.status/progress_pct/description outside the API PUT path (grep scripts/ + migrations/ + seed_data/ for UPDATE framework_nodes / ORM .status= / .progress_pct= / .description=).
-- [ ] AC3 (decision output): a findings note (logs/review/ or docs/) stating, per drift class, the producing path and the concrete recommendation for what 912 must guard (the interception scope), and whether 115/171 is legacy-legit or stale (feeds 913).
-- [ ] AC4: read-only -- zero DB writes, zero source edits; investigation + written findings only.
-
-## Technical Approach
-- git log --follow / blame on scripts/update_node_*, scripts/seed_*; query framework_nodes_description_history for 111/114/115/171; static grep for non-PUT mutation sites.
-
-## Edge Cases
-- History may be squashed/absent for some nodes -> record "indeterminate" explicitly rather than guessing.
-- Distinguish "checklist never existed" (115/171 legit pre-checklist mastery) from "checklist added then status lost".
-
-## Complexity
-S -- time-boxed ~30min, read-only, but gates the design of 910/912.
-
-## Dependencies
-None. This is the new first task: it must precede T-P0-910 and T-P1-912 because its findings define the helper guarantees and the guard interception scope (Review point: root-cause before symptom fix).
-
 #### T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress)
 - **Priority**: P0
 - **Complexity**: M
@@ -1076,6 +1047,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
 - [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
 - [x] **2026-05-16** -- T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-fr
 - [x] **2026-05-16** -- T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-we
