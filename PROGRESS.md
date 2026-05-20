@@ -743,3 +743,10 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: Run1 `review/100/(0,0) -> mastered/100/(1,1)` reconcile=True; Run2 `[SKIP]` reconcile=False (idempotent no-op). Node 69 = mastered/100, started+completed stamped. Ancestors re-propagated (pillar2 in_progress/2.4, pillar2.supervised_learning in_progress/15.2 -- correct weighted rollup). OUT-OF-SCOPE byte-unchanged: 115 (review/100), 171 (review/100), 92 (not_started/0); 111/114 still mastered (T-P0-915 preserved). `pytest` helper+sweep+router 51/51 passed (no code changed -- data + reused tested helper; focused suites are the meaningful gate).
 - **Status**: [DONE]
 - **Request**: `python .claude/hooks/task_db.py complete T-P1-919` (done)
+
+## 2026-05-19 -- [adhoc] Add Uber offer call (Jaclyn, Wed 2026-05-20 10:00 AM PT) to InterviewTimeline
+- **What I did**: Followed the `/dashboard` 6-step protocol on the calendar invite from Jaclyn. Surface chain: `Dashboard.InterviewTimeline` -> queryKey `["timeline","events"]` -> `GET /timeline/events` -> `interview_events` table (per CLAUDE.md Surface Identification, row 1). Wrote a new Invariant-3-compliant idempotent seed keyed on `(company_id=5, scheduled_at="2026-05-20 10:00:00", title)`, mirroring `_add_uber_team_match_20260515.py`. Used `event_type="hr_call"` per the recruiter-touchpoint precedent set by id=3 ("HR Talk with Jaclyn", same recruiter) and id=13 (Onsite Prep Meeting with Recruiter).
+- **Deliverables**: `scripts/_add_uber_offer_call_20260520.py` (new idempotent seed); 1 new `interview_events` row (id=79).
+- **Sanity check result**: Run1 `[INSERT] id=79`, Run2 `[SYNC] id=79` (idempotent UPSERT). SQL: `SELECT ... FROM interview_events WHERE company_id=5 AND scheduled_at LIKE "2026-05-20%"` returns exactly 1 row: `(79, Uber, hr_call, "Uber Offer Call -- Jaclyn (Recruiter)", 2026-05-20 10:00:00, 15min, Phone/Zoom, upcoming)`. Browser-side confirmation deferred to user.
+- **Status**: [DONE]
+- **Request**: ad-hoc seed, no `task_db.py` task ID.
