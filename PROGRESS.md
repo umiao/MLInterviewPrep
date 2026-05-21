@@ -438,3 +438,18 @@
   - `pytest tests/ -x -q` -> 1298 passed, 20 warnings, no failures.
 - **Status**: [DONE] (load-bearing AC met: 13/13 structural conformance + cd94/96 xref + drawer-header retrofit + ml-mlsd tab visibility). Sub-clause "both audits exit 0" is satisfied for the two closing-gate audits added here; `audit_meta_mlsd_3rule.py` still reports 2 findings on sd42 (top3-comments dataflow chars 10504 > 9000 + bold_density 0 < 3) which reflect sd42 still being declared `structured_reference` archetype while its content has migrated toward `oral_narrative` shape -- this is the explicit scope of T-P1-881 "[Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44" (sd43/sd44 already migrated; sd42 alone remains).
 - **Request**: `python .claude/hooks/task_db.py update T-P0-907 --status completed`
+
+## 2026-05-21 -- [T-P1-920] Adobe Final Round prep page: Statistics + RAG (Q1-Q50)
+- **What I did**: Seeded a new Adobe `company_documents` row covering the full 50-question source doc (`docs/adobe_final_prep_source_2026-05-21.md`) split across Part 1 statistics (Q1-Q33, 11 subsections: descriptive stats / distributions / hypothesis testing / variance reduction/CUPED / regression / CI vs PI / bias-variance / AUC vs PR-AUC / missing data / causal inference / probability brain teasers) and Part 2 RAG full-stack (Q34-Q50, 7 subsections: chunking / embedding selection / vector DB / re-ranker / query rewriting / guardrails / evaluation), plus the interview-tips coda and a 25-item self-check checklist. Followed the canonical `seed_adobe_day1_chinese.py` pattern: `StudyNoteBuilder` + `FormulaBlock` for all displayed math, inline `$..$` for inline math, Chinese narration + English-first-occurrence term expansion per [[feedback_content_style_cn_en]], all 48 acronyms (SE/SD/CI/PI/CLT/MDE/FWER/FDR/CUPED/OLS/VIF/AUC/PR-AUC/MCAR/MAR/MNAR/MICE/EM/DiD/RDD/IV/PSM/ANCOVA/RAG/MTEB/HNSW/IVF/PQ/ANN/BM25/HyDE/MRR/NDCG/RAGAS/NLI/PII/ACL/AST/ColBERT/...) registered via `b.add_term()` so they appear in the term-drawer UI. Idempotent UPSERT by sentinel `<!-- ADOBE_FINAL_STATS_RAG_V1_20260521 -->` (matches both new and stale-title rows for clean re-runs).
+- **Deliverables**:
+  - `scripts/seed_adobe_final_stats_rag.py` (new idempotent seed; sentinel + delete-then-insert pattern, 0 validation warnings, 21 sections, 48 terms, 20 display formulas, 20442-char output).
+- **Sanity check result**:
+  - Run1: `[DONE] Inserted document id=98, content_length=20442 chars` + `0 validation warnings`.
+  - Run2 (idempotency): `[CLEAN] Deleted prior row id=98` then re-inserted with same id=98 / 20442 chars (UPSERT semantics confirmed).
+  - All 50 question labels (Q1..Q50) present, zero missing in content scan.
+  - Numerical examples preserved: Q11 sample-size approx 31200/group, Q24 PR-AUC 15% precision example, Q31 Bayes posterior 16.7%, Q33 birthday paradox 253 pairs, Q5 68/95/99.7 rule, Q15 CUPED rho=0.7 -> 51% variance reduction -- all present.
+  - Key LaTeX formulas (Q1 sample mean, Q5 Gaussian PDF, Q11 sample-size, Q15 CUPED, Q17 OLS closed form, Q22 CI/PI, Q23 bias-variance, Q31 Bayes, Q48 MRR) verified via regex pattern scan: 9/9 PASS.
+  - HTTP API smoke via TestClient + dependency override against real DB: `GET /api/companies/23/documents` -> 200 (10 docs, 1 matches "Final Round"); `GET /api/company-documents/98` -> 200 (content_len=20442, sentinel anchored as first line, Q1+Q50+CUPED+RAGAS all present in payload).
+  - `pytest tests/ -x -q --timeout=60` -> 1298 passed in 81.15s (matches baseline; no regression).
+- **Status**: [DONE]
+- **Request**: `python .claude/hooks/task_db.py complete T-P1-920`

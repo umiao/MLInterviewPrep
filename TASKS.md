@@ -149,38 +149,6 @@ S -- targeted 2-node (maybe a few more) triage, read-only.
 ## Dependencies
 T-P0-914 (root-cause). The root-cause investigation already gathers the history needed to judge legit-vs-stale, so this consumes its findings; independent of the 911 sweep (different drift class).
 
-#### T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expand scope beyond what's in the file; can clarify/elaborate concepts inline where notes are dense).
-
-**Adobe context**: Senior MLE final loop on 2026-05-21 (today onsite) + video round 2026-05-22 w/ Olivia Simpson per [[project_adobe_final_onsite]]. This prep page targets the technical depth rounds.
-
-**Scope**: build ONE prep page covering both parts of the source doc:
-- Part 1 "统计学" (Q1-Q33, 11 subsections: descriptive stats, distributions, hypothesis testing, variance reduction/CUPED, regression, CI/PI, bias-variance, AUC/PR-AUC, missing data, causal inference, prob brain teasers)
-- Part 2 "RAG 全栈" (Q34-Q50, 7 subsections: chunking, embedding, vector DB, re-ranker, query rewriting, guardrails, evaluation)
-- 'Interview tips' coda
-
-**Implementation pattern**: follow existing `scripts/seed_adobe_day1_chinese.py` style:
-- New script: `scripts/seed_adobe_final_stats_rag.py` (idempotent, sentinel-guarded)
-- Use `StudyNoteBuilder` (canonical math+term builder per [[feedback_math_formatting]])
-- Register all acronyms via `b.add_term()` (SE/SD/CLT/CUPED/MDE/FWER/FDR/HNSW/IVF/PQ/HyDE/RAGAS/MRR/NDCG/MICE/RDD/IV/PSM/DiD etc.)
-- Style: Chinese narration + English terms, first occurrence `**English** (acronym, 中文)` per [[feedback_content_style_cn_en]]
-- Math: single $ or $$ both valid per [[feedback_math_formatting]]
-- Tables: convert markdown tables into Builder's table primitives
-
-**Acceptance criteria**:
-1. Seed script created + idempotent on second run (sentinel format `ADOBE_FINAL_STATS_RAG_V1_20260521`)
-2. pytest passes (current baseline 1298)
-3. API smoke: `GET` on the new page slug returns 200 with content
-4. All 50+ acronyms registered as terms (browse via term-drawer UI)
-5. All numerical examples preserved (Q11 sample-size calc, Q24 PR-AUC reverse-intuition example, Q31 disease Bayes, Q33 birthday)
-6. Math expressions render (visually inspect at least Q1, Q5, Q11, Q15 CUPED, Q22 CI/PI, Q23 bias-variance, Q31 Bayes)
-7. Committed with `[T-XXX] [Adobe] Final round prep page seeded` (one commit, scope-explicit per CLAUDE.md inner-agent git discipline)
-
-**Auto-approvable**: human_review=0 (user explicitly said "可以直接执行 不需要额外的审批" on backlog request). Depends on T-P0-907 (closing gate of current Meta-MLSD batch) to avoid front-running the in-flight batch-2 orchestrator.
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -658,6 +626,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 806 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan
 - [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l
 - [x] **2026-05-21** -- T-P0-904: sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden). Rewrite sd53 (meta-spotify-music-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-21** -- T-P0-903: sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd52 (meta-location-rec-golden) verbal_outline; mirror sd41 golden template.
