@@ -183,15 +183,13 @@ cd96_playbook:
       payload_kind: boundary_table
       apply_3rule: false
 
+    # NOTE: Post-T-P0-845/T-P0-871 dedupe, the body "## 9. Drawer" section was
+    # removed (the drawer link list now lives in the prepended drawer_header
+    # block at the top of cd96 content; see retrofit_meta_mlsd_96_drawer_header.py).
+    # The original body "## 10. 30 秒判题流程" was then renumbered to "## 9.".
+    # Updated 2026-05-21 by T-P0-907 closing gate.
     - id: "§9"
-      heading_regex: '^## 9\.\s*Drawer'   # "Drawer — 深内容入口" (T-P0-871 inserted)
-      required: true
-      payload_kind: drawer_link_list
-      apply_3rule: false   # link list; 3-rule does not apply
-      rationale: "drawer link list; rhythm rules live on §1/§2/§3/§5/§7/§10"
-
-    - id: "§10"
-      heading_regex: '^## 10\.\s*30\s*秒'   # "30 秒判题流程" (renumbered from §9 by T-P0-871)
+      heading_regex: '^## 9\.\s*30\s*秒'   # "30 秒判题流程" (renumbered from §10 by T-P0-871; was §9 Drawer pre-dedupe)
       required: true
       payload_kind: numbered_steps
       min_bullets: 5

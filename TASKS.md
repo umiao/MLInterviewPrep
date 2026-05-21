@@ -9,12 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible
-- **Priority**: P0
-- **Complexity**: S
-- **Depends on**: T-P0-896, T-P0-897, T-P0-898, T-P0-899, T-P0-900, T-P0-901, T-P0-902, T-P0-903, T-P0-904
-- **Description**: GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) land: (1) re-run retrofit_meta_mlsd_*_drawer_header.py for every re-seeded sd row (re-seeding wipes the drawer header - known regression, see LESSONS 2026-05-15). (2) verify every cd96/cd94 sd:// link resolves to a system_designs.slug. (3) run scripts/audit_meta_mlsd_3rule.py and scripts/audit_mlsd_prose_quality.py over all 13; assert each has [DOMINANT]x1 + [floating-twist]x3-5 + [best-anchor]x1 + [worst-anchor]x1 + SDxx_VERBAL_V1 sentinel + verbal_outline length 3000-5000. (4) assert ml-mlsd tab returns exactly 13 golden rows. AC: both audits exit 0; 13/13 conformant; PROGRESS.md entry.
-
 ### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
@@ -664,6 +658,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 806 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l
 - [x] **2026-05-21** -- T-P0-904: sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden). Rewrite sd53 (meta-spotify-music-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-21** -- T-P0-903: sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd52 (meta-location-rec-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-21** -- T-P0-902: sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd51 (meta-event-rec-golden) verbal_outline; mirror sd41 golden template.
