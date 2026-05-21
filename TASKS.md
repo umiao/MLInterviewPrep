@@ -9,42 +9,6 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-892
-- **Description**: Rewrite sd45 (meta-fb-newsfeed-golden) verbal_outline; mirror sd41 golden template.
-
-Depends on: T-P0-892 (sd41 golden template)
-
-Background: Harmonize verbal_outline to Chinese-narration + English-terms
-across 13 Meta sd-goldens. This task handles sd45 (meta-fb-newsfeed-golden).
-Current verbal_outline length: 7071 chars.
-
-Constraints:
-- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
-  as the template; mirror its structure exactly
-- 3-5 floating twists, 1 DOMINANT, best+worst anchor
-- Chinese narration prose + English ML terms; first occurrence
-  `**English** (acronym, Chinese)`
-- 1-problem-1-URI no-bundle
-- Target length 3000-5000 chars
-- ONLY touch verbal_outline; other fields stay as-is
-
-Files:
-- scripts/seed_meta_meta_fb_newsfeed_golden_verbal_outline.py (NEW idempotent seed)
-  - Sentinel marker `<!-- SD45_VERBAL_V1_20260515 -->`
-  - UPSERT system_designs.verbal_outline WHERE slug='meta-fb-newsfeed-golden'
-
-AC:
-- Idempotent seed (twice = same DB state)
-- verbal_outline length >= 2500
-- Mechanical check: 1 DOMINANT, 3-5 floating twists
-- pytest passes; API smoke GET /system-designs/meta-fb-newsfeed-golden
-
-git add explicit.
-Commit: [T-X] sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
-
 #### T-P0-897: sd46 meta-yelp-restaurant-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
@@ -956,6 +920,7 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 > 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-20** -- T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden). Rewrite sd45 (meta-fb-newsfeed-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-19** -- T-P1-919: No-checklist drift fix: node 69 Regularization -- add confirmation checkbox + re-derive status (user-scoped: ONLY no-checklist, NOT 115/171/92). Discord user decision 2026-05-19 (msg 1506361186168606802) for the T-P0-914 no-checklist drift bucket. SCOPE: node 69 ON
 - [x] **2026-05-19** -- T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff. ## Summary
 - [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary

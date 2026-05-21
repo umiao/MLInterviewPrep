@@ -750,3 +750,10 @@ Date:   Wed May 13 11:55:33 2026 -0700
 - **Sanity check result**: Run1 `[INSERT] id=79`, Run2 `[SYNC] id=79` (idempotent UPSERT). SQL: `SELECT ... FROM interview_events WHERE company_id=5 AND scheduled_at LIKE "2026-05-20%"` returns exactly 1 row: `(79, Uber, hr_call, "Uber Offer Call -- Jaclyn (Recruiter)", 2026-05-20 10:00:00, 15min, Phone/Zoom, upcoming)`. Browser-side confirmation deferred to user.
 - **Status**: [DONE]
 - **Request**: ad-hoc seed, no `task_db.py` task ID.
+
+## 2026-05-20 -- [T-P0-896] sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden)
+- **What I did**: Rewrote sd45 `verbal_outline` as CN-narration + EN-terms speaking skeleton mirroring the sd41 golden template; replaced the prior 7071-char English-only version. Pulled the 4 twists from sd45's existing content (MSI label hierarchy [DOMINANT], heterogeneous multi-source CG with per-source one-hot + Thompson quota, close-friend recency override via dual-feed + soft bypass head, integrity multiplicative downrank), kept own-URI 1-problem-1-URI no-bundle (refs `sd://meta-reels-golden` / `sd://meta-top3-comments-golden` / `sd://meta-friend-rec-golden` / `sd://meta-weapon-ads-golden` via `cd://96` hub).
+- **Deliverables**: `scripts/seed_meta_meta_fb_newsfeed_golden_verbal_outline.py` (new idempotent seed, sentinel `<!-- SD45_VERBAL_V1_20260515 -->`, sd41-style oral_narrative scope guard; touches ONLY `verbal_outline`).
+- **Sanity check result**: Self-check + DB validate pass. Run1 `updated id=45 ... 7071 -> 4990 chars`, Run2 `no-op id=45 (verbal_outline already current)` (idempotent, `updated_at` not bumped). Mechanical contract: 1 `[DOMINANT]`, 4 `[floating-twist]`, 1 `[best-anchor]`, 1 `[worst-anchor]`, starts with sentinel, length 4990 in target band [3000, 5000]. Scope guard: architecture / production_constraints / tradeoffs / defense remain NULL post-seed. `pytest -x -q`: 1298 passed in 88s. API smoke `GET /api/system-designs/meta-fb-newsfeed-golden`: status 200, verbal_outline 4990 chars starting with the new sentinel.
+- **Status**: [DONE]
+- **Request**: `python .claude/hooks/task_db.py complete T-P0-896`
