@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 790 completed tasks archived as of latest archival.
+> 806 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1158,3 +1158,44 @@ CONTENT:
 - [x] **2026-05-13** -- T-P0-874: [META-MLSD-CD96-LINK-FIX] cd96 §1 dedupe sd-golden cluster + new §1.1 主次映射 + §3 typography polish; match cd97 排版水准. User feedback (2026-05-13 23:22 Discord): cd96 has 3 issues — (1) §1 timing table inlines 4 sd:// URIs as raw strings (n
 - [x] **2026-05-13** -- T-P1-875: [Meta-MLSD-narrative] sd41 narrative-mode 简化 + 触发 schema 演进决策. 用户报 sd://meta-reels-golden 写得乱七八糟, 跟 framing/方法论冲突, 让我用他写的口播稿大幅简化. 已 live: sd41 10 字段→4 字段 (45KB→14KB), cd96 drawer 行描述更
 - [x] **2026-05-12** -- T-P2-852: [Meta-MLSD] doc 94 Q1-Q12 backfill: prepend 'Generic 对比' segment to each card ('通用 [domain] 怎么做 → 为什么这题不能直接套'). Edit scripts/seed_meta_mlsd_family_taxonomy.py: for each of Q1 through Q12 (skip Q13, T-P0-848 already handled), prepend
+- [x] **2026-05-14** -- T-P0-883: [Meta-MLSD] Add meta-ig-story-golden 口播稿 row (Q10 IG Story, author-tray reframe). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-14** -- T-P0-884: [Meta-MLSD] Add meta-event-attendance-golden 口播稿 row (Q12 Predict Event Attendance). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-14** -- T-P0-885: [Meta-MLSD] Add meta-ads-golden 口播稿 row (Q4 Ads, auction-mediated calibrated probability). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-14** -- T-P0-890: [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit. Meta MLSD top-9 batch FINAL wire-up task -- depends on all 7 autorun tasks landing first.
+
+GOAL: cd94 (id=94) Family Tax
+- [x] **2026-05-15** -- T-P0-891: Promote verbal_outline section to top of SystemDesignDrawer rendering. Promote verbal_outline section to top of SystemDesignDrawer rendering.
+
+Background: SystemDesignDrawer.tsx renders 9 sd 
+- [x] **2026-05-15** -- T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden). Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
+template for sd42-sd53 in this batch.
+
+Background: sd41 
+- [x] **2026-05-15** -- T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden). Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden
+- [x] **2026-05-16** -- T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-we
+- [x] **2026-05-16** -- T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-fr
+- [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
+- [x] **2026-05-19** -- T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress). ## Summary
+Promote the proven node-44 reconcile logic into a shared, tested scripts/lib/framework_progress.py -- ONE imp
+- [x] **2026-05-19** -- T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only). ## Summary
+Build the table-wide reconcile sweep as a dry-run-first tool (diff report, audit log, scope pinned). THIS tas
+- [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-14** -- T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
+
+READ FIRST: scripts/mlsd_top9_spec.md (locked template 

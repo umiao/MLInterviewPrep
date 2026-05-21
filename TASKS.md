@@ -9,46 +9,10 @@
 
 ### P0 -- Must Have (core functionality)
 
-#### T-P0-898: sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden)
-- **Priority**: P0
-- **Complexity**: M
-- **Depends on**: T-P0-892
-- **Description**: Rewrite sd47 (meta-ig-story-golden) verbal_outline; mirror sd41 golden template.
-
-Depends on: T-P0-892 (sd41 golden template)
-
-Background: Harmonize verbal_outline to Chinese-narration + English-terms
-across 13 Meta sd-goldens. This task handles sd47 (meta-ig-story-golden).
-Current verbal_outline length: 8785 chars.
-
-Constraints:
-- READ system_designs.verbal_outline WHERE slug='meta-reels-golden'
-  as the template; mirror its structure exactly
-- 3-5 floating twists, 1 DOMINANT, best+worst anchor
-- Chinese narration prose + English ML terms; first occurrence
-  `**English** (acronym, Chinese)`
-- 1-problem-1-URI no-bundle
-- Target length 3000-5000 chars
-- ONLY touch verbal_outline; other fields stay as-is
-
-Files:
-- scripts/seed_meta_meta_ig_story_golden_verbal_outline.py (NEW idempotent seed)
-  - Sentinel marker `<!-- SD47_VERBAL_V1_20260515 -->`
-  - UPSERT system_designs.verbal_outline WHERE slug='meta-ig-story-golden'
-
-AC:
-- Idempotent seed (twice = same DB state)
-- verbal_outline length >= 2500
-- Mechanical check: 1 DOMINANT, 3-5 floating twists
-- pytest passes; API smoke GET /system-designs/meta-ig-story-golden
-
-git add explicit.
-Commit: [T-X] sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden)
-
 #### T-P0-899: sd48 meta-event-attendance-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-892
+- **Depends on**: None
 - **Description**: Rewrite sd48 (meta-event-attendance-golden) verbal_outline; mirror sd41 golden template.
 
 Depends on: T-P0-892 (sd41 golden template)
@@ -84,7 +48,7 @@ Commit: [T-X] sd48 meta-event-attendance-golden verbal_outline (mirror sd41 gold
 #### T-P0-900: sd49 meta-ads-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-892
+- **Depends on**: None
 - **Description**: Rewrite sd49 (meta-ads-golden) verbal_outline; mirror sd41 golden template.
 
 Depends on: T-P0-892 (sd41 golden template)
@@ -120,7 +84,7 @@ Commit: [T-X] sd49 meta-ads-golden verbal_outline (mirror sd41 golden)
 #### T-P0-901: sd50 meta-v2v-search-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-892
+- **Depends on**: None
 - **Description**: Rewrite sd50 (meta-v2v-search-golden) verbal_outline; mirror sd41 golden template.
 
 Depends on: T-P0-892 (sd41 golden template)
@@ -156,7 +120,7 @@ Commit: [T-X] sd50 meta-v2v-search-golden verbal_outline (mirror sd41 golden)
 #### T-P0-902: sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-892
+- **Depends on**: None
 - **Description**: Rewrite sd51 (meta-event-rec-golden) verbal_outline; mirror sd41 golden template.
 
 Depends on: T-P0-892 (sd41 golden template)
@@ -192,7 +156,7 @@ Commit: [T-X] sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden)
 #### T-P0-903: sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-892
+- **Depends on**: None
 - **Description**: Rewrite sd52 (meta-location-rec-golden) verbal_outline; mirror sd41 golden template.
 
 Depends on: T-P0-892 (sd41 golden template)
@@ -228,7 +192,7 @@ Commit: [T-X] sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden)
 #### T-P0-904: sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden)
 - **Priority**: P0
 - **Complexity**: M
-- **Depends on**: T-P0-892
+- **Depends on**: None
 - **Description**: Rewrite sd53 (meta-spotify-music-golden) verbal_outline; mirror sd41 golden template.
 
 Depends on: T-P0-892 (sd41 golden template)
@@ -264,7 +228,7 @@ Commit: [T-X] sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden)
 #### T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible
 - **Priority**: P0
 - **Complexity**: S
-- **Depends on**: T-P0-894, T-P0-895, T-P0-896, T-P0-897, T-P0-898, T-P0-899, T-P0-900, T-P0-901, T-P0-902, T-P0-903, T-P0-904, T-P0-906
+- **Depends on**: T-P0-896, T-P0-897, T-P0-898, T-P0-899, T-P0-900, T-P0-901, T-P0-902, T-P0-903, T-P0-904
 - **Description**: GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) land: (1) re-run retrofit_meta_mlsd_*_drawer_header.py for every re-seeded sd row (re-seeding wipes the drawer header - known regression, see LESSONS 2026-05-15). (2) verify every cd96/cd94 sd:// link resolves to a system_designs.slug. (3) run scripts/audit_meta_mlsd_3rule.py and scripts/audit_mlsd_prose_quality.py over all 13; assert each has [DOMINANT]x1 + [floating-twist]x3-5 + [best-anchor]x1 + [worst-anchor]x1 + SDxx_VERBAL_V1 sentinel + verbal_outline length 3000-5000. (4) assert ml-mlsd tab returns exactly 13 golden rows. AC: both audits exit 0; 13/13 conformant; PROGRESS.md entry.
 
 ### P1 -- Should Have (agentic intelligence)
@@ -351,7 +315,7 @@ AC:
 #### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
 - **Priority**: P1
 - **Complexity**: L
-- **Depends on**: T-P0-910, T-P0-914
+- **Depends on**: T-P0-914
 - **Description**: ## Summary
 Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
 
@@ -882,26 +846,11 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 
 ## Completed Tasks
 
-> 790 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 806 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-05-20** -- T-P0-898: sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden). Rewrite sd47 (meta-ig-story-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-20** -- T-P0-897: sd46 meta-yelp-restaurant-golden verbal_outline (mirror sd41 golden). Rewrite sd46 (meta-yelp-restaurant-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-20** -- T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden). Rewrite sd45 (meta-fb-newsfeed-golden) verbal_outline; mirror sd41 golden template.
 - [x] **2026-05-19** -- T-P1-919: No-checklist drift fix: node 69 Regularization -- add confirmation checkbox + re-derive status (user-scoped: ONLY no-checklist, NOT 115/171/92). Discord user decision 2026-05-19 (msg 1506361186168606802) for the T-P0-914 no-checklist drift bucket. SCOPE: node 69 ON
 - [x] **2026-05-19** -- T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff. ## Summary
 - [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
-- [x] **2026-05-19** -- T-P0-911: Reconcile sweep TOOL with --dry-run/--apply + diff + audit log (scope-pinned; THIS task = tool + dry-run report only). ## Summary
-- [x] **2026-05-19** -- T-P0-910: Extract scripts/lib/framework_progress.py reconcile helper (single source for checkbox->status/progress). ## Summary
-- [x] **2026-05-16** -- T-P0-906: [Meta-MLSD] Reassign display_order sd45-53 into ml-mlsd tab window [130,199) so all 13 problems are visible. GAP A (visibility), SCHEME B (user-approved 2026-05-16: keep sd41-44 quality-leading at front). ml-mlsd tab filter = dis
-- [x] **2026-05-16** -- T-P0-895: sd44 meta-friend-rec-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd44 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd44 meta-fr
-- [x] **2026-05-16** -- T-P0-894: sd43 meta-weapon-ads-golden verbal_outline (mirror sd41 golden). GAP B golden + T-P1-881 sd43 archetype FOLDED IN (user-approved 2026-05-16). Produce sd41-SHAPED golden for sd43 meta-we
-- [x] **2026-05-15** -- T-P0-893: sd42 meta-top3-comments-golden verbal_outline (mirror sd41 golden). Rewrite sd42 (meta-top3-comments-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-15** -- T-P0-892: sd41 meta-reels-golden verbal_outline (CN-narration + EN-terms golden). Rewrite sd41 (meta-reels-golden) verbal_outline; defines golden
-- [x] **2026-05-15** -- T-P0-891: Promote verbal_outline section to top of SystemDesignDrawer rendering. Promote verbal_outline section to top of SystemDesignDrawer rendering.
-- [x] **2026-05-14** -- T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-14** -- T-P1-888: [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec, context-dominant). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-14** -- T-P1-887: [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec, sparse + temporal + dual cold-start). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-14** -- T-P1-886: [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 Video-to-Video Search, multi-facet retrieval). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-14** -- T-P0-890: [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit. Meta MLSD top-9 batch FINAL wire-up task -- depends on all 7 autorun tasks landing first.
-- [x] **2026-05-14** -- T-P0-885: [Meta-MLSD] Add meta-ads-golden 口播稿 row (Q4 Ads, auction-mediated calibrated probability). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-14** -- T-P0-884: [Meta-MLSD] Add meta-event-attendance-golden 口播稿 row (Q12 Predict Event Attendance). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
-- [x] **2026-05-14** -- T-P0-883: [Meta-MLSD] Add meta-ig-story-golden 口播稿 row (Q10 IG Story, author-tray reframe). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
