@@ -9,6 +9,8 @@ Kanban-style prep board, and Markdown/KaTeX study notes. Content is authored as
 idempotent Python seed scripts (the only sanctioned write path into the DB) and consumed
 during live mock interviews and daily drills.
 
+> **Doc discovery**: this project's docs are indexed in [`docs/INDEX.md`](docs/INDEX.md) (regenerate with `python ../scripts/index_docs.py --project MLInterviewPrep`); every doc across the workspace is in the root [`../docs/INDEX.md`](../docs/INDEX.md).
+
 ## Tech Stack
 - Python 3.11+
 - FastAPI, Uvicorn (backend API)
