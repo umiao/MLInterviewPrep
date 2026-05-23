@@ -98,3 +98,10 @@ tasks_temp.*
 # Claude worktrees
 .claude/worktrees/
 docs/staging/generated/
+
+# --- Runtime logs (WSH-C1) ------------------------------
+# Never commit per-run log spew. Hand-authored artifacts under logs/
+# (drafts, diffs, screenshots) are intentionally tracked and unaffected.
+data/logs/
+logs/wrapper-stats.jsonl
+logs/autonomous*.jsonl
