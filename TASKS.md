@@ -70,7 +70,7 @@ AC:
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: None
-- **Description**: ruff reports a fatal syntax error at scripts/translate_p6_nodes.py:1972. The outer r-string literal opened at L1968 contains an inner Python docstring -- `"""倒数排名融合"""` -- inside an embedded ``` markdown block, and the inner triple-quotes terminate the outer string prematurely. This corrupts the rest of the file (the `## Interview Tips` markdown content after line 1981 becomes top-level Python). Fix options: (a) escape the inner triple-quotes, (b) replace outer `r"""..."""` with `r'...'` or `textwrap.dedent` of a raw multi-line list, or (c) split the markdown blob to a sibling .md file and read it at runtime. Blocker for whole-tree `ruff check scripts/` runs. Surfaces only because of the cross-project-sync audit; src/+tests/ are clean.
+- **Description**: ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ by T-P2-353 lifecycle migration; line +1 from a PINNED_BY marker). The outer r-string literal opened near L1969 contains an inner Python docstring -- triple-quoted Chinese -- inside an embedded markdown block, and the inner triple-quotes terminate the outer string prematurely, corrupting the rest of the file. Fix options: (a) escape inner triple-quotes, (b) replace outer r-string with single-quote / textwrap.dedent of a raw list, (c) split markdown blob to a sibling .md read at runtime. The file is PINNED_BY this ticket (marker in file head) so the script-lifecycle lint will NOT auto-retire it. src/+tests/ are clean; nothing imports this script (verified 2026-05-24).
 
 #### T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A)
 - **Priority**: P1
@@ -148,6 +148,26 @@ S -- targeted 2-node (maybe a few more) triage, read-only.
 
 ## Dependencies
 T-P0-914 (root-cause). The root-cause investigation already gathers the history needed to judge legit-vs-stale, so this consumes its findings; independent of the 911 sweep (different drift class).
+
+#### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Summary
+Extract drawer navigation out of company_documents.content markdown into a structured drawer_nav JSON column, assemble at render time, retire the 4 retrofit_meta_mlsd_*_drawer_header.py scripts. V1 of the multi-surface fix; NO full normalization. Adds a stability-observation gate for E2.
+
+## drawer_nav JSON schema
+{"items":[{"label":"string","anchor":"string","depth":1,"ref":"cd://N|sd://slug|null"}],"rendered_at_top":true}
+
+## Acceptance Criteria
+- [ ] AC1: company_documents gets a drawer_nav JSON column (migration + relevant seed updates).
+- [ ] AC2: frontend CompanyDocDrawer assembles nav from drawer_nav above the body; render equivalent to current.
+- [ ] AC3: the 4 retrofit scripts archived (moved to scripts/migrate/ with SAFE_DELETE_AFTER) or deleted; re-seed no longer needs them.
+- [ ] AC4 (journey): open a Meta-MLSD doc drawer -> drawer nav shows correctly, links clickable (URI scheme preserved).
+- [ ] AC5: audit_uri_consistency.py all green.
+- [ ] AC6 (E2 decision gate): drawer_nav abstraction holds with NO regression on >=3 MLSD docs for >=2 weeks (no schema tweak, no retrofit-class op). E2 must NOT start until this AC is checked; once checked, human decides whether to proceed to E2 or hold.
+
+## Complexity: M. Deps: None.
 
 ### P2 -- Nice to Have
 
@@ -621,6 +641,22 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 5. Kill switch verified.
 
 **Depends on**: T-P1-713 (AR-12) -- need its telemetry to know if AR-17 is justified.
+
+#### T-P2-922: [WSH-E2] MLI content 归一化 (sections + 跨引用外键, 终局)
+- **Priority**: P2
+- **Complexity**: L
+- **Depends on**: T-P1-921
+- **Description**: ## Summary
+Normalize company_documents.content into company_document_sections (section_key/body/order) + upgrade cross-refs to FK constraints. Multi-surface render goes from 'parse markdown' to 'project sections'. The +1-quarter endgame. HUMAN_REVIEW: large schema migration. GATED by E1.AC6 (2-week no-regression observation).
+
+## Acceptance Criteria
+- [ ] AC1: join table schema + all seeds rewritten.
+- [ ] AC2: cd:// / sd:// cross-refs become FK; dangling ref fails the constraint.
+- [ ] AC3: projection function exports drawer-summary / full-page / index renditions from one master.
+- [ ] AC4 (journey): edit one master -> all three surfaces change in sync.
+- [ ] AC5: all seeds idempotent + URI audit green.
+
+## Complexity: L. Deps: E1 (incl. AC6 gate). HUMAN_REVIEW: yes.
 
 ## Completed Tasks
 
