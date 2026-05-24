@@ -81,19 +81,47 @@ _SAFE_DELETE_RE = re.compile(
     r"SAFE_DELETE_AFTER\s*[:=]\s*(\d{4}-\d{2}-\d{2})"
 )
 _RUN_ONCE_RE = re.compile(r"\bRUN_ONCE\b")
+# Explicit human pin: "in use / to be fixed -- do NOT auto-retire" (distinct from
+# "observe then retire"). Value names what holds it (a ticket, a test, an importer).
+_PINNED_RE = re.compile(r"PINNED_BY\s*[:=]\s*(\S+)")
 
 # Outcome constants
 PASS = "PASS"
+PINNED = "PINNED"                 # live reference or explicit PINNED_BY -- never retired
 CLEANUP_CANDIDATE = "CLEANUP_CANDIDATE"
 WARN = "WARN"
 SKIPPED = "SKIPPED"
+
+# --- reference scan (T-P2-353 follow-up) ------------------------------------
+# A retirement decision must be based on LIVE references at retire-time, not on
+# static visibility at write-time. Static-only import detection silently misses
+# importlib.import_module("x") / __import__("x") / string-built imports -- exactly
+# the class that the T-P2-353 migration was bitten by (caught only by a pytest
+# collection error). So before proposing ANY script for deletion, scan the repo
+# for references to it (static import, dynamic import, and path-literal) and PIN
+# anything still referenced, reporting the referrers for human review.
+
+# File types worth scanning for references. Deliberately CODE/CONFIG only --
+# deleting a script breaks imports and invocations, which live in .py/.yml/.sh/
+# Makefile, NOT in markdown prose. A doc/log mention just goes stale (like a
+# PROGRESS line) and must NOT pin, or the lint would never retire anything.
+_REF_GLOBS = ("*.py", "*.yml", "*.yaml", "*.sh", "*.toml", "*.cfg",
+              "*.ini", "Makefile")
+# Directories that are noise (stale copies / declared-dead / scratch output) or
+# huge (perf): never scanned. A reference from declared-dead code (archive/) or
+# scratch output (logs/, tmp/) is not a LIVE dependency and must not pin.
+_REF_SKIP_DIRS = frozenset({
+    ".git", "node_modules", "__pycache__", ".venv", "venv", "dist", "build",
+    ".mypy_cache", ".pytest_cache", ".ruff_cache", "worktrees",
+    "archive", "logs", "tmp", "staging",
+})
 
 
 @dataclass
 class Finding:
     path: str                 # repo-relative (or root-relative under --root)
     namespace: str            # infra | migrate | seed | tools
-    outcome: str              # PASS | CLEANUP_CANDIDATE | WARN | SKIPPED
+    outcome: str              # PASS | PINNED | CLEANUP_CANDIDATE | WARN | SKIPPED
     age_days: int | None      # None when undeterminable
     age_source: str           # git | mtime | unknown
     marker: str               # safe_delete_after:<date> | run_once | none
@@ -142,12 +170,12 @@ def _age_days(path: Path, repo: Path, now: _dt.datetime) -> tuple[int | None, st
         return None, "unknown"
 
 
-def _read_markers(path: Path) -> tuple[_dt.date | None, bool]:
-    """Return (safe_delete_after_date, has_run_once)."""
+def _read_markers(path: Path) -> tuple[_dt.date | None, bool, str | None]:
+    """Return (safe_delete_after_date, has_run_once, pinned_by)."""
     try:
         text = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
-        return None, False
+        return None, False, None
     sd = None
     m = _SAFE_DELETE_RE.search(text)
     if m:
@@ -155,7 +183,58 @@ def _read_markers(path: Path) -> tuple[_dt.date | None, bool]:
             sd = _dt.date.fromisoformat(m.group(1))
         except ValueError:
             sd = None
-    return sd, bool(_RUN_ONCE_RE.search(text))
+    pm = _PINNED_RE.search(text)
+    return sd, bool(_RUN_ONCE_RE.search(text)), (pm.group(1) if pm else None)
+
+
+def find_live_references(
+    repo: Path, stems: set[str], *, scripts_root: Path | None = None,
+) -> dict[str, list[str]]:
+    """Map each script stem -> sorted list of LIVE referrer paths (repo-relative).
+
+    Detects, across code/config files only (see ``_REF_GLOBS``), three forms:
+      * path-literal    ``scripts/.../<stem>.py``  (subprocess / Makefile calls)
+      * static import   ``import <stem>`` / ``from <stem> import``
+      * dynamic import  ``import_module("<stem>")`` / ``__import__("<stem>")``
+
+    A script mentioning its *own* name is ignored; sibling references DO pin
+    (a live caller is a live caller). Markdown/logs are not scanned -- a prose
+    mention is not a dependency and would otherwise pin everything forever.
+    """
+    if not stems:
+        return {}
+    scripts_root = scripts_root or (repo / "scripts")
+    # One alternation over all stems; word-boundary so "foo" != "foobar".
+    alt = "|".join(re.escape(s) for s in sorted(stems, key=len, reverse=True))
+    rx = re.compile(
+        rf"(?:import_module\(\s*['\"]({alt})['\"]"          # dynamic
+        rf"|__import__\(\s*['\"]({alt})['\"]"
+        rf"|(?:from|import)\s+({alt})\b"                     # static
+        rf"|scripts[\\/](?:[\w-]+[\\/])*({alt})\.py"          # path-literal nested
+        rf"|(?<![\w/])({alt})\.py)"                          # bare <stem>.py
+    )
+    refs: dict[str, set[str]] = {}
+    for pat in _REF_GLOBS:
+        for f in repo.rglob(pat):
+            if not f.is_file():
+                continue
+            if any(part in _REF_SKIP_DIRS for part in f.parts):
+                continue
+            try:
+                rel = str(f.relative_to(repo)).replace("\\", "/")
+            except ValueError:
+                continue
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                continue
+            self_stem = f.stem if f.suffix == ".py" else None
+            for m in rx.finditer(text):
+                stem = next(g for g in m.groups() if g)
+                if stem == self_stem and rel.startswith("scripts/"):
+                    continue  # a script mentioning its own name
+                refs.setdefault(stem, set()).add(rel)
+    return {k: sorted(v) for k, v in refs.items()}
 
 
 # --- core classification ----------------------------------------------------
@@ -175,6 +254,7 @@ def classify(
     max_age_days: int = DEFAULT_MAX_AGE_DAYS,
     include_migrate: bool = False,
     today: _dt.date | None = None,
+    ref_scan: bool = True,
 ) -> list[Finding]:
     """Walk the namespaces under ``scripts_root`` and classify each script."""
     repo = repo or scripts_root.parent
@@ -184,6 +264,17 @@ def classify(
     linted = list(LIFECYCLE_NAMESPACES)
     if include_migrate:
         linted.append("migrate")
+
+    # Pre-scan live references so a still-referenced script is never proposed
+    # for retirement (gap-closer: retire-time liveness > write-time visibility).
+    linted_stems: set[str] = set()
+    for ns in linted:
+        ns_dir = scripts_root / ns
+        if ns_dir.is_dir():
+            linted_stems |= {p.stem for p in _iter_scripts(ns_dir)
+                             if p.suffix == ".py"}
+    live_refs = (find_live_references(repo, linted_stems, scripts_root=scripts_root)
+                 if ref_scan else {})
 
     findings: list[Finding] = []
 
@@ -206,8 +297,26 @@ def classify(
             continue
         for p in _iter_scripts(ns_dir):
             rel = str(p.relative_to(repo)).replace("\\", "/")
-            sd_date, run_once = _read_markers(p)
+            sd_date, run_once, pinned_by = _read_markers(p)
             age, src = _age_days(p, repo, now)
+
+            # PIN takes precedence over every other outcome: a script that is
+            # still imported / referenced (or explicitly pinned to a ticket)
+            # must never be auto-retired, regardless of its age or expiry date.
+            refs = live_refs.get(p.stem, []) if p.suffix == ".py" else []
+            if pinned_by or refs:
+                if pinned_by and refs:
+                    why = f"PINNED_BY {pinned_by}; also referenced by {len(refs)} file(s)"
+                    mk = f"pinned_by:{pinned_by}+refs"
+                elif pinned_by:
+                    why = f"PINNED_BY {pinned_by} (explicit) -- not retired"
+                    mk = f"pinned_by:{pinned_by}"
+                else:
+                    shown = ", ".join(refs[:4]) + ("..." if len(refs) > 4 else "")
+                    why = f"live reference -- {len(refs)} referrer(s): {shown}"
+                    mk = "pinned:live-ref"
+                findings.append(Finding(rel, ns, PINNED, age, src, mk, detail=why))
+                continue
 
             if sd_date is not None:
                 marker = f"safe_delete_after:{sd_date.isoformat()}"
@@ -250,7 +359,8 @@ def classify(
 
 # --- reporting --------------------------------------------------------------
 
-_ICON = {PASS: "[OK]", CLEANUP_CANDIDATE: "[GAP]", WARN: "[WARN]", SKIPPED: "[skip]"}
+_ICON = {PASS: "[OK]", PINNED: "[PIN]", CLEANUP_CANDIDATE: "[GAP]",
+         WARN: "[WARN]", SKIPPED: "[skip]"}
 
 
 def print_human(findings: list[Finding], verbose: bool) -> None:
@@ -262,15 +372,17 @@ def print_human(findings: list[Finding], verbose: bool) -> None:
         print("  all lifecycle-namespace scripts pass (no findings)")
     for f in shown:
         line = f"  {_ICON[f.outcome]} {f.path}  [{f.namespace}]"
-        if verbose or f.is_finding:
+        if verbose or f.is_finding or f.outcome == PINNED:
             line += f"  -- {f.detail}"
         print(line)
     warns = [f for f in findings if f.outcome == WARN]
     cleanups = [f for f in findings if f.outcome == CLEANUP_CANDIDATE]
+    pinned = [f for f in findings if f.outcome == PINNED]
     skipped = [f for f in findings if f.outcome == SKIPPED]
     print("\n" + "=" * 72)
     print(f"SUMMARY: {len(findings)} scripts | {len(warns)} stale-unmarked | "
-          f"{len(cleanups)} cleanup-candidates | {len(skipped)} exempt(infra)")
+          f"{len(cleanups)} cleanup-candidates | {len(pinned)} pinned(in-use) | "
+          f"{len(skipped)} exempt(infra)")
     print("=" * 72)
 
 
@@ -291,6 +403,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="also lint migrate/ (default: skipped, predates convention)")
     ap.add_argument("--root", type=str, default=None,
                     help="scripts/ root to lint (default: this repo's scripts/)")
+    ap.add_argument("--no-ref-scan", action="store_true",
+                    help="skip the live-reference scan (faster; but then expired "
+                         "SAFE_DELETE scripts are proposed for retirement even if "
+                         "still imported -- only safe in a pristine sandbox)")
     args = ap.parse_args(argv)
 
     scripts_root = Path(args.root).resolve() if args.root else (WORKSPACE_ROOT / "scripts")
@@ -298,6 +414,7 @@ def main(argv: list[str] | None = None) -> int:
         scripts_root,
         max_age_days=args.max_age_days,
         include_migrate=args.include_migrate,
+        ref_scan=not args.no_ref_scan,
     )
 
     if args.json:
@@ -309,6 +426,7 @@ def main(argv: list[str] | None = None) -> int:
                 "total": len(findings),
                 "stale_unmarked": len(warns),
                 "cleanup_candidates": len(cleanups),
+                "pinned_in_use": len([f for f in findings if f.outcome == PINNED]),
                 "exempt_infra": len([f for f in findings if f.outcome == SKIPPED]),
             },
         }, indent=2, ensure_ascii=False))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SAFE_DELETE_AFTER: 2026-08-21  (T-P2-353 scripts/ lifecycle migration; one-shot already run)
+# PINNED_BY: T-P1-876  (open fix ticket for L1973 syntax error; do NOT auto-retire until fixed or ticket closed)
 """Translate nodes 149-164 to Chinese with deep expansion."""
 
 import sqlite3
