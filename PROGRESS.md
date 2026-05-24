@@ -453,3 +453,27 @@
   - `pytest tests/ -x -q --timeout=60` -> 1298 passed in 81.15s (matches baseline; no regression).
 - **Status**: [DONE]
 - **Request**: `python .claude/hooks/task_db.py complete T-P1-920`
+
+## 2026-05-21 -- [ad-hoc] Export company_documents.id=98 (Adobe Final Stats+RAG) to print-ready PDF
+- **What I did**: User asked for a PDF of `http://localhost:5173/companies/23/prep?tab=docs&doc=98` with reasonable typesetting. Dev server was down (5173 only showed TIME_WAIT sockets), so built a standalone offline renderer instead of headless-scraping the live page: pull markdown from `data/mle_prep.db` (company_documents.id=98), render via `markdown-it-py` + `dollarmath` + `tasklists` plugins, headless Chromium loads the local HTML and explicitly calls `katex.render()` on every `.math.inline` / `.math.block` node (the `dollarmath` plugin strips `$` delimiters so KaTeX auto-render finds nothing -- this was the only real bug; first PDF run reported 0 math elements rendered). Print CSS: A4, 16-18mm margins, 11pt, Segoe UI / PingFang SC / Noto Sans CJK font stack, full-width tables with zebra striping + `page-break-inside: avoid`, code blocks + KaTeX display math also non-breaking, footer with auto page numbers.
+- **Deliverables**:
+  - `tmp/export_doc98_pdf.py` (standalone exporter; CLI-less, doc id hardcoded for this one-off)
+  - `tmp/doc98.html` (49.6 KB self-contained HTML, KaTeX via CDN)
+  - `tmp/Adobe_Final_Prep_Stats_RAG_Q1-Q50.pdf` (699.8 KB, 15 pages)
+- **Sanity check result**:
+  - Final run: `[OK] KaTeX rendered=134 errors=0 katex_elems=134` -- all 115 inline + 21 block math expressions rendered successfully.
+  - HTML structure scan: 1 H1 + 21 H2 + 10 tables + 52 task-list checklist items (matches source: 1 doc title, 21 sections including the 18 numbered subsections + Prerequisites + Key Terms + Interview Tips + Self-Check, 10 tables across Q4/Q7/Q10/Q14/Q22/Q26/Q28/Q34/Q39/Q40/Q41, 50 Q&A self-check items + 2 extras).
+  - PDF header `%PDF-1.4`, page count heuristic = 15, file opens (no Chromium error in stderr).
+  - No source-DB mutation -- read-only pull; no test regression possible.
+- **Status**: [DONE]
+- **Request**: No task_db change (ad-hoc user request, not a tracked task).
+- **Followup candidate (not added to backlog yet)**: promote `tmp/export_doc98_pdf.py` to `scripts/export_company_doc_pdf.py` with `--doc-id` / `--out` CLI flags so future doc exports don't need a one-off script. Asked the user inline at end of session; deferred pending their confirmation.
+
+
+## 2026-05-24 -- [T-P2-353] [WSH-F3-mli] scripts/ 602-file lifecycle migration (risk-tiered, human-reviewed)
+
+- **What I did**: Ran the deferred bulk scripts/ migration under human review, partitioning the 602 flat scripts by RISK (not name) because 81% hard-code `Path(__file__).resolve().parent.parent` so a naive `git mv` silently breaks their DB path (the exact reason F3 deferred this). Built a static+dynamic dependency map first: only 5 scripts are sibling-imported libs (study_note_builder x31, audit_mlsd_prose_quality x10, ...) and only 15+3 are referenced by tests/CI (incl. dynamic `importlib.import_module` -- which my first static pass missed and a collection error caught: reconcile_fully_checked_nodes/forum_scrape/import_blind75_notes). Applied: 150 dated dead one-shots -> `scripts/archive/`; 104 path-safe undated -> `seed/`(42)+`tools/`(62) each with a `# SAFE_DELETE_AFTER: 2026-08-21` marker; 332 depth-coupled + 18 hard-pinned stay flat.
+- **Deliverables**: 150 renames -> scripts/archive/; 104 renames+marker -> scripts/seed|tools/; scripts/README.md (guard rewritten: migration record table + going-forward rule); scripts/ flat .py 602->348.
+- **Sanity check result**: pytest 1298 passed at baseline AND after each batch (archive, move); `lint_script_lifecycle.py --strict` -> 104 scripts, 0 stale-unmarked, 0 cleanup-candidates, exit 0; py_compile on all 104 movers -> 103 OK, 1 pre-existing-broken (`translate_p6_nodes.py`, corrupt byte 0x90 at HEAD, NOT caused by marker -- a frozen already-run one-shot, now carries SAFE_DELETE_AFTER so lint will retire it); ruff not affected (CI lints src/+tests/ only, never scripts/).
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P2-353 --reviewer xushenghui` (root DB; human_review=1)
