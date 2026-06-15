@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "plan-review/findings",
+  "title": "plan-review axis-1 findings (T-P0-388 AC1 contract)",
+  "description": "AC-level structured review output emitted by each fresh axis-1 subagent and aggregated into round1.json. Consumed by T4 (adjudication + brief) and T5 (events.jsonl writeback). The terminal verdict set is {pass,concern} (AC1); subjective items carry the NON-terminal sentinel verdict='defer' + route='human' (AC5) -- the machine must never pronounce a terminal verdict on a subjective matter (bearing wall). 'defer' reconciles AC1's {pass,concern} with AC5's 'no terminal verdict, only route=human'; it is documented, not a silent gap-fill.",
+  "type": "object",
+  "required": ["run_id", "round", "findings"],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable id for one /plan-review run; T6 aggregates incremental review by run, T5 stamps each event with it."
+    },
+    "round": {
+      "type": "integer",
+      "enum": [1, 2],
+      "description": "1 = axis-1 raw findings; 2 = axis-2 adjudicated (T4)."
+    },
+    "tasks_reviewed": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Window task ids that were reviewed (for coverage auditing)."
+    },
+    "findings": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/finding"}
+    }
+  },
+  "definitions": {
+    "finding": {
+      "type": "object",
+      "required": ["task", "ac", "dimension", "verdict", "severity", "confidence", "evidence", "suggested_fix", "route"],
+      "properties": {
+        "task": {"type": ["string", "null"], "description": "Task id (maps to T5 events task_id); null ONLY for a global/cross-task finding added by T4's global pass."},
+        "ac": {"type": ["string", "null"], "description": "The hit AC (e.g. 'AC3'); null for a task-level finding. Maps to T5 events ac_ref. AC-level granularity preserved for T5 writeback + T6 incremental."},
+        "dimension": {"type": "string", "enum": ["objective", "subjective"], "description": "The NATURE of the finding. objective = machine-ownable well-formedness; subjective = should-build/scope/intent/irreversible/security (route=human, never terminal). 'harden-L0' is NOT a dimension -- it is a ROUTE for an OBJECTIVE defect L0 missed (AC6)."},
+        "verdict": {"type": "string", "enum": ["pass", "concern", "defer"], "description": "Terminal verdict in {pass,concern} (AC1). 'defer' = non-terminal sentinel reserved for subjective items (AC5). No 'fail' (objective fail caught by L0; subjective fail does not exist)."},
+        "severity": {"type": "string", "enum": ["low", "med", "high"]},
+        "confidence": {"type": "string", "enum": ["low", "med", "high"], "description": "Coarse; drives routing ONLY (a low-confidence concern routes human), never displayed as a number."},
+        "evidence": {"type": "string", "minLength": 1, "description": "Cites a concrete AC / Verification line (AC1). Refute-by-default: a concern with no concrete evidence is itself suspect."},
+        "suggested_fix": {"type": "string", "description": "Required non-empty for concern/defer; may be empty for pass."},
+        "route": {"type": "string", "enum": ["none", "human", "harden-L0"], "description": "pass=>none; objective concern=>human OR harden-L0 (the latter iff it is an objective defect L0 should have caught, AC6); subjective(defer)=>human. route=harden-L0 requires dimension=objective AND verdict=concern."}
+      }
+    }
+  }
+}
