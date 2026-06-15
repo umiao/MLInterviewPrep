@@ -109,7 +109,32 @@ python .claude/hooks/plan_validate.py
 
 Fix any failures (missing sections, missing regeneration) before proceeding.
 
-### Step 6: Deactivate and Summarize
+### Step 6: Plan-time review (L1/L2) -- run by default
+
+After L0 (Step 5) passes, invoke the **plan-review** skill against the tasks you
+just wrote, so the user gets a refute-by-default per-task review (axis-1) plus a
+human-friendly guidance brief (axis-2) **before the plan is finalized**:
+
+```
+Skill(skill="plan-review")        # reviews the freshly-written tasks
+```
+
+This is the default closing review, not an optional afterthought. Surface the
+brief to the user and let them adjudicate concerns -- the machine never decides
+subjective items, it only routes them (see plan-review's load-bearing wall).
+
+**Cost (state it up front, then proceed):** axis-1 spawns a *fresh subagent per
+task* (~39K tokens/task; ~280-370K tokens for an 8-task plan -- T6 measured, scales
+with N). For a trivial **1-2 task** plan you MAY skip this step; for anything
+larger, run it. The T6 incremental cache means a *re-planning* pass only
+re-reviews tasks whose spec changed, so the full cost is paid once per new task.
+
+**Sub-project caveat:** in sub-projects, L3 routing (writing `human_review` back
+to gate/park tasks) is **inert until T-P2-321** (task_db unification) -- but L0
+(validation) / L1 (review) / L2 (guidance brief) still run and deliver value. At
+workspace root, all of L0-L3 are live.
+
+### Step 7: Deactivate and Summarize
 
 ```bash
 python .claude/hooks/plan_mode.py deactivate
