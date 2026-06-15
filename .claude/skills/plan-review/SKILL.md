@@ -79,7 +79,46 @@ python .claude/hooks/task_db.py list --json   # or: get the ids the gate reporte
 
 ## Phase 1 — axis-1: fresh context-free per-task review (T3)
 
-For **each** window task, spawn a **fresh subagent** (Agent tool, isolated
+### Phase 1.0 — incremental gate (T6, skip unchanged tasks)
+
+A full axis-1 pass spawns **one subagent per task** (~40K tok / ~42 s each, so an
+8-task plan is ~300K tok / several minutes — measured in the T6 decision-record).
+Before spawning anything, ask the incremental gate which tasks actually need
+re-review:
+
+```bash
+python .claude/skills/plan-review/incremental.py plan \
+    --prompt-ver axis1-v1 --model-ver claude-opus-4-8 --json
+```
+
+- A task is **reused** (no model call) iff its description content-hash AND the
+  reviewer/prompt version are both unchanged since its last receipt (AC2).
+- A **changed** task and **all its DAG downstream** are re-reviewed; the rest are
+  reused (AC3) — even a cache-fresh downstream task is dragged in when an upstream
+  task changed.
+- Bumping `--prompt-ver`/`--model-ver` forces a full re-review regardless of
+  content (AC4) — do this whenever you edit `axis1_prompt.md` or change the model.
+- **Only re-review the `to_review` list** in the per-task loop below. The gate
+  prints `reused N / re-reviewed M`; surface that line to the user (AC6).
+- **"Only future tasks":** existing tasks were seeded as already-human-reviewed
+  (`incremental.py seed`), so the first runs reuse them; only newly-created or
+  edited tasks trigger machine review. First run with no history → full review.
+- **Graceful degradation (sub-projects):** `incremental.py` is root-canonical and
+  NOT propagated (mirrors the L3-inert routing). If it is absent in this checkout,
+  **skip phase 1.0 entirely and review every window task** — the gate is a cost
+  optimization, never a correctness gate; its absence only means no reuse.
+
+After phase 2/3 finish, record receipts for the tasks you actually re-reviewed so
+the next run can reuse them:
+
+```bash
+python .claude/skills/plan-review/incremental.py record <run_id> \
+    --prompt-ver axis1-v1 --model-ver claude-opus-4-8 <T-id> [<T-id> ...]
+```
+
+### Phase 1.1 — per-task review
+
+For **each `to_review` task**, spawn a **fresh subagent** (Agent tool, isolated
 context — `general-purpose` is fine). This is mandatory: do NOT review the tasks
 yourself in this conversation — you carry the plan-generation history and would
 anchor (AC3). The subagent must see ONLY the task spec, never anything from the
@@ -248,5 +287,7 @@ reuse existing gates — this phase never completes a task.
 | `validate_findings.py` | deterministic contract gate (+ coupling invariants); importable + CLI |
 | `render_brief.py` | deterministic guidance-brief renderer (task-level default, AC drill-down, no-action edge case) |
 | `route_and_record.py` | phase 3: routing decision (pure) + hr=1 gating + provenance events + T0 acceptance-rate summary |
+| `incremental.py` | phase 1.0: incremental gate (T6) — content-hash + version verdict cache, DAG-downstream staleness, `plan`/`seed`/`record` |
 | `test_plan_review.py` | oracle tests for validate_findings + render_brief |
 | `test_route_and_record.py` | oracle tests for routing + provenance + T0 signal + the hr=1 hardline |
+| `test_incremental.py` | oracle tests for the T6 incremental gate (reuse/re-review counts, DAG closure, version override) |
