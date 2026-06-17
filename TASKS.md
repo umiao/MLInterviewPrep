@@ -104,34 +104,6 @@ AC:
 
 ### P3 -- Stretch Goals
 
-#### T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation)
-- **Priority**: P3
-- **Complexity**: S
-- **Depends on**: T-P0-915
-- **Description**: ## Summary
-Read-only decision doc for the LOW-RISK partial-checked pct-stale class (node 92 type: e.g. 7/15 checked but pct=0), kept separate from the urgent 115/171 reverse class so they are not queued together (Review missed-4).
-
-## Context
-Review explicitly: do NOT queue 92 (clearly low-risk, deterministic fix = backfill pct to checked-ratio + in_progress) with 115/171 (silent-corruption risk). This task owns ONLY the 92-class.
-
-## Acceptance Criteria
-- [ ] AC1: logs/review/ HTML lists every partial-checked leaf whose pct != checked-ratio with the deterministic recommendation (reconcile to ratio + in_progress).
-- [ ] AC2: no DB writes; the actual reconcile (if user approves) is a trivial follow-up that just calls the T-P0-910 helper partial path.
-- [ ] AC3 (both branches): user approves -> follow-up reconcile task created; user defers -> documented as known low-risk debt, no action.
-- [ ] AC4 (journey): user opens HTML, one-click sees the small deterministic set, approves -> follow-up created.
-
-## Technical Approach
-- Reuse the planning audit query (partial branch). Cross-check vs framework_nodes_description_history only if a row looks non-deterministic.
-
-## Edge Cases
-- Re-audit at task start; a node may have moved class. Do NOT conflate with mastery (92 needs pct backfill, not mastered).
-
-## Complexity
-S -- read-only audit + small HTML.
-
-## Dependencies
-T-P0-915 (apply). Run after the fully-checked sweep is applied so this report reflects the post-sweep table and only the genuinely partial-stale residue remains.
-
 ## Blocked
 
 #### T-P0-822: [KG-INT B4b-google] Google execute: hard-archive + skeleton seed + acceptance proof
@@ -650,6 +622,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 
 > 806 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml). requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` he
 - [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
 - [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan

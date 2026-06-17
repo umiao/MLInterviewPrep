@@ -501,3 +501,10 @@
 - **Sanity check result**: New tests pass (2/2); ruff clean; full suite **1307 passed** (was 1305, +2 new). tomllib-based parse confirms `req - pyproject == set()`.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P2-878`
+
+## 2026-06-17 -- [T-P3-916] Partial pct-stale decision doc (low-risk deterministic class)
+- **What I did**: Built a read-only decision report for the LOW-RISK partial pct-stale leaf class (`0 < checked < total` but `progress_pct != checked-ratio` -- the node-92 shape: 7/15 boxes checked yet pct=0). Review (missed-4) explicitly required keeping this deterministic class OUT of the same queue as the silent-corruption-risk reverse class (115/171), so this task owns ONLY the partial class. Re-audited the live table: exactly 1 node (92, `pillar3.design_problems.marketplace`, 7/15, pct 0.0 -> recommended 46.7, status not_started -> in_progress). Zero in-sync partials, so no false positives. Classification reuses the single tested T-P0-910 helper (`count_checkboxes`/`checkbox_progress_pct`); no node id hardcoded.
+- **Deliverables**: `scripts/audit_partial_pct_stale_20260617.py` (read-only audit, ZERO DB writes -- rollback+close; renders HTML), `logs/review/partial_pct_stale_decision_20260617.html` (the decision doc: affected-leaf table + deterministic recommendation + branch-A-approve / branch-B-defer next steps), `tests/test_audit_partial_pct_stale.py` (7 tests: node-92 selection, in-sync excluded, fully-checked/reverse/no-box excluded, promote-only keeps advanced status, parent excluded, HTML render + empty-set note).
+- **Sanity check result**: New tests 7/7 pass; ruff clean on both new files; full suite **1314 passed** (was 1307, +7 new). DB mtime unchanged after the audit run (verified read-only).
+- **Status**: [DONE] -- AC1 (HTML lists every stale partial leaf + deterministic recommendation), AC2 (no DB writes), AC3 (both branches documented in the report), AC4 (journey: open HTML -> see the small set -> approve creates follow-up) all met.
+- **Request**: `task_db.py complete T-P3-916`

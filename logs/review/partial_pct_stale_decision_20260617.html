@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partial pct-stale 决策稿 (T-P3-916) — 2026-06-17 14:51:48</title>
+<style>
+  :root{--ink:#1a1a1a;--mut:#666;--line:#e2e2e2;--ok:#137333;--warn:#9a6700;--risk:#b3261e;--bg:#fafafa;--code:#f4f4f5}
+  *{box-sizing:border-box}
+  body{font:15px/1.65 -apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);max-width:980px;margin:0 auto;padding:32px 24px;background:#fff}
+  h1{font-size:24px;margin:0 0 4px}
+  h2{font-size:19px;margin:34px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--line)}
+  .sub{color:var(--mut);margin:0 0 20px}
+  code{font-family:"SF Mono",Consolas,Menlo,monospace;background:var(--code);padding:1px 5px;border-radius:4px;font-size:13px}
+  .box{border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin:14px 0;background:var(--bg)}
+  .ok{border-left:4px solid var(--ok)}
+  .warn{border-left:4px solid var(--warn)}
+  .low{border-left:4px solid var(--warn);background:#fffdf6}
+  table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+  th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  th{background:#f0f0f1}
+  .risk-pct{color:var(--risk);font-weight:600}
+  .ok-pct{color:var(--ok)}
+  .kv{margin:3px 0}.kv b{display:inline-block;min-width:150px;color:var(--mut)}
+  ul{margin:6px 0 6px 0;padding-left:22px}li{margin:3px 0}
+  .small{font-size:12.5px;color:var(--mut)}
+  .verdict{font-size:15px;font-weight:600}
+  .tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+  .t-low{background:#fff4e5;color:var(--warn)}
+</style>
+</head>
+<body>
+
+<h1>Partial pct-stale 决策稿 <span class="tag t-low">LOW RISK · 确定性</span></h1>
+<p class="sub">T-P3-916 · 只读审计（零 DB 写入）· 生成于 2026-06-17 14:51:48 · 扫描 301 个 framework 节点</p>
+
+<div class="box low">
+<p class="verdict">结论：发现 <b>1</b> 个「部分勾选但 <code>progress_pct</code> 落后于勾选比例」的叶子节点。
+这是<strong>低风险、确定性</strong>的一类 —— 唯一正确的 pct 就是勾选比例，唯一的状态变化是
+promote-only 的 <code>not_started &rarr; in_progress</code>。本稿<strong>不写库</strong>；是否执行回填由你拍板。</p>
+<div class="kv"><b>这一类是什么</b> 叶子节点 <code>0 &lt; checked &lt; total</code> 且 <code>progress_pct &ne; 勾选比例</code></div>
+<div class="kv"><b>确定性修复</b> <code>progress_pct</code> 回填为勾选比例 + 状态 promote-only 提升至 <code>in_progress</code></div>
+<div class="kv"><b>与 115/171 区别</b> 那是 reverse 类（pct&gt;0 但 0 勾选，有静默损坏风险），由 T-P0-911/913 拥有，<strong>不在本稿</strong></div>
+</div>
+
+
+
+<h2>受影响的叶子节点</h2>
+<table><tr><th>node</th><th>path</th><th>boxes</th><th>stored pct (stale)</th><th>recommended pct</th><th>status</th></tr><tr><td>92</td><td><code>pillar3.design_problems.marketplace</code></td><td>7/15</td><td class='risk-pct'>0.0</td><td class='ok-pct'><b>46.7</b></td><td>not_started &rarr; <b>in_progress</b></td></tr></table>
+
+<h2>为什么这是确定性 + 低风险</h2>
+<ul>
+<li><b>pct 来源唯一</b>：叶子节点的 <code>progress_pct</code> 是勾选状态的<em>投影</em>，不是独立事实
+（见 <code>docs/adr/ADR-checkbox-canonical.md</code>）。部分勾选时，正确值只能是
+<code>round(checked/total*100,1)</code> —— 没有歧义。</li>
+<li><b>状态只升不降</b>：promote-only 规则只把 <code>not_started</code> 提升为 <code>in_progress</code>；
+已经是 <code>in_progress</code>/<code>review</code>/<code>mastered</code> 的叶子保持不动 —— 不会丢失任何更高级的进度。</li>
+<li><b>无静默损坏风险</b>：与 reverse 类不同，这里勾选框是<strong>有内容的</strong>（用户确实勾了 N 个框），
+回填只是让 pct 追上既成事实，不是凭空猜测一个来历不明的数字。</li>
+</ul>
+
+<h2>下一步（两个分支）</h2>
+<div class="box ok">
+<p><b>分支 A — 你批准回填</b>：创建一个 trivial 跟进任务，对上表每个 node 调用
+<code>scripts.lib.framework_progress.reconcile_node_from_checkboxes</code> 的 partial 分支
+（promote-only <code>in_progress</code> + pct=勾选比例），带 <code>.bak</code> + commit + JSONL 审计，
+复用 T-P0-915 的 apply 生命周期。</p>
+<p><b>分支 B — 你暂缓</b>：记为<strong>已知低风险欠债</strong>，不做任何动作。叶子节点在 UI 上会继续显示
+偏低的进度，但勾选框本身是真实的；随时可重跑本审计确认这一类是否变化。</p>
+</div>
+
+<p class="small">复跑：<code>python scripts/audit_partial_pct_stale_20260617.py --print</code> ·
+本稿只读，重跑只覆盖同一份 HTML，永不写库。</p>
+
+</body>
+</html>
