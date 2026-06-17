@@ -66,11 +66,102 @@ AC:
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
+#### T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rewrite). This task now covers sd42 ONLY: migrate sd42 meta-top3-comments-golden to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense=None; verbal_outline already golden=4829 chars from T-P0-893, KEEP it - the stale original-T-P1-881 'verbal_outline=None' line is superseded by the sd41 golden-template precedent). Update schemas/meta_mlsd_canonical.yaml sd42 entry document_archetype:oral_narrative baseline_chars_post_migration:10504. Re-run audit_meta_mlsd_3rule.py expecting 0 findings sd41-44. Revert backup: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db.
+
+#### T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add 'ml-infra-llm'. (2) new mlInfraModules useMemo filter display_order>=300 && <400, sorted. (3) new mlInfraCount useMemo. (4) BOUND pinterest: change pinterestTopics filter (line ~337) and pinterestCount (line ~374) from '>=199' to '>=199 && <300' so the new band does NOT leak into Pinterest tab. (5) new tab <button> after Pinterest, label 'ML Infra · LLM'. (6) new {activeTab==='ml-infra-llm' && (...)} content block mirroring the ml-mlsd flat-card render. switchTab is already generic. Scenario matrix: tab selected -> only [300,400) rows shown; pinterest tab -> only [199,300); no row appears in two tabs. AC: vitest + npm run build exit 0; MANUAL SMOKE: open /system-design?tab=ml-infra-llm -> tab visible & active -> (after T-B) the Anthropic card shows -> click -> drawer renders 9 sections; open ?tab=pinterest -> still exactly the 8 pinterest rows, no ML-Infra row leaked.
+
 #### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: T-P1-908
 - **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
+
+#### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: T-P0-914
+- **Description**: ## Summary
+Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
+
+## Context
+Review D ("doctor not police") + the user synthesis: layered guard -- pre-commit = scan + autofix-suggestion (preserve DX); CI fail + runtime self-heal come in Phase B. Single mode only: drop the premature strict|safe abstraction (Review debatable-3) until a real use case appears.
+
+## Acceptance Criteria
+- [ ] AC1: .claude/hooks/description_progress_guard.py (modeled on invariant3_guard.py) AST-detects writes to the mutation surface defined by T-P0-914 root-cause (at minimum framework_nodes.description; widen to status/progress_pct direct sets if root-cause says so) in scripts/*.py.
+- [ ] AC2 (scanner semantics, both branches): file writes the surface AND calls scripts.lib.framework_progress reconcile_* (or has "# RECONCILE-EXEMPT: <reason>") -> silent OK; writes surface WITHOUT reconcile and not exempt -> WARN to stderr + a copy-paste autofix hint naming the helper, exit 0 (NEVER blocks in Phase A).
+- [ ] AC3: --test (self-tests), --scan PATH (back-test), --sweep [scripts] (read-only offender report) -- parity with invariant3_guard mode surface.
+- [ ] AC4 (journey): dev writes a non-reconciling description seed, commits -> pre-commit prints the WARN+hint, commit still succeeds; dev adds the helper call -> WARN gone.
+- [ ] AC5: wired as a pre-commit SCAN step only (scripts/pre-commit infra) -- NOT into .claude/settings.json PreToolUse (that sensitive wiring is Phase B).
+- [ ] AC6: --sweep over scripts/ produces the current offender list (triage = retrofit-vs-exempt list captured; retrofitting historical scripts is OUT OF SCOPE here).
+
+## Technical Approach
+- Copy invariant3_guard.py structure (hook_utils, AST parent-map, exempt regex). Phase A exit code is ALWAYS 0; the only output is the warning. Single mode.
+
+## Edge Cases
+- Best-effort AST + the exempt escape; document residual false-negative risk. Never crash (infra error -> exit 0).
+
+## Complexity
+M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
+
+## Dependencies
+T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
+
+#### T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority)
+- **Priority**: P1
+- **Complexity**: S
+- **Depends on**: T-P0-914
+- **Description**: ## Summary
+Fast git-history triage of the REVERSE drift (pct=100 + 0 checkboxes: nodes 115, 171) -- legit pre-checklist mastery vs stale. Advanced to P1 because, unlike 111/114 (visual lag, semantically conservative), this is silent data corruption if any downstream consumes pct=100 as mastered (Review missed-4).
+
+## Context
+Review: 115/171 are "more dangerous" yet were parked at P2 with the low-risk 92 class. Decouple + advance. Most cases are second-judgeable from git history (did a checklist ever exist?).
+
+## Acceptance Criteria
+- [ ] AC1: for 115 and 171 (and any other pct>0 / 0-checked node found at task start): inspect framework_nodes_description_history + git blame of the owning seed to determine legit-legacy-mastery vs stale.
+- [ ] AC2 (both branches): legit (mastered before content became a checklist) -> document as intentional, leave pct, add a code comment / data note so the guard does not later flag it; stale -> recommend correction (clear pct OR add the now-missing checkboxes) and create a follow-up reconcile task.
+- [ ] AC3: a concise decision note (logs/review/ + Discord) with a per-node verdict + recommended action; uses the T-P0-914 root-cause findings as input.
+- [ ] AC4 (journey): user reads the per-node verdict, picks per node -> follow-up correction task created only for the stale ones.
+- [ ] AC5: read-only; no DB writes in this task.
+
+## Technical Approach
+- Cross T-P0-914 output with framework_nodes_description_history; quick git blame. Small, fast, no sweep.
+
+## Edge Cases
+- Indeterminate history -> mark indeterminate + ask the user rather than guess (a wrong "legit" call perpetuates corruption).
+
+## Complexity
+S -- targeted 2-node (maybe a few more) triage, read-only.
+
+## Dependencies
+T-P0-914 (root-cause). The root-cause investigation already gathers the history needed to judge legit-vs-stale, so this consumes its findings; independent of the 911 sweep (different drift class).
+
+#### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Summary
+Extract drawer navigation out of company_documents.content markdown into a structured drawer_nav JSON column, assemble at render time, retire the 4 retrofit_meta_mlsd_*_drawer_header.py scripts. V1 of the multi-surface fix; NO full normalization. Adds a stability-observation gate for E2.
+
+## drawer_nav JSON schema
+{"items":[{"label":"string","anchor":"string","depth":1,"ref":"cd://N|sd://slug|null"}],"rendered_at_top":true}
+
+## Acceptance Criteria
+- [ ] AC1: company_documents gets a drawer_nav JSON column (migration + relevant seed updates).
+- [ ] AC2: frontend CompanyDocDrawer assembles nav from drawer_nav above the body; render equivalent to current.
+- [ ] AC3: the 4 retrofit scripts archived (moved to scripts/migrate/ with SAFE_DELETE_AFTER) or deleted; re-seed no longer needs them.
+- [ ] AC4 (journey): open a Meta-MLSD doc drawer -> drawer nav shows correctly, links clickable (URI scheme preserved).
+- [ ] AC5: audit_uri_consistency.py all green.
+- [ ] AC6 (E2 decision gate): drawer_nav abstraction holds with NO regression on >=3 MLSD docs for >=2 weeks (no schema tweak, no retrofit-class op). E2 must NOT start until this AC is checked; once checked, human decides whether to proceed to E2 or hold.
+
+## Complexity: M. Deps: None.
 
 ### P2 -- Nice to Have
 
@@ -101,6 +192,24 @@ AC:
 - **Complexity**: S
 - **Depends on**: T-P1-821, T-P1-834
 - **Description**: Final 4-item acceptance checklist (per Discord plan v3 §9): (a) all P0/P1 companies' prep_notes/notes byte counts < threshold anchored by A0 EDA; (b) meta-prep child nodes mean byte count > 800; (c) audit_uri_consistency.py reports 0 broken kg:// db:// cd:// sd://; (d) red-dot logic manual smoke on sample companies passes. Compute byte-savings stats (before vs after) + commit count + KG growth (node + link delta). PROGRESS close-out entry summarizes the 42-task batch. AC: all 4 checklist items pass; close-out entry written.
+
+#### T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix)
+- **Priority**: P2
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (60 auto-fixable). Distribution: many UP017 (use datetime.UTC alias), F541 (f-string without placeholders), N806/N803 (lowercase var names like `X`, `N`, `LogisticRegression`), B905 (zip() without strict=), SIM103/SIM108 (return-condition / ternary), UP035 (collections.abc imports), E741 (ambiguous var `l`), E402 (import not at top of file), I001 (import block unsorted), W605 (invalid escape sequence). Concentrated in one-shot utility scripts: `_add_pinterest_*`, `_smoke_*`, `_rewrite_*`, `_verify_*`, `_update_*`, `audit_*`. Suggested approach: run `ruff check --fix scripts/` (auto-fixes ~60), then human-review remaining N806/B905/E741 (semantic risk: renaming vars in old utility scripts may break a referenced run-result). src/+tests/ remain clean (audited 2026-05-14).
+
+#### T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/except ValueError/pass guarding `_sys.path.remove(str(project_root / "scripts"))` in the `finally` block should be `with contextlib.suppress(ValueError): _sys.path.remove(...)`. Single-spot mechanical fix, runs only via whole-tree audit. Verify the same pattern is not repeated in the propagated copies under root/helixos/homestead/blog_proj before closing.
+
+#### T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work)
+- **Priority**: P2
+- **Complexity**: S
+- **Depends on**: None
+- **Description**: claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work (sd41 Reels golden, cd96, sd-friend, sd-weapon, sd42 Top-3 Comments, Meta-MLSD schema) the skill is directly applicable to MLI. Action: read `claude-code-project-template/.claude/skills/study-review/SKILL.md` to confirm scope fit, then copy the directory (SKILL.md + any helper files) to `MLInterviewPrep/.claude/skills/study-review/`. Do NOT auto-apply -- this is a sync proposal; human reviewer should validate that the template skill matches MLI conventions before merging.
 
 ### P3 -- Stretch Goals
 
@@ -369,48 +478,6 @@ COMPLEXITY: M
 - **Depends on**: T-P1-820, T-P1-833
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-parspec_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-parspec_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-parspec_2026-05-10.md, (3) move source seed scripts (scripts/seed_parspec_*.py / scripts/content_*parspec*.py / scripts/patch_parspec_*.py) -> archive/seed_scripts/B4a-parspec/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_parspec_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
-#### T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rewrite). This task now covers sd42 ONLY: migrate sd42 meta-top3-comments-golden to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense=None; verbal_outline already golden=4829 chars from T-P0-893, KEEP it - the stale original-T-P1-881 'verbal_outline=None' line is superseded by the sd41 golden-template precedent). Update schemas/meta_mlsd_canonical.yaml sd42 entry document_archetype:oral_narrative baseline_chars_post_migration:10504. Re-run audit_meta_mlsd_3rule.py expecting 0 findings sd41-44. Revert backup: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db.
-
-#### T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add 'ml-infra-llm'. (2) new mlInfraModules useMemo filter display_order>=300 && <400, sorted. (3) new mlInfraCount useMemo. (4) BOUND pinterest: change pinterestTopics filter (line ~337) and pinterestCount (line ~374) from '>=199' to '>=199 && <300' so the new band does NOT leak into Pinterest tab. (5) new tab <button> after Pinterest, label 'ML Infra · LLM'. (6) new {activeTab==='ml-infra-llm' && (...)} content block mirroring the ml-mlsd flat-card render. switchTab is already generic. Scenario matrix: tab selected -> only [300,400) rows shown; pinterest tab -> only [199,300); no row appears in two tabs. AC: vitest + npm run build exit 0; MANUAL SMOKE: open /system-design?tab=ml-infra-llm -> tab visible & active -> (after T-B) the Anthropic card shows -> click -> drawer renders 9 sections; open ?tab=pinterest -> still exactly the 8 pinterest rows, no ML-Infra row leaked.
-
-#### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P0-914
-- **Description**: ## Summary
-Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
-
-## Context
-Review D ("doctor not police") + the user synthesis: layered guard -- pre-commit = scan + autofix-suggestion (preserve DX); CI fail + runtime self-heal come in Phase B. Single mode only: drop the premature strict|safe abstraction (Review debatable-3) until a real use case appears.
-
-## Acceptance Criteria
-- [ ] AC1: .claude/hooks/description_progress_guard.py (modeled on invariant3_guard.py) AST-detects writes to the mutation surface defined by T-P0-914 root-cause (at minimum framework_nodes.description; widen to status/progress_pct direct sets if root-cause says so) in scripts/*.py.
-- [ ] AC2 (scanner semantics, both branches): file writes the surface AND calls scripts.lib.framework_progress reconcile_* (or has "# RECONCILE-EXEMPT: <reason>") -> silent OK; writes surface WITHOUT reconcile and not exempt -> WARN to stderr + a copy-paste autofix hint naming the helper, exit 0 (NEVER blocks in Phase A).
-- [ ] AC3: --test (self-tests), --scan PATH (back-test), --sweep [scripts] (read-only offender report) -- parity with invariant3_guard mode surface.
-- [ ] AC4 (journey): dev writes a non-reconciling description seed, commits -> pre-commit prints the WARN+hint, commit still succeeds; dev adds the helper call -> WARN gone.
-- [ ] AC5: wired as a pre-commit SCAN step only (scripts/pre-commit infra) -- NOT into .claude/settings.json PreToolUse (that sensitive wiring is Phase B).
-- [ ] AC6: --sweep over scripts/ produces the current offender list (triage = retrofit-vs-exempt list captured; retrofitting historical scripts is OUT OF SCOPE here).
-
-## Technical Approach
-- Copy invariant3_guard.py structure (hook_utils, AST parent-map, exempt regex). Phase A exit code is ALWAYS 0; the only output is the warning. Single mode.
-
-## Edge Cases
-- Best-effort AST + the exempt escape; document residual false-negative risk. Never crash (infra error -> exit 0).
-
-## Complexity
-M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
-
-## Dependencies
-T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
-
 #### T-P1-917: [HUMAN-REVIEW] Guard Phase B: enforcer -- CI fail-on-drift (mandatory) + runtime safe-heal + settings.json wiring
 - **Priority**: P1
 - **Complexity**: L
@@ -441,55 +508,6 @@ L -- enforcer mode + CI workflow + data-driven allow-list + sensitive split sign
 
 ## Dependencies
 T-P1-912 (Phase A scanner -- enforcer extends it) and T-P2-913 (reverse-drift verdicts define the under-decision allow-list). Last in the chain so CI does not fail on classes still pending a human decision.
-
-#### T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-914
-- **Description**: ## Summary
-Fast git-history triage of the REVERSE drift (pct=100 + 0 checkboxes: nodes 115, 171) -- legit pre-checklist mastery vs stale. Advanced to P1 because, unlike 111/114 (visual lag, semantically conservative), this is silent data corruption if any downstream consumes pct=100 as mastered (Review missed-4).
-
-## Context
-Review: 115/171 are "more dangerous" yet were parked at P2 with the low-risk 92 class. Decouple + advance. Most cases are second-judgeable from git history (did a checklist ever exist?).
-
-## Acceptance Criteria
-- [ ] AC1: for 115 and 171 (and any other pct>0 / 0-checked node found at task start): inspect framework_nodes_description_history + git blame of the owning seed to determine legit-legacy-mastery vs stale.
-- [ ] AC2 (both branches): legit (mastered before content became a checklist) -> document as intentional, leave pct, add a code comment / data note so the guard does not later flag it; stale -> recommend correction (clear pct OR add the now-missing checkboxes) and create a follow-up reconcile task.
-- [ ] AC3: a concise decision note (logs/review/ + Discord) with a per-node verdict + recommended action; uses the T-P0-914 root-cause findings as input.
-- [ ] AC4 (journey): user reads the per-node verdict, picks per node -> follow-up correction task created only for the stale ones.
-- [ ] AC5: read-only; no DB writes in this task.
-
-## Technical Approach
-- Cross T-P0-914 output with framework_nodes_description_history; quick git blame. Small, fast, no sweep.
-
-## Edge Cases
-- Indeterminate history -> mark indeterminate + ask the user rather than guess (a wrong "legit" call perpetuates corruption).
-
-## Complexity
-S -- targeted 2-node (maybe a few more) triage, read-only.
-
-## Dependencies
-T-P0-914 (root-cause). The root-cause investigation already gathers the history needed to judge legit-vs-stale, so this consumes its findings; independent of the 911 sweep (different drift class).
-
-#### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Summary
-Extract drawer navigation out of company_documents.content markdown into a structured drawer_nav JSON column, assemble at render time, retire the 4 retrofit_meta_mlsd_*_drawer_header.py scripts. V1 of the multi-surface fix; NO full normalization. Adds a stability-observation gate for E2.
-
-## drawer_nav JSON schema
-{"items":[{"label":"string","anchor":"string","depth":1,"ref":"cd://N|sd://slug|null"}],"rendered_at_top":true}
-
-## Acceptance Criteria
-- [ ] AC1: company_documents gets a drawer_nav JSON column (migration + relevant seed updates).
-- [ ] AC2: frontend CompanyDocDrawer assembles nav from drawer_nav above the body; render equivalent to current.
-- [ ] AC3: the 4 retrofit scripts archived (moved to scripts/migrate/ with SAFE_DELETE_AFTER) or deleted; re-seed no longer needs them.
-- [ ] AC4 (journey): open a Meta-MLSD doc drawer -> drawer nav shows correctly, links clickable (URI scheme preserved).
-- [ ] AC5: audit_uri_consistency.py all green.
-- [ ] AC6 (E2 decision gate): drawer_nav abstraction holds with NO regression on >=3 MLSD docs for >=2 weeks (no schema tweak, no retrofit-class op). E2 must NOT start until this AC is checked; once checked, human decides whether to proceed to E2 or hold.
-
-## Complexity: M. Deps: None.
 
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
@@ -578,24 +596,6 @@ Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 's
 5. Kill switch verified.
 
 **Depends on**: T-P1-713 (AR-12) -- need its telemetry to know if AR-17 is justified.
-
-#### T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (60 auto-fixable). Distribution: many UP017 (use datetime.UTC alias), F541 (f-string without placeholders), N806/N803 (lowercase var names like `X`, `N`, `LogisticRegression`), B905 (zip() without strict=), SIM103/SIM108 (return-condition / ternary), UP035 (collections.abc imports), E741 (ambiguous var `l`), E402 (import not at top of file), I001 (import block unsorted), W605 (invalid escape sequence). Concentrated in one-shot utility scripts: `_add_pinterest_*`, `_smoke_*`, `_rewrite_*`, `_verify_*`, `_update_*`, `audit_*`. Suggested approach: run `ruff check --fix scripts/` (auto-fixes ~60), then human-review remaining N806/B905/E741 (semantic risk: renaming vars in old utility scripts may break a referenced run-result). src/+tests/ remain clean (audited 2026-05-14).
-
-#### T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/except ValueError/pass guarding `_sys.path.remove(str(project_root / "scripts"))` in the `finally` block should be `with contextlib.suppress(ValueError): _sys.path.remove(...)`. Single-spot mechanical fix, runs only via whole-tree audit. Verify the same pattern is not repeated in the propagated copies under root/helixos/homestead/blog_proj before closing.
-
-#### T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work (sd41 Reels golden, cd96, sd-friend, sd-weapon, sd42 Top-3 Comments, Meta-MLSD schema) the skill is directly applicable to MLI. Action: read `claude-code-project-template/.claude/skills/study-review/SKILL.md` to confirm scope fit, then copy the directory (SKILL.md + any helper files) to `MLInterviewPrep/.claude/skills/study-review/`. Do NOT auto-apply -- this is a sync proposal; human reviewer should validate that the template skill matches MLI conventions before merging.
 
 #### T-P2-922: [WSH-E2] MLI content 归一化 (sections + 跨引用外键, 终局)
 - **Priority**: P2

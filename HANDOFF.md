@@ -15,27 +15,25 @@
 - 内容/DB 改动遵循 root memory `mli_content_workflow`(7 步改写、sync-ALL-surfaces、五抽屉 URI、MLSD golden 约束)+ `CLAUDE.md` 的 Surface Identification 表(改 DB 前先 widget→queryKey→endpoint→table 映射)。
 
 ## Backlog 现状(2026-06-17 核实 + 当日 autorun 后更新)
-70 任务:**17 done / 53 未完**(876/878/916 当日 autorun 完成)。53 里绝大多数被 gate/直列链锁住的 `blocked+pending`。
+70 任务:**18 done / 52 未完**(876/878/916/905 当日 autorun 完成)。52 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。
 
 ### ✅ state 卫生债已清零(2026-06-17)
 曾有 **4 个** `status='active'` 但 `state=None`(picker 不可视:912/918/905/916)。已全部正规化成 `state='ready'`,**现在 `state=None` 计数 = 0**。非完成任务现仅两态:`active+ready`(17,可拣)/ `blocked+pending`(38,dep 门控或 PARK)。
 > 有意 PARK 的形态是 `status='blocked' + state='pending'`(picker 用 `state='ready'` 过滤);`state=None` 是异常不是 PARK,已根除。
 
-### 2026-06-17 autorun 结果(scoped DEBT 批跑,两轮)
+### 2026-06-17 autorun 结果(scoped DEBT 批跑,三轮 — autorun-safe 子集全清)
 把 autorun-safe 任务 scope 进 picker(其余临时 park),跑 `autonomous_run.sh`:
-- ✅ **T-P1-876**(`9eceb95`)语法修复 · **T-P2-878**(`421e9c9`)发现 pyproject 4 dev deps 其实已同步=audit 误报,改加 dep-sync 回归测试 · **T-P3-916**(`3dd12df`)只读决策 doc。三个均完成 + push。
-- Round1(876+878+905+916)Session 2 撞 **Claude session 额度耗尽**只做完 876;额度恢复后 Round2 补做 878+916。
-- ⏸ **T-P2-905(归档 PROGRESS.md)仍未做**:它会**重构 PROGRESS.md 结构**,而前任遗留的 **Lyra ad-hoc 待决条目**(见下)还挂在 PROGRESS.md 未提交 → 现在跑 905 会把归档搞乱。**905 阻塞于 Lyra 决定**,等 Lyra 处置后再跑。
-- 跑后已恢复全部 park、清零 state=None。
+- ✅ **T-P1-876**(`9eceb95`)语法修复 · **T-P2-878**(`421e9c9`)发现 pyproject 4 dev deps 其实已同步=audit 误报,改加 dep-sync 回归测试 · **T-P3-916**(`3dd12df`)只读决策 doc · **T-P2-905**(`478d055`)PROGRESS.md 归档 517→387 行(9 旧 session 移 archive,留 45)。四个均完成 + push。
+- Round1(876+878+905+916)Session 2 撞 **Claude session 额度耗尽**只做完 876;额度恢复后 Round2 补 878+916;Lyra 决定后 Round3 补 905。
+- 跑后每轮都恢复全部 park、清零 state=None。
 > ⚠️ autorun 不能指定目标,只拣最高优先级 pickable。非 autorun-safe 任务(见下)若不 park 会被先拣中并撞 sensitive-gate / manual-smoke。重跑前须重新 park 非安全任务(含已恢复成 ready 的 912/918),或逐个 supervised。
 
-### 前任遗留待决:Lyra ad-hoc seed(阻塞 905)
-`scripts/_add_lyra_jacqueline_2026-05-27.py`(未跟踪)+ PROGRESS.md 一条 2026-05-26 ad-hoc 条目,前任标注「等用户浏览器确认 + 提交决定」。本 session autorun 期间多次 stash/pop 隔离它,未提交、未改动。**待用户拍**:提交 / 丢弃 / 继续保留待决。处置后 905 才好跑。
+### 前任遗留待决:Lyra ad-hoc seed — ✅ 已处置(提交)
+`scripts/_add_lyra_jacqueline_2026-05-27.py` + PROGRESS 条目 已提交(`24c5a0a`,2026-06-17)。决定=提交,依据 Invariant 3(interview_events id=80 已在 DB,内容行须有 git 跟踪 seed,丢弃会留孤儿行)。脚本已核查干净。**小遗留**:该 seed `status='upcoming'` 但 05-27 已过去,状态陈旧,可后续顺手改 completed(非阻塞)。
 
-### 还能直接拣的(state=ready 且依赖满足)
-- ~~876 / 878 / 916~~ ✅ 已完成(2026-06-17)
+### 还能直接拣的(state=ready 且依赖满足)— 均 supervised/gated,非 autorun-safe
+- ~~876 / 878 / 916 / 905~~ ✅ 已完成(2026-06-17,autorun)
 - **T-P2-877**〔DEBT,M〕876 修后 `ruff check scripts/` 残 ~193(60 可自动修;剩 N806/B905/E741 旧 util 改名有语义风险需人审)— **非纯 autorun**(尾部需人审)
-- **T-P2-905**〔DEBT,S〕归档 PROGRESS.md — **阻塞于上面的 Lyra 决定**
 - **T-P2-879**〔DEBT,S〕`shared/hooks/task_store.py:145` SIM105 → `contextlib.suppress` — **改活循环用的 task 基建,supervised**
 - **T-P2-880**〔SYNC,S〕从 template 引入 study-review skill(拷前人审 scope)
 - **T-P1-881**〔Meta-MLSD,S〕sd42 archetype 迁移 oral_narrative(sd43/44 已折进 894/895)
