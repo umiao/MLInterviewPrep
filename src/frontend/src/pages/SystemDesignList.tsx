@@ -280,7 +280,7 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   Hard: "bg-red-100 text-red-700",
 };
 
-type Tab = "interview" | "ml-mlsd" | "ebay" | "pinterest";
+type Tab = "interview" | "ml-mlsd" | "ebay" | "pinterest" | "ml-infra-llm";
 
 export default function SystemDesignList() {
   const navigate = useNavigate();
@@ -331,10 +331,14 @@ export default function SystemDesignList() {
     return grouped;
   }, [modules]);
 
-  // Pinterest topics: display_order >= 199 (concept index doc at 199; 7 SD
-  // docs at 200..206), separate section sorted at bottom.
+  // Pinterest topics: display_order in [199, 300) (concept index doc at 199; 7
+  // SD docs at 200..206), separate section sorted at bottom. Upper bound 300
+  // added in T-P1-908 to carve out [300, 400) for the ML Infra · LLM tab so
+  // the new band does NOT leak into the Pinterest tab.
   const pinterestTopics = useMemo(() => {
-    const topics = modules.filter((m) => m.display_order >= 199);
+    const topics = modules.filter(
+      (m) => m.display_order >= 199 && m.display_order < 300,
+    );
     const grouped: Record<string, SystemDesignSummary[]> = {};
     for (const cat of PINTEREST_CATEGORY_ORDER) {
       grouped[cat] = [];
@@ -362,6 +366,17 @@ export default function SystemDesignList() {
     [modules],
   );
 
+  // ML Infra · LLM modules: display_order in [300, 400) -- Anthropic
+  // ML-Infra LLM system-design problems (carved out in T-P1-908). Flat card
+  // list, no category subdivision, mirroring the ml-mlsd render.
+  const mlInfraModules = useMemo(
+    () =>
+      [...modules]
+        .filter((m) => m.display_order >= 300 && m.display_order < 400)
+        .sort((a, b) => a.display_order - b.display_order),
+    [modules],
+  );
+
   const interviewCount = useMemo(
     () => modules.filter((m) => m.display_order >= 100 && m.display_order < 130).length,
     [modules],
@@ -371,7 +386,15 @@ export default function SystemDesignList() {
     [modules],
   );
   const pinterestCount = useMemo(
-    () => modules.filter((m) => m.display_order >= 199).length,
+    () =>
+      modules.filter((m) => m.display_order >= 199 && m.display_order < 300)
+        .length,
+    [modules],
+  );
+  const mlInfraCount = useMemo(
+    () =>
+      modules.filter((m) => m.display_order >= 300 && m.display_order < 400)
+        .length,
     [modules],
   );
 
@@ -425,6 +448,16 @@ export default function SystemDesignList() {
           }`}
         >
           Pinterest
+        </button>
+        <button
+          onClick={() => switchTab("ml-infra-llm")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "ml-infra-llm"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
+        >
+          ML Infra · LLM
         </button>
       </div>
 
@@ -722,6 +755,80 @@ export default function SystemDesignList() {
                 </div>
               );
             })}
+        </div>
+      )}
+
+      {/* ML Infra · LLM tab -- Anthropic ML-Infra LLM system-design problems
+          (display_order 300..399). Flat card grid (no category subdivision),
+          mirroring the ml-mlsd render. */}
+      {activeTab === "ml-infra-llm" && (
+        <div>
+          <p className="text-sm text-gray-600 mb-6">
+            {mlInfraCount} ML Infra · LLM system-design problems (Anthropic-style
+            LLM infrastructure deep-dives). Kept separate from general interview
+            prep.
+          </p>
+
+          {isLoading && (
+            <div className="text-gray-500 py-12 text-center">Loading...</div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-4">
+              {error instanceof Error
+                ? error.message
+                : "Failed to load topics"}
+            </div>
+          )}
+
+          {!isLoading && !error && mlInfraModules.length === 0 && (
+            <div className="text-gray-400 py-12 text-center">
+              No ML Infra · LLM modules yet.
+            </div>
+          )}
+
+          {!isLoading && !error && mlInfraModules.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {mlInfraModules.map((topic) => {
+                const meta = TOPIC_META[topic.slug];
+                const difficulty = meta?.difficulty ?? "Medium";
+                const tags = meta?.tags ?? [];
+                const description =
+                  meta?.description ?? topic.subtitle ?? "";
+                return (
+                  <div
+                    key={topic.slug}
+                    className="bg-white rounded-lg border border-gray-200 px-4 py-3 cursor-pointer hover:border-blue-400 hover:shadow-md transition-all"
+                    onClick={() =>
+                      navigate(`/system-design/${topic.slug}`)
+                    }
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-base font-semibold text-gray-800">
+                        {topic.title}
+                      </h3>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded shrink-0 ml-2 ${DIFFICULTY_COLORS[difficulty]}`}
+                      >
+                        {difficulty}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{description}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
     </div>

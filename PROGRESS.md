@@ -415,3 +415,10 @@
 - **Sanity check result**: `ruff check scripts/ --exclude <managed>` -> "All checks passed!"; full `pytest -q` -> 1315 passed; py_compile on all 65 changed scripts -> OK.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P2-877 --reviewer xushenghui`
+
+## 2026-06-17 -- [T-P1-908] Add "ML Infra · LLM" system-design tab + carve display_order band [300,400)
+- **What I did**: Frontend-only (no DB write). Added a 5th top tab "ML Infra · LLM" to SystemDesignList.tsx for the [300,400) display_order band (Anthropic ML-Infra LLM problems), and bounded the Pinterest band to [199,300) so the new band cannot leak into the Pinterest tab.
+- **Deliverables**: `src/frontend/src/pages/SystemDesignList.tsx` (6 edits: Tab type union, mlInfraModules/mlInfraCount useMemos, pinterestTopics/pinterestCount upper-bound <300, tab button, content block mirroring ml-mlsd flat-card render).
+- **Sanity check result**: vitest 247/247 pass; `npm run build` exit 0. Manual browser smoke (conda Playwright, real backend:8100 + vite:5173): /system-design?tab=ml-infra-llm -> tab visible & active, empty state "No ML Infra · LLM modules yet" (correct, [300,400) has 0 rows until T-B/909); ?tab=pinterest -> exactly 8 cards, no ML-Infra leak; tabbar order = [Interview Prep, ML System Design, eBay Projects, Pinterest, ML Infra · LLM].
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-908 --reviewer xushenghui`
