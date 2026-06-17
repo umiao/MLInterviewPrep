@@ -494,3 +494,10 @@
 - **Sanity check result**: `py_compile` OK; `ruff check` all-clean; non-destructive module import builds all 16 translation keys (149-164), LaTeX raw backslashes preserved, no stray `"""`, f-string display block swapped; lifecycle lint classifies file `[PIN]` (not retired); `tests/test_script_lifecycle_lint.py` 7/7; full suite **1305 passed**. Did NOT run `main()` (writes DB) -- out of scope for a syntax fix and would overwrite nodes 149-164.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P1-876`
+
+## 2026-06-17 -- [T-P2-878] Guard pyproject<->requirements dep-sync (audit false positive)
+- **What I did**: Investigated the [DEBT] flag claiming pyproject.toml was missing 4 dev deps (ruff/pytest/pytest-asyncio/pyyaml). Found them already present in `[project.optional-dependencies].dev` (line 21) since T-P0-1 (2026-03-12) -- the 2026-05-14 audit scanned only `[project].dependencies` and missed the dev extra, so the task was a false positive. Programmatically confirmed zero drift: every requirements.txt pin maps into pyproject (runtime+dev), and all 4 target dev tools are in the dev extra. Per the "always add a regression test" rule, converted the audit blind spot into a durable machine check.
+- **Deliverables**: `tests/test_dependency_sync.py` (new; 2 tests: requirements.txt ⊆ pyproject full surface, and the 4 dev tools present in the dev extra). No change needed to pyproject.toml/requirements.txt -- already in sync.
+- **Sanity check result**: New tests pass (2/2); ruff clean; full suite **1307 passed** (was 1305, +2 new). tomllib-based parse confirms `req - pyproject == set()`.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P2-878`
