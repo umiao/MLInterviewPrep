@@ -14,26 +14,25 @@
 - ⚠️ 计费:`claude -p`/autorun 走**单独 API 计费池**(非订阅),见 root memory `june15_programmatic_billing_split`。
 - 内容/DB 改动遵循 root memory `mli_content_workflow`(7 步改写、sync-ALL-surfaces、五抽屉 URI、MLSD golden 约束)+ `CLAUDE.md` 的 Surface Identification 表(改 DB 前先 widget→queryKey→endpoint→table 映射)。
 
-## Backlog 现状(2026-06-17 核实)
-70 任务:**14 done / 56 未完**。56 里绝大多数被 gate/直列链锁住的 `pending`。
+## Backlog 现状(2026-06-17 核实 + 当日 autorun 后更新)
+70 任务:**15 done / 55 未完**(876 当日 autorun 完成)。55 里绝大多数被 gate/直列链锁住的 `blocked+pending`。
 
-### ⚠️ 首要卫生债:state=None 异常(picker 不可视的 4 个)
-简报曾写「2 个」,实际是 **4 个** `status='active'` 但 `state=None`,picker 完全看不到:
+### ✅ state 卫生债已清零(2026-06-17)
+曾有 **4 个** `status='active'` 但 `state=None`(picker 不可视:912/918/905/916)。已全部正规化成 `state='ready'`,**现在 `state=None` 计数 = 0**。非完成任务现仅两态:`active+ready`(17,可拣)/ `blocked+pending`(38,dep 门控或 PARK)。
+> 有意 PARK 的形态是 `status='blocked' + state='pending'`(picker 用 `state='ready'` 过滤);`state=None` 是异常不是 PARK,已根除。
 
-| ID | 种类 | 依赖(均已 done) | 备注 |
-|----|------|------|------|
-| T-P1-912 | Guard Phase A scanner (L) | T-P0-914 ✅ | 有实活 |
-| T-P1-918 | reverse-drift 紧急 triage (S) | T-P0-914 ✅ | silent-corruption 风险 |
-| T-P2-905 | 归档 PROGRESS.md 杂务 (S) | 无 | description 空 |
-| T-P3-916 | 92-class 判定 doc (S) | T-P0-915 ✅ | 只读决策文档 |
+### 2026-06-17 autorun 结果(scoped DEBT 批跑)
+当日把 4 个 autorun-safe 任务 scope 进 picker(876/878/905/916,其余临时 park),跑 `autonomous_run.sh`:
+- ✅ **T-P1-876 完成**(commit `9eceb95`,语法修复)。
+- ⏸ **878 / 905 / 916 未跑**:Session 2 时 **Claude session 额度耗尽**("resets 2:30pm America/Los_Angeles"),连续 2 次空跑后 orchestrator 停。非任务问题,无状态损坏。
+- 跑后已恢复全部 park、清零 state=None。**下次接续**:额度重置后重跑 scoped autorun(878/905/916),或人工做。
+> ⚠️ autorun 不能指定目标,只拣最高优先级 pickable。非 autorun-safe 任务(见下)若不 park 会被先拣中并撞 sensitive-gate / manual-smoke。重跑前需重新 park 非安全任务,或逐个 supervised。
 
-依赖源(914/915)都已 done → **正规化成 `state='ready'` 即可拣**,可拣任务从 8→12。
-有意 PARK 的形态是 `status='blocked' + state='pending' + hr=1`(见 memory `ops_autorun_and_taskdb`),`state=None` 是异常不是 PARK。
-
-### 现在能直接拣的(state=ready 且依赖满足);`pick` 默认 = **T-P1-876**
-- **T-P1-876**〔DEBT,S〕`scripts/seed/translate_p6_nodes.py:1973` 语法错(嵌入中文 docstring 三连引号关掉外层 r-string)— 默认拣选,**877 的前提**
-- **T-P2-877**〔DEBT,M〕876 修后 `ruff check scripts/` 残 ~193(60 可自动修;剩 N806/B905/E741 旧 util 改名有语义风险需人审)
-- **T-P2-878**〔DEBT,S〕`pyproject.toml` 缺 4 dev deps(ruff/pytest/pytest-asyncio/pyyaml)→ 加进 `[project.optional-dependencies] dev`
+### 现在能直接拣的(state=ready 且依赖满足);autorun-safe 子集 = {878, 905, 916}
+- ~~T-P1-876~~ ✅ 已完成(2026-06-17,commit `9eceb95`)
+- **T-P2-877**〔DEBT,M〕876 修后 `ruff check scripts/` 残 ~193(60 可自动修;剩 N806/B905/E741 旧 util 改名有语义风险需人审)— **非纯 autorun**(尾部需人审)
+- **T-P2-878**〔DEBT,S,★autorun-safe〕`pyproject.toml` 缺 4 dev deps(ruff/pytest/pytest-asyncio/pyyaml)→ 加进 `[project.optional-dependencies] dev`
+- 〔★autorun-safe,不在原 ready 列〕**T-P2-905** 归档 PROGRESS.md(机械)· **T-P3-916** 92-class 决策 doc(只读)
 - **T-P2-879**〔DEBT,S〕`shared/hooks/task_store.py:145` SIM105 → `contextlib.suppress`
 - **T-P2-880**〔SYNC,S〕从 template 引入 study-review skill(拷前人审 scope)
 - **T-P1-881**〔Meta-MLSD,S〕sd42 archetype 迁移 oral_narrative(sd43/44 已折进 894/895)
