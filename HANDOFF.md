@@ -14,7 +14,15 @@
 - ⚠️ 计费:`claude -p`/autorun 走**单独 API 计费池**(非订阅),见 root memory `june15_programmatic_billing_split`。
 - 内容/DB 改动遵循 root memory `mli_content_workflow`(7 步改写、sync-ALL-surfaces、五抽屉 URI、MLSD golden 约束)+ `CLAUDE.md` 的 Surface Identification 表(改 DB 前先 widget→queryKey→endpoint→table 映射)。
 
-## Backlog 现状(2026-06-17 核实 + 当日 autorun 后更新)
+## ⏯️ 下个 session = **supervised run**(autorun-safe 已清完,本文件为它而写)
+- **autorun-safe 子集已全部清完**(876/878/916/905,见下)。剩余 ready 任务都是 supervised/gated → 下个 session **逐条人值守跑**,**别挂 `autonomous_run.sh`**。
+- 直接看 **`## supervised run 运行说明`**(下方)照做:单任务循环 + 推荐首拣。autorun 配方降级为附录(当前无 autorun-safe 任务可喂)。
+
+### 最近一次 session(2026-06-17 下午,supervised)
+- ✅ **修 MLI CI 两条失败**(`cef3f26`,已 push main):`scripts/lint_script_lifecycle.py` 的活引用扫描把 `_REF_SKIP_DIRS`(含 `tmp`)拿去匹配文件**绝对路径** parts → Linux CI 上 repo 在 `/tmp/pytest-.../` 下整树被跳过 → 仍被 import 的过期脚本误判 `CLEANUP_CANDIDATE`(Windows 临时目录是 `Temp`,本地一直绿掩盖了 bug)。改成按 **repo-相对路径** parts 判断;加回归测试(把 repo 嵌在字面 `tmp` 目录下复现,任何平台可复现)。全套 1315 passed。
+- 这是一次标准 supervised 单任务循环的样板:复现 → 定位平台依赖根因 → 修 + 回归测试 → 全套验证 → 显式路径 commit → push。
+
+## Backlog 现状(2026-06-17 核实)
 70 任务:**18 done / 52 未完**(876/878/916/905 当日 autorun 完成)。52 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。
 
 ### ✅ state 卫生债已清零(2026-06-17)
@@ -57,24 +65,68 @@
 
 ---
 
-## 开新 session 运行说明(golden-path,照做即可)
+## supervised run 运行说明(下个 session 照做)
 
 ### 0. 开工前(preflight)
 ```bash
 cd "<...>/Gen_AI_Proj/MLInterviewPrep"
 git status --short                      # 工作树该干净(上个 session 已收尾);有遗留先决定去留
 ls .claude/autonomous.lock .claude/run-pgid   # 应都不存在(无在跑的 autorun)
-python .claude/hooks/task_db.py pick    # 看默认拣选;get <ID> 读权威 spec(AC 在 description)
+python .claude/hooks/task_db.py pick    # 看默认拣选
+python .claude/hooks/task_db.py get <ID> # 读权威 spec(AC 在 description),pick 给的或下方推荐的
 ```
-- ⚠️ **计费**:`claude -p`/autorun 走单独 API 池(非订阅)。额度耗尽会报 `You've hit your session limit · resets <t>`,session 空跑、不提交——等重置再跑。
-- **单写者**:跑 autorun 期间不开第二个写 session、不手动改 tasks.db。
+- ⚠️ **计费**:supervised(交互式)session 含其 subagent **走订阅池**;只有 `claude -p`/autorun 走单独 API 计费池(root memory `june15_programmatic_billing_split`)。本次是 supervised → 不动 autorun,不踩 API 池。
+- **单写者**:同一 repo 别同时开第二个写 session、别手动改 tasks.db。
 
-### 1. 选活
-- **autorun-safe(无人值守可完整完成)**:纯机械、不碰 `.claude/` sensitive-gate、不改活循环用的 task 基建(`task_store.py`/`task_db.py`)、无 manual-smoke AC、不写 MLSD golden 内容。当前这类**已清完**。
-- **supervised(逐条人值守)**:877(ruff 尾部需人审)/ 879(改 task 基建)/ 880(`.claude/skills`)/ 881(MLSD 内容)/ 908(manual-smoke)/ 921(大改)+ 所有内容簇(CHEATSHEET/KG-INT/BQ-DEPTH)。**逐个 supervised,别挂 autorun**。
+### 1. 选活(本 session 全是 supervised,逐条人值守,**不挂 autorun**)
+为什么 supervised:每条都因下列至少一项需要人在环——`.claude/` sensitive-gate / 改活循环用的 task 基建 / manual-smoke AC / 写 MLSD golden 内容 / 破坏性 DB 操作 / 改名有语义风险。
+**推荐拣选顺序**(由轻到重,先拿确定性高的):
 
-### 2. 跑 autorun(仅 autorun-safe 任务;本 session 验证过的配方)
-`autonomous_run.sh` **不能指定目标**,只拣最高优先级 pickable。要 scope 到指定子集:
+| 优先 | 任务 | 类 | 为何 supervised + 怎么做 |
+|---|---|---|---|
+| ① | **T-P2-879**〔S〕 | DEBT | `shared/hooks/task_store.py:145` SIM105 → `contextlib.suppress`。改活循环 task 基建,人审 1 处 diff + 跑全套即可。最小、最确定,适合开场。 |
+| ② | **T-P2-877**〔M〕 | DEBT | `ruff check scripts/` 残 ~193。先 `ruff check scripts/ --fix`(自动修 ~60 安全项)→ 人审剩余 N806/B905/E741(旧 util 改名有语义风险,逐个看调用点再决定改/`# noqa` 标注)。**不能盲 `--fix --unsafe-fixes`**。 |
+| ③ | **T-P1-908**〔M〕 | 内容 | 加「ML Infra·LLM」SD tab + carve [300,400) + Pinterest 收成 [199,300) 防泄漏。有 manual-smoke AC(浏览器看 tab 渲染);改 DB 前先过 Surface Identification 表。其后 909 seed 用户给的 500GB 部署 golden。 |
+| — | 内容簇起步(可选,较重) | 内容 | 先做共享 helper `scripts/lib/ds_distill.py`(DeepSeek v4+分块+temp0+截断感知)→ 开 CHEATSHEET 641 闸 → 644 跑 1 张蒸馏试点(人审 accept-default)。见「已定方向 §2」。 |
+
+其余仍锁着:881(MLSD)/921(大改 drawer_nav)/ KG-INT B4(破坏性,dry-run 闸门)/ BQ-DEPTH(锁 581)/ Guard 917(`human_review=1`)——按各簇详解的链序,**到了再 supervised 逐条做**。
+
+### 2. supervised 单任务循环(每拣一条都走一遍)
+```
+1) task_db.py update <ID> --status in_progress
+2) task_db.py get <ID>            # 把 AC 当 definition of done;每条 if-AC 都要有 else 分支(见 CLAUDE.md 计划铁律)
+3) 做改动                          # 改 DB → idempotent seed + Surface 表;写中文文件用 python 写 UTF-8
+4) 验证(必做,缺一不可):
+   - pytest -q                    # 全绿(上个 session 1315 passed 为基线)
+   - 改了脚本/server/config → 真跑一遍(不只 mock):smoke 到预期状态
+   - 修 bug → 必加回归测试(CLAUDE.md 要求);先证它对旧代码 FAIL 再对新代码 PASS
+5) PROGRESS.md append 一条 session 条目(Bash heredoc,UTF-8 干净)
+6) 显式路径 commit:git add <逐个路径> → [T-XX-N] 英文描述 → 不 push 到全做完
+7) task_db.py complete <ID> --reviewer xushenghui   # hr=1 任务必须带 --reviewer;hr=0 也可带
+```
+- 一条做完、人看过没问题,再拣下一条。**别在一个 context 里串跑多条无关任务**(context 耗尽 + 共享态污染);要批量请改用 autorun 附录。
+- 卡住/有判断分歧 → 停下问人,别 silent-gap-fill(memory `methodology_review_and_design`)。
+
+### 3. 收尾(本 session 结束前)
+```bash
+python .claude/hooks/task_db.py project          # 刷新 TASKS.md
+# 更新本 HANDOFF(就地改成当前真相:把做完的任务移出推荐表/标✅,接续点改写)
+git add <显式路径> TASKS.md HANDOFF.md PROGRESS.md
+git commit -m "[chore] supervised session: <做了什么> + handoff 更新"
+git push origin main
+```
+
+### 4. 铁律(贯穿)
+- **显式路径 commit**,**永不** `git add .`/`-A`/`-u`(`no_wildcard_add` 钩强制)。commit msg 英文(`commit_msg_guard` 拦 CJK),格式 `[T-XX-N] ...` 或 `[chore]/[ad-hoc]/[fix] ...`。
+- 改 DB 内容 → 走 idempotent seed(Invariant 3)+ Surface Identification 表;**never EnterPlanMode**(用 task_db.py 规划)。
+- 写中文文件用 `python` 写 UTF-8;PROGRESS append 用 Bash heredoc(干净)。
+- **别抢跑**(memory `no_running_ahead_of_scope`):用户只让"写交接/计划"时只产文档,别顺手 commit/跑流水线/开下个任务。
+
+---
+
+## 附录:autorun 配方(当前无 autorun-safe 任务,留作下次有纯机械批活时参考)
+
+`autonomous_run.sh` **不能指定目标**,只拣最高优先级 pickable;要 scope 到指定子集:
 ```bash
 # (a) 把"非目标但 pickable"的任务临时 park 出 picker(direct SQL;picker 用 state='ready' 过滤)
 python -c "import sqlite3;d=sqlite3.connect('.claude/tasks.db');[d.execute(\"UPDATE tasks SET status='blocked',state='pending' WHERE id=?\",(t,)) for t in ['T-P1-881','T-P1-908','T-P1-912','T-P1-918','T-P1-921','T-P2-877','T-P2-879','T-P2-880']];d.commit()"
@@ -86,27 +138,8 @@ git stash push -m "isolate-pending" -- PROGRESS.md     # 仅在有此类遗留�
 bash scripts/autonomous_run.sh <N> --allow-dirty       # N = 目标任务数 + 1~2 余量
 ```
 - 启动后核一眼:`tail logs ... EXPECTED_TASK_PREFIX=<目标>` 确认首拣正确、preflight 放行。
-- inner agent 每完成一个任务:自跑 Verification + `complete --reviewer xushenghui` + append 自己的 PROGRESS 条目 + 显式路径 commit。
-
-### 3. autorun 收尾(每轮跑完都做)
-```bash
-# 恢复 park 的任务 → active+ready(本 session 它们都源自 active+ready)
-python -c "import sqlite3;d=sqlite3.connect('.claude/tasks.db');[d.execute(\"UPDATE tasks SET status='active',state='ready' WHERE id=?\",(t,)) for t in [<上面 park 的同一批>]];d.commit()"
-python .claude/hooks/task_db.py project
-git stash pop          # 若 (b) stash 过;PROGRESS.md 尾部冲突=保留双方(已提交条目+遗留),git add 后 git reset 取消暂存留遗留为待决,git stash drop
-# 更新本 HANDOFF(就地改成当前真相)→ git add <显式路径> TASKS.md HANDOFF.md → commit [chore] → push
-git push origin main
-```
-
-### 4. 铁律(贯穿)
-- **显式路径 commit**,**永不** `git add .`/`-A`/`-u`(`no_wildcard_add` 钩强制)。commit msg 英文(`commit_msg_guard` 拦 CJK),格式 `[T-XX-N] ...` 或 `[chore]/[ad-hoc] ...`。
-- 改 DB 内容 → 走 idempotent seed(Invariant 3)+ Surface Identification 表;**never EnterPlanMode**。
-- 写中文文件用 `python` 写 UTF-8;PROGRESS append 用 Bash heredoc(干净)。
-
-### 接续点(下个 session 最可能先做)
-1. 读本文件 + `task_db.py pick`。
-2. **内容簇起步**:先做 `scripts/lib/ds_distill.py`(DeepSeek helper),再开 CHEATSHEET 641 闸 → 644 跑 1 张蒸馏试点(supervised,人审 accept-default)。
-3. 或挑 supervised DEBT(877 ruff `--fix` 自动部分 + 人审尾部 / 879 SIM105)。
+- 收尾每轮都做:恢复 park 的任务 → `active+ready`;`git stash pop`(PROGRESS.md 尾部冲突=保留双方);更新 HANDOFF → 显式路径 commit → push。
+- ⚠️ autorun 走单独 API 计费池;额度耗尽报 `You've hit your session limit · resets <t>`,session 空跑、不提交——等重置再跑。
 
 ## Pitfalls(本项目特有)
 1. **TASKS.md 只读**(PreToolUse hook 拦截 Write/Edit)— 一切走 `task_db.py`;ID 自动生成,别手编。
