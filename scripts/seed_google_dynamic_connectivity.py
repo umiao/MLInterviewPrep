@@ -336,7 +336,7 @@ def verify_examples() -> None:
             self.add(2 * node + 1, mid + 1, hi, ql, qr, edge)
 
         def solve(self, node: int, lo: int, hi: int,
-                  dsu: "RollbackDSU", queries: dict, answers: dict) -> None:
+                  dsu: RollbackDSU, queries: dict, answers: dict) -> None:
             snap = dsu.snapshot()
             for u, v in self.tree[node]:
                 dsu.union(u, v)
@@ -391,7 +391,6 @@ def verify_examples() -> None:
     def brute(events: list) -> list[bool]:
         edges: set[frozenset] = set()
         out: list[bool] = []
-        adj_out: list[bool] = []
         for ev in events:
             kind = ev[0]
             if kind == "ADD":

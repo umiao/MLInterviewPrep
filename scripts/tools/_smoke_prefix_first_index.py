@@ -13,7 +13,7 @@ class TrieNode:
     __slots__ = ("children", "min_index")
 
     def __init__(self) -> None:
-        self.children: dict[str, "TrieNode"] = {}
+        self.children: dict[str, TrieNode] = {}
         self.min_index: int = -1
 
 

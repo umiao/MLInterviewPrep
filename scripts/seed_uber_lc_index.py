@@ -189,7 +189,7 @@ def build_content(conn: sqlite3.Connection) -> str:
         "> 与 *Uber BPS LeetCode Solutions Guide* (深度精讲) 是兄弟关系——本文档是**宽度索引**, "
         "那是**深度题解**, 索引中带 `lc://N` 的链接点击会以 SlideOverPanel 弹出该题完整笔记。",
         ">",
-        f"> **覆盖**: 47 题 (38 来自用户 curated 50-list 中已有题解的部分 + 9 来自 doc id=30 独占题), "
+        "> **覆盖**: 47 题 (38 来自用户 curated 50-list 中已有题解的部分 + 9 来自 doc id=30 独占题), "
         "按知识点 / pattern 分 10 组, 组内按 LeetCode id 升序。",
         f"> **`[NEW]`**: 标 `[NEW]` 的 {new_count} 道是 2026-04 期间新加入的, "
         "在 `problem_company_tags` 关系表中也有显式 Uber 关联。",
@@ -202,8 +202,8 @@ def build_content(conn: sqlite3.Connection) -> str:
         "",
         "## 概览",
         "",
-        f"| 维度 | 数量 |",
-        f"| --- | --- |",
+        "| 维度 | 数量 |",
+        "| --- | --- |",
         f"| 总题数 | **{total}** |",
         f"| 分组数 | {len(GROUPS)} |",
         f"| `[NEW]` 标记 | {new_count} |",

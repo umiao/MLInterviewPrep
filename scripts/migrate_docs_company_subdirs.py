@@ -16,7 +16,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 # Map each old prefix to the new company subdir. The pattern captures the
@@ -35,9 +34,7 @@ def rewrite(text: str) -> tuple[str, int]:
     """Apply all prefix substitutions; return (new_text, num_replacements)."""
     total = 0
     for key, pattern in PREFIX_MAP.items():
-        if key == "pinterest_sub":
-            repl = r"docs/company/pinterest/\1"
-        elif key == "pinterest_flat":
+        if key == "pinterest_sub" or key == "pinterest_flat":
             repl = r"docs/company/pinterest/\1"
         else:
             slug = key

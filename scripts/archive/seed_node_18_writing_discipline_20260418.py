@@ -223,10 +223,7 @@ def main() -> int:
             print(f"[INFO] Applied playbook Gate-9 patch ({len(PLAYBOOK_OLD)} -> "
                   f"{len(PLAYBOOK_NEW)} chars on that line)")
 
-        if has_appendix:
-            new_desc = patched_body
-        else:
-            new_desc = patched_body.rstrip() + APPENDIX_A1
+        new_desc = patched_body if has_appendix else patched_body.rstrip() + APPENDIX_A1
 
         problems = validate(new_desc)
         if problems:

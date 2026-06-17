@@ -203,7 +203,7 @@ def _build_geomed() -> str:
 
 
 def _build_promote() -> str:
-    return f"""**Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is_golden=1` with timestamp.
+    return """**Goal**: After T-P0-701..704 pass their own AC, do a workspace-wide visual smoke pass and promote all 4 problems to `is_golden=1` with timestamp.
 
 **Workflow**:
 1. Visit `http://localhost:5173/quick-index?section=ml`. Click each of 1102, 1106, 1107, 1108. For each, verify on the RENDERED output (not just markdown source):

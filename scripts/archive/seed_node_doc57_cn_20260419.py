@@ -26,7 +26,7 @@ from __future__ import annotations
 import hashlib
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
@@ -366,7 +366,7 @@ def main() -> int:
             return 0
 
         new_hash = hashlib.sha256(DOC_57.encode("utf-8")).hexdigest()
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
         cur = conn.execute(
             "UPDATE company_documents "
             "SET content = ?, content_hash = ?, updated_at = ? "

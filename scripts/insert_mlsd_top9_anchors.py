@@ -221,7 +221,7 @@ def main():
 
     # Verify
     conn = sqlite3.connect(DB_PATH)
-    for new_id, slug in inserted:
+    for new_id, _slug in inserted:
         row = conn.execute(
             """SELECT id, slug, length(overview), length(verbal_outline),
                       length(overview)+length(verbal_outline) AS total

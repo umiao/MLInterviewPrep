@@ -560,7 +560,7 @@ def main() -> int:
     try:
         updated = 0
         unchanged = 0
-        for did, (expected_title, new_content) in DOCS.items():
+        for did, (_expected_title, new_content) in DOCS.items():
             row = conn.execute(
                 "SELECT title, content FROM company_documents WHERE id = ?",
                 (did,),

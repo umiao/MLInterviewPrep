@@ -587,7 +587,7 @@ def populate_ml_system_design_patterns() -> None:
         # Check for bare |
         lines = all_content.split("\n")
         bare_pipe_count = 0
-        for i, line in enumerate(lines):
+        for _i, line in enumerate(lines):
             # Skip table rows and code blocks
             if line.strip().startswith("|") or line.strip().startswith("```"):
                 continue

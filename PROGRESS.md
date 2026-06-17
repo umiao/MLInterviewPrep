@@ -407,3 +407,11 @@
 - **AC cross-project verification finding**: the AC asked to verify the pattern is "not repeated in propagated copies under root/helixos/homestead/blog_proj". It IS repeated -- in all 14 task_store.py copies across the workspace. BUT task_store.py is explicitly NOT a propagate-managed (byte-forced) pattern (`patterns.toml` defers cross-project task_store unification to T-P2-321), so there is no daily-broadcast / false-green revert risk for this MLI fix (verified: propagate.py/patterns.toml don't touch task_store.py; no checked-in daily sync.py invocation). The cross-project copies are independent debt under T-P2-321, deliberately NOT blast-fixed here (out of scope for an S MLI task; would touch 8 separate repos).
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P2-879`
+
+## 2026-06-17 -- [T-P2-877] scripts/ ruff cleanup (DEBT, supervised)
+- **What I did**: Cleaned `ruff check scripts/` from 177 errors to 0 (excluding propagate-managed files). Two-phase: (A) safe `--fix` auto-fixes (UP017/F541/F401/I001/UP035/UP037/W605 etc., 117 fixed); (B) human-reviewed remainder — applied real fixes for B905 (`strict=False`, 6), B007 (`_`-prefix unused loop vars, 13), B023 (bind loop var as default arg in `retrofit_doc_drawer_links.py` closure — synchronous call, behavior-identical, 3), F841 (removed 2 dead vars), SIM108/SIM103/SIM110 (simplify), E402 (moved `import sqlite3` to top); and a scoped `[tool.ruff.lint.per-file-ignores]` for `scripts/**` covering N806/N803/E741/E701/E702/SIM102 (naming/compact-style nits idiomatic-or-harmless in one-shot seed/audit/embedded-algorithm scripts — renaming risks breaking referenced run-results per task spec).
+- **Deliverables**: 65 scripts/*.py (auto-fix + hand-fix), `pyproject.toml` (per-file-ignores block).
+- **Scope guard**: did NOT touch propagate-managed files (`scripts/workflows/*`, `scripts/sweep_stuck_leases.py`, `scripts/lib/events.py`) — their ~18 residual ruff errors (incl. SIM105) are independent debt requiring root-canonical fix + propagate (would be reverted by daily broadcast otherwise). No blind `--unsafe-fixes` sweep.
+- **Sanity check result**: `ruff check scripts/ --exclude <managed>` -> "All checks passed!"; full `pytest -q` -> 1315 passed; py_compile on all 65 changed scripts -> OK.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P2-877 --reviewer xushenghui`

@@ -13,7 +13,7 @@ from __future__ import annotations
 import hashlib
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
@@ -513,7 +513,7 @@ def main() -> int:
         )
         existing = cur.fetchone()
 
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
         new_hash = sha256_bytes(CONTENT)
 
         if existing is None:

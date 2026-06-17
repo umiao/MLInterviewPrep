@@ -334,10 +334,7 @@ def _build_standalone_deepdive(pre_migration_doc19: str) -> str:
         # find next H3 or H2 header after this one
         after = rope_segment[m.end():]
         next_hdr = re.search(r"^(###? )", after, re.MULTILINE)
-        if next_hdr:
-            end = m.end() + next_hdr.start()
-        else:
-            end = len(rope_segment)
+        end = m.end() + next_hdr.start() if next_hdr else len(rope_segment)
         rope_segment = rope_segment[: m.start()] + rope_segment[end:]
 
     header = (

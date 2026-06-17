@@ -23,7 +23,7 @@ from __future__ import annotations
 import os
 import re
 import sqlite3
-from typing import Iterable
+from collections.abc import Iterable
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(PROJECT_DIR, "data", "mle_prep.db")

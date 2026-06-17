@@ -137,7 +137,7 @@ def rebuild() -> None:
 
     parts = [header.strip(), ""]  # header + blank line
 
-    for doc_id, day_label, title, content in sections:
+    for _doc_id, _day_label, _title, content in sections:
         # Add day separator
         parts.append("")
         parts.append("---")

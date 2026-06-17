@@ -1,5 +1,6 @@
 """Update all 20 SD interview prep tasks with enhanced section guide."""
 import json
+import sqlite3
 import subprocess
 import sys
 from pathlib import Path
@@ -108,8 +109,6 @@ TASK_IDS = [
 ]
 
 # Read each task's current description, extract TOPIC + STEPS + AC, replace guide
-import sqlite3
-
 conn = sqlite3.connect(str(Path(PROJ_ROOT) / ".claude" / "tasks.db"))
 c = conn.cursor()
 

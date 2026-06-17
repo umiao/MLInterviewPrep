@@ -59,7 +59,7 @@ import json
 import re
 import subprocess
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent

@@ -6,7 +6,7 @@ cross-checks against `Decimal.quantize(..., ROUND_HALF_UP)` for sanity.
 """
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 
 def round_by_precision(s: str, p: str) -> str:
@@ -89,10 +89,7 @@ def round_by_precision(s: str, p: str) -> str:
             kept_int.insert(0, "1")
 
     int_str = "".join(kept_int).lstrip("0") or "0"
-    if k >= 0:
-        magnitude = int_str + "0" * k
-    else:
-        magnitude = int_str + "." + "".join(kept_frac)
+    magnitude = int_str + "0" * k if k >= 0 else int_str + "." + "".join(kept_frac)
 
     if all(c in "0." for c in magnitude):
         if "." in magnitude:
@@ -130,10 +127,7 @@ def _decimal_half_up(s: str, p: str) -> str:
     Note: `Decimal('100')` has exponent 0, so quantize to it == quantize to
     ones. To quantize to hundreds we must use `Decimal('1E2')`. Build the
     exponent explicitly from k."""
-    if "." in p:
-        k = -len(p.split(".", 1)[1])
-    else:
-        k = len(p) - 1
+    k = -len(p.split(".", 1)[1]) if "." in p else len(p) - 1
     target = Decimal(1).scaleb(k)  # 10**k with exponent=k
     d = Decimal(s.strip()).quantize(target, rounding=ROUND_HALF_UP)
     out = format(d, "f")

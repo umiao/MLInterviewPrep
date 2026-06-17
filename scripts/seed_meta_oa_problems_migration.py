@@ -52,7 +52,7 @@ import importlib.util
 import re
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -183,7 +183,7 @@ def main() -> int:
         conn.execute("BEGIN IMMEDIATE")
 
         new_ids: dict[str, int] = {}
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        now = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
         # Phase 1: ensure 4 problem rows exist (INSERT if missing).
         # Notes/description filled in phase 2 once we know all 4 ids,

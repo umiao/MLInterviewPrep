@@ -13,8 +13,8 @@ math-like tokens (presence of backslash commands inside the span).
 
 Read-only: does not modify the DB.
 """
-import sqlite3
 import re
+import sqlite3
 import sys
 
 MODULES = [

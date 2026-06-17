@@ -51,7 +51,7 @@ from __future__ import annotations
 import argparse
 import shutil
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -517,8 +517,8 @@ def main() -> int:
             return 0
         if any(flags):
             # Partial prior run -- refuse to half-apply.
-            present = [m for m, f in zip(MARKERS, flags) if f]
-            missing = [m for m, f in zip(MARKERS, flags) if not f]
+            present = [m for m, f in zip(MARKERS, flags, strict=False) if f]
+            missing = [m for m, f in zip(MARKERS, flags, strict=False) if not f]
             print(
                 f"[FAIL] partial expansion detected. "
                 f"Present: {present}. Missing: {missing}. "

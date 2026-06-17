@@ -10,11 +10,9 @@ Each task description points to scripts/mlsd_top9_spec.md for shared template
 + inlines the per-problem twist seeds and slug.
 """
 
+import re
 import subprocess
 import sys
-import re
-import json
-from pathlib import Path
 
 TASK_DB = ".claude/hooks/task_db.py"
 
@@ -250,7 +248,7 @@ def main():
 
     print(f"\n7 autorun tasks: {','.join(new_ids)}")
     print(f"1 wire-up task: {wireup_id}")
-    print(f"\nLaunch with: bash scripts/autonomous_run.sh 8 --allow-dirty")
+    print("\nLaunch with: bash scripts/autonomous_run.sh 8 --allow-dirty")
 
 
 if __name__ == "__main__":

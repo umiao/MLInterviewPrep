@@ -18,12 +18,21 @@
 - **autorun-safe 子集已全部清完**(876/878/916/905,见下)。剩余 ready 任务都是 supervised/gated → 下个 session **逐条人值守跑**,**别挂 `autonomous_run.sh`**。
 - 直接看 **`## supervised run 运行说明`**(下方)照做:单任务循环 + 推荐首拣。autorun 配方降级为附录(当前无 autorun-safe 任务可喂)。
 
-### 最近一次 session(2026-06-17 下午,supervised)
-- ✅ **修 MLI CI 两条失败**(`cef3f26`,已 push main):`scripts/lint_script_lifecycle.py` 的活引用扫描把 `_REF_SKIP_DIRS`(含 `tmp`)拿去匹配文件**绝对路径** parts → Linux CI 上 repo 在 `/tmp/pytest-.../` 下整树被跳过 → 仍被 import 的过期脚本误判 `CLEANUP_CANDIDATE`(Windows 临时目录是 `Temp`,本地一直绿掩盖了 bug)。改成按 **repo-相对路径** parts 判断;加回归测试(把 repo 嵌在字面 `tmp` 目录下复现,任何平台可复现)。全套 1315 passed。
-- 这是一次标准 supervised 单任务循环的样板:复现 → 定位平台依赖根因 → 修 + 回归测试 → 全套验证 → 显式路径 commit → push。
+### 最近一次 session(2026-06-17 晚,supervised)— ✅ 877 done(scripts/ ruff 清零)
+- ✅ **T-P2-877 完成**:`ruff check scripts/` 从 177 errors → **0**(排除 propagate 管理文件)。两阶段:
+  - **Phase A 安全自动修**(`--fix` 不带 `--unsafe-fixes`,117 fixed):UP017/F541/F401/I001/UP035/UP037/W605 等纯机械保行为。
+  - **Phase B 人审手改**:真改代码 = B905 加 `strict=False`(6)、B007 未用循环变量加 `_`(13)、B023 闭包绑循环变量为默认参数(`retrofit_doc_drawer_links.py`,同步调用行为等价,3)、F841 删死变量(2)、SIM108/103/110 简化、E402 import 移顶部;**scripts/ 作用域 per-file-ignore**(写进 `pyproject.toml`)= N806/N803/E741/E701/E702/SIM102(一次性 seed/audit/嵌入算法脚本里命名/紧凑风格 nit,改名有破坏 run-result 风险,spec 自己警告)。**未盲跑 `--unsafe-fixes` 全扫。**
+  - **scope 守卫**:propagate 管理文件(`scripts/workflows/*`、`sweep_stuck_leases.py`、`lib/events.py`)**有意没碰**——其 ~18 残留 ruff 错(含 SIM105)是独立 debt,须 **root canonical 改 + propagate**(MLI 局部改会被 daily broadcast 冲回 = 假绿)。
+  - 验证:`ruff check scripts/ --exclude <managed>` → All checks passed;`pytest -q` → **1315 passed**;65 改动脚本 py_compile 全过。
+- 改动:65 `scripts/*.py` + `pyproject.toml`。
 
-## Backlog 现状(2026-06-17 核实)
-70 任务:**18 done / 52 未完**(876/878/916/905 当日 autorun 完成)。52 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。
+### 上一次 session(2026-06-17 晚,supervised)— ✅ 879 done + 根工作树清理
+- ✅ **T-P2-879**(MLI `69ae26a`,push main):`task_store.py` `try/except ValueError/pass` → `contextlib.suppress`;修 shared/ 源 + .claude/ 活镜像两份,**没用 sync.py**(会删 7 个 MLI-local hooks)。
+- ✅ **根工作区工作树清理**(根仓库 `master` 3 commits,本地未 push):`35ab8e2` 7 个独立子仓库/草稿目录入 `.gitignore`;`ecb8328` 收 ytpipe doc builders+语料;`5b0a978` 收 06_10_ads study HTML builder。
+- **独立 debt(下一轮/T-P2-321 需知)**:工作区 14 份 task_store.py 副本都带 SIM105,但 task_store.py 不在 propagate 管理集(deferred 到 T-P2-321),daily-broadcast 不冲回——无假绿风险,本 S 有意没 blast。
+
+## Backlog 现状(2026-06-17 晚核实)
+70 任务:**20 done / 50 未完**(876/878/916/905 autorun + **879 + 877 supervised** 完成)。50 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。
 
 ### ✅ state 卫生债已清零(2026-06-17)
 曾有 **4 个** `status='active'` 但 `state=None`(picker 不可视:912/918/905/916)。已全部正规化成 `state='ready'`,**现在 `state=None` 计数 = 0**。非完成任务现仅两态:`active+ready`(17,可拣)/ `blocked+pending`(38,dep 门控或 PARK)。
@@ -41,8 +50,9 @@
 
 ### 还能直接拣的(state=ready 且依赖满足)— 均 supervised/gated,非 autorun-safe
 - ~~876 / 878 / 916 / 905~~ ✅ 已完成(2026-06-17,autorun)
-- **T-P2-877**〔DEBT,M〕876 修后 `ruff check scripts/` 残 ~193(60 可自动修;剩 N806/B905/E741 旧 util 改名有语义风险需人审)— **非纯 autorun**(尾部需人审)
-- **T-P2-879**〔DEBT,S〕`shared/hooks/task_store.py:145` SIM105 → `contextlib.suppress` — **改活循环用的 task 基建,supervised**
+- ~~879~~ ✅ 已完成(2026-06-17 晚,supervised,`69ae26a`)
+- ~~877~~ ✅ 已完成(2026-06-17 晚,supervised):`ruff check scripts/` 清零(排除 propagate 管理文件);per-file-ignore 写进 `pyproject.toml`。
+- 👉 **T-P1-908**〔内容,M〕**= 下一轮推荐第一拣**。加「ML Infra·LLM」SD tab + carve [300,400) + Pinterest 收成 [199,300) 防泄漏。有 manual-smoke AC(浏览器看 tab 渲染);改 DB 前先过 Surface Identification 表。其后 909 seed 用户给的 500GB 部署 golden。详见下方运行说明表 ②。
 - **T-P2-880**〔SYNC,S〕从 template 引入 study-review skill(拷前人审 scope)
 - **T-P1-881**〔Meta-MLSD,S〕sd42 archetype 迁移 oral_narrative(sd43/44 已折进 894/895)
 - **T-P1-908**〔ML-Infra-LLM,M〕加「ML Infra · LLM」SD tab + carve [300,400) + Pinterest 收成 [199,300) 防泄漏(其后 909 seed golden)
@@ -80,16 +90,18 @@ python .claude/hooks/task_db.py get <ID> # 读权威 spec(AC 在 description),pi
 
 ### 1. 选活(本 session 全是 supervised,逐条人值守,**不挂 autorun**)
 为什么 supervised:每条都因下列至少一项需要人在环——`.claude/` sensitive-gate / 改活循环用的 task 基建 / manual-smoke AC / 写 MLSD golden 内容 / 破坏性 DB 操作 / 改名有语义风险。
-**推荐拣选顺序**(由轻到重,先拿确定性高的):
+**推荐拣选顺序**(由轻到重,先拿确定性高的;~~879/877~~ 已完成):
 
 | 优先 | 任务 | 类 | 为何 supervised + 怎么做 |
 |---|---|---|---|
-| ① | **T-P2-879**〔S〕 | DEBT | `shared/hooks/task_store.py:145` SIM105 → `contextlib.suppress`。改活循环 task 基建,人审 1 处 diff + 跑全套即可。最小、最确定,适合开场。 |
-| ② | **T-P2-877**〔M〕 | DEBT | `ruff check scripts/` 残 ~193。先 `ruff check scripts/ --fix`(自动修 ~60 安全项)→ 人审剩余 N806/B905/E741(旧 util 改名有语义风险,逐个看调用点再决定改/`# noqa` 标注)。**不能盲 `--fix --unsafe-fixes`**。 |
-| ③ | **T-P1-908**〔M〕 | 内容 | 加「ML Infra·LLM」SD tab + carve [300,400) + Pinterest 收成 [199,300) 防泄漏。有 manual-smoke AC(浏览器看 tab 渲染);改 DB 前先过 Surface Identification 表。其后 909 seed 用户给的 500GB 部署 golden。 |
+| ~~①~~ | ~~**T-P2-879**〔S〕~~ ✅ | DEBT | 已完成(`69ae26a`)。`task_store.py` SIM105 → `contextlib.suppress`。 |
+| ~~②~~ | ~~**T-P2-877**〔M〕~~ ✅ | DEBT | 已完成。`ruff check scripts/` 清零(排除 propagate 管理文件):safe `--fix` + 人审手改(B905 strict / B007 `_` / B023 默认参数 / F841 / E402)+ scripts/ per-file-ignore(N806/N803/E741/E701/E702/SIM102 写进 pyproject)。**未盲跑 unsafe-fixes**。残留 ~18 错全在 propagate 管理文件 = 独立 debt(root canonical + propagate)。 |
+| **① 下一轮起** | 👉 **T-P1-908**〔M〕 | 内容 | **下一轮推荐第一拣。** 加「ML Infra·LLM」SD tab + carve [300,400) + Pinterest 收成 [199,300) 防泄漏。有 manual-smoke AC(浏览器看 tab 渲染);改 DB 前先过 Surface Identification 表。其后 909 seed 用户给的 500GB 部署 golden。 |
 | — | 内容簇起步(可选,较重) | 内容 | 先做共享 helper `scripts/lib/ds_distill.py`(DeepSeek v4+分块+temp0+截断感知)→ 开 CHEATSHEET 641 闸 → 644 跑 1 张蒸馏试点(人审 accept-default)。见「已定方向 §2」。 |
 
 其余仍锁着:881(MLSD)/921(大改 drawer_nav)/ KG-INT B4(破坏性,dry-run 闸门)/ BQ-DEPTH(锁 581)/ Guard 917(`human_review=1`)——按各簇详解的链序,**到了再 supervised 逐条做**。
+
+> **独立 debt(非任一现有任务,下一轮规划可考虑开新任务)**:① 跨项目 task_store.py 14 份副本的 SIM105 统一化,归 **T-P2-321**(propagate 管理化后一并修,别零散改)。② MLI 全树另有 **11 处 SIM105** 全在 propagate 管理文件(`scripts/lib/events.py`、`scripts/sweep_stuck_leases.py`、`scripts/workflows/*`、`route_and_record.py`)——须 **root canonical 改 + propagate**,不能 MLI 局部改(会被冲回);若要清,开一条 root 任务。
 
 ### 2. supervised 单任务循环(每拣一条都走一遍)
 ```

@@ -100,7 +100,7 @@ def main() -> int:
     remaining = cur.fetchone()[0]
     conn.close()
     if remaining:
-        print(f"[FAIL] row still present after DELETE")
+        print("[FAIL] row still present after DELETE")
         return 1
     print("[DONE] verified absent post-delete")
     return 0

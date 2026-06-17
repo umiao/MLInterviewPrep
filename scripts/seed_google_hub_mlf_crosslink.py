@@ -100,7 +100,7 @@ def main() -> int:
         print(f"[UPDATE] id={DOC_ID} inserted '系统性八股文复习' bucket above Fundamentals")
         print(f"         pre  sha256={pre_hash[:16]}...")
         print(f"         post sha256={post_hash[:16]}...")
-        print(f"[OK] updates=1")
+        print("[OK] updates=1")
         return 0
     finally:
         conn.close()

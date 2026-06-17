@@ -96,13 +96,7 @@ def already_wired(content: str) -> bool:
     """
     if WIREUP_SENTINEL not in content:
         return False
-    for slug in Q_SLUGS.values():
-        # Q13 has 1 extra inline mention pre-existing in the twist column;
-        # Q1 has 1 extra mention from retrofit_meta_mlsd_94_top3_xref.py.
-        # So a strict ">= 2" suffices for the new (table cell + heading) pair.
-        if content.count(slug) < 2:
-            return False
-    return True
+    return all(content.count(slug) >= 2 for slug in Q_SLUGS.values())
 
 
 def transform_content(content: str) -> str:
@@ -260,7 +254,7 @@ def main() -> int:
     conn = sqlite3.connect(str(DB_PATH))
     try:
         verify_slug_existence(conn)
-        print(f"[OK] all 13 sd:// slugs verified in system_designs")
+        print("[OK] all 13 sd:// slugs verified in system_designs")
 
         row = conn.execute(
             "SELECT id, company_id, title, content "

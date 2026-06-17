@@ -181,9 +181,9 @@ def validate(desc: str) -> list[str]:
         if marker not in desc:
             problems.append(f"missing marker: {marker!r}")
     if PATCH_1_OLD in desc:
-        problems.append(f"PATCH_1 not applied: original text still present")
+        problems.append("PATCH_1 not applied: original text still present")
     if PATCH_2_OLD in desc:
-        problems.append(f"PATCH_2 not applied: original text still present")
+        problems.append("PATCH_2 not applied: original text still present")
     return problems
 
 

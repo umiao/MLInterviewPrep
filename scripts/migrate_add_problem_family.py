@@ -75,7 +75,7 @@ def migrate(db_path: str) -> None:
         print(f"[INSERT] LC {lc_id} {title}")
 
     cur.executemany(
-        f"UPDATE problems SET family=? WHERE leetcode_id=?",
+        "UPDATE problems SET family=? WHERE leetcode_id=?",
         [(FAMILY_VALUE, lc) for lc in TARGET_LC_IDS],
     )
     conn.commit()

@@ -2,7 +2,6 @@
 """One-shot: append T-P2-666 PROGRESS.md entry."""
 from __future__ import annotations
 
-import io
 from pathlib import Path
 
 ENTRY = """
@@ -27,7 +26,7 @@ def main() -> None:
     if not src.endswith("\n"):
         src += "\n"
     src += ENTRY
-    with io.open(p, "w", encoding="utf-8", newline="\n") as f:
+    with open(p, "w", encoding="utf-8", newline="\n") as f:
         f.write(src)
     print("Appended PROGRESS entry for T-P2-666")
 

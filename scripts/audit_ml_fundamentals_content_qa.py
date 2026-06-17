@@ -25,8 +25,8 @@ from __future__ import annotations
 import re
 import sqlite3
 import sys
-from pathlib import Path
 from collections import OrderedDict
+from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = REPO_ROOT / "data" / "mle_prep.db"
@@ -258,10 +258,7 @@ def has_canonical_expansion(text: str, acronym: str, first_idx: int) -> bool:
         r"\*\*" + re.escape(acronym) + r"\*\*\s*[(（]?\s*"
         r"[A-Za-z][A-Za-z\s\-]{4,}"
     )
-    if pat_e.search(window):
-        return True
-
-    return False
+    return bool(pat_e.search(window))
 
 
 def strip_h1_title(text: str) -> str:
@@ -356,7 +353,7 @@ def scan_standalone_formulas(text: str) -> list[tuple[str, str]]:
 def scan_jargon(text: str) -> list[tuple[str, str]]:
     """Return [(jargon, context)] for first-occurrence jargon lacking gloss."""
     findings: list[tuple[str, str]] = []
-    for needle, hint in JARGON_PATTERNS:
+    for needle, _hint in JARGON_PATTERNS:
         idx = text.find(needle)
         if idx < 0:
             continue

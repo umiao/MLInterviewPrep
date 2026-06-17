@@ -223,11 +223,8 @@ def build_updated_selfcheck(existing_content: str) -> str:
     next_section_marker = "\n## "
     after_sc = existing_content[sc_idx + len(sc_marker):]
     next_idx = after_sc.find(next_section_marker)
-    if next_idx == -1:
-        # Self-Check is the last section
-        sc_end = len(existing_content)
-    else:
-        sc_end = sc_idx + len(sc_marker) + next_idx
+    # next_idx == -1 means Self-Check is the last section
+    sc_end = len(existing_content) if next_idx == -1 else sc_idx + len(sc_marker) + next_idx
 
     # Extract existing checklist lines
     sc_block = existing_content[sc_idx:sc_end]

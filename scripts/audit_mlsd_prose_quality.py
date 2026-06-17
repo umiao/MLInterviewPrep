@@ -40,7 +40,6 @@ import re
 import sqlite3
 import sys
 from pathlib import Path
-from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = REPO_ROOT / "data" / "mle_prep.db"
@@ -113,9 +112,7 @@ def classify_prose(line: str) -> bool:
         return False
     if is_bullet(line) or is_table(line) or is_heading(line):
         return False
-    if is_blockquote(line) or is_code_fence(line):
-        return False
-    return True
+    return not (is_blockquote(line) or is_code_fence(line))
 
 
 def split_sections(text: str) -> list[tuple[str, list[str]]]:

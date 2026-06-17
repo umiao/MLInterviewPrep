@@ -184,7 +184,7 @@ def verify(cur: sqlite3.Cursor) -> int:
             file=sys.stderr,
         )
         return 1
-    print(f"[VERIFY-OK] 1/1 row matches canonical, drift=0")
+    print("[VERIFY-OK] 1/1 row matches canonical, drift=0")
     print(f"[OK] {title} @ {sched}")
     return 0
 

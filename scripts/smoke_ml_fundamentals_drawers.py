@@ -80,7 +80,7 @@ def check_katex(body: str) -> tuple[str, list[str]]:
     stripped = strip_code_fences(body)
 
     # (1) incompatible delimiters — rehype-katex only accepts $ / $$
-    for bad in [r"\\(", r"\\)", r"\\[", r"\\]"]:
+    for _bad in [r"\\(", r"\\)", r"\\[", r"\\]"]:
         # Only flag LaTeX-style inline/display; these must be backslash-literal pairs
         # followed by content. Use a stricter regex.
         pass
@@ -344,7 +344,7 @@ def main() -> int:
     out_lines.append("")
     out_lines.append("## Summary")
     out_lines.append("")
-    out_lines.append(f"- Total leaves: 27")
+    out_lines.append("- Total leaves: 27")
     out_lines.append(
         f"- KaTeX: OK={summary_counts['katex_ok']} / FAIL={summary_counts['katex_fail']}"
     )

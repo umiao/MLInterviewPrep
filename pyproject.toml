@@ -44,6 +44,20 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
 
+[tool.ruff.lint.per-file-ignores]
+# scripts/ is one-shot utility / seed / embedded-algorithm code, not library code.
+# These rules are either idiomatic-or-harmless here, or their "fix" (renaming vars in
+# archived run scripts) carries semantic risk of breaking a referenced run-result
+# (T-P2-877). src/ + tests/ remain fully linted.
+"scripts/**" = [
+    "N806",   # ML/data convention: uppercase locals (X, y, N, LogisticRegression)
+    "N803",   # ML convention: uppercase function args (e.g. X)
+    "E741",   # ambiguous single-char name (l) — harmless in throwaway audit/seed scripts
+    "E701",   # compact one-line if/colon mirrors embedded whiteboard-style solutions
+    "E702",   # compact semicolon statements in embedded algorithm solutions
+    "SIM102", # nested-if structure kept readable in generated/seed content
+]
+
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true

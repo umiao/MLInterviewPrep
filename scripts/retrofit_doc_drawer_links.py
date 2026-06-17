@@ -22,9 +22,9 @@ import json
 import re
 import sqlite3
 import sys
-from dataclasses import dataclass, field
+from collections.abc import Iterable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 DB_PATH = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
 
@@ -109,7 +109,7 @@ def rewrite_custom(text: str, mappings: Iterable[CustomMapping]) -> tuple[str, i
         )
         count = 0
 
-        def _sub(match: re.Match[str]) -> str:
+        def _sub(match: re.Match[str], m=m) -> str:  # bind loop var (closure called synchronously this iteration)
             nonlocal count
             if match.group(1) is not None:
                 return match.group(1)

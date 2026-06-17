@@ -4,7 +4,7 @@
 Idempotent: looks up by title, updates content if already exists.
 """
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 DB_PATH = "data/mle_prep.db"
 COMPANY_ID = 29  # Pinterest
@@ -157,7 +157,7 @@ If stuck >10 min, read notes and mark for re-review tomorrow.
 def main() -> None:
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    now = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    now = datetime.now(UTC).isoformat(timespec="seconds")
 
     cursor.execute(
         "SELECT id FROM company_documents WHERE company_id = ? AND title = ?",

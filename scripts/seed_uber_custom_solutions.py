@@ -54,9 +54,7 @@ def parse_solutions(doc_path: Path) -> dict[int, str]:
     """
     text = doc_path.read_text(encoding="utf-8")
 
-    # Split on "## N. " or "## (N) " section headers
-    # Pattern matches: ## 1. Title or ## (1) Title
-    pattern = r"^## (?:(\d+)\.|(\(\d+\)))\s+"
+    # Split on "## N. " or "## (N) " section headers (matched inline below)
     sections: dict[int, str] = {}
 
     lines = text.split("\n")

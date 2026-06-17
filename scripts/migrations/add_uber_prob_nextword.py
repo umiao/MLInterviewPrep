@@ -11,9 +11,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-import re
 import sqlite3
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 DB = Path(__file__).resolve().parents[2] / "data" / "mle_prep.db"
@@ -335,7 +334,7 @@ CROSS_CUTTING_FIRST_LINE = "Uber VO ML coding 不是纯 LeetCode — 你写出�
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
 
 def main() -> None:

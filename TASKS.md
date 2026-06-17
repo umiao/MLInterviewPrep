@@ -193,12 +193,6 @@ AC:
 - **Depends on**: T-P1-821, T-P1-834
 - **Description**: Final 4-item acceptance checklist (per Discord plan v3 §9): (a) all P0/P1 companies' prep_notes/notes byte counts < threshold anchored by A0 EDA; (b) meta-prep child nodes mean byte count > 800; (c) audit_uri_consistency.py reports 0 broken kg:// db:// cd:// sd://; (d) red-dot logic manual smoke on sample companies passes. Compute byte-savings stats (before vs after) + commit count + KG growth (node + link delta). PROGRESS close-out entry summarizes the 42-task batch. AC: all 4 checklist items pass; close-out entry written.
 
-#### T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix)
-- **Priority**: P2
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (60 auto-fixable). Distribution: many UP017 (use datetime.UTC alias), F541 (f-string without placeholders), N806/N803 (lowercase var names like `X`, `N`, `LogisticRegression`), B905 (zip() without strict=), SIM103/SIM108 (return-condition / ternary), UP035 (collections.abc imports), E741 (ambiguous var `l`), E402 (import not at top of file), I001 (import block unsorted), W605 (invalid escape sequence). Concentrated in one-shot utility scripts: `_add_pinterest_*`, `_smoke_*`, `_rewrite_*`, `_verify_*`, `_update_*`, `audit_*`. Suggested approach: run `ruff check --fix scripts/` (auto-fixes ~60), then human-review remaining N806/B905/E741 (semantic risk: renaming vars in old utility scripts may break a referenced run-result). src/+tests/ remain clean (audited 2026-05-14).
-
 #### T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work)
 - **Priority**: P2
 - **Complexity**: S
@@ -615,6 +609,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
 - [x] **2026-06-17** -- T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress). `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/ex
 - [x] **2026-06-17** -- T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml). requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` he
+- [x] **2026-06-17** -- T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix). After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (6
 - [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
 - [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan
 - [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l

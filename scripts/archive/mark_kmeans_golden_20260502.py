@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -50,7 +50,7 @@ def main() -> int:
             )
             return 0
 
-        now_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        now_iso = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S")
 
         if is_golden and not golden_at:
             conn.execute(

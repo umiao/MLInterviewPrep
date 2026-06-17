@@ -171,7 +171,7 @@ def main() -> int:
 
     fields = ["situation", "task", "action", "result", "risk_statement"]
     print(f"[OK] {EXAMPLE_ID} (id={row_id}) '{title}' rewritten:")
-    for f, b, a in zip(fields, before, after):
+    for f, b, a in zip(fields, before, after, strict=False):
         sign = "+" if a >= b else ""
         print(f"  {f:<16} {b:>5} -> {a:>5} chars ({sign}{a - b})")
     return 0

@@ -25,12 +25,11 @@ the review artifact for per-concept human sign-off.
 
 from __future__ import annotations
 
-import re
 import sqlite3
 import sys
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable
 
 DB_PATH = Path("data/mle_prep.db")
 OUTPUT_PATH = Path("docs/staging/audits/legacy_hejiji_coverage_checklist_20260416.md")
@@ -673,8 +672,8 @@ def _render_section(doc: DocSpec, content: str) -> str:
         lines.append(f"- **Status**: {c.status}")
         lines.append(f"- **Where**: {c.location}")
         lines.append(f"- **Action**: {c.action}")
-        lines.append(f"- [ ] User-verified migration complete")
-        lines.append(f"- [ ] Signed off for deletion from this 合集")
+        lines.append("- [ ] User-verified migration complete")
+        lines.append("- [ ] Signed off for deletion from this 合集")
         lines.append("")
 
     return "\n".join(lines)
@@ -733,7 +732,7 @@ def _render_header(docs: Iterable[DocSpec]) -> str:
         f"  - PARTIAL: {overall['PARTIAL']}",
         f"  - UNIQUE: {overall['UNIQUE']}",
         f"- **Source DB**: `{DB_PATH.as_posix()}`",
-        f"- **Generator**: `scripts/audit_legacy_hejiji_coverage.py`",
+        "- **Generator**: `scripts/audit_legacy_hejiji_coverage.py`",
         "- **Determinism**: re-running the generator produces a byte-identical",
         "  file (no timestamps in body, sorted iteration, fixed UTF-8 newline",
         "  output).",

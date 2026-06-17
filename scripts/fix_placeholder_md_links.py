@@ -16,10 +16,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import re
 import sqlite3
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -50,7 +49,7 @@ TARGET_DOCS = (47, 36)
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def _resolve_doc_id(cur: sqlite3.Cursor, cid: int, title: str) -> int | None:

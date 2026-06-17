@@ -10,7 +10,7 @@ from pathlib import Path
 DB = Path(__file__).resolve().parent.parent / "data" / "mle_prep.db"
 MARKER = "### Pinterest 2025-11 Follow-up"
 
-ADDENDUM = """
+ADDENDUM = r"""
 
 ---
 
