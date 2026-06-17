@@ -199,12 +199,6 @@ AC:
 - **Depends on**: None
 - **Description**: After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (60 auto-fixable). Distribution: many UP017 (use datetime.UTC alias), F541 (f-string without placeholders), N806/N803 (lowercase var names like `X`, `N`, `LogisticRegression`), B905 (zip() without strict=), SIM103/SIM108 (return-condition / ternary), UP035 (collections.abc imports), E741 (ambiguous var `l`), E402 (import not at top of file), I001 (import block unsorted), W605 (invalid escape sequence). Concentrated in one-shot utility scripts: `_add_pinterest_*`, `_smoke_*`, `_rewrite_*`, `_verify_*`, `_update_*`, `audit_*`. Suggested approach: run `ruff check --fix scripts/` (auto-fixes ~60), then human-review remaining N806/B905/E741 (semantic risk: renaming vars in old utility scripts may break a referenced run-result). src/+tests/ remain clean (audited 2026-05-14).
 
-#### T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/except ValueError/pass guarding `_sys.path.remove(str(project_root / "scripts"))` in the `finally` block should be `with contextlib.suppress(ValueError): _sys.path.remove(...)`. Single-spot mechanical fix, runs only via whole-tree audit. Verify the same pattern is not repeated in the propagated copies under root/helixos/homestead/blog_proj before closing.
-
 #### T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work)
 - **Priority**: P2
 - **Complexity**: S
@@ -619,6 +613,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 
 - [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
+- [x] **2026-06-17** -- T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress). `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/ex
 - [x] **2026-06-17** -- T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml). requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` he
 - [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
 - [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan

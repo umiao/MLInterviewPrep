@@ -10,6 +10,7 @@ Provides:
 - Lossless import from existing TASKS.md
 """
 
+import contextlib
 import datetime
 import json
 import re
@@ -142,10 +143,8 @@ def _try_events_append(project_root: Path, payload: dict[str, Any]) -> None:
     except (ImportError, ValueError, OSError) as exc:
         _sys.stderr.write(f"WARN: events.append failed: {exc}\n")
     finally:
-        try:
+        with contextlib.suppress(ValueError):
             _sys.path.remove(str(project_root / "scripts"))
-        except ValueError:
-            pass
 
 
 # --- TaskStore ---
