@@ -487,3 +487,10 @@
 - **Sanity check result**: pytest 1298 passed (full suite, after all reverts); 7/7 new lint tests pass; `lint --strict` exit 0 (71 linted, 0 stale, 0 cleanup, 3 pinned); 70/71 movers py_compile OK (1 = translate_p6_nodes, PINNED, pre-existing T-P1-876 breakage).
 - **Status**: [DONE] (supersedes move-count details in the entry above)
 - **Request**: No change (T-P2-353 already complete; this is the same-session correction).
+
+## 2026-06-17 -- [T-P1-876] Fix outer r-string syntax error in translate_p6_nodes.py (embedded triple-quotes)
+- **What I did**: The 16 `translations[NNN] = r"""..."""` markdown blobs (framework_nodes 149-164) embed display-only Python code examples whose docstrings/f-strings used `"""`, which prematurely terminated the outer raw string (first break at L117, cascading corruption surfaced by ruff at L1973). Since these code blocks are text-only (never executed), I converted their inner `"""` -> `'''` (16 lines) -- still valid, readable Python -- so they no longer collide with the outer `r"""` delimiter. Left all structural delimiters (openers `r"""`, lone closers `"""`, module docstring) untouched. Could not switch the outer delimiter to `'''` because content already contains `'''` (L102-105), and could not escape inside a raw string (LaTeX `\prod`/`\theta` require raw).
+- **Deliverables**: `scripts/seed/translate_p6_nodes.py` (16 inner-delimiter swaps + ruff import-sort autofix + re-pinned head marker `PINNED_BY: invariant-3` since the file is the source-of-truth seed for nodes 149-164 per Invariant 3, replacing the now-stale `PINNED_BY: T-P1-876` open-ticket pin).
+- **Sanity check result**: `py_compile` OK; `ruff check` all-clean; non-destructive module import builds all 16 translation keys (149-164), LaTeX raw backslashes preserved, no stray `"""`, f-string display block swapped; lifecycle lint classifies file `[PIN]` (not retired); `tests/test_script_lifecycle_lint.py` 7/7; full suite **1305 passed**. Did NOT run `main()` (writes DB) -- out of scope for a syntax fix and would overwrite nodes 149-164.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-876`

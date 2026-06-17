@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-# PINNED_BY: T-P1-876  (open fix ticket for L1973 syntax error; do NOT auto-retire until fixed or ticket closed)
+# PINNED_BY: invariant-3  (source-of-truth seed for framework_nodes 149-164 Chinese descriptions; do NOT auto-retire)
+# Note: the L117/L1973 outer-r-string syntax error (T-P1-876) is fixed -- embedded code-block docstrings/f-strings
+# in the markdown blobs use ''' so they no longer terminate the outer r""" literal prematurely.
 """Translate nodes 149-164 to Chinese with deep expansion."""
 
+import io
 import sqlite3
 import sys
-import io
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
@@ -114,7 +116,7 @@ import torch
 import torch.nn.functional as F
 
 def compute_perplexity(model, tokenizer, text):
-    """计算给定文本的困惑度"""
+    '''计算给定文本的困惑度'''
     inputs = tokenizer(text, return_tensors="pt")
     with torch.no_grad():
         outputs = model(**inputs, labels=inputs["input_ids"])
@@ -222,7 +224,7 @@ model = AutoModelForCausalLM.from_pretrained(
 
 # RoPE 位置编码的核心实现
 def apply_rotary_emb(xq, xk, freqs_cis):
-    """对 query 和 key 施加旋转位置编码"""
+    '''对 query 和 key 施加旋转位置编码'''
     xq_complex = torch.view_as_complex(xq.reshape(*xq.shape[:-1], -1, 2))
     xk_complex = torch.view_as_complex(xk.reshape(*xk.shape[:-1], -1, 2))
     xq_out = torch.view_as_real(xq_complex * freqs_cis).flatten(-2)
@@ -230,7 +232,7 @@ def apply_rotary_emb(xq, xk, freqs_cis):
     return xq_out, xk_out
 
 def precompute_freqs_cis(dim, max_seq_len, theta=10000.0):
-    """预计算旋转频率"""
+    '''预计算旋转频率'''
     freqs = 1.0 / (theta ** (torch.arange(0, dim, 2).float() / dim))
     t = torch.arange(max_seq_len)
     freqs = torch.outer(t, freqs)
@@ -330,7 +332,7 @@ import hashlib
 tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b")
 
 def dedup_by_minhash(documents, num_hashes=128, threshold=0.8):
-    """基于 MinHash 的模糊去重"""
+    '''基于 MinHash 的模糊去重'''
     from datasketch import MinHash, MinHashLSH
     lsh = MinHashLSH(threshold=threshold, num_perm=num_hashes)
     unique_docs = []
@@ -347,7 +349,7 @@ def dedup_by_minhash(documents, num_hashes=128, threshold=0.8):
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 def get_cosine_schedule_with_warmup(optimizer, warmup_steps, total_steps):
-    """带 warmup 的余弦退火学习率调度"""
+    '''带 warmup 的余弦退火学习率调度'''
     def lr_lambda(step):
         if step < warmup_steps:
             return step / warmup_steps
@@ -450,11 +452,11 @@ tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-2-7b-hf")
 
 # 格式化指令数据
 def format_instruction(sample):
-    return f"""### Instruction:
+    return f'''### Instruction:
 {sample['instruction']}
 
 ### Response:
-{sample['response']}"""
+{sample['response']}'''
 
 # 训练配置
 training_args = TrainingArguments(
@@ -849,7 +851,7 @@ results = lm_eval.simple_evaluate(
 
 # 自定义评估指标
 def compute_pass_at_k(n, c, k):
-    """计算 pass@k 指标"""
+    '''计算 pass@k 指标'''
     from math import comb
     if n - c < k:
         return 1.0
@@ -947,14 +949,14 @@ from typing import List, Dict
 
 @dataclass
 class KVBlock:
-    """KV cache 的物理块"""
+    '''KV cache 的物理块'''
     block_id: int
     tokens: List[int]        # 存储的 token IDs
     kv_data: torch.Tensor    # shape: [num_layers, 2, block_size, head_dim]
     ref_count: int = 0       # 引用计数（用于 copy-on-write）
 
 class BlockAllocator:
-    """块分配器 - 管理物理 KV cache 块"""
+    '''块分配器 - 管理物理 KV cache 块'''
     def __init__(self, num_blocks, block_size):
         self.free_blocks = list(range(num_blocks))
         self.block_size = block_size
@@ -968,7 +970,7 @@ class BlockAllocator:
         self.free_blocks.append(block_id)
 
 class BlockTable:
-    """块表 - 逻辑到物理的映射"""
+    '''块表 - 逻辑到物理的映射'''
     def __init__(self):
         self.table: List[int] = []  # 逻辑 block index → 物理 block id
 
@@ -1237,7 +1239,7 @@ class ContinuousBatchScheduler:
         self.waiting: deque[Request] = deque()
 
     def schedule_iteration(self):
-        """每次迭代的调度决策"""
+        '''每次迭代的调度决策'''
         # 1. 移除已完成的请求
         self.running = [r for r in self.running if r.state != RequestState.FINISHED]
 
@@ -1514,7 +1516,7 @@ chunks = recursive_splitter.split_text(document)
 
 # 3. 语义分块
 def semantic_chunking(text, model_name="all-MiniLM-L6-v2", threshold=0.5):
-    """基于语义相似度的分块"""
+    '''基于语义相似度的分块'''
     model = SentenceTransformer(model_name)
     sentences = text.split(". ")
     embeddings = model.encode(sentences)
@@ -1949,7 +1951,7 @@ from langchain_openai import ChatOpenAI
 
 # 1. HyDE 实现
 def hyde_retrieve(query, retriever, llm):
-    """使用 HyDE 进行检索"""
+    '''使用 HyDE 进行检索'''
     # 生成假设回答
     hyde_prompt = f"请回答以下问题（即使不确定也要尝试）：\n{query}"
     hypothetical_doc = llm.invoke(hyde_prompt).content
@@ -1959,7 +1961,7 @@ def hyde_retrieve(query, retriever, llm):
 
 # 2. Multi-query 实现
 def multi_query_retrieve(query, retriever, llm, n_queries=3):
-    """生成多个查询变体并合并检索结果"""
+    '''生成多个查询变体并合并检索结果'''
     prompt = "将以下问题改写为" + str(n_queries) + "个不同角度的查询:\n    原始问题: " + query + "\n    请每行输出一个查询。"
     queries = llm.invoke(prompt).content.strip().split("\n")
     all_docs = set()
@@ -1970,7 +1972,7 @@ def multi_query_retrieve(query, retriever, llm, n_queries=3):
 
 # 3. RRF 融合
 def reciprocal_rank_fusion(results_lists, k=60):
-    """倒数排名融合"""
+    '''倒数排名融合'''
     scores = {}
     for results in results_lists:
         for rank, doc in enumerate(results):
