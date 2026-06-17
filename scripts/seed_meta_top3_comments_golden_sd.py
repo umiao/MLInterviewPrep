@@ -1,58 +1,40 @@
-"""Seed: T-P0-853 [Meta-MLSD] Top-3 Comments Golden -> system_designs.
+"""Seed: T-P0-853 / T-P1-881 [Meta-MLSD] Top-3 Comments Golden -> system_designs.
 
 INSERTs (or idempotently updates) the canonical Meta MLSD Top-3 Comments
 golden example as ``system_designs(slug='meta-top3-comments-golden')``,
-drawer-reachable via ``sd://meta-top3-comments-golden``. Sourced from
-``docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md``
-(user-authored Discord msg 1503871555216605214 Part 4 Golden Answer + Part 5
-Mock Checklist + msg 1503874418802163744 Bias Tower / Shadow Logging reference).
+drawer-reachable via ``sd://meta-top3-comments-golden``.
 
-T-P0-868 reseed (2026-05-13): per schemas/meta_mlsd_canonical.yaml, the
-methodology homepage moved to cd96 and sd-golden is now solution-only.
-Replaced overview 整体节奏哲学 prose (R-FORBID-rhythm-philosophy) with a
-2-paragraph solution anchor + Top-3-Comments-specific 4-Strong-Moment slot
-map; stripped any 'why this is strong' meta-prose from defense
-(R-FORBID-why-this-is-strong); consolidated verbal_outline + cheat_sheet
-to Top-3-Comments-specific anchors only (R-XPAGE-{cheatsheet,verbal}-no-
-cd96-dup); added Decision summary blocks to architecture / dataflow /
-production_constraints / tradeoffs / defense for section-level 3-rule
-pass. NO drawer header (R-DRAWER-no-sd-drawer).
+T-P1-881 archetype migration (2026-06-17): document_archetype migrated from
+``structured_reference`` (10-field shape, ~54KB across overview/architecture/
+dataflow/formulas/production_constraints/tradeoffs/defense/verbal_outline/
+cheat_sheet) to ``oral_narrative``, mirroring the sd41 (reels) golden template
+(T-P1-875) and the sd-weapon/sd-friend minimal-A mirrors (T-P0-894/895). Per
+``schemas/meta_mlsd_canonical.yaml`` (``document_archetypes.values.oral_narrative``):
 
-T-P0-873 narrative retrofit (2026-05-13): per the now-formalized
-R-NARRATIVE-prose-form rule in schemas/meta_mlsd_canonical.yaml, all
-apply_3rule:true sections are converted from bullet-heavy markdown notes
-to oral-recital first-person English narrative. Measurable proxies
-enforced by validate(): >=3 **bold** spans per section; <=4 consecutive
-bullet lines; <=3-row markdown tables. Substance preserved; this is pure
-form conversion. Specifically: (a) overview 4-row slot map table
-compressed to 3 rows + a prose sentence carrying slot #4;
-(b) dataflow Section 3 (labels) and Section 4 (features) bullet runs
-broken up by prose interleavers so the longest run drops to <=4;
-(c) production_constraints 5-row latency budget table compressed by
-folding the aggregation+serialize row into a sentence, and the 5-row
-tiered-refresh table compressed similarly; (d) tradeoffs 4-row option
-compare tables converted to 'I pick A because X, costs Y, switches to B
-if Z' prose so the longest table body drops to <=3 rows.
+  - ``dataflow`` carries a single continuous 第一人称 45-min 口播稿 (8 sections).
+    This 10504-char narrative is the made golden (authored into the DB ahead of
+    this migration); this seed captures it as the source of truth (Invariant 3).
+    The prior structured-shape DATAFLOW (6378 chars) is superseded.
+  - ``overview`` / ``formulas`` / ``cheat_sheet`` are slim anchors (kept from the
+    structured seed -- they already read as oral anchors).
+  - ``architecture`` / ``production_constraints`` / ``tradeoffs`` / ``defense``
+    are NULL by design -- their content (2-stage ranking + bias tower + MMR-vs-DPP
+    + selection-bias label + serving/skew + 8 tradeoffs + 4 Strong Moments) lives
+    inlined in the dataflow 口播稿.
+  - ``verbal_outline`` is NULLed here and re-populated by
+    ``seed_meta_meta_top3_comments_golden_verbal_outline.py`` (T-P0-893); run that
+    verbal seed AFTER this main seed. It is a nullable field for oral_narrative.
 
-Target row shape (9 prose columns, all > 200 chars, schema char ranges
-per sd_golden.fields):
-  - overview                : 2-paragraph solution anchor (what / 3 twists / 4-slot map)
-  - architecture            : 2-stage point-wise ranking + MMR set-selection reranker + bias tower
-  - dataflow                : 4-section verbatim walk (framing / metrics / labels / features)
-  - formulas                : label schema (L1-L4) + negative sampling + multi-task conflict + score combine
-  - production_constraints  : Section 5.3 serving + tiered refresh + skew defense
-  - tradeoffs               : 8 tradeoffs ("I pick A because X, costs Y, switches to B if Z")
-  - defense                 : 4 Strong Moment verbatim + monitoring + A/B + loop closure; NO 'why this is strong' meta-prose
-  - verbal_outline          : Top-3-specific entry phrases + drift lines (methodology lives in cd://96)
-  - cheat_sheet             : Top-3-only quantification anchors + firm-claim register + 4 Design Doc 强调话术 (cd://96 owns timing skeleton + 8 meta-rules)
+The 4 oral_narrative criteria (causal chain complete / first-person speakable /
+立场 + trade-off / twist 在 body 兑现) plus the section-level 3-rule were
+mechanically verified against the dataflow before this migration; the canonical
+post-seed gate is ``scripts/audit_meta_mlsd_3rule.py`` (expects 0 findings
+sd41-44).
 
-Architecture and production_constraints both embed a short Bias Tower /
-Shadow-Logging digest with an anchor sentence pointing to fr-node
-``meta-prep/system-design-must-knows/popularity-bias-debiasing`` (id=266)
-for the 深版 walkthrough (T-P0-854 owns that 深版).
-
-Idempotent: re-running upserts in place by `slug`. Sentinel-based UPSERT
-keyed on `slug='meta-top3-comments-golden'`.
+Idempotent: re-running upserts in place by ``slug``. Sentinel-based UPSERT
+keyed on ``slug='meta-top3-comments-golden'``. The 5 NULLed fields remain NULL
+on re-run; the canonical archetype declaration in ``meta_mlsd_canonical.yaml``
+means the audit flags any structured-shape re-population as a regression.
 
 Usage::
 
@@ -80,7 +62,9 @@ SUBTITLE = (
 DISPLAY_ORDER = 131
 SOURCE_PATH = "docs/prep/meta_mlsd_2026-05-12_top3/source_04_top3_comments_golden.md"
 
-ANCHOR_FR_NODE = "meta-prep/system-design-must-knows/popularity-bias-debiasing"
+# T-P1-881: this seed produces an oral_narrative archetype document. See
+# schemas/meta_mlsd_canonical.yaml > document_archetypes.values.oral_narrative.
+DOCUMENT_ARCHETYPE = "oral_narrative"
 
 
 OVERVIEW = """\
@@ -110,168 +94,154 @@ The 4 slots fire at fixed times. **Slot #1 (0-1)** carries the 3-twist framing �
 | 2 | 8-12   | Selection-bias 三阶 negative label     | IPS-weighted exposed-not-engaged + 5% bandit unexposed + hard-neg mining        |
 | 3 | 15-21  | Bias Tower + MMR vs DPP                | shallow additive bias tower + mask-at-inference + MMR with hard quota across 3 axes |
 
-The dataflow / defense / tradeoffs columns are this row's solution body; verbal_outline + cheat_sheet hold only Top-3-Comments-specific anchors. Anything else (rhythm rules, vocab YES/NO, E4/E5 line) belongs in `cd://96`.
-"""
-
-
-ARCHITECTURE = """\
-# Architecture: 2-stage Pointwise Ranking + MMR Set-Selection Reranker + Shallow Bias Tower
-
-## Decision summary (the architectural twist)
-
-**I pick** a 2-stage point-wise ranking funnel (cheap pre-rank -> deep rank) followed by an **MMR list-level reranker with hard quota across 3 axes (commenter / sentiment / topic)** -- the **unique angle** vs a generic ranker is the shallow additive **bias tower with mask-at-inference** that structurally decouples relevance from position / popularity / freshness bias. **This is where** the Bias-Tower-and-MMR-vs-DPP twist of Strong Moment #3 lives. Latency budget p99 < 200 ms over ~1000 candidates per request.
-
-## Funnel (top-down, each layer budget explicit)
-
-```
-Pre-filter (toxicity hard filter + dedup, in-storage)  -> 1000 candidates
-L1 pre-rank (GBDT, cheap features, weighted target)    -> top 100-200
-L2 deep rank (MMOE + shallow bias tower)               -> point-wise scores
-Reranker (MMR with hard quota across 3 axes)           -> top 3
-```
-
-## L2 ranker detail (the core -- expand ~90s)
-
-```
-+--------------------------------------------+
-| Main tower (Deep + Cross)                  |
-|  +- Head 1: engagement                     |
-|  +- Head 2: toxicity (also pre-filter)     |
-|  +- Head 3: diversity-contrib              |
-+--------------------------------------------+
-| Shallow bias tower                         |
-|  Input: position / popularity / recency    |
-|  Output: additive at training              |
-|           MASKED at inference  <- key      |
-+--------------------------------------------+
-```
-
-**Multi-task start point**: shared bottom + multi heads + composite label; **upgrade to MMOE only if negative transfer appears** -- do not default to MMOE on day 1. Loss weights are **locked by business context** (comment lift value + risk budget), **NOT uncertainty weighting** -- because the weight is a product decision, not a statistical estimate.
-
-## Reranker: MMR not DPP (the most important architectural trade-off)
-
-- **Why MMR**: for n=3 the list is too short for DPP's set-level optimization -- the 3-item determinant is dominated by any single pairwise cosine, costing DPP its theoretical edge
-- **Method**: MMR across 3 axes (commenter / sentiment / topic) + **hard quota** (no 2 same commenter, <=1 OP self-reply)
-- **Future upgrade signal**: switches to DPP with learned kernel **when list expands to top-10+**; this is the senior way to write the trade-off -- not "MMR is better", but "MMR for this regime, DPP if regime changes"
-
-==> Section-stitch: the 3 heads map back to Section 2's 3 proxies; the shallow tower delivers what Section 3 promised on debias.
-
-## Bias Tower digest (this section self-contained -- deep version in fr-node)
-
-**3-sentence core (verbatim from user reference §1-§3)**:
-
-1. **Additive structure + capacity bottleneck**: `logit = main_tower(content, user, ctx) + bias_tower(bias_features)`, main tower deep (MMoE), bias tower shallow (1-2 layers / linear). Bias tower input is **bias features only** (position / device / slot type / isAds). The shallow inductive bias **cannot absorb content signal**, leaving it room only for additive bias -> the main tower is forced to learn real relevance.
-2. **Mask-at-inference**: at training time the bias tower sees real position; at inference the **bias term is zeroed entirely** (or position set to a fixed reference value). Companion training trick: position-feature dropout to make the model robust to missingness.
-3. **Bias tower vs feature-input**: the bias tower is **additively separable**, so inference masking is well-defined; mixing position into the main tower causes content x position entanglement, distributional drift at inference, and position stealing gradient share. Theoretical equivalence (random position + dropout + regularization + large capacity) is exactly the hand-built bias-tower decomposition.
-
-**Deep version in fr-node `""" + ANCHOR_FR_NODE + """`** -- covers isAds counterfactual vs context-feature distinction, shadow logging x bias tower coupling, and the 3-line mantra (architecture / inference / data debias, three layers all required); T-P0-854 owns that 深版.
-
-## Architectural choices -> 3 twists (callback)
-
-| Twist                       | Architectural choice                                                       |
-|-----------------------------|----------------------------------------------------------------------------|
-| Comment != item             | Comment text embedding @ creation + commenter sub-entity features in main tower |
-| Time-bias                   | Engagement velocity feature (rate, not count) + shallow bias tower mask    |
-| Adversarial / community     | Toxicity hard filter pre-ranker + **independent abuse model** (no shared weights) |
+The full first-person 45-min 口播稿 now lives in the **`dataflow`** tab -- this row is an **oral_narrative** archetype, so the solution body is consolidated there rather than split across architecture / tradeoffs / defense (those columns are intentionally NULL). **`formulas`** holds the label schema; **`cheat_sheet`** holds the Top-3-Comments quantification anchors + firm-claim register; **`verbal_outline`** holds the Top-3-specific entry phrases. Methodology (rhythm rules, vocab YES/NO, E4/E5 line) belongs in `cd://96`.
 """
 
 
 DATAFLOW = """\
-# Dataflow: Section 1-4 Verbatim (前段 14 min framing + metric + label + feature)
+# 完整 45min 口播稿 (第一人称, 8 段连续)
 
-## Decision summary (the rhythm twist)
+> 第一人称连续口播稿, 8 段串下来。Section 标题只是导航用, 真讲的时候是连续说下来的。每段串因果链, 每立场挂 trade-off。framing 立的 3 个 twist (comment 不是 item / early-comment time-bias / community health 是 guardrail) 在 body 里逐个兑现。方法论层 (timing skeleton、Strong Moment 调度、ML-native vocab、8 meta-rules、E4/E5 boundary) 不在这份脚本里, 在 `cd://96` 主 hub。
 
-**I pick** a chronological 4-section walk over a component-by-component walk because **the core decision here is** time-allocation: 4 Strong Moments at fixed slots (0-1 framing / 8-12 label / 15-21 architecture / 31-35 monitoring), **this is where** E4 vs E5 wrap diverges. Latency: p99 < 200 ms at billion-QPS for hot post sessions, single-digit ms p99 for the streaming engagement-velocity feature.
+---
 
-## Section 1: Framing (90s)  <- Strong Moment #1
+## 开场 · Framing
 
-"L1 (user): **Viewer is the primary user** -- they consume comments and decide whether to engage. Commenter and OP are secondary stakeholders, folded into the joint-experience guardrail.
+"好, 这道题我把它 formulate 成一个 post 评论区的 top-3 选取问题——给定一个 viewer 和一个 post, 从这个 post 底下的评论池里, 选出 3 条排好序, 呈现在评论区顶部。
 
-L2 (scale): **100M DAU, ~10% commenting rate, viral post peak 100x average, p99 < 200ms**.
+我先做几个假设, 确认一下边界。第一, user 这一侧, 我假设 viewer 是 primary user——他消费评论、决定要不要 engage; commenter 和 OP 是 secondary stakeholder, 我把他们折进 guardrail 里, 不单独建模。第二, 规模上, 我假设是亿级 DAU、大概 10% 的 commenting rate、viral post 峰值能到平均的 100 倍, 端到端 latency 我按 p99 200 毫秒来设计。
 
-L3 (twists with implications):
+然后说 input、output 和 objective。这里我想先纠正一个我自己容易说顺嘴的地方——一个 post 底下的 comment pool 是 corpus, 它不是 model 的 input。一次 request 真正的 model input, 是 viewer feature、context feature, 加上候选 comment 的 feature 这三组。而且因为这个 pool 本身已经是 bounded 的, retrieval 这一阶几乎不存在——我会把它明确 formulate 成一个 ranking 加 set-selection 的问题, budget 全压在 ranker 和 reranker 上。
 
-- **Comment != item** -> need text + social fused representation, commenter as sub-entity
-- **Time-bias** -> engagement velocity (rate, not count) as feature, bandit explore late comments
-- **Community health** -> independent abuse model + toxicity hard filter pre-ranker
+objective 上, user-end metric 要明确高于 biz metric。我的 north-star 是 weekly commenter return rate——一个数, 不是一串并行指标。它捕捉的是'看到了好的 top-3, 所以愿意去 engage, 所以长期会回来'这条链。guardrail 这一侧我要强调: 最重要的不是 revenue, 是 integrity——toxicity、harassment 这类 violation rate, 这是 UGC 评论区的大头; 再加 report rate 和 latency。
 
-L4 (ML formulation): **2-stage point-wise ranking** (cheap pre-rank -> deep rank) + **list-level reranking** (MMR for diversity). Retrieval is trivially bounded -- not expanded."
+output 这一侧, 我们没有一个直接的 ground truth label, 所以要找 proxy。我会用 engagement 类的信号, 但负向信号这里特别脏, 因为有 selection bias, 具体怎么设计我留到 label section 展开。
 
-==> Section-stitch: each of these 3 twists hooks into a specific downstream metric or guardrail.
+最后说 twist——这道题和一个传统 recSys 不一样的地方, 我认为有三点, 每一点都带一个 design implication。第一, comment 不是一个 generic item——它是 ultra-short text, 而它的 authorship 是 social graph 上的一个节点, 所以主导信号是 relational 的, 不是 content-intrinsic 的。第二, early-comment time-bias——一个 post 生命早期发的评论会拿到不成比例的曝光, raw engagement count 把'到达时间'和'质量'这两件事 confound 在一起了。第三, community health 是 guardrail、不是 head——toxicity 是 disqualifying 的, 把 compliance 当成一个 soft loss term 是 category error。
 
-## Section 2: Metrics (60s)
+整体方案: 一个 in-storage 的 pre-filter, 接一个两阶段的 point-wise ranking 漏斗 (L1 cheap、L2 deep), 最后一个 MMR 的 set-selection reranker。retrieval 因为 bounded 直接跳过。
 
-"**L1 North-star**: **weekly commenter return rate** -- one number, not a parallel list. Captures 'see good top-3 -> willing to engage -> long-term return'.
+这是我的 framing。接下来 metric、label、feature、model 这几块, 你想我先深入哪一块? 还是按顺序走?"
 
-**L2 Proxies (3, each with one-line alignment)**:
+---
 
-- Comment-area dwell time -> top-3 interesting -> user reads longer -> return up
-- Reply rate triggered by top-3 -> top-3 sparks conversation -> commenter return up
-- Self-comment rate after top-3 -> top-3 activates participation -> new-commenter return up
+## Metrics
 
-**List-level metric (top-3 is set selection)**:
+"好, metric 这一层我讲清楚, 后面 label schema 直接挂上来。
 
-- Top-3 **diversity score** (sentiment / commenter / topic, 3 axes)
-- Set-level user satisfaction (post-view next-action distribution)
+north-star 刚才说了, weekly commenter return rate, 因果链是'看到好 top-3 → 愿意 engage → 长期回来'。
 
-**L3 Guardrails (metric + threshold + enforcement mechanism)**: the three production guardrails are listed below; two additional fairness guardrails follow as prose because they fold into the same enforcement lane.
+往下我用 3 个 proxy, 每个挂一句 alignment: 第一, 评论区的 dwell time——top-3 有意思, 用户读得更久。第二, top-3 触发的 reply rate——top-3 能勾起对话。第三, 看完 top-3 之后用户自己发评论的 rate——top-3 激活了参与。
 
-- Toxicity rate < 0.5% -> hard filter pre-ranker
-- Report rate per 1k impressions < X -> A/B halt criterion
-- p99 latency < 200ms -> serving constraint
+这里有一个 nuance 我想专门提——reply rate 这个 proxy 有一个 failure mode。rage comment、引战的评论同样能撬动大量 reply, 所以我不会单看 reply rate, 一定要配一个 sentiment 维度一起看。这其实是这道题最危险的那个 alarm, wrap 里还会再收一次。
 
-**Fairness guardrails** sit on top of these three: **early-post exposure share** feeds a fairness re-weight inside the loss, and **group-exposure gini** is the slow-loop fairness audit that gates monthly retrain releases.
+因为 top-3 本质是 set selection, 我还需要一个 list-level metric——top-3 的 diversity score, 在 commenter、sentiment、topic 三个轴上算。
 
-**L4 Causal chain**: reply rate up -> users perceive conversation value in the comment area -> users return to engage -> weekly commenter return up."
+guardrail 这一侧讲三个就够: toxicity rate 卡硬阈值、每千次曝光的 report rate、p99 latency。fairness 相关的这里先不展开, 它和 integrity 走的是同一条 enforcement lane。
 
-==> Section-stitch: north-star and 3 proxies directly define the label schema -- the next section will land each one.
+metric 大概这样。要不要我接着讲 label? label 是我觉得这道题最 non-trivial 的一块。"
 
-## Section 3: Labels (90s)  <- Strong Moment #2 (selection bias)
+---
 
-"**Positive label ladder, L1 -> L4**. L1 is the dumbest version -- binary engagement, like or reply within a window. L2 is a weighted multi-signal where reply beats like beats view-completion. **L3 is the level I pick** -- engagement-to-impression ratio in a rolling `[T, T+1h]` window; **partial-debias of position bias front-loaded to the label layer**, more complex than raw count but one defensive layer ahead of the model-level bias tower. L4 is left for senior follow-up -- multi-task labels with weighted heads, where head-weighting design becomes the next direction.
+## Labels
 
-**Negative label is the core difficulty of this question -- selection bias**. **Explicit negatives** -- dislike, report -- are strong signals used directly. **Exposed-not-engaged** is the standard negative, but I IPS-weight it by propensity from a separate logging-policy model so low-propensity items get higher sample weight at training. **Unexposed** is where naive systems break: treating every unexposed comment as negative introduces massive false negatives -- a good comment that simply was not surfaced gets a 0 label, teaching the model 'good things are bad'. I treat unexposed as **unknown** with IPS-weighted + bandit-exploration backfill -- the engineering complexity buys theoretical correctness on the under-exposed long tail.
+"好, label 这块。核心张力是 signal density 和 bias 之间的权衡——越显式的信号越准但越稀疏, 越 implicit 的越多但越脏。我分正向、负向两侧看。
 
-**Imbalance ladder stops at L2** with stratified sampling plus class-weighted loss; L3/L4 are left for senior follow-up.
+正向用一个 label ladder。最 dumb 的版本是二元 engagement, 窗口内 like 或 reply。往上是 weighted multi-signal, reply > like > view-completion。我实际会选再上一层——engagement-to-impression ratio, 在一个 rolling 的 [T, T+1 小时] 窗口里算。它比 weighted 版本只多一步: 用 impression count 做 normalize。但这一步直接把'高位评论天然拿到更多曝光'这个优势除掉了, 等于把一部分 debias 前置到了 label 层, 比 model 层的 bias tower 早一道防线。
 
-**Bias handling**: popularity / position / freshness -> **shallow bias tower, masked at serving** (YouTube 2019 design, more stable than masking input features because the model cannot reconstruct bias from other features).
+负向 label 是这道题真正的核心难点, 就是 selection bias。三阶来讲。第一阶, explicit negative——dislike、report, 强信号直接用。第二阶, exposed-not-engaged, 标准负样本, 但我不会原样用——我用一个独立的 logging-policy model 估出 propensity, 然后做 IPS-weighting, 低 propensity 的样本给更高的训练权重, 这是一个 counterfactual correction。第三阶, unexposed, 这是 naive 系统会崩的地方: 如果你把每一条没曝光过的评论都标成负样本, 你等于在教模型'凡是检索没捞到的好东西都是坏的'——这是 selection bias 最糟糕的表现形式。所以我把 unexposed 当成 unknown, 用一个 5% per-session 的 bandit exploration budget 去 backfill, 给 under-exposed 的长尾提供相对无偏的 label。
 
-**Leakage guard**: feature snapshot @ T, label observation @ [T, T+ΔT], **no overlap**."
+在这之上我还会从上一版模型挖一点 hard negative——高分但没 engagement 的, 教模型去 discriminate 那些'自信的错误'。batch 配比大概是 1 正样本配 3-5 个 IPS-weighted exposed-not-engaged、1-2 个 bandit 来的 unexposed、再加 0.5-1 个 hard negative, 具体数字用 ablation 调, 不写死。
 
-==> Section-stitch: multi-task labels (engagement / quality / safety) define the number of heads the architecture in the next section will need.
+最后一句 leakage guard: feature 的 snapshot 在 T 时刻取, label 在 [T, T+ΔT] 观测, 两个窗口不重叠。
 
-## Section 4: Features (60s) -- 4-quadrant model
+label 我想讲到这。要不要我接着讲 feature? feature 里有一块我想多挖一层。"
 
-"**4-quadrant model, 3 per quadrant + 1 comment-specific**:
+---
 
-**User (viewer)**:
+## Features
 
-- Demographic + topic-preference embedding
-- Viewer history comment-engagement rate
-- Viewer sentiment preference (positive / debate / sarcasm)
+"feature 我按 user、item、context、interaction 四个象限分, interaction 那一象限多讲一点——那是 twist 1 ('comment 不是 generic item') 真正兑现的地方。
 
-**Item (comment + commenter sub-entity)** -- contains the comment-specific items:
+user (viewer) 这一侧: demographic + topic-preference embedding、viewer 历史评论 engagement rate、viewer 的 sentiment 偏好。
 
-- Comment text embedding (computed once at creation)
-- **Early engagement velocity** (rate-based, time-debiased) <- corresponds to Section 1 time-bias twist
-- **Commenter identity** (verified / OP / followed-by-viewer) <- corresponds to comment-is-not-item twist
-- Toxicity / sentiment score (bonus, feeds quality head)
+item (comment + commenter sub-entity): comment 的 text embedding, 在评论创建时算一次; early engagement velocity, 注意是 rate 不是 count——time-debiased 的信号, 呼应 framing 里的 time-bias twist; commenter identity——verified / OP / viewer 有没有 follow。
 
-**Context**:
+context 比较直接: post topic 和 age、time of day、device。
 
-- Post topic + age
-- Time of day + day of week
-- Device + session intent
+interaction 这象限有两个结构性后果。generic item (视频、商品) 是 content object, signal 在内容本身; comment 是 ultra-short text, 可能就一句'lol'或一个 emoji, 文本 low-signal, predictive 的是'谁说的'和'viewer 跟 commenter 什么关系'。
 
-**Interaction (viewer x this specific comment)** -- the root of why ranking beats single-tower retrieval:
+第一, commenter 必须是 sub-entity, 有自己的 embedding。同一个 commenter 跨很多 post 出现, 可以学一个 shared representation——一个到处写出高 engagement 评论的人, 这个身份本身就是信号; 顺带还给 abuse 那一侧一个 reputation 抓手。
 
-- Viewer x commenter follow relationship
-- Semantic similarity (viewer's comment history vs this comment)
-- Viewer's historical engagement with this commenter
+第二, 也是更重要的——这正是 retrieval 在这道题里只能是 ranking、不能是 two-tower 的结构性原因。最 predictive 的一组 feature 是 viewer × commenter 的 interaction term: follow 关系、viewer 历史上跟这个 commenter 的 engagement、viewer 自己评论历史和这条评论的语义相似度。这些都是 per-(viewer, comment) pair 的 cross feature, serving 时每个候选现算。two-tower 的 dot product 结构上就表达不了这种 pair-level interaction。所以我说的不是'ranker 比 two-tower 好一点', 而是'two-tower 结构上做不了这件事'。
 
-**Critical distinction**: Interaction features are per-(user, item) pair, **recomputed per candidate at serving**. This is the root of why ranking beats two-tower retrieval -- two-tower can never compute user x item interaction, only a dot product."
+feature 大概这样, 要不要我进 model?"
 
-==> Section-stitch: comment embedding feeds the L2 ranker main path; interaction features cross with user embedding in the DCN-style cross layer.
+---
+
+## Model
+
+"model 分 pre-filter、两阶段 ranking、reranking 来讲, 最后用一小段收一下冷启动。
+
+最前面是 pre-filter, 在 storage 本地做 toxicity 的 hard filter 加去重, 把候选砍到一千量级。我想在这里点一下 twist 3: toxicity 是一个 hard filter, 放在 ranker 之前, 它不是 ranker 里的一个 head, 更不是 loss 里的一个软项。把 compliance 当成一个 soft loss term, 是我觉得推荐团队经常犯的一个 category error——违规内容不是'engagement 少一点', 它是 disqualifying 的。
+
+两阶段 ranking, L1 和 L2 不是两个无关的模型, 它们是同一个建模思路上的成本梯度。L1 是 cheap pre-rank, 把一千个候选快速砍到一两百, 只要别误杀 L2 本来会高分的就行。L2 才放开, 做 deep rank, 输出 point-wise 分数。
+
+L2 做成 multi-task: shared bottom 加多个 head——engagement、一个 toxicity 的 monitor head、还有 diversity-contrib。我不会 day-1 就上 MMOE, 从 shared bottom 起步, 只有观测到 negative transfer 才升级。loss 权重用 business context 来锁——comment lift value 加 risk budget——不用 uncertainty weighting。原因: 这些权重是一个 product decision, 不是一个 statistical estimate, uncertainty weighting 解的是统计上的不匹配, 不是产品优先级。
+
+L2 里我会专门加一个 shallow 的 additive bias tower。input 只有 bias feature——position、popularity、recency。training 时它的输出加到 main tower 的 logit 上, inference 时这个 bias 项整个置 0。为什么单独一个 tower、而不是把 position 塞进 main tower: shallow 的 inductive bias 吸收不了 content signal, 它只能留给 additive bias, 这样就逼着 main tower 学真正的 relevance; 而 position 混进 main tower 会造成 content 和 position 的 entanglement、inference 时的分布漂移、以及 position 偷走本该属于真实 feature 的 gradient。配套 training 时做 position-feature dropout, 让模型对 position 缺失更鲁棒。
+
+reranking 我选 MMR、不选 DPP, 这是我觉得这道题最重要的一个架构 trade-off。n=3 时 list 太短了, DPP 那种 set-level 优化发挥不出来——三个 item 的 determinant 会被任意一对 pairwise cosine 主导, DPP 的理论优势 land 不下来。所以我用 MMR, 在 commenter、sentiment、topic 三个轴做, 再加一个 hard quota, 比如不能有两条同一个 commenter、最多一条 OP 自己的回复。我会明确说: 这不是'MMR 更好', 而是'MMR 适配 n=3 这个 regime, 如果 list 扩到 top-10 以上, 我就切 DPP 加 learned kernel'。
+
+最后用一小段收冷启动。item 冷启动: 新评论靠创建时就算好的 text + social embedding 进 ranker, 这个 twist 1 已经给了, 所以新评论不会没有内容表征; engagement 统计量缺失时, 直接 fallback 到一个 default value。这里有个 nuance——这一点和 Reels 那种 feed 推荐不一样。Reels 那种场景 site-average fallback 不好, 是因为它跨整个 corpus 检索, 新内容要和全站比, 糊的 prior 会系统性 mis-rank。但 Top-3 永远只在一个 post 内部排序, comparison set 小而且 bounded, 一个 default value 不会造成系统性 mis-rank, 因为所有评论都在同一个 post 的 context 里互相比。所以这里不去搞复杂的 prior。唯一的 caveat: 如果哪天要做'跨 post 串流热评'的 surface, 这个假设才需要重新审视。user 冷启动保持轻量, onboarding 时让新用户过一个 diverse 的内容集, 拿早期 engagement 当相对无偏的偏好信号。
+
+model 我想讲到这, 要不要我进 evaluation?"
+
+---
+
+## Evaluation & Monitoring
+
+"evaluation 分 offline、online、long-term 三层, 然后讲 monitoring。
+
+offline, 先看 per-head metric——engagement-to-impression 这个回归 head 看 weighted NDCG, binary head 看 AUC, 所有 metric 按 post age 和 commenter segment 切片。train/eval split 用 time-based 为主——comment ranking 对 freshness 敏感, random split 会泄漏 future popularity trend, AUC 被 inflate; 配一个 user-level holdout 抓'模型在记具体用户而不是学偏好'。
+
+online A/B 有个这道题特有的陷阱——实验单位必须是 user 或 session 级, 不能是 item 或 impression 级。因为这是 set selection, top-3 里的 item 互相影响, impression 级随机化会污染。看的指标也要是 list-level: top-3 的 any-engagement rate, 不是单 item 的 NDCG / MRR。
+
+monitoring 看四个信号, 按 leading 到 lagging 排序。第一, online 和 offline 的 metric gap——eval AUC 和线上 CTR 背离, 是 label leak 或分布漂移的早期信号。第二, prediction distribution shift, 模型输出分布的 day-over-day KL, 比 metric 退化更早, 是最 leading 的指标——大多数人只会说'monitor AUC', 这一个是 senior 信号。第三, feature drift, top feature 的 PSI, 小时级。第四, engagement metric 的 24 小时移动平均, 是 lagging 的——等它掉的时候用户已经走了。
+
+第三层 long-term holdout, 4 周以上, 抓 filter bubble 收窄、fatigue 累积、creator 生态效应。north-star 是 weekly return, 没法每次 launch 等 4 周, A/B 决策接受 proxy-based, 但保留 holdout 做回溯校验。abuse detection 用独立模型, weekly retrain——adversarial drift 速度和 ranker drift 不是一回事。
+
+evaluation 大概这样, 要不要我讲 serving?"
+
+---
+
+## Serving / Logging
+
+"serving 和 logging, 我知道这不是 ML system design 考察的最大重点, 所以我给你几个我最在意的点, 不展开。
+
+我最关心的是 train-serving skew。首选根治方案是 serving-time 的 shadow feature logging——serving 当下把喂给模型的 feature 值原样落盘, 训练直接用这一份, 不重新计算。
+
+engagement velocity 这个 feature 必须是 streaming 的, 1-5 分钟 cadence。否则 framing 里我承诺的 time-bias mitigation 根本跑不起来——这是一条从 framing 的 product promise 到 serving infra cost 的 accountability chain, 我希望它显式。
+
+latency 上, p99 200 毫秒, 候选规模一千量级, 关键设计是 feature prefetch 在 candidate retrieve 阶段就并行把 RPC 发出去, 等到 ranker 的时候 feature 已经在内存里。
+
+cache: hot post 在 session 起始就把结果 cache 住, 5 分钟 TTL, 再加一个'有新的高 engagement 评论时主动失效'的机制。在 100 倍 viral 峰值下, cache 是 latency 的生命线。
+
+production scar: 我们第一次上 shadow logging 时没用 async queue, inline 的写直接把 serving p99 顶高了 30%, 后来改成 fire-and-forget 的 pub-sub 才解决。
+
+serving 我想讲到这, 要不要我 wrap 一下?"
+
+---
+
+## Wrap
+
+"好, 我 zoom out 总结一下, 然后说三个我最担心的 risk。
+
+整体是两阶段 point-wise ranking 加 MMR set-selection rerank。comment 用 relational representation (commenter 作为 sub-entity、viewer × commenter interaction term); position bias 靠 shallow bias tower 加 mask-at-inference; selection bias 靠 IPS 加 5% bandit exploration; evaluation 覆盖 offline、online、long-term 三层。
+
+三个 risk。第一, selection bias 复利可能快过我们 mitigation, 5% 的 bandit 预算不一定够——我会监控 served diversity, 跌破阈值要有 circuit breaker。第二, multi-task 的 loss 权重会随数据分布漂移, retrain pipeline 要能重新调 head 权重, 不是固定组合下重训。第三, 也是最重要的——reply rate、engagement 涨, 但 commenter return 跌, 这就是 rage comment、引战内容在 gaming 我们的 proxy, 正好呼应 metric 段提的那个 nuance。这个最重要的 alarm, 靠 4 周的 long-term holdout 来抓。
+
+这些就是我的设计, 有哪一块你想让我再深入吗?"
 """
 
 
@@ -341,236 +311,6 @@ Weights `w_k` **post-train tunable** -- engagement-vs-quality trade-off A/Bs can
 """
 
 
-PRODUCTION_CONSTRAINTS = """\
-# Production Constraints (Section 5.3 Serving + Shadow-Logging digest)
-
-## Decision summary (the production twist)
-
-**I pick** parallel feature prefetch in the candidate-retrieve stage + streaming engagement-velocity feature (1-5 min cadence) + shadow-feature logging + online-offline feature parity test + cache with 5-min TTL and high-engagement invalidation -- **this is where** time-bias mitigation and skew defense meet the wire. p99 < 200 ms over ~1000 candidates, viral peak 100x average, streaming feature single-digit ms p99.
-
-## Section 5.3 Serving (~6 min, verbatim)
-
-**Latency budget (p99 < 200ms, breakdown)**. The serving budget decomposes into three primary stages with a small aggregation tail.
-
-| Stage                                            | Budget   |
-|--------------------------------------------------|----------|
-| Candidate retrieve + parallel feature prefetch   | **60 ms** |
-| L2 ranker (DNN batch 100-200)                    | **80 ms** |
-| Rerank feature fetch + MMR                       | **30 ms** |
-
-Storage-local pre-filter contributes **10 ms** and aggregation + serialize contributes **20 ms**, for a total of **200 ms** at p99. **Key design**: **feature prefetch issues RPCs in parallel during candidate retrieve** -- by ranker time the features are already in memory; that is why the 60ms stage runs prefetch instead of waiting for pre-filter to finish. The reranker spends only **30ms** because MMR is essentially free at **n=3** -- the overhead is the extra sentiment / commenter-group feature fetch, not the diversity optimization itself.
-
-## Tiered refresh strategy (5 cadences, not one-size-fits-all)
-
-The refresh strategy spans **five cadences** sized to how fast each signal class drifts. The three latency-sensitive cadences are tabulated below; the two batch cadences are described after.
-
-| Cadence              | What                                                                       |
-|----------------------|----------------------------------------------------------------------------|
-| **Streaming 1-5 min**| engagement velocity, recent counts, real-time toxicity flag                |
-| Hourly batch         | aggregated like rate, cumulative stats                                     |
-| Daily batch          | user profile, commenter reputation, topic preference                       |
-
-**At creation** the comment text embedding is computed **once and never recomputed** -- the most frozen feature in the system. **Daily / Quarterly** is the model retrain lane: the **ranker retrains daily**, and the **embedding model retrains contrastively every quarter**.
-
-**Key**: **engagement velocity must be streaming** -- otherwise the time-bias mitigation promised in Section 1 cannot run. This is the **explicit accountability chain** from Section 1 framing's product promise to the serving section's streaming infra cost.
-
-## Serving-skew prevention (2-piece industrial standard) + Cache
-
-**2-piece skew defense**:
-
-1. **Shadow feature logging**: at serving time, dump the actual feature values fed to the model; offline training consumes that log, **never recomputes** -> the only way to fully prevent skew.
-2. **Online-offline feature parity test**: compute the same (user, item) pair through online and offline pipelines, alert when diff > threshold -- the audit gate that polices shadow logging.
-
-**Cache**: hot-post results cached at session start, **5-min TTL + invalidation triggered by newly-high-engagement comments**. Under 100x viral peak, cache is the latency lifeline.
-
-## Shadow Logging + Train-Serve Skew digest (self-contained -- deep version in fr-node)
-
-**4 sources distilled (verbatim from user reference §5)**:
-
-1. Train / serve code-path mismatch (Python vs C++)
-2. Time travel: training feature leaks future
-3. Data-source / default-value / null-handling drift
-4. **Bias feature uses real value at train, mask at serve -- distribution mismatch** -- directly coupled to the architecture section's bias tower
-
-**Shadow logging 2-piece core (verbatim from user reference §6)**:
-
-- Guarantees train / serve features are **100% identical** (same code computes both)
-- **Point-in-time correct, no future leakage**; bias features (position / device) are recorded faithfully so the bias-tower training distribution aligns -- otherwise the architecture section's mask-at-inference is broken by skew at the data layer.
-
-**Deep version in fr-node `""" + ANCHOR_FR_NODE + """`** -- covers shadow logging engineering details (async queue Kafka/Pub-Sub, non-blocking serving / streaming label joiner Flink/Beam, request_id correlation of behavior / continuous monitoring of logged feature distribution vs serving real-time distribution, alerts); T-P0-854 owns that 深版.
-
-## Production scar (E4 senior signal -- one or two sentences total)
-
-- "**In my past work**, we found that when shadow logging was first launched without an async queue, inline writes pushed serving p99 up by 30%. The fix was fire-and-forget pub-sub."
-- "**One thing we learned the hard way**: the bias tower mask-at-inference step had forgotten to apply position-feature dropout in training. After deployment the model collapsed on position=missing, because the test-time distribution was out-of-distribution."
-"""
-
-
-TRADEOFFS = """\
-# Tradeoffs (8 decision points -- each "I pick A because X, costs Y, switches to B if Z")
-
-## Decision summary (the tradeoff twist)
-
-8 tradeoffs follow, each in the form **"I pick A because X, costs Y, switches to B if Z"**. **This is where** the architectural twists meet concrete numbers: ~1000 candidate batch, p99 < 200ms, 5% bandit exploration, daily ranker retrain, weekly abuse-model retrain, MMR at n=3 vs DPP at n=10+.
-
-## 1. Multi-task conflict: hard pre-filter + soft penalty  vs  PCGrad / reward shaping
-
-**I pick** a **hard constraint via pre-filter plus a soft penalty in the engagement head** because Top-3 ranking is not GradNorm-class high-competitive multi-task and **gradient surgery is over-engineering** at this scale. Pre-filter (hard constraint) handles disqualifying violations; soft penalty (engagement head) handles borderline cases; a separate monitor head provides diagnostic without participating in loss -- **three layers of clear responsibility, all audit-able**. **Costs**: the pre-filter threshold is a product decision rather than a statistical one, and the soft-penalty weight needs explicit tuning. **Switches to** PCGrad / GradVac only if 4+ heads with measurable negative transfer appear; **switches to** reward shaping into a single composite label is rejected outright because it loses eval diagnostic power and the monitor head disappears.
-
-## 2. Reranker: MMR  vs  DPP
-
-**I pick (the most important architectural trade-off of the question)** MMR with hard quota across 3 axes. **For n=3 the list is perfect for MMR** -- short list, greedy deterministic optimization with auditable knobs (lambda parameter plus 3 axes: commenter / sentiment / topic) plus a **hard quota** (no 2 same commenter, <=1 OP self-reply). **DPP at n=3 is solving for n=20 with n=3 evidence** -- the 3-item determinant is dominated by any single pairwise cosine and the kernel power never lands. **Costs**: MMR's lambda needs tuning, and the hard-quota threshold is a list-level constraint not learned end-to-end. **Switches to** DPP with a learned kernel **when the list expands to top-10+** pinned comments -- not "MMR is better", but "MMR for this regime, DPP if regime changes".
-
-## 3. Negative sampling: 'unexposed = negative'  vs  IPS + bandit backfill
-
-**I pick (the question's core difficulty -- selection bias ML solution)** IPS-weighted exposed-not-engaged plus unexposed-as-unknown plus **5% bandit exploration backfill**, because this is theoretically correct, catches the under-exposed long tail, and the **5% bandit is an explicit budget** the product team signs off on. Labeling unexposed as negative introduces **massive false negatives** -- the worst manifestation of selection bias -- and pure random exploration produces UX degradation that is too large to ship. **Costs**: engineering complexity (a separate logging-policy model for propensity + bandit infra) plus a product-side budget commitment. **Switching trigger**: "If the 5% bandit budget gives 0 net-new positives after 4 weeks -> raise to 8%; if commenter-complaint rate rises -> lower to 3% with a quality-eligibility filter."
-
-## 4. Label level: L3 engagement-to-impression ratio  vs  L1 binary  vs  L4 multi-task
-
-**I pick** L3 (rolling-window ratio in [T, T+1h]) because L3 adds one step over L2 -- **normalize by impression count** -- and that step divides out the impression advantage a high-position comment gets. **This front-loads partial debias to the label layer**, one defensive layer ahead of the model-level bias tower. **Costs**: streaming impression-count joins at training time and a rolling-window join that is more complex than a single-row binary label. **Switches to** L4 multi-task labels with weighted heads **if** head-weighting design becomes the senior follow-up direction; L4 is the deliberate "left for senior follow-up" branch.
-
-## 5. Bias handling: shallow bias tower + mask  vs  feature input  vs  IPS only
-
-**I pick** a shallow bias tower with **mask-at-inference** (the YouTube 2019 design) because the bias tower is **additively separable** so inference masking is well-defined, and the shallow inductive bias **cannot absorb content signal** -- it leaves room only for additive bias and the main tower is forced to learn real relevance. Putting position into the main tower causes content x position entanglement, distributional drift at inference, and position-stealing gradient share. IPS alone is training-time-only with no inference mask -- a second-line correction, not a first-line architecture. **Costs**: maintaining a second tower head plus the discipline of position-feature dropout during training to make the model robust to missingness. **Switches to** feature-into-main-tower **if and only if** position becomes truly random (e.g., experimental shuffling), where theoretical equivalence holds. **"Bias tower + mask is an architectural mechanism; IPS is a statistical correction. They are not in conflict -- but the bias tower is first-line defense, IPS is second-line."**
-
-## 6. Train/eval split: time-based + user holdout  vs  random
-
-**I pick** time-based primary + user-level holdout secondary.
-
-**Why pick**: "Comment ranking is freshness-sensitive -- random split leaks future popularity trend, AUC is inflated. Time-based primary is mandatory; user holdout secondary catches 'model memorizes specific users instead of learning preferences'." Switches to random **only if** the use case stops being temporal (not our regime).
-
-## 7. Abuse model: independent  vs  shared weights with ranker
-
-**I pick** independent abuse model (NSFW + relevance + high-risk), **NOT shared weights** with the ranker.
-
-| Dim              | Independent (pick)                                    | Shared weights                          |
-|------------------|-------------------------------------------------------|------------------------------------------|
-| Risk             | Ranker cannot learn abuse pattern; no collusion       | Ranker may internalize abuse signal as engagement proxy |
-| Update cadence   | Abuse model **weekly retrain** (adversarial drift)    | Coupled to ranker retrain cycle (daily) |
-| Audit            | Independent precision/recall, daily monitor           | Mixed inside multi-task metric          |
-
-**Why pick**: "Adversarial drift speed != ranker drift speed; independent model + independent retrain schedule is mandatory." Switches to shared weights **only if** abuse becomes a labeling artifact rather than adversarial -- which is not the regime here.
-
-## 8. Loss weighting strategy: biz-context locked  vs  uncertainty weighting
-
-**I pick** biz-context locked (comment lift value + risk budget), **NOT uncertainty weighting**.
-
-**Why pick**: "**Loss weights are a product decision, not a statistical estimate.** Uncertainty weighting solves statistical mismatch; biz-context locking reflects product priority. The E5 boundary signal is knowing when an ML decision should defer to product." Switches to uncertainty weighting **only if** product priority is truly ambiguous and the head distribution is statistically dominant.
-"""
-
-
-DEFENSE = """\
-# Strong Moments -- 4 verbatim English lines (say them as-is)
-
-The 4 lines below are canonical Strong Moment shape, **internalized verbatim** -- do not explain / paraphrase / shrink. Drop them precisely at the 0-1 / 8-12 / 15-21 / 31-35 minute slots. Strong-Moment methodology (reframe-claim-3-actions-tradeoff template, 元结构, 8 meta-rules) lives in `cd://96` §3 / §5 / §6; this column carries only the speak-aloud English plus the monitoring / A/B / loop-closure wrap.
-
-## Decision summary (which Strong Moment to fire when)
-
-**I pick** the 4 Strong Moment slots at the 4 sections where Top-3 Comments diverges most: framing (3 twists), label (selection bias), architecture (bias tower + MMR-vs-DPP), monitoring (4 leading-vs-lagging signals). Each block has Cue + verbatim. The **unique angle** is each Strong Moment ends with a trade-off, **this is where** E5 separates from a brain dump. Latency context: p99 < 200 ms, 100x viral peak.
-
----
-
-## Strong Moment #1 -- 3 Unique Twists Framing (0-1 min, opening)
-
-**Cue**: declarative open "Scope: ... viewer-primary set-selection, retrieval bounded ... let me put 3 twists on the table".
-
-> "**Three unique twists vs generic ranking, each with a design implication**.
->
-> **First, comment is not a generic item** -- ultra-short text, authorship is a user-graph node, social signal is dominant. Implication: text + social fused representation, commenter as a sub-entity in the main tower.
->
-> **Second, early-comment time-bias** -- comments posted in the first minutes accumulate disproportionate impressions, so raw counts confound arrival time with quality. Implication: engagement velocity, a rate-not-count feature, plus a bandit exploration budget for late comments.
->
-> **Third, community health as guardrail, not as a head** -- toxicity is disqualifying, not 'less engagement'. Implication: independent abuse model + toxicity hard filter pre-ranker. Treating compliance as a soft loss term is a category error.
->
-> Time plan: 15 minutes framing / metric / label / feature, 25 minutes model / serving / monitoring. Does that anchor make sense, or is there a different angle you'd like me to start from?"
-
----
-
-## Strong Moment #2 -- Selection Bias 3-Stage Negative Label (8-12 min, label section)
-
-**Cue**: after announcing 'Negative label is the core difficulty of this question', "**Let me walk through the three-stage negative label**". This is where the selection-bias twist pays off versus a generic CTR ranker.
-
-> "**Negative label is the core difficulty here, because of selection bias on the comments we never showed**.
->
-> **Explicit negatives** -- dislike, report -- are strong signals; we use them directly.
->
-> **Exposed-not-engaged** are standard negatives, but I IPS-weight them by propensity from a separate logging-policy model so that low-propensity items get higher sample weight at training -- a counterfactual correction.
->
-> **Unexposed** is where naive systems break: if you label every unexposed comment as negative, you teach the model that good things are bad whenever retrieval missed them. So I treat unexposed as **unknown** and backfill with a **5% per-session bandit exploration budget**, which gives unbiased label on the under-exposed long tail.
->
-> **Hard negative mining from the previous model** -- high-prediction-but-no-engagement items -- teaches the model to discriminate confidence-high mistakes.
->
-> Why this matters more than IPS alone: IPS corrects bias in the data you have; the bandit changes the data you collect. **It is a stronger lever, but it requires cross-functional cost** -- product and growth pay part of the bill that ML would otherwise pay in accuracy loss."
-
----
-
-## Strong Moment #3 -- Bias Tower + MMR vs DPP (15-21 min, architecture section)
-
-**Cue**: after introducing the L2 ranker structure, "**Let me unpack two decisions inside this -- the bias tower, and MMR vs DPP**". This is the most important architectural trade-off in the question.
-
-> "**The first architectural decision is the bias tower**. I add a **shallow additive bias tower** -- linear or 1-2 layers -- whose input is **bias features only**: position, popularity, recency, device, slot type. Output is added to the main-tower logit at training. At inference, the **bias term is zeroed entirely**. Companion trick: position-feature dropout in training to make the model robust to missingness.
->
-> Why a separate tower rather than putting position into the main tower: the shallow inductive bias **cannot absorb content signal**, so it leaves room only for additive bias and the main tower is forced to learn real relevance. Mixing position into the main tower entangles content with position, contaminates the inference distribution, and makes position steal gradient share from real features. The bias tower is **additively separable**, so masking is well-defined.
->
-> **The second architectural decision is reranking with MMR, not DPP**. For n=3 the list is too short for DPP's set-level optimization -- the 3-item determinant is dominated by any pairwise cosine, costing DPP its theoretical edge. **I pick MMR across 3 axes -- commenter, sentiment, topic -- plus a hard quota** (no two same-commenter items, at most one OP self-reply). **Switches to DPP with a learned kernel when the list expands to top-10+** -- not 'MMR is better', but 'MMR for this regime, DPP if regime changes'."
-
-**Bonus closer (objective combination, said immediately after the architecture claim)**:
-
-> "On objectives, I combine three: engagement (multi-head), set-level diversity, and compliance / safety. Combination strategy: multi-task heads for engagement and diversity, but **compliance applied as a hard filter pre-ranker, not a loss term** -- compliance violations are not 'less engagement', they are disqualifying. **Treating them as a soft loss term is a category error** recommendation teams often make."
-
----
-
-## Strong Moment #4 -- 4 Monitoring Signals + List-level A/B (31-35 min, monitoring section)
-
-**Cue**: actively opening, "**Let me zoom out from the model and talk about monitoring, A/B, and the abuse loop -- because these decide whether the design ships safely**". This is the E5 boundary signal -- the wrap-up Strong Moment.
-
-> "**Model health monitoring needs four signals, ordered by leading vs lagging**.
->
-> **Signal 1, online-offline metric gap**: eval AUC vs online CTR divergence > X% -- an early signal of label leak or distribution shift.
->
-> **Signal 2, prediction distribution shift**: KL divergence of model output day-over-day. This is **earlier than metric degradation**, so it is the leading-est indicator. Most candidates only say 'monitor AUC'; this is the senior signal.
->
-> **Signal 3, feature drift**: PSI on top features, hourly.
->
-> **Signal 4, engagement metric**: 24h moving average vs baseline. Lagging -- by the time it drops users have churned.
->
-> **A/B for top-3 list-level**: user-level randomization so weekly-return metrics are consistent per user. **Primary metric is any-engagement rate in the top 3, not single-item NDCG / MRR**, because this is a set-selection problem, not pure ranking. Ramp 1% -> 5% -> 20% -> 50%, with **automatic halt when any guardrail breaches** -- circuit breaker, not manual review. **North-star** (weekly return) measured by a **4-week long-horizon holdout group**; A/B ramp decisions accept proxy-based -- we cannot wait 4 weeks per launch, but we retain the holdout for retrospective validation.
->
-> **Abuse detection is an independent model** -- NSFW + relevance + high-risk -- **not shared weights with the ranker**. Adversarial drift speed != ranker drift speed; abuse model **weekly retrain**, daily precision/recall monitor. Tiered action: **hard filter** at confident, **hard demote** at uncertain -- avoids a one-size-fits-all false-positive sweep.
->
-> Loop closure: monitoring outputs feed back into two places -- **training data quality** (alerts trigger sample re-labeling and hard-neg mining) and **abuse-model retraining schedule** (drift signal escalates weekly -> daily emergency). **Monitoring outputs are the input to the next iteration**, not deploy-and-forget.
->
-> Are there parts of the design you'd like me to deepen?"
-"""
-
-
-VERBAL_OUTLINE = """\
-# Top-3-Comments-specific verbal anchors (methodology lives in cd://96)
-
-The general verbal scaffolding (declarative openers, sub-structure announce, drift recovery, ML-native YES/NO vocab table, hand-off / collaborative-mode 句式, quantification 句式, production-scar 句式) lives in `cd://96` §5 (Framing/Body/Strong/Zoom 元结构) and §6 (8 偏好节奏 meta-rules). The lines below are the only ones unique to **Top-3 Comments under a Post** -- quote them verbatim, do NOT duplicate cd96.
-
-## 4 Strong Moment entry phrases (memorize verbatim -- these are the cue lines)
-
-1. "**Three unique twists vs generic ranking, each with a design implication**..."  (3-twist framing, 0-1 min -- Twist 1/2/3)
-2. "**Negative label is the core difficulty here, because of selection bias on the comments we never showed**..."  (label, 8-12 min -- selection-bias twist)
-3. "**The first architectural decision is the bias tower** ... **The second architectural decision is reranking with MMR, not DPP**..."  (architecture, 15-21 min -- bias-tower + MMR-vs-DPP twist)
-4. "**Model health monitoring needs four signals, ordered by leading vs lagging**..."  (monitoring + A/B + abuse, 31-35 min -- E5 wrap-up twist)
-
-## Top-3-Comments-specific drift-recovery lines (NOT in cd96 -- these name Top-3 by surface)
-
-- Drift to generic ranking -> "**Let me return to the ML core** -- for Top-3 Comments the more important question is the set-selection list-level constraint, not generic point-wise ranking."
-- Asked about retrieval depth -> "**Retrieval is trivially bounded by the post's own comment pool** for this surface -- I'll spend the budget on ranker + reranker instead."
-- Asked about cold-start too early -> "**Let me park cold-start until the bandit-exploration section** -- the 5% per-session budget is where that answer lives. Flag it as a known risk for now."
-- Asked about QPS at framing -> "**100M DAU and 100x viral peak** -- I will come back to the serving constraint at Section 5.3; the ML decisions here do not change with QPS, only the cache TTL and prefetch concurrency do."
-
-## Top-3-Comments-only hand-off prompt (the deepen-which-side question)
-
-> "Want me to **deepen the label-selection-bias 3-stage design, the bias tower x MMR architectural pair, or the 4 monitoring signals + list-level A/B**?"
-
-The 3-way choice maps to Top-3-Comments-specific levers: labels = IPS + 5% bandit + hard-neg mining; architecture = shallow additive bias tower + MMR with hard quota across 3 axes; monitoring = 4 leading-vs-lagging signals + circuit-breaker A/B + independent abuse model. Avoid offering a 4th choice -- three is the canonical Top-3 Comments carve-up.
-"""
-
-
 CHEAT_SHEET = """\
 # 30-sec pre-walk-in checklist -- Top-3-Comments-only
 
@@ -626,12 +366,25 @@ Why these 4 sentences are the killer ending:
 - Sentence 4 = **business-metric alignment** -- "ship with offline AUC flat or slightly down" is the E5 boundary signal: you know the relationship between ML metric and product metric and refuse to be bound by offline numbers.
 """
 
+# T-P1-881: oral_narrative archetype NULLs these 5 fields. Their content lives
+# inlined in DATAFLOW (the 8-section 口播稿); verbal_outline is re-populated by
+# seed_meta_meta_top3_comments_golden_verbal_outline.py (run AFTER this seed).
+# Validation in scripts/audit_meta_mlsd_3rule.py respects the archetype declared
+# on the instance in schemas/meta_mlsd_canonical.yaml.
+ARCHITECTURE: str | None = None
+PRODUCTION_CONSTRAINTS: str | None = None
+TRADEOFFS: str | None = None
+DEFENSE: str | None = None
+VERBAL_OUTLINE: str | None = None
+
 
 def _now() -> str:
+    """ISO-8601 UTC timestamp with seconds precision."""
     return datetime.now(UTC).isoformat(timespec="seconds")
 
 
 def _content_hash(payload: dict[str, str | None]) -> str:
+    """Stable hash over the canonical content fields (NULL contributes empty string)."""
     keys = (
         "title", "subtitle", "overview", "architecture", "dataflow",
         "formulas", "production_constraints", "tradeoffs", "defense",
@@ -648,6 +401,7 @@ def _content_hash(payload: dict[str, str | None]) -> str:
 
 
 def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
+    """Insert or update the row, writing NULL for archetype-nullable fields."""
     now = _now()
     payload: dict[str, str | int | None] = {
         "slug": SLUG,
@@ -694,73 +448,71 @@ def upsert(cur: sqlite3.Cursor, dry: bool) -> str:
 
 
 def validate(cur: sqlite3.Cursor) -> list[str]:
-    """Run AC1-AC7 + T-P0-868 schema checks (R-DRAWER, R-FORBID-*, 3-rule)."""
-    import re
+    """Archetype-aware seed-side validation (oral_narrative).
 
+    Verifies the 4 contracted fields populated above their floor, the 5 NULL
+    fields actually NULL (verbal_outline is NULL at this point -- the verbal seed
+    runs AFTER), content_hash present, and slug/subtitle/display_order. Deep
+    semantic checks (R-3RULE-* / R-NARRATIVE-* / R-CHAR-range / R-DRAWER-no-sd-
+    drawer) live in scripts/audit_meta_mlsd_3rule.py and are the canonical gate.
+    """
     errs: list[str] = []
 
     cur.execute(
-        "SELECT id, slug, title, subtitle, display_order, overview, architecture, "
-        "dataflow, formulas, production_constraints, tradeoffs, defense, "
-        "verbal_outline, cheat_sheet, content_hash, updated_at "
-        "FROM system_designs WHERE slug = ?",
+        "SELECT id, slug, title, subtitle, display_order, overview, "
+        "architecture, dataflow, formulas, production_constraints, "
+        "tradeoffs, defense, verbal_outline, cheat_sheet, content_hash, "
+        "updated_at FROM system_designs WHERE slug = ?",
         (SLUG,),
     )
     rows = cur.fetchall()
     if len(rows) != 1:
-        errs.append(f"AC1 FAIL: expected exactly 1 row for slug={SLUG}, got {len(rows)}")
+        errs.append(
+            f"AC1 FAIL: expected exactly 1 row for slug={SLUG}, got {len(rows)}"
+        )
         return errs
 
-    row = rows[0]
-    (rid, slug, title, subtitle, disp_order, overview, architecture, dataflow,
-     formulas, prod_cons, tradeoffs, defense, verbal, cheat, chash, upd_at) = row
+    (
+        rid, slug, title, subtitle, disp_order, overview, architecture,
+        dataflow, formulas, prod_cons, tradeoffs, defense, verbal, cheat,
+        chash, upd_at,
+    ) = rows[0]
 
-    prose_cols = {
-        "overview": overview,
+    # Populated-fields contract for oral_narrative.
+    populated = {
+        "overview": (overview, 200),
+        "dataflow": (dataflow, 4000),
+        "formulas": (formulas, 200),
+        "cheat_sheet": (cheat, 200),
+    }
+    for col, (body, floor) in populated.items():
+        if body is None or len(body) < floor:
+            errs.append(
+                f"AC2 FAIL: column {col} length={len(body or '')} < {floor} "
+                f"(oral_narrative populated-floor)"
+            )
+
+    # NULL-fields contract for oral_narrative (verbal_outline re-populated later).
+    nulled = {
         "architecture": architecture,
-        "dataflow": dataflow,
-        "formulas": formulas,
         "production_constraints": prod_cons,
         "tradeoffs": tradeoffs,
         "defense": defense,
         "verbal_outline": verbal,
-        "cheat_sheet": cheat,
     }
-    for k, v in prose_cols.items():
-        if v is None:
-            errs.append(f"AC2 FAIL: column {k} is NULL")
-        elif len(v) <= 200:
-            errs.append(f"AC2 FAIL: column {k} length={len(v)} <= 200")
-
-    total_bytes = sum(len((v or "").encode("utf-8")) for v in prose_cols.values())
-    if total_bytes <= 8000:
-        errs.append(f"AC3 FAIL: total prose bytes={total_bytes} <= 8000")
-
-    if disp_order != DISPLAY_ORDER:
-        errs.append(f"AC4 FAIL: display_order={disp_order}, expected {DISPLAY_ORDER}")
-
-    if ANCHOR_FR_NODE not in (architecture or ""):
-        errs.append("AC5 FAIL: anchor fr-node path not in architecture col")
-    if ANCHOR_FR_NODE not in (prod_cons or ""):
-        errs.append("AC6 FAIL: anchor fr-node path not in production_constraints col")
-
-    design_doc_phrases = [
-        "采用加性 shallow bias tower",
-        "Mask-at-inference 提供干净的反事实",
-        "Shadow feature logging 保证 bias 特征",
-        "离线 AUC 可能持平甚至微跌",
-    ]
-    for phrase in design_doc_phrases:
-        if phrase not in (cheat or ""):
-            errs.append(f"AC7 FAIL: design-doc phrase {phrase!r} not in cheat_sheet col")
+    for col, val in nulled.items():
+        if val is not None and val != "":
+            errs.append(
+                f"AC3 FAIL: column {col} expected NULL (oral_narrative) but "
+                f"got length={len(val)}"
+            )
 
     if "Meta MLSD Golden Example" not in (subtitle or ""):
-        errs.append("subtitle missing 'Meta MLSD Golden Example' substring")
-
+        errs.append("AC4 FAIL: subtitle missing 'Meta MLSD Golden Example'")
     if not chash:
-        errs.append("content_hash is empty")
+        errs.append("AC5 FAIL: content_hash empty")
     if not upd_at:
-        errs.append("updated_at is empty")
+        errs.append("AC5 FAIL: updated_at empty")
 
     cur.execute(
         "SELECT COUNT(*) FROM system_designs WHERE display_order = ?",
@@ -769,151 +521,29 @@ def validate(cur: sqlite3.Cursor) -> list[str]:
     cnt = cur.fetchone()[0]
     if cnt != 1:
         errs.append(
-            f"display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
+            f"AC6 FAIL: display_order={DISPLAY_ORDER} has {cnt} rows (expected 1)"
         )
-
-    # ----- T-P0-868 schema checks (schemas/meta_mlsd_canonical.yaml) -----
-    # R-DRAWER-no-sd-drawer: no drawer table at top of any sd-golden body.
-    drawer_top_re = re.compile(r"^\|.*sd://.*\|", re.MULTILINE)
-    for k, v in prose_cols.items():
-        if v and drawer_top_re.search(v[:2000] or ""):
-            errs.append(
-                f"R-DRAWER-no-sd-drawer FAIL: {k} top has '| ... sd:// ... |' table"
-            )
-
-    # R-FORBID-rhythm-philosophy: 整体节奏哲学 must not appear in overview.
-    if overview and "整体节奏哲学" in overview:
-        errs.append(
-            "R-FORBID-rhythm-philosophy FAIL: overview still contains 整体节奏哲学"
-        )
-
-    # R-FORBID-why-this-is-strong: 'why this is strong' must not appear in defense.
-    if defense and re.search(r"(?i)why this is strong", defense):
-        errs.append(
-            "R-FORBID-why-this-is-strong FAIL: defense still contains 'Why this is strong'"
-        )
-
-    # R-FORBID-drawer-header-literal: '| Doc | ... sd://' must not appear anywhere.
-    drawer_header_re = re.compile(r"^\|\s*Doc\s*\|.*sd://", re.MULTILINE)
-    for k, v in prose_cols.items():
-        if v and drawer_header_re.search(v):
-            errs.append(
-                f"R-FORBID-drawer-header-literal FAIL: {k} contains '| Doc | ... sd://' header"
-            )
-
-    # 3-rule (section-level, at_least_one_bullet pass) for apply_3rule=true cols.
-    rule_patterns = {
-        "R-3RULE-decision": [
-            r"\b(I pick|we pick|I choose|we choose|default to|pick A)\b",
-            r"(?i)\bdecision\b.*\bover\b",
-        ],
-        "R-3RULE-tradeoff": [
-            r"(?i)\b(costs?|at the cost of|switches? to|in exchange for)\b",
-            r"\bvs\b",
-        ],
-        "R-3RULE-scale-sla": [
-            r"\b\d+\s*(ms|µs|us|qps|QPS|dim|k|K|M|B|fps|min|sec|s)\b",
-            r"\bp(50|95|99|999)\b",
-            r"\bHNSW\b|\bIVF\b|\bScaNN\b|\bMMR\b|\bDPP\b",
-        ],
-        "R-3RULE-twist-callback": [
-            r"(?i)\b(twist|unique angle|the core decision here is|this is where)\b",
-            r"(?i)\bcallback (to|of)\b",
-        ],
-    }
-    apply_3rule_cols = (
-        "overview", "architecture", "dataflow",
-        "production_constraints", "tradeoffs", "defense",
-    )
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        for rule_id, patterns in rule_patterns.items():
-            hit = any(re.search(p, body) for p in patterns)
-            if not hit:
-                errs.append(
-                    f"{rule_id} FAIL: section {col} has no matching bullet "
-                    f"(at_least_one_bullet pass)"
-                )
-
-    # sd_golden.overview target_chars [1500, 4500]; defense [2500, 8500];
-    # architecture [2000, 6000]; dataflow [2500, 9000].
-    field_char_ranges = {
-        "overview":     (1500, 4500),
-        "architecture": (2000, 6000),
-        "dataflow":     (2500, 9000),
-        "defense":      (2500, 8500),
-    }
-    for col, (lo, hi) in field_char_ranges.items():
-        n = len(prose_cols.get(col) or "")
-        if not (lo <= n <= hi):
-            errs.append(
-                f"SCHEMA-charrange FAIL: {col} chars={n} not in [{lo}, {hi}]"
-            )
-
-    # R-NARRATIVE-prose-form: measurable_proxy thresholds (T-P0-873 retrofit).
-    #   - bold_density_per_section_min: 3 (>=3 **bold** spans per apply_3rule section)
-    #   - bullet_run_max_consecutive:   4 (>4 unbroken bullet lines = violation)
-    #   - table_row_max:                3 (markdown tables with >3 body rows = violation)
-    bold_re = re.compile(r"\*\*[^*\n]+\*\*")
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        bold_count = len(bold_re.findall(body))
-        if bold_count < 3:
-            errs.append(
-                f"R-NARRATIVE FAIL: {col} bold_density={bold_count} < 3"
-            )
-
-    bullet_line_re = re.compile(r"^\s*[-*]\s+", re.MULTILINE)
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        run = 0
-        max_run = 0
-        for line in body.splitlines():
-            if bullet_line_re.match(line):
-                run += 1
-                max_run = max(max_run, run)
-            elif line.strip() == "":
-                run = 0
-            else:
-                run = 0
-        if max_run > 4:
-            errs.append(
-                f"R-NARRATIVE FAIL: {col} bullet_run_max={max_run} > 4"
-            )
-
-    for col in apply_3rule_cols:
-        body = prose_cols.get(col) or ""
-        in_table = False
-        rows_seen = 0
-        for line in body.splitlines():
-            if line.lstrip().startswith("|"):
-                rows_seen += 1
-                in_table = True
-            else:
-                if in_table:
-                    body_rows = rows_seen - 2  # subtract header + separator
-                    if body_rows > 3:
-                        errs.append(
-                            f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
-                        )
-                in_table = False
-                rows_seen = 0
-        if in_table:
-            body_rows = rows_seen - 2
-            if body_rows > 3:
-                errs.append(
-                    f"R-NARRATIVE FAIL: {col} table_body_rows={body_rows} > 3"
-                )
 
     print(f"[OK] row id={rid} slug={slug}")
     print(f"     title={title[:60]}...")
-    print(f"     display_order={disp_order}, total prose bytes={total_bytes}")
-    for k, v in prose_cols.items():
-        print(f"     {k}: {len(v or '')} chars")
+    print(f"     archetype={DOCUMENT_ARCHETYPE}")
+    print(f"     display_order={disp_order}")
+    print(
+        f"     populated: overview={len(overview or '')} dataflow={len(dataflow or '')} "
+        f"formulas={len(formulas or '')} cheat_sheet={len(cheat or '')}"
+    )
+    print(
+        f"     nulled: architecture={'NULL' if architecture is None else len(architecture)} "
+        f"production_constraints={'NULL' if prod_cons is None else len(prod_cons)} "
+        f"tradeoffs={'NULL' if tradeoffs is None else len(tradeoffs)} "
+        f"defense={'NULL' if defense is None else len(defense)} "
+        f"verbal_outline={'NULL' if verbal is None else len(verbal)}"
+    )
     return errs
 
 
 def main() -> int:
+    """CLI entrypoint."""
     ap = argparse.ArgumentParser()
     ap.add_argument("--db", default=str(DEFAULT_DB))
     ap.add_argument("--dry-run", action="store_true")
@@ -946,7 +576,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print("\n[DONE] all ACs pass")
+    print("\n[DONE] oral_narrative archetype seed: all ACs pass")
     return 0
 
 

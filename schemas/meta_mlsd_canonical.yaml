@@ -46,7 +46,20 @@ applies_to:
         archetype_migrated_from: structured_reference
         archetype_migrated_by_task: T-P1-875
         baseline_chars_post_migration: 13417   # diff-delta baseline reset (was 45274)
-      - {ref: "sd42", slug: "meta-top3-comments-golden", scope: "RecSys / list-level"}
+      # sd42 migrated to oral_narrative archetype 2026-06-17 (T-P1-881),
+      # mirroring sd41 (and the sd43/sd44 mirrors by T-P0-894/895). The made
+      # 第一人称 45-min 口播稿 (10504 chars) lives in dataflow; overview/formulas/
+      # cheat_sheet are slim anchors; architecture/production_constraints/
+      # tradeoffs/defense NULL. verbal_outline re-populated by
+      # seed_meta_meta_top3_comments_golden_verbal_outline.py (T-P0-893).
+      - ref: "sd42"
+        slug: "meta-top3-comments-golden"
+        scope: "RecSys / list-level"
+        document_archetype: oral_narrative
+        archetype_migrated_at: "2026-06-17"
+        archetype_migrated_from: structured_reference
+        archetype_migrated_by_task: T-P1-881
+        baseline_chars_post_migration: 10504   # diff-delta baseline reset (oral_narrative dataflow size at migration; structured 9-field total was 44176)
       # sd43 migrated to oral_narrative archetype 2026-05-16 (T-P0-894),
       # mirroring sd41. structured_reference 10-field shape (~51KB) replaced by
       # single continuous 第一人称 口播稿 in dataflow + slim overview/formulas/
