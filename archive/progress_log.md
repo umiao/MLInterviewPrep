@@ -7190,3 +7190,137 @@ Date:   Wed May 13 11:55:33 2026 -0700
   2. autonomous_run.sh + tasklist invisibility creates concurrent-orchestrator race after a lockfile-clear + relaunch (MSYS bash invisible to tasklist; ps -ef + /usr/bin/timeout is the safe detection)
   3. Anthropic API rate limit can kill inner session AFTER DB writes / task_db mark but BEFORE git commit (recovery: manually commit untracked seed)
 - **Status**: USER REQUEST SATISFIED. Meta MLSD doc bundle is open-the-box for interview rehearsal: cd96 is the playbook homepage, 4 sd-goldens are oral-recital narrative scripts with bold-anchored key surfaces (decisions / scale-SLA / tradeoffs / twist callbacks / technical scheme names). All entry-points cross-linked via sd:// drawer protocol.
+
+<!-- Archived from PROGRESS.md on 2026-06-17 (T-P2-905): 9 oldest sessions (2026-05-13..2026-05-15) + 1 undated orphan fragment. PROGRESS.md retained 45 recent sessions. -->
+
+## [undated orphan fragment recovered from PROGRESS.md header]
+- **What I did**: Redesigned RecipeCard to be compact (reduced padding, smaller text, single-row name+badge layout, truncated names). Added category grouping in BakingStudio browse mode -- recipes are now grouped under section headers (Base/Cream/Decoration/Complete) with descriptive captions. Removed unused category pill from cards since category is now shown via section headers. Maintained per-cake-type color themes.
+- **Deliverables**: RecipeCard.tsx (compact layout), BakingStudio.tsx (category grouping with CATEGORY_SECTIONS + groupByCategory)
+- **Sanity check result**: TypeScript type check passes, Vite build succeeds
+- **Status**: [DONE]
+
+## 2026-05-13 23:35 -- [T-P0-874] [META-MLSD-CD96-LINK-FIX] cd96 §1 dedupe + new §1.1 主次映射 + §3 typography polish (cd97 voice)
+
+- **What I did**: Per user Discord feedback (cd96 has lost link / broken sd-golden links / severe duplication / no primary-secondary distinction / weak typography vs cd97): (1) replaced `WORKED_EXAMPLES_CITATION` (4-link cluster repeated 4× in §1 timing-table SM#1-#4 rows) with one proper `[label](sd://slug)` markdown link per Strong Moment — root cause of "link 坏掉了" was that bare `sd://slug` strings don't get linkified by react-markdown; (2) inserted new §1.1 "4 Golden Examples — 主次映射 + 适配场景" between §1 table and §2, with 4 `---`-separated cards (主例 A/B/C/D) each carrying `**问题** / **主适配 Moment** / **为什么这例** / **与其他例的对照**` in cd97 voice; (3) §3 Strong Moments polished — each Mechanism/何时投放/Hook phrase now on own paragraph + new `**主适配示例**` line tying each moment back to §1.1 + `---` between moments; (4) bumped seed validate_content upper bound 15000→18000; (5) bumped retrofit drawer-header validate upper bound 16000→20000; (6) re-ran retrofit_meta_mlsd_96_drawer_header.py (per memory: reseed wipes drawer). NOT touching §2.2 gap — canonical schema (schemas/meta_mlsd_canonical.yaml line 92) intentionally deletes §2.2 per T-P0-866.
+
+- **Deliverables**:
+  - `scripts/seed_meta_mlsd_main_hub.py`: replaced WORKED_EXAMPLES_CITATION → 4 per-Moment primary-link constants; rewrote §1 timing table rows; inserted §1.1 (4 cards, ~2.5KB); polished §3 (--- separators + **主适配** callouts); bumped char ceiling 15000→18000.
+  - `scripts/retrofit_meta_mlsd_96_drawer_header.py`: bumped char ceiling 16000→20000.
+  - cd96 row in company_documents: 14202 → 17464 (seed UPDATE +3262 chars) → 18144 (retrofit UPDATE +680 chars).
+
+- **Sanity check result**:
+  - Seed validate_content passed (chars=17464, all 4 sd-golden URIs + 2 cd-sibling URIs present, 10 H2 sections, 4 Strong Moment anchors, §1 table 9 rows × 6 cols).
+  - Drawer retrofit re-applied (chars=18144, 8 drawer entries unique, no cd://96 self-link, body landmarks all preserved).
+  - URI audit: 0 ERRORs (89 ambiguous-link warnings are pre-existing in Uber doc, not cd96).
+  - Canonical audit: 2 findings on cd96 (missing §9 Drawer + §10 30秒判题 headings) are pre-existing schema-vs-retrofit mismatch — retrofit renames §10→§9 + strips body §9 Drawer (now in top-of-doc drawer block); my edits did NOT touch §9/§10.
+  - pytest tests/ -k "meta or drawer or retrofit or canonical or cd96": 31/31 pass (test_bias_variance_canonical_hub 11, test_doc_kind_taxonomy 1, test_kg_link_convention 2, test_hub_cd_link_resolution 2, test_retrofit_doc_drawer_links 15).
+  - Spot-check rendering: 23 proper `[label](sd://slug|cd://N)` markdown links in cd96 body. Body §1 timing table no longer has duplicated link clusters; each SM row has exactly 1 primary link.
+
+- **Status**: [DONE].
+
+- **Request**: `task_db.py update T-P0-874 --status completed`. Awaiting user visual sign-off on http://localhost:5173/companies/31/prep?tab=docs&doc=96 (user must refresh browser to pull new content). If user wants different primary/secondary mapping (e.g. swap SM#2 main example from Top-3 to Reels), one-line edit in seed constants + re-run seed + re-run drawer retrofit.
+## 2026-05-13 22:55 -- [T-P1-875] [Meta-MLSD-narrative] sd41 narrative-mode 简化 + 触发 schema 演进决策
+- **What I did**: User Discord 5/13 22:39 报 `sd://meta-reels-golden` 写得乱七八糟、跟 framing 方法论冲突 + 给了一份 21KB 的"完整 45min 第一人称口播稿"作为替换源。读了 doc 96 + sd41 后做诊断: 现状 sd41 把"方法论 + 言语稿 + Strong Moment 调度 + tradeoffs registry + verbatim Defense"散在 10 字段 ~45KB, 同一 insight (multimodal twist / ambiguous middle / IPS-as-acquisition) 在 overview→architecture→dataflow→defense 各重述一遍 — 这恰是用户写在 attachment 第一半的方法论 3 条 (每段串因果链 / 每立场挂 trade-off / twist 在 body 兑现) 想消灭的形态。Discord 22:42 提议 10 字段 → 4 字段 (overview + dataflow=口播稿 + formulas + cheat_sheet), 用户 22:43 回 "好 同意 按照你说的修改 (drawer 可以的话也可以顺便改)"。
+  备份 DB → `data/mle_prep.db` 复制到 `data/backups/mle_prep_pre_reels_golden_simplify_20260513_224406.db`。用 `scripts/_tmp_reels_simplify.py` 直接 UPDATE `system_designs WHERE slug='meta-reels-golden'`: subtitle/overview/dataflow/formulas/cheat_sheet 写入新内容 + content_hash 重算, architecture/production_constraints/tradeoffs/defense/verbal_outline 设 NULL。content_hash=cd63a12decf9c2b0, 总 chars 13654 (subtitle 237 / overview 902 / dataflow 8626 / formulas 1833 / cheat 2056)。用 `scripts/_tmp_cd96_drawer_update.py` 单行 replace `company_documents WHERE id=96` 的 drawer 表 Reels 行: "八段台词 + 4 Strong Moments verbatim" → "8 段第一人称口播稿 (因果链 + 立场+trade-off + twist 在 body 兑现)", drawer header sentinel `<!-- META_MLSD_DRAWER_HEADER_96_20260512 -->` + 表头 `| 入口 | 内容 | 何时打开 |` 都保留。删除 2 个 _tmp 脚本 (避免 scripts/ 留 ad-hoc 写库器)。
+- **Deliverables**:
+  - DB writes (live): `system_designs.id=41` (10 col → 4 col + NULL × 5, hash cd63a12d), `company_documents.id=96` content (drawer row 1 行替换, hash 01ddd437)
+  - Backup: `data/backups/mle_prep_pre_reels_golden_simplify_20260513_224406.db` (15.6 MB)
+  - Discord 2 条 msg: 1504358211682304042 (诊断 + 4-field 提议) / 1504362209818574958 (validator finding 通报 + A/B 选项 ask)
+  - Task DB: T-P1-875 added (state=in_progress, P1)
+- **Sanity check result**:
+  - DB-level verify: rows affected 1+1, content_hash 写入, NULL 字段 5 个 (架构/PC/trade/defense/verbal), drawer sentinel 在, 新 Reels 行 present, 旧 "八段台词 + 4 Strong Moments verbatim" 字符串清空
+  - Frontend smoke test: localhost:5173 + 8000 都 unreachable (`curl exit 7`), 用户那边 frontend 需 refresh 才能看到; netstat 显示只有 fakechat 8787 LISTENING
+  - **Validator (`scripts/audit_meta_mlsd_3rule.py`) BREACH**: 31 finding on sd41 + 2 pre-existing finding on cd96 (§9 Drawer / §10 30 秒 heading 缺失 — 这是 T-P0-871 renumber 漏的 drift, 跟我这次改动无关)。sd41 主要 finding: (1) `required` field length=0 × 3 (architecture / tradeoffs / defense), (2) `R-CHAR-range overview chars=902 ∉ [1500,4500]`, (3) `R-NARRATIVE-prose-form bold_density=0` on dataflow (口播稿是连续中文叙述), (4) **`R-DIFFDELTA-70pct BREACH` chars=13417 baseline=45274 delta=-70.4%** — schema 设计的 >70% 砍量门, 触发后 `action_on_breach: human_review_required`, (5) `R-XPAGE-section-naming` sd41.defense 缺 canonical Strong-Moments header
+  - **Invariant 3 违反**: 用 `_tmp` 脚本直接 UPDATE 而非通过 git-tracked idempotent seed (`scripts/seed_meta_reels_golden_sd.py` + `scripts/retrofit_meta_mlsd_96_drawer_header.py`)。canonical seed 的 docstring 把 architecture/tradeoffs/defense 钉成 must-populate, 现在 seed 跟 DB state 严重 desync — 任何人重跑 seed 都会把 DB 反向覆盖回 old shape。
+- **Status**: [BLOCKED] — 等用户 Discord 回 A/B/C:
+  - **A**: 加 `narrative_mode: true` 到 `schemas/meta_mlsd_canonical.yaml`, 改 ~4 文件 (schema YAML + audit_meta_mlsd_3rule.py + seed_meta_reels_golden_sd.py + retrofit_meta_mlsd_96_drawer_header.py), 把 invariant 3 + schema 都补齐。3 sister sd-golden (top3/weapon/friend) 暂留旧模式。
+  - **B**: 从备份还原 sd41 + cd96, 重新规划。
+  - **C** (不推荐): 把口播稿切回 8 字段保 schema 形式, 等于复原 "乱七八糟"。
+- **Request**: 等用户 reply 后再 `task_db.py update T-P1-875 --status completed` (走 A 路径) 或 `--status deleted` (走 B 还原)。
+## 2026-05-13 23:25 -- [T-P1-875] [Meta-MLSD-narrative] minimal A executed: oral_narrative archetype shipped on sd41
+- **What I did**: User Discord 23:24 forwarded a third-party review of the A/B/C proposal. Review's directive: before any further schema work, mechanically verify the 4 criteria (因果链 / 第一人称可口播 / trade-off 有立场 / defense+twist) against the LIVE sd41 dataflow, then if all 4 pass do the **minimal** archetype change (not the elaborated semantic-validator / 3-phase rollout someone else had proposed in parallel). I ran the verification (Discord msg 1504369692121239665): 62 因果连接 + 24 transitions = PASS; 69 我-pronouns = PASS; 39 pick + 8 cost + 28 counter markers = PASS; SM #1/#2/#3/#4 + 3 twists keyword-present, with 1 editorial change (SM #3 framing inverted: 用户自己口播稿里 bias-tower primary 替代 data-acquisition-reframe primary — 用户编辑选择, 非 deletion). 4/4 passed → minimal A path triggered.
+
+  **4 file edits** (no semantic detector, no char-range refit, no 3-phase rollout):
+  1. `schemas/meta_mlsd_canonical.yaml`: (a) added `document_archetypes:` block (default_archetype=structured_reference + values.{structured_reference, oral_narrative}); (b) marked sd41 instance with `document_archetype: oral_narrative` + `baseline_chars_post_migration: 13417` (diff-delta baseline reset); (c) added Chinese-alternate regex to `three_rule.rules.R-3RULE-decision/-tradeoff` so 我选/我会/代价是/不过/吃不动 等中文立场标记 也能被识别 (英文 regex 仍保留, 兼容 structured_reference sister docs)
+  2. `scripts/audit_meta_mlsd_3rule.py`: (a) added `get_sd_golden_instance` / `get_archetype_for_slug` / `get_oral_narrative_contract` helpers; (b) split `audit_sd_golden` into `_audit_sd_golden_structured_reference` + `_audit_sd_golden_oral_narrative` branches; (c) `audit_cross_page`: skip R-XPAGE-section-naming for oral_narrative slugs (no defense field); (d) `audit_diff_delta`: read baseline_chars_post_migration for oral_narrative instead of BASELINE_CHARS
+  3. `scripts/seed_meta_reels_golden_sd.py`: full rewrite — old 912-line structured_reference 10-field constants → new 400-ish-line oral_narrative shape with `DOCUMENT_ARCHETYPE = "oral_narrative"`, OVERVIEW/DATAFLOW/FORMULAS/CHEAT_SHEET populated, ARCHITECTURE/PRODUCTION_CONSTRAINTS/TRADEOFFS/DEFENSE/VERBAL_OUTLINE = None, validate() rewritten for archetype contract (populated-floor + nulled-fields + content_hash). Idempotent UPSERT preserved.
+  4. `scripts/retrofit_meta_mlsd_96_drawer_header.py`: line 84 drawer row text updated (label "45min 全文" → "45min 口播稿", description "八段台词 + 4 Strong Moments verbatim" → "8 段第一人称口播稿 (因果链 + 立场+trade-off + twist 在 body 兑现)", 何时打开 column also tweaked). DRAWER_INDEX recomputed; retrofit reports UNCHANGED on re-run (live cd96 already byte-identical to new DRAWER_INDEX from my earlier _tmp UPDATE — invariant 3 alignment confirmed).
+- **Deliverables**:
+  - 4 file edits (schemas/ + 3 scripts/, total +280/-450 lines net per `git diff --stat`)
+  - DB: sd41 + cd96 unchanged from earlier _tmp writes (seed + retrofit re-run = idempotent no-op)
+  - Validator clean: sd41 0 findings, cross-page clean, diff-delta +0.0% (baseline reset to 13417), 0 breaches. Only finding remaining is pre-existing cd96 §9/§10 drift unrelated to T-P1-875.
+  - Discord 23:13 verification report msg 1504369692121239665 (4-criteria audit) + 1504369693555818538 (minimal A proposal)
+- **Sanity check result**:
+  - `python scripts/seed_meta_reels_golden_sd.py --dry-run` → DRY UPDATE id=41 ✓
+  - `python scripts/seed_meta_reels_golden_sd.py` → updated id=41 + all ACs pass ✓
+  - `python scripts/retrofit_meta_mlsd_96_drawer_header.py` → UNCHANGED (byte-identical) + 5 sd:// + 3 cd:// deps verified ✓
+  - `python scripts/audit_meta_mlsd_3rule.py` → 4 docs clean (sd41 0 findings down from 31), cd96 has 2 pre-existing T-P0-871 §9/§10 drift findings unrelated to this task, cross-page clean, diff-delta 0 breaches
+  - Bilingual regex spot-check: `我选/我会/代价是/吃不动/更稳/不展开` all hit by updated R-3RULE-decision/-tradeoff patterns; sister docs (sd42 top3 / sd-weapon / sd-friend) still pass on existing English regex (no regression)
+- **Status**: [DONE]
+- **Request**: `task_db.py update T-P1-875 --status completed`. Cd96 §9/§10 pre-existing drift is a separate task (it's a T-P0-871 leftover where the retrofit collapsed §9 Drawer into the top sentinel block but the schema heading_regex was never updated; track as follow-up if user wants schema-cd96 alignment).
+## 2026-05-15 04:30 -- [Meta-MLSD top-9 batch] Recovery: backfill 3 commits + relaunch autorun for remaining 5
+
+- **What I did**: Previous autorun (16:22-17:16 wall, max 8 sessions) stopped after 2 consecutive session failures (Session 1: AR-7 hung-2x on T-P0-883; Session 2: API 529 Overloaded on T-P0-885). BUT inner agents actually completed work on T-P0-883/884/885 -- DB has rows id=47/48/49 + tasks marked completed -- they just timed out before committing the seed scripts to git, so wrapper saw no HEAD movement and counted as fail. Recovery:
+  1. Verified 3 rows pass mechanical rubric: ig-story=12993 chars, event-attendance=12994, ads=12978 (within 8k-13k spec); each has 6 `(driven by Twist N · interacts with M)` prefixes in §3.
+  2. 2 of 3 insert scripts existed as untracked (`insert_meta_event_attendance_golden.py`, `insert_meta_ads_golden.py`). Created the missing Q10 seed (`insert_meta_ig_story_golden.py`) from DB content dump -- inlined as UPSERT for forward-compat with the other 2 SKIP-on-exist pattern.
+  3. Committed 4 commits: `[chore]` for shared infrastructure (`mlsd_top9_spec.md`, anchor inserter, task orchestrator); `[T-P0-883]`/`[T-P0-884]`/`[T-P0-885]` for each Q's seed.
+  4. Marked T-P0-885 completed via `task_db.py complete` (T-P0-883/884 were already flipped by the autorun agent before timeout).
+  5. Discovered remaining 5 tasks had `state=NULL` and were invisible to `task_db.py pick` (state-aware post-B3 foldin). Promoted T-P1-886/887/888/T-P2-889/T-P0-890 to `state='ready'` via direct SQL on `tasks.db`.
+  6. Killed mistakenly-launched intermediate autorun (T-P1-886 had been bumped to in_progress before kill); reset to active.
+  7. Relaunched `bash scripts/autonomous_run.sh 5 --allow-dirty` (bg job `bz1z6wi7g`).
+- **Deliverables**:
+  - 4 commits: `6cc69eb` [chore] infrastructure, `367a9e6` [T-P0-883] Q10 IG Story seed, `7107064` [T-P0-884] Q12 Event Attendance seed, `256d04d` [T-P0-885] Q4 Ads seed.
+  - `scripts/insert_meta_ig_story_golden.py` (new, 147 LoC, UPSERT idempotent, inlined ~13k char content).
+  - `scripts/insert_meta_event_attendance_golden.py` (preserved, 151 LoC, SKIP-on-exist).
+  - `scripts/insert_meta_ads_golden.py` (preserved, 150 LoC, SKIP-on-exist).
+  - tasks.db state promotion for 5 pending: state=NULL→'ready'.
+- **Sanity check result**: `git log` shows 4 new commits on main; `task_db.py pick` returns `T-P1-886` (correctly picking the highest-priority state='ready' task w/o blocked deps -- T-P0-890 dep-blocked); autorun resume log shows Session 1/5 started; inner agent uses state-aware `pick` so it'll pick T-P1-886 even though EXPECTED_TASK_PREFIX peek returns T-P1-876 (legacy non-state-aware path -- mismatch is soft-credited by AR-18 `head_legit_unexpected`).
+- **Status**: [PARTIAL] -- 3/9 sd rows committed + audited; 5 remaining tasks in autorun (T-P1-886 V2V / T-P1-887 Event Rec / T-P1-888 Location / T-P2-889 Spotify / T-P0-890 cd94 wire-up). Expected runtime ~3-4h. Discord pings on launch + completion.
+- **Lesson** (worth surfacing): autorun's AR-18 peek logic uses legacy `status='active'` filter (not state-aware), so EXPECTED_TASK_PREFIX can disagree with what the inner agent (using `pick`) actually selects. As long as both find the same task by deps + priority, AR-18 soft-credits. But if NEW tasks are added without state='ready', they're invisible to `pick` -- the `task_db.py add` CLI doesn't set state. Need either: (a) post-add SQL bump to state='ready', or (b) `task_db.py add --state ready` flag. (b) is the cleaner long-term fix; tracked as candidate followup for INFRA-HITL B3 fold-in extension.
+- **Request**: leave T-P1-886..890 active; do NOT mark done until autorun completes.
+## 2026-05-15 04:50 -- [T-P1-886] [Meta-MLSD] Add meta-v2v-search-golden 口播稿 row (Q2 V2V Search)
+
+- **What I did**: Drafted overview (§1+§2) + verbal_outline (§3-§5) for Q2 Video-to-Video Search per locked template (anchors id=45/46). Inherited template from `scripts/mlsd_top9_spec.md`; sourced twist seeds from cd94 Q2 block + task description. Dominant twist: "similar" is undefined without a text query (visual/audio/intent axes pull in different directions), so multi-facet retrieval with session-time learned facet weights (Thompson sampling on per-facet Beta posterior over in-session CTR), L2-normalize each modality BEFORE fusion to prevent silent audio dominance, single-stage content-only retrieval (query IS the video, no two-tower) with corpus-level cold-start friendly. Twist interactions: 1↔3 (per-session facet weights operationalize multi-facet), 2↔1 (L2-normalize keeps facets composable under merge), 3↔4 (Thompson exploration covers session cold-start; content-only embedding covers corpus cold-start). Required 5 iterative trim passes (16947 → 14585 → 13883 → 13605 → 13446 → 13385 → 12976) to land within 8k-13k mechanical envelope.
+- **Deliverables**:
+  - `scripts/insert_meta_v2v_search_golden.py` (new, ~180 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=50, slug=`meta-v2v-search-golden`, overview=4601 / verbal=8375 / total=12976 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-v2v-search-golden';"` returns `12976|meta-v2v-search-golden` (within 8000-13000 spec). All 5 §3 sections open with `**(driven by Twist N · interacts with M)**`. §4 has 4 SM bullets. §5 has 4 drift lines + 1 3-way handoff. §2 has 4 twists with #1 marked DOMINANT and twists #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-886`
+## 2026-05-15 05:05 -- [T-P1-887] [Meta-MLSD] Add meta-event-rec-golden 口播稿 row (Q5 Event Rec)
+
+- **What I did**: Drafted overview (§1+§2) + verbal_outline (§3-§5) for Q5 FB Event Recommendation per locked template (anchors id=45/46). Inherited template from `scripts/mlsd_top9_spec.md`; insert script + content was pre-drafted in worktree. Dominant twist: dual cold-start (per-user RSVP ~3/yr + ~30% event-pool churn weekly) reframes the problem as content-based ANN over event-metadata embeddings + LLM aspect-tag graph -- NOT user-item CF. Interacting twists: (#2) geo+time+capacity as HARD filters at candidate gen (not soft scoring), substitution rate "30mi+high-affinity" ↔ "2mi+mid-affinity" is physically incoherent; (#3) friend-going is strongest single feature AND selection-biased, IPS-weighted by 1/p(friend exposed) breaks the feedback loop; (#4) capacity soft-downrank as post-prediction multiplicative layer (decouples policy from retraining). Eval uses social-cluster A/B (per-user leaks via friend-going). One trim pass needed (13011 → 12990) to land within mechanical envelope; trimmed " firing soft-downrank" from §3 risk #3 (the soft-downrank context is already established 2 paragraphs earlier).
+- **Deliverables**:
+  - `scripts/insert_meta_event_rec_golden.py` (new, ~150 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=51, slug=`meta-event-rec-golden`, overview=4403 / verbal=8587 / total=12990 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-event-rec-golden';"` returns `12990|meta-event-rec-golden` (within 8000-13000 spec). 6 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 3 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-887`
+## 2026-05-14 22:28 -- [T-P1-888] [Meta-MLSD] Add meta-location-rec-golden 口播稿 row (Q6 Location Rec)
+
+- **What I did**: Drafted overview (§1+§2) + verbal_outline (§3-§5) for Q6 Personalized Location Recommendation per locked template (anchors id=45/46). Inherited template from `scripts/mlsd_top9_spec.md`. Dominant twist: context (time/weather/calendar/party) is the PRIMARY intent disambiguator -- same user at 9am vs 9pm has different intents, static profile gives the average no one wants at any moment. Interacting twists: (#2) intent classification as intermediate task (food/coffee/activity/nightlife/errand) BEFORE ranking, framed as senior-signal product can A/B independently from ranker; (#3) walk-vs-drive candidate-set switch (3mi vs 30mi) keyed off context-inferred mode -- switches candidate-gen layer, not soft distance feature, because "30mi + high-affinity" ↔ "2mi + mid-affinity" substitutions are physically incoherent for a walker; (#4) MMR diversity re-rank across predicted intent classes + POI categories as policy-layer split. Eval slices by time-of-day + mode + intent-class to expose intent-class collapse that aggregate top-line masks. Multiple trim passes (17162 → 13738 → 13017 → 12976) to land within mechanical envelope.
+- **Deliverables**:
+  - `scripts/insert_meta_location_rec_golden.py` (new, ~140 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=52, slug=`meta-location-rec-golden`, overview=4110 / verbal=8866 / total=12976 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-location-rec-golden';"` returns `12976|meta-location-rec-golden` (within 8000-13000 spec). 6 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 4 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-888`
+## 2026-05-15 05:35 -- [T-P2-889] [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify Music Rec)
+
+- **What I did**: Verified pre-drafted insert script + content for Q11 Spotify Music Recommendation per locked template (anchors id=45/46). Tier-3 (non-Meta) fill per 2026-05-14 user directive: structural twists transfer but Meta signal hierarchies do not. Dominant twist: relisten is POSITIVE, not redundant -- same song 50 times = 5-star signal, not saturation, inverts dedup logic standard in video/article rec, so NO post-ranking dedup and relisten-frequency-30d is a positive feature. Interacting twists: (#2) audio embedding from log-mel-spectrogram CNN as cold-start lever for ~60k new tracks/day (metadata too coarse), indexed at upload time with zero playcount; (#3) session mood coherence as autoregressive constraint -- transformer over session prefix (~20 tracks), NOT pointwise scoring, because rock→classical→rock slips through pointwise when each matches user-static profile; (#4) skip-rate <30s as primary negative label, PTC as primary positive, NOT play-count (gameable by auto-play queue loops). Eval slices by mood + cold-track-quota + relisten-bucket + user-tenure; IPS counterfactual replay corrects auto-play-queue selection bias; cluster-randomized A/B by user (no friend-network leakage like Event Rec). This session ran the idempotent insert (SKIP confirmed at id=53) and mechanical validation.
+- **Deliverables**:
+  - `scripts/insert_meta_spotify_music_golden.py` (new, ~150 LoC, SKIP-on-exist idempotent)
+  - `system_designs` row id=53, slug=`meta-spotify-music-golden`, overview=3742 / verbal=9252 / total=12994 (within spec 8k-13k)
+- **Sanity check result**: `sqlite3 data/mle_prep.db "SELECT length(overview)+length(verbal_outline), slug FROM system_designs WHERE slug='meta-spotify-music-golden';"` returns `12994|meta-spotify-music-golden` (within 8000-13000 spec). 5 §3 sections each open with `**(driven by Twist N ...)**`; §4 has 4 SM bullets; §5 has 4 drift lines + 1 3-way handoff; §2 has 4 twists with #1 marked DOMINANT and #1/#2/#3/#4 each carrying interaction clauses.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P2-889`
+## 2026-05-15 06:08 -- [T-P0-890] [Meta-MLSD] cd94 family table wire-up: link all 9 new sd:// URIs + re-run drawer header retrofit
+
+- **What I did**: Wired all 13 sd://meta-*-golden URIs into Meta MLSD doc 94 (id=94) in two places: (1) added a 5th `sd-golden` column to Section 1 Family Taxonomy 总表 (13 rows: Q1 Top-3, Q2 V2V, Q3 Friend, Q4 Ads, Q5 Event, Q6 Location, Q7 Weapon, Q8 Yelp, Q9 FB Feed, Q10 IG Story, Q11 Spotify, Q12 Event Attendance, Q13 Reels), and (2) appended → [sd-golden](sd://meta-XXX-golden) suffix to each ### QN. heading in Section 2. Then re-ran retrofit_meta_mlsd_94_drawer_header.py to re-establish the drawer header at the top (the wire-up does NOT touch the drawer block, but the retrofit script is the canonical post-write sanity check). Pre-task fixup: backfilled state='done' on T-P0-883/T-P0-884 (status=completed but state=NULL); without this the picker reported T-P0-890 as blocked by deps_missing=[T-P0-883, T-P0-884] even though both deps were completed 2026-05-14.
+- **Deliverables**:
+  - `scripts/wire_meta_mlsd_94_uris.py` (new, ~210 LoC, sentinel-based idempotent; sentinel `<!-- META_MLSD_94_URI_WIREUP_20260514 -->` inserted directly after FAMILY_TAXONOMY sentinel)
+  - `scripts/retrofit_meta_mlsd_94_drawer_header.py` (validator upper bound bumped 19000 -> 21000 to accommodate +~1100 chars from wire-up; rationale comment updated)
+  - `data/mle_prep.db` company_documents.id=94: chars 18073 -> 19196 (+1123), drawer sentinel intact at top, all 13 slugs now appear >=2x (table cell + heading).
+- **Sanity check result**: `pytest tests/ -x -q` -> 1265 passed in 46s. Re-running both wire-up + retrofit reports `[UNCHANGED] 0 writes` (idempotency proven). `sqlite3 SELECT substr(content,1,80) FROM company_documents WHERE id=94` -> still starts with `<!-- META_MLSD_DRAWER_HEADER_94_20260512 -->`. Slug count: 12 of 13 at count=2, Q1=3 (extra mention from earlier top3_xref retrofit), Q13=9 (golden card has 7 pre-existing mentions + table cell + heading).
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P0-890`
