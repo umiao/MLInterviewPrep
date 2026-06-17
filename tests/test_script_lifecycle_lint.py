@@ -75,6 +75,28 @@ def test_static_import_pins_an_expired_script(tmp_path):
     assert out["stat_used.py"] == lint.PINNED
 
 
+def test_ref_scan_pins_when_repo_lives_under_a_skipdir_named_path(tmp_path):
+    """The skip-dir filter is repo-RELATIVE, not absolute-path based.
+
+    Regression: on Linux CI the repo checkout is under ``/tmp/pytest-.../``,
+    whose ``tmp`` path component is in ``_REF_SKIP_DIRS``. The old filter
+    matched it against every file's absolute parts, skipped the whole tree,
+    found zero references, and demoted a still-imported expired script to
+    CLEANUP_CANDIDATE. (Passed on Windows only because its temp dir is
+    ``...\\Temp\\`` -- different name/case.) Reproduce on any platform by
+    nesting the repo under a literal ``tmp`` directory.
+    """
+    repo = _make_repo(tmp_path / "tmp" / "checkout")
+    (repo / "scripts" / "seed" / "stat_used.py").write_text(
+        EXPIRED + "y = 2\n", encoding="utf-8")
+    (repo / "scripts" / "seed" / "caller.py").write_text(
+        "from stat_used import y\n", encoding="utf-8")
+    out = _outcomes(repo)
+    assert out["stat_used.py"] == lint.PINNED, (
+        "a repo nested under a skip-dir-named path must still see its own "
+        "live references")
+
+
 def test_unreferenced_expired_script_is_cleanup_candidate(tmp_path):
     """The whole point still works: a truly-dead expired script is flagged."""
     repo = _make_repo(tmp_path)

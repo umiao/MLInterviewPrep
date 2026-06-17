@@ -218,11 +218,16 @@ def find_live_references(
         for f in repo.rglob(pat):
             if not f.is_file():
                 continue
-            if any(part in _REF_SKIP_DIRS for part in f.parts):
-                continue
             try:
                 rel = str(f.relative_to(repo)).replace("\\", "/")
             except ValueError:
+                continue
+            # Skip-dir filter is REPO-RELATIVE: it skips noise namespaces
+            # *inside* the repo (archive/, logs/, tmp/, ...). It must NOT be
+            # matched against the absolute path the repo lives under -- e.g.
+            # on Linux CI a tmp_path checkout is /tmp/pytest-.../, whose "tmp"
+            # part would otherwise skip every file and pin nothing.
+            if any(part in _REF_SKIP_DIRS for part in rel.split("/")):
                 continue
             try:
                 text = f.read_text(encoding="utf-8", errors="replace")
