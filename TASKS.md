@@ -66,12 +66,6 @@ AC:
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
-#### T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rewrite). This task now covers sd42 ONLY: migrate sd42 meta-top3-comments-golden to oral_narrative shape (overview/dataflow/formulas/cheat_sheet populated, architecture/PC/tradeoffs/defense=None; verbal_outline already golden=4829 chars from T-P0-893, KEEP it - the stale original-T-P1-881 'verbal_outline=None' line is superseded by the sd41 golden-template precedent). Update schemas/meta_mlsd_canonical.yaml sd42 entry document_archetype:oral_narrative baseline_chars_post_migration:10504. Re-run audit_meta_mlsd_3rule.py expecting 0 findings sd41-44. Revert backup: data/backups/mle_prep_pre_top3_komantxe_20260514_111304.db.
-
 #### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
 - **Priority**: P1
 - **Complexity**: M
@@ -605,6 +599,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 - [x] **2026-06-17** -- T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml). requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` he
 - [x] **2026-06-17** -- T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix). After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (6
 - [x] **2026-06-17** -- T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400). FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add
+- [x] **2026-06-17** -- T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A). SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rew
 - [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
 - [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan
 - [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l

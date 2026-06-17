@@ -18,7 +18,14 @@
 - **autorun-safe 子集已全部清完**(876/878/916/905,见下)。剩余 ready 任务都是 supervised/gated → 下个 session **逐条人值守跑**,**别挂 `autonomous_run.sh`**。
 - 直接看 **`## supervised run 运行说明`**(下方)照做:单任务循环 + 推荐首拣。autorun 配方降级为附录(当前无 autorun-safe 任务可喂)。
 
-### 最近一次 session(2026-06-17 晚,supervised)— ✅ 908 done(ML Infra·LLM SD tab + carve [300,400))
+### 最近一次 session(2026-06-17 晚,supervised)— ✅ 881 done(sd42 → oral_narrative archetype 迁移)
+- ✅ **T-P1-881 完成**(MLI `820bc4d`,未 push):sd42 `meta-top3-comments-golden` 从 structured_reference 迁到 **oral_narrative**(镜像 sd41/T-P1-875 + weapon/friend minimal-A)。
+  - **发现 drift**:成品 10504 字第一人称 45min 口播稿早已被写进 DB `dataflow`,但主 seed 还是旧 structured DATAFLOW(6378)+ 其余 9 字段仍填充。**复用成品**(memory `handoff_reuse_made_content`):把 DB 口播稿捕获进主 seed 作真相源(Invariant 3),NULL 掉 architecture/PC/tradeoffs/defense,保留 overview/formulas/cheat_sheet,verbal_outline 由既有 T-P0-893 verbal seed 在主 seed 后重填 4829。
+  - 改动:`scripts/seed_meta_top3_comments_golden_sd.py`(重生成为 archetype-aware oral_narrative seed)、`schemas/meta_mlsd_canonical.yaml`(sd42 条目加 document_archetype:oral_narrative + baseline_chars_post_migration:10504)。DB 走 idempotent seed(不入 git)。一次性 builder 已删。
+  - 验证:`audit_meta_mlsd_3rule.py` **exit 0 / 0 findings**(cd96 + sd41-44),cross-page clean,diff-delta 无 breach;幂等(二次跑链仍 exit 0);`pytest -q` **1315 passed**;seed py_compile + ruff clean。最终形态:overview 4596 / dataflow 10504 / formulas 4920 / verbal 4829 / cheat 4155;architecture/PC/tradeoffs/defense=NULL。无浏览器 smoke(纯数据迁移,落在已上线的 oral_narrative 渲染路径上,sd41/weapon/friend 已证 NULL-列渲染;canonical gate = audit oracle 已绿)。
+  - **接续点**:Meta-MLSD narrative 簇 sd41-44 全部 oral_narrative 化完毕。
+
+### 上一次 session(2026-06-17 晚,supervised)— ✅ 908 done(ML Infra·LLM SD tab + carve [300,400))
 - ✅ **T-P1-908 完成**(MLI `7760c20`,未 push):纯前端,DB 未写。`SystemDesignList.tsx` 6 处改动:① `Tab` 类型加 `'ml-infra-llm'` ② 新 `mlInfraModules`/`mlInfraCount` useMemo(filter `[300,400)`)③ Pinterest 收边 `pinterestTopics`/`pinterestCount` 加上界 `<300` 防新 band 漏入 ④ Pinterest 后加 tab `<button>` label `ML Infra · LLM` ⑤ 新内容块镜像 ml-mlsd flat-card。
   - 验证:vitest **247/247** pass;`npm run build` exit 0;**真浏览器 manual-smoke**(conda Playwright + 真后端:8100/vite:5173):`?tab=ml-infra-llm` → tab 可见且激活 + 空态「No ML Infra · LLM modules yet」(对,`[300,400)` 现 0 行,待 T-B/909 seed);`?tab=pinterest` → 恰好 8 卡、无 ML-Infra 漏入;tabbar 顺序 = [Interview Prep, ML System Design, eBay Projects, Pinterest, ML Infra · LLM]。
   - **接续点**:909 = seed 用户给的 500GB 部署 golden(需用户提供内容),seed 进 `[300,400)` band → 卡片自动出现在此 tab。
@@ -38,7 +45,7 @@
 - **独立 debt(下一轮/T-P2-321 需知)**:工作区 14 份 task_store.py 副本都带 SIM105,但 task_store.py 不在 propagate 管理集(deferred 到 T-P2-321),daily-broadcast 不冲回——无假绿风险,本 S 有意没 blast。
 
 ## Backlog 现状(2026-06-17 晚核实)
-70 任务:**21 done / 49 未完**(876/878/916/905 autorun + **879 + 877 + 908 supervised** 完成)。49 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。
+70 任务:**22 done / 48 未完**(876/878/916/905 autorun + **879 + 877 + 908 + 881 supervised** 完成)。48 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。
 
 ### ✅ state 卫生债已清零(2026-06-17)
 曾有 **4 个** `status='active'` 但 `state=None`(picker 不可视:912/918/905/916)。已全部正规化成 `state='ready'`,**现在 `state=None` 计数 = 0**。非完成任务现仅两态:`active+ready`(17,可拣)/ `blocked+pending`(38,dep 门控或 PARK)。
@@ -59,8 +66,8 @@
 - ~~879~~ ✅ 已完成(2026-06-17 晚,supervised,`69ae26a`)
 - ~~877~~ ✅ 已完成(2026-06-17 晚,supervised):`ruff check scripts/` 清零(排除 propagate 管理文件);per-file-ignore 写进 `pyproject.toml`。
 - ~~908~~ ✅ 已完成(2026-06-17 晚,supervised,`7760c20`):「ML Infra·LLM」SD tab + carve [300,400) + Pinterest 收成 [199,300) 防泄漏。vitest 247 + build + 真浏览器 smoke 全过。其后 **909 = seed 用户给的 500GB 部署 golden**(需用户提供内容)。
-- 👉 **T-P1-881**〔Meta-MLSD,S〕**= 下一轮推荐第一拣**(picker 默认即给它)。sd42 archetype 迁移 oral_narrative(sd43/44 已折进 894/895);改 `schemas/meta_mlsd_canonical.yaml` sd42 条目 + 重跑 `audit_meta_mlsd_3rule.py` 期望 0 findings。改 DB 走 idempotent seed + Surface 表。
-- **T-P2-880**〔SYNC,S〕从 template 引入 study-review skill(拷前人审 scope)
+- ~~881~~ ✅ 已完成(2026-06-17 晚,supervised,`820bc4d`):sd42 → oral_narrative;audit exit 0 / 0 findings sd41-44;pytest 1315。Meta-MLSD narrative 簇收官。
+- 👉 **T-P2-880**〔SYNC,S〕**= 下一轮推荐第一拣(确定性高的)**。从 template 引入 study-review skill(拷前人审 scope)。注:picker 默认给 909,但 909 等用户提供 500GB 部署内容,无内容时拣 880。
 - **T-P1-909**〔ML-Infra-LLM,—〕seed 用户给的 500GB 部署 golden 进 [300,400)(需用户提供内容;末尾可选 light polish=CN 叙述+EN 首现展开)
 - **T-P1-921**〔WSH-E1,M〕drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
 
@@ -103,7 +110,8 @@ python .claude/hooks/task_db.py get <ID> # 读权威 spec(AC 在 description),pi
 | ~~①~~ | ~~**T-P2-879**〔S〕~~ ✅ | DEBT | 已完成(`69ae26a`)。`task_store.py` SIM105 → `contextlib.suppress`。 |
 | ~~②~~ | ~~**T-P2-877**〔M〕~~ ✅ | DEBT | 已完成。`ruff check scripts/` 清零(排除 propagate 管理文件):safe `--fix` + 人审手改(B905 strict / B007 `_` / B023 默认参数 / F841 / E402)+ scripts/ per-file-ignore(N806/N803/E741/E701/E702/SIM102 写进 pyproject)。**未盲跑 unsafe-fixes**。残留 ~18 错全在 propagate 管理文件 = 独立 debt(root canonical + propagate)。 |
 | ~~②~~ | ~~**T-P1-908**〔M〕~~ ✅ | 内容 | 已完成(`7760c20`)。「ML Infra·LLM」SD tab + carve [300,400) + Pinterest 收边 [199,300)。vitest 247 + build + 真浏览器 smoke 全过。 |
-| **① 下一轮起** | 👉 **T-P1-881**〔S〕 | MLSD | **下一轮推荐第一拣**(picker 默认即给)。sd42 archetype 迁移 oral_narrative;改 `schemas/meta_mlsd_canonical.yaml` sd42 条目 + 重跑 `audit_meta_mlsd_3rule.py` 期望 0 findings sd41-44。改 DB 走 idempotent seed + Surface 表。 |
+| ~~①~~ | ~~**T-P1-881**〔S〕~~ ✅ | MLSD | 已完成(`820bc4d`)。sd42 → oral_narrative;捕获成品 10504 口播稿进 seed + NULL 4 字段 + YAML archetype 声明;`audit_meta_mlsd_3rule.py` exit 0 / 0 findings sd41-44;pytest 1315。 |
+| **① 下一轮起** | 👉 **T-P2-880**〔S〕 | SYNC | **下一轮推荐第一拣**(picker 默认给 909 但需用户内容;无内容时拣 880)。从 template 引入 study-review skill,拷前人审 scope。 |
 | — | 内容簇起步(可选,较重) | 内容 | 先做共享 helper `scripts/lib/ds_distill.py`(DeepSeek v4+分块+temp0+截断感知)→ 开 CHEATSHEET 641 闸 → 644 跑 1 张蒸馏试点(人审 accept-default)。见「已定方向 §2」。 |
 
 其余仍锁着:881(MLSD)/921(大改 drawer_nav)/ KG-INT B4(破坏性,dry-run 闸门)/ BQ-DEPTH(锁 581)/ Guard 917(`human_review=1`)——按各簇详解的链序,**到了再 supervised 逐条做**。
