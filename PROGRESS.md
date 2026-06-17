@@ -508,3 +508,10 @@
 - **Sanity check result**: New tests 7/7 pass; ruff clean on both new files; full suite **1314 passed** (was 1307, +7 new). DB mtime unchanged after the audit run (verified read-only).
 - **Status**: [DONE] -- AC1 (HTML lists every stale partial leaf + deterministic recommendation), AC2 (no DB writes), AC3 (both branches documented in the report), AC4 (journey: open HTML -> see the small set -> approve creates follow-up) all met.
 - **Request**: `task_db.py complete T-P3-916`
+## 2026-05-26 -- [ad-hoc] Add Lyra/Jacqueline therapy session (05-27) to dashboard timeline
+
+- **What I did**: Per user request (dashboard reminder "next session with Jacqueline, Tomorrow 2:00 PM PDT 05-27 Wed"), walked the /dashboard 6-step surface-routing protocol -> schedule + interviewer + date routes to `interview_events` (NOT company_documents). Created a git-tracked idempotent seed mirroring the prior Jacqueline session pattern.
+- **Deliverables**: `scripts/_add_lyra_jacqueline_2026-05-27.py` (new). Inserted interview_events id=80: Lyra / "Lyra session with Jacqueline" / 2026-05-27 14:00:00 (naive Pacific) / 50min / upcoming.
+- **Sanity check result**: ran seed twice -- run 1 `[INSERT] id=80`, run 2 `[SYNC]` (idempotent, no dup). SQL assert confirms exactly one row at company_id=25 AND scheduled_at LIKE '2026-05-27%'. Renders via Dashboard.InterviewTimeline (`["timeline","events"]` -> GET /timeline/events).
+- **Status**: [DONE] (DB-side verified). Pending: user browser confirmation + commit decision (asked user, not yet committed per git convention).
+- **Request**: No task-db change (ad-hoc data add, no T-XX task).
