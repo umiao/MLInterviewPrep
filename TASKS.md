@@ -102,35 +102,6 @@ M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
 ## Dependencies
 T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
 
-#### T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P0-914
-- **Description**: ## Summary
-Fast git-history triage of the REVERSE drift (pct=100 + 0 checkboxes: nodes 115, 171) -- legit pre-checklist mastery vs stale. Advanced to P1 because, unlike 111/114 (visual lag, semantically conservative), this is silent data corruption if any downstream consumes pct=100 as mastered (Review missed-4).
-
-## Context
-Review: 115/171 are "more dangerous" yet were parked at P2 with the low-risk 92 class. Decouple + advance. Most cases are second-judgeable from git history (did a checklist ever exist?).
-
-## Acceptance Criteria
-- [ ] AC1: for 115 and 171 (and any other pct>0 / 0-checked node found at task start): inspect framework_nodes_description_history + git blame of the owning seed to determine legit-legacy-mastery vs stale.
-- [ ] AC2 (both branches): legit (mastered before content became a checklist) -> document as intentional, leave pct, add a code comment / data note so the guard does not later flag it; stale -> recommend correction (clear pct OR add the now-missing checkboxes) and create a follow-up reconcile task.
-- [ ] AC3: a concise decision note (logs/review/ + Discord) with a per-node verdict + recommended action; uses the T-P0-914 root-cause findings as input.
-- [ ] AC4 (journey): user reads the per-node verdict, picks per node -> follow-up correction task created only for the stale ones.
-- [ ] AC5: read-only; no DB writes in this task.
-
-## Technical Approach
-- Cross T-P0-914 output with framework_nodes_description_history; quick git blame. Small, fast, no sweep.
-
-## Edge Cases
-- Indeterminate history -> mark indeterminate + ask the user rather than guess (a wrong "legit" call perpetuates corruption).
-
-## Complexity
-S -- targeted 2-node (maybe a few more) triage, read-only.
-
-## Dependencies
-T-P0-914 (root-cause). The root-cause investigation already gathers the history needed to judge legit-vs-stale, so this consumes its findings; independent of the 911 sweep (different drift class).
-
 #### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
 - **Priority**: P1
 - **Complexity**: M
@@ -180,12 +151,6 @@ AC:
 - **Complexity**: S
 - **Depends on**: T-P1-821, T-P1-834
 - **Description**: Final 4-item acceptance checklist (per Discord plan v3 §9): (a) all P0/P1 companies' prep_notes/notes byte counts < threshold anchored by A0 EDA; (b) meta-prep child nodes mean byte count > 800; (c) audit_uri_consistency.py reports 0 broken kg:// db:// cd:// sd://; (d) red-dot logic manual smoke on sample companies passes. Compute byte-savings stats (before vs after) + commit count + KG growth (node + link delta). PROGRESS close-out entry summarizes the 42-task batch. AC: all 4 checklist items pass; close-out entry written.
-
-#### T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work (sd41 Reels golden, cd96, sd-friend, sd-weapon, sd42 Top-3 Comments, Meta-MLSD schema) the skill is directly applicable to MLI. Action: read `claude-code-project-template/.claude/skills/study-review/SKILL.md` to confirm scope fit, then copy the directory (SKILL.md + any helper files) to `MLInterviewPrep/.claude/skills/study-review/`. Do NOT auto-apply -- this is a sync proposal; human reviewer should validate that the template skill matches MLI conventions before merging.
 
 ### P3 -- Stretch Goals
 
@@ -595,9 +560,12 @@ Normalize company_documents.content into company_document_sections (section_key/
 
 - [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
+- [x] **2026-06-17** -- T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work). claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work
 - [x] **2026-06-17** -- T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress). `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/ex
 - [x] **2026-06-17** -- T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml). requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` he
 - [x] **2026-06-17** -- T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix). After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (6
+- [x] **2026-06-17** -- T-P1-923: [reconcile] Clear reverse-drift on nodes 115/171 (pct=100->0, review->not_started) via idempotent seed. Follow-up from T-P1-918 triage (user verdict 2026-06-17: BOTH stale).
+- [x] **2026-06-17** -- T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority). ## Summary
 - [x] **2026-06-17** -- T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400). FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add
 - [x] **2026-06-17** -- T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A). SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rew
 - [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
