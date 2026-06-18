@@ -5,12 +5,6 @@
 
 ## In Progress
 
-## Active Tasks
-
-### P0 -- Must Have (core functionality)
-
-### P1 -- Should Have (agentic intelligence)
-
 #### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
 - **Priority**: P1
 - **Complexity**: L
@@ -34,6 +28,12 @@ AC:
 - Each batch script re-runs with [SKIP]
 - No schema field empty; all 4 structured fields populated for every question
 - User spot-check passed between batches
+
+## Active Tasks
+
+### P0 -- Must Have (core functionality)
+
+### P1 -- Should Have (agentic intelligence)
 
 #### T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel
 - **Priority**: P1

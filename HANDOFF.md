@@ -14,11 +14,27 @@
 - ⚠️ 计费:`claude -p`/autorun 走**单独 API 计费池**(非订阅),见 root memory `june15_programmatic_billing_split`。
 - 内容/DB 改动遵循 root memory `mli_content_workflow`(7 步改写、sync-ALL-surfaces、五抽屉 URI、MLSD golden 约束)+ `CLAUDE.md` 的 Surface Identification 表(改 DB 前先 widget→queryKey→endpoint→table 映射)。
 
-## ⏯️ 下个 session = **supervised run**,首活 = **T-P1-582(BQ 批量 probe_notes,★DeepSeek 生成本命)**
+## ⏯️ 下个 session = **supervised run**,首活 = **T-P1-583(前端 Phase D:primary 卡 + probe panel)**
 - **autorun-safe 子集早已清完**;剩余 ready 任务全 supervised/gated → 下个 session **逐条人值守跑**,**别挂 `autonomous_run.sh`**。
-- ✅ **T-P1-581 已完成**(2026-06-17,supervised,见最近 session)——top40 primary-story flags 落库,DeepSeek QA 接线已建好(`scripts/lib/deepseek_creds.py` + gitignored `.env.deepseek`)。**MLI 现已有可复用的 DeepSeek 客户端**,582 直接用。
-- **下一活 = T-P1-582**(剩 ~36 题批量生成 probe_notes,DeepSeek 生成 + 人审 accept-default)。接 581 解锁,DeepSeek 接线现成。其后 583(前端 Phase D primary 卡 + probe panel)→ 585(Phase E 漂移检测)。
-- 一般运行规程见 **`## supervised run 运行说明`**。autorun 配方降级为附录(当前无 autorun-safe 任务可喂)。
+- ✅ **T-P1-582 已完成**(2026-06-17,见最近 session):全 40 top BQ 题 probe_notes 落库,DeepSeek 4 批生成。**解锁 583**。
+- ✅ **T-P1-581 已完成**——top40 primary-story flags 落库,DeepSeek 客户端已建好(`scripts/lib/deepseek_creds.py` + gitignored `.env.deepseek`)。
+
+### 🧭 T-P1-583 接续提示(前端 Phase D,消费 581/582 数据)
+- **数据已就绪**:`GET /api/behavioral/questions` 每题返回 `probe_notes`(4 字段 dict:`core_signal`/`what_good_looks_like`/`what_L5_adds`/`common_failure_modes`)+ `probe_notes_updated_at`;`GET /api/behavioral/examples` 每题 `is_primary` 标志(581 落库)。40 题全有 primary + probe_notes,已真 endpoint 验证。
+- **渲染注意**:前端 = react-markdown + remark-math + rehype-katex。probe_notes 文本已 render-safe(无裸 `$`/`<`/行首 `>`),但 583 仍要在浏览器真跑确认 KaTeX/blockquote 不误触发(manual-smoke AC)。
+- **生成器复用**(若 583 之后还要补 probe_notes):`scripts/_bq_582_probe_notes_deepseek.py` 现成,normalizer 已含数字比较 `<=N`→`不超过 N` / `<N`→`低于 N` 的 render-safe 改写;`scripts/seed_bq_probe_notes_20260421.py --batch N` 幂等落库。
+- 其后 585(Phase E 漂移检测)。一般运行规程见 **`## supervised run 运行说明`**。
+
+### 最近一次 session(2026-06-17,supervised)— ✅ 582 done(全 40 题 probe_notes,DeepSeek 4 批)
+- ✅ **T-P1-582 完成**:从 batch 1 spot-check gate 接续,seed batch 1 → 逐批(2/3/4)generate→spot-check→seed,全 40 top BQ 题 probe_notes 落库(DeepSeek deepseek-v4-pro temp0,4 字段 schema)。
+  - **render-unsafe `<` 漂移类**:DeepSeek 反复在数字比较里出 `<=1%`/`<5%`(react-markdown 把 `<` 当 HTML 起始)。batch 2 手修 3 处(含一个 `<->` bridge 改 '和...之间');随后**扩展生成器确定性 normalizer**(`<=N`→`不超过 N`、`<N`→`低于 N`,加 `import re`)→ batch 3 两处自动清零、batch 4 9/9 零手动。
+  - 验证:真 endpoint `GET /api/behavioral/questions`(TestClient+lifespan,活 DB)返回 **40** 题 probe_notes 4-字段 dict + updated_at;coverage SQL 0 missing/0 empty;4 批 seed 重跑 0 写/36 SKIP(幂等);`pytest -q` **1315 passed**;py_compile+ruff clean。
+  - 改动:`scripts/_bq_582_probe_notes_deepseek.py`、`scripts/seed_bq_probe_notes_20260421.py`、`docs/bq_probe_notes_batch{1-4}_20260421.deepseek.json`(+`.review.html`×4)。DB 走 idempotent seed(`data/` 未跟踪)。
+  - **接续点**:583(前端 Phase D primary 卡 + probe panel,数据已就绪)。
+
+### 上一次 session(2026-06-17,supervised)— 🔶 582 batch 1 内容定稿(标点/render-safety 已焊死)+ branch 退役
+- ✅ **branch 退役**:`claude/agitated-leavitt`(MLI worktree)退役——唯一 commit `3fc8a54` 已被 main 完全超越(root `claude_wrapper.sh` 在 + main `autonomous_run.sh` 已 source),7 个未提交残留全旧于 main 无前向价值 → `worktree remove --force`+`branch -D`+prune(**不 merge**:991 behind 会冲回新版)。root CLAUDE.md agitated-leavitt 脚注已清(root `3146286`)。
+- 🔶 **T-P1-582 进行中**(in_progress):建生成器+幂等 seed,**batch 1(OWN-2/6/8/11、ADP-11/10/1/15、IMP-11)内容已定稿**:9/9 clean,voice 对齐 calibration,EX-NN primary 必引用。用户拍板「只做内容侧,渲染留 583」后,把**标点口径(半角+全角 `。`)、render-safety(挡 `$`/`<`/行首 `>`)、截断重试 ladder** 全焊进生成器(见 playbook Step 0),batch 2-4 自动继承。**API 已验**(TestClient `GET /api/behavioral/questions`:4 条 calibration 返回 probe_notes dict 4 键、未 seed 的 OWN-2 返回 None)→ 583 可直接消费。DB 仍未写、batch 2-4 未生成、脚本未 commit(582 收尾一起提)。新 session 从 playbook **Step 1(seed batch 1)** 接续。
 
 ### 最近一次 session(2026-06-17 深夜,supervised)— ✅ 581 done(top40 primary-story + DeepSeek QA 接线)
 - ✅ **T-P1-581 完成**(用户批准 40 件指派后落库):给 top40 高频行为题各定唯一 primary story,`question_example_links.is_primary=1`(36 置新 + 4 库内原有匹配)。
@@ -62,7 +78,7 @@
 - **独立 debt(下一轮/T-P2-321 需知)**:工作区 14 份 task_store.py 副本都带 SIM105,但 task_store.py 不在 propagate 管理集(deferred 到 T-P2-321),daily-broadcast 不冲回——无假绿风险,本 S 有意没 blast。
 
 ## Backlog 现状(2026-06-17 晚核实)
-**26 done / 44 未完**(876/878/916/905 autorun + **879 + 877 + 908 + 881 + 880 + 918 + 923 + 581 supervised** 完成;923 为 918 派生的 reconcile 跟进;581 为 BQ-DEPTH primary-story + DeepSeek QA 接线)。44 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。下一活 = **582**(BQ 批量 probe_notes,DeepSeek 生成,接 581 解锁)。
+**27 done / 43 未完**(876/878/916/905 autorun + **879 + 877 + 908 + 881 + 880 + 918 + 923 + 581 + 582 supervised** 完成;923 为 918 派生的 reconcile 跟进;581 primary-story + 582 全 40 题 probe_notes 接 DeepSeek)。43 里绝大多数被 gate/直列链锁住的 `blocked+pending`。**autorun-safe 子集已全部清完**;剩下的都是 supervised/gated。下一活 = **583**(BQ 前端 Phase D primary 卡 + probe panel,接 582 解锁)。
 
 ### ✅ state 卫生债已清零(2026-06-17)
 曾有 **4 个** `status='active'` 但 `state=None`(picker 不可视:912/918/905/916)。已全部正规化成 `state='ready'`,**现在 `state=None` 计数 = 0**。非完成任务现仅两态:`active+ready`(17,可拣)/ `blocked+pending`(38,dep 门控或 PARK)。
@@ -86,7 +102,8 @@
 - ~~881~~ ✅ 已完成(2026-06-17 晚,supervised,`820bc4d`):sd42 → oral_narrative;audit exit 0 / 0 findings sd41-44;pytest 1315。Meta-MLSD narrative 簇收官。
 - ~~880~~ ✅ 已完成(SYNC 驳回照搬,见最近 session)。~~918~~ ✅ ~~923~~ ✅(漂移补救侧收口)。
 - ~~581~~ ✅ 已完成(2026-06-17,supervised):top40 primary-story flags + DeepSeek QA 接线。解锁 582→583→585。
-- 👉 **T-P1-582**〔BQ-DEPTH,M〕**= 下一活**。剩 ~36 题批量 probe_notes,DeepSeek 生成 + 人审 accept-default(DeepSeek 客户端 `scripts/lib/deepseek_creds.py` 现成)。
+- ~~582~~ ✅ 已完成(2026-06-17):全 40 题 probe_notes,DeepSeek 4 批生成。
+- 👉 **T-P1-583**〔BQ-DEPTH,前端〕**= 下一活**。Phase D primary 卡 + probe panel,消费 581/582 数据(probe_notes dict + is_primary)。manual-smoke AC 必做。
 - **T-P1-909**〔ML-Infra-LLM,—〕seed 用户给的 500GB 部署 golden 进 [300,400)(需用户提供内容;末尾可选 light polish=CN 叙述+EN 首现展开)
 - **T-P1-912**〔Guard A,L〕drift guard Phase A scanner(`.claude/hooks` sensitive-gate);漂移治理**预防侧**收口(918/923 是补救侧)。
 - **T-P1-921**〔WSH-E1,M〕drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
@@ -95,7 +112,7 @@
 - **DEBT/SYNC**(876–880):技术债,直列,不碰内容,判断少 → **autonomous 批跑一扫**。
 - **CHEATSHEET 1–9**(全锁 641):641=schema+API(加 `cheat_sheet` 列,不写内容)→ 642 前端 tab → 643 Uber 2 行 → **644–648 共 30 张速查表撰写**(从既有 system_designs 列**蒸馏**,不发明新内容;格式 doc 85 §1.6:竖排伪架构+keywords+Senior signal 表+mini glossary;每张 ~1500-2000 字;idempotent seed upsert)→ 649 smoke。★DeepSeek 蒸馏本命。
 - **KG-INT B4**(~21,最长直列 DAG,人机共审):B4a dry-run(815–820,**不写 DB**,产 archive plan+causal-proof matrix,Discord 等👍 闸门)→ B4b execute(822–828 P0 链 Google→…→Meta;829–834 P1 链,👍后 hard-archive+restore.sql+skeleton seed+7 步证明)→ 821 promotion + 836 cleanup。**含 DB 破坏性操作,dry-run 承认闸门必须维持**。
-- **BQ-DEPTH 10–14**:~~581~~ ✅(top40 primary-story + DeepSeek QA 接线,2026-06-17)→ 👉 **582 = 下一活**,剩 ~36 题批量 probe_notes(★DeepSeek 生成本命,客户端现成)→ 583 前端 Phase D → 585 Phase E 漂移检测。
+- **BQ-DEPTH 10–14**:~~581~~ ✅(top40 primary-story + DeepSeek QA 接线)→ ~~582~~ ✅(全 40 题 probe_notes,DeepSeek 4 批,2026-06-17)→ 👉 **583 = 下一活**(前端 Phase D primary 卡 + probe panel)→ 585 Phase E 漂移检测。
 - **ML-Infra-LLM**:~~908(前端)~~ ✅ done → **909**(seed 用户给的 500GB 部署 golden 进 [300,400),需用户提供内容;末尾可选 light polish=CN 叙述+EN 首现展开)。
 - **Guard A/B**:912 scanner(只警告不 block)→ 918 triage → **917 CI fail-on-drift 带 `human_review=1`**(enforcement 必须人审)。
 
@@ -174,7 +191,8 @@ python .claude/hooks/task_db.py get <ID> # 读权威 spec(AC 在 description),pi
 | ~~①~~ | ~~**T-P2-880**〔S〕~~ ✅ | SYNC | 已完成:**驳回照搬** study-review skill(blog-CLI 绑死 + MLI 已有自己的间隔重复系统)。 |
 | ~~②~~ | ~~**T-P1-918 / 923**〕~~ ✅ | Guard | 已完成:reverse-drift 甄别 + reconcile(115/171→not_started/0.0,user-confirmed stale)。补救侧收口。 |
 | ~~①~~ | ~~**T-P1-581**〔M〕~~ ✅ | BQ | 已完成(2026-06-17):top40 primary-story flags + DeepSeek QA 接线落地。 |
-| **① 下一活** | 👉 **T-P1-582**〔M〕 | BQ | 剩 ~36 题批量 probe_notes,DeepSeek 生成 + 人审 accept-default。DeepSeek 客户端 `scripts/lib/deepseek_creds.py` 现成可复用(接线参考见上方 581 段)。 |
+| ~~①~~ | ~~**T-P1-582**〔M〕~~ ✅ | BQ | 已完成(2026-06-17):全 40 题 probe_notes,DeepSeek 4 批生成+人审 accept-default;normalizer 加数字比较 render-safe 改写。 |
+| **① 下一活** | 👉 **T-P1-583**〔前端〕 | BQ | Phase D primary 卡 + probe panel,消费 581/582 数据。manual-smoke AC 必做。 |
 | — | 内容簇起步(可选,较重) | 内容 | 先做共享 helper `scripts/lib/ds_distill.py`(DeepSeek v4+分块+temp0+截断感知)→ 开 CHEATSHEET 641 闸 → 644 跑 1 张蒸馏试点(人审 accept-default)。见「已定方向 §2」。 |
 
 其余仍锁着:881(MLSD)/921(大改 drawer_nav)/ KG-INT B4(破坏性,dry-run 闸门)/ BQ-DEPTH(锁 581)/ Guard 917(`human_review=1`)——按各簇详解的链序,**到了再 supervised 逐条做**。

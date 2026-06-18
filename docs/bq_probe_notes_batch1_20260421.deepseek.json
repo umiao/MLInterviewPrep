@@ -1,0 +1,254 @@
+[
+  {
+    "question_id": "OWN-2",
+    "text": "Describe a situation where you went above and beyond to meet a deadline.",
+    "category": "Ownership & Accountability",
+    "primary_id": "EX-23",
+    "primary_rendered": "QUESTION (Ownership & Accountability): Describe a situation where you went above and beyond to meet a deadline.\n\n[PRIMARY] EX-23 | Large-Scale Project with Tight Deadlines --- NYC C2C Policy Launch\n  situation: Our NYC C2C business had been declining for weeks as competitors captured market share, and the VP demanded a test within 2 weeks and a launch proposal within 1 month -- with 30+ people across the org needing to coordinate.\n  task: As project lead, needed to deliver a policy test and launch framework under extremely tight timeline, while maintaining daily updates and weekly VP meeting cadence.\n  action: - Inventoried all workstreams, identified the critical path, and organized work so 30+ people didn't block each other - After test launch, discovered control effectiveness was below expectations. Team suspected Kafka logging fluctuation, but while fixing logging I continued digging deeper - Discovered root cause: upstream web gateway team had silently \"fixed\" an incident by overwriting our control property -- causing silent test failure that would have invalidated all results - Found a deeper structural issue: multiple policies that tested successfully independently **competed for the same top\n  result: Project **delivered within the VP's deadline**. More critically, I prevented the team from making a costly mistake: blindly combo-launching all policies would have shown disappointing results (policies canceling each other), potentially killing good individual policies based on a flawed combined test. The scope adjustment ensured the **highest-impact policies launched cleanly**, and the allocation\n  evidence_quotes: [\"VP demanded test within 2 weeks, launch proposal within 1 month, 30+ person project\", \"Upstream gateway team silently fixed an incident by overwriting control property\", \"Multiple policies competed for top slots when combo-launched\"]\n  cn_elevator_pitch: NYC C2C 业务持续下滑，VP 要求 2 周内出测试、1 月内出 launch 方案，30+ 人跨组协调；测试上线后发现 control 失效——upstream 团队\"修复\" incident 时覆盖了 control property；进一步发现 combo-launch 各 policy 互相抵消，推动逐项上线避免好 policy 被误杀 | KEY FACTS: 2 周 deadline + 30 人协调 | silent control 覆盖 | combo-launch 互相抵消 | 逐项上线策略",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 在高压 deadline 约束下, 你能否保持超越 'just ship it' 的 ownership -- 主动 uncover hidden systemic risks, 并做出 trade-off 保护真正的 business outcome。L5 bar 是 outside-in 的 risk discovery: 不只有执行力, 还能在 deadline 压迫下扫描 blind spot (如 silent control override / combo-launch 冲突), 将 'meet timeline' 升级为 'protect result integrity'。",
+      "what_good_looks_like": [
+        "不只交付 deadline, 还主动发现并修正了 sleep-in-production 的风险。EX-23 primary 动作: 团队怀疑 Kafka 日志波动时, 我一边修日志一边继续深挖, 最终定位到 upstream gateway team 静默覆盖 control property -- 这个 silent test failure 会 invalidate 全部结果。",
+        "把 deadline 压力下发现的点状 failure 推演为系统级的组合问题: 进一步查出多个独立成功的 policies combo-launch 会竞争同一 top slots 相互抵消, 并主动调整 scope 避免好 policy 被误杀。这是一个 beyond-timeline 的 structural fix。",
+        "在 30+ 人跨组协调的 extreme pressure 下, 用 critical path identification 保证不互相阻塞 -- 展现的是 orchestration as a force multiplier, 而不是靠 personal heroics 硬扛。",
+        "沟通节奏主动设计: daily updates + weekly VP cadence, 把 deadline 焦虑转化成可预期的 decision points, 让 leadership 有 visibility 而不是被动等奇迹。"
+      ],
+      "what_L5_adds": [
+        "从 '按时交付 scope' 跳到了 '重新定义 scope 以保护 outcome': 发现 combo-launch 风险后, 不是报告给 VP 等指示, 而是自己提出逐项上线策略并执行, 这是 org-level 的 business outcome ownership。",
+        "Deadline 下的 signal-noise separator: 在团队锚定 Kafka 波动时, 我选择不相信表面解释, 继续向下挖 -- 这种 '不相信 first answer' 的 intuition 建立在 L5 应有的 domain judgment 之上, 不是瞎猜。",
+        "Credit 抑制与失败预判: 结果里没有自我标榜, 重点放在 'prevented costly mistake', 表明我衡量自己贡献的 unit 是 org 避免了多少损伤, 而不是我干了多少活。"
+      ],
+      "common_failure_modes": [
+        "Junior 答案: '我连续加班两周, 一个人干了三个人的活, 最终按时交付' -- 没有 uncover any hidden risk, 没有 structural 贡献, reviewer 一眼判定为 L4 以下。",
+        "把 above and beyond 讲成单向的 execution heroism, 不提 trade‑off 或发现: 比如只说自己如何克服困难, 但没有像 EX-23 里静默覆盖的发现 -- 会被认为只是一个 tireless executor, 不是 L5。",
+        "Blaming 上游团队: 把 story 变成 '上游的 mistake 差点害了我, 还好我发现了' -- 这破坏了 first‑person ownership, 因为 ownership 体现在发现并解决, 而不是 attribution of fault。",
+        "没有 quantifiable stakes: 只泛泛地说 '项目很紧很重要', 没有 30+ 人 / 2 周测试 / 1 月 launch / 可能误杀 policies 的具体数据 -- 缺少 blast radius 会让 reviewer 觉得故事不够 high-stakes。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "OWN-6",
+    "text": "Tell me about a time when you took a bold risk at work.",
+    "category": "Ownership & Accountability",
+    "primary_id": "EX-33",
+    "primary_rendered": "QUESTION (Ownership & Accountability): Tell me about a time when you took a bold risk at work.\n\n[PRIMARY] EX-33 | MoE -> Allocation Paradigm Shift - Org-Level Reframe via Honest Negative Result\n  situation: In the eBay search org, the dominant paradigm was pairwise distributed ranking -- each item scored independently, then sorted. The industry had moved toward whole-page optimization and reranking. Several senior ICs, my manager, and I had been flagging the gap for several quarters. The org agreed at the abstract level but had no concrete path. Shared vision, no path.\n  task: Leadership handed me a high-visibility project: migrate search from boosting to neural ranking plus MoE, consuming about 80 GPU nodes -- nearly all the org-wide headroom, shared with the cross-org AI intake. On the surface, a ranker upgrade. In my head, also a critical empirical test of the ranker-c\n  action: (1) Scoped it as \"start test\", not \"test and launch\". Against org convention. My manager signed off, but the framing was mine to propose and own. Convention would have let me wrap a failure as \"carry over to next quarter\" -- IC's track record protected, paradigm-level signal destroyed. I gave that protection up on purpose. A wrapped success cannot convince anyone, and if this project was going to function as a paradigm test, the result had to be credible either way.  (2) Mid-execution, something didn't fit. Adding an expert for abandonment and exploration, I saw it and the conversion expert co\n  result: MoE was officially deprecated. Did not ship. That honest negative result was the chip that made the reframe credible. The Allocation direction that came out of it later shipped **200M+ in annualized GMB** -- the paradigm reframe, not the MoE project itself, was the real business outcome. Three org-level follow-throughs locked it in: (1) the team was renamed from \"ranking modeling\" to \"policy learn\n  evidence_quotes: [\"A wrapped success cannot convince anyone. A credibly honest negative result was the last empirical chip that flipped the paradigm.\", \"I scoped it as 'start test', not 'test and launch' -- gave up my carry-over protection on purpose so the result would be credible either way.\", \"MRR was a self-fulf\n  cn_elevator_pitch: eBay 搜索 org 范式停在 pairwise distributed ranking; leadership 批 MoE + neural ranking 项目 ~80 GPU nodes，我把 scope 定为 \"start test\" 而非 \"test and launch\"——放弃 carry-over 保护，让结果两边都可信。执行中看到 abandonment/exploration expert 与 conversion expert 结构性正交，单头 item-level ranker 扛不动；MRR up、revenue neutral 按 launch criteria \n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-01 | Search Diversity --- Intent Collapse via Item-vs-Page Diagnosis: Hacker Week 自己去找 search ranker 在哪 silently failing -- dashboard 显示健康但 multi-intent query 比如 \"pokemon\" 90%+ 返回 trading cards，而购买数据显示一半 buyer 要 games / toys / fig\n- EX-08 | Module Proliferation Prod Degradation — Escalation to VP: 发现搜索 production baseline 数月缓慢退化但无人察觉——因各组都用最新 production 做 control；溯源到 module 占位 4-6x 挤压 organic results，escalate 到 VP 推动 module arbitration team 成立 | KEY FACTS\n- EX-16 | Cross-Datacenter Deployment Incident --- Counterpart Bandwidth as a Line Item: Manager 没拿到 cross-team PD quota 让我独自扛 release-by-DC rollout；DC2 几分钟内 panic out，rollback 是我的，没拿手上的证据指对方而是 framing 成 context gap，事后推动了 search engine 层的 cross-team\n- BLOG-04 | Goal Tracking Reform: Honest Metrics Over Cosmetic Delivery: 团队 goal tracking 暗中奖励失败——改名、re-scope、rollover 伪装交付率；推动锁定 scope + peer confidence estimates，短期交付率下降反证系统生效 | KEY FACTS: 锁定 goal scope | peer confidence estimates ",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 能否在 stakes 很高时主动把 downside 结构进 project scope, 而不是等人来 protect 你的 track record。L5 bar 是能 identify 到 org 层面 '成功可以被 wrap, 但 honest negative result 无法被 rebut' 这个 dynamic, 并用它换 credibility。",
+      "what_good_looks_like": [
+        "First-person bold risk 声明: EX-33 primary 动作 -- 'I scoped it as start test, not test and launch. I gave up my carry-over protection on purpose so the result would be credible either way.' 这句话本身就是 ownership 的 evidence, 不 is-a-wrap-friendly-success。",
+        "Risk 不是 gamble, 是 structured down-side: 明确讲出 downside 是什么 (80 GPU nodes / org-wide headroom / track record of a high-visibility project), upside 是什么 (paradigm reframe chip), 以及 why it's asymmetric in org value。",
+        "Honest negative result 的 credibility 陈述: 'A wrapped success cannot convince anyone. A credibly honest negative result was the last empirical chip that flipped the paradigm' -- 这是 L5 的 perspective switch, 从 individual success 切换到 org signal。",
+        "Bold risk 的 payoff 有 org 量级: 不是 personal promotion impact, 而是 '200M+ in annualized GMB / team renamed / paradigm-level follow-throughs' -- 这证明 risk 是为 org 承担的, 不是为 self-promotion。"
+      ],
+      "what_L5_adds": [
+        "对抗 org 默认激励机制: L5 能 articulate 'carry-over protection' 是如何让它 自动保护 IC track record 同时 自动 kill paradigm-level signal 的。L4 很少能 identify 到工具/流程层 embedding 的 incentive structure。",
+        "Admit 到自己是被工具奖励的: 'MRR was a self-fulfilling proxy' -- 承认自己也曾经 optimize 这个 proxy, 现在亲手 kill 它。这是 L5 级别的 self-awareness, 不是 'metrics 不好用' 的 external blame。",
+        "Risk 之外还有 discipline: ~80 GPU nodes 全都跑完没超支, 没有 'burn 一堆资源最后一事无成' -- L5 的 bold risk 是 financial-responsibility-gated, 不是 reckless gamble。"
+      ],
+      "common_failure_modes": [
+        "Bold risk = I fixed someone else's mess: 'They deployed garbage, I rolled it back under pressure' -- 这是 reliability / crisis management, 不是 ownership risk-taking, 因为 downside 不是 candidate 主动 structure 的, 而是被动接的。",
+        "Redemption tail 冲淡 bold risk: 'I took the risk, failed, but then did the real fix later' -- 讲成 failure-redemption arc 会让 reviewer 觉得 candidate 不好意思停在 honest negative result, L5 bar 要的是停在 negative result 的 comfort。",
+        "Risk 但没有 downside: 'I proposed a new approach and it shipped successfully' -- 这讲的是 success, 不是 bold risk。reviewer 想听 candidate 主动 predict + accept 失败可能, 不是在成功之后 retro-label。",
+        "Scapegoating via abstraction: 'Leadership didn't give me enough time / tooling was inadequate' -- 把 risk 的外部条件 blame 给 org, 而不是 own 到 'I chose to run the test with these constraints and would accept the outcome either way'。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "OWN-8",
+    "text": "Describe a situation where you were moving fast and made a mistake.",
+    "category": "Ownership & Accountability",
+    "primary_id": "EX-30",
+    "primary_rendered": "QUESTION (Ownership & Accountability): Describe a situation where you were moving fast and made a mistake.\n\n[PRIMARY] EX-30 | Hash Capability Misdesign --- Domain Depth Is Not Design Authority\n  situation: At eBay Search, I was the IC owning hash design in our diversity team. We were in a high-velocity loop with our PM, shipping diversity features that moved GMV and engagement, with winning metrics landing both offline and online.\n  task: The next step was a real-time facet hash plus entropy-based diversity metric, meant to unblock a strategic push: running rigorous tests from seller and advertiser angles, not just buyer-perceived experience. I owned the design.\n  action: I designed a hash that was mathematically elegant. Prime multiplication, high-bit extraction. Uniformity, performance, extensibility all clean. Our internal bar was met. I shipped it.  Weeks later, tickets came back through analytics. Two or three downstream DS teams were blocked on launch analysis. Our hash was implicit at the SQL layer with no stable identity, so they could not trace which bucket mapped to which facet.  My first instinct was to fix it with more engineering. I proposed making the hash a first-class operator in our lower search infra, with matching changes to the data pipeline\n  result: DS unblocked within the next sprint. Launch analysis resumed. The metric wins held.  Structurally, I now treat \"fundamental but not yet integrated\" as a red flag, not a neutral state. An orphan capability will leak into its consumers somehow -- I have seen this later show up as experiment-level confounding in adjacent work.  The lesson: **Domain depth is not design authority. The authority belongs\n  evidence_quotes: [\"I had a feeling of invincibility - the collaboration loop was so smooth I stopped looking for blockers.\", \"The escalation landed on my desk and I realized I had not shipped a hash function, I had shipped an analytical artifact.\", \"Expertise had taught me to design first. I should have asked first.\n  cn_elevator_pitch: 高速 PM 合作期以 hash-expert 身份上线数学优雅的 facet hash，下游 2-3 个 DS 团队被 block 几周 launch analysis；提 cross-four-team rescue 被拒后停了，认出 rescue 是 self-centered。最终采纳 indexing team 已有的 explicit aspect cache + stable ID assignment。Kill-line: domain depth is not design authority——authority belongs to whoever consumes the\n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-05 | Relevance Filtering: Deployment Feasibility Under Latency Constraints: 作为唯一 MLE 发现 XGBoost 模型 +10% latency 远超 <=1% 预算；三路方案中两路失败，最终 cheap rejection + early exit 组合达标 | KEY FACTS: +10% latency vs <=1% 预算 | cheap rejection + early exi\n- EX-15 | Model Deprecation Incident --- Reframing Conflict into a Governance Pattern: 我自己的 traffic dashboard 盲区漏掉了 hardcoded 调用，下线 legacy model 后 3-4 个 Query Understanding pipeline 被 block；不争流程对错先吃 rollback，一周内全部 unblock 换到 credibility，再把 \"谁必须迁移\"",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 在 velocity 压力下, 能否把 mistake 的 root cause 定位到自己的 design-time judgment (而非 'speed' 这个外部借口), 并给出一个结构性而非战术性的 lesson。L5 bar 是能 reframe 高速中 expertise 带来的盲区 (design ego / orphan capability), 并将该 reframe 固化为日后 design 的默认检查项。",
+      "what_good_looks_like": [
+        "EX-30 primary 动作: 'It was rejected. And this is where I stopped.' 主动停掉修补冲动, 承认 failure 不需要一个自己主导的 comeback arc, 是 moving fast 后最清醒的 ownership。",
+        "Blast radius 具体到 consumer 级: '2-3 downstream DS teams blocked on launch analysis for weeks', 不飘在 'it broke something'。这证明你理解 mistake 的成本落在了谁身上。",
+        "lesson 是 design-time 的 default shift: 'Domain depth is not design authority. The authority belongs to whoever consumes the output.' 这不是 '以后要小心', 而是下次 design 开始前会先问 'whose decision depends on this output?'。",
+        "Handling 部分有 rejection 的承受: 提议了 cross-4-team infra change 被拒后, 没有 escalate, 没有 argue, 直接接受 indexing team 已有的 explicit aspect cache 方案 -- 把自己的 deep fix 降级为别人的 shallow fix, 是 credibility 的杠杆。"
+      ],
+      "what_L5_adds": [
+        "Recognizing the speed-blindness pattern: 'I had a feeling of invincibility - the collaboration loop was so smooth I stopped looking for blockers.' L5 把 single mistake 抽象成自己在高 velocity 下会复现的认知 bias, 而不是一次意外。",
+        "Org-level risk意识: 认识到 orphan capability 会 'leak into consumers as experiment-level confounding' -- 这是在 claim mistake 的复利性风险, 即同一个 mistake 不只伤害 launch analysis, 还会污染未来的实验。",
+        "Perspective pivot at rejection: 当 rescue 被拒, L5 立刻认识到 'it was self-centered', 从 individual design authority 视角切换到 org cost-benefit 视角 -- 这种快速的 self-awareness 是 L4 难以做到的。"
+      ],
+      "common_failure_modes": [
+        "Blame on speed: 'We were moving too fast, so I didn't have time to check with DS teams' -- reviewer 直接扣分: 你在把 accountability 外包给 timeline, 而不是承认自己 decision-making 的断层。",
+        "Trivial mistake: 只讲一个 config typo 或漏写 test 的故事, 几分钟修完 -- 这暴露你不敢暴露真正有 stake 的 failure, 默认降为 L4 以下。",
+        "Rescue-heavy narrative: 大篇幅描述你如何奋战三天三夜重写 hash module, 最后 everyone happy -- mistake 只是序幕, 重点成了英雄叙事, 毫无 clean failure 的勇气。",
+        "Generic lesson: 'I learned to slow down and ask questions.' 没有具体化 哪个 阶段 (design/review/ship) 要问什么, 谁来 answer, 无法让 interviewer 想象你下一次 design 会做出 different action。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "OWN-11",
+    "text": "Tell me about a time when you took ownership of a challenging situation.",
+    "category": "Ownership & Accountability",
+    "primary_id": "EX-02",
+    "primary_rendered": "QUESTION (Ownership & Accountability): Tell me about a time when you took ownership of a challenging situation.\n\n[PRIMARY] EX-02 | Diversity Ranking --- Moving the Problem to Its Right Home\n  situation: After Hacker Week I had a working diversity-ranking prototype -- 200M+ GMB opportunity on multi-intent queries the existing dashboards missed. My manager judged it out of scope. Our relevance team's charter was filtering thresholds, not ranking allocation. No experiment slots, no resources, project about to die.\n  task: Not: argue harder. The mismatch was structural -- a ranking problem sitting inside a relevance team whose OKRs measured precision and recall against filtering thresholds, not allocation across intents. No amount of reframing would change what the team was actually measured on. The real task was to d\n  action: First I tried the soft move. Reframed the project in relevance-threshold language -- if I could make it fit the existing OKRs, nobody had to move. It didn't fit. The team was measured on filtering; the work was an allocation problem wearing a relevance hat.  The failure was the signal, not a setback. The next move was structural: find the team whose charter already covers allocation, and make the transfer the clean way.  I went to the Final Ranking team's lead before formally raising the transfer. Walked them through diversity as intent-aware slot allocation in the final-ranking stage -- so th\n  result: First experiment in the new team delivered +1% GMB. The allocation framework was reused across multiple verticals and compounded into 200M+ annualized impact -- the idea survived the move and scaled well beyond the original scope.  The lesson I carry: **when organizational structure blocks a validated idea, the cheapest move is to relocate the idea, not to keep arguing about whether the structure \n  evidence_quotes: [\"Manager 认为 team 的 job 是 relevance flooring，而非 ranking 优化；缺乏 experiment slot，项目停滞\", \"主动 transfer 到 Final Ranking team，将问题重新定义为 ranking problem，获得完整 ownership\", \"问题跟着人走——这是我主动做的选择，不是被动的妥协\"]\n  cn_elevator_pitch: Hacker Week 做出 diversity ranking prototype -- 200M+ GMB opportunity 但 manager 判 out of scope，team charter 是 relevance filtering thresholds 而不是 ranking allocation，OKRs 结构上对不上；先试 soft reframe 把 project 包装进 relevance 语言，失败 -- OKRs 是 team 被 measure 的东西，不是 aspire 的东西；做了 structural call 转到 Final Ranking t\n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-01 | Search Diversity --- Intent Collapse via Item-vs-Page Diagnosis: Hacker Week 自己去找 search ranker 在哪 silently failing -- dashboard 显示健康但 multi-intent query 比如 \"pokemon\" 90%+ 返回 trading cards，而购买数据显示一半 buyer 要 games / toys / fig\n- BLOG-03 | Cross-Org Boundary Defense via LLM Relevance Pipeline: Ads 团队要求共享 relevance 数据违反 org boundary；深挖发现真需求是验证 A/B 结果，构建 LLM relevance pipeline 日产 ~18K 标签 ~$500 替代人工标注 | KEY FACTS: ~18K 标签/天 ~$500 | 人工标注 $0.30-0.80/条 | or\n- BLOG-04 | Goal Tracking Reform: Honest Metrics Over Cosmetic Delivery: 团队 goal tracking 暗中奖励失败——改名、re-scope、rollover 伪装交付率；推动锁定 scope + peer confidence estimates，短期交付率下降反证系统生效 | KEY FACTS: 锁定 goal scope | peer confidence estimates \n- EX-05 | Relevance Filtering: Deployment Feasibility Under Latency Constraints: 作为唯一 MLE 发现 XGBoost 模型 +10% latency 远超 <=1% 预算；三路方案中两路失败，最终 cheap rejection + early exit 组合达标 | KEY FACTS: +10% latency vs <=1% 预算 | cheap rejection + early exi\n- EX-33B | MoE Over-Iteration: A Model Believer's Humility Lesson on Problem Formulation: 作为 model believer 在 MoE 上层层迭代——修 bias、修 router、加正交 expert；耗尽 ~80 GPU 后认清 BI/GMB 是真 KPI，MRR 是 self-fulfilling proxy | KEY FACTS: ~80 GPU 节点 | BI + GMB 真 KPI | MR",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 当组织结构和已验证 idea 冲突时, 你的 ownership 如何体现 -- 不是硬 argue 结构, 而是 relocate the problem to its right home。L5 bar 是能诊断出 structural mismatch (OKRs vs problem type) 并做 clean relocation, 而不是 escalate for exception。",
+      "what_good_looks_like": [
+        "Ownership 主动表现为 'move the problem, not argue the structure'。EX-02 primary 动作: 先 soft reframe 验证不可行, 再去找 Final Ranking team lead 把 problem 重新定义为 allocation slot (不是 relevance filter) -- 这一步把 ownership 从 team-local 扩展到了 org-wide。",
+        "容错性: soft reframe 失败后, 不把自己锁在 '我需要说服 manager' 的死循环里。识别失败是 signal, 不是 setback -- 结构不是用来 argue 的, 是用来 read 的。",
+        "迁移是 clean handoff + follow-through, 不是 dump。带着 idea 落地: 在 Final Ranking 团队完成 experiment 交付 +1% GMB, 并用框架复用把 impact 扩到 200M+。ownership 并未在 handoff 时提前终止。",
+        "Lesson 可复用: 'when organizational structure blocks a validated idea, the cheapest move is to relocate the idea' -- 这是一个可以移植到 future design / future team context 的 default strategy, 不是一次性经验。"
+      ],
+      "what_L5_adds": [
+        "L4 的 ownership 往往表现为 'push harder within existing structure to get exception'; L5 的 ownership 是 '识别 structural mismatch 本身是最 cheap 的 fix' -- 把问题迁到 naturally incentivized 的 home, 不消耗 org 政治资本。",
+        "Org-level 自省: 知道 OKRs 是 team 被衡量的事实语言, 不是 aspire 的愿景。没有把 manager 的 rejection 读作人际冲突, 而是 读作 measurement misalignment。这是 frame-level 的诊断。",
+        "Transfer 同时维持 original scope 的 integrity: 没有为了 fit 进 relevance team 而把 diversity ranking 砍成 shell feature。宁愿 带完整 scope 迁走, 也不在错误 home 做 cosmetic fit。这是 L5 的 impact 责任感。"
+      ],
+      "common_failure_modes": [
+        "硬扛型: '我跟 manager argue 了三周终于被允许跑 experiment' -- reviewer 会看到把 ownership 误解为说服力, 缺乏 org-awareness, 当场扣分。",
+        "妥协型: 把 idea 砍到只剩一个 shell 去 fit 原 team 的 OKR, 最后 impact 消失 -- owner 自己抹掉了 problem 的本质, 属于 self-sabotage。",
+        "丢包型: 把问题交给 '对' 的团队后就撤了, 没有 follow-through own rollout。reviewer 会抓住 'own to closure' 欠缺。",
+        "没有诊断出 structural mismatch: 只讲 'my manager didn't support' 但没说明为什么没法支持 (team OKR 矛盾) -- 听起来像 blame manager, 而不是 system-level 的 reasoning。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "ADP-11",
+    "text": "Describe a major setback you experienced and how you overcame it.",
+    "category": "Adaptability & Resilience",
+    "primary_id": "EX-15",
+    "primary_rendered": "QUESTION (Adaptability & Resilience): Describe a major setback you experienced and how you overcame it.\n\n[PRIMARY] EX-15 | Model Deprecation Incident --- Reframing Conflict into a Governance Pattern\n  situation: On-call, I picked up a long-deferred ticket: deprecate a set of legacy models to reclaim indexing capacity. I aligned with my manager and teammates on the plan, scanned the traffic dashboard to confirm zero client calls, then executed.\n  task: Within minutes of the deprecation, incident tickets flooded in. The dashboard only tracked URL-parameter calls and missed calls hardcoded directly into the search engine. Three to four Query Understanding pipelines were blocked. The immediate need was to unblock them, but the deeper problem was stru\n  action: Early call: don't argue about who followed the right process -- just absorb the rollback. Within a week, every affected pipeline was restored. That week of credibility bought me the standing to push a deeper change.  Then I reframed the problem. The original frame was \"who must comply with deprecation?\" I introduced a third option: **ownership transfer**. If a team's calibration had diverged enough that they truly needed a legacy model long-term, they could fork the code, own it, and stop consuming our indexing capacity.  I escalated the framework to senior leadership for a boundary decision. \n  result: Leadership aligned on the boundary. After weighing the options, most consumer usage migrated to the new model; for the handful of legacy models that were genuinely irreplaceable, consumer teams accepted ownership and maintained them independently. Short-term: every blocked team was back online within a week. Long-term: a recurring zero-sum conflict became a sustainable governance pattern.  The dee\n  evidence_quotes: []\n  cn_elevator_pitch: 我自己的 traffic dashboard 盲区漏掉了 hardcoded 调用，下线 legacy model 后 3-4 个 Query Understanding pipeline 被 block；不争流程对错先吃 rollback，一周内全部 unblock 换到 credibility，再把 \"谁必须迁移\" 这道单选题 reframe 为 含 ownership transfer 的双选题，推到 senior leadership 划清 capacity ownership 边界 | KEY FACTS: 1 周 unblock 3-4 pipelines | dashboard ",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 当遇到由自身盲区引发的 major setback 时, 是否能在 absorb impact 后做到 frame-level reframe, 将一次性的 failure 转化为 org-level 的 sustainable rule。L5 bar 是不止 own recovery, 还能用 recovery 赢得的 credibility 推动 structural governance change。",
+      "what_good_looks_like": [
+        "First-person ownership of the setback: 一开场就明确 'my dashboard missed the hardcoded calls', 不甩锅给 tool。EX-15 primary 动作: dashboard 盲区导致 3-4 条 Query Understanding pipeline 被 block, 立即 rollback 不争对错。",
+        "Recovery 先于辩解: 在一周内 unblock 所有受影响团队, 用这周建立 credibility, 然后才提出 deeper change。顺序错了会 kill ownership signal。",
+        "Setback recovery 不是终点, 而是 leverage: 利用刚刚赢得的信任, 把 '谁必须迁移' 的零和 debate 重构成包含 ownership transfer 的双选项框架。这是 L5 级别的 frame pivot。",
+        "Escalate for boundary decision: 不自己替 org 决定, 而是提出治理框架推给 senior leadership, 让 organizational boundary 被正式定义, 这展示了 ownership 的分寸感--不越俎代庖。"
+      ],
+      "what_L5_adds": [
+        "把个人 failure 归因从 execution-level 的 'dashboard 没抓到' 抬升到 structural framing-level: '我的 instrumentation model 是不完整的, 这个 gap 会反复出现' -- 从而推动 shared-infra governance pattern。",
+        "Org-level 风险转化: 不是 patch 这一次 deprecation, 而是建立一个可持续的 ownership transfer 机制, 为所有类似 infra-consumer 冲突提供默认解, 表现出对 cross-team blast radius 的系统性理解。",
+        "Self-awareness 体现在动作顺序: 先 absorb 再 influence, 而不是先 blame 再 rescue; 同时承认自己的 recovery 阶段短暂而不完美, 为后续 reframe 留下让其他 stakeholder 也能参与的空间。"
+      ],
+      "common_failure_modes": [
+        "Junior 答案: 只讲克服 (rollback + 道歉) 不讲结构性学习, 没有从 incident 跳到 governance pattern 的意识, reviewer 直接给 L4 以下。",
+        "Redemption focus 过重: 把故事重点放在 '我多努力把大家 unblock' 而忘了讲 setback 是自己的盲区造成的, 这会让 ownership signal 被 heroism 覆盖。",
+        "Scapegoating via abstraction: 'dashboard 没设计好' '别的团队没有来 review' -- 即使属实也会 kill 本题最核心的 'I own the failure' 信号。",
+        "没有具体 blast radius: 只说 '影响了 users', 没有 3-4 pipelines 这样的可量化 impact, reviewer 无法判断 setback 的规模, 也会怀疑故事的诚实度。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "ADP-10",
+    "text": "Describe a time when you created a plan in a highly ambiguous environment.",
+    "category": "Adaptability & Resilience",
+    "primary_id": "EX-14",
+    "primary_rendered": "QUESTION (Adaptability & Resilience): Describe a time when you created a plan in a highly ambiguous environment.\n\n[PRIMARY] EX-14 | LLM Exploration --- Killing the Agentic Mandate with One Week of ROI Math\n  situation: In 2023, leadership wanted to \"upgrade to GenAI\" -- expert-like search experiences, agentic flows -- but the brief was a hand wave. I got a sandbox, some API credits, no requirements, no precedent in our production stack. Explore on your own.\n  task: Find a real, business-impactful LLM application -- but the bigger task underneath was scoping. Without a feasibility-first cut, the exploration would drift into the agentic search demo leadership half-imagined: high-visibility, weeks of prototype, then quietly deprioritized. The job was to disqualif\n  action: First move: a 1-week feasibility study on the agentic path, framed as ROI math. LLM couldn't plug into the indexing pipeline. Couldn't read live inventory. Throughput maxed at tens of QPS against a 40K-peak surface; latency was prohibitive for real-time. The numbers killed the path before any prototype.  That bought me the standing to push the harder argument: skip the headline demo, find the highest-value low-hanging fruit, use it to build org confidence in LLMs as a tool. The agentic version would be a pitch; this would be infrastructure.  The fit was the relevance backlog -- severe mislabel\n  result: LLM-as-Judge won across multiple relevance metrics, delivered GMB improvement, and lifted user engagement. It became the production measurement infrastructure for the team, then for ads, then for several other groups -- a solo exploration scaled into org-wide infra without ever shipping the demo leadership originally asked for.  The lesson I carry: **the cheapest move in a vague AI mandate is the \n  evidence_quotes: []\n  cn_elevator_pitch: 2023 年 leadership 要 'upgrade to GenAI'，给 sandbox + API credits 自己探，没有 requirements、没有 LLM precedent；先用 1 周 feasibility 把 agentic search 路径用 ROI math 杀掉 -- 不能接 indexing pipeline、tens of QPS vs 40K peak、latency 不适合 real-time；换来 standing 推 manager 跳过 headline demo 找 highest-value low-hanging fruit，落到 r\n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-09 | Conversational Search — Proxy Item Breakthrough: LLM query rewrite 因 tokenizer 不匹配持续返回无关结果；提出 proxy item 方案——让 LLM 生成理想商品描述再用向量匹配，最大化复用现有 infra 快速 unblock 实验 | KEY FACTS: LLM-search 适配鸿沟 | proxy item 方案 | 最大化现",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 在没有明确 brief 时, 你能否 self-orient, 用 minimal 实验/数据切断低价值路径, 并且有原则地 pivot 到高回报方向。L5 bar 是你能管理 upward 的期待 (不是乖乖做 demo), 用 data-driven disqualification 做出 org-level 的取舍。",
+      "what_good_looks_like": [
+        "用 1 个极快可消歧动作量化不确定性, EX-14 primary 动作: '1 周可行性研究, ROI math 一算 agentic 路径在 QPS/latency/索引管道上全部不通, 直接杀了它'。",
+        "主动 push 反向建议: '跳过 headline demo, 找 highest-value low-hanging fruit' -- 不是等 manager 指明方向, 而是 frame 出新的价值路径。",
+        "Concrete 取舍逻辑: 明确说 'agentic 版本只是 pitch, 我们做的才是 infrastructure' -- 展示 tradeoff 不是随便选, 而是有原则的优先级判断。",
+        "成果超越最初模糊要求: LLM-as-Judge 变成跨团队的 production 测量基础设施, 证明你不是在模糊中做了一次性项目, 而是 carved a durable path。"
+      ],
+      "what_L5_adds": [
+        "主动管理 upward 的政治风险: 你敢用一周数据杀掉领导层 vague 想要的 demo, 而不是 'explore and report back', 这展示了对 org 资源负责的 ownership。",
+        "Reframe 问题的能力: 把 'upgrade to GenAI' 这个手挥从 agentic spectacle 重新框定为 relevance infra, 并且让领导层 buy in 这个 pivot -- 这是 L5 的 frame-level influence。",
+        "Durability 视野: 选择的方案能 scale 成 multiple teams 的生产依赖, 说明在模糊性中你不是只扫清自己的路, 而是预判了未来 adoption 的 leverage 点。"
+      ],
+      "common_failure_modes": [
+        "Junior 答案: '我问了 manager, 然后 we brainstormed a plan together' -- 缺少自主定向信号, 评审会认为你只能在有人划好方向时执行。",
+        "把计划做成 exhaustive roadmap: 在模糊环境中制定了 overly detailed 6 个月计划, 评审会质疑你不知道 ambiguity 需要用快速学习来削减, 而不是 predict everything。",
+        "没有明确杀掉哪些选项: story 只有 'I built a POC and it worked', 没有展现 how you said no to multiple other paths, 缺少 tradeoff 意识。",
+        "错误归因成功: '领导层后来方向就改了' -- 听起来像是你幸运, 不是主动 pivot, 要强调是你说服了他们改方向。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "ADP-1",
+    "text": "Tell me about a time when you had to quickly learn a new technology or skill.",
+    "category": "Adaptability & Resilience",
+    "primary_id": "EX-14",
+    "primary_rendered": "QUESTION (Adaptability & Resilience): Tell me about a time when you had to quickly learn a new technology or skill.\n\n[PRIMARY] EX-14 | LLM Exploration --- Killing the Agentic Mandate with One Week of ROI Math\n  situation: In 2023, leadership wanted to \"upgrade to GenAI\" -- expert-like search experiences, agentic flows -- but the brief was a hand wave. I got a sandbox, some API credits, no requirements, no precedent in our production stack. Explore on your own.\n  task: Find a real, business-impactful LLM application -- but the bigger task underneath was scoping. Without a feasibility-first cut, the exploration would drift into the agentic search demo leadership half-imagined: high-visibility, weeks of prototype, then quietly deprioritized. The job was to disqualif\n  action: First move: a 1-week feasibility study on the agentic path, framed as ROI math. LLM couldn't plug into the indexing pipeline. Couldn't read live inventory. Throughput maxed at tens of QPS against a 40K-peak surface; latency was prohibitive for real-time. The numbers killed the path before any prototype.  That bought me the standing to push the harder argument: skip the headline demo, find the highest-value low-hanging fruit, use it to build org confidence in LLMs as a tool. The agentic version would be a pitch; this would be infrastructure.  The fit was the relevance backlog -- severe mislabel\n  result: LLM-as-Judge won across multiple relevance metrics, delivered GMB improvement, and lifted user engagement. It became the production measurement infrastructure for the team, then for ads, then for several other groups -- a solo exploration scaled into org-wide infra without ever shipping the demo leadership originally asked for.  The lesson I carry: **the cheapest move in a vague AI mandate is the \n  evidence_quotes: []\n  cn_elevator_pitch: 2023 年 leadership 要 'upgrade to GenAI'，给 sandbox + API credits 自己探，没有 requirements、没有 LLM precedent；先用 1 周 feasibility 把 agentic search 路径用 ROI math 杀掉 -- 不能接 indexing pipeline、tens of QPS vs 40K peak、latency 不适合 real-time；换来 standing 推 manager 跳过 headline demo 找 highest-value low-hanging fruit，落到 r\n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-16 | Cross-Datacenter Deployment Incident --- Counterpart Bandwidth as a Line Item: Manager 没拿到 cross-team PD quota 让我独自扛 release-by-DC rollout；DC2 几分钟内 panic out，rollback 是我的，没拿手上的证据指对方而是 framing 成 context gap，事后推动了 search engine 层的 cross-team",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 在 vague mandate / zero precedent 下, 如何把 '学习新技术' 从技能获取 upgrade 成 scoping-driven 的 business impact, 而不是漫无目的地堆 prototype。L5 bar 是用极短的学习窗口 (1 周 feasibility) 产出 disqualification decision, 主动收窄探索空间, 并用 ROI math 而非激情说服 leadership 换方向。",
+      "what_good_looks_like": [
+        "明确学习窗口和阶段化动作: EX-14 primary 动作 '1-week feasibility study on the agentic path, framed as ROI math' -- 把学习本身变成了 可交付的决策包, 不是 '我学了很多 GPT-4 特性'。",
+        "技术障碍被翻译成 business blockers, 不是技术术语堆积: 'LLM couldn't plug into indexing pipeline / couldn't read live inventory / throughput maxed at tens of QPS against 40K-peak surface / latency prohibitive for real-time' ~> 这就 是 L5 的 business case 语言。",
+        "从 '领导让我做什么' 转成 '我建议我们做什么': 先 kill agentic path, 再 push 'skip the headline demo, find the highest-value low-hanging fruit', 用工具而非 demo 思维对待新技术。",
+        "Lesson 可迁移: 'the cheapest move in a vague AI mandate is the feasibility study that kills the bad path early' -- 这是一条可重复的决策原则, 不是 '我学会了 prompt engineering'。"
+      ],
+      "what_L5_adds": [
+        "从个人学习升维到 org 信心构建: 在 AI exploration 中不是炫技术, 而是选 LLM-as-Judge 做 relevance 基础设施, 最终成为 ads 等多个组的 infrastructure, 证明 L5 关心的不是 '我学会了什么', 而是 '我的学习如何变成 org capability'。",
+        "主动的 mandate shaping: 对 vague 'upgrade to GenAI' 不是被动执行, 而是用可行性研究重新框定 scope, 并向上管理产出反对意见 -- 这是 L5 的第一性主动性。",
+        "技术学习的深度不是为了 mastery, 是为了 boundary 判断: 只学到足以对 agentic 路径说 '不可行' 的程度, 然后立刻转向 -- 避免 sunk-cost learning, 体现了 L5 的资源自觉。"
+      ],
+      "common_failure_modes": [
+        "讲故事只讲技能曲线: '我花了几周学了 LLM / prompt engineering / fine-tuning, 然后做出了一个 demo' -- 没有决策动作, reviewer 识别为 junior 学习故事, 不给 L5。",
+        "服从指令, 不 manage up: '领导让我做 agentic search demo, 我就做了, 学到了很多' -- 即使 demo 成功, 也缺乏 L5 的 mandate shaping 信号, 会被视为执行者。",
+        "技术判断无量化: 只说 'agentic 很慢 / 很贵', 没有具体 throughput / latency / integration blockers -- 失去 L5 的 rigor, 回答降级为印象派。",
+        "Lesson 太 personal, 无组织影响: '我学会了新领域的快速入门方法' -- 没讲清楚怎么惠及团队, L5 bar 要求看到 structural 的影响力 (e.g., LLM-as-Judge 变成了团队基础设施)。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "ADP-15",
+    "text": "What's the biggest lesson you've learned from a failed project?",
+    "category": "Adaptability & Resilience",
+    "primary_id": "EX-33B",
+    "primary_rendered": "QUESTION (Adaptability & Resilience): What's the biggest lesson you've learned from a failed project?\n\n[PRIMARY] EX-33B | MoE Over-Iteration: A Model Believer's Humility Lesson on Problem Formulation\n  situation: At eBay search I was a strong believer in the model-side narrative: the industry had moved toward whole-page optimization, neural ranking, and MoE architectures, and I shared the assumption that increasingly sophisticated rankers would unlock the diversity, abandonment, and exploration problems we were stuck on. Leadership assigned me ownership of a high-visibility project to migrate search from b\n  task: Deliver a working MoE ranker that integrated multiple expert heads (conversion, abandonment, exploration) and demonstrated improvement on our org's launch criteria. My personal stake was even higher than the project scope: I had been advocating internally that model-side sophistication was the right\n  action: (1) First wall - bias in expert routing. Initial training showed the gating network was collapsing onto the conversion expert and ignoring the others. I treated this as a technical bug: re-balanced training data, added auxiliary losses to encourage expert diversification, retrained. Bias reduced.  (2) Second wall - degraded MoE router behavior. After the bias fix, the router started oscillating - co-activating experts that were pulling in opposite directions. I again treated it as a tuning problem: more training rounds, careful warmup schedules, auxiliary load-balancing terms. The oscillation \n  result: The MoE direction did not launch. Technically the system was complete; business-wise the direction was wrong from day one because we had been asking the wrong question. I had burned ~80 GPU nodes of org-wide headroom, several quarters of my own time, and the implicit credibility I had built advocating for the model-side narrative. There was no rescue and no silver lining I could honestly offer. Th\n  evidence_quotes: [\"The system was tech-unblocked but business-unlaunchable.\", \"I was fixing one wall after another -- bias, router, orthogonal expert -- and that pattern itself should have told me the problem was not where I was looking.\", \"No amount of further model iteration would fix it, because the problem was n\n  cn_elevator_pitch: 作为 model believer 在 MoE 上层层迭代——修 bias、修 router、加正交 expert；耗尽 ~80 GPU 后认清 BI/GMB 是真 KPI，MRR 是 self-fulfilling proxy | KEY FACTS: ~80 GPU 节点 | BI + GMB 真 KPI | MRR 不是 KPI | 技术 unblocked 但 business unlaunchable\n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-05 | Relevance Filtering: Deployment Feasibility Under Latency Constraints: 作为唯一 MLE 发现 XGBoost 模型 +10% latency 远超 <=1% 预算；三路方案中两路失败，最终 cheap rejection + early exit 组合达标 | KEY FACTS: +10% latency vs <=1% 预算 | cheap rejection + early exi\n- EX-16 | Cross-Datacenter Deployment Incident --- Counterpart Bandwidth as a Line Item: Manager 没拿到 cross-team PD quota 让我独自扛 release-by-DC rollout；DC2 几分钟内 panic out，rollback 是我的，没拿手上的证据指对方而是 framing 成 context gap，事后推动了 search engine 层的 cross-team\n- EX-30 | Hash Capability Misdesign --- Domain Depth Is Not Design Authority: 高速 PM 合作期以 hash-expert 身份上线数学优雅的 facet hash，下游 2-3 个 DS 团队被 block 几周 launch analysis；提 cross-four-team rescue 被拒后停了，认出 rescue 是 self-centered。最终采纳 indexing team",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 能否把 failure 的根本原因从 execution 抬升到 problem formulation 层, 并提炼出一个 transferrable 的 default shift。L5 bar 是能识别并对自己 identity-level 的 assumption (比如 'model believer') 进行拆解, 并在 recount 时保持 clean failure 而无 rescue narrative, 同时承担的 cost 是 org-level 的 (~80 GPU 节点 / credibility 损失)。",
+      "what_good_looks_like": [
+        "Clean failure 无 rescue tail: EX-33B primary 动作是直陈 'There was no rescue and no silver lining I could honestly offer', 不把故事扭成 redemption arc。",
+        "从 execution wall 跳转到 formulation wall: 在迭代 bias / router / orthogonal expert 后, 识别出 'I was fixing one wall after another... and that pattern itself should have told me the problem was not where I was looking' ---- 这是 frame pivot 的 L5 动作。",
+        "量化 org-level 的 sunk cost: ~80 GPU 节点, 几个季度年个人时间, 已积累的 model-side 信念信用----不抽象/不缩小。",
+        "Lesson 是 portable mental-model 重写: 'MRR was a self-fulfilling proxy; BI/GMB were the real KPI' 不是一个 '我更应该早问' 的教训, 而是一个会改变下一项目 starting question 的 default shift。"
+      ],
+      "what_L5_adds": [
+        "身份级自省: 不是 '我的模型不够好', 而是 '我作为 model believer 的 narrative 错误地把 problem formulation 框在了 model-side 复杂化上'----自省到自己的 expert identity 是 failure 的 root, 这是 L5 的 meta-cognition。",
+        "无 silver lining 的 accountability: 不将失败转述为 '至少我学到了 xx' 的正面, 而是承接 'direction was wrong from day one' 的纯粹失败, 这个不加糖的复盘姿态就是 L5 signal。",
+        "org 成本的 self-audit: 不止意识到 ~80 GPU 是资源浪费, 而进一步承认 'implicit credibility I had built advocating for the model-side narrative' 也被消耗----这种信用记账的自觉是 L4 少有的。"
+      ],
+      "common_failure_modes": [
+        "选一个 trivial execution mistake (比如 config 错误) 来讲'最大教训', reviewer 会当场判定无真正 stakes, 直接停在 L4。",
+        "把教训降维成 '我应该多做 A/B 测试' 或 '我应该更早和 PM 对齐'----这仍然是 solution 层的补丁, 不是 problem-formulation 层 pivot, L5 bar 够不到。",
+        "忍不住画 redemption tail: 讲成 '失败后我做了另一个成功项目, 证明我学到了'----reviewer 立刻扣分, 因为 FAANG L5 要的是干净承担失败的能力, 不是事后弥补的叙事。",
+        "scope 太小: 如果最大失败是一个 sprint 的计划差错, 没有 org-level 的 blast radius 和 sunk cost, 信号会弱到等同于没回答问题。"
+      ]
+    },
+    "problems": []
+  },
+  {
+    "question_id": "IMP-11",
+    "text": "Describe a time when you faced an ethical dilemma in your work.",
+    "category": "Impact & Long-Term Vision",
+    "primary_id": "EX-20",
+    "primary_rendered": "QUESTION (Impact & Long-Term Vision): Describe a time when you faced an ethical dilemma in your work.\n\n[PRIMARY] EX-20 | Seller Risk Modeling Fairness --- Ethical Dilemma and Escalation\n  situation: While reviewing risk guardrails, I discovered our seller risk model systematically penalized new sellers -- they received high risk scores with zero transaction history, creating a vicious cycle where they could never build a reputation.\n  task: Believed the approach needed to shift from seller-only modeling to seller-listing cross-modeling, allowing new sellers to be fairly evaluated through listing quality. This direction faced strong opposition from the principal researcher who designed the original system.\n  action: - Phase 1: Raised the issue at design review. Principal researcher argued buyer complaints were rising and the seller bar needed to be higher. Understood his concern but believed the framing ignored the fairness problem - Phase 2: Conducted deep research using PayPal and other industry cases to demonstrate that the tradeoff (false-positive blocking vs. fraud prevention) is inherently part of compliance. Researched platform liability legal framework; found no evidence supporting blanket new-seller penalties, which could actually constitute a bigger legal risk - Phase 3: After working-level pers\n  result: Leadership reviewed both perspectives, **collaborated with legal department**, and confirmed the precision modeling direction -- evaluating sellers through listing quality cross-modeling rather than blanket penalties. This aligned with the company's strategic recommerce push. Key principle: **\"Escalation goal is not 'let me win' but ensuring the decision is made with full information.\"**\n  evidence_quotes: [\"Sell risk model systematically unfair to new sellers: high risk score with zero transactions = vicious cycle\", \"Blanket new-seller penalties could be a bigger legal risk than the fraud they aim to prevent\", \"Escalation goal was not 'let me win' but ensuring the decision was made with full informat\n  cn_elevator_pitch: 发现 seller risk model 系统性惩罚新卖家——零交易历史 = 高风险分，形成\"永远无法建立信誉\"的恶性循环；研究 PayPal 案例 + 平台责任法律框架，推动从 seller-only 转向 seller-listing cross-modeling，经法务确认后落地 | KEY FACTS: 新卖家 vicious cycle | PayPal 等行业案例 | precision modeling 替代 blanket penalty | 法务协作 | recommerce 战略对齐\n\nOTHER LINKED STORIES (context only, 不必引用):\n- EX-34 | BBE Risk Policy: Seller-Level vs Listing-Level — Disagreeing with a Principal Researcher on Absolutism as Lazy Non-Action: 在 BBE 项目和 principal researcher disagree on seller-level 绝对风险 policy；用新卖家/小卖家 false-positive 数据 + '绝对标准是 lazy non-action 伪装'重新框定问题；落地 listing-level + cumulative ",
+    "probe_notes": {
+      "core_signal": "这题本质在问: 能否在组织压力下识别并坚守真正的 ethical boundary, 而不是把 individual discomfort 误当成 dilemma。L5 bar 是能从 systemic fairness / legal liability / business strategy 多轴拆解 ethical tension, 并且 escalation 的 maturity 表现为 'goal is informed decision, not I win'。",
+      "what_good_looks_like": [
+        "Dilemma 的双方都有 legitimate 的立足点: EX-20 primary 里 'principal researcher argued buyer complaints were rising and the seller bar needed to be higher' -- 承认对立面的真实压力, 而不是 caricature 成 '他就是不关心 fairness'。",
+        "Deep research 把 dilemma 从 opinions 转到 evidence: 调研 PayPal 案例 + 美国平台责任法律框架, 用外部 grounding 证明 blanket new-seller penalties 可能构成更大的 legal risk。",
+        "Escalation 过程有 precise 动作: Phase 1 design review 提出, Phase 2 准备 research, Phase 3 与 principal researcher 多次对话未果后 escalation, 且 escalation 明确不是绕过, 而是带着他的 arguments 一起 upward。",
+        "EX-20 primary 动作: 'Escalation goal was not let me win but ensuring the decision was made with full information.' 这句 kill-line 是 L5 bar 的 ownership 表达, 把 ego 从 ethical decision 里完全抽离。"
+      ],
+      "what_L5_adds": [
+        "将 ethical tension 从 fairness vs. fraud 抬到 legal/compliance 风险 vs. short-term metric 的 org-level 框架, 并且用法务确认来 close the loop -- 这是 L5 从 IC trade-off 跳到 org accountability 的典型 pose。",
+        "Self-awareness in escalation: 清楚地区分 '我不同意你' 和 '我 escalate 是为了让决策者看到全局信息', 并且在 story 里主动 credit 对手的 concern 也是 valid 的, L5 展现的这种 escalation maturity 是 L4 难达到的。",
+        "Connect local ethical fix 到 company strategy: 指出 precision modeling 与 recommerce push 战略对齐, 不是只是修一个模型, 而是让 ethical decision 成为 business enabler -- 这种 framing 说明 L5 能看见 beyond immediate technical impact。"
+      ],
+      "common_failure_modes": [
+        "把 ethical dilemma 讲成 clear-cut right vs. wrong: 例如 '我发现了模型不公平, 我修正了它' -- 缺少 tension, reviewer 会扣分, 因为 ethical dilemma 的核心是 competing valid interests, 不是 wrongdoing。",
+        "Redemption tail 太甜: 讲成 '我坚持正义, 最终领导支持了我, 模型变好了, 大家感谢我' -- 缺少对 escalation 风险 (与 principal researcher 关系可能恶化, 可能失败) 的 acknowledgement, 显得 naive。",
+        "没有具体 blast radius / stakes: 只泛泛说 '新卖家被 unfair' 而不量化 'zero transaction history leads to irrecoverable score' 这种 vicious cycle, 也不提 legal risk, 让 story 显得 small scale。",
+        "Scapegoating via abstraction: 把 pressure 推到 '公司要 risk 所以必须这样' / 'principal researcher 太固执' -- 把 dilemma 变成 blame game, 失去 L5 该有的 first-person ownership of ethical tension。"
+      ]
+    },
+    "problems": []
+  }
+]
