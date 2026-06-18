@@ -5,30 +5,6 @@
 
 ## In Progress
 
-#### T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-581
-- **Description**: After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 36 questions in the top 40.
-
-Split into 3-4 sub-batches of ~10 each, each a separate autonomous session per feedback_always_auto_run. Between batches, user spot-check one probe_notes entry to catch style drift early.
-
-Content rules (locked by BQ-DEPTH-09 calibration):
-- 中文叙述 + 英文术语
-- All 4 schema fields required (core_signal, what_good_looks_like, what_L5_adds, common_failure_modes)
-- Reference the is_primary story in what_good_looks_like
-- No angle_label -- angle lives in prose
-
-Deliverables:
-- scripts/seed_bq_probe_notes_batch{1-4}_20260421.py -- each idempotent + DB-backup-guarded
-- After each batch: spot-check doc attached to Discord for user review
-
-AC:
-- All 40 top questions have probe_notes set
-- Each batch script re-runs with [SKIP]
-- No schema field empty; all 4 structured fields populated for every question
-- User spot-check passed between batches
-
 ## Active Tasks
 
 ### P0 -- Must Have (core functionality)
@@ -550,6 +526,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 - [x] **2026-06-17** -- T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400). FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add
 - [x] **2026-06-17** -- T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A). SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rew
 - [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
+- [x] **2026-06-17** -- T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions. After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 
 - [x] **2026-06-17** -- T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions. From the Phase A matrix (BQ-DEPTH-01), propose the top 40 high-probability BQ questions (based on company overlap + aske
 - [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan
 - [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l
