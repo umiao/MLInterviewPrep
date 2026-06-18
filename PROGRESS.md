@@ -452,3 +452,15 @@
 - **Sanity check result**: dry-run showed exactly the 2 expected deltas; apply committed them; idempotent re-run = all SKIP/no-op. AC3: full-table leaf+checklist+0-checked+pct=100 signature scan now EMPTY. AC4: real endpoint via in-process TestClient (lifespan-started, live data/mle_prep.db) -> GET /api/framework/nodes/115 & /171 both 200 status=not_started pct=0.0; node 69 untouched (mastered/100, AC5). py_compile + ruff clean. Targeted pytest (framework/review/spaced/reconcile) -> 250 passed, 0 failed.
 - **Status**: [DONE]
 - **Request**: `task_db.py complete T-P1-923` (executed; state=done).
+
+## 2026-06-17 21:00 -- [T-P1-581] BQ-DEPTH-10 top-40 primary-story flags + DeepSeek QA
+- **What I did**: Assigned a unique primary story to the top-40 high-probability behavioral questions (across all 9 categories), set `question_example_links.is_primary=1` for each. Flow = Claude drafts 40 (primary chosen from each question's existing links, guided by `bq_golden_trait_matrix.md`) -> DeepSeek QA judges each (keep/swap/flag) -> Claude accept-default review -> user approval -> idempotent .bak-guarded seed. Stood up MLI's first DeepSeek client (new, copied pensieve's security-reviewed creds pattern).
+- **Deliverables**:
+  - `scripts/lib/deepseek_creds.py` (+ gitignored `.env.deepseek`, committed `.env.deepseek.example`) -- handwritten KEY=VALUE parser, never os.environ, FileNotFoundError on absent key (autorun-safe), masked repr.
+  - `scripts/_bq_581_qa_deepseek.py` -- per-row DeepSeek judge (deepseek-v4-pro, temp0). NB: reasoning model, needed max_tokens=3000 (400 got eaten by reasoning_tokens -> empty output).
+  - `scripts/seed_bq_primary_flags_20260421.py` -- source-of-truth ROWS + idempotent dry-run-by-default seed (.bak + audit + per-question single-primary self-verify).
+  - `scripts/_bq_581_review_html.py` + `docs/bq_primary_story_assignments_20260421.md` + `...deepseek.json` (DeepSeek verdict留痕).
+- **DeepSeek QA result**: keep=24, swap=14, flag=2. Claude review: 26 kept-as-drafted, 5 accepted DeepSeek swaps (OWN-6->EX-33, INN-8->EX-03, LDR-3->BLOG-04, COL-3->EX-12B, COL-5->BLOG-03), 9 overrode (matrix prior / story diversity).
+- **Sanity check result**: seed --apply set 36 / skipped 4 (the 4 pre-existing primaries matched). AC SQL: 0 questions with >1 primary, 40 distinct questions with is_primary=1. Idempotency: re-run = 0 SET / 40 SKIP. Real endpoint smoke (`GET /api/behavioral/examples`): 40 is_primary=true live, spot-checks exact (EX-33->OWN-6, EX-14->{ADP-1,ADP-10,COM-2}, BLOG-03->COL-5, BLOG-04->LDR-3). `pytest -q`: 1315 passed. ruff + py_compile clean.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-581 --reviewer xushenghui` (user approved the 40 assignments). Unlocks 582 (bulk probe_notes, DeepSeek generation) -> 583 (Phase D primary cards) -> 585.
