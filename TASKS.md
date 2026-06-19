@@ -19,28 +19,6 @@
 
 ### P2 -- Nice to Have
 
-#### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
-
-Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
-- behavioral_examples.principle_tags
-- behavioral_examples.risk_statement
-- behavioral_examples.result (the outcome)
-- Narrative hash (SHA256 of situation+task+action+result) changed AND delta > threshold (e.g. >30% diff)
-
-Output: docs/bq_probe_drift_report_<date>.md listing (question_id, linked_example_id, drift_reason, diff_preview).
-
-Optional: cron-schedule via session_context.py reminder (not hook -- reminder only).
-
-AC:
-- Script reads-only; no DB writes
-- Empty output when no drift (silent-on-no-work rule)
-- False-positive rate: manually run after BQ-DEPTH-09 with no changes; expect 0 reports
-- True-positive rate: manually mutate a test risk_statement; expect 1 report
-
 #### T-P2-836: [KG-INT B6-cleanup] Final acceptance checklist + audit + savings stats
 - **Priority**: P2
 - **Complexity**: S
@@ -490,6 +468,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 
 > 828 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-06-18** -- T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only). Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user le
 - [x] **2026-06-18** -- T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel. src/frontend/src/pages/BehavioralQuestions.tsx redesign.
 - [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
