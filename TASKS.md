@@ -23,36 +23,6 @@
 - **Depends on**: None
 - **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
 
-#### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: ## Summary
-Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
-
-## Context
-Review D ("doctor not police") + the user synthesis: layered guard -- pre-commit = scan + autofix-suggestion (preserve DX); CI fail + runtime self-heal come in Phase B. Single mode only: drop the premature strict|safe abstraction (Review debatable-3) until a real use case appears.
-
-## Acceptance Criteria
-- [ ] AC1: .claude/hooks/description_progress_guard.py (modeled on invariant3_guard.py) AST-detects writes to the mutation surface defined by T-P0-914 root-cause (at minimum framework_nodes.description; widen to status/progress_pct direct sets if root-cause says so) in scripts/*.py.
-- [ ] AC2 (scanner semantics, both branches): file writes the surface AND calls scripts.lib.framework_progress reconcile_* (or has "# RECONCILE-EXEMPT: <reason>") -> silent OK; writes surface WITHOUT reconcile and not exempt -> WARN to stderr + a copy-paste autofix hint naming the helper, exit 0 (NEVER blocks in Phase A).
-- [ ] AC3: --test (self-tests), --scan PATH (back-test), --sweep [scripts] (read-only offender report) -- parity with invariant3_guard mode surface.
-- [ ] AC4 (journey): dev writes a non-reconciling description seed, commits -> pre-commit prints the WARN+hint, commit still succeeds; dev adds the helper call -> WARN gone.
-- [ ] AC5: wired as a pre-commit SCAN step only (scripts/pre-commit infra) -- NOT into .claude/settings.json PreToolUse (that sensitive wiring is Phase B).
-- [ ] AC6: --sweep over scripts/ produces the current offender list (triage = retrofit-vs-exempt list captured; retrofitting historical scripts is OUT OF SCOPE here).
-
-## Technical Approach
-- Copy invariant3_guard.py structure (hook_utils, AST parent-map, exempt regex). Phase A exit code is ALWAYS 0; the only output is the warning. Single mode.
-
-## Edge Cases
-- Best-effort AST + the exempt escape; document residual false-negative risk. Never crash (infra error -> exit 0).
-
-## Complexity
-M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
-
-## Dependencies
-T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
-
 #### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
 - **Priority**: P1
 - **Complexity**: M
@@ -469,6 +439,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 > 828 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-06-18** -- T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only). Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user le
+- [x] **2026-06-18** -- T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode). ## Summary
 - [x] **2026-06-18** -- T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel. src/frontend/src/pages/BehavioralQuestions.tsx redesign.
 - [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions

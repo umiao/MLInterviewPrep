@@ -63,4 +63,13 @@ if [ -n "$STAGED_ALL" ]; then
         || die "Emoji found in staged files. Remove emoji before committing."
 fi
 
+# --- 5. framework_nodes description/progress drift SCAN (T-P1-912, Phase A) -
+# WARN-only: flags staged scripts/*.py that write the framework_nodes mutation
+# surface (description/status/progress_pct) without a reconcile_* call. NEVER
+# blocks the commit (Phase A "doctor not police"); CI fail + runtime self-heal
+# are Phase B (T-P1-917). The `|| true` guard is belt-and-suspenders -- the
+# scanner already exits 0 in --staged mode.
+echo "[pre-commit] Scanning staged scripts for framework_nodes description/progress drift..."
+python "$REPO_ROOT/.claude/hooks/description_progress_guard.py" --staged || true
+
 echo "[OK] Pre-commit checks passed."
