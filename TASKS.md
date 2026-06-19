@@ -245,12 +245,6 @@ COMPLEXITY: M
 - **Depends on**: None
 - **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for TikTok. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-tiktok_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
 
-#### T-P1-818: [KG-INT B4a-slack] Slack dry-run: archive plan + causal-proof matrix
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: Per docs/workflow/company_internalization_protocol.md, dry-run for Slack. Read all 6 note-surfaces for company_id=see audit B1, produce docs/archive_plans/B4a-slack_2026-05-10.md with §1 Inventory snapshot (byte counts + first 200 chars per surface), §2 Migration matrix (per-row 4-tuple: 原 prose 摘要 / 原覆盖 / 现迁移到 (kg/db/cd/sd URI) / 可验证查询), §3 Skeleton preview (full markdown of replacement thin drawer-link doc), §4 Hard-archive checklist (DB DELETE rows + UPDATE clears + seed-script moves + INSERT-statement restore.sql to be generated), §5 Promotion candidates flagged for meta-prep (any patterns spotted in this company that should be batch-promoted by B4-promotion). Discord ping user with plan path. WRITES NOTHING TO DB. AC: plan markdown exists; §2 has >=1 row per archive candidate; §3 skeleton renders; §5 lists 0+ candidates.
-
 #### T-P1-819: [KG-INT B4a-doordash] DoorDash dry-run: archive plan + causal-proof matrix
 - **Priority**: P1
 - **Complexity**: S
@@ -440,6 +434,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 
 - [x] **2026-06-18** -- T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only). Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user le
 - [x] **2026-06-18** -- T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode). ## Summary
+- [x] **2026-06-18** -- T-P1-818: [KG-INT B4a-slack] Slack dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Slack. Read all 6 note-surfaces for company_id=see au
 - [x] **2026-06-18** -- T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel. src/frontend/src/pages/BehavioralQuestions.tsx redesign.
 - [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
