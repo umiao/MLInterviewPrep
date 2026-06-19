@@ -14,16 +14,31 @@
 - ⚠️ 计费:`claude -p`/autorun 走**单独 API 计费池**(非订阅),见 root memory `june15_programmatic_billing_split`。
 - 内容/DB 改动遵循 root memory `mli_content_workflow`(7 步改写、sync-ALL-surfaces、五抽屉 URI、MLSD golden 约束)+ `CLAUDE.md` 的 Surface Identification 表(改 DB 前先 widget→queryKey→endpoint→table 映射)。
 
-## ⏯️ 下个 session = **supervised run**,首活 = **T-P1-583(前端 Phase D:primary 卡 + probe panel)**
-- **autorun-safe 子集早已清完**;剩余 ready 任务全 supervised/gated → 下个 session **逐条人值守跑**,**别挂 `autonomous_run.sh`**。
-- ✅ **T-P1-582 已完成**(2026-06-17,见最近 session):全 40 top BQ 题 probe_notes 落库,DeepSeek 4 批生成。**解锁 583**。
-- ✅ **T-P1-581 已完成**——top40 primary-story flags 落库,DeepSeek 客户端已建好(`scripts/lib/deepseek_creds.py` + gitignored `.env.deepseek`)。
+## 下个 session = **supervised run**(别挂 autorun,见下方原因),任务菜单见下
 
-### 🧭 T-P1-583 接续提示(前端 Phase D,消费 581/582 数据)
-- **数据已就绪**:`GET /api/behavioral/questions` 每题返回 `probe_notes`(4 字段 dict:`core_signal`/`what_good_looks_like`/`what_L5_adds`/`common_failure_modes`)+ `probe_notes_updated_at`;`GET /api/behavioral/examples` 每题 `is_primary` 标志(581 落库)。40 题全有 primary + probe_notes,已真 endpoint 验证。
-- **渲染注意**:前端 = react-markdown + remark-math + rehype-katex。probe_notes 文本已 render-safe(无裸 `$`/`<`/行首 `>`),但 583 仍要在浏览器真跑确认 KaTeX/blockquote 不误触发(manual-smoke AC)。
-- **生成器复用**(若 583 之后还要补 probe_notes):`scripts/_bq_582_probe_notes_deepseek.py` 现成,normalizer 已含数字比较 `<=N`→`不超过 N` / `<N`→`低于 N` 的 render-safe 改写;`scripts/seed_bq_probe_notes_20260421.py --batch N` 幂等落库。
-- 其后 585(Phase E 漂移检测)。一般运行规程见 **`## supervised run 运行说明`**。
+- **[重要] 当前 autorun-safe 子集 = 空。** picker 现返回 **T-P1-909**,但 909 卡在缺源文件上(见下)——**盲挂 `autonomous_run.sh` 会拣中 909 并失败**。要跑 autorun 必须先 park 掉 909(及 supervised-only 的 912/921),但 park 完已无安全任务剩,所以下个 session 直接 **supervised 逐条人值守跑**。
+- **[DONE] BQ-DEPTH 线全收口**(581→582→583→585):内容 seed → top40 primary 指派 → 前端 primary 卡 + probe 面板 → 只读漂移检测器,端到端打通。本次 session 详见下方 2026-06-18 条目。
+
+### 任务菜单(供下个 supervised session 选,按可执行性排)
+
+| 任务 | 状态 | 说明 / 运行前置 |
+|---|---|---|
+| **T-P1-909** [P1/M] ML-Infra golden seed | **[BLOCKED-ON-INPUT]** | 需用户把 golden doc `distributed_model_deployment_golden.md` 放进仓库(任务 spec 写明"user-provided")。**文件不在 = 不能做**。拿到后:idempotent `scripts/seed_anthropic_distributed_model_deployment_golden.py`,slug=`anthropic-distributed-model-deployment`,9 列映射见 `task_db.py get T-P1-909`(Anthropic tag = scheme A:slug 前缀 + subtitle;system_designs 无 company_id 列;NOT MLSD family,不套 [DOMINANT]/floating-twist)。|
+| **T-P1-912** [P1/L] Guard Phase A 扫描器 | **[SUPERVISED-READY]** | 前置 910/911/914 **已全归档(done)**,可做。但建新 hook `.claude/hooks/description_progress_guard.py`(autonomous 敏感目录)→ **只在 supervised 跑**,别 autorun。仿 `invariant3_guard.py`,AST 检测对 `framework_nodes.description`(及 914 root-cause 指定的 status/progress_pct 直写面)的写入;scanner-only(warn+autofix-suggestion,**不 block**)。完成后解锁 917(Phase B enforcer,HUMAN-REVIEW)。|
+| **T-P1-921** [P1/M] WSH-E1 drawer_nav | **[SUPERVISED]** | 抽 `company_documents` 的 drawer 导航进结构化 `drawer_nav` JSON 列(schema 迁移)+ 前端 `CompanyDocDrawer` 渲染 + 退役 4 个 retrofit 脚本。带 manual-smoke AC(开 Meta-MLSD 抽屉验导航)→ supervised。完成后解锁 922。|
+| **KG-INT B4a dry-run** (815–820) | **[需用户决策]** | backlog 最大一坨(~21 任务,含全部 7 个 P0)。全冻结,入口是 6 个 B4a dry-run(**不写 DB**,产 archive plan + causal-proof matrix,Discord 等用户 gate)。放行后 → B4b execute(822–828=P0 串行链)→ 821 promotion → 836 cleanup。**等用户拍板才启动**。|
+
+- 一般运行规程见本文件 **`## supervised run 运行说明`**。
+- **autorun 重启清单**(若将来有 autorun-safe 任务):先 `task_db.py pick` 确认拣到的是安全任务;非安全的先 park(`UPDATE tasks SET state='pending',status='blocked'`——注意 `task_db.py update --status` 只改 status 不改 state,picker 看的是 **state**);跑完恢复 `state='ready',status='active'`;再 `task_db.py project` 重生成 TASKS.md。
+
+### 最近一次 session(2026-06-18,supervised + 1 次 autorun)— [DONE] 583 + 585(BQ-DEPTH 线收口)
+- **[DONE] T-P1-583**(前端 Phase D,supervised,commit `86b651c`):重写 `BehavioralQuestions.tsx` 展开视图。有 `is_primary` link 的题 → 金边 Primary Story 卡(置顶,full `relevance_note` + STAR Situation 预览 + "lead with this" 提示)+ 折叠 "Also applies (N)" 备用面板 + 折叠 "What this question probes" → 4 段 probe_notes 面板(markdown via 共享 `MarkdownPreview`)。非 top-40(无 primary)走旧 flat list(无回归);0-link 走旧空状态。抽出共享 `LinkedExampleCard` 去重。`BehavioralQuestion` interface 加 `probe_notes`/`probe_notes_updated_at`。
+  - 验证:tsc clean、eslint clean、`vitest run` **251 passed**(+13,含 4 个场景 A-D 真组件渲染测试)、`npm run build` exit 0。活 API 端到端:OWN-1 返回 4 字段 probe + primary EX-15 + 3 备用;**全 40 top 题都有 primary+probe**。**用户浏览器验收通过**(金边卡、probe 面板、Also-applies、抽屉均 OK)。
+  - 改动:`src/frontend/src/pages/BehavioralQuestions.tsx`、`...BehavioralQuestions.test.tsx`。无后端/DB 改动。顺手修了 `scripts/_bq_581_review_html.py` 里被 lint guard 标的 emoji(✋/👍 → ASCII)。
+- **[DONE] T-P2-585**(Phase E 漂移检测器,autorun 1 session,commit `130f4ff`):`scripts/detect_probe_drift.py` —— 只读 watchdog,**窄口径**(只在 `principle_tags`/`risk_statement`/`result` 变,或叙事 situation+task+action+result delta>30% 时触发)。baseline 快照 `data/probe_drift_baseline.json`(gitignored)只在 probe 重生成时重拍,所以真漂移每次都报到刷新为止;字段编辑不会偷偷 re-baseline。`mode=ro` URI(不可能写 DB)。无漂移时静默(无报告文件无 stdout);`--strict` 漂移时 exit 1(cron/CI)。`tests/test_detect_probe_drift.py`(10 测试)。
+  - 验证(我已**独立复验**,非只看 inner 自报):10/10 测试通过;真库只读跑 baseline → `--strict` exit 0 静默无报告 = **0 误报**(AC 达成);true-positive 在沙箱 DB 副本上证过(改 risk_statement 触发 exit 1)。可选的 session_context.py cron 提醒**故意跳过**(spec 标 optional + 会动敏感 hook)。
+- **本 session 运维动作**:为让 autorun 拣中安全的 585,临时 park 了 909/912/921(commit `e3e7b1a`);585 跑完**已全部解冻**回 `state=ready,status=active`(commit 见本次)。所以现在 picker 又会拣 909(input-blocked)——下个 session 看上方菜单,**别盲挂 autorun**。
+- **接续点**:BQ-DEPTH 线(581-585)整条完。下个活在上方任务菜单里选;无 autorun-safe 任务剩,supervised 跑。
 
 ### 最近一次 session(2026-06-17,supervised)— ✅ 582 done(全 40 题 probe_notes,DeepSeek 4 批)
 - ✅ **T-P1-582 完成**:从 batch 1 spot-check gate 接续,seed batch 1 → 逐批(2/3/4)generate→spot-check→seed,全 40 top BQ 题 probe_notes 落库(DeepSeek deepseek-v4-pro temp0,4 字段 schema)。
