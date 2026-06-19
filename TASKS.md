@@ -17,62 +17,6 @@
 - **Depends on**: T-P1-815, T-P1-816, T-P1-817, T-P1-818, T-P1-819, T-P1-820
 - **Description**: Read §5 'Promotion candidates flagged for meta-prep' from each B4a archive plan in docs/archive_plans/. Deduplicate. For candidates passing the >=3 P0+P1 threshold (per promotion_criteria.md), author follow-up seed updates to meta-prep child nodes. AC: list of accepted vs rejected candidates committed; framework_nodes deltas applied via idempotent seed; updated archive plans get a §6 'promoted' section.
 
-#### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
-
-#### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: ## Summary
-Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
-
-## Context
-Review D ("doctor not police") + the user synthesis: layered guard -- pre-commit = scan + autofix-suggestion (preserve DX); CI fail + runtime self-heal come in Phase B. Single mode only: drop the premature strict|safe abstraction (Review debatable-3) until a real use case appears.
-
-## Acceptance Criteria
-- [ ] AC1: .claude/hooks/description_progress_guard.py (modeled on invariant3_guard.py) AST-detects writes to the mutation surface defined by T-P0-914 root-cause (at minimum framework_nodes.description; widen to status/progress_pct direct sets if root-cause says so) in scripts/*.py.
-- [ ] AC2 (scanner semantics, both branches): file writes the surface AND calls scripts.lib.framework_progress reconcile_* (or has "# RECONCILE-EXEMPT: <reason>") -> silent OK; writes surface WITHOUT reconcile and not exempt -> WARN to stderr + a copy-paste autofix hint naming the helper, exit 0 (NEVER blocks in Phase A).
-- [ ] AC3: --test (self-tests), --scan PATH (back-test), --sweep [scripts] (read-only offender report) -- parity with invariant3_guard mode surface.
-- [ ] AC4 (journey): dev writes a non-reconciling description seed, commits -> pre-commit prints the WARN+hint, commit still succeeds; dev adds the helper call -> WARN gone.
-- [ ] AC5: wired as a pre-commit SCAN step only (scripts/pre-commit infra) -- NOT into .claude/settings.json PreToolUse (that sensitive wiring is Phase B).
-- [ ] AC6: --sweep over scripts/ produces the current offender list (triage = retrofit-vs-exempt list captured; retrofitting historical scripts is OUT OF SCOPE here).
-
-## Technical Approach
-- Copy invariant3_guard.py structure (hook_utils, AST parent-map, exempt regex). Phase A exit code is ALWAYS 0; the only output is the warning. Single mode.
-
-## Edge Cases
-- Best-effort AST + the exempt escape; document residual false-negative risk. Never crash (infra error -> exit 0).
-
-## Complexity
-M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
-
-## Dependencies
-T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
-
-#### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: None
-- **Description**: ## Summary
-Extract drawer navigation out of company_documents.content markdown into a structured drawer_nav JSON column, assemble at render time, retire the 4 retrofit_meta_mlsd_*_drawer_header.py scripts. V1 of the multi-surface fix; NO full normalization. Adds a stability-observation gate for E2.
-
-## drawer_nav JSON schema
-{"items":[{"label":"string","anchor":"string","depth":1,"ref":"cd://N|sd://slug|null"}],"rendered_at_top":true}
-
-## Acceptance Criteria
-- [ ] AC1: company_documents gets a drawer_nav JSON column (migration + relevant seed updates).
-- [ ] AC2: frontend CompanyDocDrawer assembles nav from drawer_nav above the body; render equivalent to current.
-- [ ] AC3: the 4 retrofit scripts archived (moved to scripts/migrate/ with SAFE_DELETE_AFTER) or deleted; re-seed no longer needs them.
-- [ ] AC4 (journey): open a Meta-MLSD doc drawer -> drawer nav shows correctly, links clickable (URI scheme preserved).
-- [ ] AC5: audit_uri_consistency.py all green.
-- [ ] AC6 (E2 decision gate): drawer_nav abstraction holds with NO regression on >=3 MLSD docs for >=2 weeks (no schema tweak, no retrofit-class op). E2 must NOT start until this AC is checked; once checked, human decides whether to proceed to E2 or hold.
-
-## Complexity: M. Deps: None.
-
 ### P2 -- Nice to Have
 
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
@@ -351,6 +295,42 @@ COMPLEXITY: M
 - **Depends on**: T-P1-820, T-P1-833
 - **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-parspec_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-parspec_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-parspec_2026-05-10.md, (3) move source seed scripts (scripts/seed_parspec_*.py / scripts/content_*parspec*.py / scripts/patch_parspec_*.py) -> archive/seed_scripts/B4a-parspec/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_parspec_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
+#### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
+
+#### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
+- **Priority**: P1
+- **Complexity**: L
+- **Depends on**: None
+- **Description**: ## Summary
+Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
+
+## Context
+Review D ("doctor not police") + the user synthesis: layered guard -- pre-commit = scan + autofix-suggestion (preserve DX); CI fail + runtime self-heal come in Phase B. Single mode only: drop the premature strict|safe abstraction (Review debatable-3) until a real use case appears.
+
+## Acceptance Criteria
+- [ ] AC1: .claude/hooks/description_progress_guard.py (modeled on invariant3_guard.py) AST-detects writes to the mutation surface defined by T-P0-914 root-cause (at minimum framework_nodes.description; widen to status/progress_pct direct sets if root-cause says so) in scripts/*.py.
+- [ ] AC2 (scanner semantics, both branches): file writes the surface AND calls scripts.lib.framework_progress reconcile_* (or has "# RECONCILE-EXEMPT: <reason>") -> silent OK; writes surface WITHOUT reconcile and not exempt -> WARN to stderr + a copy-paste autofix hint naming the helper, exit 0 (NEVER blocks in Phase A).
+- [ ] AC3: --test (self-tests), --scan PATH (back-test), --sweep [scripts] (read-only offender report) -- parity with invariant3_guard mode surface.
+- [ ] AC4 (journey): dev writes a non-reconciling description seed, commits -> pre-commit prints the WARN+hint, commit still succeeds; dev adds the helper call -> WARN gone.
+- [ ] AC5: wired as a pre-commit SCAN step only (scripts/pre-commit infra) -- NOT into .claude/settings.json PreToolUse (that sensitive wiring is Phase B).
+- [ ] AC6: --sweep over scripts/ produces the current offender list (triage = retrofit-vs-exempt list captured; retrofitting historical scripts is OUT OF SCOPE here).
+
+## Technical Approach
+- Copy invariant3_guard.py structure (hook_utils, AST parent-map, exempt regex). Phase A exit code is ALWAYS 0; the only output is the warning. Single mode.
+
+## Edge Cases
+- Best-effort AST + the exempt escape; document residual false-negative risk. Never crash (infra error -> exit 0).
+
+## Complexity
+M -- one scanner hook + 3 modes, no blocking, no sensitive wiring.
+
+## Dependencies
+T-P0-910 and T-P0-914. Needs the helper name to scan for (910) and the root-cause-defined interception surface (914). Ships early (after 910) so coverage exists before any apply -- closes the naked-window Review flagged.
+
 #### T-P1-917: [HUMAN-REVIEW] Guard Phase B: enforcer -- CI fail-on-drift (mandatory) + runtime safe-heal + settings.json wiring
 - **Priority**: P1
 - **Complexity**: L
@@ -381,6 +361,26 @@ L -- enforcer mode + CI workflow + data-driven allow-list + sensitive split sign
 
 ## Dependencies
 T-P1-912 (Phase A scanner -- enforcer extends it) and T-P2-913 (reverse-drift verdicts define the under-decision allow-list). Last in the chain so CI does not fail on classes still pending a human decision.
+
+#### T-P1-921: [WSH-E1] MLI drawer_nav 抽列 + 4 retrofit 退役 + E2 决策门
+- **Priority**: P1
+- **Complexity**: M
+- **Depends on**: None
+- **Description**: ## Summary
+Extract drawer navigation out of company_documents.content markdown into a structured drawer_nav JSON column, assemble at render time, retire the 4 retrofit_meta_mlsd_*_drawer_header.py scripts. V1 of the multi-surface fix; NO full normalization. Adds a stability-observation gate for E2.
+
+## drawer_nav JSON schema
+{"items":[{"label":"string","anchor":"string","depth":1,"ref":"cd://N|sd://slug|null"}],"rendered_at_top":true}
+
+## Acceptance Criteria
+- [ ] AC1: company_documents gets a drawer_nav JSON column (migration + relevant seed updates).
+- [ ] AC2: frontend CompanyDocDrawer assembles nav from drawer_nav above the body; render equivalent to current.
+- [ ] AC3: the 4 retrofit scripts archived (moved to scripts/migrate/ with SAFE_DELETE_AFTER) or deleted; re-seed no longer needs them.
+- [ ] AC4 (journey): open a Meta-MLSD doc drawer -> drawer nav shows correctly, links clickable (URI scheme preserved).
+- [ ] AC5: audit_uri_consistency.py all green.
+- [ ] AC6 (E2 decision gate): drawer_nav abstraction holds with NO regression on >=3 MLSD docs for >=2 weeks (no schema tweak, no retrofit-class op). E2 must NOT start until this AC is checked; once checked, human decides whether to proceed to E2 or hold.
+
+## Complexity: M. Deps: None.
 
 #### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
 - **Priority**: P2
