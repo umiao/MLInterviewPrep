@@ -11,31 +11,6 @@
 
 ### P1 -- Should Have (agentic intelligence)
 
-#### T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-581
-- **Description**: src/frontend/src/pages/BehavioralQuestions.tsx redesign.
-
-Journey-first AC (from CLAUDE.md planning rules): user opens /behavioral -> clicks expand on a top-40 question -> sees ONE gold-bordered primary story card (big, with full relevance_note + STAR Situation preview + 'use this angle' hint) -> sees 'Also applies' collapsed panel with 2-3 backup stories -> clicks 'What this question probes' -> sees 4-section probe_notes panel (core_signal / what_good_looks_like / what_L5_adds / common_failure_modes).
-
-Scenario matrix:
-- Question has is_primary link + probe_notes -> full new treatment
-- Question has is_primary link + no probe_notes -> primary card only, probe panel hidden
-- Question has no is_primary link (non-top-40) -> current flat list fallback (no visual regression)
-- Question has 0 links -> current 'no example' red badge
-
-Manual smoke test AC:
-- Launch vite dev (localhost:5173/behavioral); pick OWN-1 (will have probe_notes after Phase C); verify primary card is gold-bordered and renders at top; verify probe_notes panel expands and shows 4 sections with markdown; verify 'Also applies' toggles
-
-Also update frontend type src/frontend/src/types/behavioral.ts to include probe_notes + is_primary.
-
-AC:
-- TypeScript compiles
-- vitest suite passes
-- Manual smoke test path completes without console errors
-- No regression on questions without probe_notes / without is_primary
-
 #### T-P1-821: [KG-INT B4-promotion] Consolidate flagged promotion candidates -> meta-prep updates
 - **Priority**: P1
 - **Complexity**: M
@@ -45,13 +20,13 @@ AC:
 #### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
 - **Priority**: P1
 - **Complexity**: M
-- **Depends on**: T-P1-908
+- **Depends on**: None
 - **Description**: CONTENT SEED (Invariant 3). Idempotent scripts/seed_anthropic_distributed_model_deployment_golden.py for a new system_designs row. Source: user-provided golden doc 'distributed_model_deployment_golden_answer.md' (500GB model -> 100-1000 GPU workers, pipeline distribution). slug='anthropic-distributed-model-deployment'; title from doc; subtitle='Anthropic · ML Infra (LLM)' (Anthropic tag = scheme A: slug prefix + subtitle, since system_designs has NO company_id col); display_order=300 (first in ML-Infra band; future docs 301,302...). 9-column mapping: overview<-需求澄清(problem+func/nonfunc+clarification+out-of-scope); architecture<-架构深度解析; dataflow<-API设计与数据流; formulas<-容量估算与核心算法(keep 20785..20785 math); production_constraints<-生产环境约束; tradeoffs<-权衡讨论; defense<-面试官追问Q&A; verbal_outline<-1小时节奏指南+3分钟电梯演讲; cheat_sheet<-常见错误+精简pitch. NOT MLSD family -> do NOT apply [DOMINANT]/floating-twist golden markers (Meta-MLSD-only contract). Sentinel UPSERT keyed on slug; 2x run = byte-identical. Optional light incremental polish: CN-narration + EN-term first-occurrence expansion consistency, obvious typos ONLY -- preserve user's voice/length, no rewrite. AC: seed exit 0 + idempotent re-run no-op; GET /api/system-designs/anthropic-distributed-model-deployment -> 200 with all 9 fields populated & non-trivial; row at display_order=300; MANUAL SMOKE: /system-design?tab=ml-infra-llm shows the card -> drawer 9 sections render incl. KaTeX math.
 
 #### T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode)
 - **Priority**: P1
 - **Complexity**: L
-- **Depends on**: T-P0-914
+- **Depends on**: None
 - **Description**: ## Summary
 Phase A of the drift guard: a SCANNER that detects + warns + suggests the autofix, never blocks. Ships right after T-P0-910 so there is no naked window between the 911 fix and any enforcement (Review point-2 + D synthesis).
 
@@ -103,7 +78,7 @@ Extract drawer navigation out of company_documents.content markdown into a struc
 #### T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only)
 - **Priority**: P2
 - **Complexity**: S
-- **Depends on**: T-P1-582
+- **Depends on**: None
 - **Description**: Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user learns to ignore.
 
 Write scripts/detect_probe_drift.py that flags probe_notes needing refresh ONLY when one of these changes on a linked story since probe_notes_updated_at:
@@ -379,7 +354,7 @@ COMPLEXITY: M
 #### T-P1-917: [HUMAN-REVIEW] Guard Phase B: enforcer -- CI fail-on-drift (mandatory) + runtime safe-heal + settings.json wiring
 - **Priority**: P1
 - **Complexity**: L
-- **Depends on**: T-P1-912, T-P1-918
+- **Depends on**: T-P1-912
 - **Description**: ## Summary
 Phase B: promote the scanner to an ENFORCER -- a mandatory CI gate that fails on uncovered drift, plus runtime safe-mode self-heal, plus the sensitive .claude/settings.json PreToolUse wiring. Enabled only after drift taxonomy is decided.
 
@@ -513,32 +488,11 @@ Normalize company_documents.content into company_document_sections (section_key/
 
 ## Completed Tasks
 
-> 806 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
+> 828 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
+- [x] **2026-06-18** -- T-P1-583: [BQ-DEPTH-12] Frontend Phase D: primary-story prominent card + probe_notes expandable panel. src/frontend/src/pages/BehavioralQuestions.tsx redesign.
 - [x] **2026-06-17** -- T-P3-916: 92-class partial pct-stale: decision doc (low risk, deterministic recommendation). ## Summary
 - [x] **2026-06-17** -- T-P2-905: Archive PROGRESS.md (545 lines > ~300 convention) to archive/progress_log.md, keep ~40-50 recent sessions
 - [x] **2026-06-17** -- T-P2-880: [SYNC] MLI: Add study-review skill from claude-code-project-template (relevant to MLSD study-deck work). claude-code-project-template ships `.claude/skills/study-review/` which MLI lacks. Given the active MLSD study-deck work
 - [x] **2026-06-17** -- T-P2-879: [DEBT] MLI: shared/hooks/task_store.py:145 SIM105 (try/except/pass -> contextlib.suppress). `ruff check` (whole-tree scan, excluding src/tests/archive) flags shared/hooks/task_store.py:145 with SIM105: the try/ex
 - [x] **2026-06-17** -- T-P2-878: [DEBT] MLI: pyproject.toml missing 4 dev deps present in requirements.txt (ruff, pytest, pytest-asyncio, pyyaml). requirements.txt lists ruff==0.15.4, pytest==7.4.4, pytest-asyncio==0.23.3, pyyaml==6.0 under a `# Development tools` he
-- [x] **2026-06-17** -- T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix). After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (6
-- [x] **2026-06-17** -- T-P1-923: [reconcile] Clear reverse-drift on nodes 115/171 (pct=100->0, review->not_started) via idempotent seed. Follow-up from T-P1-918 triage (user verdict 2026-06-17: BOTH stale).
-- [x] **2026-06-17** -- T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority). ## Summary
-- [x] **2026-06-17** -- T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400). FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add
-- [x] **2026-06-17** -- T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A). SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rew
-- [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
-- [x] **2026-06-17** -- T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions. After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 
-- [x] **2026-06-17** -- T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions. From the Phase A matrix (BQ-DEPTH-01), propose the top 40 high-probability BQ questions (based on company overlap + aske
-- [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan
-- [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l
-- [x] **2026-05-21** -- T-P0-904: sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden). Rewrite sd53 (meta-spotify-music-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-21** -- T-P0-903: sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd52 (meta-location-rec-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-21** -- T-P0-902: sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd51 (meta-event-rec-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-21** -- T-P0-901: sd50 meta-v2v-search-golden verbal_outline (mirror sd41 golden). Rewrite sd50 (meta-v2v-search-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-21** -- T-P0-900: sd49 meta-ads-golden verbal_outline (mirror sd41 golden). Rewrite sd49 (meta-ads-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-21** -- T-P0-899: sd48 meta-event-attendance-golden verbal_outline (mirror sd41 golden). Rewrite sd48 (meta-event-attendance-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-20** -- T-P0-898: sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden). Rewrite sd47 (meta-ig-story-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-20** -- T-P0-897: sd46 meta-yelp-restaurant-golden verbal_outline (mirror sd41 golden). Rewrite sd46 (meta-yelp-restaurant-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-20** -- T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden). Rewrite sd45 (meta-fb-newsfeed-golden) verbal_outline; mirror sd41 golden template.
-- [x] **2026-05-19** -- T-P1-919: No-checklist drift fix: node 69 Regularization -- add confirmation checkbox + re-derive status (user-scoped: ONLY no-checklist, NOT 115/171/92). Discord user decision 2026-05-19 (msg 1506361186168606802) for the T-P0-914 no-checklist drift bucket. SCOPE: node 69 ON
-- [x] **2026-05-19** -- T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff. ## Summary
-- [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary

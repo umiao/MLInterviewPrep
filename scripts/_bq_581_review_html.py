@@ -104,7 +104,7 @@ def build() -> Path:
                  f"{n.get('accept-swap',0)} 条采纳 DeepSeek 换故事 · "
                  f"{n.get('override',0)} 条否决 DeepSeek(保留草稿,理由见各行)。"
                  f" 全部 40 个 primary 均为已存在的 link。</div>")
-    parts.append("<div class='gate'><b>✋ 此为审阅稿,尚未写 DB。</b> 你 👍 后我才跑 "
+    parts.append("<div class='gate'><b>[审阅] 此为审阅稿,尚未写 DB。</b> 你批准后我才跑 "
                  "<code>seed_bq_primary_flags_20260421.py --apply</code>(先备份 + audit + 自校验每题恰一个 primary)。"
                  "可整批批准,或指出要改的行。</div>")
 

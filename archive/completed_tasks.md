@@ -1,6 +1,6 @@
 # Completed Tasks Archive
 
-> 806 completed tasks archived as of latest archival.
+> 828 completed tasks archived as of latest archival.
 
 - [x] **2026-03-12** -- T-P0-1: Update dependencies in requirements.txt and pyproject.toml. Add fastapi, uvicorn, sqlalchemy, anthropic, pydantic-settings, httpx, beautifulsoup4, playwright to requirements.txt (p
 - [x] **2026-03-12** -- T-P0-10: POST /api/problems (create). Create problem. Duplicate leetcode_id -> 409. Null leetcode_id always OK. Convert tags/company_tags to JSON. Return 201.
@@ -1199,3 +1199,48 @@ READ FIRST: scripts/mlsd_top9_spec.md (locked template
 - [x] **2026-05-14** -- T-P2-889: [Meta-MLSD] Add meta-spotify-music-golden 口播稿 row (Q11 Spotify, audio + session + relisten positive). Meta MLSD top-9 口播稿 batch -- creates one row in system_designs.
 
 READ FIRST: scripts/mlsd_top9_spec.md (locked template 
+- [x] **2026-05-20** -- T-P0-896: sd45 meta-fb-newsfeed-golden verbal_outline (mirror sd41 golden). Rewrite sd45 (meta-fb-newsfeed-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden t
+- [x] **2026-05-20** -- T-P0-897: sd46 meta-yelp-restaurant-golden verbal_outline (mirror sd41 golden). Rewrite sd46 (meta-yelp-restaurant-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 gold
+- [x] **2026-05-20** -- T-P0-898: sd47 meta-ig-story-golden verbal_outline (mirror sd41 golden). Rewrite sd47 (meta-ig-story-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden temp
+- [x] **2026-05-21** -- T-P0-899: sd48 meta-event-attendance-golden verbal_outline (mirror sd41 golden). Rewrite sd48 (meta-event-attendance-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 gol
+- [x] **2026-05-21** -- T-P0-900: sd49 meta-ads-golden verbal_outline (mirror sd41 golden). Rewrite sd49 (meta-ads-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden template)
+- [x] **2026-05-21** -- T-P0-901: sd50 meta-v2v-search-golden verbal_outline (mirror sd41 golden). Rewrite sd50 (meta-v2v-search-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden te
+- [x] **2026-05-21** -- T-P0-902: sd51 meta-event-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd51 (meta-event-rec-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden tem
+- [x] **2026-05-21** -- T-P0-903: sd52 meta-location-rec-golden verbal_outline (mirror sd41 golden). Rewrite sd52 (meta-location-rec-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden 
+- [x] **2026-05-21** -- T-P0-904: sd53 meta-spotify-music-golden verbal_outline (mirror sd41 golden). Rewrite sd53 (meta-spotify-music-golden) verbal_outline; mirror sd41 golden template.
+
+Depends on: T-P0-892 (sd41 golden
+- [x] **2026-05-21** -- T-P0-907: [Meta-MLSD] Closing gate: re-run drawer-header retrofit + cd94/cd96 sd:// xref + audit all 13 golden-conformant & visible. GAP A+B closing gate. After all 11 golden verbal_outline rewrites (T-P0-894..904) and the display_order fix (T-P0-906) l
+- [x] **2026-05-19** -- T-P0-914: Root-cause: which code path produced the checkbox/status drift (pre-910 lightweight investigation). ## Summary
+A ~30-minute read-only investigation that identifies the exact code path(s) that produced both drift directio
+- [x] **2026-05-19** -- T-P0-915: [HUMAN-REVIEW] Apply reconcile sweep after human approves the T-P0-911 dry-run diff. ## Summary
+Run reconcile_fully_checked_nodes --apply ONLY after a human has reviewed and approved the T-P0-911 dry-run d
+- [x] **2026-06-17** -- T-P1-581: [BQ-DEPTH-10] Primary-story batch: mark is_primary=1 for top 40 high-probability questions. From the Phase A matrix (BQ-DEPTH-01), propose the top 40 high-probability BQ questions (based on company overlap + aske
+- [x] **2026-06-17** -- T-P1-582: [BQ-DEPTH-11] Bulk probe_notes for remaining ~36 high-probability questions. After calibration samples (BQ-DEPTH-09) approved + primary flags set (BQ-DEPTH-10), write probe_notes for the remaining 
+- [x] **2026-06-17** -- T-P1-876: [DEBT] MLI: scripts/translate_p6_nodes.py syntax error (embedded markdown breaks outer triple-quote at L1972). ruff reports a fatal syntax error at scripts/seed/translate_p6_nodes.py:1973 (path moved from scripts/ -> scripts/seed/ 
+- [x] **2026-06-17** -- T-P1-881: [Meta-MLSD-narrative] Archetype migration for sd42/sd43/sd44 (oral_narrative shape, mirror T-P1-875 minimal-A). SCOPE NARROWED 2026-05-16: sd43/sd44 archetype migration FOLDED into T-P0-894/T-P0-895 (done as part of their golden rew
+- [x] **2026-06-17** -- T-P1-908: [ML-Infra-LLM] Add 'ML Infra · LLM' system-design tab + carve display_order band [300,400). FRONTEND. New top tab in SystemDesignList.tsx for Anthropic ML-Infra LLM system-design problems. Edits: (1) type Tab add
+- [x] **2026-06-17** -- T-P1-918: 115/171 reverse-drift QUICK TRIAGE (pct=100/0-checked = silent-corruption risk; advanced priority). ## Summary
+Fast git-history triage of the REVERSE drift (pct=100 + 0 checkboxes: nodes 115, 171) -- legit pre-checklist 
+- [x] **2026-05-19** -- T-P1-919: No-checklist drift fix: node 69 Regularization -- add confirmation checkbox + re-derive status (user-scoped: ONLY no-checklist, NOT 115/171/92). Discord user decision 2026-05-19 (msg 1506361186168606802) for the T-P0-914 no-checklist drift bucket. SCOPE: node 69 ON
+- [x] **2026-05-21** -- T-P1-920: [Adobe] Final round prep page: Stats + RAG (101 Q's, StudyNoteBuilder). **Source**: `docs/adobe_final_prep_source_2026-05-21.md` (user-provided 2026-05-21, complete content -- no need to expan
+- [x] **2026-06-17** -- T-P1-923: [reconcile] Clear reverse-drift on nodes 115/171 (pct=100->0, review->not_started) via idempotent seed. Follow-up from T-P1-918 triage (user verdict 2026-06-17: BOTH stale).
+
+Nodes 115 (pillar4.nlp_llm_applications.text_clas
+- [x] **2026-06-17** -- T-P2-877: [DEBT] MLI: scripts/ ruff cleanup (193 errors after L1972 fix). After the scripts/translate_p6_nodes.py L1972 syntax-error fix lands, `ruff check scripts/` still reports ~193 errors (6

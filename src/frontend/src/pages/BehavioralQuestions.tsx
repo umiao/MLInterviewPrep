@@ -10,12 +10,15 @@ import GoldenToggleButton from "../components/ui/GoldenToggleButton";
 import GoldenBadge from "../components/ui/GoldenBadge";
 import SignatureBadge from "../components/ui/SignatureBadge";
 import FacetPills from "../components/behavioral/FacetPills";
+import MarkdownPreview from "../components/ui/MarkdownPreview";
 import { goldenCardClass } from "../utils/goldenStyle";
 import { parsePitch } from "../utils/parsePitch";
 import { normalizeTagLabel } from "../utils/tagLabel";
 import type {
   BehavioralExample,
   BehavioralThemeSummary,
+  LinkedQuestion,
+  ProbeNotes,
   ThemeMode,
   ThemeTag,
 } from "../types/behavioral";
@@ -34,6 +37,8 @@ interface BehavioralQuestion {
   original_category: string | null;
   example_count: number;
   theme_tags?: ThemeTag[];
+  probe_notes?: ProbeNotes | null;
+  probe_notes_updated_at?: string | null;
 }
 
 interface CategorySummary {
@@ -223,7 +228,188 @@ function ExampleCard({
   );
 }
 
-function QuestionRow({
+/** True when a probe_notes payload has at least one non-empty section. */
+function hasProbeContent(probe?: ProbeNotes | null): probe is ProbeNotes {
+  if (!probe) return false;
+  return Boolean(
+    probe.core_signal ||
+      probe.what_good_looks_like?.length ||
+      probe.what_L5_adds?.length ||
+      probe.common_failure_modes?.length,
+  );
+}
+
+/**
+ * The standard "backup story" card (blue) shown under a question. Shared by the
+ * flat-list fallback (non-top-40 questions) and the "Also applies" panel under a
+ * primary card, so the two render identically (no duplication -- CLAUDE.md rule).
+ */
+function LinkedExampleCard({
+  ex,
+  question,
+  onExampleClick,
+}: {
+  ex: BehavioralExample;
+  question: BehavioralQuestion;
+  onExampleClick: (exampleId: string) => void;
+}) {
+  const link = ex.linked_questions.find(
+    (lq) => lq.question_id === question.question_id,
+  );
+  const exNeedsInput = ex.title.startsWith("[NEEDS-INPUT]");
+  return (
+    <div
+      className={`rounded-lg p-4 mb-2.5 border shadow-sm ${
+        exNeedsInput ? "bg-amber-50 border-amber-300" : "bg-blue-50 border-blue-200"
+      }`}
+    >
+      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+        <span className="text-sm font-mono font-bold text-blue-500">
+          {ex.example_id}
+        </span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onExampleClick(ex.example_id);
+          }}
+          className="text-[15px] text-blue-700 font-bold hover:text-blue-900 hover:underline text-left"
+          title="View full STAR example"
+        >
+          {ex.title}
+        </button>
+        <GoldenBadge golden={Boolean(ex.is_golden)} />
+        {exNeedsInput && (
+          <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
+            Needs Input
+          </span>
+        )}
+      </div>
+      {link?.relevance_note && (
+        <blockquote
+          className="text-sm text-green-700 border-l-3 border-green-400 pl-3 mb-2 leading-relaxed"
+          style={{ borderLeftWidth: "3px" }}
+        >
+          {link.relevance_note}
+        </blockquote>
+      )}
+      {ex.situation && (
+        <p className="text-sm text-gray-700 leading-relaxed">
+          <span className="text-blue-700 font-bold">S:</span>{" "}
+          {ex.situation.slice(0, 200)}
+          {ex.situation.length > 200 ? "..." : ""}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Gold-bordered prominent card for the question's PRIMARY story (the link with
+ * is_primary=1). Shows the full relevance_note as the "angle in" plus a STAR
+ * Situation preview, and a one-line "lead with this" hint.
+ */
+function PrimaryStoryCard({
+  example,
+  link,
+  onExampleClick,
+}: {
+  example: BehavioralExample;
+  link: LinkedQuestion | undefined;
+  onExampleClick: (exampleId: string) => void;
+}) {
+  return (
+    <div className="bq-primary-story-card rounded-xl border-2 border-amber-300 bg-amber-50/60 ring-1 ring-amber-200 p-4 mb-3 shadow-sm">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <span className="text-[11px] font-bold uppercase tracking-wider bg-amber-200 text-amber-900 px-2 py-0.5 rounded">
+          Primary story
+        </span>
+        <span className="text-sm font-mono font-bold text-amber-700">
+          {example.example_id}
+        </span>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onExampleClick(example.example_id);
+          }}
+          className="text-base text-amber-900 font-extrabold hover:underline text-left"
+          title="View full STAR example"
+        >
+          {example.title}
+        </button>
+        <GoldenBadge golden={Boolean(example.is_golden)} />
+      </div>
+      <p className="text-xs font-semibold text-amber-700 mb-2">
+        Lead with this story -- the note below is your angle in.
+      </p>
+      {link?.relevance_note && (
+        <blockquote
+          className="text-sm text-amber-900 border-l-4 border-amber-400 pl-3 mb-2 leading-relaxed"
+        >
+          {link.relevance_note}
+        </blockquote>
+      )}
+      {example.situation && (
+        <p className="text-sm text-gray-700 leading-relaxed">
+          <span className="text-amber-700 font-bold">S:</span>{" "}
+          {example.situation.slice(0, 220)}
+          {example.situation.length > 220 ? "..." : ""}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Renders the 4-section probe_notes panel (markdown). */
+function ProbeNotesPanel({ probe }: { probe: ProbeNotes }) {
+  const toMd = (items?: string[] | null) =>
+    (items ?? []).map((i) => `- ${i}`).join("\n");
+  const sections: { key: string; label: string; body: string }[] = [];
+  if (probe.core_signal) {
+    sections.push({ key: "core", label: "Core signal", body: probe.core_signal });
+  }
+  if (probe.what_good_looks_like?.length) {
+    sections.push({
+      key: "good",
+      label: "What good looks like",
+      body: toMd(probe.what_good_looks_like),
+    });
+  }
+  if (probe.what_L5_adds?.length) {
+    sections.push({
+      key: "l5",
+      label: "What L5 (Staff) adds",
+      body: toMd(probe.what_L5_adds),
+    });
+  }
+  if (probe.common_failure_modes?.length) {
+    sections.push({
+      key: "fail",
+      label: "Common failure modes",
+      body: toMd(probe.common_failure_modes),
+    });
+  }
+  return (
+    <div className="bq-probe-panel mt-2 rounded-lg border border-indigo-200 bg-indigo-50/40 p-4">
+      <div className="grid gap-3 sm:grid-cols-2">
+        {sections.map((s) => (
+          <div
+            key={s.key}
+            className="rounded-md bg-white border border-indigo-100 p-3"
+          >
+            <h5 className="text-xs font-bold uppercase tracking-wide text-indigo-700 mb-1">
+              {s.label}
+            </h5>
+            <div className="text-sm text-gray-800">
+              <MarkdownPreview markdown={s.body} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function QuestionRow({
   question,
   examples,
   expanded,
@@ -247,11 +433,22 @@ function QuestionRow({
       ex.linked_questions.some((lq) => lq.question_id === question.question_id) &&
       (!goldenOnly || ex.is_golden)
   );
+  const linkFor = (ex: BehavioralExample): LinkedQuestion | undefined =>
+    ex.linked_questions.find((lq) => lq.question_id === question.question_id);
+  // Primary story = the linked example whose link to THIS question has
+  // is_primary=1 (top-40 questions only; non-top-40 have none -> flat fallback).
+  const primaryExample = linkedExamples.find((ex) => linkFor(ex)?.is_primary);
+  const backupExamples = primaryExample
+    ? linkedExamples.filter((ex) => ex !== primaryExample)
+    : linkedExamples;
+  const showProbe = hasProbeContent(question.probe_notes);
   const themeTags = question.theme_tags ?? [];
   const MAX_VISIBLE_THEMES = 5;
   const visibleThemes = themeTags.slice(0, MAX_VISIBLE_THEMES);
   const overflowThemes = themeTags.slice(MAX_VISIBLE_THEMES);
   const [showOverflow, setShowOverflow] = useState(false);
+  const [showBackups, setShowBackups] = useState(false);
+  const [showProbePanel, setShowProbePanel] = useState(false);
 
   return (
     <div className="border-b border-gray-200 py-3">
@@ -355,64 +552,78 @@ function QuestionRow({
         )}
       </div>
 
-      {expanded && linkedExamples.length > 0 && (
+      {expanded && (
         <div className="ml-20 mt-3 mb-3">
-          {linkedExamples.map((ex) => {
-            const link = ex.linked_questions.find(
-              (lq) => lq.question_id === question.question_id
-            );
-            const exNeedsInput = ex.title.startsWith("[NEEDS-INPUT]");
-            return (
-              <div
-                key={ex.id}
-                className={`rounded-lg p-4 mb-2.5 border shadow-sm ${
-                  exNeedsInput
-                    ? "bg-amber-50 border-amber-300"
-                    : "bg-blue-50 border-blue-200"
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                  <span className="text-sm font-mono font-bold text-blue-500">
-                    {ex.example_id}
-                  </span>
+          {linkedExamples.length === 0 ? (
+            <div className="text-sm text-gray-500 italic">
+              No examples linked to this question yet.
+            </div>
+          ) : primaryExample ? (
+            <>
+              <PrimaryStoryCard
+                example={primaryExample}
+                link={linkFor(primaryExample)}
+                onExampleClick={onExampleClick}
+              />
+              {backupExamples.length > 0 && (
+                <div className="mb-2">
                   <button
+                    type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onExampleClick(ex.example_id);
+                      setShowBackups((v) => !v);
                     }}
-                    className="text-[15px] text-blue-700 font-bold hover:text-blue-900 hover:underline text-left"
-                    title="View full STAR example"
+                    aria-expanded={showBackups}
+                    className="text-sm font-semibold text-gray-600 hover:text-gray-900"
                   >
-                    {ex.title}
+                    {showBackups ? "[-]" : "[+]"} Also applies (
+                    {backupExamples.length})
                   </button>
-                  <GoldenBadge golden={Boolean(ex.is_golden)} />
-                  {exNeedsInput && (
-                    <span className="text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-400 px-2 py-0.5 rounded">
-                      Needs Input
-                    </span>
+                  {showBackups && (
+                    <div className="mt-2">
+                      {backupExamples.map((ex) => (
+                        <LinkedExampleCard
+                          key={ex.id}
+                          ex={ex}
+                          question={question}
+                          onExampleClick={onExampleClick}
+                        />
+                      ))}
+                    </div>
                   )}
                 </div>
-                {link?.relevance_note && (
-                  <blockquote className="text-sm text-green-700 border-l-3 border-green-400 pl-3 mb-2 leading-relaxed" style={{ borderLeftWidth: '3px' }}>
-                    {link.relevance_note}
-                  </blockquote>
-                )}
-                {ex.situation && (
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    <span className="text-blue-700 font-bold">S:</span>{" "}
-                    {ex.situation.slice(0, 200)}
-                    {ex.situation.length > 200 ? "..." : ""}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {expanded && linkedExamples.length === 0 && (
-        <div className="ml-20 mt-3 mb-3 text-sm text-gray-500 italic">
-          No examples linked to this question yet.
+              )}
+              {showProbe && (
+                <div>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowProbePanel((v) => !v);
+                    }}
+                    aria-expanded={showProbePanel}
+                    className="text-sm font-semibold text-indigo-700 hover:text-indigo-900"
+                  >
+                    {showProbePanel ? "[-]" : "[+]"} What this question probes
+                  </button>
+                  {showProbePanel && (
+                    <ProbeNotesPanel probe={question.probe_notes!} />
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {linkedExamples.map((ex) => (
+                <LinkedExampleCard
+                  key={ex.id}
+                  ex={ex}
+                  question={question}
+                  onExampleClick={onExampleClick}
+                />
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
