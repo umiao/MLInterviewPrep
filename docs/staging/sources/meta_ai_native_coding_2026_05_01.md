@@ -581,7 +581,7 @@ AC 把这个想法搬到 trie：
 •	沿 trie 走完 root → s → h → e（即 "she" 节点）
 •	fail(she) = he（因为 "he" 是 "she" 的最长真后缀，且 trie 中有 "he" 这条路径）
 •	这意味着：每当我们走完 "she"，应顺着 fail 链同时检查"是否在 'he' 这个 pattern 上也命中了"
-•	输出 "she" 和 "he" 两个命中 ✓
+•	输出 "she" 和 "he" 两个命中 
 为什么是线性
 关键 insight：主指针每前进 1 步，fail 跳跃总长度的均摊是 O(1)。这与 KMP 是同样的均摊论证：fail 指针只能往浅处跳（depth 严格变小），而每次主指针深入一步 depth 才 +1。所以总 fail 跳跃数 ≤ 总主指针前进数 = O(|text|)。
 加上每个命中输出 O(1)，总 O(|text| + 命中数)。
@@ -632,10 +632,10 @@ Prompt 模板 3：实现阶段
 Prompt 模板 4：审查阶段
 "对于这段代码：[code]。请检查：(1) 时间复杂度是否真的是我预期的 O(...)？(2) 哪些 edge case 没处理？(3) 哪一行最有可能在面试中被追问？给出具体行号。"
 反模式（不要这样 prompt）
-•	❌ "帮我写一个高效的解法"
-•	❌ "这道题最优解是什么？"
-•	❌ "请帮我做这道面试题"
-•	❌ "这段代码哪里可以优化？"（太开放，AI 会瞎改）
+•	[FAIL] "帮我写一个高效的解法"
+•	[FAIL] "这道题最优解是什么？"
+•	[FAIL] "请帮我做这道面试题"
+•	[FAIL] "这段代码哪里可以优化？"（太开放，AI 会瞎改）
 ________________________________________
 第 6 部分：备考刷题清单
 必须熟练（trie 类）
@@ -736,10 +736,10 @@ Bellman:
 State 空间 ~10⁶ reachable, Python 慢, C++ 可
 → 实战取 MC rollout 做采样近似
 Implementation Pitfalls
-✗ def f(x, memo={})            # 默认参数共享坑
-✓ @lru_cache(maxsize=None)     # state 是 tuple, 函数纯 → 一行搞定
-✗ memo 作参数传                 # 无回退需求, 全局共享即可
-✓ rank-level DP + 花色 filter 单独函数  # 对称性 + 灵活性
+ def f(x, memo={})            # 默认参数共享坑
+ @lru_cache(maxsize=None)     # state 是 tuple, 函数纯 → 一行搞定
+ memo 作参数传                 # 无回退需求, 全局共享即可
+ rank-level DP + 花色 filter 单独函数  # 对称性 + 灵活性
 Meta-Prompt（AI 协作四步）
 1. CLARIFY  先问澄清四问, 不动键盘
 2. TIER     口头报 Tier 1→5 的爬升路线, 选 Tier 4 实战

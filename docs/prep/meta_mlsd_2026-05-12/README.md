@@ -7,10 +7,10 @@ User feedback on 2026-05-12 06:36 (Discord msg `1503646926468415548`): 5-task ba
 2. Wanted single-link consolidation — pushed back, user accepted, but wants the drawer-index UX overhaul
 
 Post-discussion (2026-05-12 06:55), user authorized:
-- ✅ New `prep_note` for the RecSys-models technical content
-- ✅ Retrofit all 4 existing Meta MLSD surfaces (doc 94 / 95 / 96 + Reels SD id=41) with prominent **Drawer 入口** section at TOP
-- ✅ Strict dedupe — same URI must NOT appear in any one doc's Drawer 入口 section twice
-- ✅ Markdown-native visual prominence (NO emoji per default + user's "如果你实在想用 emoji 可以事后把对应脚本清理了" reluctance signal)
+- [DONE] New `prep_note` for the RecSys-models technical content
+- [DONE] Retrofit all 4 existing Meta MLSD surfaces (doc 94 / 95 / 96 + Reels SD id=41) with prominent **Drawer 入口** section at TOP
+- [DONE] Strict dedupe — same URI must NOT appear in any one doc's Drawer 入口 section twice
+- [DONE] Markdown-native visual prominence (NO emoji per default + user's "如果你实在想用 emoji 可以事后把对应脚本清理了" reluctance signal)
 
 ## Files
 

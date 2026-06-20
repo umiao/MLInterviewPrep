@@ -222,8 +222,8 @@
 - **Tags**: #react-query #invalidation #generic-components #integration-risk
 
 ## [2026-04-20] Copying raw notes into KG docs needs a two-pass pass-through (emoji + inline math)
-- **Context**: User provided raw notes with `❌`/`✅` markers and requested "critical distillation" into the MHA/MQA/GQA leaf (node 225). I lifted the markers directly and also wrapped an inline formula `x = x + \text{Attn}(x)` in backticks (code span) to "make it look formula-like."
-- **What went wrong**: (1) Project CLAUDE.md explicitly forbids emoji in any doc / config / code; I violated it by passing through `❌`/`✅` as-is. (2) Markdown code spans (backticks) suppress KaTeX, so the backticked inline formula rendered literally as `x = x + \text{Attn}(x)` instead of math. User caught both on the frontend.
+- **Context**: User provided raw notes with `[FAIL]`/`[DONE]` markers and requested "critical distillation" into the MHA/MQA/GQA leaf (node 225). I lifted the markers directly and also wrapped an inline formula `x = x + \text{Attn}(x)` in backticks (code span) to "make it look formula-like."
+- **What went wrong**: (1) Project CLAUDE.md explicitly forbids emoji in any doc / config / code; I violated it by passing through `[FAIL]`/`[DONE]` as-is. (2) Markdown code spans (backticks) suppress KaTeX, so the backticked inline formula rendered literally as `x = x + \text{Attn}(x)` instead of math. User caught both on the frontend.
 - **Fix**: T-P2-571 — swap backticks to `$...$` for inline math; replace emoji with ASCII `**[误]** / **[对]**` tags. Also ran a cross-node emoji regex scan over all docs I edited this session to ensure nothing else leaked.
 - **Rule**: When absorbing user-supplied raw notes into KG docs, do a two-pass translation: (a) **rendering pass** — every piece of math has to be in `$...$` or `$$...$$`; never use backticks for math ('looks like code' is not good enough reason). (b) **project-convention pass** — apply the no-emoji rule; replace unicode check/cross with ASCII text tags. Run a regex scan (`[\u2600-\u27BF\U0001F300-\U0001FAFF]`) before claiming done.
 - **Tags**: #markdown #katex #emoji #project-convention #content-authoring

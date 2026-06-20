@@ -350,12 +350,12 @@ Client --> API Gateway --> Rec Orchestrator
 
 ### 7-Category Pass-Bar (映射 id=18 L5 打分表)
 
-- [x] **Requirements**：功能/非功能/排除齐全 ✓（DAU 100M、p99<200ms、多目标、冷启澄清、out-of-scope 列出广告/审核/支付）。
-- [x] **Capacity**：QPS+storage+bandwidth 数字齐全 + **每数字绑定决策** ✓（256 GB→ANN sharding；350 K→GPU；8 TB/day→Kafka+S3）。
-- [x] **Architecture**：9 服务按 read/write+SLA 切 ✓（S11a）；编号数据流 ✓；8 类存储选型带理由 ✓（S11b）。
-- [x] **Deep Dive**：召回/排序/冷启/延迟 4 个深挖 ✓；含 log-Q softmax、MMoE gate、MMR、PSI、融合公式 ✓。
-- [x] **Reliability**：4 层 failure domain ✓；降级链 精排→粗排→召回→热门 ✓；熔断/超时/永不空结果 ✓。
-- [x] **Monitoring**：SLO 9 条技术+业务 ✓（S8b）；告警分级 P0/P1/P2；季度 chaos 演练。
+- [x] **Requirements**：功能/非功能/排除齐全 （DAU 100M、p99<200ms、多目标、冷启澄清、out-of-scope 列出广告/审核/支付）。
+- [x] **Capacity**：QPS+storage+bandwidth 数字齐全 + **每数字绑定决策** （256 GB→ANN sharding；350 K→GPU；8 TB/day→Kafka+S3）。
+- [x] **Architecture**：9 服务按 read/write+SLA 切 （S11a）；编号数据流 ；8 类存储选型带理由 （S11b）。
+- [x] **Deep Dive**：召回/排序/冷启/延迟 4 个深挖 ；含 log-Q softmax、MMoE gate、MMR、PSI、融合公式 。
+- [x] **Reliability**：4 层 failure domain ；降级链 精排→粗排→召回→热门 ；熔断/超时/永不空结果 。
+- [x] **Monitoring**：SLO 9 条技术+业务 （S8b）；告警分级 P0/P1/P2；季度 chaos 演练。
 - [x] **Communication**：3 大 tradeoff（延迟/多样/新鲜度）主动表达；缺点+缓解主动提；未覆盖明确。
 
 7 类全硬 → strong L5。最具区分度的展示点：**S11a service-by-SLA**、**S8b 双指标 SLO**、**S12b 7 行 tradeoff**。

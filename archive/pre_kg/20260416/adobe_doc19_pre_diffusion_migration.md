@@ -1341,10 +1341,10 @@ DPO:   Pretrained → SFT → DPO Loss → Aligned
 
 | 方法 | 核心思想 | 重要程度 |
 |------|---------|---------|
-| **GRPO (Group Relative Policy Optimization，分组相对策略优化)** | 去掉 value model：同一 prompt 生成一组回答，用组内 reward 均值作 baseline 计算 advantage。DeepSeek 采用 | ⭐⭐⭐ |
-| **RLAIF (Reinforcement Learning from AI Feedback, AI反馈强化学习)** (Constitutional AI) | 用 AI 代替人类生成偏好标注，基于预定义"宪法原则"。解决标注成本和可扩展性问题。Anthropic 提出 | ⭐⭐⭐ |
-| **RAFT (Reward-rAnked Fine-Tuning，奖励排序微调)** | 用 RM 筛选高分回答做 SFT，完全跳过 RL，RM 当筛选器而非优化信号 | ⭐⭐ |
-| **ReMax (REINFORCE with Maximum baseline)** | REINFORCE + baseline 替代 PPO，降低实现复杂度 | ⭐ |
+| **GRPO (Group Relative Policy Optimization，分组相对策略优化)** | 去掉 value model：同一 prompt 生成一组回答，用组内 reward 均值作 baseline 计算 advantage。DeepSeek 采用 | *** |
+| **RLAIF (Reinforcement Learning from AI Feedback, AI反馈强化学习)** (Constitutional AI) | 用 AI 代替人类生成偏好标注，基于预定义"宪法原则"。解决标注成本和可扩展性问题。Anthropic 提出 | *** |
+| **RAFT (Reward-rAnked Fine-Tuning，奖励排序微调)** | 用 RM 筛选高分回答做 SFT，完全跳过 RL，RM 当筛选器而非优化信号 | ** |
+| **ReMax (REINFORCE with Maximum baseline)** | REINFORCE + baseline 替代 PPO，降低实现复杂度 | * |
 
 ### DPO 变体
 
@@ -2712,9 +2712,9 @@ PagedAttention：
 投机解码：
   Draft:  "今天" → 7B快速生成 → "天气很好"（3个候选，很快）
   Verify: "今天[天气很好]" → 70B 一次前向传播验证 3 个 token
-    "天气": p_target ≥ p_draft? ✓ 接受
-    "很":   p_target ≥ p_draft? ✓ 接受
-    "好":   p_target ≥ p_draft? ✓ 接受
+    "天气": p_target ≥ p_draft?  接受
+    "很":   p_target ≥ p_draft?  接受
+    "好":   p_target ≥ p_draft?  接受
   总计: 1次 70B 前向传播 → 3个 token！
 ```
 
@@ -3533,12 +3533,12 @@ Z(x) 是归一化常数（配分函数）。
 2. Adam vs AdamW（decoupled weight decay）
 3. QLoRA 三个创新点
 
-### 🟡 重要
+### [yellow] 重要
 4. CLIP 训练目标与 zero-shot 原理
 5. Pre-norm vs Post-norm
 6. Cross-entropy 不用 MSE 的梯度原因
 
-### 🟢 锦上添花
+### [green] 锦上添花
 7. GAN-BERT semi-supervised
 8. torch.distributed backend 选择
 

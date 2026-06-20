@@ -6,13 +6,13 @@
 基于上面的分析，给你一个更新的 timing 建议，注意我把"strong moment 时刻"显式标出来了：
 
 0-3 min：Framing（独裁式，60秒说完一个 proposal，30秒确认）
-3-5 min：⭐ Strong moment #1: 指出 problem 的 unique twist（"the core decision here is X, not Y"）
+3-5 min：* Strong moment #1: 指出 problem 的 unique twist（"the core decision here is X, not Y"）
 5-12 min：Data & labels（中等深度，重点 surface 1 个 bias 问题）
-12-15 min：⭐ Strong moment #2: 一个 sophisticated label 或 bias 洞察
+12-15 min：* Strong moment #2: 一个 sophisticated label 或 bias 洞察
 15-25 min：Model（two-stage，主动问面试官想 deep dive 哪边）
-25-28 min：⭐ Strong moment #3: 一个 production scar 或量化直觉
+25-28 min：* Strong moment #3: 一个 production scar 或量化直觉
 28-35 min：Evaluation（offline + online + counterfactual）
-35-40 min：⭐ Strong moment #4: zoom-out summary + top 3 risks
+35-40 min：* Strong moment #4: zoom-out summary + top 3 risks
 40-45 min：Serving / monitoring（轻描淡写）+ Q&A
 
 
@@ -29,10 +29,10 @@ Calibration：跨 surface（email/push/in-app）混排需要概率校准
 关于"减少沟通澄清"的取舍
 你的直觉对了一半。减少澄清的"广度"是对的，但不要减少澄清的"深度"。区别是：
 
-❌ 不要再 triage email/push/in-app/portal 这种 surface 维度
-❌ 不要展开 FR/NFR/QPS/availability
-✅ 要快速锁定一句话假设："I'll assume we're optimizing for in-app notification ranking with a daily candidate pool of ~1000 per user, latency budget ~200ms"——说完就往下走，不等面试官反复确认
-✅ 要在每个 ML 决策点 surface trade-off，但自己给出推荐答案，不要把选择权抛回去
+[FAIL] 不要再 triage email/push/in-app/portal 这种 surface 维度
+[FAIL] 不要展开 FR/NFR/QPS/availability
+[DONE] 要快速锁定一句话假设："I'll assume we're optimizing for in-app notification ranking with a daily candidate pool of ~1000 per user, latency budget ~200ms"——说完就往下走，不等面试官反复确认
+[DONE] 要在每个 ML 决策点 surface trade-off，但自己给出推荐答案，不要把选择权抛回去
 
 面试官说 "on track" 但给了"加面"的 feedback——我的解读是：方向对，但深度和决断力不够。你被自己的澄清习惯拖慢了，没来得及展示 ML 深度。这次要"快速 frame、自信决策、深入 ML 内核"。
 Golden example 的构造
@@ -166,7 +166,7 @@ Second, Reels consumption is session-based and continuous. Unlike a structured f
 I'm choosing not to deep-dive on cold-start, content moderation, or multi-resolution storage for now, but I'll flag them as risks later.
 Does this framing make sense, or is there a different angle you'd like me to anchor on?"
 
-⭐ Strong Moment #1 = 上面的 "First" 段
+* Strong Moment #1 = 上面的 "First" 段
 为什么 strong: pretrained + fine-tune + upload-time compute + quarterly refresh + decoupling。每一句话都是 production-aware ML decision，不是 buzzword。
 关键句式
 
@@ -174,7 +174,7 @@ Does this framing make sense, or is there a different angle you'd like me to anc
 "I'm choosing not to deep-dive on [X, Y]..."
 "Does this make sense, or is there a different angle..."
 
-❌ 不要说的话
+[FAIL] 不要说的话
 
 "Let me clarify the requirements" / "What's the QPS?" / "What's the latency budget?" / "Which surface—mobile or web?"
 "I'm going to follow a standard recommendation pipeline..."（cookbook 语言）
@@ -187,7 +187,7 @@ Does this framing make sense, or is there a different angle you'd like me to anc
 Data sources: We have impression logs (what we showed), engagement logs (watch time, likes, comments, shares, follows, swipe events), and content metadata (uploader, duration, embeddings, hashtags). We also have user-side data: long-term profile, recent session history, and demographic features where available.
 Label schema — and this is where Reels diverges from standard ranking problems. I'd argue against a single binary label, in favor of multiple labels feeding multi-task heads:"
 
-⭐ Strong Moment #2 starts here (60-90 秒)
+* Strong Moment #2 starts here (60-90 秒)
 
 "Label 1: normalized watch ratio, defined as watch_time divided by video_duration, capped at 1.0. Critical to normalize—raw watch time would systematically over-weight long content. A 3-second video watched fully should count as much as a 60-second video watched fully.
 Label 2: strong positive (binary)—explicit engagement like, comment, share, follow, save. Sparse but high-precision.
@@ -256,7 +256,7 @@ Bias 段（这是 Strong Moment #3）
 The dominant bias in Reels is exposure bias—we only have labels on content we chose to show. This creates a feedback loop where the model reinforces past retrieval decisions and progressively narrows the recommendation space. Three layers of mitigation:
 Standard correction at training time: IPS or propensity weighting on training samples, weighting inversely by probability-of-exposure. This corrects bias in the data we have."
 
-⭐ Strong Moment #3 核心段（90 秒）
+* Strong Moment #3 核心段（90 秒）
 
 "But I want to push the framing further—I'd reframe exposure bias as a system-level data acquisition problem, not just a training-time statistical correction. Three places we can intervene:
 First, onboarding as labeled exploration. New users go through cold-start anyway. Rather than treating cold-start as a constraint to overcome, treat it as an opportunity to collect high-quality preference labels under controlled exposure—surface a curated diverse set covering distinct content clusters, and use early engagement as relatively unbiased preference signals.
@@ -302,7 +302,7 @@ Offline-online alignment as itself a metric
 
 
 38-42 min · Zoom-out + Top Risks
-⭐ Strong Moment #4（约 2-3 分钟）
+* Strong Moment #4（约 2-3 分钟）
 
 "Let me zoom out for a moment and summarize the design, then flag the top risks I see.
 We have a two-stage retrieval-plus-ranking system with multimodal content understanding, multi-task ranking heads, session-aware features, exposure bias mitigation via active exploration policy, and evaluation across offline, online, and long-term layers.

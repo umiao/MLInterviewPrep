@@ -33,43 +33,43 @@
 - **Priority**: P0
 - **Complexity**: L
 - **Depends on**: None
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-google_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-google_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-google_2026-05-10.md, (3) move source seed scripts (scripts/seed_google_*.py / scripts/content_*google*.py / scripts/patch_google_*.py) -> archive/seed_scripts/B4a-google/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_google_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-google_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-google_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-google_2026-05-10.md, (3) move source seed scripts (scripts/seed_google_*.py / scripts/content_*google*.py / scripts/patch_google_*.py) -> archive/seed_scripts/B4a-google/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_google_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-823: [KG-INT B4b-lyra] Lyra execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: M
 - **Depends on**: T-P0-822
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-lyra_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-lyra_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-lyra_2026-05-10.md, (3) move source seed scripts (scripts/seed_lyra_*.py / scripts/content_*lyra*.py / scripts/patch_lyra_*.py) -> archive/seed_scripts/B4a-lyra/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_lyra_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-lyra_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-lyra_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-lyra_2026-05-10.md, (3) move source seed scripts (scripts/seed_lyra_*.py / scripts/content_*lyra*.py / scripts/patch_lyra_*.py) -> archive/seed_scripts/B4a-lyra/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_lyra_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-824: [KG-INT B4b-pinterest-toc] Pinterest-TOC execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: M
 - **Depends on**: T-P0-823
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-pinterest-toc_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-toc_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-toc_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_toc_*.py / scripts/content_*pinterest_toc*.py / scripts/patch_pinterest_toc_*.py) -> archive/seed_scripts/B4a-pinterest-toc/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_toc_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-pinterest-toc_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-toc_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-toc_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_toc_*.py / scripts/content_*pinterest_toc*.py / scripts/patch_pinterest_toc_*.py) -> archive/seed_scripts/B4a-pinterest-toc/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_toc_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-825: [KG-INT B4b-pinterest-concepts] Pinterest-CONCEPTS execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: L
 - **Depends on**: T-P0-824
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-pinterest-concepts_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-concepts_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-concepts_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_concepts_*.py / scripts/content_*pinterest_concepts*.py / scripts/patch_pinterest_concepts_*.py) -> archive/seed_scripts/B4a-pinterest-concepts/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_concepts_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-pinterest-concepts_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-concepts_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-concepts_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_concepts_*.py / scripts/content_*pinterest_concepts*.py / scripts/patch_pinterest_concepts_*.py) -> archive/seed_scripts/B4a-pinterest-concepts/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_concepts_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-826: [KG-INT B4b-pinterest-prep] Pinterest-prep execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: M
 - **Depends on**: T-P0-825
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-pinterest-prep_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-prep_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-prep_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_prep_*.py / scripts/content_*pinterest_prep*.py / scripts/patch_pinterest_prep_*.py) -> archive/seed_scripts/B4a-pinterest-prep/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_prep_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-pinterest-prep_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-pinterest-prep_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-pinterest-prep_2026-05-10.md, (3) move source seed scripts (scripts/seed_pinterest_prep_*.py / scripts/content_*pinterest_prep*.py / scripts/patch_pinterest_prep_*.py) -> archive/seed_scripts/B4a-pinterest-prep/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_pinterest_prep_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-827: [KG-INT B4b-uber] Uber execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: L
 - **Depends on**: T-P0-826
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-uber_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-uber_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-uber_2026-05-10.md, (3) move source seed scripts (scripts/seed_uber_*.py / scripts/content_*uber*.py / scripts/patch_uber_*.py) -> archive/seed_scripts/B4a-uber/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_uber_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-uber_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-uber_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-uber_2026-05-10.md, (3) move source seed scripts (scripts/seed_uber_*.py / scripts/content_*uber*.py / scripts/patch_uber_*.py) -> archive/seed_scripts/B4a-uber/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_uber_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P0-828: [KG-INT B4b-meta] Meta execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P0
 - **Complexity**: L
 - **Depends on**: T-P0-827
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-meta_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-meta_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-meta_2026-05-10.md, (3) move source seed scripts (scripts/seed_meta_*.py / scripts/content_*meta*.py / scripts/patch_meta_*.py) -> archive/seed_scripts/B4a-meta/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_meta_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-meta_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-meta_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-meta_2026-05-10.md, (3) move source seed scripts (scripts/seed_meta_*.py / scripts/content_*meta*.py / scripts/patch_meta_*.py) -> archive/seed_scripts/B4a-meta/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_meta_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-606: Fix emoji-scan cp1252 crash + lock regex consistency (F-1 + F-3 + meta-test)
 - **Priority**: P1
@@ -87,65 +87,6 @@ REVISED EXECUTION SCOPE when unblocked:
 2. scripts/check_emoji.py + scripts/check_emoji_files.py: F-1 UTF-8 stream reconfigure at main() entry (defense in depth for future U+1F6xx emoji).
 3. tests/test_emoji_regex.py (or new tests/test_emoji_scanner.py): regex-equality meta-test + subprocess cp1252 env test (reviewer's revised F-3).
 4. User-chosen handling of PROGRESS.md:590 FE0F (option A/B/C pending).
-
-#### T-P1-627: Add display_label short field to principle_tags so pills show short labels (full phrase in tooltip)
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Follow-up to T-P0-626. Pill UI primitive is for short labels; commit e52d568 (2026-04-23) put 33-char-avg phrases in principle_tags. T-P0-626 patches the layout to tolerate long phrases; this ticket fixes the data layer.
-
-GATE (manual, intentional hack): status=blocked even though depends_on=None. Reason: programmatic schema has no 'not_before' field and creating a sentinel-task pattern is overhead for one ticket. Description-only soft gates are insufficient because the autonomous orchestrator's task picker reads only DB fields. Therefore status=blocked is the load-bearing gate. Re-open by manually flipping to active.
-
-UNGATE WHEN: All Uber final-round interviews complete (last is May 4 Coding 2 with Ali Shameli). Manually run: `task_db.py update T-P1-627 --status active`. Re-launch autonomous_run.sh; the orchestrator will then pick this up.
-
-Approach (when ungated):
-- Add 'display_label' (~12 chars) to principle_tags source-of-truth seed
-- Backend exposes both slug and display_label
-- Frontend pills render display_label; tooltip shows full phrase
-- Tags missing display_label fall back to label or auto-truncate
-
-AC:
-- All 8 EX-01 principle_tags have hand-crafted display_label
-- Pills show short labels; tooltip on hover shows full phrase
-- T-P0-626's _-to-space rendering becomes unnecessary once this ships
-
-Scope: backend schema + router + frontend pill rendering + seed. M complexity.
-
-#### T-P1-644: [CHEATSHEET-4] Author cheat-sheets for 4 eBay projects (display_order 1-4)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-641
-- **Description**: Slugs: module-arbitration, llm-orchestration, pbe-pipeline, ranking-allocation. Source each cheat sheet from the existing system_designs.{overview,architecture,dataflow,formulas,production_constraints,tradeoffs,defense,verbal_outline} columns -- do NOT invent new content, distill from what is already there. Format MUST match doc 85 §1.6: (a) code-fence vertical pseudo-arch; (b) keywords block (bold industry jargon); (c) Senior signal table (不及格 vs Staff Golden); (d) mini jargon glossary. Length budget: ~2000 chars per cheat sheet. Write to cheat_sheet column via idempotent seed script scripts/seed_cheat_sheets_ebay_projects.py (upsert by slug, only update if content_hash differs). AC: 4 rows have non-null cheat_sheet; markdown lints; KaTeX renders if formulas used; vitest of CheatSheetCard with one of these 4 as fixture passes.
-
-#### T-P1-645: [CHEATSHEET-5] Author cheat-sheets for 4 eBay reference docs (display_order 5-8)
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-641
-- **Description**: Slugs: database-comparison, distributed-task-queue, vibe-code-engineering-patterns, ml-system-design-patterns. These are reference / pattern docs not single design problems, so the cheat sheet format adapts: (a) for database-comparison -- side-by-side decision matrix (workload -> recommended store) instead of vertical pseudo-arch; (b) for distributed-task-queue -- failure-mode table + idempotency strategy keywords; (c) for vibe-code -- pattern bullet-list with one-line trade-off each; (d) for ml-sd-patterns -- the cross-cutting senior signals from doc 85 §3 are a strong template, mirror that style. Same length budget (~2000 chars), same idempotent seed pattern (scripts/seed_cheat_sheets_ebay_refs.py). AC: 4 rows have non-null cheat_sheet; rendered cards visually distinct from project cards (badge color differs).
-
-#### T-P1-646: [CHEATSHEET-6] Author cheat-sheets for 7 Pinterest ML problems
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-641
-- **Description**: Slugs: pinterest-ad-ctr, pinterest-embeddings, pinterest-chatbot-pins, pinterest-pin-ranking, pinterest-pins-search, pinterest-notification-reco, pinterest-catalog-bulk-update. Source from existing system_designs columns AND from any company_documents rows where company.slug='pinterest' and the doc maps to one of these 7 problems (cross-reference by title). Format MUST match doc 85 §1.6 -- vertical pseudo-arch + keywords + senior table + mini glossary. Pinterest-specific jargon to call out: PinSage, GraphSAGE, two-tower, Galaxy item embeddings, Pixie random walk, AutoML reranker -- expand each acronym in the glossary. Idempotent seed: scripts/seed_cheat_sheets_pinterest.py. Length budget per card ~2000 chars. AC: all 7 rows have non-null cheat_sheet; the vibe-code-style 'badge' on the card reads 'Pinterest'; manual smoke test on /system-design?tab=cheatsheet shows them grouped together visually.
-
-#### T-P1-647: [CHEATSHEET-7] Author cheat-sheets for 10 generic SD problems (batch 1: Core Infra + Social/Real-time + Geo)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-641
-- **Description**: Batch 1 slugs: interview-url-shortener, interview-rate-limiter, interview-distributed-cache, interview-notification-system, interview-news-feed, interview-chat-system, interview-live-comments, interview-game-leaderboard, interview-ride-sharing, interview-proximity-service. Format per doc 85 §1.6 (vertical pseudo-arch + keywords + senior table + mini glossary). Source from existing system_designs columns. Length ~1500 chars (these are interview-prep concise cards, slightly tighter than the eBay project cards). Idempotent seed: scripts/seed_cheat_sheets_generic_sd_batch1.py. AC: 10 rows have non-null cheat_sheet; ruff/mypy clean; vitest passes.
-
-#### T-P1-648: [CHEATSHEET-8] Author cheat-sheets for 9 generic SD problems (batch 2: Search/Data + Storage/Media + Specialized)
-- **Priority**: P1
-- **Complexity**: L
-- **Depends on**: T-P1-641
-- **Description**: Batch 2 slugs: interview-search-autocomplete, interview-top-k-heavy-hitters, interview-ad-click-aggregator, interview-web-crawler, interview-video-streaming, interview-cloud-storage, interview-price-drop-tracker, interview-online-judge, interview-ticket-reservation, interview-auction-system. (10 slugs total -- batch 2 takes the remainder.) Same format as batch 1 (~1500 chars, doc 85 §1.6 style, idempotent seed scripts/seed_cheat_sheets_generic_sd_batch2.py). AC: every interview-* row in system_designs has non-null cheat_sheet after this task lands.
-
-#### T-P1-649: [CHEATSHEET-9] Smoke test: load /system-design?tab=cheatsheet, verify all 37 cards render, no console errors
-- **Priority**: P1
-- **Complexity**: S
-- **Depends on**: T-P1-648
-- **Description**: Final integration smoke test (manual + automated): (1) start dev server (npm run dev + uvicorn); (2) navigate to http://localhost:5173/system-design?tab=cheatsheet; (3) verify ALL rows in system_designs have a rendered card (count == row count); (4) zero console errors; (5) KaTeX formulas render where present; (6) deep-link with #<slug> hash scrolls correctly; (7) prev/next nav still works on detail pages; (8) Interview Prep + eBay Projects tabs still render unchanged (regression check). Append a screenshot or text-only confirmation to PROGRESS.md. Add a vitest E2E-ish test that mounts SystemDesignList and asserts all 3 tabs render their expected card count. AC: all 8 verification points pass; no regression in existing tabs.
 
 #### T-P1-657: Invariant-3 promotion: doc 84 §5 N-gram LM + problem 1097 to seed scripts
 - **Priority**: P1
@@ -211,37 +152,37 @@ COMPLEXITY: M
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: T-P1-815, T-P0-828
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-adobe_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-adobe_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-adobe_2026-05-10.md, (3) move source seed scripts (scripts/seed_adobe_*.py / scripts/content_*adobe*.py / scripts/patch_adobe_*.py) -> archive/seed_scripts/B4a-adobe/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_adobe_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-adobe_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-adobe_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-adobe_2026-05-10.md, (3) move source seed scripts (scripts/seed_adobe_*.py / scripts/content_*adobe*.py / scripts/patch_adobe_*.py) -> archive/seed_scripts/B4a-adobe/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_adobe_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-830: [KG-INT B4b-linkedin] LinkedIn execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: T-P1-816, T-P1-829
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-linkedin_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-linkedin_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-linkedin_2026-05-10.md, (3) move source seed scripts (scripts/seed_linkedin_*.py / scripts/content_*linkedin*.py / scripts/patch_linkedin_*.py) -> archive/seed_scripts/B4a-linkedin/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_linkedin_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-linkedin_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-linkedin_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-linkedin_2026-05-10.md, (3) move source seed scripts (scripts/seed_linkedin_*.py / scripts/content_*linkedin*.py / scripts/patch_linkedin_*.py) -> archive/seed_scripts/B4a-linkedin/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_linkedin_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-831: [KG-INT B4b-tiktok] TikTok execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: T-P1-817, T-P1-830
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-tiktok_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-tiktok_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-tiktok_2026-05-10.md, (3) move source seed scripts (scripts/seed_tiktok_*.py / scripts/content_*tiktok*.py / scripts/patch_tiktok_*.py) -> archive/seed_scripts/B4a-tiktok/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_tiktok_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-tiktok_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-tiktok_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-tiktok_2026-05-10.md, (3) move source seed scripts (scripts/seed_tiktok_*.py / scripts/content_*tiktok*.py / scripts/patch_tiktok_*.py) -> archive/seed_scripts/B4a-tiktok/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_tiktok_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-832: [KG-INT B4b-slack] Slack execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P1
 - **Complexity**: M
 - **Depends on**: T-P1-818, T-P1-831
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-slack_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-slack_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-slack_2026-05-10.md, (3) move source seed scripts (scripts/seed_slack_*.py / scripts/content_*slack*.py / scripts/patch_slack_*.py) -> archive/seed_scripts/B4a-slack/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_slack_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-slack_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-slack_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-slack_2026-05-10.md, (3) move source seed scripts (scripts/seed_slack_*.py / scripts/content_*slack*.py / scripts/patch_slack_*.py) -> archive/seed_scripts/B4a-slack/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_slack_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-833: [KG-INT B4b-doordash] DoorDash execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: T-P1-819, T-P1-832
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-doordash_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-doordash_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-doordash_2026-05-10.md, (3) move source seed scripts (scripts/seed_doordash_*.py / scripts/content_*doordash*.py / scripts/patch_doordash_*.py) -> archive/seed_scripts/B4a-doordash/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_doordash_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-doordash_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-doordash_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-doordash_2026-05-10.md, (3) move source seed scripts (scripts/seed_doordash_*.py / scripts/content_*doordash*.py / scripts/patch_doordash_*.py) -> archive/seed_scripts/B4a-doordash/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_doordash_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-834: [KG-INT B4b-parspec] PARSPEC execute: hard-archive + skeleton seed + acceptance proof
 - **Priority**: P1
 - **Complexity**: S
 - **Depends on**: T-P1-820, T-P1-833
-- **Description**: EXECUTE (after manual unblock following user 👍 on docs/archive_plans/B4a-parspec_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-parspec_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-parspec_2026-05-10.md, (3) move source seed scripts (scripts/seed_parspec_*.py / scripts/content_*parspec*.py / scripts/patch_parspec_*.py) -> archive/seed_scripts/B4a-parspec/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_parspec_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
+- **Description**: EXECUTE (after manual unblock following user [approved] on docs/archive_plans/B4a-parspec_2026-05-10.md). Steps: (1) generate archive/company_internalized/B4a-parspec_2026-05-10_restore.sql with INSERT statements for every row to be deleted, (2) write full prose dump to archive/company_internalized/B4a-parspec_2026-05-10.md, (3) move source seed scripts (scripts/seed_parspec_*.py / scripts/content_*parspec*.py / scripts/patch_parspec_*.py) -> archive/seed_scripts/B4a-parspec/, (4) DELETE rows per §4 plan, (5) author NEW seed scripts/seed_parspec_drawer_index.py for the thin skeleton doc and run it (Invariant 3 compliance), (6) run scripts/audit_uri_consistency.py and assert exit 0, (7) execute the §2 'verifiable queries' and capture output as PROGRESS acceptance proof. Idempotent (re-runs detect already-archived state and no-op). AC: all 7 steps pass; PROGRESS entry includes verifiable-query outputs; UI loads / company page without dangling refs.
 
 #### T-P1-909: [ML-Infra-LLM] Seed anthropic-distributed-model-deployment golden (500GB model distribution SD)
 - **Priority**: P1
@@ -299,94 +240,6 @@ Extract drawer navigation out of company_documents.content markdown into a struc
 - [ ] AC6 (E2 decision gate): drawer_nav abstraction holds with NO regression on >=3 MLSD docs for >=2 weeks (no schema tweak, no retrofit-class op). E2 must NOT start until this AC is checked; once checked, human decides whether to proceed to E2 or hold.
 
 ## Complexity: M. Deps: None.
-
-#### T-P2-207: [SYNC] Remove deprecated stop-cache from helixos + template test_check.py
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: Remove deprecated stop-cache from BOTH helixos/.claude/hooks/test_check.py AND claude-code-project-template/.claude/hooks/test_check.py. Both still import and use check_stop_cache/write_stop_cache from hook_utils. MLInterviewPrep already removed these (T-P2-188, commit abf6543) per the lesson that stop caches cause false PASS results when files change between sessions.
-
-Verified state (2026-04-23): helixos/.claude/hooks/test_check.py lines 10, 21, 48 still import/call check_stop_cache/write_stop_cache. claude-code-project-template/.claude/hooks/test_check.py same three lines.
-
-Action:
-1. helixos/.claude/hooks/test_check.py: remove cache import and calls -- copy MLInterviewPrep version.
-2. claude-code-project-template/.claude/hooks/test_check.py: same removal.
-3. Clean up hook_utils.py in both repos only if no other callers remain.
-4. Run tests after to confirm hook still works.
-
-Consolidated from duplicates: T-P2-255, T-P2-320 (both helixos stop-cache), T-P2-208 (template stop-cache). All 3 marked completed-as-duplicate on 2026-04-23 per T-P2-587.
-
-Blocked: must be executed from a helixos or template Claude Code session -- file permissions prevent writing to those repos' .claude/hooks/ from a MLInterviewPrep session.
-
-Source: MLInterviewPrep/.claude/hooks/test_check.py (cache-free reference).
-
-#### T-P2-239: [SYNC] Propagate session_context.py improvements from MLInterviewPrep to helixos
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: MLInterviewPrep session_context.py has two improvements over helixos version: (1) Extracted _get_completed_task_ids() as a named helper function instead of inline code. (2) Added fresh-clone DB missing warning: if .claude/tasks.db is missing but TASKS.md has tasks, warn user to run `python .claude/hooks/task_db.py import`. Apply both changes to helixos/.claude/hooks/session_context.py.
-
-#### T-P2-636: [UBER-VO-5b POST-5/4] Bespoke pages/UberIndex.tsx with 5-tab charter switcher (deferred)
-- **Priority**: P2
-- **Complexity**: L
-- **Depends on**: None
-- **Description**: ## Status: DEFERRED post-2026-05-04 per critical review
-This is the original T-P0-632 scope (bespoke React page + URL state + drawer state + browser back/forward + accessibility + vitest). Moved out of the 5/4-readiness critical path. Pick up only if the T-P0-632 MVP (id=37 patch) proves insufficient during actual prep usage.
-
-## Trigger to re-prioritize
-- I find myself navigating id=37 -> Round 2 -> click link -> target doc -> back button -> click another link, repeatedly, and the friction matters.
-- Or: a follow-up Uber recruiter loop schedules another VO requiring deeper navigation.
-
-## Goal (preserved from original plan)
-A bespoke \`pages/UberIndex.tsx\` route at \`/companies/uber/index\` mirroring \`pages/QuickIndex.tsx\` pattern: 5 tab pills (LC / ML Coding / ML SD / Behavioral / HR), per-tab card grid, click-to-drawer, URL state, browser back/forward, empty-state copy, ARIA accessibility, vitest coverage.
-
-## Locked decisions inherited from MVP
-- Drawer type: SlideOverPanel via existing \`db://N#anchor\` convention (with anchor support added if T-P0-632 surfaces it as missing).
-- Behavioral API: \`/behavioral/themes?company=uber\`.
-- Implementation Option A: bespoke page (NOT generalize QuickIndex).
-
-## Acceptance criteria (from original T-P0-632)
-- All 5 tabs render correct content with stable URL state.
-- Card click opens SlideOverPanel with anchor-scroll.
-- Browser back/forward preserves tab+drawer state.
-- Empty state for charters lacking content.
-- Accessibility: role=tab, ARIA-controls, keyboard arrow nav.
-- Vitest tab-switch + drawer-open + empty-state.
-- No emoji.
-
-## Dependencies
-Upstream: T-P0-632 (MVP must ship first; if MVP suffices, this task closes as 'skipped').
-
-#### T-P2-716: [AR-17] Placeholder ticket: PostToolUse heartbeat as fallback if AR-12 porcelain signal proves insufficient
-- **Priority**: P2
-- **Complexity**: S
-- **Depends on**: None
-- **Description**: **Status**: PLACEHOLDER ONLY. Do NOT implement until trigger condition met.
-
-**Trigger condition** (do not start work until this is observed):
-- AR-12 (T-P1-713) has been live for >= 1 week with telemetry collected.
-- `logs/wrapper-stats.jsonl` analysis shows AR-12 false-negative rate > 10% (i.e., wrapper false-killed sessions where Claude was working in stdout but had not yet touched working tree -- e.g., stuck in a long Read/Bash loop without an Edit).
-- OR user reports a specific failure mode that AR-12's porcelain signal did not catch.
-
-**Goal (when triggered)**: Implement a finer-grained progress signal via PostToolUse hook. Hook writes a heartbeat timestamp to `.claude/heartbeat` on every tool call. Wrapper polls heartbeat freshness; mtime within last N seconds = Claude is alive even if no commit / no working-tree change yet.
-
-**Why deferred**: AR-12 + AR-16 cover the dominant failure modes (uncommitted edits + cold-start hang). Heartbeat adds complexity (hook coordination, file-system race, polling cadence) that may be unnecessary. Wait for data before adding.
-
-**Implementation sketch (for future reference, not to be built now)**:
-1. Add PostToolUse hook `.claude/hooks/heartbeat.py` that touches `.claude/heartbeat` on every invocation.
-2. In wrapper, on timeout, also stat `.claude/heartbeat`; if mtime within last 60s, treat as InProgress like AR-12 porcelain branch.
-3. New telemetry branch: `heartbeat_only` (HEAD unchanged + porcelain unchanged + heartbeat fresh).
-4. Same kill switch pattern: `CLAUDE_P_DISABLE_HEARTBEAT_SIGNAL=1`.
-5. Clean up stale heartbeat at session start.
-
-**Acceptance criteria (when triggered)**:
-1. Trigger condition documented and met (telemetry data referenced).
-2. Hook coordinated across MLI + root .claude/hooks/.
-3. Wrapper integration parallel to AR-12.
-4. Telemetry branch added.
-5. Kill switch verified.
-
-**Depends on**: T-P1-713 (AR-12) -- need its telemetry to know if AR-17 is justified.
 
 #### T-P2-922: [WSH-E2] MLI content 归一化 (sections + 跨引用外键, 终局)
 - **Priority**: P2

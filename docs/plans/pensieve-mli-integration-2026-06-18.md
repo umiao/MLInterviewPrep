@@ -168,7 +168,7 @@ rewrite 必须 strip（MLI 内部无 `/mli-api` 前缀）；CORS 不涉及（服
 pensieve 已有完整日历机制：CalDAV/iCal 读（Google Cal / Apple）+ 写回 Apple Calendar。MLI 持有 `interview_events`。
 → 本质是接到既有原语，而非新建。
 
-### 🚨 拦路问题（fact-check claim 8）
+###  拦路问题（fact-check claim 8）
 MLI `interview_events` **无稳定业务键** —— 唯一键是自增 `id`，导入路径"always insert, no dedup"，re-seed 换新 id。
 而 pensieve 幂等写回靠确定性 UID（`<item_id>@pensieve`）。→ "同步两次只产生一个日历事件"在 MLI 现状下**做不到**。
 **首要开放决策**（文末 #4）：先给 `interview_events` 加稳定键/去重（换幂等+可删改），还是接受非幂等"只新增"。
@@ -201,7 +201,7 @@ MLI `interview_events` **无稳定业务键** —— 唯一键是自增 `id`，�
 
 ---
 
-## 🔲 开放决策汇总（只有你能拍板）
+##  开放决策汇总（只有你能拍板）
 
 1. **T1 进程崩溃策略**：带崩整体 vs 仅挂那一格。（建议：**独立** —— MLI 挂 ≠ pensieve 挂）
 2. **T2 图标 & 标签**：复用 9 个之一（`schedule`？`archive`？）vs 新画 MLI 图标；标签"面试" vs "ML 面试准备"。
@@ -212,4 +212,4 @@ MLI `interview_events` **无稳定业务键** —— 唯一键是自增 `id`，�
 5. **T4 方向 & 触发**：单向 vs 双向；手动 vs 定时。
    （建议：**v1 单向 + 手动**，与 pensieve "对外日历只读、仅 Apple writer 写"不变量一致）
 6. **任务落库去向**：写进 **pensieve 的 tasks.db**（代码主要落那、执行也在那）还是 MLI 的？
-   ⚠️ 两个 repo 都有 autonomous runner，**写入即可能被自动拾取执行** —— 故本稿先存为 md，待你确认去向+点头后再投射。
+   [WARN] 两个 repo 都有 autonomous runner，**写入即可能被自动拾取执行** —— 故本稿先存为 md，待你确认去向+点头后再投射。

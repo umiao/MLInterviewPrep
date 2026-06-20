@@ -212,7 +212,7 @@ L2 ranker (DNN batch 100-200):                    80 ms
 Rerank feature fetch + MMR:                       30 ms
 Aggregation + serialize:                          20 ms
                                                 ------
-                                                 200 ms ✓
+                                                 200 ms 
 关键设计: feature prefetch 在 candidate retrieve 阶段就并行发 RPC，到 ranker 时
 feature 已在内存。Reranker 只要 30ms 因为 n=3 时 MMR 几乎免费，主要开销是 sentiment
 / commenter group 的额外 feature fetch。

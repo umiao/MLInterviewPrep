@@ -208,12 +208,12 @@ def greedy_dispatch(order_locs, driver_locs):
 
 ## Self-Check (按 id=18 7 类 pass-bar)
 
-- [x] **Requirements**：功能/非功能/排除项齐全 ✓（DAU 10M+1M、p95<30s、派单强一致、单 region 多 AZ）；关键数字 + out-of-scope 主动声明。
-- [x] **Capacity**：QPS avg+peak、storage/day、bandwidth 均给出 + **每个数字绑定架构决策** ✓（200K 写 QPS→Redis 非 MySQL；10GB/day→分层存储）。
-- [x] **Architecture**：5 服务按 read/write+SLA 切 ✓；8 步编号数据流 ✓；存储选型表有理由 ✓。
-- [x] **Deep Dive**：3 个（dispatch / surge / ETA）+ 1 个 nested ML 归档 ✓；每个按 5-step（essence/options/pick+why/scale-out/edges） ✓；含 SQL (CAS) + Python (surge, greedy) ✓。
-- [x] **Reliability**：4 层 failure domain ✓；5 行降级表 ✓；熔断 / 限流 / CAS / idempotency 齐全 ✓；**"多 region 是覆盖不是兜底"** 是 L6 级 signal。
-- [x] **Monitoring**：SLO 技术（p95/p99/avail）+ 业务（match-rate / cancel-rate / dup-dispatch）双指标 ✓；供需比热力仪表盘为平台命根。
+- [x] **Requirements**：功能/非功能/排除项齐全 （DAU 10M+1M、p95<30s、派单强一致、单 region 多 AZ）；关键数字 + out-of-scope 主动声明。
+- [x] **Capacity**：QPS avg+peak、storage/day、bandwidth 均给出 + **每个数字绑定架构决策** （200K 写 QPS→Redis 非 MySQL；10GB/day→分层存储）。
+- [x] **Architecture**：5 服务按 read/write+SLA 切 ；8 步编号数据流 ；存储选型表有理由 。
+- [x] **Deep Dive**：3 个（dispatch / surge / ETA）+ 1 个 nested ML 归档 ；每个按 5-step（essence/options/pick+why/scale-out/edges） ；含 SQL (CAS) + Python (surge, greedy) 。
+- [x] **Reliability**：4 层 failure domain ；5 行降级表 ；熔断 / 限流 / CAS / idempotency 齐全 ；**"多 region 是覆盖不是兜底"** 是 L6 级 signal。
+- [x] **Monitoring**：SLO 技术（p95/p99/avail）+ 业务（match-rate / cancel-rate / dup-dispatch）双指标 ；供需比热力仪表盘为平台命根。
 - [x] **Communication**：tradeoff 主动表达（批量 vs 贪心、CAS vs ZK、H3 vs S2）；缺点主动提（跨 cell 订单、surge gaming）；未覆盖点明确（拼车、跨城、供应链）。
 
 7 类全硬 → strong L5。若时间紧，优先展示 Section 3 服务表 + Section 4a CAS + Section 5 SLO 三处，这是 L5 vs L4 的分水岭区域。
