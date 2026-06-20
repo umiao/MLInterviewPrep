@@ -528,3 +528,10 @@
 - **Sanity check result**: Autorun guardrail VERIFIED -- why-blocked reports pickable=false for all 5 (T1/T4a/T4b status=blocked->state=pending; T2/T3 blocked by missing dep T1); `task_db.py pick` returns T-P0-355 (a pre-existing pensieve task), NOT any MLI-INT task. TASKS.md regenerated.
 - **Status**: [DONE] Epic in pensieve backlog, all non-pickable pending human sign-off. Open decisions (icon/label, T4b direction+trigger, prod MLI frontend hosting) remain for the user; unblock T-P1-433 to start execution.
 - **Request**: No change (MLI-side; the stable-key task T-P2-436 will execute in this repo when unblocked).
+
+## 2026-06-19 00:00 -- [T-P1-641] Verify + close out cheat_sheet schema/API task
+- **What I did**: Verified the CHEATSHEET-1 work (model column, idempotent migration, router endpoints, schemas, frontend types/hook) was already implemented and committed under `1281ea6` but the task was never marked done. Re-ran the full acceptance gate and closed the task out properly.
+- **Deliverables**: No code changes (work was already committed). Closed task in tasks.db; PROGRESS/TASKS updated.
+- **Sanity check result**: pytest tests/test_system_design_cheat_sheet.py 5/5 PASS; all system_design-related tests 6/6 PASS; ruff clean on the 4 touched files; migration idempotent on canonical data/mle_prep.db (reports [SKIP] when column exists). Confirmed all 5 ACs: (1) idempotent ALTER TABLE; (2) GET /system-designs/<slug> includes cheat_sheet (null when empty); (3) list endpoint stays lean + dedicated /system-designs/cheat-sheets aggregation; (4) backend tests present; (5) ruff clean (mypy errors are pre-existing project-wide SQLAlchemy Base typing, not introduced here). Frontend SystemDesign types + SECTION_LABELS + useSystemDesignNotes all wire cheat_sheet.
+- **Status**: [DONE]
+- **Request**: `task_db.py complete T-P1-641`
