@@ -580,3 +580,12 @@
 - **Sanity check result**: tsc + eslint clean; CheatSheetCard tests 3/3; live dev servers (backend 8100 + vite 5173) confirmed alive, HMR applied. Commits aa121b9 (tab) + 21e1a82 (restyle), pushed.
 - **Status**: [DONE]. User reviewed live at http://localhost:5173/system-design?tab=cheatsheet.
 - **Request**: No change (T-P1-642 already completed).
+
+
+## 2026-06-19 22:30 -- [T-P1-643] Promote 2 Uber golden answers to system_designs rows
+- **What I did**: Created scripts/seed_uber_system_designs.py (idempotent upsert-by-slug) projecting doc 85 (company_documents id=85) sections 1.x/2.x into two first-class system_designs rows: uber-eats-restaurant-rec (Restaurant Rec) + uber-budget-promo-rec (Budget-Constrained Promo). All 9 columns populated (overview..verbal_outline structured projection; cheat_sheet authored from doc 85 §1.6 + §2.11). Each overview links back to the canonical doc via cd://85 (doc 85 left UNCHANGED, len 37212). Added a dedicated "Uber" tab to SystemDesignList.tsx (band [400,500); rows at display_order 400/401).
+- **Spec deviation (flagged)**: task spec said display_order 200/201, but those are already taken by pinterest-ad-ctr(200)/pinterest-embeddings(201) AND fall inside the frontend Pinterest tab band [199,300). Used 400/401 + a new Uber tab instead (only correct placement). cheatSheetCategory already routes slug.includes("uber") -> "Uber" badge, no change needed.
+- **Deliverables**: scripts/seed_uber_system_designs.py (new); src/frontend/src/pages/SystemDesignList.tsx (Tab union + uberModules/uberCount memos + TOPIC_META x2 + Uber tab button + render block).
+- **Sanity check result**: seed ran for real (2 inserted, then 2 updated on rerun = idempotent); ruff clean; py_compile OK; no emoji/typographic-arrow (normalized -> to ASCII). Backend via TestClient+lifespan: GET /api/system-designs returns 55 rows incl. both uber slugs; GET /api/system-designs/{slug} -> 200 with all 9/9 sections; GET /api/system-designs/cheat-sheets includes both. Frontend: tsc --noEmit clean, eslint clean, CheatSheetCard 3/3 + SystemDesignDrawer 12/12 pass. doc 85 byte-length unchanged.
+- **Status**: [DONE] code + headless verification green. Remaining = user 30-sec browser smoke (open /system-design?tab=uber: 2 cards; click each -> detail page renders 9 sections w/ KaTeX, no console errors; cheatsheet tab shows 2 Uber one-pagers).
+- **Request**: `task_db.py update T-P1-643 --status completed` (done this session).

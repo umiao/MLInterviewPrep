@@ -276,6 +276,20 @@ const TOPIC_META: Record<string, TopicMeta> = {
     tags: ["Bulk Ingest", "Solr", "Indexing"],
     category: "Pinterest",
   },
+  "uber-eats-restaurant-rec": {
+    description:
+      "Uber Eats home-feed restaurant recommendation (Staff golden answer): multi-stage funnel (H3 geo + two-tower ANN + MMoE/DIN ranking + MMR re-rank), training-serving skew 三层防御 (feature snapshot + Michelangelo + KL/PSI), freshness hard/soft 双层, position-bias + DR off-policy eval + cluster-randomized A/B.",
+    difficulty: "Hard",
+    tags: ["H3", "Two-Tower", "MMoE", "Train-Serve Skew"],
+    category: "Uber",
+  },
+  "uber-budget-promo-rec": {
+    description:
+      "Budget-constrained promo recommendation (Staff golden answer): uplift modeling (causal, incrementality trap) + Multiple-Choice Knapsack / Lagrangian relaxation at 10M scale + shadow-price binary search + PID budget pacing + contextual bandit + DR off-policy eval + long-running holdout.",
+    difficulty: "Hard",
+    tags: ["Uplift", "Lagrangian", "MCKP", "Off-Policy Eval"],
+    category: "Uber",
+  },
 };
 
 const DIFFICULTY_COLORS: Record<Difficulty, string> = {
@@ -290,6 +304,7 @@ type Tab =
   | "ebay"
   | "pinterest"
   | "ml-infra-llm"
+  | "uber"
   | "cheatsheet";
 
 /**
@@ -403,6 +418,18 @@ export default function SystemDesignList() {
     [modules],
   );
 
+  // Uber modules: display_order in [400, 500) -- Uber Staff-level ML system
+  // design golden answers promoted from company doc 85 (Restaurant Rec at 400,
+  // Budget-Constrained Promo at 401). Own band/tab because [199, 300) is fully
+  // claimed by the Pinterest tab. Flat card grid, mirroring ml-infra render.
+  const uberModules = useMemo(
+    () =>
+      [...modules]
+        .filter((m) => m.display_order >= 400 && m.display_order < 500)
+        .sort((a, b) => a.display_order - b.display_order),
+    [modules],
+  );
+
   const interviewCount = useMemo(
     () => modules.filter((m) => m.display_order >= 100 && m.display_order < 130).length,
     [modules],
@@ -420,6 +447,12 @@ export default function SystemDesignList() {
   const mlInfraCount = useMemo(
     () =>
       modules.filter((m) => m.display_order >= 300 && m.display_order < 400)
+        .length,
+    [modules],
+  );
+  const uberCount = useMemo(
+    () =>
+      modules.filter((m) => m.display_order >= 400 && m.display_order < 500)
         .length,
     [modules],
   );
@@ -520,6 +553,16 @@ export default function SystemDesignList() {
           }`}
         >
           ML Infra · LLM
+        </button>
+        <button
+          onClick={() => switchTab("uber")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "uber"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
+        >
+          Uber
         </button>
         {/* Cheat Sheet gets special status: right-aligned (ml-auto) + amber
             accent + lightning glyph, since it is the cross-module one-pager
@@ -875,6 +918,80 @@ export default function SystemDesignList() {
           {!isLoading && !error && mlInfraModules.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {mlInfraModules.map((topic) => {
+                const meta = TOPIC_META[topic.slug];
+                const difficulty = meta?.difficulty ?? "Medium";
+                const tags = meta?.tags ?? [];
+                const description =
+                  meta?.description ?? topic.subtitle ?? "";
+                return (
+                  <div
+                    key={topic.slug}
+                    className="bg-white rounded-lg border border-gray-200 px-4 py-3 cursor-pointer hover:border-blue-400 hover:shadow-md transition-all"
+                    onClick={() =>
+                      navigate(`/system-design/${topic.slug}`)
+                    }
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <h3 className="text-base font-semibold text-gray-800">
+                        {topic.title}
+                      </h3>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded shrink-0 ml-2 ${DIFFICULTY_COLORS[difficulty]}`}
+                      >
+                        {difficulty}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{description}</p>
+                    <div className="flex flex-wrap gap-1">
+                      {tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Uber tab -- Uber Staff-level ML system design golden answers
+          (display_order 400..499), promoted from company doc 85. Flat card grid
+          (no category subdivision), mirroring the ml-infra render. */}
+      {activeTab === "uber" && (
+        <div>
+          <p className="text-sm text-gray-600 mb-6">
+            {uberCount} Uber Staff-level ML system design golden answers
+            (Restaurant Recommendation + Budget-Constrained Promo). Promoted from
+            the Uber golden-answers study doc; kept in their own tab.
+          </p>
+
+          {isLoading && (
+            <div className="text-gray-500 py-12 text-center">Loading...</div>
+          )}
+
+          {error && (
+            <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-4">
+              {error instanceof Error
+                ? error.message
+                : "Failed to load topics"}
+            </div>
+          )}
+
+          {!isLoading && !error && uberModules.length === 0 && (
+            <div className="text-gray-400 py-12 text-center">
+              No Uber modules yet.
+            </div>
+          )}
+
+          {!isLoading && !error && uberModules.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {uberModules.map((topic) => {
                 const meta = TOPIC_META[topic.slug];
                 const difficulty = meta?.difficulty ?? "Medium";
                 const tags = meta?.tags ?? [];
