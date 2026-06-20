@@ -16,7 +16,11 @@
 
 ## 下个 session = **supervised run**(别挂 autorun,见下方原因),任务菜单见下
 
-- **[2026-06-19 更新] 当前 `pick` = none。** 本 session 关闭了 **T-P1-641**(CHEATSHEET-1;其 schema/API/前端早在 `1281ea6` 已实现,只是没标 done——picker 一直误报它;inner agent 复跑验收门后关闭,commit `c88ee52`,5/5 测试已**独立复验**)。并把 **909**(input-blocked)+ **921**(supervised-only)临时 PARK(`status=blocked/state=pending`)以净化 picker——**这两个现在仍 parked**,要重新可拣需恢复 `state=ready,status=active`。
+- **[2026-06-19 更新] 当前 `pick` = none。本 session 完成了 641 + 815(后者是 autorun 越界 bonus,见下)。**
+  - **T-P1-641**(CHEATSHEET-1)关闭:其 schema/API/前端早在 `1281ea6` 已实现,只是没标 done——picker 一直误报它;inner agent 复跑验收门后关闭,commit `c88ee52`,5/5 测试已**独立复验**。
+  - **T-P1-815**(KG-INT B4a-adobe dry-run)**意外完成**:我本想只跑 641,park 了 909/921,但 autorun Session 2 的 inner agent 自行从 backlog 拣了 815(depends_on=None、不写 DB 的安全 dry-run),产出完整 230 行 plan 并 commit(`335b481`),在我 taskkill 后竞态完成。**净结果是好的**(815 是之前缺的 5 份 B4a plan 之一,安全可逆),但暴露一个**铁律**:**`state='pending'` 的 PARK 挡不住 autorun inner agent 的自主拣选**(它读 backlog 用判断拣,不只看 state-based picker)。要真正限定 autorun 子集,必须让不安全任务对 inner agent **不可执行**(加阻塞 dep / 抽走素材),不能只 `state=pending`。详见 `LESSONS.md` 2026-06-19 条。
+  - **909**(input-blocked)+ **921**(supervised-only)仍 PARK(`status=blocked/state=pending`),要重新可拣需恢复 `state=ready,status=active`。
+  - **815 的 plan 留了 4 个 open questions 给用户**(Teams passcode 脱敏、STAR 故事 provenance=潜在 blocker、PyTorch-ops 节点映射、doc-20 orphan)——见 `docs/archive_plans/B4a-adobe_2026-06-19.md` 末尾;B4b-adobe(T-P1-829)execute 前须用户先答。
 - **CHEATSHEET 现状**:641 done → schema/API/前端 type 全就位(`cheat_sheet` 列在 canonical `data/mle_prep.db`;`/api/system-designs/cheat-sheets` 聚合端点已上线)。剩 **642**(前端 Cheat Sheet tab,manual browser-smoke → supervised)+ **643**(Uber 2 行,MLSD 撰写)+ **644–648**(30 张速查表,★DeepSeek 蒸馏 + accept-default;需先把 DeepSeek key 复制到 gitignored `scripts/lib/.env.deepseek`)+ **649** smoke。这些都 **supervised**,目前仍 parked(pending)。
 - **[原] autorun-safe 子集 = 空。** 盲挂 `autonomous_run.sh` 会拣中已 parked 之外的 dep-blocked 任务或 none;要跑 autorun 必须先确认 `pick` 拣到的是安全任务。下个 session 默认 **supervised 逐条人值守跑**。
 - **[DONE] BQ-DEPTH 线全收口**(581→582→583→585):内容 seed → top40 primary 指派 → 前端 primary 卡 + probe 面板 → 只读漂移检测器,端到端打通。本次 session 详见下方 2026-06-18 条目。
