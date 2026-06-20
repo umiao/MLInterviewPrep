@@ -16,7 +16,9 @@
 
 ## 下个 session = **supervised run**(别挂 autorun,见下方原因),任务菜单见下
 
-- **[重要] 当前 autorun-safe 子集 = 空。** picker 现返回 **T-P1-909**,但 909 卡在缺源文件上(见下)——**盲挂 `autonomous_run.sh` 会拣中 909 并失败**。要跑 autorun 必须先 park 掉 909(及 supervised-only 的 912/921),但 park 完已无安全任务剩,所以下个 session 直接 **supervised 逐条人值守跑**。
+- **[2026-06-19 更新] 当前 `pick` = none。** 本 session 关闭了 **T-P1-641**(CHEATSHEET-1;其 schema/API/前端早在 `1281ea6` 已实现,只是没标 done——picker 一直误报它;inner agent 复跑验收门后关闭,commit `c88ee52`,5/5 测试已**独立复验**)。并把 **909**(input-blocked)+ **921**(supervised-only)临时 PARK(`status=blocked/state=pending`)以净化 picker——**这两个现在仍 parked**,要重新可拣需恢复 `state=ready,status=active`。
+- **CHEATSHEET 现状**:641 done → schema/API/前端 type 全就位(`cheat_sheet` 列在 canonical `data/mle_prep.db`;`/api/system-designs/cheat-sheets` 聚合端点已上线)。剩 **642**(前端 Cheat Sheet tab,manual browser-smoke → supervised)+ **643**(Uber 2 行,MLSD 撰写)+ **644–648**(30 张速查表,★DeepSeek 蒸馏 + accept-default;需先把 DeepSeek key 复制到 gitignored `scripts/lib/.env.deepseek`)+ **649** smoke。这些都 **supervised**,目前仍 parked(pending)。
+- **[原] autorun-safe 子集 = 空。** 盲挂 `autonomous_run.sh` 会拣中已 parked 之外的 dep-blocked 任务或 none;要跑 autorun 必须先确认 `pick` 拣到的是安全任务。下个 session 默认 **supervised 逐条人值守跑**。
 - **[DONE] BQ-DEPTH 线全收口**(581→582→583→585):内容 seed → top40 primary 指派 → 前端 primary 卡 + probe 面板 → 只读漂移检测器,端到端打通。本次 session 详见下方 2026-06-18 条目。
 
 ### 任务菜单(供下个 supervised session 选,按可执行性排)
