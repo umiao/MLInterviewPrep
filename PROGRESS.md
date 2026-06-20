@@ -572,3 +572,11 @@
 - **Sanity check result**: vitest new component 3/3 pass; full suite 254/254 pass; tsc --noEmit clean; eslint clean on both changed files; vite build succeeds (chunk-size warning pre-existing). Real endpoint smoke: booted uvicorn, GET /api/system-designs/cheat-sheets returns 53 items (43 with cheat_sheet, 10 -> empty state), keys exactly match SystemDesignCheatSheet, sorted by display_order. 53 cards >> 35+ AC.
 - **Status**: [DONE] code + all headless verification green. Remaining = user 30-sec browser smoke (open /system-design?tab=cheatsheet: 53 cards, KaTeX renders, TOC jump + #slug deep-link scroll, no console errors).
 - **Request**: `task_db.py update T-P1-642 --status completed` (done this session).
+
+
+## 2026-06-19 21:58 -- [T-P1-642] Cheat Sheet tab visual elevation (follow-up)
+- **What I did**: Per user feedback, gave the Cheat Sheet tab special status -- right-aligned (ml-auto), inline lightning SVG glyph (no emoji per project rule), amber accent + tinted active background -- to distinguish the cross-module one-pager overview from the blue topic tabs.
+- **Deliverables**: src/frontend/src/pages/SystemDesignList.tsx (tab button restyle only).
+- **Sanity check result**: tsc + eslint clean; CheatSheetCard tests 3/3; live dev servers (backend 8100 + vite 5173) confirmed alive, HMR applied. Commits aa121b9 (tab) + 21e1a82 (restyle), pushed.
+- **Status**: [DONE]. User reviewed live at http://localhost:5173/system-design?tab=cheatsheet.
+- **Request**: No change (T-P1-642 already completed).
