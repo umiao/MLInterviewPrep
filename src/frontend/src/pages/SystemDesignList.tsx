@@ -521,14 +521,27 @@ export default function SystemDesignList() {
         >
           ML Infra · LLM
         </button>
+        {/* Cheat Sheet gets special status: right-aligned (ml-auto) + amber
+            accent + lightning glyph, since it is the cross-module one-pager
+            overview rather than just another topic bucket. Inline SVG (no
+            emoji, per project rule). */}
         <button
           onClick={() => switchTab("cheatsheet")}
-          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+          className={`ml-auto flex items-center gap-1.5 rounded-t-md px-4 py-2 text-sm font-semibold border-b-2 transition-colors ${
             activeTab === "cheatsheet"
-              ? "border-blue-500 text-blue-600"
-              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              ? "border-amber-500 text-amber-600 bg-amber-50"
+              : "border-transparent text-amber-600/80 hover:text-amber-700 hover:border-amber-300 hover:bg-amber-50/60"
           }`}
         >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="h-4 w-4 shrink-0"
+            aria-hidden="true"
+          >
+            <path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
+          </svg>
           Cheat Sheet
         </button>
       </div>
