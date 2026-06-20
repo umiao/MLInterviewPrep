@@ -564,3 +564,11 @@
 - **Sanity check result**: DB search reproducible (behavioral_examples row-by-row + regex signature scan). B4b-adobe (T-P1-829) confirmed dep-fenced behind the sequential B4b chain (depends T-P0-828) -- will NOT be auto-picked; execution deferred to a supervised new session per user ("写交接给新 session"). Did NOT execute any destructive archive this session.
 - **Status**: [DONE] Adobe B4a fully resolved + recorded; ready for B4b-adobe execute in a future supervised session (after the rest of the B4b chain, or by unblocking 829 deliberately). Committed + pushed.
 - **Request**: No change.
+
+
+## 2026-06-19 21:50 -- [T-P1-642] Frontend Cheat Sheet tab on /system-design
+- **What I did**: Added a 6th "Cheat Sheet" tab (sibling of the existing 5) to SystemDesignList.tsx rendering a vertically-stacked one-pager per system-design module (NOT a grid), sorted by display_order, backed by the already-shipped GET /api/system-designs/cheat-sheets aggregate endpoint. New CheatSheetCard component: sticky title header + category badge + "Full design ->" Link, MarkdownPreview of cheat_sheet (KaTeX+GFM+ascii fences), graceful "No cheat sheet yet" empty state. Desktop-only sticky TOC sidebar lists all cards by title; ?tab=cheatsheet URL sync + deep-link ?tab=cheatsheet#<slug> scroll-to-card (section id=slug, smooth scrollIntoView).
+- **Deliverables**: src/frontend/src/components/CheatSheetCard.tsx (new), src/frontend/src/components/CheatSheetCard.test.tsx (new, 3 tests), src/frontend/src/pages/SystemDesignList.tsx (tab union + query + TOC + render block + cheatSheetCategory helper).
+- **Sanity check result**: vitest new component 3/3 pass; full suite 254/254 pass; tsc --noEmit clean; eslint clean on both changed files; vite build succeeds (chunk-size warning pre-existing). Real endpoint smoke: booted uvicorn, GET /api/system-designs/cheat-sheets returns 53 items (43 with cheat_sheet, 10 -> empty state), keys exactly match SystemDesignCheatSheet, sorted by display_order. 53 cards >> 35+ AC.
+- **Status**: [DONE] code + all headless verification green. Remaining = user 30-sec browser smoke (open /system-design?tab=cheatsheet: 53 cards, KaTeX renders, TOC jump + #slug deep-link scroll, no console errors).
+- **Request**: `task_db.py update T-P1-642 --status completed` (done this session).

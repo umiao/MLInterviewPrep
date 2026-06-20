@@ -111,12 +111,6 @@ AC:
 
 Scope: backend schema + router + frontend pill rendering + seed. M complexity.
 
-#### T-P1-642: [CHEATSHEET-2] Frontend: add 'Cheat Sheet' tab to /system-design with one-pager card per row
-- **Priority**: P1
-- **Complexity**: M
-- **Depends on**: T-P1-641
-- **Description**: Add third tab 'Cheat Sheet' to SystemDesignList.tsx alongside 'Interview Prep' and 'eBay Projects'. New tab renders a vertically-stacked single-page list (NOT a grid) of all system_designs entries sorted by display_order. Each entry is a CheatSheetCard component:  (a) sticky-position H2 with title + small badge for category (eBay / Pinterest / Generic / Uber); (b) MarkdownPreview of the cheat_sheet field (so code-fence ascii arch + tables render correctly with KaTeX + GFM); (c) right-edge link 'Full design ->' to /system-design/<slug>; (d) graceful empty state when cheat_sheet is null ('No cheat sheet yet'). Add ?tab=cheatsheet URL synchronization (same pattern as existing tabs). Add a left-side sticky TOC sidebar within the cheat-sheet tab (desktop only) listing all cards by title for quick jump. AC includes a manual smoke test: open /system-design?tab=cheatsheet, verify 35+ cards render, KaTeX formulas render, no console errors, deep-link to ?tab=cheatsheet#<slug> scrolls to that card. Vitest snapshot for the new component.
-
 #### T-P1-643: [CHEATSHEET-3] Add 2 Uber rows to system_designs from doc 85 (Restaurant Rec + Budget-Constrained Promo)
 - **Priority**: P1
 - **Complexity**: M
@@ -421,6 +415,7 @@ Normalize company_documents.content into company_document_sections (section_key/
 > 828 completed tasks archived to [archive/completed_tasks.md](archive/completed_tasks.md).
 
 - [x] **2026-06-19** -- T-P1-815: [KG-INT B4a-adobe] Adobe dry-run: archive plan + causal-proof matrix. Per docs/workflow/company_internalization_protocol.md, dry-run for Adobe. Read all 6 note-surfaces for company_id=see au
+- [x] **2026-06-19** -- T-P1-642: [CHEATSHEET-2] Frontend: add 'Cheat Sheet' tab to /system-design with one-pager card per row. Add third tab 'Cheat Sheet' to SystemDesignList.tsx alongside 'Interview Prep' and 'eBay Projects'. New tab renders a ve
 - [x] **2026-06-19** -- T-P1-641: [CHEATSHEET-1] Schema + API: add cheat_sheet TEXT column to system_designs, expose in /system-designs/:slug. Add nullable TEXT column 'cheat_sheet' to system_designs SQLAlchemy model + Alembic-style migration script (scripts/migr
 - [x] **2026-06-18** -- T-P2-585: [BQ-DEPTH-14] Phase E: narrow probe-drift detector (principle_tags/risk/outcome/hash only). Per user direction: drift trigger must be NARROW. Monitoring arbitrary STAR field changes will produce noise the user le
 - [x] **2026-06-18** -- T-P1-912: Guard Phase A: scanner-only (detect + warn + autofix-suggestion, NO block, single mode). ## Summary

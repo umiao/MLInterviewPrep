@@ -1,9 +1,13 @@
-import { useState, useMemo } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../utils/api";
-import type { SystemDesignSummary } from "../types/system-design";
+import type {
+  SystemDesignSummary,
+  SystemDesignCheatSheet,
+} from "../types/system-design";
 import ImageLightbox from "../components/ui/ImageLightbox";
+import CheatSheetCard from "../components/CheatSheetCard";
 
 const EBAY_NARRATIVE = `My core work at eBay has been systematically transforming search ranking from independent pointwise scoring into page-level resource allocation. Starting with the data foundation (PBE Pipeline for unbiased training data), I built the allocation framework (Ranking-as-Allocation with diversity constraints), extended it to multi-module page composition (Module Arbitration marketplace), and most recently brought GenAI into the production search path (LLM Artifact Orchestration). Each project builds on the last -- together they represent a complete evolution from 'rank items by relevance score' to 'optimize the entire user experience as a constrained allocation problem.'`;
 
@@ -280,10 +284,32 @@ const DIFFICULTY_COLORS: Record<Difficulty, string> = {
   Hard: "bg-red-100 text-red-700",
 };
 
-type Tab = "interview" | "ml-mlsd" | "ebay" | "pinterest" | "ml-infra-llm";
+type Tab =
+  | "interview"
+  | "ml-mlsd"
+  | "ebay"
+  | "pinterest"
+  | "ml-infra-llm"
+  | "cheatsheet";
+
+/**
+ * Short category badge for a cheat-sheet row, derived from the same
+ * display_order bands the rest of this page partitions tabs by. Keeps the
+ * badge consistent with tab membership without needing a DB `category` column
+ * (category is a frontend-only concept here -- see TOPIC_META).
+ */
+function cheatSheetCategory(item: SystemDesignCheatSheet): string {
+  if (item.display_order < 100) return "eBay";
+  if (item.display_order >= 130 && item.display_order < 199) return "ML MLSD";
+  if (item.display_order >= 199 && item.display_order < 300) return "Pinterest";
+  if (item.display_order >= 300 && item.display_order < 400) return "ML Infra";
+  if (item.slug.includes("uber")) return "Uber";
+  return "Generic";
+}
 
 export default function SystemDesignList() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialTab = (searchParams.get("tab") as Tab) || "interview";
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
@@ -398,6 +424,42 @@ export default function SystemDesignList() {
     [modules],
   );
 
+  // Cheat Sheet tab: all modules with their one-pager `cheat_sheet`, fetched
+  // from the dedicated aggregate endpoint (separate from the summary list so
+  // the markdown payload only loads when this tab is used).
+  const {
+    data: cheatSheets = [],
+    isLoading: cheatSheetsLoading,
+    error: cheatSheetsError,
+  } = useQuery({
+    queryKey: ["system-design-cheat-sheets"],
+    queryFn: () =>
+      api.get<SystemDesignCheatSheet[]>("/system-designs/cheat-sheets"),
+  });
+
+  const cheatSheetItems = useMemo(
+    () =>
+      [...cheatSheets].sort((a, b) => a.display_order - b.display_order),
+    [cheatSheets],
+  );
+
+  // Deep-link support: when landing on ?tab=cheatsheet#<slug> (or jumping via
+  // the TOC), scroll the matching card into view once data has rendered.
+  useEffect(() => {
+    if (activeTab !== "cheatsheet" || cheatSheetItems.length === 0) return;
+    const slug = location.hash.replace(/^#/, "");
+    if (!slug) return;
+    const el = document.getElementById(slug);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeTab, cheatSheetItems, location.hash]);
+
+  const scrollToCard = (slug: string) => {
+    const el = document.getElementById(slug);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    // Keep the URL shareable (?tab=cheatsheet#<slug>) without a full reload.
+    navigate({ search: "?tab=cheatsheet", hash: slug }, { replace: true });
+  };
+
   const switchTab = (tab: Tab) => {
     setActiveTab(tab);
     setSearchParams(tab === "interview" ? {} : { tab });
@@ -458,6 +520,16 @@ export default function SystemDesignList() {
           }`}
         >
           ML Infra · LLM
+        </button>
+        <button
+          onClick={() => switchTab("cheatsheet")}
+          className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            activeTab === "cheatsheet"
+              ? "border-blue-500 text-blue-600"
+              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          }`}
+        >
+          Cheat Sheet
         </button>
       </div>
 
@@ -829,6 +901,82 @@ export default function SystemDesignList() {
               })}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Cheat Sheet tab -- vertically-stacked one-pager per module (NOT a
+          grid), sorted by display_order, with a desktop sticky TOC sidebar for
+          quick jumps. Deep-linkable via ?tab=cheatsheet#<slug>. */}
+      {activeTab === "cheatsheet" && (
+        <div>
+          <p className="text-sm text-gray-600 mb-6">
+            One-pager cheat sheets for all {cheatSheetItems.length} system-design
+            modules, in study order. Use the sidebar to jump; click "Full design
+            -&gt;" for the complete write-up.
+          </p>
+
+          {cheatSheetsLoading && (
+            <div className="text-gray-500 py-12 text-center">Loading...</div>
+          )}
+
+          {cheatSheetsError && (
+            <div className="bg-red-50 text-red-700 px-4 py-2 rounded mb-4">
+              {cheatSheetsError instanceof Error
+                ? cheatSheetsError.message
+                : "Failed to load cheat sheets"}
+            </div>
+          )}
+
+          {!cheatSheetsLoading &&
+            !cheatSheetsError &&
+            cheatSheetItems.length === 0 && (
+              <div className="text-gray-400 py-12 text-center">
+                No cheat sheets yet.
+              </div>
+            )}
+
+          {!cheatSheetsLoading &&
+            !cheatSheetsError &&
+            cheatSheetItems.length > 0 && (
+              <div className="lg:flex lg:gap-6 lg:items-start">
+                {/* Desktop-only sticky TOC sidebar */}
+                <aside className="hidden lg:block lg:w-56 shrink-0">
+                  <nav className="sticky top-6 max-h-[calc(100vh-3rem)] overflow-y-auto border-r border-gray-100 pr-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                      Cheat Sheets
+                    </p>
+                    <ul className="space-y-1">
+                      {cheatSheetItems.map((item) => (
+                        <li key={item.slug}>
+                          <a
+                            href={`#${item.slug}`}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              scrollToCard(item.slug);
+                            }}
+                            className="block text-sm text-gray-600 hover:text-blue-600 truncate py-0.5"
+                            title={item.title}
+                          >
+                            {item.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </nav>
+                </aside>
+
+                {/* Stacked one-pager cards */}
+                <div className="flex-1 min-w-0 space-y-6">
+                  {cheatSheetItems.map((item) => (
+                    <CheatSheetCard
+                      key={item.slug}
+                      item={item}
+                      category={cheatSheetCategory(item)}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
         </div>
       )}
     </div>
