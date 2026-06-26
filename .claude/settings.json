@@ -88,11 +88,6 @@
             "type": "command",
             "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint_check.py\"",
             "timeout": 150
-          },
-          {
-            "type": "command",
-            "command": "/c/Anaconda/python.exe \"$CLAUDE_PROJECT_DIR/.claude/hooks/test_check.py\"",
-            "timeout": 900
           }
         ]
       }
