@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# Enforce the Stop-event test gate ONLY under autorun (propagated, T-P1-425).
+export TEST_GATE_ENFORCE=1
 # Autonomous task runner.
 # Runs Claude Code sessions in a loop. Each session starts with a FRESH context
 # and picks up state from .claude/session_state.json + SessionStart hook.

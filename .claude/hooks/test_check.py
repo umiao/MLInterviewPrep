@@ -11,7 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hook_utils import run_hook  # noqa: E402
 
 # <!-- CUSTOMIZE: Set your test command and paths -->
-TEST_COMMAND = ["python", "-m", "pytest"]
+TEST_COMMAND = [sys.executable, "-m", "pytest"]
 TEST_PATHS = ["tests/"]
 TEST_FLAGS = ["-x", "-q", "--tb=short", "--maxfail=1", "-m", "not integration and not slow"]
 
@@ -56,6 +56,14 @@ def run_frontend_build() -> bool:
 
 def main(hook_input: dict) -> None:
     """Run tests and frontend build, blocking exit if either fails."""
+    # --- Stop-gate enforcement (propagated from pensieve T-P0-489/493) ---
+    import os
+    if os.environ.get("TEST_GATE_DISABLE") == "1":
+        print("[TEST GUARD] TEST_GATE_DISABLE=1 -- skipping test gate (operator opt-out)", file=sys.stderr)
+        sys.exit(0)
+    if os.environ.get("TEST_GATE_ENFORCE") != "1":
+        print("[TEST GUARD] interactive session (TEST_GATE_ENFORCE unset) -- skipping; autorun enforces", file=sys.stderr)
+        sys.exit(0)
     blocked = False
 
     # --- Frontend production build check ---
